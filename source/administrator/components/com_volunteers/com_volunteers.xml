@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension version="2.5" type="component" method="upgrade">
+	<name>Volunteers</name>
+	<creationDate>2014-03-26</creationDate>
+	<author>Nicholas K. Dionysopoulos</author>
+	<authorEmail>nicholas@akeebabackup.com</authorEmail>
+	<authorUrl>http://www.akeebabackup.com</authorUrl>
+	<copyright>Copyright (c)2012 Nicholas K. Dionysopoulos</copyright>
+	<license>GNU GPL v3 or later</license>
+	<version>1.0.0</version>
+	<description>To-do is a demo component for the FOF framework</description>
+
+	<!-- Public front end files -->
+	<files folder="frontend">
+		<filename>index.html</filename>
+		<filename>volunteers.php</filename>
+
+		<folder>controllers</folder>
+		<folder>views</folder>
+	</files>
+
+	<!-- Front end translation files -->
+	<languages folder="language/frontend">
+		<language tag="en-GB">en-GB/en-GB.com_volunteers.ini</language>
+	</languages>
+
+	<!-- SQL query files to execute on installation -->
+	<install>
+		<sql>
+			<file driver="mysql" charset="utf8">sql/install/mysql/install.sql</file>
+			<file driver="mysql">sql/install/mysql/install.sql</file>
+			<file driver="mysqli" charset="utf8">sql/install/mysql/install.sql</file>
+			<file driver="mysqli">sql/install/mysql/install.sql</file>
+		</sql>
+	</install>
+
+	<!-- SQL query files to execute on uninstallation -->
+	<uninstall>
+		<sql>
+			<file driver="mysql" charset="utf8">sql/install/mysql/uninstall.sql</file>
+			<file driver="mysql">sql/install/mysql/uninstall.sql</file>
+			<file driver="mysqli" charset="utf8">sql/install/mysql/uninstall.sql</file>
+			<file driver="mysqli">sql/install/mysql/uninstall.sql</file>
+		</sql>
+	</uninstall>
+
+	<!-- SQL files to run on update -->
+	<update>
+		<schemas>
+			<schemapath type="mysql">sql/updates/mysql</schemapath>
+		</schemas>
+	</update>
+
+	<!-- Media files -->
+	<media destination="com_volunteers" folder="media">
+		<folder>css</folder>
+		<folder>images</folder>
+		<folder>js</folder>
+	</media>
+
+	<!-- Administrator back-end section -->
+	<administration>
+		<!-- Administration menu -->
+		<menu view="cpanel"
+			img="../media/com_volunteers/images/volunteers-16.png">COM_TODO</menu>
+
+		<!-- Back-end files -->
+		<files folder="backend">
+			<folder>fields</folder>
+			<folder>sql</folder>
+			<folder>views</folder>
+
+			<filename>access.xml</filename>
+			<filename>config.xml</filename>
+			<filename>dispatcher.php</filename>
+			<filename>index.html</filename>
+			<filename>volunteers.php</filename>
+		</files>
+
+		<!-- Back-end translation files -->
+		<languages folder="language/backend">
+			<language tag="en-GB">en-GB/en-GB.com_volunteers.ini</language>
+			<language tag="en-GB">en-GB/en-GB.com_volunteers.sys.ini</language>
+		</languages>
+
+	</administration>
+
+	<!-- Installation / uninstallation script file -->
+	<scriptfile>script.volunteers.php</scriptfile>
+
+	<!-- Update servers -->
+	<!--
+	<updateservers>
+		<server type="extension" priority="1" name="To-Do"><![CDATA[http://cdn.akeebabackup.com/updates/volunteers.xml]]></server>
+	</updateservers>
+	-->
+</extension>

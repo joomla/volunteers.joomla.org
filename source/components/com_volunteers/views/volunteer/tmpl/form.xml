@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<metadata>
+	<layout title="VP - Edit Profile">
+		<message>
+				<![CDATA[COM_CONFERENCE_VIEW_SPEAKER_ADD_DESC]]>
+		</message>
+	</layout>
+</metadata>

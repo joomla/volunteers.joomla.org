@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form
+        validate="true"
+        serverside_validate="true"
+>
+    <fieldset name="basic_configuration"
+              label="COM_VOLUNTEER_GROUP_BASIC"
+              description="COM_VOLUNTEER_GROUP_BASIC_DESC"
+    >
+
+        <field name="title" type="text" class="inputbox form-control"  labelClass="control-label"
+               size="150" label="COM_VOLUNTEER_TITLE"
+               description="COM_VOLUNTEER_TITLE_DESC" required="true" />
+
+        <field name="department_id" type="volunteers.department" class="inputbox form-control"
+               labelClass="control-label"
+               label="COM_VOLUNTEER_DEPARTMENT" required="true" />
+
+        <field name="lead" type="volunteers.volunteer" class="inputbox form-control"
+               labelClass="control-label"
+               label="COM_VOLUNTEER_TEAMLEAD"
+               description="COM_VOLUNTEER_TEAMLEAD_DESC" required="true" />
+
+        <field name="assistent1" type="volunteers.volunteer" class="inputbox form-control"
+               labelClass="control-label"
+               label="COM_VOLUNTEER_ASSISTENTTEAMLEAD"
+               description="COM_VOLUNTEER_ASSISTENTTEAMLEAD_DESC" />
+
+        <field name="assistent2" type="volunteers.volunteer" class="inputbox form-control"
+               labelClass="control-label"
+               label="COM_VOLUNTEER_ASSISTENTTEAMLEAD"
+               description="COM_VOLUNTEER_ASSISTENTTEAMLEAD_DESC" />
+
+        <field name="slug" type="text" class="inputbox form-control"  labelClass="control-label"
+               size="150" label="COM_VOLUNTEER_SLUG"
+               description="COM_VOLUNTEER_SLUG_DESC" required="true" />
+
+        <field name="email" type="text" class="inputbox form-control"  labelClass="control-label"
+               size="150" label="COM_VOLUNTEER_EMAIL"
+               description="COM_VOLUNTEER_EMAIL_DESC"/>
+
+        <field name="website" type="text" class="inputbox form-control"  labelClass="control-label"
+               size="150" label="COM_VOLUNTEER_WEBSITE"
+               description="COM_VOLUNTEER_WEBSITE_DESC"/>
+
+        <field name="acronym" type="text" class="inputbox form-control"  labelClass="control-label"
+               size="10" label="COM_VOLUNTEER_ACRONYM"
+               description="COM_VOLUNTEER_ACRONYM_DESC"/>
+
+        <field name="description" type="textarea" class="inputbox form-control"  labelClass="control-label"
+               size="150" label="COM_VOLUNTEER_DESCRIPTION"
+               description="COM_VOLUNTEER_DESCRIPTION_DESC"
+               buttons="false" rows="5" cols="80"/>
+
+        <field name="notes" type="textarea" class="inputbox form-control"  labelClass="control-label"
+               size="150" label="COM_VOLUNTEER_NOTES"
+               description="COM_VOLUNTEER_NOTES_DESC"
+               buttons="false" rows="5" cols="80"/>
+
+        <field name="enabled" type="list"
+               label="JSTATUS" description="COM_VOLUNTEER_GROUP_STATE_DESC"
+               class="inputbox" size="1" default="1" >
+            <option value="1">JPUBLISHED</option>
+            <option value="0">JUNPUBLISHED</option>
+        </field>
+
+        <field name="date_started" type="calendar" class="inputbox form-control"
+               label="COM_VOLUNTEER_DATE_STARTED" description="COM_VOLUNTEER_DATE_STARTED_DESC"
+               format="%d.%m.%Y"
+        />
+
+        <field name="date_ended" type="calendar" class="inputbox form-control"
+               label="COM_VOLUNTEER_DATE_ENDED" description="COM_VOLUNTEER_DATE_ENDED_DESC"
+               format="%d.%m.%Y"
+        />
+    </fieldset>
+
+</form>

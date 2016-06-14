@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form
+        type="browse"
+        show_header="1"
+        show_filters="1"
+        show_pagination="1"
+        norows_placeholder="COM_VOLUNTEER_COMMON_NORECORDS"
+>
+    <headerset>
+        <header name="voltuneer_group_id" type="rowselect" tdwidth="20" />
+        <header name="enabled" type="published" sortable="true" tdwidth="5%" />
+        <header name="title" type="fieldsearchable" sortable="true"
+                buttons="yes" buttonclass="btn" placeholder="COM_VOLUNTEER_SEARCH_IN_TITLE"
+        />
+    </headerset>
+
+    <fieldset name="items">
+        <field name="voltuneer_group_id" type="selectrow"/>
+        <field name="enabled" type="published"/>
+        <field name="title" type="text"
+               show_link="true"
+               url="index.php?option=com_volunteers&amp;view=group&amp;id=[ITEM:ID]"
+        />
+    </fieldset>
+</form>

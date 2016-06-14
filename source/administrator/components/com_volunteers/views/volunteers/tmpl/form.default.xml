@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form
+        type="browse"
+        show_header="1"
+        show_filters="1"
+        show_pagination="1"
+        norows_placeholder="COM_VOLUNTEER_COMMON_NORECORDS"
+>
+    <headerset>
+        <header name="volunteers_volunteer_id" type="rowselect" tdwidth="20" />
+        <header name="enabled" type="published" sortable="true" tdwidth="5%" />
+        <header name="firstname" type="fieldsearchable" sortable="true"
+                buttons="yes" buttonclass="btn" placeholder="COM_VOLUNTEER_SEARCH"
+        />
+        <header name="lastname" type="fieldsearchable" sortable="true"
+                buttons="yes" buttonclass="btn" placeholder="COM_VOLUNTEER_SEARCH"
+        />
+        <header name="email" type="fieldsearchable" sortable="true"
+                buttons="yes" buttonclass="btn" placeholder="COM_VOLUNTEER_SEARCH"
+        />
+    </headerset>
+
+    <fieldset name="items">
+        <field name="volunteers_volunteer_id" type="selectrow"/>
+        <field name="enabled" type="published"/>
+        <field name="firstname" type="text"
+               show_link="true"
+               url="index.php?option=com_volunteers&amp;view=volunteers&amp;id=[ITEM:ID]"
+        />
+        <field name="lastname" type="text"
+               show_link="true"
+               url="index.php?option=com_volunteers&amp;view=volunteers&amp;id=[ITEM:ID]"
+        />
+        <field name="email" type="text"/>
+    </fieldset>
+</form>

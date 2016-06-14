@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form
+        validate="true"
+        serverside_validate="true"
+>
+    <fieldset name="basic_configuration"
+              label="COM_VOLUNTEER_GROUP_BASIC"
+              description="COM_VOLUNTEER_GROUP_BASIC_DESC"
+    >
+
+        <field name="firstname" type="text" class="inputbox form-control"  labelClass="control-label"
+               size="150" label="COM_VOLUNTEER_FIRSTNAME"
+               description="COM_VOLUNTEER_FIRSTNAME_DESC" required="true" />
+
+        <field name="lastname" type="text" class="inputbox form-control"  labelClass="control-label"
+               size="150" label="COM_VOLUNTEER_LASTNAME"
+               description="COM_VOLUNTEER_LASTNAME_DESC" required="true" />
+
+        <field name="slug" type="text" class="inputbox form-control"  labelClass="control-label"
+               size="150" label="COM_VOLUNTEER_SLUG"
+               description="COM_VOLUNTEER_SLUG_DESC" required="true" />
+
+        <field name="country" type="text" class="inputbox form-control"  labelClass="control-label"
+               size="150" label="COM_VOLUNTEER_COUNTRY"
+               description="COM_VOLUNTEER_COUNTRY_DESC" required="true" />
+
+        <field name="city" type="text" class="inputbox form-control"  labelClass="control-label"
+               size="150" label="COM_VOLUNTEER_CITY"
+               description="COM_VOLUNTEER_CITY_DESC" />
+
+        <field name="intro" type="textarea" class="inputbox form-control"  labelClass="control-label"
+               size="150" label="COM_VOLUNTEER_INTRO"
+               description="COM_VOLUNTEER_INTRO_DESC"
+               buttons="false" rows="5" cols="80"/>
+
+        <field name="joomlastory" type="textarea" class="inputbox form-control"  labelClass="control-label"
+               size="150" label="COM_VOLUNTEER_JOOMLASTORY"
+               description="COM_VOLUNTEER_JOOMLASTORY_DESC"
+               buttons="false" rows="5" cols="80"/>
+
+        <field name="image" type="media" class="" labelclass="control-label"
+               label="COM_CONFERENCEPLUS_IMAGE"
+               description="COM_CONFERENCEPLUS_IMAGE_DESC" accept="image/*" />
+
+        <field name="email" type="text" class="inputbox form-control"  labelClass="control-label"
+               size="150" label="COM_VOLUNTEER_EMAIL"
+               description="COM_VOLUNTEER_EMAIL_DESC"/>
+
+        <field name="github" type="text" class="inputbox form-control"  labelClass="control-label"
+               size="150" label="COM_VOLUNTEER_GITHUB"
+               description="COM_VOLUNTEER_GITHUB_DESC"/>
+
+        <field name="facebook" type="text" class="inputbox form-control"  labelClass="control-label"
+               size="150" label="COM_VOLUNTEER_FACEBOOK"
+               description="COM_VOLUNTEER_FACEBOOK_DESC"/>
+
+        <field name="twitter" type="text" class="inputbox form-control"  labelClass="control-label"
+               size="150" label="COM_VOLUNTEER_TWITTER"
+               description="COM_VOLUNTEER_TWITTER_DESC"/>
+
+        <field name="googleplus" type="text" class="inputbox form-control"  labelClass="control-label"
+               size="150" label="COM_VOLUNTEER_GOOGLEPLUS"
+               description="COM_VOLUNTEER_GOOGLEPLUS_DESC"/>
+
+        <field name="linkedin" type="text" class="inputbox form-control"  labelClass="control-label"
+               size="150" label="COM_VOLUNTEER_LINKEDIN"
+               description="COM_VOLUNTEER_LINKEDIN_DESC"/>
+
+        <field name="website" type="text" class="inputbox form-control"  labelClass="control-label"
+               size="150" label="COM_VOLUNTEER_WEBSITE"
+               description="COM_VOLUNTEER_WEBSITE_DESC"/>
+
+        <field name="notes" type="textarea" class="inputbox form-control"  labelClass="control-label"
+               size="150" label="COM_VOLUNTEER_NOTES"
+               description="COM_VOLUNTEER_NOTES_DESC"
+               buttons="false" rows="5" cols="80"/>
+
+        <field name="enabled" type="list"
+               label="JSTATUS" description="COM_VOLUNTEER_GROUP_STATE_DESC"
+               class="inputbox" size="1" default="1" >
+            <option value="1">JPUBLISHED</option>
+            <option value="0">JUNPUBLISHED</option>
+        </field>
+    </fieldset>
+
+</form>

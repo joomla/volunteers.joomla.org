@@ -10,15 +10,15 @@ defined('_JEXEC') or die;
 
 class VolunteersToolbar extends FOFToolbar
 {
-	protected function getMyViews()
+
+	/**
+	 * Renders the submenu (toolbar links) for all detected views of this component
+	 *
+	 * @return  void
+	 */
+	public function renderSubmenu()
 	{
-		$views = array(
-			'groups',
-			'groupmembers',
-			'volunteers',
-			'reports',
-		);
-		return $views;
+		parent::renderSubmenu();
 	}
 
 	public function onBrowse()

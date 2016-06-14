@@ -16,4 +16,13 @@ if(!defined('FOF_INCLUDED')) {
 	return;
 }
 
+// Load js
+JHtml::_('bootstrap.framework');
+JHTML::_('formbehavior.chosen', 'select');
+
+// Load css
+$doc = JFactory::getDocument();
+$doc->addStyleSheet(JURI::root(true).'/media/com_volunteers/css/frontend.css');
+
+
 FOFDispatcher::getTmpInstance('com_volunteers')->dispatch();

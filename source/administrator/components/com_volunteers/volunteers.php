@@ -14,4 +14,8 @@ if(!defined('FOF_INCLUDED')) {
 	JError::raiseError ('500', 'FOF is not installed');
 }
 
+// Include the library
+JLoader::import('volunteers.library');
+
+
 FOFDispatcher::getTmpInstance('com_volunteers')->dispatch();

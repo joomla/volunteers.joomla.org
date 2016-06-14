@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="library" method="upgrade" version="3.5">
+    <name>Volunteers - Library</name>
+    <libraryname>volunteers</libraryname>
+    <author>Robert Deutz</author>
+    <authorEmail>rdeutz@googlemail.com</authorEmail>
+    <authorUrl>robert-deutz.de</authorUrl>
+    <copyright>Copyright (C) 2005 - 2016 Open Source Matters. All rights reserved.</copyright>
+    <license>GNU General Public License version 2 or later; see LICENSE.txt</license>
+    <creationDate>June 2016</creationDate>
+    <version>1.0.0</version>
+    <description>Volunteers library</description>
+    <files>
+        <folder>form</folder>
+        <filename>LICENSE</filename>
+        <filename>library.php</filename>
+    </files>
+</extension>

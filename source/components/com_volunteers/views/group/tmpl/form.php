@@ -74,6 +74,16 @@ if($itemId != 0) {
 					</div>
 					<hr>
 					<div class="control-group">
+						<div class="controls">
+							<label for="ready4transition" class="checkbox">
+								<input type="checkbox" name="ready4transition" id="ready4transition" value="1" <?php echo $this->item->ready4transition == 1 ? 'checked="checked"' : ''; ?>/><?php echo JText::_('COM_VOLUNTEERS_FIELD_READY4TRANSITION')?>
+							</label>
+							<p><br/><strong><?php echo JText::_('COM_VOLUNTEERS_FIELD_READY4TRANSITION_NOTE');?></strong></p>
+						</div>
+
+					</div>
+					<hr>
+					<div class="control-group">
 						<label for="acronym" class="control-label">
 							<?php echo JText::_('COM_VOLUNTEERS_FIELD_ACRONYM')?>
 						</label>
@@ -81,28 +91,14 @@ if($itemId != 0) {
 							<input type="text" name="acronym" id="acronym" class="span" value="<?php echo $this->item->acronym?>"/>
 						</div>
 					</div>
+
+
 					<div class="control-group">
 						<label for="title" class="control-label">
 							<?php echo JText::_('COM_VOLUNTEERS_FIELD_WEBSITE')?>
 						</label>
 						<div class="controls">
 							<input type="text" name="website" id="website" class="span" value="<?php echo $this->item->website?>"/>
-						</div>
-					</div>
-					<div class="control-group">
-						<label for="created_on" class="control-label">
-							<?php echo JText::_('COM_VOLUNTEERS_FIELD_DATE_STARTED'); ?>
-						</label>
-						<div class="controls">
-							<?php echo JHTML::_('calendar', $this->item->date_started, 'date_started', 'date_started'); ?>
-						</div>
-					</div>
-					<div class="control-group">
-						<label for="created_on" class="control-label">
-							<?php echo JText::_('COM_VOLUNTEERS_FIELD_DATE_ENDED'); ?>
-						</label>
-						<div class="controls">
-							<?php echo JHTML::_('calendar', $this->item->date_ended, 'date_ended', 'date_ended'); ?>
 						</div>
 					</div>
 					<hr>

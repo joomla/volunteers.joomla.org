@@ -1,5 +1,9 @@
 <?php
-
+/*
+ * @package		Joomla! Volunteers
+ * @copyright   Copyright (C) 2016 Open Source Matters, Inc. All rights reserved.
+ * @license     GNU General Public License version 2 or later; see LICENSE.txt
+ */
 
 defined('JPATH_BASE') or die;
 
@@ -9,7 +13,7 @@ JFormHelper::loadFieldClass('list');
  * field type
  *
  * @package  volunteers
- * @since    1.0.0
+ * @since    2.0.0
  */
 class VolunteersFormFieldVolunteer extends JFormFieldList
 {

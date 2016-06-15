@@ -16,6 +16,10 @@
                labelClass="control-label"
                label="COM_VOLUNTEER_DEPARTMENT" required="true" />
 
+        <field name="state" type="volunteers.state" class="inputbox form-control"
+               labelClass="control-label"
+               label="COM_VOLUNTEER_STATE" required="true" />
+
         <field name="lead" type="volunteers.volunteer" class="inputbox form-control"
                labelClass="control-label"
                label="COM_VOLUNTEER_TEAMLEAD"
@@ -58,7 +62,7 @@
                buttons="false" rows="5" cols="80"/>
 
         <field name="enabled" type="list"
-               label="JSTATUS" description="COM_VOLUNTEER_GROUP_STATE_DESC"
+               label="COM_VOLUNTEER_GROUP_STATE" description="COM_VOLUNTEER_GROUP_STATE_DESC"
                class="inputbox" size="1" default="1" >
             <option value="1">JPUBLISHED</option>
             <option value="0">JUNPUBLISHED</option>

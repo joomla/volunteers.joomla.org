@@ -10,7 +10,7 @@ defined('JPATH_BASE') or die;
 JFormHelper::loadFieldClass('list');
 
 /**
- * field type
+ * field State
  *
  * @package  volunteers
  * @since    2.0.0
@@ -31,9 +31,9 @@ class VolunteersFormFieldState extends JFormFieldList
 	{
 		$options = array();
 
-		$options[] = JHtml::_('select.option', 0, 'In Formation');
-		$options[] = JHtml::_('select.option', 1, 'Official');
-		$options[] = JHtml::_('select.option', 2, 'Unofficial');
+		$options[] = JHtml::_('select.option', 0, JText::_('COM_VOLUNTEERS_NS_STATE_0'));
+		$options[] = JHtml::_('select.option', 1, JText::_('COM_VOLUNTEERS_NS_STATE_1'));
+		$options[] = JHtml::_('select.option', 2, JText::_('COM_VOLUNTEERS_NS_STATE_2'));
 
 		// Merge any additional options in the XML definition.
 		$options = array_merge(parent::getOptions(), $options);

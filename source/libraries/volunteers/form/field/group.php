@@ -10,17 +10,17 @@ defined('JPATH_BASE') or die;
 JFormHelper::loadFieldClass('list');
 
 /**
- * field type
+ * field group
  *
  * @package  volunteers
  * @since    2.0.0
  */
-class VolunteersFormFieldDepartment extends JFormFieldList
+class VolunteersFormFieldGroup extends JFormFieldList
 {
 	/**
 	 * The form field type.
 	 */
-	protected $type = 'Department';
+	protected $type = 'Group';
 
 	/**
 	 * Method to get the field options.
@@ -34,8 +34,8 @@ class VolunteersFormFieldDepartment extends JFormFieldList
 		$db		= JFactory::getDbo();
 		$query	= $db->getQuery(true);
 
-		$query->select('title as text, volunteers_department_id as value')
-			->from('#__volunteers_departments')
+		$query->select('title as text, volunteers_group_id as value')
+			->from('#__volunteers_groups')
 		;
 
 		$db->setQuery($query);

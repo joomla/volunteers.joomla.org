@@ -4,13 +4,13 @@
         show_header="1"
         show_filters="1"
         show_pagination="1"
-        norows_placeholder="COM_VOLUNTEER_COMMON_NORECORDS"
+        norows_placeholder="COM_VOLUNTEERS_COMMON_NORECORDS"
 >
     <headerset>
-        <header name="voltuneer_group_id" type="rowselect" tdwidth="20" />
+        <header name="voltuneer_group_id" type="rowselect" tdwidth="20" sortable="false"/>
         <header name="enabled" type="published" sortable="true" tdwidth="5%" />
         <header name="title" type="fieldsearchable" sortable="true"
-                buttons="yes" buttonclass="btn" placeholder="COM_VOLUNTEER_SEARCH_IN_TITLE"
+                buttons="yes" buttonclass="btn" placeholder="COM_VOLUNTEERS_SEARCH_IN_TITLE"
         />
     </headerset>
 

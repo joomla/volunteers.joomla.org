@@ -4,19 +4,19 @@
         show_header="1"
         show_filters="1"
         show_pagination="1"
-        norows_placeholder="COM_VOLUNTEER_COMMON_NORECORDS"
+        norows_placeholder="COM_VOLUNTEERS_COMMON_NORECORDS"
 >
     <headerset>
-        <header name="volunteers_volunteer_id" type="rowselect" tdwidth="20" />
+        <header name="volunteers_volunteer_id" type="rowselect" tdwidth="20" sortable="false"/>
         <header name="enabled" type="published" sortable="true" tdwidth="5%" />
         <header name="firstname" type="fieldsearchable" sortable="true"
-                buttons="yes" buttonclass="btn" placeholder="COM_VOLUNTEER_SEARCH"
+                buttons="yes" buttonclass="btn" placeholder="COM_VOLUNTEERS_VOLUNTEERSEARCH"
         />
-        <header name="lastname" type="fieldsearchable" sortable="true"
-                buttons="yes" buttonclass="btn" placeholder="COM_VOLUNTEER_SEARCH"
+        <header name="lastname" sortable="true"
+                buttons="yes" buttonclass="btn"
         />
-        <header name="email" type="fieldsearchable" sortable="true"
-                buttons="yes" buttonclass="btn" placeholder="COM_VOLUNTEER_SEARCH"
+        <header name="email" sortable="true"
+                buttons="yes" buttonclass="btn"
         />
     </headerset>
 

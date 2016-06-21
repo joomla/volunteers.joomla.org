@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<extension version="2.5" type="component" method="upgrade">
+<extension version="3.5" type="component" method="upgrade">
 	<name>Volunteers</name>
-	<creationDate>2014-03-26</creationDate>
-	<author>Nicholas K. Dionysopoulos</author>
-	<authorEmail>nicholas@akeebabackup.com</authorEmail>
-	<authorUrl>http://www.akeebabackup.com</authorUrl>
-	<copyright>Copyright (c)2012 Nicholas K. Dionysopoulos</copyright>
-	<license>GNU GPL v3 or later</license>
-	<version>1.0.0</version>
-	<description>To-do is a demo component for the FOF framework</description>
+	<creationDate>2016-06-21</creationDate>
+	<author>Robert Deutz</author>
+	<authorEmail>rdeutz@googlemail.com</authorEmail>
+	<authorUrl>http://robert-deutz.de</authorUrl>
+	<copyright>(C) 2005 - 2016 Open Source Matters. All rights reserved.</copyright>
+	<license>GNU General Public License version 2 or later; see LICENSE.txt</license>
+	<version>2.0.0</version>
+	<description>Extension for the volunteers portal</description>
 
 	<!-- Public front end files -->
 	<files folder="frontend">
@@ -62,18 +62,19 @@
 	<administration>
 		<!-- Administration menu -->
 		<menu view="cpanel"
-			img="../media/com_volunteers/images/volunteers-16.png">COM_TODO</menu>
+			img="../media/com_volunteers/images/volunteers-16.png">COM_VOLUNTEERS</menu>
 
 		<!-- Back-end files -->
 		<files folder="backend">
-			<folder>fields</folder>
-			<folder>sql</folder>
+			<folder>models</folder>
+			<folder>tables</folder>
 			<folder>views</folder>
 
 			<filename>access.xml</filename>
 			<filename>config.xml</filename>
-			<filename>dispatcher.php</filename>
+			<filename>fof.xml</filename>
 			<filename>index.html</filename>
+			<filename>toolbar.php</filename>
 			<filename>volunteers.php</filename>
 		</files>
 
@@ -85,13 +86,6 @@
 
 	</administration>
 
-	<!-- Installation / uninstallation script file -->
-	<scriptfile>script.volunteers.php</scriptfile>
 
-	<!-- Update servers -->
-	<!--
-	<updateservers>
-		<server type="extension" priority="1" name="To-Do"><![CDATA[http://cdn.akeebabackup.com/updates/volunteers.xml]]></server>
-	</updateservers>
-	-->
+
 </extension>

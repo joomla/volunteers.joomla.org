@@ -8,10 +8,6 @@
 // No direct access.
 defined('_JEXEC') or die;
 
-$this->loadHelper('params');
-$this->loadHelper('modules');
-$this->loadHelper('format');
-
 // Get User
 $user = JFactory::getUser();
 ?>
@@ -37,10 +33,10 @@ $user = JFactory::getUser();
 	<div class="span12">
 
 		<ul class="nav nav-tabs">
-			<?php if($this->groups):?>
+			<?php if($this->item->groups):?>
 				<li><a href="#groups" data-toggle="tab"><?php echo JText::_('COM_VOLUNTEERS_GROUPS_INVOLVED') ?></a></li>
 			<?php endif;?>
-			<?php if($this->honorroll):?>
+			<?php if($this->item->honorroll):?>
 				<li><a href="#honorroll" data-toggle="tab"><?php echo JText::_('COM_VOLUNTEERS_HONOR_ROLL') ?></a></li>
 			<?php endif;?>
 			<?php if($this->item->joomlastory):?>
@@ -50,7 +46,7 @@ $user = JFactory::getUser();
 		</ul>
 
 		<div class="tab-content">
-			<?php if($this->groups):?>
+			<?php if($this->item->groups):?>
 			<div class="tab-pane fade" id="groups">
 				<table class="table table-striped">
 					<thead>
@@ -62,11 +58,11 @@ $user = JFactory::getUser();
 						<?php endif;?>
 					</thead>
 					<tbody>
-						<?php foreach($this->groups as $group):?>
+						<?php foreach($this->item->groups as $group): ?>
 						<tr>
 							<td>
 			                  	<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=group&id='.$group->volunteers_group_id)?>">
-			                  		<?php echo($group->group_title)?>
+			                  		<?php echo($group->title)?>
 			                  	</a>
 							</td>
 							<td>
@@ -92,7 +88,7 @@ $user = JFactory::getUser();
 			</div>
 			<?php endif;?>
 
-			<?php if($this->honorroll):?>
+			<?php if($this->item->honorroll):?>
 			<div class="tab-pane fade" id="honorroll">
 				<table class="table table-striped">
 					<thead>
@@ -102,11 +98,11 @@ $user = JFactory::getUser();
 						<th width="15%"><?php echo JText::_('COM_VOLUNTEERS_FIELD_DATE_LEFT') ?></th>
 					</thead>
 					<tbody>
-						<?php foreach($this->honorroll as $group):?>
+						<?php foreach($this->item->honorroll as $group):?>
 						<tr>
 							<td>
 			                  	<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=group&id='.$group->volunteers_group_id)?>">
-			                  		<?php echo($group->group_title)?>
+			                  		<?php echo($group->title)?>
 			                  	</a>
 							</td>
 							<td>

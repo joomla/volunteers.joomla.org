@@ -5,31 +5,34 @@
  * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
 
-// No direct access.
+// No direct access
 defined('_JEXEC') or die;
 
-$this->loadHelper('params');
-$this->loadHelper('select');
-$this->loadHelper('format');
+JHTML::_('behavior.framework', true);
+JHtml::_('behavior.formvalidator');
+JHtml::_('behavior.keepalive');
+JHtml::_('formbehavior.chosen', 'select');
 
-// Joomla! editor object
-$editor = JFactory::getEditor();
-
-// Get the Itemid
-$itemId = FOFInput::getInt('Itemid',0,$this->input);
-if($itemId != 0) {
-	$actionURL = 'index.php?Itemid='.$itemId;
-} else {
-	$actionURL = 'index.php';
-}
+JFactory::getDocument()->addScriptDeclaration('
+	Joomla.submitbutton = function(task)
+	{
+		if (task == "cancel" || document.formvalidator.isValid(document.id("adminForm"))) {
+			Joomla.submitform(task, document.getElementById("adminForm"));
+		} else {
+			alert("Invalid form");
+		}
+	};
+');
+$item   = $this->get('item');
+$form   = $this->get('form');
+$fields = array_keys($form->getFieldset('basic_configuration'));
 ?>
-
-<form name="adminForm" class="form form-horizontal" action="<?php echo $actionURL ?>" method="post" enctype="multipart/form-data">
+<form id="adminForm" class="form-validate form-horizontal" name="adminForm" method="post" action="<?php echo JRoute::_('index.php'); ?>">
 	<div class="row-fluid">
 		<h1 class="pull-left"><?php echo JText::_('COM_VOLUNTEERS_PAGETITLE_ADD_REPORT')?></h1>
 		<div class="btn-toolbar pull-right">
 			<div id="toolbar-cancel" class="btn-group">
-				<a class="btn btn-small btn-danger" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=group&id='.$this->group->volunteers_group_id)?>">
+				<a class="btn btn-small btn-danger" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=group&id='.$item->group->volunteers_group_id)?>#reports">
 					<span class="icon-cancel"></span> <?php echo JText::_('JCANCEL')?>
 				</a>
 			</div>
@@ -41,77 +44,46 @@ if($itemId != 0) {
 		</div>
 	</div>
 
-	<div class="row-fluid">
-		<div class="span12">
-			<input type="hidden" name="option" value="com_volunteers" />
-			<input type="hidden" name="view" value="report" />
-			<input type="hidden" name="task" value="save" />
-			<input type="hidden" name="volunteers_group_id" value="<?php echo $this->group->volunteers_group_id ?>" />
-			<input type="hidden" name="volunteers_report_id" value="<?php echo $this->item->volunteers_report_id ?>" />
-			<input type="hidden" name="Itemid" value="<?php echo $itemId ?>" />
-			<input type="hidden" name="<?php echo JFactory::getSession()->getFormToken();?>" value="1" />
-			<input type="hidden" name="enabled" value="<?php echo($this->item->enabled); ?>" />
+	<br />
 
-			<!-- Start row -->
-			<div class="row-fluid">
-				<!-- Start left -->
-				<div class="span12">
-					<div class="alert alert-info">
-						<?php echo JText::_('COM_VOLUNTEERS_NOTE_REPORT') ?>
-					</div>
-					<hr>
-					<div class="control-group">
-						<label for="title" class="control-label">
-							<?php echo JText::_('COM_VOLUNTEERS_FIELD_GROUP')?>
-						</label>
-						<div class="controls">
-							<strong><?php echo $this->group->title?></strong>
-						</div>
-					</div>
-					<hr>
-					<div class="control-group">
-						<label for="title" class="control-label">
-							<?php echo JText::_('COM_VOLUNTEERS_FIELD_TITLE')?>
-						</label>
-						<div class="controls">
-							<input type="text" name="title" id="title" class="span" value="<?php echo $this->item->title?>" required="required"/>
-						</div>
-					</div>
-					<hr>
-					<div class="control-group">
-						<label for="created_on" class="control-label">
-							<?php echo JText::_('JGLOBAL_FIELD_CREATED_LABEL'); ?>
-						</label>
-						<div class="controls">
-							<?php echo JHTML::_('calendar', $this->item->created_on, 'created_on', 'created_on'); ?>
-						</div>
-					</div>
-					<hr>
-					<div class="control-group">
-						<label for="description" class="control-label">
-							<?php echo JText::_('COM_VOLUNTEERS_FIELD_REPORT')?>
-						</label>
-						<div class="controls">
-							<?php echo $editor->display( 'description',  $this->item->description, '100%', '250', '50', '10', false ) ; ?>
-						</div>
-					</div>
-				</div>
-			</div>
+	<div class="row-fluid">
+		<div class="alert alert-info">
+			<?php echo JText::_('COM_VOLUNTEERS_NOTE_REPORT') ?>
 		</div>
 	</div>
 
+	<hr>
+
 	<div class="row-fluid">
-		<div class="btn-toolbar pull-right">
-			<div id="toolbar-cancel" class="btn-group">
-				<a class="btn btn-small btn-danger" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=group&id='.$this->group->volunteers_group_id)?>">
-					<span class="icon-cancel"></span> <?php echo JText::_('JCANCEL')?>
-				</a>
-			</div>
-			<div id="toolbar-apply" class="btn-group">
-				<button class="btn btn-small btn-success" type="submit">
-					<span class="icon-pencil"></span> <?php echo JText::_('JSAVE')?>
-				</button>
-			</div>
+		<div class="span2">
+			<?php echo JText::_('COM_VOLUNTEERS_FIELD_GROUP')?>
+		</div>
+		<div class="span10">
+			<strong><?php echo $item->group->title?></strong>
 		</div>
 	</div>
+
+	<hr>
+
+	<?php foreach($fields as $field) : ?>
+		<div class="row-fluid">
+			<div class="span2">
+				<?php echo $form->getLabel($field); ?>
+			</div>
+			<div class="span10">
+				<?php echo $form->getInput($field); ?>
+
+			</div>
+		</div>
+		<br />
+	<?php endforeach; ?>
+
+	<input type="hidden" value="com_volunteers" name="option">
+	<input type="hidden" value="report" name="view">
+	<input type="hidden" value="save" name="task">
+	<input type="hidden" value="<?php echo $item->volunteers_report_id; ?>" name="volunteers_report_id" />
+	<input type="hidden" value="<?php echo $item->group->volunteers_group_id ?>" name="volunteers_group_id" />
+	
+	<?php echo JHtml::_('form.token'); ?>
+
 </form>

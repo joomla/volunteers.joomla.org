@@ -5,26 +5,31 @@
  * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
 
-// No direct access.
+// No direct access
 defined('_JEXEC') or die;
 
-$this->loadHelper('params');
-$this->loadHelper('select');
-$this->loadHelper('format');
+JHTML::_('behavior.framework', true);
+JHtml::_('behavior.formvalidator');
+JHtml::_('behavior.keepalive');
+JHtml::_('formbehavior.chosen', 'select');
 
-// Joomla! editor object
-$editor = JFactory::getEditor();
+JFactory::getDocument()->addScriptDeclaration('
+	Joomla.submitbutton = function(task)
+	{
+		if (task == "cancel" || document.formvalidator.isValid(document.id("adminForm"))) {
+			Joomla.submitform(task, document.getElementById("adminForm"));
+		} else {
+			alert("Invalid form");
+		}
+	};
+');
 
-// Get the Itemid
-$itemId = FOFInput::getInt('Itemid',0,$this->input);
-if($itemId != 0) {
-	$actionURL = 'index.php?Itemid='.$itemId;
-} else {
-	$actionURL = 'index.php';
-}
+$item   = $this->get('item');
+$form   = $this->get('form');
+$fields = array_keys($form->getFieldset('basic_configuration'));
+
 ?>
-
-<form name="adminForm" class="form form-horizontal" action="<?php echo $actionURL ?>" method="post" enctype="multipart/form-data">
+<form id="adminForm" class="form-validate form-horizontal" name="adminForm" method="post" action="<?php echo JRoute::_('index.php'); ?>">
 	<div class="row-fluid">
 		<h1 class="pull-left"><?php echo JText::_('COM_VOLUNTEERS_EDIT_GROUP')?></h1>
 		<div class="btn-toolbar pull-right">
@@ -41,87 +46,35 @@ if($itemId != 0) {
 		</div>
 	</div>
 
-	<div class="row-fluid">
-		<div class="span12">
-			<input type="hidden" name="option" value="com_volunteers" />
-			<input type="hidden" name="view" value="group" />
-			<input type="hidden" name="task" value="save" />
-			<input type="hidden" name="volunteers_group_id" value="<?php echo $this->item->volunteers_group_id ?>" />
-			<input type="hidden" name="Itemid" value="<?php echo $itemId ?>" />
-			<input type="hidden" name="<?php echo JFactory::getSession()->getFormToken();?>" value="1" />
-			<input type="hidden" name="enabled" value="<?php echo($this->item->enabled); ?>" />
+	<hr>
 
-			<!-- Start row -->
+	<?php foreach($fields as $field) : ?>
+		<?php if(strpos($field, 'ready4transition') !== false) :?>
+			<hr />
 			<div class="row-fluid">
-				<!-- Start left -->
-				<div class="span12">
-					<hr>
-					<div class="control-group">
-						<label for="title" class="control-label">
-							<?php echo JText::_('COM_VOLUNTEERS_FIELD_NAME')?>
-						</label>
-						<div class="controls">
-							<input type="text" name="title" id="title" class="span" value="<?php echo $this->item->title?>"/>
-						</div>
-					</div>
-					<div class="control-group">
-						<label for="title" class="control-label">
-							<?php echo JText::_('COM_VOLUNTEERS_FIELD_SLUG')?>
-						</label>
-						<div class="controls">
-							<input type="text" name="slug" id="slug" class="span" value="<?php echo $this->item->slug?>"/>
-						</div>
-					</div>
-					<hr>
-					<div class="control-group">
-						<div class="controls">
-							<label for="ready4transition" class="checkbox">
-								<input type="checkbox" name="ready4transition" id="ready4transition" value="1" <?php echo $this->item->ready4transition == 1 ? 'checked="checked"' : ''; ?>/><?php echo JText::_('COM_VOLUNTEERS_FIELD_READY4TRANSITION')?>
-							</label>
-							<p><br/><strong><?php echo JText::_('COM_VOLUNTEERS_FIELD_READY4TRANSITION_NOTE');?></strong></p>
-						</div>
-
-					</div>
-					<hr>
-					<div class="control-group">
-						<label for="acronym" class="control-label">
-							<?php echo JText::_('COM_VOLUNTEERS_FIELD_ACRONYM')?>
-						</label>
-						<div class="controls">
-							<input type="text" name="acronym" id="acronym" class="span" value="<?php echo $this->item->acronym?>"/>
-						</div>
-					</div>
-
-
-					<div class="control-group">
-						<label for="title" class="control-label">
-							<?php echo JText::_('COM_VOLUNTEERS_FIELD_WEBSITE')?>
-						</label>
-						<div class="controls">
-							<input type="text" name="website" id="website" class="span" value="<?php echo $this->item->website?>"/>
-						</div>
-					</div>
-					<hr>
-					<div class="control-group">
-						<label for="description" class="control-label">
-							<?php echo JText::_('COM_VOLUNTEERS_FIELD_DESCRIPTION')?>
-						</label>
-						<div class="controls">
-							<textarea name="description" id="description" rows="4" class="span"><?php echo $this->item->description?></textarea>
-						</div>
-					</div>
-					<div class="control-group">
-						<label for="getinvolved" class="control-label">
-							<?php echo JText::_('Get Involved')?>
-						</label>
-						<div class="controls">
-							<?php echo $editor->display( 'getinvolved',  $this->item->getinvolved, '100%', '250', '50', '10', false ) ; ?>
-						</div>
-					</div>
+				<div class="span2"></div>
+				<div class="span10">
+					<label id="ready4transition-lbl" for="ready4transition" class="checkbox">
+						<input type="checkbox" name="ready4transition" id="ready4transition" value="1" class="inputbox form-control">
+						Ready for Transition into the new structure
+					</label>
+					<p><br/><strong><?php echo JText::_('COM_VOLUNTEERS_FIELD_READY4TRANSITION_NOTE');?></strong></p>
 				</div>
 			</div>
-		</div>
-	</div>
+			<hr />
+		<?php else: ?>
+			<div class="row-fluid">
+				<div class="span2">
+					<?php echo $form->getLabel($field); ?>
+				</div>
+				<div class="span10">
+					<?php echo $form->getInput($field); ?>
+
+				</div>
+			</div>
+		<?php endif; ?>
+		<br />
+	<?php endforeach; ?>
 
 	<div class="row-fluid">
 		<div class="btn-toolbar pull-right">
@@ -137,4 +90,12 @@ if($itemId != 0) {
 			</div>
 		</div>
 	</div>
+
+	<input type="hidden" value="com_volunteers" name="option">
+	<input type="hidden" value="group" name="view">
+	<input type="hidden" value="save" name="task">
+	<input type="hidden" value="<?php echo $item->volunteers_group_id ?>" name="volunteers_group_id" />
+	
+	<?php echo JHtml::_('form.token'); ?>
+
 </form>

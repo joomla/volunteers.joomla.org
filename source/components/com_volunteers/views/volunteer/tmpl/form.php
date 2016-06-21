@@ -8,10 +8,6 @@
 // No direct access.
 defined('_JEXEC') or die;
 
-$this->loadHelper('params');
-$this->loadHelper('select');
-$this->loadHelper('format');
-
 // Get the Itemid
 $itemId = FOFInput::getInt('Itemid',0,$this->input);
 if($itemId != 0) {

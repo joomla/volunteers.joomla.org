@@ -8,102 +8,237 @@
 // No direct access.
 defined('_JEXEC') or die;
 
-class VolunteersModelGroups extends FOFModel
+include_once 'base.php';
+
+class VolunteersModelGroups extends VolunteersModelBase
 {
-	private function getFilterValues()
+	/**
+	 * Constructor.
+	 *
+	 * @param   array  $config  An optional associative array of configuration settings.
+	 *
+	 * @see     JController
+	 */
+	public function __construct($config = array())
 	{
-		$enabled = $this->getState('enabled','','cmd');
-
-		return (object)array(
-			'id'			=> $this->getState('id',null,'int'),
-			'group'			=> $this->getState('group',null,'int'),
-			'active'		=> $this->getState('active',1,'int'),
-			'ownership'		=> $this->getState('ownership',null,'int'),
-			'enabled'		=> $enabled,
-		);
-	}
-
-	protected function _buildQueryColumns($query)
-	{
-		$db = $this->getDbo();
-		$state = $this->getFilterValues();
-
-		$query->select(array(
-			$db->qn('tbl').'.*',
-		));
-
-		$order = $this->getState('filter_order', 'random', 'cmd');
-
-		if($order =='random')
+		if (empty($config['filter_fields']))
 		{
-			$query->order('RAND()');
-		}
-		else
-		{
-			if(!in_array($order, array_keys($this->getTable()->getData()))) $order = 'title';
-			$dir = $this->getState('filter_order_Dir', 'ASC', 'cmd');
-			$query->order($order.' '.$dir);
+			$config['filter_fields'] = array(
+				'id', 'group.volunteers_group_id',
+				'title', 'group.title',
+				'enabled', 'group.enabled'
+			);
 		}
 
+		parent::__construct($config);
 	}
 
-	protected function _buildQueryWhere($query)
+	/**
+	 * Method to auto-populate the model state.
+	 *
+	 * Note. Calling getState in this method will result in recursion.
+	 *
+	 * @param   string  $ordering   An optional ordering field.
+	 * @param   string  $direction  An optional direction (asc|desc).
+	 *
+	 * @return  void
+	 */
+	protected function populateState($ordering = 'group.title', $direction = 'asc')
 	{
-		$db = $this->getDbo();
-		$state = $this->getFilterValues();
-
-		if(is_numeric($state->enabled)) {
-			$query->where(
-				$db->qn('tbl').'.'.$db->qn('enabled').' = '.
-					$db->q($state->enabled)
-			);
-		}
-
-		if(is_numeric($state->id) && ($state->id > 0)) {
-			$query->where(
-				$db->qn('tbl').'.'.$db->qn('volunteers_group_id').' = '.
-					$db->q($state->id)
-			);
-		}
-
-		if(is_numeric($state->group) && ($state->group > 0)) {
-			$query->where(
-				$db->qn('tbl').'.'.$db->qn('volunteers_group_id').' = '.
-					$db->q($state->group)
-			);
-		}
-
-		if(is_numeric($state->ownership) && ($state->ownership > 0)) {
-			$query->where(
-				$db->qn('tbl').'.'.$db->qn('ownership').' = '.
-					$db->q($state->ownership)
-			);
-		}
-
-		if($state->active == 1) {
-			$now = JDate::getInstance('now');
-			$query->where(
-				$db->qn('tbl').'.'.$db->qn('date_ended').' IS NULL'
-			);
-		}
-
-		if($state->active == 0) {
-			$now = JDate::getInstance('now');
-			$query->where(
-				$db->qn('tbl').'.'.$db->qn('date_ended').' > '.
-					$db->q('0000-00-00')
-			);
-		}
+		parent::populateState($ordering, $direction);
 	}
 
-	public function buildQuery($overrideLimits = false) {
-		$db = $this->getDbo();
-		$query = FOFQueryAbstract::getNew($db)
-			->from($db->quoteName('#__volunteers_groups').' AS '.$db->qn('tbl'));
+	/**
+	 * Builds the SELECT query
+	 *
+	 * @param   boolean  $overrideLimits  Are we requested to override the set limits?
+	 *
+	 * @return  JDatabaseQuery
+	 */
+	public function buildQuery($overrideLimits = false)
+	{
+		$query = parent::buildQuery($overrideLimits);
 
-		$this->_buildQueryColumns($query);
-		$this->_buildQueryWhere($query);
+		if (FOFPlatform::getInstance()->isFrontend())
+		{
+			$query->where('enabled = 1');
+
+			$query->clear('order')
+				->order('group.title ASC');
+		}
 
 		return $query;
+	}
+	
+	/**
+	 * This method can be overriden to automatically do something with the
+	 * list results array. You are supposed to modify the list which was passed
+	 * in the parameters; DO NOT return a new array!
+	 *
+	 * @param   array  &$resultArray  An array of objects, each row representing a record
+	 *
+	 * @return  void
+	 */
+	protected function onProcessList(&$resultArray)
+	{
+		$db = JFactory::getDbo();
+		$membersQuery = $db->getQuery(true);
+		
+		$membersQuery->select('*')
+			->from('#__volunteers_volunteers AS volunteer')
+			->innerJoin('#__volunteers_groupmembers AS g2m ON g2m.volunteers_volunteer_id = volunteer.volunteers_volunteer_id')
+			->where('volunteer.enabled = 1')
+			->where('g2m.date_ended = "0000-00-00"')
+			->order('RAND()');
+		
+		$db->setQuery($membersQuery);
+		
+		$members = $db->loadObjectList();
+
+		foreach($members as $member)
+		{
+			$groupmembers[$member->volunteers_group_id][] = $member;
+		}
+
+		foreach ($resultArray as $result)
+		{
+			$result->members = array();
+
+			if (array_key_exists($result->volunteers_group_id, $groupmembers))
+			{
+				$result->members = $groupmembers[$result->volunteers_group_id];
+			}
+		}
+	}
+
+	/**
+	 * This method runs after an item has been gotten from the database in a read
+	 * operation. You can modify it before it's returned to the MVC triad for
+	 * further processing.
+	 *
+	 * @param   FOFTable  &$record  The table instance we fetched
+	 *
+	 * @return  void
+	 */
+	protected function onAfterGetItem(&$record)
+	{
+		parent::onAfterGetItem($record);
+
+		if (FOFPlatform::getInstance()->isFrontend())
+		{
+			$record->groupmembers = $this->getGroupVolunteers($record->volunteers_group_id);
+			$record->honourroll   = $this->getGroupHonourroll($record->volunteers_group_id);
+			$record->subgroups    = $this->getSubgroup($record->volunteers_group_id);
+			$record->reports      = $this->getGroupReports($record->volunteers_group_id);
+
+			$departmentTable = FOFTable::getAnInstance('department','VolunteersTable');
+			$departmentTable->load($record->department_id);
+			$record->department = $departmentTable;
+			
+			// Finally Check ACL
+			$this->getAcl($record);
+		}
+	}
+
+	/**
+	 * Allows data and form manipulation after preprocessing the form
+	 *
+	 * @param   FOFForm  $form    A FOFForm object.
+	 * @param   array    &$data   The data expected for the form.
+	 * @codeCoverageIgnore
+	 *
+	 * @return  void
+	 */
+	public function onAfterPreprocessForm(FOFForm &$form, &$data)
+	{
+		if (FOFPlatform::getInstance()->isFrontend())
+		{
+			$item = $this->getItem();
+
+			$form->removeField('department_id');
+			$form->removeField('state');
+			$form->removeField('date_started');
+			$form->removeField('date_ended');
+			$form->removeField('enabled');
+			$form->removeField('notes');
+			$form->removeField('lead');
+
+			if (! $item->acl->teamLeader)
+			{
+				$form->removeField('assistent1');
+				$form->removeField('assistent2');
+			}
+		}
+	}
+
+	/**
+	 * This method runs before the $data is saved to the $table. Return false to
+	 * stop saving.
+	 *
+	 * @param   array     &$data   The data to save
+	 * @param   FOFTable  &$table  The table to save the data to
+	 *
+	 * @return  boolean  Return false to prevent saving, true to allow it
+	 */
+	protected function onBeforeSave(&$data, &$table)
+	{
+		$result = parent::onBeforeSave($data, $table);
+
+		if ($result && $data['ready4transition'] == 1 && $data['ready4transitiondate'] == '0000-00-00 00:00:00' )
+		{
+			$data['ready4transitiondate'] = JFactory::getDate()->toSql();
+		}
+
+		return $result;
+	}
+
+	protected function getAcl(&$record)
+	{
+		$acl = new stdClass;
+
+		$acl->admin = false;
+		$acl->departmentCoordinator = false;
+		$acl->teamLeader = false;
+		$acl->assistentTeamLeader = false;
+		$acl->member = false;
+
+		$acl->allowAddMembers   = false;
+		$acl->allowAddreports   = false;
+		$acl->allowAddSubgroups = false;
+		$acl->allowEditgroup    = false;
+
+		$vId = $this->getVolunteerId();
+
+		if ($vId)
+		{
+			$acl->admin = $this->isAdmin();
+
+			$department = $record->department;
+			$acl->departmentCoordinator = $department->lead == $vId || $department->assistent1 == $vId || $department->assistent2 == $vId;
+
+			$group = $record;
+			$acl->teamLeader = $group->lead == $vId;
+
+			$acl->assistentTeamLeader = $group->assistent1 == $vId || $group->assistent2 == $vId;
+
+			$found = false;
+			$gm = $record->groupmembers;
+
+			reset($gm);
+
+			while ((list(, $group) = each($gm)) && ! $found)
+			{
+				$found = $group->volunteers_volunteer_id == $vId;
+			}
+
+			$acl->member = $found;
+
+			$acl->allowAddMembers   = $acl->admin || $acl->departmentCoordinator || $acl->teamLeader || $acl->assistentTeamLeader;
+			$acl->allowAddreports   = $acl->teamLeader || $acl->assistentTeamLeader || $acl->member;
+			$acl->allowAddSubgroups = $acl->teamLeader || $acl->assistentTeamLeader;
+			$acl->allowEditgroup    = $acl->teamLeader || $acl->assistentTeamLeader;
+		}
+
+		$record->acl = $acl;
 	}
 }

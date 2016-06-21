@@ -10,10 +10,7 @@ defined('_JEXEC') or die;
 
 include_once 'base.php';
 
-/**
- * Class VolunteersModelVolunteers
- */
-class VolunteersModelVolunteers extends VolunteersModelBase
+class VolunteersModelSubgroups extends VolunteersModelBase
 {
 	/**
 	 * Method to auto-populate the model state.
@@ -25,11 +22,11 @@ class VolunteersModelVolunteers extends VolunteersModelBase
 	 *
 	 * @return  void
 	 */
-	protected function populateState($ordering = 'volunteer.firstname', $direction = 'asc')
+	protected function populateState($ordering = 'subgroup.title', $direction = 'desc')
 	{
 		parent::populateState($ordering, $direction);
 	}
-
+	
 	/**
 	 * Builds the SELECT query
 	 *
@@ -43,32 +40,19 @@ class VolunteersModelVolunteers extends VolunteersModelBase
 
 		if (FOFPlatform::getInstance()->isFrontend())
 		{
-			$query->clear('order')
-				->order('volunteer.firstname ASC');
+			$query->where('enabled = 1');
 
-			$this->setState('limit', 40);
+			$query->clear('order')
+				->order('subgroup.title ASC');
+		}
+
+		if (FOFPlatform::getInstance()->isBackend())
+		{
+			$query->select('g.title AS gtitle')
+				->from('#__volunteers_groups AS g')
+				->where('subgroup.group_id = g.volunteers_group_id');
 		}
 
 		return $query;
-	}
-	
-	/**
-	 * This method runs after an item has been gotten from the database in a read
-	 * operation. You can modify it before it's returned to the MVC triad for
-	 * further processing.
-	 *
-	 * @param   FOFTable  &$record  The table instance we fetched
-	 *
-	 * @return  void
-	 */
-	protected function onAfterGetItem(&$record)
-	{
-		parent::onAfterGetItem($record);
-		
-		if (FOFPlatform::getInstance()->isFrontend())
-		{
-			$record->groups    = $this->getVolunteerGroups($record->volunteers_volunteer_id);
-			$record->honorroll = $this->getVolunteerHonourroll($record->volunteers_volunteer_id);
-		}
 	}
 }

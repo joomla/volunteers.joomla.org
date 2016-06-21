@@ -77,13 +77,29 @@ class VolunteersModelReports extends VolunteersModelBase
 		
 		if (FOFPlatform::getInstance()->isFrontend())
 		{
-			$volunteerTable = FOFTable::getAnInstance('volunteer','VolunteersTable');
-			$volunteerTable->load(array('user_id' => $record->created_by ));
-			$record->volunteer    = $volunteerTable;
+			$record->volunteer = null;
+			$record->group     = null;
 
-			$groupTable = FOFTable::getAnInstance('group','VolunteersTable');
-			$groupTable->load($record->volunteers_group_id);
-			$record->group    = $groupTable;
+			if ($record->created_by != 0)
+			{
+				$volunteerTable = FOFTable::getAnInstance('volunteer','VolunteersTable');
+				$volunteerTable->load(array('user_id' => $record->created_by ));
+				$record->volunteer    = $volunteerTable;
+			}
+
+			$group_id = $record->volunteers_group_id;
+
+			if (is_null($group_id))
+			{
+				$group_id = $this->input->get('group', 0);
+			}
+
+			if ($group_id != 0)
+			{
+				$groupTable = FOFTable::getAnInstance('group','VolunteersTable');
+				$groupTable->load($group_id);
+				$record->group = $groupTable;
+			}
 		}
 	}
 
@@ -106,7 +122,6 @@ class VolunteersModelReports extends VolunteersModelBase
 		}
 	}
 
-
 	/**
 	 * This method runs before the $data is saved to the $table. Return false to
 	 * stop saving.
@@ -124,5 +139,7 @@ class VolunteersModelReports extends VolunteersModelBase
 		{
 			$data['created_by'] = JFactory::getUser()->get('id');
 		}
+
+		return $result;
 	}
 }

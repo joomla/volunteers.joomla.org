@@ -24,5 +24,8 @@ JHTML::_('formbehavior.chosen', 'select');
 $doc = JFactory::getDocument();
 $doc->addStyleSheet(JURI::root(true).'/media/com_volunteers/css/frontend.css');
 
+// Include the library
+JLoader::import('volunteers.library');
+
 
 FOFDispatcher::getTmpInstance('com_volunteers')->dispatch();

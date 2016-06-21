@@ -6,6 +6,22 @@
             <field name="locked_by">checked_out</field>
             <field name="locked_on">checked_out_time</field>
         </table>
+        <!-- Table options for a specific table -->
+        <table name="department">
+            <tablealias>department</tablealias>
+        </table>
+        <table name="group">
+            <tablealias>group</tablealias>
+        </table>
+        <table name="report">
+            <tablealias>report</tablealias>
+        </table>
+        <table name="subgroup">
+            <tablealias>subgroup</tablealias>
+        </table>
+        <table name="volunteer">
+            <tablealias>volunteer</tablealias>
+        </table>
     </common>
 
     <!-- Component back-end options -->

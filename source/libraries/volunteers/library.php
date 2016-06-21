@@ -18,6 +18,10 @@ if(version_compare(PHP_VERSION, '5.4.0', '<'))
 // Common fields
 JFormHelper::addFieldPath(dirname(__FILE__) . '/form/field');
 
+require_once __DIR__ . '/helpers/format.php';
+require_once __DIR__ . '/helpers/select.php';
+require_once __DIR__ . '/helpers/params.php';
+
 // load admin lang file
 $jlang = JFactory::getLanguage();
 $jlang->load('com_volunteers.sys', JPATH_ADMINISTRATOR, 'en-GB', true);

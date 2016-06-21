@@ -14,10 +14,12 @@ class VolunteersHelperParams
 	{
 		static $params = null;
 
-		if(!is_object($params)) {
+		if(!is_object($params)) 
+		{
 			jimport('joomla.application.component.helper');
 			$params = JComponentHelper::getParams('com_volunteers');
 		}
+		
 		return $params->get($key, $default);
 	}
 }

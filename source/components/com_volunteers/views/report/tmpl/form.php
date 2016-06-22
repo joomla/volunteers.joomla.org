@@ -26,13 +26,23 @@ JFactory::getDocument()->addScriptDeclaration('
 $item   = $this->get('item');
 $form   = $this->get('form');
 $fields = array_keys($form->getFieldset('basic_configuration'));
+
+$returnto = $this->input->get('returnto', 'wg');
+
+$cancelUrl = JRoute::_('index.php?option=com_volunteers&view=reports');
+
+if ($returnto == 'wg')
+{
+	$cancelUrl = JRoute::_('index.php?option=com_volunteers&view=group&id='.$item->group->volunteers_group_id) . "#reports";
+}
+
 ?>
 <form id="adminForm" class="form-validate form-horizontal" name="adminForm" method="post" action="<?php echo JRoute::_('index.php'); ?>">
 	<div class="row-fluid">
 		<h1 class="pull-left"><?php echo JText::_('COM_VOLUNTEERS_PAGETITLE_ADD_REPORT')?></h1>
 		<div class="btn-toolbar pull-right">
 			<div id="toolbar-cancel" class="btn-group">
-				<a class="btn btn-small btn-danger" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=group&id='.$item->group->volunteers_group_id)?>#reports">
+				<a class="btn btn-small btn-danger" href="<?php echo $cancelUrl;?>"
 					<span class="icon-cancel"></span> <?php echo JText::_('JCANCEL')?>
 				</a>
 			</div>
@@ -80,6 +90,7 @@ $fields = array_keys($form->getFieldset('basic_configuration'));
 
 	<input type="hidden" value="com_volunteers" name="option">
 	<input type="hidden" value="report" name="view">
+	<input type="hidden" value="<?php echo $returnto;?>" name="returnto">
 	<input type="hidden" value="save" name="task">
 	<input type="hidden" value="<?php echo $item->volunteers_report_id; ?>" name="volunteers_report_id" />
 	<input type="hidden" value="<?php echo $item->group->volunteers_group_id ?>" name="volunteers_group_id" />

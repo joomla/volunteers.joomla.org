@@ -247,7 +247,7 @@ defined('_JEXEC') or die;
 						</div>
 						<div class="span10">
 							<?php if($report->created_by == JFactory::getUser()->id):?>
-							<a class="btn btn-small pull-right" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=report&task=edit&id='.$report->volunteers_report_id.'&group='.$report->volunteers_group_id)?>">
+							<a class="btn btn-small pull-right" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=report&returnto=wg&task=edit&id='.$report->volunteers_report_id.'&group='.$report->volunteers_group_id)?>">
 								<span class="icon-edit"></span>  <?php echo JText::_('COM_VOLUNTEERS_EDIT') ?>
 							</a>
 							<?php endif;?>

@@ -76,7 +76,7 @@ $user = JFactory::getUser();
 							</td>
 							<?php if((JFactory::getUser()->id == $this->item->user_id) && $this->item->user_id):?>
 							<td>
-								<a class="btn btn-small pull-right" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=groupmember&task=edit&id='.$group->volunteers_groupmember_id)?>">
+								<a class="btn btn-small pull-right" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=member&task=edit&id='.$group->volunteers_member_id)?>">
 									<span class="icon-edit"></span>  <?php echo JText::_('COM_VOLUNTEERS_EDIT') ?>
 								</a>
 							</td>

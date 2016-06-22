@@ -8,6 +8,9 @@
 // No direct access.
 defined('_JEXEC') or die;
 
+/**
+ * Class VolunteersControllerReports
+ */
 class VolunteersControllerReports extends FOFController
 {
 	protected function onBeforeAdd()
@@ -40,6 +43,16 @@ class VolunteersControllerReports extends FOFController
 	{
 		// Redirect
 		$this->setRedirect(JRoute::_('index.php?option=com_volunteers&view=reports'), JText::_('COM_VOLUNTEERS_LBL_REPORT_SAVED'),'success');
+
+		if ($this->input->get('returnto', 'wg') == 'wg')
+		{
+			$group_id = $this->input->get('volunteers_group_id', 0);
+
+			if ($group_id != 0)
+			{
+				$this->setRedirect(JRoute::_('index.php?option=com_volunteers&view=group&id='.$group_id) . '#report', JText::_('COM_VOLUNTEERS_LBL_REPORT_SAVED'),'success');
+			}
+		}
 
 		return true;
 	}

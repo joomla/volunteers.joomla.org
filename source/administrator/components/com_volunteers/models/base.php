@@ -12,39 +12,65 @@ class VolunteersModelBase extends FOFModel
 {
 	protected $volunteersId = null;
 
+	/**
+	 * Method to auto-populate the model state.
+	 *
+	 * Note. Calling getState in this method will result in recursion.
+	 *
+	 * @param   string  $ordering   An optional ordering field.
+	 * @param   string  $direction  An optional direction (asc|desc).
+	 *
+	 * @return  void
+	 */
+	protected function populateState($ordering = 'a.id', $direction = 'asc')
+	{
+		// Todo: implement
+	}
+
 
 	protected function getVolunteerGroups($volunteer_id)
 	{
-		return $this->getVolunteerGroupRelations($volunteer_id, false);
+		return $this->getVolunteerRelations($volunteer_id);
 	}
 
 	protected function getVolunteerHonourroll($volunteer_id)
 	{
-		return $this->getVolunteerGroupRelations($volunteer_id, true);
+		return $this->getVolunteerRelations($volunteer_id, 'group', true);
 	}
 	
-	protected function getVolunteerGroupRelations($volunteer_id, $honour = false)
+	/**
+	 * Returns information about the relation of a given volunteer to a subgroup|group|department
+	 *
+	 * @param   integer  $volunteer_id  The volunteer id
+	 * @param   string   $type          The type of the relation
+	 * @param   bool     $honour        List past relations for group|department
+	 *
+	 * @return  bool|mixed
+	 */
+	protected function getVolunteerRelations($volunteer_id, $type = 'group', $honour = false)
 	{
-		$date = 'gm.date_ended = "0000-00-00"';
-		
-		if ($honour)
+		if ( ! in_array($type, array('subgroup', 'group', 'department')))
 		{
-			$date = 'gm.date_ended <> "0000-00-00"';
+			return false;
 		}
-		
+
+		$date = $this->getPastRelationFilter($honour);
+
 		$db = $this->getDbo();
-		
 		$query = $db->getQuery(true);
 		
-		$query->select('g.*, gm.role as role, gm.position as position')
-			->select('gm.volunteers_groupmember_id as volunteers_groupmember_id')
-			->from('#__volunteers_groups as g')
-			->from('#__volunteers_groupmembers as gm')
-			->where('gm.volunteers_volunteer_id = ' . (int) $volunteer_id)
-			->where('gm.volunteers_group_id = g.volunteers_group_id')
+		$query->select('a.*')
+			->select('rel.role as role, rel.position as position, rel.ns_role as ns_role, rel.ns_position as ns_position')
+			->select('rel.volunteers_member_id as volunteers_member_id')
+			->select('rel.date_started as date_started, rel.date_ended as date_ended')
+			->from('#__volunteers_' . $type . 's as a')
+			->from('#__volunteers_members as rel')
+			->where('rel.volunteers_volunteer_id = ' . (int) $volunteer_id)
+			->where('rel.reltable_id = a.volunteers_' . $type . '_id')
 			->where($date)
-			->order('g.title ASC');
-		
+			->where('rel.reltable =' .$db->q($type . 's'))
+			->order('a.title ASC');
+
 		$db->setQuery($query);
 		
 		return $db->loadObjectList();
@@ -52,40 +78,47 @@ class VolunteersModelBase extends FOFModel
 
 	protected function getGroupVolunteers($group_id)
 	{
-		return $this->getGroupVolunteerRelations($group_id, false);
+		return $this->getGroupRelations($group_id);
 	}
 
 	protected function getGroupHonourroll($group_id)
 	{
-		return $this->getGroupVolunteerRelations($group_id, true);
+		return $this->getGroupRelations($group_id, 'group', true);
 	}
 
-	protected function getGroupVolunteerRelations($group_id, $honour = false)
+	protected function getGroupRelations($id, $type = 'group', $honour = false)
 	{
-		$date = 'gm.date_ended = "0000-00-00"';
-
-		if ($honour)
+		if ( ! in_array($type, array('subgroup', 'group', 'department')))
 		{
-			$date = 'gm.date_ended <> "0000-00-00"';
+			return false;
 		}
+
+		$date = $this->getPastRelationFilter($honour);
 
 		$db = $this->getDbo();
 
 		$query = $db->getQuery(true);
 
-		$query->select('v.*, gm.role as role, gm.position as position')
-			->select('gm.volunteers_groupmember_id as volunteers_groupmember_id')
-			->select('gm.date_started as date_started, gm.date_ended as date_ended')
-			->from('#__volunteers_volunteers as v')
-			->from('#__volunteers_groupmembers as gm')
-			->where('gm.volunteers_group_id = ' . (int) $group_id)
-			->where('gm.volunteers_volunteer_id = v.volunteers_volunteer_id')
+		$query->select('a.*')
+			->select('rel.role as role, rel.position as position, rel.ns_role as ns_role, rel.ns_position as ns_position')
+			->select('rel.volunteers_member_id as volunteers_member_id')
+			->select('rel.date_started as date_started, rel.date_ended as date_ended')
+			->from('#__volunteers_volunteers as a')
+			->from('#__volunteers_members as rel')
+			->where('rel.reltable_id = ' . (int) $id)
+			->where('rel.volunteers_volunteer_id = a.volunteers_volunteer_id')
 			->where($date)
-			->order('v.firstname ASC');
+			->where('rel.reltable =' .$db->q($type . 's'))
+			->order('a.firstname ASC');
 
 		$db->setQuery($query);
 
 		return $db->loadObjectList();
+	}
+
+	protected function getSubgroupVolunteerRelations($id)
+	{
+		return $this->getGroupRelations($id, 'subgroup');
 	}
 
 	protected function getGroupReports($group_id)
@@ -176,5 +209,20 @@ class VolunteersModelBase extends FOFModel
 	public function getComponentConfiguration()
 	{
 		return JComponentHelper::getParams('com_volunteers');
+	}
+
+	/**
+	 * @param $honour
+	 *
+	 * @return string
+	 */
+	private function getPastRelationFilter($honour)
+	{
+		if ($honour)
+		{
+			return 'rel.date_ended <> "0000-00-00"';
+		}
+
+		return 'rel.date_ended = "0000-00-00"';
 	}
 }

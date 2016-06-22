@@ -86,7 +86,9 @@ class VolunteersModelGroups extends VolunteersModelBase
 		
 		$membersQuery->select('*')
 			->from('#__volunteers_volunteers AS volunteer')
-			->innerJoin('#__volunteers_groupmembers AS g2m ON g2m.volunteers_volunteer_id = volunteer.volunteers_volunteer_id')
+			->from('#__volunteers_members AS g2m')
+			->where('g2m.volunteers_volunteer_id = volunteer.volunteers_volunteer_id')
+			->where('g2m.reltable = "groups"')
 			->where('volunteer.enabled = 1')
 			->where('g2m.date_ended = "0000-00-00"')
 			->order('RAND()');
@@ -95,9 +97,14 @@ class VolunteersModelGroups extends VolunteersModelBase
 		
 		$members = $db->loadObjectList();
 
+		if (empty($members))
+		{
+			return true;
+		}
+
 		foreach($members as $member)
 		{
-			$groupmembers[$member->volunteers_group_id][] = $member;
+			$groupmembers[$member->reltable_id][] = $member;
 		}
 
 		foreach ($resultArray as $result)

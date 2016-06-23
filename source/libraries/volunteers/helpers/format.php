@@ -28,7 +28,18 @@ class VolunteersHelperFormat
 	
 	public static function getNsPositionText($value)
 	{
-		// Todo: implement
+		$options = array(
+			JText::_('COM_VOLUNTEERS_NS_POSITION_0'),
+			JText::_('COM_VOLUNTEERS_NS_POSITION_1'),
+			JText::_('COM_VOLUNTEERS_NS_POSITION_2'),
+			JText::_('COM_VOLUNTEERS_NS_POSITION_3')
+		);
+		
+		if (array_key_exists($value, $options))
+		{
+			return $options[$value];
+		}
+		
 		return '';
 	}
 	

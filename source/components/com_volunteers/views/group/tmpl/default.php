@@ -70,7 +70,7 @@ defined('_JEXEC') or die;
 			<div class="tab-pane fade in active" id="members">
 				<?php if($this->item->acl->allowAddMembers):?>
 				<div class="row-fluid">
-					<a class="btn pull-right" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=groupmember&task=add&group='.$this->item->volunteers_group_id)?>">
+					<a class="btn pull-right" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=member&task=add&group='.$this->item->volunteers_group_id)?>">
 						<span class="icon-edit"></span>  <?php echo JText::_('COM_VOLUNTEERS_ADD_GROUPMEMBER') ?>
 					</a>
 				</div>
@@ -101,11 +101,7 @@ defined('_JEXEC') or die;
 			                  	</a>
 							</td>
 							<td>
-								<?php if($volunteer->position):?>
-									<?php echo($volunteer->position);?>
-								<?php elseif($volunteer->role != 1):?>
-									<?php echo VolunteersHelperFormat::role($volunteer->role); ?>
-								<?php endif;?>
+								<?php echo VolunteersHelperFormat::getNsPositionText($volunteer->ns_position); ?>
 							</td>
 							<td>
 								<?php echo VolunteersHelperFormat::date($volunteer->date_started,'M Y'); ?>
@@ -113,7 +109,7 @@ defined('_JEXEC') or die;
 							<?php if($this->item->acl->member):?>
 							<td>
 								<?php if(($this->item->acl->allowEditgroup) || ($volunteer->user_id == JFactory::getUser()->id)):?>
-								<a class="btn btn-small pull-right" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=groupmember&task=edit&id='.$volunteer->volunteers_groupmember_id)?>">
+								<a class="btn btn-small pull-right" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=member&task=edit&id='.$volunteer->volunteers_member_id)?>">
 									<span class="icon-edit"></span>  <?php echo JText::_('COM_VOLUNTEERS_EDIT') ?>
 								</a>
 								<?php endif;?>
@@ -138,9 +134,11 @@ defined('_JEXEC') or die;
 					<?php if($this->item->subgroups):?>
 						<?php foreach($this->item->subgroups as $subgroup):?>
 							<h2><?php echo $subgroup->title;?>
+								<?php if($this->item->acl->allowAddSubgroups) :?>
 								<a class="btn" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=subgroup&task=edit&id='.$subgroup->volunteers_subgroup_id)?>">
 									<span class="icon-edit"></span> <?php echo JText::_('COM_VOLUNTEERS_EDIT_SUBGROUP') ?>
 								</a>
+								<?php endif;?>
 							</h2>
 							<p>
 								<?php echo $subgroup->description;?>
@@ -154,7 +152,7 @@ defined('_JEXEC') or die;
 										<th><?php echo JText::_('COM_VOLUNTEERS_FIELD_NAME') ?></th>
 									</thead>
 									<tbody>
-									<?php foreach($subgroups->members as $volunteer):?>
+									<?php foreach($subgroup->members as $volunteer):?>
 										<tr>
 											<td class="volunteer-image">
 												<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id='.$volunteer->volunteers_volunteer_id)?>">
@@ -216,7 +214,7 @@ defined('_JEXEC') or die;
 							</td>
 							<?php if($this->item->acl->allowEditgroup):?>
 							<td>
-								<a class="btn btn-small pull-right" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=groupmember&task=edit&id='.$volunteer->volunteers_groupmember_id)?>">
+								<a class="btn btn-small pull-right" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=member&task=edit&id='.$volunteer->volunteers_member_id)?>">
 									<span class="icon-edit"></span>  <?php echo JText::_('COM_VOLUNTEERS_EDIT') ?>
 								</a>
 							</td>

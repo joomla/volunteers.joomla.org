@@ -135,15 +135,33 @@ class VolunteersModelGroups extends VolunteersModelBase
 		{
 			$record->groupmembers = $this->getGroupVolunteers($record->volunteers_group_id);
 			$record->honourroll   = $this->getGroupHonourroll($record->volunteers_group_id);
-			$record->subgroups    = $this->getSubgroup($record->volunteers_group_id);
 			$record->reports      = $this->getGroupReports($record->volunteers_group_id);
 
 			$departmentTable = FOFTable::getAnInstance('department','VolunteersTable');
 			$departmentTable->load($record->department_id);
 			$record->department = $departmentTable;
-			
-			// Finally Check ACL
+
+			// Check ACL
 			$this->getAcl($record);
+
+			$subgroupsAndAssignedMembers = array();
+
+			$subgroups = $this->getSubgroup($record->volunteers_group_id);
+
+			foreach ($subgroups AS $subgroup)
+			{
+				if ($subgroup->enabled || $record->acl->allowAddSubgroups)
+				{
+					$assignedMembers = $this->getSubgroupVolunteerRelations($subgroup->volunteers_subgroup_id);
+
+					$subgroup->members = $assignedMembers;
+
+					$subgroupsAndAssignedMembers[] = $subgroup;
+				}
+			}
+
+			$record->subgroups = $subgroupsAndAssignedMembers;
+
 		}
 	}
 

@@ -55,4 +55,199 @@ class VolunteersModelSubgroups extends VolunteersModelBase
 
 		return $query;
 	}
+
+	/**
+	 * This method runs after an item has been gotten from the database in a read
+	 * operation. You can modify it before it's returned to the MVC triad for
+	 * further processing.
+	 *
+	 * @param   FOFTable  &$record  The table instance we fetched
+	 *
+	 * @return  void
+	 */
+	protected function onAfterGetItem(&$record)
+	{
+		parent::onAfterGetItem($record);
+
+		if (FOFPlatform::getInstance()->isFrontend())
+		{
+			$record->groupmembers = array();
+				
+			$group_id = $record->group_id;
+			
+			if (is_null($group_id))
+			{
+				$group_id = $this->input->get('group', 0);
+			}
+			
+			if ($group_id != 0)
+			{
+				$record->groupmembers = $this->getGroupVolunteers($group_id);
+
+				$groupTable = FOFTable::getAnInstance('group','VolunteersTable');
+				$groupTable->load($group_id);
+				$record->group = $groupTable;
+
+				$departmentTable = FOFTable::getAnInstance('department','VolunteersTable');
+				$departmentTable->load($record->group->department_id);
+				$record->department = $departmentTable;
+
+				// Finally Check ACL
+				$this->getAcl($record);
+			}
+			
+			$record->subgroupmembers = $this->getSubgroupVolunteerRelations($record->volunteers_subgroup_id);
+
+			$record->subgroupmemberIds = array();
+
+			foreach ($record->subgroupmembers AS $subgroupmember)
+			{
+				$record->subgroupmemberIds[] = $subgroupmember->volunteers_volunteer_id;
+			}
+		}
+	}
+
+	/**
+	 * Allows data and form manipulation after preprocessing the form
+	 *
+	 * @param   FOFForm  $form    A FOFForm object.
+	 * @param   array    &$data   The data expected for the form.
+	 * @codeCoverageIgnore
+	 *
+	 * @return  void
+	 */
+	public function onAfterPreprocessForm(FOFForm &$form, &$data)
+	{
+		if (FOFPlatform::getInstance()->isFrontend())
+		{
+			$item = $this->getItem();
+
+			$form->removeField('group_id');
+			$form->removeField('state');
+			$form->removeField('date_started');
+			$form->removeField('date_ended');
+			if (! $item->acl->teamLeader && ! $item->acl->assistentTeamLeader)
+			{
+				$form->removeField('lead');
+				$form->removeField('enabled');
+				$form->removeField('notes');
+			}
+
+			if (! $item->acl->teamLeader && ! $item->acl->assistentTeamLeader && ! $item->acl->subteamLeader)
+			{
+				$form->removeField('assistent1');
+				$form->removeField('assistent2');
+			}
+		}
+	}
+
+	/**
+	 * This method runs before the $data is saved to the $table. Return false to
+	 * stop saving.
+	 *
+	 * @param   array     &$data   The data to save
+	 * @param   FOFTable  &$table  The table to save the data to
+	 *
+	 * @return  boolean  Return false to prevent saving, true to allow it
+	 */
+	protected function onAfterSave(&$table)
+	{
+		$result = parent::onAfterSave($table);
+
+		if  ($result)
+		{
+			$savedAssignedMembers = $this->record->subgroupmemberIds;
+			$toBeAssigendMembers = (array) $this->input->get('assigned');
+
+			$unchanged = array_intersect($savedAssignedMembers, $toBeAssigendMembers);
+			$toDelete  = array_diff($savedAssignedMembers, $unchanged);
+			$toAdd     = array_diff($toBeAssigendMembers, $unchanged);
+
+			if ( ! empty($toDelete))
+			{
+				$db    = $this->getDbo();
+				$query = $db->getQuery(true);
+				
+				$query->delete('#__volunteers_members')
+					->where('reltable = "subgroups"')
+					->where('reltable_id = ' . (int) $table->volunteers_subgroup_id)
+					->where('volunteers_volunteer_id in (' . implode(',', $toDelete) . ')');
+
+				$db->setQuery($query);
+
+				$db->execute();
+			}	
+			
+			$membersTable =  FOFTable::getAnInstance('member','VolunteersTable');
+
+			foreach ($toAdd as $add)
+			{
+				// Force to make a new entry
+				$membersTable->volunteers_member_id = null;
+
+				$membersTable->reltable    = 'subgroups';
+				$membersTable->reltable_id = $table->volunteers_subgroup_id;
+				$membersTable->enabled     = 1;
+				$membersTable->volunteers_volunteer_id = $add;
+				
+				$membersTable->store();
+			}
+		}
+
+		return $result;
+	}
+
+	protected function getAcl(&$record)
+	{
+		$acl = new stdClass;
+
+		$acl->admin = false;
+		$acl->departmentCoordinator = false;
+		$acl->teamLeader = false;
+		$acl->assistentTeamLeader = false;
+		$acl->subteamLeader = false;
+		$acl->assistentSubteamLeader = false;
+		$acl->member = false;
+
+		$acl->allowEditSubgroup    = false;
+
+		$vId = $this->getVolunteerId();
+
+		if ($vId)
+		{
+			$acl->admin = $this->isAdmin();
+
+			$department = $record->department;
+			$acl->departmentCoordinator = $department->lead == $vId || $department->assistent1 == $vId || $department->assistent2 == $vId;
+
+			$group = $record->group;
+			$acl->teamLeader = $group->lead == $vId;
+
+			$acl->assistentTeamLeader = $group->assistent1 == $vId || $group->assistent2 == $vId;
+
+			$subgroup = $record;
+			$acl->subteamLeader = $subgroup->lead == $vId;
+
+			$acl->assistentSubteamLeader = $subgroup->assistent1 == $vId || $subgroup->assistent2 == $vId;
+
+			$found = false;
+			$gm = $record->groupmembers;
+
+			reset($gm);
+
+			while ((list(, $group) = each($gm)) && ! $found)
+			{
+				$found = $group->volunteers_volunteer_id == $vId;
+			}
+
+			$acl->member = $found;
+
+			$acl->allowAddMembers   = $acl->admin || $acl->departmentCoordinator || $acl->teamLeader || $acl->assistentTeamLeader;
+			$acl->allowAddreports   = $acl->teamLeader || $acl->assistentTeamLeader || $acl->member;
+			$acl->allowEditSubgroup = $acl->teamLeader || $acl->assistentTeamLeader || $acl->subteamLeader || $acl->assistentSubteamLeader;
+		}
+
+		$record->acl = $acl;
+	}
+
 }

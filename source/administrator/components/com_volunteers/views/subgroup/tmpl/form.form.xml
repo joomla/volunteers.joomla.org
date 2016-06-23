@@ -8,7 +8,7 @@
               description="COM_VOLUNTEERS_GROUP_BASIC_DESC"
     >
 
-        <field name="title" type="text" class="inputbox form-control"  labelClass="control-label"
+        <field name="title" type="text" class="inputbox form-control input-xxlarge"  labelClass="control-label"
                size="150" label="COM_VOLUNTEERS_TITLE"
                description="COM_VOLUNTEERS_TITLE_DESC" required="true" />
 
@@ -35,28 +35,28 @@
                label="COM_VOLUNTEERS_ASSISTENTTEAMLEAD"
                description="COM_VOLUNTEERS_ASSISTENTTEAMLEAD_DESC" />
 
-        <field name="slug" type="text" class="inputbox form-control"  labelClass="control-label"
+        <field name="slug" type="text" class="inputbox form-control input-xxlarge"  labelClass="control-label"
                size="150" label="COM_VOLUNTEERS_SLUG"
                description="COM_VOLUNTEERS_SLUG_DESC" required="true" />
 
-        <field name="email" type="text" class="inputbox form-control"  labelClass="control-label"
+        <field name="email" type="text" class="inputbox form-control input-xxlarge"  labelClass="control-label"
                size="150" label="COM_VOLUNTEERS_EMAIL"
                description="COM_VOLUNTEERS_EMAIL_DESC"/>
 
-        <field name="website" type="text" class="inputbox form-control"  labelClass="control-label"
+        <field name="website" type="text" class="inputbox form-control input-xxlarge"  labelClass="control-label"
                size="150" label="COM_VOLUNTEERS_WEBSITE"
                description="COM_VOLUNTEERS_WEBSITE_DESC"/>
 
-        <field name="acronym" type="text" class="inputbox form-control"  labelClass="control-label"
+        <field name="acronym" type="text" class="inputbox form-control input-xxlarge"  labelClass="control-label"
                size="10" label="COM_VOLUNTEERS_ACRONYM"
                description="COM_VOLUNTEERS_ACRONYM_DESC"/>
 
-        <field name="description" type="textarea" class="inputbox form-control"  labelClass="control-label"
+        <field name="description" type="textarea" class="inputbox form-control input-xxlarge"  labelClass="control-label"
                size="150" label="COM_VOLUNTEERS_DESCRIPTION"
                description="COM_VOLUNTEERS_DESCRIPTION_DESC"
                buttons="false" rows="5" cols="80"/>
 
-        <field name="notes" type="textarea" class="inputbox form-control"  labelClass="control-label"
+        <field name="notes" type="textarea" class="inputbox form-control input-xxlarge"  labelClass="control-label"
                size="150" label="COM_VOLUNTEERS_NOTES"
                description="COM_VOLUNTEERS_NOTES_DESC"
                buttons="false" rows="5" cols="80"/>

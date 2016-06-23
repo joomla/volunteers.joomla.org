@@ -22,6 +22,9 @@
         <table name="volunteer">
             <tablealias>volunteer</tablealias>
         </table>
+        <table name="member">
+            <tablealias>member</tablealias>
+        </table>
     </common>
 
     <!-- Component back-end options -->

@@ -8,85 +8,22 @@
 // No direct access.
 defined('_JEXEC') or die;
 
+/**
+ * Class VolunteersControllerVolunteers
+ */
 class VolunteersControllerVolunteers extends FOFController
 {
-	public function onBeforeRead() {
-		$groups = FOFModel::getTmpInstance('Groupmembers', 'VolunteersModel')
-			->limit(0)
-			->limitstart(0)
-			->enabled(1)
-			->active(1)
-			->volunteer($this->getThisModel()->getItem()->volunteers_volunteer_id)
-			->filter_order('volunteer_title')
-			->filter_order_Dir('ASC')
-			->getList();
-
-		$this->getThisView()->assign('groups', $groups);
-
-		$honorroll = FOFModel::getTmpInstance('Groupmembers', 'VolunteersModel')
-			->limit(0)
-			->limitstart(0)
-			->enabled(1)
-			->active(0)
-			->volunteer($this->getThisModel()->getItem()->volunteers_volunteer_id)
-			->filter_order('volunteer_title')
-			->filter_order_Dir('ASC')
-			->getList();
-
-		$this->getThisView()->assign('honorroll', $honorroll);
-
-		return true;
-	}
-
-	/**
-	 * This runs before the browse() method. Return false to prevent executing
-	 * the method.
-	 *
-	 * @return bool
-	 */
-	public function onBeforeBrowse() {
-		$result = parent::onBeforeBrowse();
-		if($result) {
-			// Get the current order by column
-			$orderby = $this->getThisModel()->getState('filter_order','');
-			// If it's not one of the allowed columns, force it to be the "ordering" column
-			if(!in_array($orderby, array('ordering','firstname','random'))) {
-				$orderby = 'firstname';
-			}
-
-			// Get the event ID
-			$params = JFactory::getApplication()->getPageParameters('com_volunteers');
-
-			// Apply ordering and filter only the enabled items
-			$this->getThisModel()
-				->limit(40)
-				->filter_order($orderby)
-				->enabled(1)
-				->filter_order_Dir('ASC');
-
-			// If no volunteers are shown even though I do have volunteers, use a limitstart of 0
-			if($this->input->getInt('limitstart') == '')
-            {
-				$this->getThisModel()->limitstart(0);
-			}
-
-			// Fetch page parameters
-			$params = JFactory::getApplication()->getPageParameters('com_volunteers');
-
-			// Push page parameters
-			$this->getThisView()->assign('pageparams', $params);
-		}
-		return $result;
-	}
 
 	protected function onBeforeEdit()
 	{
 		$volunteer = $this->getThisModel()->getItem();
 
-		if($volunteer->user_id == JFactory::getUser()->id) {
+		if($volunteer->user_id == JFactory::getUser()->id) 
+		{
 			return $this->checkACL('core.edit.own');
 		}
 
+		return false;
 	}
 
 	/**

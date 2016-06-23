@@ -70,7 +70,7 @@ defined('_JEXEC') or die;
 			<div class="tab-pane fade in active" id="members">
 				<?php if($this->item->acl->allowAddMembers):?>
 				<div class="row-fluid">
-					<a class="btn pull-right" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=member&task=add&group='.$this->item->volunteers_group_id)?>">
+					<a class="btn pull-right" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=member&task=add&type=group&group='.$this->item->volunteers_group_id)?>">
 						<span class="icon-edit"></span>  <?php echo JText::_('COM_VOLUNTEERS_ADD_GROUPMEMBER') ?>
 					</a>
 				</div>

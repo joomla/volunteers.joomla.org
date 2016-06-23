@@ -25,7 +25,13 @@ class VolunteersHelperFormat
 
 		return '';
 	}
-
+	
+	public static function getNsPositionText($value)
+	{
+		// Todo: implement
+		return '';
+	}
+	
 	public static function role($id)
 	{
 		if($id == 1)

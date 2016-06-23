@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form
+        validate="true"
+        serverside_validate="true"
+>
+    <fieldset name="basic_configuration"
+              label="COM_VOLUNTEERS_MEMBER_BASIC"
+              description="COM_VOLUNTEERS_MEMBER_BASIC_DESC"
+    >
+
+        <field name="volunteers_volunteer_id" type="volunteers.volunteer" class="inputbox form-control"
+               labelClass="control-label"
+               label="COM_VOLUNTEERS_VOLUNTEER"
+               exclude="groupmember,teamleader,assistantteamleader"
+               description="COM_VOLUNTEERS_VOLUNTEER_DESC" required="true" />
+
+        <field name="ns_position" type="volunteers.position" class="inputbox form-control"
+               labelClass="control-label"
+               label="COM_VOLUNTEERS_MEMBER_POSITION" required="true" />
+
+        <field name="ns_role" type="text" class="inputbox form-control input-xxlarge"  labelClass="control-label"
+               size="150" label="COM_VOLUNTEERS_MEMBER_ROLE"
+               description="COM_VOLUNTEERS_MEMBER_ROLE_DESC" />
+
+        <field name="enabled" type="list"
+               label="COM_VOLUNTEERS_MEMBER_STATE"
+               description="COM_VOLUNTEERS_MEMBER_MEMBER_STATE_DESC"
+               class="inputbox" size="1" default="1" >
+            <option value="1">JPUBLISHED</option>
+            <option value="0">JUNPUBLISHED</option>
+        </field>
+
+        <field name="date_started" type="calendar" class="inputbox form-control"
+               label="COM_VOLUNTEERS_MEMBER_DATE_STARTED"
+               description="COM_VOLUNTEERS_MEMBER_DATE_STARTED_DESC"
+               format="%d.%m.%Y"
+        />
+
+        <field name="date_ended" type="calendar" class="inputbox form-control"
+               label="COM_VOLUNTEERS_MEMBER_DATE_ENDED" description="COM_VOLUNTEERS_MEMBER_DATE_ENDED_DESC"
+               format="%d.%m.%Y"
+        />
+
+        <field name="volunteers_department_id" type="hidden"/>
+        <field name="volunteers_group_id" type="hidden"/>
+        <field name="volunteers_subgroup_id" type="hidden"/>
+
+    </fieldset>
+
+</form>

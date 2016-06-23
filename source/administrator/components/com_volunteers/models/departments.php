@@ -65,8 +65,8 @@ class VolunteersModelDepartments extends VolunteersModelBase
 			$record->groups = $this->getDepartmentGroups($record->volunteers_department_id);
 
 			$record->teamlead = null;
-			$record->teamassistent1 = null;
-			$record->teamassistent2 = null;
+			$record->teamassistant1 = null;
+			$record->teamassistant2 = null;
 
 			$v = FOFTable::getAnInstance('volunteer','VolunteersTable');
 
@@ -79,18 +79,18 @@ class VolunteersModelDepartments extends VolunteersModelBase
 				$v = $v->getClone();
 			}
 
-			if (! empty($record->assistent1))
+			if (! empty($record->assistant1))
 			{
-				$v->load($record->assistent1);
-				$record->teamassistent1 = $v;
+				$v->load($record->assistant1);
+				$record->teamassistant1 = $v;
 
 				$v = $v->getClone();
 			}
 
-			if (! empty($record->assistent2))
+			if (! empty($record->assistant2))
 			{
-				$v->load($record->assistent2);
-				$record->teamassistent2 = $v;
+				$v->load($record->assistant2);
+				$record->teamassistant2 = $v;
 			}
 		}
 	}

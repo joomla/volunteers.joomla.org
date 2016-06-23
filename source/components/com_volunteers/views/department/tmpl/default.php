@@ -38,15 +38,15 @@ defined('_JEXEC') or die;
 	</div>
 	<hr />
 <?php endif; ?>
-<?php if(! is_null($this->item->teamassistent1)) :?>
-	<?php $leader = $this->item->teamassistent1;?>
+<?php if(! is_null($this->item->teamassistant1)) :?>
+	<?php $leader = $this->item->teamassistant1;?>
 		<div class="row-fluid">
 			<div class="span3 volunteer-image">
 				<?php echo VolunteersHelperFormat::image($leader->image, 'large'); ?>
 			</div>
 			<div class="span9">
 				<h3>
-					<?php echo JText::_('COM_VOLUNTEERS_DEPARTMENT_ASSISTENTLEADER');?>
+					<?php echo JText::_('COM_VOLUNTEERS_DEPARTMENT_ASSISTANTLEADER');?>
 					<?php echo $leader->firstname?> <?php echo $leader->lastname?>
 				</h3>
 				<?php if($leader->city || $leader->country):?>
@@ -57,15 +57,15 @@ defined('_JEXEC') or die;
 		</div>
 	<hr />
 <?php endif; ?>
-<?php if(! is_null($this->item->teamassistent2)) :?>
-	<?php $leader = $this->item->teamassistent2;?>
+<?php if(! is_null($this->item->teamassistant2)) :?>
+	<?php $leader = $this->item->teamassistant2;?>
 	<div class="row-fluid">
 		<div class="span3 volunteer-image">
 			<?php echo VolunteersHelperFormat::image($leader->image, 'large'); ?>
 		</div>
 		<div class="span9">
 			<h3>
-				<?php echo JText::_('COM_VOLUNTEERS_DEPARTMENT_ASSISTENTLEADER');?>
+				<?php echo JText::_('COM_VOLUNTEERS_DEPARTMENT_ASSISTANTLEADER');?>
 				<?php echo $leader->firstname?> <?php echo $leader->lastname?>
 			</h3>
 			<?php if($leader->city || $leader->country):?>

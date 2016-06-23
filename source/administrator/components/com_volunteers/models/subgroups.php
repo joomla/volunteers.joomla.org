@@ -126,17 +126,17 @@ class VolunteersModelSubgroups extends VolunteersModelBase
 			$form->removeField('state');
 			$form->removeField('date_started');
 			$form->removeField('date_ended');
-			if (! $item->acl->teamLeader && ! $item->acl->assistentTeamLeader)
+			if (! $item->acl->teamLeader && ! $item->acl->assistantTeamLeader)
 			{
 				$form->removeField('lead');
 				$form->removeField('enabled');
 				$form->removeField('notes');
 			}
 
-			if (! $item->acl->teamLeader && ! $item->acl->assistentTeamLeader && ! $item->acl->subteamLeader)
+			if (! $item->acl->teamLeader && ! $item->acl->assistantTeamLeader && ! $item->acl->subteamLeader)
 			{
-				$form->removeField('assistent1');
-				$form->removeField('assistent2');
+				$form->removeField('assistant1');
+				$form->removeField('assistant2');
 			}
 		}
 	}
@@ -204,9 +204,9 @@ class VolunteersModelSubgroups extends VolunteersModelBase
 		$acl->admin = false;
 		$acl->departmentCoordinator = false;
 		$acl->teamLeader = false;
-		$acl->assistentTeamLeader = false;
+		$acl->assistantTeamLeader = false;
 		$acl->subteamLeader = false;
-		$acl->assistentSubteamLeader = false;
+		$acl->assistantSubteamLeader = false;
 		$acl->member = false;
 
 		$acl->allowEditSubgroup    = false;
@@ -218,17 +218,17 @@ class VolunteersModelSubgroups extends VolunteersModelBase
 			$acl->admin = $this->isAdmin();
 
 			$department = $record->department;
-			$acl->departmentCoordinator = $department->lead == $vId || $department->assistent1 == $vId || $department->assistent2 == $vId;
+			$acl->departmentCoordinator = $department->lead == $vId || $department->assistant1 == $vId || $department->assistant2 == $vId;
 
 			$group = $record->group;
 			$acl->teamLeader = $group->lead == $vId;
 
-			$acl->assistentTeamLeader = $group->assistent1 == $vId || $group->assistent2 == $vId;
+			$acl->assistantTeamLeader = $group->assistant1 == $vId || $group->assistant2 == $vId;
 
 			$subgroup = $record;
 			$acl->subteamLeader = $subgroup->lead == $vId;
 
-			$acl->assistentSubteamLeader = $subgroup->assistent1 == $vId || $subgroup->assistent2 == $vId;
+			$acl->assistantSubteamLeader = $subgroup->assistant1 == $vId || $subgroup->assistant2 == $vId;
 
 			$found = false;
 			$gm = $record->groupmembers;
@@ -242,9 +242,9 @@ class VolunteersModelSubgroups extends VolunteersModelBase
 
 			$acl->member = $found;
 
-			$acl->allowAddMembers   = $acl->admin || $acl->departmentCoordinator || $acl->teamLeader || $acl->assistentTeamLeader;
-			$acl->allowAddreports   = $acl->teamLeader || $acl->assistentTeamLeader || $acl->member;
-			$acl->allowEditSubgroup = $acl->teamLeader || $acl->assistentTeamLeader || $acl->subteamLeader || $acl->assistentSubteamLeader;
+			$acl->allowAddMembers   = $acl->admin || $acl->departmentCoordinator || $acl->teamLeader || $acl->assistantTeamLeader;
+			$acl->allowAddreports   = $acl->teamLeader || $acl->assistantTeamLeader || $acl->member;
+			$acl->allowEditSubgroup = $acl->teamLeader || $acl->assistantTeamLeader || $acl->subteamLeader || $acl->assistantSubteamLeader;
 		}
 
 		$record->acl = $acl;

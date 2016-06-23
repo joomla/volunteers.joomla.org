@@ -190,8 +190,8 @@ class VolunteersModelGroups extends VolunteersModelBase
 
 			if (! $item->acl->teamLeader)
 			{
-				$form->removeField('assistent1');
-				$form->removeField('assistent2');
+				$form->removeField('assistant1');
+				$form->removeField('assistant2');
 			}
 		}
 	}
@@ -224,7 +224,7 @@ class VolunteersModelGroups extends VolunteersModelBase
 		$acl->admin = false;
 		$acl->departmentCoordinator = false;
 		$acl->teamLeader = false;
-		$acl->assistentTeamLeader = false;
+		$acl->assistantTeamLeader = false;
 		$acl->member = false;
 
 		$acl->allowAddMembers   = false;
@@ -239,12 +239,12 @@ class VolunteersModelGroups extends VolunteersModelBase
 			$acl->admin = $this->isAdmin();
 
 			$department = $record->department;
-			$acl->departmentCoordinator = $department->lead == $vId || $department->assistent1 == $vId || $department->assistent2 == $vId;
+			$acl->departmentCoordinator = $department->lead == $vId || $department->assistant1 == $vId || $department->assistant2 == $vId;
 
 			$group = $record;
 			$acl->teamLeader = $group->lead == $vId;
 
-			$acl->assistentTeamLeader = $group->assistent1 == $vId || $group->assistent2 == $vId;
+			$acl->assistantTeamLeader = $group->assistant1 == $vId || $group->assistant2 == $vId;
 
 			$found = false;
 			$gm = $record->groupmembers;
@@ -258,10 +258,10 @@ class VolunteersModelGroups extends VolunteersModelBase
 
 			$acl->member = $found;
 
-			$acl->allowAddMembers   = $acl->admin || $acl->departmentCoordinator || $acl->teamLeader || $acl->assistentTeamLeader;
-			$acl->allowAddreports   = $acl->teamLeader || $acl->assistentTeamLeader || $acl->member;
-			$acl->allowAddSubgroups = $acl->teamLeader || $acl->assistentTeamLeader;
-			$acl->allowEditgroup    = $acl->teamLeader || $acl->assistentTeamLeader;
+			$acl->allowAddMembers   = $acl->admin || $acl->departmentCoordinator || $acl->teamLeader || $acl->assistantTeamLeader;
+			$acl->allowAddreports   = $acl->teamLeader || $acl->assistantTeamLeader || $acl->member;
+			$acl->allowAddSubgroups = $acl->teamLeader || $acl->assistantTeamLeader;
+			$acl->allowEditgroup    = $acl->teamLeader || $acl->assistantTeamLeader;
 		}
 
 		$record->acl = $acl;

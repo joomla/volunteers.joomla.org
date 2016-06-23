@@ -29,15 +29,15 @@
                label="COM_VOLUNTEERS_TEAMLEAD"
                description="COM_VOLUNTEERS_TEAMLEAD_DESC" required="true" />
 
-        <field name="assistent1" type="volunteers.volunteer" class="inputbox form-control"
+        <field name="assistant1" type="volunteers.volunteer" class="inputbox form-control"
                labelClass="control-label"
-               label="COM_VOLUNTEERS_ASSISTENTTEAMLEAD"
-               description="COM_VOLUNTEERS_ASSISTENTTEAMLEAD_DESC" />
+               label="COM_VOLUNTEERS_ASSISTANTTEAMLEAD"
+               description="COM_VOLUNTEERS_ASSISTANTTEAMLEAD_DESC" />
 
-        <field name="assistent2" type="volunteers.volunteer" class="inputbox form-control"
+        <field name="assistant2" type="volunteers.volunteer" class="inputbox form-control"
                labelClass="control-label"
-               label="COM_VOLUNTEERS_ASSISTENTTEAMLEAD"
-               description="COM_VOLUNTEERS_ASSISTENTTEAMLEAD_DESC" />
+               label="COM_VOLUNTEERS_ASSISTANTTEAMLEAD"
+               description="COM_VOLUNTEERS_ASSISTANTTEAMLEAD_DESC" />
 
         <field name="slug" type="text" class="inputbox form-control input-xxlarge"  labelClass="control-label"
                size="150" label="COM_VOLUNTEERS_SLUG"

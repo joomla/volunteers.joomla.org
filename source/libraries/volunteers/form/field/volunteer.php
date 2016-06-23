@@ -29,7 +29,70 @@ class VolunteersFormFieldVolunteer extends JFormFieldList
 	 */
 	public function getOptions()
 	{
-		$options = array();
+		$options     = array();
+		$excludedIds = array();
+		$db		     = JFactory::getDbo();
+		$query	     = $db->getQuery(true);
+
+		$reltable      = $this->getAttribute('reltable');
+		$reltable_id   = $this->getAttribute('reltable_id');
+
+		// Values: groupmember,teamleader,assistantteamleader
+		$exclude       = explode(',', $this->getAttribute('exclude'));
+
+		if (in_array('groupmember', $exclude) && ! empty($reltable_id))
+		{
+			$query->select('volunteers_volunteer_id')
+					->from('#__volunteers_members')
+					->where('reltable_id =' . (int) $reltable_id)
+					->where('reltable = ' . $db->q($reltable))
+					->where('ns_position in (0,1)');
+
+			$db->setQuery($query);
+
+			$ids = $db->loadColumn();
+
+			$excludedIds = array_merge($excludedIds, $ids);
+		}
+
+		if ((in_array('teamleader', $exclude) || in_array('assistantteamleader', $exclude)) && ! empty($reltable_id) && ! empty($reltable))
+		{
+			$field = substr($reltable, 0, strlen($reltable)-1);
+
+			$query->select('lead, assistant1, assistant2')
+				->from('#__volunteers_' . $reltable)
+				->where('volunteers_' . $field . '_id =' . (int) $reltable_id)
+				->where('reltable = ' . $db->q($reltable));
+
+			$db->setQuery($query);
+
+			$obj = $db->loadObject();
+
+			$ids = array();
+
+			$toExclude = array();
+
+			if (in_array('teamleader', $exclude))
+			{
+				$toExclude[] = 'lead';
+			}
+
+			if (in_array('assistantteamleader', $exclude))
+			{
+				$toExclude[] = 'assistant1';
+				$toExclude[] = 'assistant2';
+			}
+
+			foreach ($toExclude AS $col)
+			{
+				if ($obj->$col != 0)
+				{
+					$ids[] = $obj->$col;
+				}
+			}
+
+			$excludedIds = array_merge($excludedIds, $ids);
+		}
 
 		$db		= JFactory::getDbo();
 		$query	= $db->getQuery(true);
@@ -39,6 +102,11 @@ class VolunteersFormFieldVolunteer extends JFormFieldList
 			->where('enabled = 1')
 			->order('firstname, lastname');
 
+		if ( ! empty($excludedIds))
+		{
+			$query->where('volunteers_volunteer_id not in (' . implode(',', $excludedIds) . ')');
+		}
+
 		$db->setQuery($query);
 		$options = $db->loadObjectList();
 
@@ -47,7 +115,6 @@ class VolunteersFormFieldVolunteer extends JFormFieldList
 		{
 			JError::raiseWarning(500, $db->getErrorMsg());
 		}
-
 
 		// Merge any additional options in the XML definition.
 		$options = array_merge(

@@ -1,2 +1,2 @@
 # volunteers.joomla.org
-Extension for the voltuneers portal
+Extension for the volunteers portal

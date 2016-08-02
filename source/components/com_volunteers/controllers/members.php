@@ -9,7 +9,7 @@
 defined('_JEXEC') or die;
 
 /**
- * Class VolunteersControllerReports
+ * Class VolunteersControllerMembers
  */
 class VolunteersControllerMembers extends FOFController
 {

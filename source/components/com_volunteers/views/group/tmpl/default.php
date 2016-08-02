@@ -7,6 +7,9 @@
 
 // No direct access.
 defined('_JEXEC') or die;
+
+$params = JComponentHelper::getParams('com_volunteers');
+
 ?>
 <div class="row-fluid">
 	<?php if($this->item->acl->allowEditgroup):?>
@@ -27,7 +30,7 @@ defined('_JEXEC') or die;
 		<dd><a href="<?php echo ($this->item->website)?>"><?php echo ($this->item->website)?></a></dd>
 		<?php endif;?>
 
-		<?php if(VolunteersHelperParams::getParam('show_nsi', 1) == 1) :?>
+		<?php if($params->get('show_nsi', 1) == 1) :?>
 			<?php if(($this->item->department) && ($this->item->department->volunteers_department_id != 0)):?>
 				<dt><?php echo JText::_('COM_VOLUNTEERS_FIELD_DEPARTMENT') ?></dt>
 				<dd><?php echo $this->item->department->title; ?></dd>
@@ -37,7 +40,7 @@ defined('_JEXEC') or die;
 			<dd><?php echo VolunteersHelperFormat::getNsStateText($this->item->state); ?></dd>
 		<?php endif; ?>
 
-		<?php if(VolunteersHelperParams::getParam('show_osi', 1) == 1) :?>
+		<?php if($params->get('show_osi', 1) == 1) :?>
 			<?php if(($this->item->ownership) && ($this->item->ownership != 1)):?>
 				<dt><?php echo JText::_('COM_VOLUNTEERS_FIELD_OWNERSHIP') ?></dt>
 				<dd><?php echo VolunteersHelperFormat::ownership($this->item->ownership); ?></dd>
@@ -108,8 +111,8 @@ defined('_JEXEC') or die;
 							</td>
 							<?php if($this->item->acl->member):?>
 							<td>
-								<?php if(($this->item->acl->allowEditgroup) || ($volunteer->user_id == JFactory::getUser()->id)):?>
-								<a class="btn btn-small pull-right" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=member&task=edit&id='.$volunteer->volunteers_member_id)?>">
+								<?php if(($this->item->acl->allowEditMembers) || ($volunteer->user_id == JFactory::getUser()->id)):?>
+								<a class="btn btn-small pull-right" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=member&task=edit&type=group&id=' . $volunteer->volunteers_member_id)?>">
 									<span class="icon-edit"></span>  <?php echo JText::_('COM_VOLUNTEERS_EDIT') ?>
 								</a>
 								<?php endif;?>

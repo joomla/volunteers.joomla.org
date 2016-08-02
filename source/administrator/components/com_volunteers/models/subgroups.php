@@ -124,6 +124,8 @@ class VolunteersModelSubgroups extends VolunteersModelBase
 
 			$form->removeField('group_id');
 			$form->removeField('state');
+			$form->removeField('slug');
+			$form->removeField('acronym');
 			$form->removeField('date_started');
 			$form->removeField('date_ended');
 			if (! $item->acl->teamLeader && ! $item->acl->assistantTeamLeader)

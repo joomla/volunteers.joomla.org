@@ -193,6 +193,20 @@ class VolunteersModelGroups extends VolunteersModelBase
 				$form->removeField('assistant1');
 				$form->removeField('assistant2');
 			}
+
+			$params = $this->getComponentConfiguration();
+
+			// Special setting for the transition period, remove most of the values for group members
+			if($params->get('transactiv', 0) == 1 && ! $item->acl->teamLeader)
+			{
+				$form->removeField('slug');
+				$form->removeField('email');
+				$form->removeField('website');
+				$form->removeField('acronym');
+				$form->removeField('description');
+				$form->removeField('getinvolved');
+				$form->setFieldAttribute('title', 'disabled', true);
+			}
 		}
 	}
 
@@ -212,6 +226,7 @@ class VolunteersModelGroups extends VolunteersModelBase
 		if ($result && $data['ready4transition'] == 1 && $data['ready4transitiondate'] == '0000-00-00 00:00:00' )
 		{
 			$data['ready4transitiondate'] = JFactory::getDate()->toSql();
+			$data['ready4transitionsetby'] = JFactory::getUser()->get('id');
 		}
 
 		return $result;
@@ -259,9 +274,18 @@ class VolunteersModelGroups extends VolunteersModelBase
 			$acl->member = $found;
 
 			$acl->allowAddMembers   = $acl->admin || $acl->departmentCoordinator || $acl->teamLeader || $acl->assistantTeamLeader;
+			$acl->allowEditMembers  = $acl->allowAddMembers;
 			$acl->allowAddreports   = $acl->teamLeader || $acl->assistantTeamLeader || $acl->member;
 			$acl->allowAddSubgroups = $acl->teamLeader || $acl->assistantTeamLeader;
 			$acl->allowEditgroup    = $acl->teamLeader || $acl->assistantTeamLeader;
+
+			$params = $this->getComponentConfiguration();
+
+			// Special setting for the transition period to allow all group members to edit certain group values
+			if($params->get('transactiv', 0) == 1)
+			{
+				$acl->allowEditgroup = $acl->allowEditgroup || $acl->member;
+			}
 		}
 
 		$record->acl = $acl;

@@ -29,7 +29,7 @@ $form   = $this->get('form');
 $fields = array_keys($form->getFieldset('basic_configuration'));
 
 ?>
-<form id="adminForm" class="form-validate form-horizontal" name="adminForm" method="post" action="<?php echo JRoute::_('index.php'); ?>">
+<form id="adminForm" class="form-validate form-horizontal" name="adminForm" method="post" action="<?php echo JRoute::_('index.php?option=com_volunteers&view=group&id='.$this->item->volunteers_group_id)?>">
 	<div class="row-fluid">
 		<h1 class="pull-left"><?php echo JText::_('COM_VOLUNTEERS_EDIT_GROUP')?></h1>
 		<div class="btn-toolbar pull-right">
@@ -76,25 +76,10 @@ $fields = array_keys($form->getFieldset('basic_configuration'));
 		<br />
 	<?php endforeach; ?>
 
-	<div class="row-fluid">
-		<div class="btn-toolbar pull-right">
-			<div id="toolbar-cancel" class="btn-group">
-				<a class="btn btn-small btn-danger" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=group&id='.$this->item->volunteers_group_id)?>">
-					<span class="icon-cancel"></span> <?php echo JText::_('JCANCEL')?>
-				</a>
-			</div>
-			<div id="toolbar-apply" class="btn-group">
-				<button class="btn btn-small btn-success" type="submit">
-					<span class="icon-pencil"></span> <?php echo JText::_('JSAVE')?>
-				</button>
-			</div>
-		</div>
-	</div>
-
 	<input type="hidden" value="com_volunteers" name="option">
 	<input type="hidden" value="group" name="view">
 	<input type="hidden" value="save" name="task">
-	<input type="hidden" value="<?php echo $item->volunteers_group_id ?>" name="volunteers_group_id" />
+	<input type="hidden" value="<?php echo $this->item->volunteers_group_id ?>" name="volunteers_group_id" />
 	
 	<?php echo JHtml::_('form.token'); ?>
 

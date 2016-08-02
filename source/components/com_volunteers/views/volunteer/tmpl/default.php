@@ -8,16 +8,16 @@
 // No direct access.
 defined('_JEXEC') or die;
 
-// Get User
-$user = JFactory::getUser();
+$userId = JFactory::getUser()->id;
+
 ?>
 <div class="row-fluid profile">
 	<div class="span3 volunteer-image">
 		<?php echo VolunteersHelperFormat::image($this->item->image, 'large'); ?>
 	</div>
 	<div class="span9">
-		<?php if((JFactory::getUser()->id == $this->item->user_id) && $this->item->user_id):?>
-		<a class="btn pull-right" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&task=edit&id='.$this->item->volunteers_volunteer_id)?>">
+		<?php if(($userId == $this->item->user_id) && $this->item->user_id):?>
+		<a class="btn pull-right" href="<?php echo JRoute::_('index.php?option=com_volunteers&returnto=v&view=volunteer&task=edit&id='.$this->item->volunteers_volunteer_id)?>">
 			<span class="icon-edit"></span>  <?php echo JText::_('COM_VOLUNTEERS_EDIT_PROFILE') ?>
 		</a>
 		<?php endif;?>
@@ -51,9 +51,9 @@ $user = JFactory::getUser();
 				<table class="table table-striped">
 					<thead>
 						<th><?php echo JText::_('COM_VOLUNTEERS_FIELD_NAME') ?></th>
-						<th width="25%"><?php echo JText::_('COM_VOLUNTEERS_FIELD_ROLE') ?></th>
+						<th width="25%"><?php echo JText::_('COM_VOLUNTEERS_MEMBER_POSITION') ?></th>
 						<th width="15%"><?php echo JText::_('COM_VOLUNTEERS_FIELD_DATE_JOINED') ?></th>
-						<?php if((JFactory::getUser()->id == $this->item->user_id) && $this->item->user_id):?>
+						<?php if(($userId == $this->item->user_id) && $this->item->user_id):?>
 						<th width="15%"><?php echo JText::_('COM_VOLUNTEERS_EDIT') ?></th>
 						<?php endif;?>
 					</thead>
@@ -66,15 +66,12 @@ $user = JFactory::getUser();
 			                  	</a>
 							</td>
 							<td>
-								<?php if($group->role != 1):?>
-									<?php echo VolunteersHelperFormat::role($group->role); ?>
-								<?php endif;?>
-								<?php echo($group->position);?>
+								<?php echo VolunteersHelperFormat::getNsPositionText($group->ns_position); ?>
 							</td>
 							<td>
 								<?php echo VolunteersHelperFormat::date($group->date_started,'M Y'); ?>
 							</td>
-							<?php if((JFactory::getUser()->id == $this->item->user_id) && $this->item->user_id):?>
+							<?php if(($userId == $this->item->user_id) && $this->item->user_id):?>
 							<td>
 								<a class="btn btn-small pull-right" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=member&task=edit&id='.$group->volunteers_member_id)?>">
 									<span class="icon-edit"></span>  <?php echo JText::_('COM_VOLUNTEERS_EDIT') ?>
@@ -106,10 +103,7 @@ $user = JFactory::getUser();
 			                  	</a>
 							</td>
 							<td>
-								<?php if($group->role != 1):?>
-									<?php echo VolunteersHelperFormat::role($group->role); ?>
-								<?php endif;?>
-								<?php echo($group->position);?>
+								<?php echo VolunteersHelperFormat::getNsPositionText($group->ns_position); ?>
 							</td>
 							<td>
 								<?php echo VolunteersHelperFormat::date($group->date_started,'M Y'); ?>

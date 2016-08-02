@@ -159,18 +159,21 @@ class VolunteersModelMembers extends VolunteersModelBase
 
 				if ($group_id != 0)
 				{
-					$groupTable = FOFTable::getAnInstance('group', 'VolunteersTable');
-					$groupTable->load($group_id);
-					$record->group = $groupTable;
+					$gmodel = FOFModel::getAnInstance('Groups', 'VolunteersModel');
+					$groupItem = $gmodel->getItem($group_id);
+					$record->group = $groupItem;
+					$record->acl = $groupItem->acl;
 
-					$departmentTable = FOFTable::getAnInstance('department', 'VolunteersTable');
-					$departmentTable->load($record->group->department_id);
-					$record->department = $departmentTable;
+					$record->department = $groupItem->department;
+
+					if ($record->volunteers_volunteer_id)
+					{
+						$volunteerTable = FOFTable::getAnInstance('volunteer', 'VolunteersTable');
+						$volunteerTable->load($record->volunteers_volunteer_id);
+						$record->volunteer = $volunteerTable;
+					}
 
 					$record->reltable_id = $group_id;
-
-					// Finally Check ACL
-					$this->getAcl($record);
 				}
 			}
 		}
@@ -192,14 +195,31 @@ class VolunteersModelMembers extends VolunteersModelBase
 			$type = $this->input->get('type');
 
 			$record = $this->record;
+			
+			if ($record->volunteers_volunteer_id)
+			{
+				$form->setFieldAttribute('volunteers_volunteer_id', 'type', 'hidden');
 
-			$form->setFieldAttribute('volunteers_volunteer_id', 'reltable', $type . 's');
-			$form->setFieldAttribute('volunteers_volunteer_id', 'reltable_id', $record->group->volunteers_group_id);
+				$userId = JFactory::getUser()->get('id');
+				
+				$itsMe = $record->volunteer->user_id == $userId;
+				
+				if (! $record->acl->allowEditMembers || $itsMe)
+				{
+					$form->removeField('ns_position');
+					$form->removeField('ns_role');
+				}
+			}
+			else
+			{
+				$form->setFieldAttribute('volunteers_volunteer_id', 'reltable', $type . 's');
+				$form->setFieldAttribute('volunteers_volunteer_id', 'reltable_id', $record->group->volunteers_group_id);
+			}
 
 			$form->removeField('enabled');
 			$form->removeField('created_on');
 			$form->removeField('date_started');
-
+			
 			if (is_null($record->volunteers_member_id))
 			{
 				$form->removeField('date_ended');

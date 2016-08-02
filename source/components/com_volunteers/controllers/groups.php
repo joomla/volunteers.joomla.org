@@ -18,7 +18,7 @@ class VolunteersControllerGroups extends FOFController
 		$group = $this->getThisModel()->getItem();
 
 		// Redirect
-		$this->setRedirect(JRoute::_('index.php?option=com_volunteers&view=group&id='.$group->volunteers_group_id), JText::_('COM_VOLUNTEERS_LBL_GROUP_SAVED'),'success');
+		$this->setRedirect(JRoute::_('index.php?option=com_volunteers&view=group&id='.$group->volunteers_group_id, false), JText::_('COM_VOLUNTEERS_LBL_GROUP_SAVED'),'success');
 
 		return true;
 	}

@@ -64,6 +64,12 @@ $fields = array_keys($form->getFieldset('basic_configuration'));
 				<?php echo $this->escape($item->department->title)?>
 			</div>
 		</h2>
+		<?php if($item->volunteers_member_id) :?>
+			<h2>
+				<?php echo JText::_('COM_VOLUNTEERS_VOLUNTEER');?>:
+				<?php echo $item->volunteer->firstname . ' ' . $item->volunteer->lastname;?>
+			</h2>
+		<? endif; ?>
 	</div>
 
 	<hr>
@@ -86,6 +92,7 @@ $fields = array_keys($form->getFieldset('basic_configuration'));
 	<input type="hidden" value="save" name="task">
 	<input type="hidden" value="<?php echo $item->type; ?>" name="type">
 	<input type="hidden" value="<?php echo $item->reltable_id; ?>" name="reltable_id" />
+	<input type="hidden" value="<?php echo $item->volunteers_member_id; ?>" name="volunteers_member_id" />
 	
 	<?php echo JHtml::_('form.token'); ?>
 

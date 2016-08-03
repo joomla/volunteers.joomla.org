@@ -43,10 +43,10 @@ class VolunteersFormFieldVolunteer extends JFormFieldList
 		if (in_array('groupmember', $exclude) && ! empty($reltable_id))
 		{
 			$query->select('volunteers_volunteer_id')
-					->from('#__volunteers_members')
-					->where('reltable_id =' . (int) $reltable_id)
-					->where('reltable = ' . $db->q($reltable))
-					->where('ns_position in (0,1)');
+					->from('#__volunteers_members AS m')
+					->where('m.reltable_id =' . (int) $reltable_id)
+					->where('m.reltable = ' . $db->q($reltable))
+					->where('m.ns_position in (0,1)');
 
 			$db->setQuery($query);
 
@@ -60,9 +60,9 @@ class VolunteersFormFieldVolunteer extends JFormFieldList
 			$field = substr($reltable, 0, strlen($reltable)-1);
 
 			$query->select('lead, assistant1, assistant2')
-				->from('#__volunteers_' . $reltable)
-				->where('volunteers_' . $field . '_id =' . (int) $reltable_id)
-				->where('reltable = ' . $db->q($reltable));
+				->from('#__volunteers_' . $reltable . 'AS ex')
+				->where('ex.volunteers_' . $field . '_id =' . (int) $reltable_id)
+				->where('ex.reltable = ' . $db->q($reltable));
 
 			$db->setQuery($query);
 
@@ -97,14 +97,24 @@ class VolunteersFormFieldVolunteer extends JFormFieldList
 		$db		= JFactory::getDbo();
 		$query	= $db->getQuery(true);
 
-		$query->select('concat(firstname, " ", lastname, " ", email) as text, volunteers_volunteer_id as value')
-			->from('#__volunteers_volunteers')
-			->where('enabled = 1')
-			->order('firstname, lastname');
-
+		$query->select('concat(v.firstname, " ", v.lastname, " ", v.email) as text, v.volunteers_volunteer_id as value')
+			->from('#__volunteers_volunteers AS v')
+			->where('v.enabled = 1')
+			->order('v.firstname, v.lastname');
+		
+		$filter = $this->getAttribute('filtergroup');
+		
+		if ( ! empty($filter) && ! empty($reltable_id))
+		{
+			$query->from('#__volunteers_members AS m')
+				->where('m.volunteers_volunteer_id = v.volunteers_volunteer_id')
+				->where('m.reltable_id =' . (int) $reltable_id)
+				->where('m.reltable = ' . $db->q($reltable));
+		}
+		
 		if ( ! empty($excludedIds))
 		{
-			$query->where('volunteers_volunteer_id not in (' . implode(',', $excludedIds) . ')');
+			$query->where('v.volunteers_volunteer_id not in (' . implode(',', $excludedIds) . ')');
 		}
 
 		$db->setQuery($query);

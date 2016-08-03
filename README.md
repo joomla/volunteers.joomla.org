@@ -1,3 +1,10 @@
+#NOTE
+
+This isn't an installable extension because there is only one site we are using it and we only patching the existing version.
+
+I have opened it for getting code reviews and to allow people to contribute
+
+
 # Extension to manage the volunteers portal
 ## Main features
 * 3 levels: Departments, Groups, Subgroups

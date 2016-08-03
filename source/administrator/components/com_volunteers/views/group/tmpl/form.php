@@ -24,7 +24,25 @@ JFactory::getDocument()->addScriptDeclaration('
 ');
 
 $fields = array_keys($this->form->getFieldset('basic_configuration'));
+
+// This brilliant code can be removed after the transtion, so 2020 then.
+
+$params = JComponentHelper::getParams('com_volunteers');
+
+$show = $params->get('transactiv') == 1 && $this->item->ready4transition == 1;
+
+if($show)
+{
+	$user_set_ready = JFactory::getUser($this->item->ready4transitionsetby);
+}
+
 ?>
+<?php if($show) :?>
+	<div class="alert alert-info">
+		Ready for transition set by <?php echo $user_set_ready->name;?> at <?php echo $this->item->ready4transitiondate; ?>
+	</div>
+<?php endif; ?>
+
 <form id="adminForm" class="form-validate" name="adminForm" method="post" action="index.php">
 
 	<div class="form-horizontal">

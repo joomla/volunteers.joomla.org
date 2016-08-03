@@ -50,18 +50,25 @@ $fields = array_keys($form->getFieldset('basic_configuration'));
 
 	<?php foreach($fields as $field) : ?>
 		<?php if(strpos($field, 'ready4transition') !== false) :?>
-			<hr />
-			<div class="row-fluid">
-				<div class="span2"></div>
-				<div class="span10">
-					<label id="ready4transition-lbl" for="ready4transition" class="checkbox">
-						<input type="checkbox" name="ready4transition" id="ready4transition" value="1" class="inputbox form-control">
-						Ready for Transition into the new structure
-					</label>
-					<p><br/><strong><?php echo JText::_('COM_VOLUNTEERS_FIELD_READY4TRANSITION_NOTE');?></strong></p>
+			<?php if($item->ready4transition == 1) :?>
+				<?php $user_set_ready = JFactory::getUser($item->ready4transitionsetby); ?>
+				<div class="row-fluid">
+					Ready for transtion set by <?php echo $user_set_ready->name;?> at <?php echo $item->ready4transitiondate; ?>
 				</div>
-			</div>
-			<hr />
+			<?php else: ?>
+				<hr />
+				<div class="row-fluid">
+					<div class="span2"></div>
+					<div class="span10">
+						<label id="ready4transition-lbl" for="ready4transition" class="checkbox">
+							<input type="checkbox" name="ready4transition" id="ready4transition" value="1" class="inputbox form-control">
+							Ready for Transition into the new structure
+						</label>
+						<p><br/><strong><?php echo JText::_('COM_VOLUNTEERS_FIELD_READY4TRANSITION_NOTE');?></strong></p>
+					</div>
+				</div>
+				<hr />
+			<?php endif; ?>
 		<?php else: ?>
 			<div class="row-fluid">
 				<div class="span2">

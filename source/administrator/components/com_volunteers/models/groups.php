@@ -208,7 +208,7 @@ class VolunteersModelGroups extends VolunteersModelBase
 				$form->removeField('acronym');
 				$form->removeField('description');
 				$form->removeField('getinvolved');
-				$form->setFieldAttribute('title', 'disabled', true);
+				$form->setFieldAttribute('title', 'readonly', true);
 			}
 		}
 	}
@@ -224,9 +224,20 @@ class VolunteersModelGroups extends VolunteersModelBase
 	 */
 	protected function onBeforeSave(&$data, &$table)
 	{
+		if (FOFPlatform::getInstance()->isFrontend())
+		{
+			// If it is set then don't removed it from the frontend
+			$ready4transition = $table->ready4transition;
+			
+			if ($ready4transition == 1)
+			{
+				$data['ready4transition'] = 1;
+			}
+		}
+		
 		$result = parent::onBeforeSave($data, $table);
 
-		if ($result && $data['ready4transition'] == 1 && $data['ready4transitiondate'] == '0000-00-00 00:00:00' )
+		if ($result && $data['ready4transition'] == 1 && $table->ready4transitiondate == '0000-00-00 00:00:00' )
 		{
 			$data['ready4transitiondate'] = JFactory::getDate()->toSql();
 			$data['ready4transitionsetby'] = JFactory::getUser()->get('id');

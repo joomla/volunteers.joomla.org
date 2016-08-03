@@ -10,6 +10,9 @@ defined('_JEXEC') or die;
 
 include_once 'base.php';
 
+/**
+ * Class VolunteersModelGroups
+ */
 class VolunteersModelGroups extends VolunteersModelBase
 {
 	/**

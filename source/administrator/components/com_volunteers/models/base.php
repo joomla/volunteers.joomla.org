@@ -8,6 +8,9 @@
 // No direct access.
 defined('_JEXEC') or die;
 
+/**
+ * Class VolunteersModelBase
+ */
 class VolunteersModelBase extends FOFModel
 {
 	protected $volunteersId = null;
@@ -24,9 +27,9 @@ class VolunteersModelBase extends FOFModel
 	 */
 	protected function populateState($ordering = 'a.id', $direction = 'asc')
 	{
-		// Todo: implement
+		$this->setState('filter_order', $ordering);
+		$this->setState('filter_order_dir', $direction);
 	}
-
 
 	protected function getVolunteerGroups($volunteer_id)
 	{

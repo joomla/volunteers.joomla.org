@@ -10,6 +10,7 @@ defined('_JEXEC') or die;
 
 include_once 'base.php';
 
+
 /**
  * Class VolunteersModelReports
  */

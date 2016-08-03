@@ -13,7 +13,11 @@ defined('_JEXEC') or die;
  */
 class VolunteersControllerVolunteers extends FOFController
 {
-
+	/**
+	 * ACL check before editing a record; override to customise
+	 *
+	 * @return  boolean  True to allow the method to run
+	 */
 	protected function onBeforeEdit()
 	{
 		$volunteer = $this->getThisModel()->getItem();

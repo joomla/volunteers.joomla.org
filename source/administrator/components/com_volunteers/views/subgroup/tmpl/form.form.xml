@@ -22,16 +22,19 @@
 
         <field name="lead" type="volunteers.volunteer" class="inputbox form-control"
                labelClass="control-label"
+               filtergroup="true"
                label="COM_VOLUNTEERS_TEAMLEAD"
                description="COM_VOLUNTEERS_TEAMLEAD_DESC" required="true" />
 
         <field name="assistant1" type="volunteers.volunteer" class="inputbox form-control"
                labelClass="control-label"
+               filtergroup="true"
                label="COM_VOLUNTEERS_ASSISTANTTEAMLEAD"
                description="COM_VOLUNTEERS_ASSISTANTTEAMLEAD_DESC" />
 
         <field name="assistant2" type="volunteers.volunteer" class="inputbox form-control"
                labelClass="control-label"
+               filtergroup="true"
                label="COM_VOLUNTEERS_ASSISTANTTEAMLEAD"
                description="COM_VOLUNTEERS_ASSISTANTTEAMLEAD_DESC" />
 

@@ -10,6 +10,9 @@ defined('_JEXEC') or die;
 
 include_once 'base.php';
 
+/**
+ * Class VolunteersModelSubgroups
+ */
 class VolunteersModelSubgroups extends VolunteersModelBase
 {
 	/**
@@ -134,11 +137,27 @@ class VolunteersModelSubgroups extends VolunteersModelBase
 				$form->removeField('enabled');
 				$form->removeField('notes');
 			}
+			else
+			{
+				$form->setFieldAttribute('lead', 'reltable', 'groups');
+				$form->setFieldAttribute('lead', 'reltable_id', $item->group_id);
+				$form->setFieldAttribute('lead', 'filter', 'true');
+			}
 
 			if (! $item->acl->teamLeader && ! $item->acl->assistantTeamLeader && ! $item->acl->subteamLeader)
 			{
 				$form->removeField('assistant1');
 				$form->removeField('assistant2');
+			}
+			else
+			{
+				$form->setFieldAttribute('assistant1', 'reltable', 'groups');
+				$form->setFieldAttribute('assistant1', 'reltable_id', $item->group_id);
+				$form->setFieldAttribute('assistant1', 'filter', 'true');
+				$form->setFieldAttribute('assistant2', 'reltable', 'groups');
+				$form->setFieldAttribute('assistant2', 'reltable_id', $item->group_id);
+				$form->setFieldAttribute('assistant2', 'filter', 'true');
+				
 			}
 		}
 	}
@@ -147,7 +166,6 @@ class VolunteersModelSubgroups extends VolunteersModelBase
 	 * This method runs before the $data is saved to the $table. Return false to
 	 * stop saving.
 	 *
-	 * @param   array     &$data   The data to save
 	 * @param   FOFTable  &$table  The table to save the data to
 	 *
 	 * @return  boolean  Return false to prevent saving, true to allow it
@@ -251,5 +269,4 @@ class VolunteersModelSubgroups extends VolunteersModelBase
 
 		$record->acl = $acl;
 	}
-
 }

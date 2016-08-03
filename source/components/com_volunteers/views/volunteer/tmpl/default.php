@@ -8,7 +8,8 @@
 // No direct access.
 defined('_JEXEC') or die;
 
-$userId = JFactory::getUser()->id;
+$user   = JFactory::getUser();
+$userId = $user->id;
 
 ?>
 <div class="row-fluid profile">

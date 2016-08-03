@@ -41,16 +41,31 @@ class VolunteersControllerReports extends FOFController
 
 	public function onAfterSave()
 	{
+		$model = $this->getModel();
+		$model->reset();
+		
 		// Redirect
+		$returnTo = $this->input->get('returnto', 'wg');
+		
 		$this->setRedirect(JRoute::_('index.php?option=com_volunteers&view=reports'), JText::_('COM_VOLUNTEERS_LBL_REPORT_SAVED'),'success');
-
+		
+		if ($returnTo == 're')
+		{
+			$volunteers_report_id = $this->input->get('volunteers_report_id', 0);
+			$this->setRedirect(JRoute::_('index.php?option=com_volunteers&view=reports&id=' . $volunteers_report_id, false), JText::_('COM_VOLUNTEERS_LBL_REPORT_SAVED'),'success');
+			
+			return true;
+		}
+		
 		if ($this->input->get('returnto', 'wg') == 'wg')
 		{
 			$group_id = $this->input->get('volunteers_group_id', 0);
 
 			if ($group_id != 0)
 			{
-				$this->setRedirect(JRoute::_('index.php?option=com_volunteers&view=group&id='.$group_id) . '#report', JText::_('COM_VOLUNTEERS_LBL_REPORT_SAVED'),'success');
+				$this->setRedirect(JRoute::_('index.php?option=com_volunteers&view=group&id='.$group_id, false) . '#reports', JText::_('COM_VOLUNTEERS_LBL_REPORT_SAVED'),'success');
+
+				return true;
 			}
 		}
 

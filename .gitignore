@@ -1,7 +1,36 @@
-/.idea/
-/vendor
-/node_modules
-/bower_components
-composer.phar
-.DS_Store
+# Joomla System Files (i.e. cache, etc.) #
+/www/administrator/cache
+/www/cache
+/www/images
+/www/logs
+/www/tmp
+/www/configuration.php
+/www/.htaccess
+/www/LICENSE.txt
+/www/README.txt
+/www/htaccess.txt
+/www/robots.txt.dist
+/www/web.config.txt
 
+# Sitemap is generated automatically
+/www/sitemap.xml
+
+# Log Files
+/log
+
+# IDE & System Related Files #
+.buildpath
+.project
+.settings
+.DS_Store
+.idea
+serverinfo.txt
+
+# OSX #
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows #
+Thumbs.db
+Desktop.ini

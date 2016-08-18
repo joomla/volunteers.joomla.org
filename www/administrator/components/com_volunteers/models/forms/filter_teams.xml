@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form>
+    <fields name="filter">
+        <field
+                name="search"
+                type="text"
+                label="COM_VOLUNTEERS_FILTER_SEARCH"
+                description="COM_VOLUNTEERS_FILTER_SEARCH_DESC"
+                hint="JSEARCH_FILTER"
+        />
+
+        <field
+                name="state"
+                type="status"
+                label="COM_VOLUNTEERS_FILTER_PUBLISHED"
+                description="COM_VOLUNTEERS_FILTER_PUBLISHED_DESC"
+                onchange="this.form.submit();"
+        >
+            <option value="">JOPTION_SELECT_PUBLISHED</option>
+        </field>
+
+        <field
+                name="department"
+                type="departments"
+                label="COM_VOLUNTEERS_FIELD_DEPARTMENT"
+                description="COM_VOLUNTEERS_FIELD_DEPARTMENT_DESC"
+                onchange="this.form.submit();"
+        >
+            <option value="">COM_VOLUNTEERS_SELECT_DEPARTMENT</option>
+        </field>
+    </fields>
+    <fields name="list">
+        <field
+                name="fullordering"
+                type="list"
+                label="COM_VOLUNTEERS_LIST_FULL_ORDERING"
+                description="COM_VOLUNTEERS_LIST_FULL_ORDERING_DESC"
+                onchange="this.form.submit();"
+                default="a.id DESC"
+        >
+            <option value="">JGLOBAL_SORT_BY</option>
+            <option value="a.state ASC">JSTATUS_ASC</option>
+            <option value="a.state DESC">JSTATUS_DESC</option>
+            <option value="a.title ASC">JGLOBAL_TITLE_ASC</option>
+            <option value="a.title DESC">JGLOBAL_TITLE_DESC</option>
+            <option value="a.created ASC">JDATE_ASC</option>
+            <option value="a.created DESC">JDATE_DESC</option>
+            <option value="a.id ASC">JGRID_HEADING_ID_ASC</option>
+            <option value="a.id DESC">JGRID_HEADING_ID_DESC</option>
+        </field>
+
+        <field
+                name="limit"
+                type="limitbox"
+                class="input-mini"
+                default="25"
+                label="COM_VOLUNTEERS_LIST_LIMIT"
+                description="COM_VOLUNTEERS_LIST_LIMIT_DESC"
+                onchange="this.form.submit();"
+        />
+    </fields>
+</form>

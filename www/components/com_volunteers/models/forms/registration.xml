@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form>
+    <fieldset
+            name="item"
+            addfieldpath="/administrator/components/com_volunteers/models/fields"
+    >
+        <field
+                name="firstname"
+                type="text"
+                class="input-large input-large-text"
+                label="COM_VOLUNTEERS_FIELD_FIRSTNAME"
+                required="true"
+        />
+
+        <field
+                name="lastname"
+                type="text"
+                class="input-large input-large-text"
+                label="COM_VOLUNTEERS_FIELD_LASTNAME"
+                required="true"
+        />
+
+        <field
+                name="email"
+                type="text"
+                label="COM_VOLUNTEERS_FIELD_EMAIL"
+                required="true"
+                autocomplete="off"
+        />
+
+        <field
+                name="password1"
+                type="password"
+                autocomplete="off"
+                class="validate-password"
+                field="password1"
+                filter="raw"
+                label="COM_USERS_PROFILE_PASSWORD1_LABEL"
+                size="30"
+                validate="password"
+                required="true"
+        />
+
+        <field
+                name="password2"
+                type="password"
+                autocomplete="off"
+                class="validate-password"
+                field="password1"
+                filter="raw"
+                label="COM_USERS_PROFILE_PASSWORD2_LABEL"
+                message="COM_USERS_PROFILE_PASSWORD1_MESSAGE"
+                size="30"
+                validate="equals"
+                required="true"
+        />
+
+        <field
+                name="user_id"
+                type="user"
+                label="COM_VOLUNTEERS_FIELD_SELECT_USER"
+                filter="unset"
+        />
+
+        <field
+                name="country"
+                type="countries"
+                label="COM_VOLUNTEERS_FIELD_COUNTRY"
+                required="true"
+        />
+
+        <field
+                name="city"
+                type="text"
+                label="COM_VOLUNTEERS_FIELD_CITY"
+        />
+
+        <field
+                name="address"
+                type="text"
+                label="COM_VOLUNTEERS_FIELD_ADDRESS"
+        />
+
+        <field
+                addfieldpath="plugins/content/perfectimage/field"
+                name="image"
+                type="perfectimage"
+                ratio="1/1"
+                width="250"
+                label="COM_VOLUNTEERS_FIELD_IMAGE"
+        />
+
+        <field
+                name="website"
+                type="textprepend"
+                label="COM_VOLUNTEERS_FIELD_WEBSITE"
+                prepend="COM_VOLUNTEERS_FIELD_WEBSITE_URL"
+        />
+
+        <field
+                name="github"
+                type="textprepend"
+                label="COM_VOLUNTEERS_FIELD_GITHUB"
+                prepend="COM_VOLUNTEERS_FIELD_GITHUB_URL"
+        />
+
+        <field
+                name="twitter"
+                type="textprepend"
+                label="COM_VOLUNTEERS_FIELD_TWITTER"
+                prepend="COM_VOLUNTEERS_FIELD_TWITTER_URL"
+        />
+
+        <field
+                name="facebook"
+                type="textprepend"
+                label="COM_VOLUNTEERS_FIELD_FACEBOOK"
+                prepend="COM_VOLUNTEERS_FIELD_FACEBOOK_URL"
+        />
+
+        <field
+                name="googleplus"
+                type="textprepend"
+                label="COM_VOLUNTEERS_FIELD_GOOGLEPLUS"
+                prepend="COM_VOLUNTEERS_FIELD_GOOGLEPLUS_URL"
+        />
+
+        <field
+                name="linkedin"
+                type="textprepend"
+                label="COM_VOLUNTEERS_FIELD_LINKEDIN"
+                prepend="COM_VOLUNTEERS_FIELD_LINKEDIN_URL"
+        />
+
+        <field
+                name="intro"
+                type="textarea"
+                rows="4"
+                class="span12"
+                label="COM_VOLUNTEERS_FIELD_INTRO"
+        />
+
+        <field
+                name="joomlastory"
+                type="editor"
+                buttons="false"
+                filter="JComponentHelper::filterText"
+                label="COM_VOLUNTEERS_FIELD_JOOMLASTORY"
+        />
+    </fieldset>
+</form>

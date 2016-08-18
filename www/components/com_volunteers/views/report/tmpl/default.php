@@ -1,0 +1,51 @@
+<?php
+/**
+ * @package    Joomla! Volunteers
+ * @copyright  Copyright (C) 2016 Open Source Matters, Inc. All rights reserved.
+ * @license    GNU General Public License version 2 or later; see LICENSE.txt
+ */
+
+// No direct access.
+defined('_JEXEC') or die;
+?>
+
+<div class="row-fluid report">
+	<div class="span2 volunteer-image">
+		<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $this->item->volunteer_id) ?>">
+			<?php echo VolunteersHelper::image($this->item->volunteer_image, 'large'); ?>
+		</a>
+	</div>
+	<div class="span10">
+		<div class="filter-bar">
+			<?php if ($this->item->created_by == $this->user->id): ?>
+				<a class="btn pull-right" href="<?php echo JRoute::_('index.php?option=com_volunteers&task=report.edit&id=' . $this->item->id) ?>">
+					<span class="icon-edit"></span> <?php echo JText::_('COM_VOLUNTEERS_EDIT') ?>
+				</a>
+			<?php endif; ?>
+		</div>
+
+		<div class="page-header">
+			<h1><?php echo $this->item->title ?></h1>
+		</div>
+
+		<p class="muted">
+			<?php echo JText::_('COM_VOLUNTEERS_BY') ?>
+			<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $this->item->volunteer_id) ?>"><?php echo($this->item->volunteer_firstname) ?>&nbsp;<?php echo($this->item->volunteer_lastname) ?></a>
+			<?php echo JText::_('COM_VOLUNTEERS_ON') ?>
+			<?php echo VolunteersHelper::date($this->item->created, 'Y-m-d H:i'); ?>
+			<?php echo JText::_('COM_VOLUNTEERS_IN') ?>
+			<?php if ($this->item->team): ?>
+				<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=team&id=' . $this->item->team) ?>"><?php echo $this->item->team_title; ?></a>
+			<?php elseif ($this->item->department): ?>
+				<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=department&id=' . $this->item->department) ?>"><?php echo $this->item->department_title; ?></a>
+			<?php endif; ?>
+		</p>
+
+		<?php echo($this->item->description) ?>
+
+	</div>
+</div>
+
+<div class="share">
+	<?php echo $this->share; ?>
+</div>

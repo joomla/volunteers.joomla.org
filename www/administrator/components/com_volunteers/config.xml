@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<config>
+    <fieldset
+            name="component"
+            label="COM_VOLUNTEERS_COMPONENT_LABEL"
+            description="COM_VOLUNTEERS_COMPONENT_DESC"
+    >
+        <field
+                name="yourlsapikey"
+                type="text"
+                label="COM_VOLUNTEERS_OPTIONS_YOURLSAPIKEY"
+        />
+
+        <field
+                name="start_transition"
+                type="radio"
+                class="btn-group btn-group-yesno"
+                default="0"
+                label="COM_VOLUNTEERS_OPTIONS_TRANSITION"
+        >
+            <option value="1">JYES</option>
+            <option value="0">JNO</option>
+        </field>
+
+        <field
+                name="new_structure"
+                type="radio"
+                class="btn-group btn-group-yesno"
+                default="0"
+                label="COM_VOLUNTEERS_OPTIONS_STRUCTURE"
+        >
+            <option value="1">JYES</option>
+            <option value="0">JNO</option>
+        </field>
+    </fieldset>
+
+    <fieldset
+            name="permissions"
+            description="JCONFIG_PERMISSIONS_DESC"
+            label="JCONFIG_PERMISSIONS_LABEL"
+    >
+
+        <field
+                name="rules"
+                type="rules"
+                component="com_volunteers"
+                filter="rules"
+                validate="rules"
+                label="JCONFIG_PERMISSIONS_LABEL"
+                section="component"
+        />
+    </fieldset>
+</config>

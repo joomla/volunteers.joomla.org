@@ -1,0 +1,79 @@
+.table .volunteer-image img {
+	width: 50px;
+	height: 50px;
+}
+
+.report .report-title {
+	margin-top: 0;
+}
+
+.members img {
+	width: 50px;
+	height: 50px;
+	margin: 0;
+	padding: 0;
+}
+
+.members a {
+	margin: 1px;
+	padding: 0;
+	float: left;
+}
+
+.all-members {
+	width: 50px;
+	height: 50px;
+	background: #1b63a2;
+	color: #fff;
+	padding: 2px;
+	text-align: center;
+	text-transform: uppercase;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
+}
+
+.all-members:hover {
+	background: #13294a;
+	color: #fff;
+	text-decoration: none;
+}
+
+.all-members .all {
+	line-height: 25px;
+	display: block;
+}
+
+.all-members .number {
+	line-height: 18px;
+	font-size: 25px;
+	font-weight: bold;
+}
+
+.table.table-vertical-align td {
+	vertical-align: middle !important;
+}
+
+.well h2 {
+	margin-top: 0;
+}
+
+.address {
+	display: none;
+}
+
+.volunteer-edit .controls .alert {
+	margin-bottom: 0;
+}
+
+.btn-group.pull-right + .btn-group {
+	margin-right: 5px;
+}
+
+.filter-bar {
+	margin: 12px 0;
+}
+
+.filter-bar .btn-toolbar {
+	margin: 0;
+}

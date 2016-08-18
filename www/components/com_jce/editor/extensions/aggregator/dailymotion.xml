@@ -1,0 +1,25 @@
+<?xml version="1.0" ?>
+<install version="2.0" type="extension" extension="dailymotion" folder="aggregator" method="upgrade" core="1">
+	<name>WF_AGGREGATOR_DAILYMOTION_TITLE</name>
+	<version>2.5.24</version>
+	<creationDate>18 August 2016</creationDate>
+	<author>Ryan Demmer</author>
+	<authorEmail>info@joomlacontenteditor.net</authorEmail>
+	<authorUrl>http://www.joomlacontenteditor.net/</authorUrl>
+	<copyright>Copyright (C) 2006 - 2016 Ryan Demmer. All rights reserved</copyright>
+	<license>GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html</license>
+	<description>WF_AGGREGATOR_DAILYMOTION_DESC</description>
+	<files>
+		<filename>dailymotion</filename>
+		<folder>dailymotion</folder>
+	</files>
+	<params group="dailymotion">
+		<param name="enable" type="list" default="1" label="WF_LABEL_EXTENSION_ENABLE" description="WF_LABEL_EXTENSION_ENABLE_DESC">
+        	<option value="1">WF_OPTION_YES</option>
+        	<option value="0">WF_OPTION_NO</option>
+    	</param>
+		<param name="width" type="text" default="400" label="WF_LABEL_WIDTH" description="WF_AGGREGATOR_DAILYMOTION_WIDTH_DESC" />
+		<param name="height" type="text" default="225" label="WF_LABEL_HEIGHT" description="WF_AGGREGATOR_DAILYMOTION_HEIGHT_DESC" />
+	</params>
+	<plugins></plugins>
+</install>

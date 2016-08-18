@@ -1,0 +1,32 @@
+.rrssb-buttons li a {
+    border-radius: 0;
+}
+
+.rrssb-buttons li a .rrssb-text {
+    font-size: 11px;
+}
+
+.rrssb-buttons.large-format li a {
+    border-radius: 0;
+    padding: 11px 7px 12px 27px;
+}
+
+.share-container {
+    margin: 10px 0;
+}
+
+/* Smartphones and Tablets */
+@media only screen and (min-width: 321px) and (max-width: 767px) {
+    .rrssb-buttons li {
+        width: 42px !important;
+    }
+
+    .rrssb-buttons li a .rrssb-text {
+        visibility: hidden;
+    }
+
+    .rrssb-buttons li a .rrssb-icon {
+        width: 17px;
+        height: 17px
+    }
+}

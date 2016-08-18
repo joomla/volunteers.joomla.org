@@ -1,0 +1,104 @@
+// Core variables and mixins
+@import "variables.less";
+@import "../../joomla-cms/media/jui/less/mixins.less";
+
+// Core RTL
+@import "../../joomla-cms/media/jui/less/bootstrap-rtl.less";
+
+// Override border-radius
+.nav-tabs.nav-stacked > li:first-child > a {
+  .border-top-radius(0);
+}
+.nav-tabs.nav-stacked > li:last-child > a {
+  .border-bottom-radius(0);
+}
+
+.pagination ul > li:first-child > a,
+.pagination ul > li:first-child > span {
+  .border-left-radius(0);
+}
+.pagination ul > li:last-child > a,
+.pagination ul > li:last-child > span {
+  .border-right-radius(0);
+}
+
+.btn {
+  .border-radius(0);
+}
+
+/* Nav Inline */
+.nav-inline {
+  li {
+    display: inline-block;
+  }
+}
+
+/* Header */
+.header {
+  /*header btn*/
+  .btn-group {
+    > .btn:first-child:last-child {
+      background-image: none;
+      border: none;
+      .border-radius(0);
+      text-shadow: none;
+    }
+  }
+}
+
+/* Navbar */
+.navbar {
+  ul {
+    &#nav-joomla {
+      float: right;
+    }
+    &#nav-international {
+      float: left;
+    }
+  }
+
+  div#nav-search {
+    float: left;
+  }
+
+  .nav {
+    margin: 0 0 0 10px;
+    > li {
+      ul {
+        -webkit-overflow-scrolling: touch;
+        -moz-overflow-scrolling: touch;
+        -ms-overflow-scrolling: touch;
+        -o-overflow-scrolling: touch;
+        overflow-scrolling: touch;
+        height: auto;
+        margin: 0;
+
+        &::-webkit-scrollbar {
+          -webkit-appearance: none;
+          width: 7px;
+        }
+        &::-webkit-scrollbar-thumb {
+          border-radius: 4px;
+          background-color: rgba(0, 0, 0, .5);
+          -webkit-box-shadow: 0 0 1px rgba(255, 255, 255, .5);
+        }
+      }
+      > a {
+        padding: 11px 15px 11px;
+      }
+      > .dropdown-menu {
+        left: auto;
+        right: 0;
+
+        &:before {
+          left: auto;
+          right: 12px;
+        }
+        &:after {
+          right: 12px;
+          width: 0;
+        }
+      }
+    }
+  }
+}

@@ -63,9 +63,6 @@ class VolunteersModelReports extends JModelList
 
 		// List state information.
 		parent::populateState($ordering, $direction);
-
-		// List Limit
-		$this->setState('list.limit', $this->getUserStateFromRequest($this->context . '.list.limit', 'limit', $this->get('list_limit', 15), 'uint'));
 	}
 
 	/**

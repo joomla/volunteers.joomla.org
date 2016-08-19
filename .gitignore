@@ -25,7 +25,7 @@
 .settings
 .DS_Store
 .idea
-serverinfo.txt
+.htaccess
 
 # OSX #
 ._*

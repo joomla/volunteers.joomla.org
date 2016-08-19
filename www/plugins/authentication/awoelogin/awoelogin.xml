@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension version="3.0" type="plugin" group="authentication" method="upgrade" >
+	<name>Authentication - Awo Email Login</name>
+	<author>Seyi Awofadeju</author>
+	<creationDate>2013-12-23</creationDate>
+	<copyright>Copyright (C) 2010 Seyi Awofadeju - All rights reserved.</copyright>
+	<license>http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL</license>
+	<authorEmail>dev@awofadeju.com</authorEmail>
+	<authorUrl>http://dev.awofadeju.com</authorUrl>
+	<version>3.2.1</version>
+	<description>A user authentication through email</description>
+	<files>
+		<filename plugin="awoelogin">awoelogin.php</filename>
+		<filename>index.html</filename>
+	</files>
+</extension>
+
+

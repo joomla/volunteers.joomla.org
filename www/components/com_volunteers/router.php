@@ -448,6 +448,11 @@ class VolunteersRouter extends JComponentRouterBase
 					$db->setQuery($dbQuery);
 					$id = $db->loadResult();
 
+					if(!$id)
+					{
+						JError::raiseError(404, JText::_('COM_VOLUNTEERS_ERROR_TEAM_NOT_FOUND'));
+					}
+
 					$vars['view'] = substr($view, 0, -1);
 					$vars['id']   = $id;
 
@@ -461,8 +466,28 @@ class VolunteersRouter extends JComponentRouterBase
 
 			case 'volunteers':
 				list($id) = explode('-', $segments[0], 2);
-				$vars['view'] = 'volunteer';
-				$vars['id']   = $id;
+				if(!is_numeric($id))
+				{
+					$dbQuery = $db->getQuery(true)
+						->select('id')
+						->from('#__volunteers_' . $view)
+						->where('alias=' . $db->quote($segments[0]));
+					$db->setQuery($dbQuery);
+					$id = $db->loadResult();
+
+					if(!$id)
+					{
+						JError::raiseError(404, JText::_('COM_VOLUNTEERS_ERROR_VOLUNTEER_NOT_FOUND'));
+					}
+
+					$vars['view'] = 'volunteer';
+					$vars['id']   = $id;
+				}
+				else
+				{
+					$vars['view'] = 'volunteer';
+					$vars['id']   = $id;
+				}
 
 				if (isset($segments[1]) && ($segments[1] == 'edit'))
 				{

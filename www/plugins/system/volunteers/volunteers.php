@@ -33,12 +33,13 @@ class PlgSystemVolunteers extends JPlugin
 		}
 
 		// Get variables
-		$option = $this->app->input->get('option');
-		$view   = $this->app->input->get('view');
-		$id     = $this->app->input->get('id');
+		$option = $this->app->input->getString('option');
+		$view   = $this->app->input->getString('view');
+		$layout = $this->app->input->getString('layout');
+		$id     = $this->app->input->getInt('id');
 
 		// Check if volunteer url is correct
-		if ($option == 'com_volunteers' && $view == 'volunteer')
+		if ($option == 'com_volunteers' && $view == 'volunteer' && $layout != 'edit')
 		{
 			$itemURL    = JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $id);
 			$correctURL = JUri::getInstance()->toString(['scheme', 'host', 'port']) . $itemURL;

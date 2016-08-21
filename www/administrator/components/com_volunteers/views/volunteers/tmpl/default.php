@@ -125,7 +125,7 @@ if ($saveOrder)
 								<?php if ($item->image): ?>
 									<img class="img-rounded" src="<?php echo JURI::root() . 'images/volunteers/' . $item->image; ?>">
 								<?php else: ?>
-									<img class="img-rounded" src="http://placehold.it/50x50?text=No+image">
+									<img class="img-rounded" src="<?php echo JURI::root() . 'images/joomla.png'; ?>">
 								<?php endif; ?>
 							</td>
 							<td class="nowrap">

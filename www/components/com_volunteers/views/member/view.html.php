@@ -74,9 +74,11 @@ class VolunteersViewMember extends JViewLegacy
 	 */
 	protected function _manipulateForm()
 	{
-		$app      = JFactory::getApplication();
-		$jinput   = $app->input;
-		$memberId = $jinput->getInt('id');
+		$app          = JFactory::getApplication();
+		$jinput       = $app->input;
+		$memberId     = $jinput->getInt('id');
+		$departmentId = (int) $app->getUserState('com_volunteers.edit.member.departmentid');
+		$teamId       = (int) $app->getUserState('com_volunteers.edit.member.teamid');
 
 		// Disable fields
 		$this->form->setFieldAttribute('department', 'readonly', 'true');
@@ -86,11 +88,14 @@ class VolunteersViewMember extends JViewLegacy
 		if ($memberId)
 		{
 			$this->form->setFieldAttribute('volunteer', 'readonly', 'true');
+
+			if ($departmentId)
+			{
+				$this->form->removeField('role');
+			}
 		}
 		else
 		{
-			$departmentId = (int) $app->getUserState('com_volunteers.edit.member.departmentid');
-			$teamId       = (int) $app->getUserState('com_volunteers.edit.member.teamid');
 			$this->form->setValue('department', $department = null, $departmentId);
 			$this->form->setValue('team', $team = null, $teamId);
 			$this->form->setValue('date_started', $team = null, JFactory::getDate());

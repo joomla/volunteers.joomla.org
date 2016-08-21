@@ -63,12 +63,12 @@ class VolunteersViewVolunteers extends JViewLegacy
 
 		if ($canDo->get('core.create'))
 		{
-			JToolbarHelper::addNew('team.add');
+			JToolbarHelper::addNew('volunteer.add');
 		}
 
 		if ($canDo->get('core.edit'))
 		{
-			JToolbarHelper::editList('team.edit');
+			JToolbarHelper::editList('volunteer.edit');
 		}
 
 		if ($canDo->get('core.edit.state'))

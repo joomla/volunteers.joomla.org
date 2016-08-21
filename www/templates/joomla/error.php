@@ -10,6 +10,13 @@ defined('_JEXEC') or die;
 
 /** @var JDocumentError $this */
 
+// $this doesn't load the language file like its HTML counterpart, so do it ourselves if able
+if (JFactory::$language)
+{
+	$lang = JFactory::getLanguage();
+	$lang->load('tpl_joomla', JPATH_BASE, null, false, true) || $lang->load('tpl_joomla', __DIR__, null, false, true);
+}
+
 // Set the base URL
 $this->setBase(htmlspecialchars(JUri::current()));
 

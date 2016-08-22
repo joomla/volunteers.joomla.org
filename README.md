@@ -12,19 +12,19 @@ I have opened it for getting code reviews and to allow people to contribute
 
 ## Organisation structure
 ### Department 
-A department consist of a number of groups.
+A department consists of a number of groups.
 
 ### Group
-Is build for a certain purpose and has team members, a team leader, a assistant team leader and can have a 2nd assistant team leader. A group can have subgroups.
+Is build for a certain purpose and has team members, a team leader, an assistant team leader and can have a 2nd assistant team leader. A group can have subgroups.
 
 ### Subgroup
 Subgroups are just a tool to assign responsibilities to a part of the group, they can have a subgroup team leader and assistant leaders. Subgroups can be created and removed as needed. You need to be part of the group to join a subgroup.
 
 ## Access control
-There are two ways for access control build in
+There are two ways for access control built-in
 
 1. Access control over Joomla ACL
-This is only used for setting up administrators. If you are administrator you can do anything at any level. Administrators are the only ones who can create departments, groups and can change not to a department connected groups.
+This is only used to set up administrators. If you are administrator you can do anything at any level. Administrators are the only ones who can create departments, groups and can change not to a department connected groups.
 
 2. Access control because of your position in the organisation
 This allows the self management and should make sure that people follow the processes we as a community have agreed to.
@@ -71,4 +71,4 @@ This allows the self management and should make sure that people follow the proc
 
 ### Group member
 * Can add reports
-* Can set up an leave date to be not longer listend as group member
+* Can set up an leave date to be not longer listed as group member

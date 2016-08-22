@@ -107,7 +107,8 @@ class VolunteersViewVolunteers extends JViewLegacy
 			'a.title'    => JText::_('JGLOBAL_TITLE'),
 			'a.id'       => JText::_('JGRID_HEADING_ID'),
 			'a.modified' => JText::_('JGLOBAL_MODIFIED_DATE'),
-			'num_teams'  => JText::_('COM_VOLUNTEERS_FIELD_TEAMS_NUM')
+			'num_teams'  => JText::_('COM_VOLUNTEERS_FIELD_TEAMS_NUM'),
+			'a.spam'     => JText::_('COM_VOLUNTEERS_FIELD_SPAM')
 		);
 	}
 }

@@ -234,6 +234,12 @@ defined('_JEXEC') or die;
 				<?php endif; ?>
 			</div>
 		</div>
+
+		<?php if ($this->user->id && ($this->user->id != $this->item->user_id)): ?>
+			<a class="btn btn-danger js-reportspam" data-volunteer="<?php echo $this->item->id; ?>" data-success="<?php echo JText::_('COM_VOLUNTEERS_SPAM_REPORT_SUCCESS') ?>">
+				<span class="icon-warning"></span> <?php echo JText::_('COM_VOLUNTEERS_SPAM_REPORT') ?>
+			</a>
+		<?php endif; ?>
 	</div>
 </div>
 
@@ -263,4 +269,27 @@ defined('_JEXEC') or die;
 		var target = this.href.split('#');
 		jQuery('.nav-tabs a').filter('[href="#' + target[1] + '"]').tab('show');
 	});
+
+	// Report Spam Button
+	var reportspambutton = jQuery('.js-reportspam');
+	if (reportspambutton) {
+		reportspambutton.click(function (e) {
+			e.preventDefault();
+			var item = jQuery(this),
+				request = {
+					'option': 'com_ajax',
+					'plugin': 'reportspam',
+					'format': 'json',
+					'volunteer': item.attr('data-volunteer')
+				};
+
+			jQuery.ajax({
+				type: 'POST',
+				data: request,
+				success: function (response) {
+					item.removeClass('btn-danger').addClass('btn-success').html('<span class="icon-thumbs-up"></span> ' + item.attr('data-success'));
+				}
+			});
+		});
+	}
 </script>

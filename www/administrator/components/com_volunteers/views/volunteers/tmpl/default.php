@@ -69,6 +69,9 @@ if ($saveOrder)
 						<th width="6%" class="nowrap hidden-phone">
 							<?php echo JHtml::_('searchtools.sort', 'COM_VOLUNTEERS_FIELD_TEAMS_NUM', 'num_teams', $listDirn, $listOrder); ?>
 						</th>
+						<th width="6%" class="nowrap hidden-phone">
+							<?php echo JHtml::_('searchtools.sort', 'COM_VOLUNTEERS_FIELD_SPAM', 'a.spam', $listDirn, $listOrder); ?>
+						</th>
 						<th width="8%" class="nowrap hidden-phone">
 							<?php echo JHtml::_('searchtools.sort', 'JGLOBAL_CREATED_DATE', 'a.created', $listDirn, $listOrder); ?>
 						</th>
@@ -164,8 +167,11 @@ if ($saveOrder)
 							<td>
 								<?php echo JHtml::_('string.truncate', $item->intro, 250); ?>
 							</td>
-							<td class="nowrap center">
+							<td class="center">
 								<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=members&filter[volunteer]=' . $item->id); ?>"><?php echo $item->num_teams; ?></a>
+							</td>
+							<td class="center">
+								<?php echo $item->spam; ?>
 							</td>
 							<td class="nowrap small hidden-phone">
 								<?php echo JHtml::_('date', $item->created, JText::_('DATE_FORMAT_LC4')); ?>

@@ -38,7 +38,8 @@ class VolunteersModelVolunteers extends JModelList
 				'featured', 'a.featured',
 				'username', 'user.username',
 				'modified', 'a.modified',
-				'num_teams', 'num_teams'
+				'num_teams', 'num_teams',
+				'spam', 'a.spam'
 			);
 		}
 

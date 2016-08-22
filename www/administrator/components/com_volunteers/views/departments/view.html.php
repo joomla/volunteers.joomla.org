@@ -73,19 +73,19 @@ class VolunteersViewDepartments extends JViewLegacy
 
 		if ($canDo->get('core.edit.state'))
 		{
-			JToolbarHelper::publish('volunteers.publish', 'JTOOLBAR_PUBLISH', true);
-			JToolbarHelper::unpublish('volunteers.unpublish', 'JTOOLBAR_UNPUBLISH', true);
-			JToolbarHelper::archiveList('volunteers.archive');
-			JToolbarHelper::checkin('volunteers.checkin');
+			JToolbarHelper::publish('departments.publish', 'JTOOLBAR_PUBLISH', true);
+			JToolbarHelper::unpublish('departments.unpublish', 'JTOOLBAR_UNPUBLISH', true);
+			JToolbarHelper::archiveList('departments.archive');
+			JToolbarHelper::checkin('departments.checkin');
 		}
 
 		if ($state->get('filter.state') == -2 && $canDo->get('core.delete'))
 		{
-			JToolbarHelper::deleteList('', 'volunteers.delete', 'JTOOLBAR_EMPTY_TRASH');
+			JToolbarHelper::deleteList('', 'departments.delete', 'JTOOLBAR_EMPTY_TRASH');
 		}
 		elseif ($canDo->get('core.edit.state'))
 		{
-			JToolbarHelper::trash('volunteers.trash');
+			JToolbarHelper::trash('departments.trash');
 		}
 
 		if ($user->authorise('core.admin', 'com_volunteers') || $user->authorise('core.options', 'com_volunteers'))

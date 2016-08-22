@@ -205,27 +205,27 @@ defined('_JEXEC') or die;
 								</a>
 							<?php endif; ?>
 							<?php if ($this->item->twitter): ?>
-								<a class="btn btn-block btn-twitter" target="_blank" href="http://twitter.com/<?php echo($this->item->twitter) ?>">
+								<a class="btn btn-block btn-twitter" target="_blank" href="https://twitter.com/<?php echo($this->item->twitter) ?>">
 									<span class="icon-twitter"></span> <?php echo JText::_('COM_VOLUNTEERS_CONNECT_TWITTER') ?>
 								</a>
 							<?php endif; ?>
 							<?php if ($this->item->facebook): ?>
-								<a class="btn btn-block btn-facebook" target="_blank" href="http://facebook.com/<?php echo($this->item->facebook) ?>">
+								<a class="btn btn-block btn-facebook" target="_blank" href="https://www.facebook.com/<?php echo($this->item->facebook) ?>">
 									<span class="icon-facebook"></span> <?php echo JText::_('COM_VOLUNTEERS_CONNECT_FACEBOOK') ?>
 								</a>
 							<?php endif; ?>
 							<?php if ($this->item->googleplus): ?>
-								<a class="btn btn-block btn-google-plus" target="_blank" href="http://plus.google.com/<?php echo($this->item->googleplus) ?>">
+								<a class="btn btn-block btn-google-plus" target="_blank" href="https://plus.google.com/<?php echo($this->item->googleplus) ?>">
 									<span class="icon-google-plus"></span> <?php echo JText::_('COM_VOLUNTEERS_CONNECT_GOOGLEPLUS') ?>
 								</a>
 							<?php endif; ?>
 							<?php if ($this->item->linkedin): ?>
-								<a class="btn btn-block btn-linkedin" target="_blank" href="http://www.linkedin.com/in/<?php echo($this->item->linkedin) ?>">
+								<a class="btn btn-block btn-linkedin" target="_blank" href="https://www.linkedin.com/in/<?php echo($this->item->linkedin) ?>">
 									<span class="icon-linkedin"></span> <?php echo JText::_('COM_VOLUNTEERS_CONNECT_LINKEDIN') ?>
 								</a>
 							<?php endif; ?>
 							<?php if ($this->item->github): ?>
-								<a class="btn btn-block btn-gtihub" target="_blank" href="http://github.com/<?php echo($this->item->github) ?>">
+								<a class="btn btn-block btn-gtihub" target="_blank" href="https://github.com/<?php echo($this->item->github) ?>">
 									<span class="icon-github"></span> <?php echo JText::_('COM_VOLUNTEERS_CONNECT_GITHUB') ?>
 								</a>
 							<?php endif; ?>

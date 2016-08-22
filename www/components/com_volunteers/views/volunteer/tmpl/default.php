@@ -51,12 +51,13 @@ defined('_JEXEC') or die;
 
 		<ul class="nav nav-tabs">
 			<?php if ($this->item->teams->active): ?>
-				<li class="active">
+				<li>
 					<a href="#teams" data-toggle="tab"><?php echo JText::_('COM_VOLUNTEERS_TAB_TEAMSINVOLVED') ?></a>
 				</li>
 			<?php endif; ?>
 			<?php if ($this->item->teams->honorroll): ?>
-				<li><a href="#honorroll" data-toggle="tab"><?php echo JText::_('COM_VOLUNTEERS_TAB_HONORROLL') ?></a>
+				<li>
+					<a href="#honorroll" data-toggle="tab"><?php echo JText::_('COM_VOLUNTEERS_TAB_HONORROLL') ?></a>
 				</li>
 			<?php endif; ?>
 			<?php if ($this->item->joomlastory): ?>
@@ -64,12 +65,14 @@ defined('_JEXEC') or die;
 					<a href="#joomlastory" data-toggle="tab"><?php echo JText::_('COM_VOLUNTEERS_TAB_JOOMLASTORY') ?></a>
 				</li>
 			<?php endif; ?>
-			<li><a href="#contact" data-toggle="tab"><?php echo JText::_('COM_VOLUNTEERS_TAB_CONTACT') ?></a></li>
+			<li>
+				<a href="#contact" data-toggle="tab"><?php echo JText::_('COM_VOLUNTEERS_TAB_CONTACT') ?></a>
+			</li>
 		</ul>
 
 		<div class="tab-content">
 			<?php if ($this->item->teams->active): ?>
-				<div class="tab-pane fade in active" id="teams">
+				<div class="tab-pane" id="teams">
 					<table class="table table-striped table-hover table-vertical-align">
 						<thead>
 						<th width="30%"><?php echo JText::_('COM_VOLUNTEERS_FIELD_TEAM') ?></th>
@@ -108,7 +111,7 @@ defined('_JEXEC') or die;
 			<?php endif; ?>
 
 			<?php if ($this->item->teams->honorroll): ?>
-				<div class="tab-pane fade" id="honorroll">
+				<div class="tab-pane" id="honorroll">
 					<table class="table table-striped table-hover table-vertical-align">
 						<thead>
 						<th width="30%"><?php echo JText::_('COM_VOLUNTEERS_FIELD_TEAM') ?></th>
@@ -151,12 +154,12 @@ defined('_JEXEC') or die;
 			<?php endif; ?>
 
 			<?php if ($this->item->joomlastory): ?>
-				<div class="tab-pane fade" id="joomlastory">
+				<div class="tab-pane" id="joomlastory">
 					<?php echo(nl2br($this->item->joomlastory)) ?>
 				</div>
 			<?php endif; ?>
 
-			<div class="tab-pane fade" id="contact">
+			<div class="tab-pane" id="contact">
 				<?php if ($this->user->guest) : ?>
 					<p class="alert alert-info">
 						<?php echo JText::_('COM_VOLUNTEERS_NOTE_LOGIN_CONTACT_VOLUNTEER') ?>
@@ -239,6 +242,8 @@ defined('_JEXEC') or die;
 </div>
 
 <script type="text/javascript">
+	jQuery('.nav-tabs a:first').tab('show');
+
 	// Javascript to enable link to tab
 	var url = document.location.toString();
 	if (url.match('#')) {
@@ -256,6 +261,6 @@ defined('_JEXEC') or die;
 
 	jQuery('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
 		var target = this.href.split('#');
-		jQuery('.nav a').filter('[href="#' + target[1] + '"]').tab('show');
+		jQuery('.nav-tabs a').filter('[href="#' + target[1] + '"]').tab('show');
 	});
 </script>

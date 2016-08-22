@@ -66,8 +66,9 @@ defined('_JEXEC') or die;
 	<div class="span12">
 
 		<ul class="nav nav-tabs">
-			<li class="active">
-				<a href="#members" data-toggle="tab"><?php echo JText::_('COM_VOLUNTEERS_TAB_MEMBERS') ?></a></li>
+			<li>
+				<a href="#members" data-toggle="tab"><?php echo JText::_('COM_VOLUNTEERS_TAB_MEMBERS') ?></a>
+			</li>
 			<?php if ($this->item->members->honorroll): ?>
 				<li>
 					<a href="#honorroll" data-toggle="tab"><?php echo JText::_('COM_VOLUNTEERS_TAB_HONORROLL') ?></a>
@@ -78,14 +79,22 @@ defined('_JEXEC') or die;
 					<a href="#subteams" data-toggle="tab"><?php echo JText::_('COM_VOLUNTEERS_TAB_SUBTEAMS') ?></a>
 				</li>
 			<?php endif; ?>
-			<li><a href="#roles" data-toggle="tab"><?php echo JText::_('COM_VOLUNTEERS_TAB_ROLES') ?></a></li>
-			<li><a href="#reports" data-toggle="tab"><?php echo JText::_('COM_VOLUNTEERS_TAB_REPORTS') ?></a></li>
-			<li><a href="#getinvolved" data-toggle="tab"><?php echo JText::_('COM_VOLUNTEERS_TAB_GETINVOLVED') ?></a>
-			<li><a href="#contact" data-toggle="tab"><?php echo JText::_('COM_VOLUNTEERS_TAB_CONTACT') ?></a></li>
+			<li>
+				<a href="#roles" data-toggle="tab"><?php echo JText::_('COM_VOLUNTEERS_TAB_ROLES') ?></a>
+			</li>
+			<li>
+				<a href="#reports" data-toggle="tab"><?php echo JText::_('COM_VOLUNTEERS_TAB_REPORTS') ?></a>
+			</li>
+			<li>
+				<a href="#getinvolved" data-toggle="tab"><?php echo JText::_('COM_VOLUNTEERS_TAB_GETINVOLVED') ?>
+				</a>
+			<li>
+				<a href="#contact" data-toggle="tab"><?php echo JText::_('COM_VOLUNTEERS_TAB_CONTACT') ?></a>
+			</li>
 		</ul>
 
 		<div class="tab-content">
-			<div class="tab-pane fade in active" id="members">
+			<div class="tab-pane" id="members">
 				<?php if ($this->acl->edit): ?>
 					<div class="row-fluid">
 						<a class="btn pull-right" href="<?php echo JRoute::_('index.php?option=com_volunteers&task=member.add&team=' . $this->item->id) ?>">
@@ -143,7 +152,7 @@ defined('_JEXEC') or die;
 			</div>
 
 			<?php if ($this->item->members->honorroll): ?>
-				<div class="tab-pane fade" id="honorroll">
+				<div class="tab-pane" id="honorroll">
 					<?php if ($this->acl->edit): ?>
 						<div class="row-fluid">
 							<a class="btn pull-right" href="<?php echo JRoute::_('index.php?option=com_volunteers&task=member.add&team=' . $this->item->id) ?>">
@@ -204,7 +213,7 @@ defined('_JEXEC') or die;
 			<?php endif; ?>
 
 			<?php if (!$this->item->parent_id && ($this->item->subteams || $this->acl->create_team)): ?>
-				<div class="tab-pane fade in" id="subteams">
+				<div class="tab-pane" id="subteams">
 					<?php if ($this->acl->create_team): ?>
 						<div class="row-fluid">
 							<a class="btn pull-right" href="<?php echo JRoute::_('index.php?option=com_volunteers&task=team.add&team=' . $this->item->id) ?>">
@@ -258,7 +267,7 @@ defined('_JEXEC') or die;
 				</div>
 			<?php endif; ?>
 
-			<div class="tab-pane fade in" id="roles">
+			<div class="tab-pane" id="roles">
 				<?php if ($this->acl->edit): ?>
 					<div class="row-fluid">
 						<a class="btn pull-right" href="<?php echo JRoute::_('index.php?option=com_volunteers&task=role.add&team=' . $this->item->id) ?>">
@@ -313,7 +322,7 @@ defined('_JEXEC') or die;
 				<?php endif; ?>
 			</div>
 
-			<div class="tab-pane fade" id="reports">
+			<div class="tab-pane" id="reports">
 				<?php if ($this->acl->create_report): ?>
 					<div class="row-fluid">
 						<a class="btn pull-right" href="<?php echo JRoute::_('index.php?option=com_volunteers&task=report.add&team=' . $this->item->id) ?>">
@@ -373,7 +382,7 @@ defined('_JEXEC') or die;
 				<?php endif; ?>
 			</div>
 
-			<div class="tab-pane fade" id="getinvolved">
+			<div class="tab-pane" id="getinvolved">
 				<?php if ($this->item->getinvolved): ?>
 					<?php echo $this->item->getinvolved; ?>
 				<?php else: ?>
@@ -381,7 +390,7 @@ defined('_JEXEC') or die;
 				<?php endif; ?>
 			</div>
 
-			<div class="tab-pane fade" id="contact">
+			<div class="tab-pane" id="contact">
 				<?php if ($this->user->guest) : ?>
 					<p class="alert alert-info">
 						<?php echo JText::_('COM_VOLUNTEERS_NOTE_LOGIN_CONTACT_TEAM') ?>
@@ -429,6 +438,8 @@ defined('_JEXEC') or die;
 </div>
 
 <script type="text/javascript">
+	jQuery('.nav-tabs a:first').tab('show');
+
 	// Javascript to enable link to tab
 	var url = document.location.toString();
 	if (url.match('#')) {
@@ -446,6 +457,6 @@ defined('_JEXEC') or die;
 
 	jQuery('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
 		var target = this.href.split('#');
-		jQuery('.nav a').filter('[href="#' + target[1] + '"]').tab('show');
+		jQuery('.nav-tabs a').filter('[href="#' + target[1] + '"]').tab('show');
 	});
 </script>

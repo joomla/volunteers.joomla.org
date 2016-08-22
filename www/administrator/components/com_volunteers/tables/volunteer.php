@@ -115,4 +115,26 @@ class VolunteersTableVolunteer extends JTable
 
 		return true;
 	}
+
+	/**
+	 * Overloaded delete method
+	 *
+	 * @param   mixed $pk An optional primary key value to delete.  If not set the instance property value is used.
+	 *
+	 * @return  boolean  True on success.
+	 */
+	public function delete($pk = null)
+	{
+		$return = parent::delete($pk);
+
+		// Delete the Joomla User
+		$user = JUser::getInstance($this->user_id);
+
+		if (!$user->delete())
+		{
+			return false;
+		}
+
+		return $return;
+	}
 }

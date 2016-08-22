@@ -9,7 +9,6 @@
 defined('_JEXEC') or die;
 
 use Joomla\Registry\Registry;
-use Joomla\String\String;
 
 /**
  * Member model.
@@ -145,7 +144,7 @@ class VolunteersModelMember extends JModelAdmin
 		$db = $this->getDbo();
 
 		$nullDate = $db->quote($db->getNullDate());
-		
+
 		$query = $db->getQuery(true)
 			->select('position')
 			->from('#__volunteers_members')

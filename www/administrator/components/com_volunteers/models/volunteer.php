@@ -9,7 +9,7 @@
 defined('_JEXEC') or die;
 
 use Joomla\Registry\Registry;
-use Joomla\String\String;
+use Joomla\Utilities\ArrayHelper;
 
 /**
  * Team model.
@@ -287,14 +287,19 @@ class VolunteersModelVolunteer extends JModelAdmin
 					JError::raiseError(404, JText::_('COM_VOLUNTEERS_ERROR_VOLUNTEER_NOT_FOUND'));
 				}
 
-				$item = $data;
+				return $data;
 			}
 			catch (Exception $e)
 			{
 				$this->setError($e);
-				$item = false;
+
+				return false;
 			}
 		}
+
+		// Convert to the JObject before adding other data.
+		$properties = $this->getTable()->getProperties(1);
+		$item       = ArrayHelper::toObject($properties, 'JObject');
 
 		return $item;
 	}

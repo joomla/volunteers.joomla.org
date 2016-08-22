@@ -37,6 +37,9 @@ class VolunteersModelMembers extends JModelList
 				'created_by', 'a.created_by',
 				'ordering', 'a.ordering',
 				'featured', 'a.featured',
+				'date_started', 'a.date_started',
+				'date_ended', 'a.date_ended',
+				'volunteer', 'a.volunteer',
 			);
 		}
 

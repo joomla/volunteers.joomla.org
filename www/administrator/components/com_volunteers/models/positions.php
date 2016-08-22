@@ -53,6 +53,8 @@ class VolunteersModelPositions extends JModelList
 		// Load the filter state.
 		$this->setState('filter.search', $this->getUserStateFromRequest($this->context . '.filter.search', 'filter_search'));
 		$this->setState('filter.state', $this->getUserStateFromRequest($this->context . '.filter.state', 'filter_state'));
+		$this->setState('filter.type', $this->getUserStateFromRequest($this->context . '.filter.type', 'filter_type'));
+		$this->setState('filter.acl', $this->getUserStateFromRequest($this->context . '.filter.acl', 'filter_acl'));
 
 		// Load the parameters.
 		$params = JComponentHelper::getParams('com_volunteers');
@@ -78,6 +80,7 @@ class VolunteersModelPositions extends JModelList
 		// Compile the store id.
 		$id .= ':' . $this->getState('filter.search');
 		$id .= ':' . $this->getState('filter.state');
+		$id .= ':' . $this->getState('filter.type');
 
 		return parent::getStoreId($id);
 	}
@@ -125,6 +128,33 @@ class VolunteersModelPositions extends JModelList
 				$search = $db->quote('%' . str_replace(' ', '%', $db->escape(trim($search), true) . '%'));
 				$query->where('(a.title LIKE ' . $search . ' OR a.alias LIKE ' . $search . ')');
 			}
+		}
+
+		// Filter by published state
+		$type = $this->getState('filter.type');
+
+		if (is_numeric($type) && ($type > 0))
+		{
+			$query->where('a.type = ' . (int) $type);
+		}
+
+		// Filter by acl state
+		$acl = $this->getState('filter.acl');
+
+		switch ($acl)
+		{
+			case 'edit_department':
+				$query->where('a.edit_department = 1');
+				break;
+			case 'edit':
+				$query->where('a.edit = 1');
+				break;
+			case 'create_report':
+				$query->where('a.create_report = 1');
+				break;
+			case 'create_team':
+				$query->where('a.create_team = 1');
+				break;
 		}
 
 		// Add the list ordering clause.

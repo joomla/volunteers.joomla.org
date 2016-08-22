@@ -279,12 +279,11 @@ class VolunteersModelDepartment extends JModelAdmin
 
 		foreach ($teamLeads as $lead)
 		{
-			if ($lead->position == 2 || $lead->position == 6)
+			if (strpos($lead->position_title, 'Assistant') === false)
 			{
 				$teamsById[$lead->team]->leader[] = $lead;
 			}
-
-			if ($lead->position == 7)
+			else
 			{
 				$teamsById[$lead->team]->assistantleader[] = $lead;
 			}
@@ -304,10 +303,23 @@ class VolunteersModelDepartment extends JModelAdmin
 	{
 		$pk = (!empty($pk)) ? $pk : (int) $this->getState($this->getName() . '.id');
 
+		// Get team lead positions
+		$model = JModelLegacy::getInstance('Positions', 'VolunteersModel', array('ignore_request' => true));
+		$model->setState('filter.type', 2);
+		$model->setState('filter.acl', 'edit');
+		$positions = $model->getItems();
+
+		$positionIds = array();
+		foreach ($positions as $position)
+		{
+			$positionIds[] = $position->id;
+		}
+
 		// Get team leads
 		$model = JModelLegacy::getInstance('Members', 'VolunteersModel', array('ignore_request' => true));
 		$model->setState('filter.team', $pk);
-		$model->setState('filter.position', array(2, 6, 7));
+		$model->setState('filter.position', $positionIds);
+		$model->setState('filter.active', 1);
 
 		return $model->getItems();
 	}

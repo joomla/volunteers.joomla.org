@@ -53,7 +53,7 @@ abstract class JHtmlVolunteers
 		}
 		catch (RuntimeException $e)
 		{
-			JError::raiseWarning(500, $e->getMessage());
+			JFactory::getApplication()->enqueueMessage($e->getMessage(), 'warning');
 		}
 
 		return $options;
@@ -82,7 +82,7 @@ abstract class JHtmlVolunteers
 		}
 		catch (RuntimeException $e)
 		{
-			JError::raiseWarning(500, $e->getMessage());
+			JFactory::getApplication()->enqueueMessage($e->getMessage(), 'warning');
 		}
 
 		return $options;
@@ -120,7 +120,7 @@ abstract class JHtmlVolunteers
 		}
 		catch (RuntimeException $e)
 		{
-			JError::raiseWarning(500, $e->getMessage());
+			JFactory::getApplication()->enqueueMessage($e->getMessage(), 'warning');
 		}
 
 		return $options;
@@ -163,7 +163,7 @@ abstract class JHtmlVolunteers
 		}
 		catch (RuntimeException $e)
 		{
-			JError::raiseWarning(500, $e->getMessage());
+			JFactory::getApplication()->enqueueMessage($e->getMessage(), 'warning');
 		}
 
 		return $options;
@@ -199,7 +199,7 @@ abstract class JHtmlVolunteers
 		}
 		catch (RuntimeException $e)
 		{
-			JError::raiseWarning(500, $e->getMessage());
+			JFactory::getApplication()->enqueueMessage($e->getMessage(), 'warning');
 		}
 
 		return $options;

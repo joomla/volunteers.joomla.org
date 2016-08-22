@@ -56,17 +56,23 @@ if ($saveOrder)
 							<?php echo JHtml::_('searchtools.sort', 'JSTATUS', 'a.state', $listDirn, $listOrder); ?>
 						</th>
 						<th width="8%"></th>
-						<th width="20%" class="team">
+						<th width="15%" class="team">
 							<?php echo JHtml::_('searchtools.sort', 'COM_VOLUNTEERS_FIELD_TEAM_DEPARTMENT', 'a.team', $listDirn, $listOrder); ?>
 						</th>
-						<th width="20%" class="firstname">
-							<?php echo JHtml::_('searchtools.sort', 'COM_VOLUNTEERS_FIELD_VOLUNTEER', 'a.firstname', $listDirn, $listOrder); ?>
+						<th width="15%" class="firstname">
+							<?php echo JHtml::_('searchtools.sort', 'COM_VOLUNTEERS_FIELD_VOLUNTEER', 'a.volunteer', $listDirn, $listOrder); ?>
 						</th>
-						<th class="role">
+						<th>
 							<?php echo JHtml::_('searchtools.sort', 'COM_VOLUNTEERS_FIELD_POSITION', 'a.position', $listDirn, $listOrder); ?>
 						</th>
-						<th class="postion">
+						<th>
 							<?php echo JHtml::_('searchtools.sort', 'COM_VOLUNTEERS_FIELD_ROLE', 'a.role', $listDirn, $listOrder); ?>
+						</th>
+						<th>
+							<?php echo JHtml::_('searchtools.sort', 'COM_VOLUNTEERS_FIELD_DATE_STARTED', 'a.date_started', $listDirn, $listOrder); ?>
+						</th>
+						<th>
+							<?php echo JHtml::_('searchtools.sort', 'COM_VOLUNTEERS_FIELD_DATE_ENDED', 'a.date_ended', $listDirn, $listOrder); ?>
 						</th>
 						<th width="1%" class="nowrap center hidden-phone">
 							<?php echo JHtml::_('searchtools.sort', 'JGRID_HEADING_ID', 'a.id', $listDirn, $listOrder); ?>
@@ -88,7 +94,7 @@ if ($saveOrder)
 						$canCheckin = $user->authorise('core.manage', 'com_checkin') || $item->checked_out == $user->get('id') || $item->checked_out == 0;
 						$canChange = $user->authorise('core.edit.state', 'com_volunteers') && $canCheckin;
 						?>
-						<tr class="row<?php echo $i % 2; ?>" sortable-volunteer-id="<?php echo $item->id ?>">
+						<tr class="row<?php echo $i % 2; ?><?php if($item->date_ended == '0000-00-00'):?> success<?php else:?> error<?php endif;?>"  sortable-volunteer-id="<?php echo $item->id ?>">
 							<td class="order nowrap center hidden-phone">
 								<?php
 								$iconClass = '';
@@ -150,8 +156,14 @@ if ($saveOrder)
 							<td class="nowrap">
 								<?php echo $item->position_title; ?>
 							</td>
-							<td class="nowrap">
+							<td>
 								<?php echo $this->escape($item->role_title); ?>
+							</td>
+							<td>
+								<?php echo $item->date_started; ?>
+							</td>
+							<td>
+								<?php echo $item->date_ended; ?>
 							</td>
 							<td class="center hidden-phone">
 								<?php echo (int) $item->id; ?>

@@ -23,7 +23,8 @@ JHtml::script('com_volunteers/markerclusterer.js', false, true);
 		<p><?php echo JText::_('COM_VOLUNTEERS_HOME_INTRO_HOW_DESC'); ?></p>
 		<p><?php echo JText::_('COM_VOLUNTEERS_HOME_INTRO_HOW_ACTION'); ?></p>
 		<p>
-			<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=registration'); ?>" class="btn"><span class="icon-chevron-right"></span><?php echo JText::_('COM_VOLUNTEERS_HOME_INTRO_HOW_BUTTON'); ?></a>
+			<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=registration'); ?>" class="btn"><span class="icon-chevron-right"></span><?php echo JText::_('COM_VOLUNTEERS_HOME_INTRO_HOW_BUTTON'); ?>
+			</a>
 		</p>
 	</div>
 	<div class="span6">
@@ -31,7 +32,8 @@ JHtml::script('com_volunteers/markerclusterer.js', false, true);
 		<p><?php echo JText::_('COM_VOLUNTEERS_HOME_INTRO_WHY_DESC'); ?></p>
 		<p><?php echo JText::_('COM_VOLUNTEERS_HOME_INTRO_WHY_ACTION'); ?></p>
 		<p>
-			<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=joomlers'); ?>" class="btn"><span class="icon-chevron-right"></span><?php echo JText::_('COM_VOLUNTEERS_HOME_INTRO_WHY_BUTTON'); ?></a>
+			<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=joomlers'); ?>" class="btn"><span class="icon-chevron-right"></span><?php echo JText::_('COM_VOLUNTEERS_HOME_INTRO_WHY_BUTTON'); ?>
+			</a>
 		</p>
 	</div>
 </div>
@@ -49,11 +51,11 @@ JHtml::script('com_volunteers/markerclusterer.js', false, true);
 					</a>
 				</div>
 				<div class="span10">
-					<h2 class="report-title">
+					<h3 class="report-title">
 						<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=report&id=' . $item->id) ?>">
 							<?php echo($item->title); ?>
 						</a>
-					</h2>
+					</h3>
 					<p class="muted">
 						<?php echo JText::_('COM_VOLUNTEERS_BY') ?>
 						<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $item->volunteer_id) ?>"><?php echo $item->author_name; ?></a>
@@ -203,7 +205,6 @@ JHtml::script('com_volunteers/markerclusterer.js', false, true);
 			origin: new google.maps.Point(0, 0), // origin
 			anchor: new google.maps.Point(25, 25) // anchor
 		};
-
 
 		for (i = 0; i < locations.length; i++) {
 			marker = new google.maps.Marker({

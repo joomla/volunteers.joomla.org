@@ -352,7 +352,9 @@ class JoomlaTemplateHelper
 
 			case 'volunteers.joomla.org':
 			{
-				$tag = 'jvols';
+				$hasCustom = true;
+				$tag       = 'jvols';
+				$url       = 'https://github.com/joomla/volunteers.joomla.org/issues/new?body=Please%20describe%20the%20problem%20or%20your%20issue';
 
 				break;
 			}

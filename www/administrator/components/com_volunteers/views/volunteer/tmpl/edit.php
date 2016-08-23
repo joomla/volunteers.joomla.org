@@ -52,3 +52,14 @@ JFactory::getDocument()->addScriptDeclaration("
 	<input type="hidden" name="task" value=""/>
 	<?php echo JHtml::_('form.token'); ?>
 </form>
+
+<script>
+	jQuery(document).ready(function () {
+		jQuery('.location').on('change', function (e) {
+			var city = jQuery('.location-city').val();
+			var country = jQuery('.location-country').val();
+			jQuery('.gllpSearchField').val(city + ', ' + country);
+			jQuery('.gllpSearchButton').click();
+		});
+	});
+</script>

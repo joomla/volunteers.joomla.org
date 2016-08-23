@@ -16,19 +16,21 @@ abstract class VolunteersHelper
 	{
 		$countries = JHtmlVolunteers::$countries;
 
+		$text = '';
+
 		if ($city)
 		{
-			$text = $city;
-		}
-
-		if ($country)
-		{
-			$text = $countries[$country];
+			$text .= $city;
 		}
 
 		if ($city && $country)
 		{
-			$text = $city . ', ' . $countries[$country];
+			$text .= ', ';
+		}
+
+		if ($country)
+		{
+			$text .= $countries[$country];
 		}
 
 		return $text;

@@ -58,6 +58,9 @@ class VolunteersModelVolunteers extends JModelList
 		// Load the filter state.
 		$this->setState('filter.search', $this->getUserStateFromRequest($this->context . '.filter.search', 'filter_search'));
 		$this->setState('filter.state', $this->getUserStateFromRequest($this->context . '.filter.state', 'filter_state'));
+		$this->setState('filter.image', $this->getUserStateFromRequest($this->context . '.filter.image', 'filter_image'));
+		$this->setState('filter.joomlastory', $this->getUserStateFromRequest($this->context . '.filter.joomlastory', 'filter_joomlastory'));
+		$this->setState('filter.location', $this->getUserStateFromRequest($this->context . '.filter.location', 'filter_location'));
 
 		// Load the parameters.
 		$params = JComponentHelper::getParams('com_volunteers');
@@ -83,6 +86,9 @@ class VolunteersModelVolunteers extends JModelList
 		// Compile the store id.
 		$id .= ':' . $this->getState('filter.search');
 		$id .= ':' . $this->getState('filter.state');
+		$id .= ':' . $this->getState('filter.image');
+		$id .= ':' . $this->getState('filter.joomlastory');
+		$id .= ':' . $this->getState('filter.location');
 
 		return parent::getStoreId($id);
 	}
@@ -139,6 +145,31 @@ class VolunteersModelVolunteers extends JModelList
 				$search = $db->quote('%' . str_replace(' ', '%', $db->escape(trim($search), true) . '%'));
 				$query->where('(a.firstname LIKE ' . $search . ' OR a.lastname LIKE \' . $search . \' OR a.alias LIKE ' . $search . ')');
 			}
+		}
+
+		// Filter by image
+		$image = $this->getState('filter.image');
+
+		if ($image)
+		{
+			$query->where('a.image <> \'\'');
+		}
+
+		// Filter by joomlastory
+		$joomlastory = $this->getState('filter.joomlastory');
+
+		if ($joomlastory)
+		{
+			$query->where('a.joomlastory <> \'\'');
+		}
+
+		// Filter by location
+		$location = $this->getState('filter.location');
+
+		if ($location)
+		{
+			$query->where('a.latitude <> \'\'');
+			$query->where('a.longitude <> \'\'');
 		}
 
 		// Group by ID

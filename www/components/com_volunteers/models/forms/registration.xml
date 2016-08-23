@@ -67,12 +67,20 @@
                 type="countries"
                 label="COM_VOLUNTEERS_FIELD_COUNTRY"
                 required="true"
+                class="location-country location"
         />
 
         <field
                 name="city"
                 type="text"
                 label="COM_VOLUNTEERS_FIELD_CITY"
+                class="location-city location"
+        />
+
+        <field
+                name="location"
+                type="location"
+                label="COM_VOLUNTEERS_FIELD_LOCATION"
         />
 
         <field
@@ -148,4 +156,14 @@
                 label="COM_VOLUNTEERS_FIELD_JOOMLASTORY"
         />
     </fieldset>
+
+    <field
+            name="latitude"
+            type="hidden"
+    />
+
+    <field
+            name="longitude"
+            type="hidden"
+    />
 </form>

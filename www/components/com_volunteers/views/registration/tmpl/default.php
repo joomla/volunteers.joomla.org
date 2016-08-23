@@ -54,6 +54,8 @@ JHtml::_('formbehavior.chosen', 'select');
 
 		<?php echo $this->form->renderField('country'); ?>
 		<?php echo $this->form->renderField('city'); ?>
+		<?php echo $this->form->renderField('location'); ?>
+
 		<div class="address">
 			<?php echo $this->form->renderField('address'); ?>
 		</div>
@@ -112,3 +114,14 @@ JHtml::_('formbehavior.chosen', 'select');
 		<?php echo JHtml::_('form.token'); ?>
 	</form>
 </div>
+
+<script>
+	jQuery(document).ready(function () {
+		jQuery('.location').on('change', function (e) {
+			var city = jQuery('.location-city').val();
+			var country = jQuery('.location-country').val();
+			jQuery('.gllpSearchField').val(city + ', ' + country);
+			jQuery('.gllpSearchButton').click();
+		});
+	});
+</script>

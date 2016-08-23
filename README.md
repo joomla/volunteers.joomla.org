@@ -12,12 +12,12 @@ Code contributions are much welcome! Browse the [Issue tracker](https://github.c
 ## Local Development
 You can fork & clone the repository for local development. To get started you need to:
  - Clone the repository
- - Setup the [sample database](https://github.com/joomla/volunteers.joomla.org/tree/master/db/installation/)
+ - Setup the [sample database](https://github.com/joomla/volunteers.joomla.org/tree/master/database/installation/)
  - Rename `configuration.php.dist` into `configuration.php`, add the database credentials and paths to the `logs` and `tmp` folder. All marked with `[XXXXXXXXXX]`.
  - Rename `htaccess.txt` into `.htaccess`
 
 ## Database changes
-Please update the sample database if any code changes are needed for your code contributions and add a .sql file with the changes in the [updates folder](https://github.com/joomla/volunteers.joomla.org/tree/master/db/updates/) and use the issue number as filename. 
+Please update the sample database if any code changes are needed for your code contributions and add a .sql file with the changes in the [updates folder](https://github.com/joomla/volunteers.joomla.org/tree/master/database/updates/) and use the issue number as filename. 
 
 ---
 
@@ -137,105 +137,105 @@ The sample database has several accounts available for testing.
 #### Admin
 
 **Admin User**
-User ID: 1
-Name: `Admin Joomler`
-Email: `admin@volunteers.joomla.org`
-Password: `test`
+* User ID: 1
+* Name: `Admin Joomler`
+* Email: `admin@volunteers.joomla.org`
+* Password: `test`
 
 #### Departmental Coordination Team Leader
 
 **Frontend Department**
-User ID: 2
-Name: `Frontend Leader`
-Email: `frontend.leader@volunteers.joomla.org`
-Password: `test`
+* User ID: 2
+* Name: `Frontend Leader`
+* Email: `frontend.leader@volunteers.joomla.org`
+* Password: `test`
 
 **Backend Department**
-User ID: 5
-Name: `Backend Leader`
-Email: `backend.leader@volunteers.joomla.org`
-Password: `test`
+* User ID: 5
+* Name: `Backend Leader`
+* Email: `backend.leader@volunteers.joomla.org`
+* Password: `test`
 
 #### Assistant Departmental Coordination Team Leader
 
 **Frontend Department**
-User ID: 3
-Name: `Frontend Assistant`
-Email: `frontend.assistant@volunteers.joomla.org`
-Password: `test`
+* User ID: 3
+* Name: `Frontend Assistant`
+* Email: `frontend.assistant@volunteers.joomla.org`
+* Password: `test`
 
 **Backend Department**
-User ID: 6
-Name: `Backend Assistant`
-Email: `backend.assistant@volunteers.joomla.org`
-Password: `test`
+* User ID: 6
+* Name: `Backend Assistant`
+* Email: `backend.assistant@volunteers.joomla.org`
+* Password: `test`
 
 #### Departmental Coordinator
 
 **Frontend Department**
-User ID: 4
-Name: `Frontend Coordinator`
-Email: `frontend.coordinator@volunteers.joomla.org`
-Password: `test`
+* User ID: 4
+* Name: `Frontend Coordinator`
+* Email: `frontend.coordinator@volunteers.joomla.org`
+* Password: `test`
 
 **Backend Department**
-User ID: 7
-Name: `Backend Coordinator`
-Email: `backend.coordinator@volunteers.joomla.org`
-Password: `test`
+* User ID: 7
+* Name: `Backend Coordinator`
+* Email: `backend.coordinator@volunteers.joomla.org`
+* Password: `test`
 
 #### Team Leader
 
 **Extensions Team**
-User ID: 8
-Name: `Extensions Leader`
-Email: `extensions.leader@volunteers.joomla.org`
-Password: `test`
+* User ID: 8
+* Name: `Extensions Leader`
+* Email: `extensions.leader@volunteers.joomla.org`
+* Password: `test`
 
 **Sample Data Team**
-User ID: 12
-Name: `Sample Leader`
-Email: `sample.leader@volunteers.joomla.org`
-Password: `test`
+* User ID: 12
+* Name: `Sample Leader`
+* Email: `sample.leader@volunteers.joomla.org`
+* Password: `test`
 
 #### Assistant Team Leader
 
 **Extensions Team**
-User ID: 9
-Name: `Extensions Assistant`
-Email: `extensions.assistant@volunteers.joomla.org`
-Password: `test`
+* User ID: 9
+* Name: `Extensions Assistant`
+* Email: `extensions.assistant@volunteers.joomla.org`
+* Password: `test`
 
 **Sample Data Team**
-User ID: 13
-Name: `Sample Assistant`
-Email: `sample.assistant@volunteers.joomla.org`
-Password: `test`
+* User ID: 13
+* Name: `Sample Assistant`
+* Email: `sample.assistant@volunteers.joomla.org`
+* Password: `test`
 
 #### Member
 
 **Extensions Team**
-User ID: 10
-Name: `Extensions Member`
-Email: `extensions.member@volunteers.joomla.org`
-Password: `test`
+* User ID: 10
+* Name: `Extensions Member`
+* Email: `extensions.member@volunteers.joomla.org`
+* Password: `test`
 
 **Sample Data Team**
-User ID: 14
-Name: `Sample Member`
-Email: `sample.member@volunteers.joomla.org`
-Password: `test`
+* User ID: 14
+* Name: `Sample Member`
+* Email: `sample.member@volunteers.joomla.org`
+* Password: `test`
 
 #### Contributor
 
 **Extensions Team**
-User ID: 11
-Name: `Extensions Contributor`
-Email: `extensions.contributor@volunteers.joomla.org`
-Password: `test`
+* User ID: 11
+* Name: `Extensions Contributor`
+* Email: `extensions.contributor@volunteers.joomla.org`
+* Password: `test`
 
 **Sample Data Team**
-User ID: 15
-Name: `Sample Contributor`
-Email: `sample.contributor@volunteers.joomla.org`
-Password: `test`
+* User ID: 15
+* Name: `Sample Contributor`
+* Email: `sample.contributor@volunteers.joomla.org`
+* Password: `test`

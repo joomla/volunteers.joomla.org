@@ -214,7 +214,7 @@ JHtml::script('com_volunteers/markerclusterer.js', false, true);
 
 			google.maps.event.addListener(marker, 'click', (function (marker, i, infoWindow) {
 				return function () {
-					infoWindow.setContent('<div style="width:200px;"><img width="40" class="pull-left" style="padding-right: 10px" src="' + locations[i].logo + '" /><a href="' + locations[i].url + '">' + locations[i].title + '</a><br />' + locations[i].address + '</div>');
+					infoWindow.setContent('<div style="width:200px;"><img width="40" class="pull-left" style="padding-right: 10px" src="' + locations[i].image + '" /><a href="' + locations[i].url + '">' + locations[i].title + '</a><br />' + locations[i].address + '</div>');
 					infoWindow.open(map, marker);
 				}
 			})(marker, i, infoWindow));

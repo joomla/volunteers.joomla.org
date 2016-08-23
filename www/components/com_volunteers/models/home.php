@@ -94,7 +94,7 @@ class VolunteersModelHome extends JModelList
 				'lng'     => $item->longitude,
 				'url'     => JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $item->id),
 				'address' => VolunteersHelper::location($item->city, $item->country),
-				'logo'    => 'images/volunteers/' . $item->image
+				'image'    => VolunteersHelper::image($item->image, 'small', true)
 			)));
 		});
 

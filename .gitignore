@@ -2,14 +2,12 @@
 /www/administrator/cache
 /www/administrator/logs
 /www/cache
-/www/images
 /www/logs
 /www/tmp
 /www/configuration.php
 /www/.htaccess
 /www/LICENSE.txt
 /www/README.txt
-/www/htaccess.txt
 /www/robots.txt.dist
 /www/web.config.txt
 

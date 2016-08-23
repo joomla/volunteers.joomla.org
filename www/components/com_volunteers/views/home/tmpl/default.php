@@ -137,7 +137,7 @@ JHtml::script('com_volunteers/markerclusterer.js', false, true);
 	</div>
 </div>
 
-<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js"></script>
+<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC04czYnPuPFkO6eDAKX-j_lfrpanAAo-U"></script>
 
 <script>
 	function initialise() {

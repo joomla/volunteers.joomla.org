@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension version="3.0" type="plugin" group="search" method="upgrade">
+    <name>Search - Volunteers - Volunteers</name>
+    <author>Joomla! Project</author>
+    <creationDate>August 2016</creationDate>
+    <copyright>(C) 2005 - 2015 Open Source Matters. All rights reserved.</copyright>
+    <license>GNU General Public License version 2 or later; see LICENSE.txt</license>
+    <authorEmail>admin@joomla.org</authorEmail>
+    <authorUrl>www.joomla.org</authorUrl>
+    <version>1.0.0</version>
+    <description>Volunteers search for com_volunteers</description>
+
+    <files>
+        <file plugin="volunteers_volunteers">volunteers_volunteers.php</file>
+        <filename>volunteers_volunteers.xml</filename>
+    </files>
+</extension>

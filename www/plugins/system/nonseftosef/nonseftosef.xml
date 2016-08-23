@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<extension type="plugin" version="3.0" group="system" method="upgrade">
+    <name>PLG_NONSEFTOSEF</name>
+    <version>3.1.2</version>
+    <creationDate>2016-06-30</creationDate>
+    <license>http://www.gnu.org/licenses/gpl</license>
+    <copyright>Copyright 2016 Viktor Vogel. All rights reserved.</copyright>
+    <author>Viktor Vogel</author>
+    <authoremail>admin@kubik-rubik.de</authoremail>
+    <authorurl>https://joomla-extensions.kubik-rubik.de/</authorurl>
+    <description>PLG_NONSEFTOSEF_XML_DESCRIPTION</description>
+    <files>
+        <filename plugin="nonseftosef">nonseftosef.php</filename>
+        <filename plugin="nonseftosef">index.html</filename>
+        <folder plugin="nonseftosef">fields</folder>
+    </files>
+    <languages>
+        <language tag="en-GB">language/en-GB/en-GB.plg_system_nonseftosef.ini</language>
+        <language tag="en-GB">language/en-GB/en-GB.plg_system_nonseftosef.sys.ini</language>
+        <language tag="de-DE">language/de-DE/de-DE.plg_system_nonseftosef.ini</language>
+        <language tag="de-DE">language/de-DE/de-DE.plg_system_nonseftosef.sys.ini</language>
+    </languages>
+    <updateservers>
+        <server type="extension" priority="1" name="PLG_NONSEFTOSEF">https://check.kubik-rubik.de/updates/nonseftosef.xml</server>
+    </updateservers>
+    <config>
+        <fields name="params" addfieldpath="/plugins/system/nonseftosef/fields">
+            <fieldset name="settings">
+                <field type="krdonationcodecheck" />
+                <field name="exclude_components" type="textarea" default="" label="PLG_NONSEFTOSEF_EXCLUDECOMPONENTS" description="PLG_NONSEFTOSEF_EXCLUDECOMPONENTSDESC" rows="6" cols="60" />
+                <field name="only_menu_items" type="list" default="0" label="PLG_NONSEFTOSEF_ONLY_MENU_ITEMS" description="PLG_NONSEFTOSEF_ONLY_MENU_ITEMSDESC">
+                    <option value="0">JNO</option>
+                    <option value="1">JYES</option>
+                </field>
+            </fieldset>
+            <fieldset name="donation">
+                <field type="krdonationcodecheck" name="donation" />
+                <field name="donation_code" type="text" default="" size="40" label="KR_DONATION_CODE" description="KR_DONATION_CODEDESC" />
+            </fieldset>
+        </fields>
+    </config>
+</extension>

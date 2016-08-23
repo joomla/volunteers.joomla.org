@@ -1,8 +1,0 @@
-{
-    "minimum-stability": "dev",
-
-    "require": {
-        "codegyre/robo": "^0.6.0",
-        "joomla-projects/jorobo": "^0.4.0"
-    }
-}

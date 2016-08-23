@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension version="3.0" type="plugin" group="content" method="upgrade">
+    <name>Perfect Image Form Field</name>
+    <author>Perfect Web Team - Sander Potjer</author>
+    <creationDate>March 2016</creationDate>
+    <copyright>Copyright (C) 2015 Perfect Web Team</copyright>
+    <license>GPLv3 http://www.gnu.org/licenses/gpl.html</license>
+    <authorEmail>info@perfectwebteam.nl</authorEmail>
+    <authorUrl>www.perfectwebteam.nl</authorUrl>
+    <version>1.0</version>
+    <description>Perfect Image Form Field</description>
+
+    <files>
+        <filename plugin="perfectimage">perfectimage.php</filename>
+    </files>
+
+    <media folder="media" destination="plg_content_perfectimage">
+        <folder>css</folder>
+        <folder>js</folder>
+    </media>
+</extension>

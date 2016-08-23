@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="component" version="3.0" method="upgrade">
+    <name>com_volunteers</name>
+    <author>Joomla! Project</author>
+    <creationDate>February 2016</creationDate>
+    <copyright>(C) 2005 - 2015 Open Source Matters. All rights reserved.</copyright>
+    <license>GNU General Public License version 2 or later; see LICENSE.txt</license>
+    <authorEmail>admin@joomla.org</authorEmail>
+    <authorUrl>www.joomla.org</authorUrl>
+    <version>2.0.0</version>
+    <description>COM_VOLUNTEERS_XML_DESCRIPTION</description>
+
+    <files folder="components/com_volunteers">
+
+    </files>
+
+    <languages folder="language">
+
+    </languages>
+
+    <administration>
+        <menu img="class:volunteers">com_volunteers</menu>
+
+        <submenu>
+
+        </submenu>
+
+        <files folder="administrator/components/com_volunteers">
+
+        </files>
+        <languages folder="administrator/language">
+
+        </languages>
+    </administration>
+</extension>
+

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE install PUBLIC "-//Joomla! 2.5//DTD template 1.0//EN" "https://www.joomla.org/xml/dtd/2.5/template-install.dtd">
+<extension version="3.6" type="template" client="site" method="upgrade">
+	<name>joomla</name>
+	<version>2.0.0</version>
+	<creationDate>6/14/2013</creationDate>
+	<author>Kyle Ledbetter</author>
+	<authorEmail>kyle@kyleledbetter.com</authorEmail>
+	<copyright>Copyright (C) 2005 - 2016 Open Source Matters, Inc. All rights reserved.</copyright>
+	<description>TPL_JOOMLA_XML_DESCRIPTION</description>
+	<scriptfile>script.php</scriptfile>
+	<files>
+		<filename>LICENSE.txt</filename>
+		<filename>component.php</filename>
+		<filename>error.php</filename>
+		<filename>favicon.ico</filename>
+		<filename>index.php</filename>
+		<filename>templateDetails.xml</filename>
+		<filename>template_preview.png</filename>
+		<filename>template_thumbnail.png</filename>
+		<folder>css</folder>
+		<folder>fonts</folder>
+		<folder>helpers</folder>
+		<folder>html</folder>
+		<folder>images</folder>
+		<folder>img</folder>
+		<folder>js</folder>
+		<folder>language</folder>
+		<folder>less</folder>
+	</files>
+	<positions>
+		<position>banner</position>
+		<position>debug</position>
+		<position>footer</position>
+		<position>position-0</position>
+		<position>position-1</position>
+		<position>position-2</position>
+		<position>position-3</position>
+		<position>position-4</position>
+		<position>position-5</position>
+		<position>position-6</position>
+		<position>position-7</position>
+		<position>position-8</position>
+		<position>position-9</position>
+		<position>position-10</position>
+		<position>position-11</position>
+		<position>position-12</position>
+		<position>position-13</position>
+		<position>position-14</position>
+	</positions>
+	<config>
+		<fields name="params">
+			<fieldset name="advanced">
+				<field name="googleFont" type="radio" class="btn-group btn-group-yesno" default="1" label="TPL_JOOMLA_FONT_LABEL" description="TPL_JOOMLA_FONT_DESC">
+					<option value="0">JNO</option>
+					<option value="1">JYES</option>
+				</field>
+
+				<field name="googleFontName" type="text" default="Open+Sans" label="TPL_JOOMLA_FONT_NAME_LABEL" description="TPL_JOOMLA_FONT_NAME_DESC" showon="googleFont:1" />
+
+				<field name="fluidContainer" type="radio" class="btn-group btn-group-yesno" default="0" label="TPL_JOOMLA_FLUID_LABEL" description="TPL_JOOMLA_FLUID_DESC">
+					<option value="0">TPL_JOOMLA_STATIC</option>
+					<option value="1">TPL_JOOMLA_FLUID</option>
+				</field>
+
+				<field name="leftColumnWidth" type="integer" default="3" first="1" last="12" step="1" label="TPL_JOOMLA_LEFT_COLUMN_WIDTH_LABEL" description="TPL_JOOMLA_COLUMN_WIDTH_DESC" />
+
+				<field name="rightColumnWidth" type="integer" default="3" first="1" last="12" step="1" label="TPL_JOOMLA_RIGHT_COLUMN_WIDTH_LABEL" description="TPL_JOOMLA_COLUMN_WIDTH_DESC" />
+
+				<field name="twitterCardTitle" type="text" default="Joomla.org" label="TPL_JOOMLA_TWITTER_CARD_TITLE_LABEL" description="TPL_JOOMLA_TWITTER_CARD_TITLE_DESC" />
+
+				<field name="twitterCardDescription" type="text" default="The Platform Millions of Websites Are Built On" label="TPL_JOOMLA_TWITTER_CARD_DESC_LABEL" description="TPL_JOOMLA_TWITTER_CARD_DESC_DESC" />
+
+				<field name="searchModule" type="radio" class="btn-group" default="search" label="TPL_JOOMLA_SEARCH_MODULE_LABEL" description="TPL_JOOMLA_SEARCH_MODULE_DESC">
+					<option value="finder">TPL_JOOMLA_FINDER</option>
+					<option value="search">TPL_JOOMLA_SEARCH</option>
+				</field>
+			</fieldset>
+		</fields>
+	</config>
+</extension>

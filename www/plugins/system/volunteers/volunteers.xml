@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension version="3.0" type="plugin" group="system" method="upgrade">
+    <name>plg_system_volunteers</name>
+    <author>Joomla! Project</author>
+    <creationDate>July 2016</creationDate>
+    <copyright>(C) 2005 - 2015 Open Source Matters. All rights reserved.</copyright>
+    <license>GNU General Public License version 2 or later; see LICENSE.txt</license>
+    <authorEmail>admin@joomla.org</authorEmail>
+    <authorUrl>www.joomla.org</authorUrl>
+    <version>1.0.0</version>
+    <description>Volunteers System Plugin</description>
+
+    <files>
+        <filename plugin="volunteers">volunteers.php</filename>
+        <filename>volunteers.xml</filename>
+    </files>
+</extension>

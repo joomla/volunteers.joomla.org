@@ -100,7 +100,7 @@ class VolunteersControllerReport extends JControllerForm
 	{
 		// Get variables
 		$app          = JFactory::getApplication();
-		$reportId     = $this->input->getInt('id');
+		$reportId     = ($this->input->getInt('id')) ? $this->input->getInt('id') : null;
 		$report       = $this->getModel()->getItem($reportId);
 		$departmentId = (int) ($reportId) ? $report->department : $app->getUserState('com_volunteers.edit.report.departmentid');
 		$teamId       = (int) ($reportId) ? $report->team : $app->getUserState('com_volunteers.edit.report.teamid');
@@ -119,7 +119,7 @@ class VolunteersControllerReport extends JControllerForm
 		}
 
 		// Check if the user is authorized to edit this team
-		if (!$acl->edit && ($userId != $report->created_by))
+		if (!$acl->edit && !$acl->create_report && ($userId != $report->created_by))
 		{
 			return JError::raiseError(403, JText::sprintf('JLIB_APPLICATION_ERROR_UNHELD_ID', $memberId));
 		}

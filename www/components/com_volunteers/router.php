@@ -352,6 +352,7 @@ class VolunteersRouter extends JComponentRouterBase
 			case 'volunteers':
 			case 'teams':
 			case 'registration':
+			case 'home':
 				$query['Itemid'] = $this->getItemid($view);
 		}
 
@@ -509,6 +510,13 @@ class VolunteersRouter extends JComponentRouterBase
 					$vars['layout'] = 'edit';
 				}
 
+				break;
+
+			case 'home':
+				if (isset($segments[0]))
+				{
+					JError::raiseError(404, JText::_('COM_VOLUNTEERS_ERROR_NOT_FOUND'));
+				}
 				break;
 		}
 

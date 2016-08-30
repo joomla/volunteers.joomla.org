@@ -41,7 +41,7 @@ if (JDEBUG)
 }
 else
 {
-	$cssURL = 'https://cdn.joomla.org/template/css/template_2.0.0.min.css';
+	$cssURL = 'https://cdn.joomla.org/template/css/template_2.1.0.min.css';
 }
 
 // Optional site specific CSS override, prefer a minified custom.css file first
@@ -164,7 +164,7 @@ $gtmId = JoomlaTemplateHelper::getGtmId(JUri::getInstance()->toString(['host']))
 						<span class="icon-bar"></span>
 					</a>
 
-					<?php echo str_replace($search, $replacement, file_get_contents('https://cdn.joomla.org/template/menu/v3_menu.php')); ?>
+					<?php echo str_replace($search, $replacement, JoomlaTemplateHelper::getTemplateFooter($this->language)); ?>
 				</div>
 			</div>
 		</div>
@@ -268,52 +268,7 @@ $gtmId = JoomlaTemplateHelper::getGtmId(JUri::getInstance()->toString(['host']))
 		<div class="container<?php echo $params->get('fluidContainer') ? '-fluid' : ''; ?>">
 			<hr />
 
-			<div class="social">
-				<ul class="soc">
-					<li><a href="https://twitter.com/joomla" target="_blank" class="soc-twitter2" title="<?php echo JText::_('TPL_JOOMLA_FOLLOW_ON_TWITTER'); ?>"><span class="element-invisible"><?php echo JText::_('TPL_JOOMLA_FOLLOW_ON_TWITTER'); ?></span></a></li>
-					<li><a href="https://www.facebook.com/joomla" target="_blank" class="soc-facebook" title="<?php echo JText::_('TPL_JOOMLA_FOLLOW_ON_FACEBOOK'); ?>"><span class="element-invisible"><?php echo JText::_('TPL_JOOMLA_FOLLOW_ON_FACEBOOK'); ?></span></a></li>
-					<li><a href="https://plus.google.com/+joomla/posts" target="_blank" class="soc-google" title="<?php echo JText::_('TPL_JOOMLA_FOLLOW_ON_GOOGLE_PLUS'); ?>"><span class="element-invisible"><?php echo JText::_('TPL_JOOMLA_FOLLOW_ON_GOOGLE_PLUS'); ?></span></a></li>
-					<li><a href="https://www.youtube.com/user/joomla" target="_blank" class="soc-youtube3" title="<?php echo JText::_('TPL_JOOMLA_FOLLOW_ON_YOUTUBE'); ?>"><span class="element-invisible"><?php echo JText::_('TPL_JOOMLA_FOLLOW_ON_YOUTUBE'); ?></span></a></li>
-					<li><a href="https://www.linkedin.com/company/joomla" target="_blank" class="soc-linkedin" title="<?php echo JText::_('TPL_JOOMLA_FOLLOW_ON_LINKEDIN'); ?>"><span class="element-invisible"><?php echo JText::_('TPL_JOOMLA_FOLLOW_ON_LINKEDIN'); ?></span></a></li>
-					<li><a href="https://www.pinterest.com/joomla" target="_blank" class="soc-pinterest" title="<?php echo JText::_('TPL_JOOMLA_FOLLOW_ON_PINTEREST'); ?>"><span class="element-invisible"><?php echo JText::_('TPL_JOOMLA_FOLLOW_ON_PINTEREST'); ?></span></a></li>
-					<li><a href="https://github.com/joomla" target="_blank" class="soc-github3 soc-icon-last" title="<?php echo JText::_('TPL_JOOMLA_FOLLOW_ON_GITHUB'); ?>"><span class="element-invisible"><?php echo JText::_('TPL_JOOMLA_FOLLOW_ON_GITHUB'); ?></span></a></li>
-				</ul>
-			</div>
-
-			<div class="footer-menu">
-				<ul class="nav-inline">
-					<li><a href="https://www.joomla.org"><span><?php echo JText::_('TPL_JOOMLA_FOOTER_LINK_HOME'); ?></span></a></li>
-					<li><a href="https://www.joomla.org/about-joomla.html"><span><?php echo JText::_('TPL_JOOMLA_FOOTER_LINK_ABOUT'); ?></span></a></li>
-					<li><a href="https://community.joomla.org"><span><?php echo JText::_('TPL_JOOMLA_FOOTER_LINK_COMMUNITY'); ?></span></a></li>
-					<li><a href="http://forum.joomla.org"><span><?php echo JText::_('TPL_JOOMLA_FOOTER_LINK_FORUM'); ?></span></a></li>
-					<li><a href="http://extensions.joomla.org"><span><?php echo JText::_('TPL_JOOMLA_FOOTER_LINK_JED'); ?></span></a></li>
-					<li><a href="http://resources.joomla.org"><span><?php echo JText::_('TPL_JOOMLA_FOOTER_LINK_JRD'); ?></span></a></li>
-					<li><a href="https://docs.joomla.org"><span><?php echo JText::_('TPL_JOOMLA_FOOTER_LINK_DOCS'); ?></span></a></li>
-					<li><a href="https://developer.joomla.org"><span><?php echo JText::_('TPL_JOOMLA_FOOTER_LINK_DEVELOPER'); ?></span></a></li>
-					<li><a href="https://shop.joomla.org"><span><?php echo JText::_('TPL_JOOMLA_FOOTER_LINK_SHOP'); ?></span></a></li>
-				</ul>
-
-				<ul class="nav-inline">
-					<li><a href="https://www.joomla.org/accessibility-statement.html"><?php echo JText::_('TPL_JOOMLA_FOOTER_LINK_ACCESSIBILITY_STATEMENT'); ?></a></li>
-					<li><a href="https://www.joomla.org/privacy-policy.html"><?php echo JText::_('TPL_JOOMLA_FOOTER_LINK_PRIVACY_POLICY'); ?></a></li>
-					<li><a href="<?php echo JoomlaTemplateHelper::getIssueLink(JUri::getInstance()->toString(['host'])); ?>"><?php echo JText::_('TPL_JOOMLA_FOOTER_LINK_REPORT_AN_ISSUE'); ?></a></li>
-					<li><a href="<?php echo JRoute::_(JoomlaTemplateHelper::getLoginRoute()); ?>"><?php echo JFactory::getUser()->guest ? JText::_('TPL_JOOMLA_FOOTER_LINK_LOG_IN') : JText::_('TPL_JOOMLA_FOOTER_LINK_LOG_OUT'); ?></a></li>
-				</ul>
-
-				<p class="copyright"><?php echo JText::sprintf('TPL_JOOMLA_FOOTER_LINK_COPYRIGHT', 2005, date('Y'), '<a href="http://opensourcematters.org">Open Source Matters, Inc.</a>'); ?></p>
-
-				<div class="hosting">
-					<div class="hosting-image"><a href="https://www.rochen.com/joomla-hosting" target="_blank"><img class="rochen" src="https://cdn.joomla.org/rochen/rochen_footer_logo_white.png" alt="Rochen" /></a></div>
-					<div class="hosting-text"><a href="https://www.rochen.com/joomla-hosting" target="_blank"><?php echo JText::sprintf('TPL_JOOMLA_FOOTER_LINK_HOSTING', 'Rochen'); ?></a></div>
-				</div>
-			</div>
-
-			<div id="adblock-msg" class="navbar navbar-fixed-bottom hide">
-				<div class="navbar-inner">
-					<i class="icon-warning"></i>
-					<?php echo JText::_('TPL_JOOMLA_AD_BLOCK_BLURB'); ?>
-				</div>
-			</div>
+			<?php echo JoomlaTemplateHelper::getTemplateFooter($this->language); ?>
 		</div>
 	</footer>
 </body>

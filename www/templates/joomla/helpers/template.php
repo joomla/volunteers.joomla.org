@@ -406,4 +406,99 @@ class JoomlaTemplateHelper
 		// Return the base route plus menu item ID if available
 		return 'index.php?option=com_users&view=login' . $itemid;
 	}
+
+	/**
+	 * Load the template's footer section
+	 *
+	 * @param   string  $lang  The language to request
+	 *
+	 * @return  string
+	 */
+	public static function getTemplateFooter($lang)
+	{
+		$result = self::loadTemplateSection('footer', $lang);
+
+		// Check for an error
+		if ($result === 'Could not load template section.')
+		{
+			return $result;
+		}
+
+		// Replace the placeholders and return the result
+		return strtr(
+			$result,
+			[
+				'%reportroute%' => static::getIssueLink(JUri::getInstance()->toString(['host'])),
+				'%loginroute%'  => JRoute::_(static::getLoginRoute()),
+				'%logintext%'   => JFactory::getUser()->guest ? JText::_('TPL_JOOMLA_FOOTER_LINK_LOG_IN') : JText::_('TPL_JOOMLA_FOOTER_LINK_LOG_OUT'),
+				'%currentyear%' => date('Y'),
+			]
+		);
+	}
+
+	/**
+	 * Load the template's CDN menu section
+	 *
+	 * @param   string  $lang  The language to request
+	 *
+	 * @return  string
+	 */
+	public static function getTemplateMenu($lang)
+	{
+		return self::loadTemplateSection('menu', $lang);
+	}
+
+	/**
+	 * Execute the HTTP request to load the remote data
+	 *
+	 * @param   string  $url  The URL to request
+	 *
+	 * @return  string
+	 *
+	 * @deprecated  Will become a lambda function inside the loadTemplateSection method when Joomla! 3.7 is the minimum supported version
+	 */
+	public static function loadRemoteData($url)
+	{
+		try
+		{
+			// Set a very short timeout to try and not bring the site down
+			$response = JHttpFactory::getHttp()->get($url, [], 2);
+		}
+		catch (RuntimeException $e)
+		{
+			return 'Could not load template section.';
+		}
+
+		if ($response->code !== 200)
+		{
+			return 'Could not load template section.';
+		}
+
+		return $response->body;
+	}
+
+	/**
+	 * Load the template section, caching the result if needed
+	 *
+	 * @param   string  $section  The section to be loaded
+	 * @param   string  $lang     The language to request
+	 *
+	 * @return  string
+	 */
+	private static function loadTemplateSection($section, $lang)
+	{
+		/** @var JCacheControllerCallback $cache */
+		$cache = JFactory::getCache('tpl_joomla', 'callback');
+
+		// This is always cached regardless of the site's global setting
+		$cache->setCaching(true);
+
+		// Cache this for one hour
+		$cache->setLifeTime(60);
+
+		// Build the remote URL
+		$url = "https://cdn.joomla.org/template/renderer.php?section=$section&language=$lang";
+
+		return $cache->get(['JoomlaTemplateHelper', 'loadRemoteData'], [$url]);
+	}
 }

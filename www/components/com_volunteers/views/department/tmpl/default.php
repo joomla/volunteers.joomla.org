@@ -278,7 +278,7 @@ defined('_JEXEC') or die;
 					</p>
 				<?php else : ?>
 					<form class="form form-horizontal" name="sendmail" action="<?php echo JRoute::_('index.php?option=com_volunteers&task=department.sendmail') ?>" method="post" enctype="multipart/form-data">
-						<input type="hidden" name="team" value="<?php echo $this->item->id ?>"/>
+						<input type="hidden" name="department" value="<?php echo $this->item->id ?>"/>
 
 						<div class="control-group">
 							<label class="control-label span2" for="to_name"><?php echo JText::_('COM_VOLUNTEERS_MESSAGE_TO') ?></label>

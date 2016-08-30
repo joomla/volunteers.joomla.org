@@ -168,6 +168,12 @@ class VolunteersViewTeam extends JViewLegacy
 			$this->form->setValue('department', null, $departmentId);
 			$this->form->setValue('parent_id', null, $teamId);
 			$this->form->setValue('date_started', null, JFactory::getDate());
+			$this->form->setFieldAttribute('department', 'readonly', 'true');
+			if ($teamId)
+			{
+				$this->form->setFieldAttribute('parent_id', 'readonly', 'true');
+			}
+
 		}
 
 		// Transition specific

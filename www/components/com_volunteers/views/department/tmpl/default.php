@@ -168,6 +168,14 @@ defined('_JEXEC') or die;
 
 			<?php if ($this->item->teams): ?>
 				<div class="tab-pane" id="teams">
+					<?php if ($this->acl->create_team): ?>
+						<div class="row-fluid">
+							<a class="btn pull-right" href="<?php echo JRoute::_('index.php?option=com_volunteers&task=team.add&department=' . $this->item->id) ?>">
+								<span class="icon-new"></span> <?php echo JText::_('COM_VOLUNTEERS_TEAM_ADD') ?>
+							</a>
+						</div>
+						<hr>
+					<?php endif; ?>
 					<table class="table table-striped table-hover table-vertical-align">
 						<thead>
 						<th><?php echo JText::_('COM_VOLUNTEERS_FIELD_TEAM') ?></th>

@@ -287,6 +287,9 @@ class VolunteersModelVolunteer extends JModelAdmin
 					JError::raiseError(404, JText::_('COM_VOLUNTEERS_ERROR_VOLUNTEER_NOT_FOUND'));
 				}
 
+				// Make sure we have http:// or https://
+				$data->website = parse_url($data->website, PHP_URL_SCHEME) == '' ? 'http://' . $data->website : $data->website;
+
 				return $data;
 			}
 			catch (Exception $e)

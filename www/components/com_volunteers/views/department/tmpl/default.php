@@ -168,6 +168,14 @@ defined('_JEXEC') or die;
 
 			<?php if ($this->item->teams): ?>
 				<div class="tab-pane" id="teams">
+					<?php if ($this->acl->create_team): ?>
+						<div class="row-fluid">
+							<a class="btn pull-right" href="<?php echo JRoute::_('index.php?option=com_volunteers&task=team.add&department=' . $this->item->id) ?>">
+								<span class="icon-new"></span> <?php echo JText::_('COM_VOLUNTEERS_TEAM_ADD') ?>
+							</a>
+						</div>
+						<hr>
+					<?php endif; ?>
 					<table class="table table-striped table-hover table-vertical-align">
 						<thead>
 						<th><?php echo JText::_('COM_VOLUNTEERS_FIELD_TEAM') ?></th>
@@ -270,7 +278,7 @@ defined('_JEXEC') or die;
 					</p>
 				<?php else : ?>
 					<form class="form form-horizontal" name="sendmail" action="<?php echo JRoute::_('index.php?option=com_volunteers&task=department.sendmail') ?>" method="post" enctype="multipart/form-data">
-						<input type="hidden" name="team" value="<?php echo $this->item->id ?>"/>
+						<input type="hidden" name="department" value="<?php echo $this->item->id ?>"/>
 
 						<div class="control-group">
 							<label class="control-label span2" for="to_name"><?php echo JText::_('COM_VOLUNTEERS_MESSAGE_TO') ?></label>

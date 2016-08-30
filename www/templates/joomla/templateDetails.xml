@@ -2,7 +2,7 @@
 <!DOCTYPE install PUBLIC "-//Joomla! 2.5//DTD template 1.0//EN" "https://www.joomla.org/xml/dtd/2.5/template-install.dtd">
 <extension version="3.6" type="template" client="site" method="upgrade">
 	<name>joomla</name>
-	<version>2.0.0</version>
+	<version>2.1.0</version>
 	<creationDate>6/14/2013</creationDate>
 	<author>Kyle Ledbetter</author>
 	<authorEmail>kyle@kyleledbetter.com</authorEmail>
@@ -70,6 +70,10 @@
 				<field name="twitterCardTitle" type="text" default="Joomla.org" label="TPL_JOOMLA_TWITTER_CARD_TITLE_LABEL" description="TPL_JOOMLA_TWITTER_CARD_TITLE_DESC" />
 
 				<field name="twitterCardDescription" type="text" default="The Platform Millions of Websites Are Built On" label="TPL_JOOMLA_TWITTER_CARD_DESC_LABEL" description="TPL_JOOMLA_TWITTER_CARD_DESC_DESC" />
+
+				<field name="twitterCardImage" type="url" filter="url" default="https://cdn.joomla.org/images/joomla-twitter-card.jpg" label="TPL_JOOMLA_TWITTER_CARD_IMAGE_LABEL" description="TPL_JOOMLA_TWITTER_CARD_IMAGE_DESC" />
+
+				<field name="ogImage" type="url" filter="url" default="https://cdn.joomla.org/images/joomla-org-og.jpg" label="TPL_JOOMLA_OPENGRAPH_IMAGE_LABEL" description="TPL_JOOMLA_OPENGRAPH_IMAGE_DESC" />
 
 				<field name="searchModule" type="radio" class="btn-group" default="search" label="TPL_JOOMLA_SEARCH_MODULE_LABEL" description="TPL_JOOMLA_SEARCH_MODULE_DESC">
 					<option value="finder">TPL_JOOMLA_FINDER</option>

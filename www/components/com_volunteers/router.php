@@ -76,17 +76,32 @@ class VolunteersRouter extends JComponentRouterBase
 				}
 				else
 				{
-					$teamId = JFactory::getApplication()->getUserState('com_volunteers.edit.team.teamid');
+					$departmentId = JFactory::getApplication()->getUserState('com_volunteers.edit.team.departmentid');
+					$teamId       = JFactory::getApplication()->getUserState('com_volunteers.edit.team.teamid');
 
-					$dbQuery = $db->getQuery(true)
-						->select($db->qn('alias'))
-						->from('#__volunteers_teams')
-						->where('id=' . (int) $teamId);
-					$db->setQuery($dbQuery);
-					$teamAlias = $db->loadResult();
+					if ($teamId)
+					{
+						$dbQuery = $db->getQuery(true)
+							->select($db->qn('alias'))
+							->from('#__volunteers_teams')
+							->where('id=' . (int) $teamId);
+						$db->setQuery($dbQuery);
 
-					$segments[] = $teamAlias;
-					$segments[] = 'subteam';
+						$segments[] = $db->loadResult();
+						$segments[] = 'subteam';
+					}
+					elseif ($departmentId)
+					{
+						$dbQuery = $db->getQuery(true)
+							->select($db->qn('alias'))
+							->from('#__volunteers_departments')
+							->where('id=' . (int) $departmentId);
+						$db->setQuery($dbQuery);
+
+						$segments[] = $db->loadResult();
+						$segments[] = 'team';
+					}
+
 					$segments[] = 'new';
 					unset($query['layout']);
 				}
@@ -337,6 +352,7 @@ class VolunteersRouter extends JComponentRouterBase
 			case 'volunteers':
 			case 'teams':
 			case 'registration':
+			case 'home':
 				$query['Itemid'] = $this->getItemid($view);
 		}
 
@@ -430,7 +446,7 @@ class VolunteersRouter extends JComponentRouterBase
 					}
 				}
 				// Subteam
-				elseif (isset($segments[1]) && ($segments[1] == 'subteam'))
+				elseif (isset($segments[1]) && ($segments[1] == 'subteam' || $segments[1] == 'team'))
 				{
 					$vars['view'] = 'team';
 
@@ -448,7 +464,7 @@ class VolunteersRouter extends JComponentRouterBase
 					$db->setQuery($dbQuery);
 					$id = $db->loadResult();
 
-					if(!$id)
+					if (!$id)
 					{
 						JError::raiseError(404, JText::_('COM_VOLUNTEERS_ERROR_TEAM_NOT_FOUND'));
 					}
@@ -466,7 +482,7 @@ class VolunteersRouter extends JComponentRouterBase
 
 			case 'volunteers':
 				list($id) = explode('-', $segments[0], 2);
-				if(!is_numeric($id))
+				if (!is_numeric($id))
 				{
 					$dbQuery = $db->getQuery(true)
 						->select('id')
@@ -475,7 +491,7 @@ class VolunteersRouter extends JComponentRouterBase
 					$db->setQuery($dbQuery);
 					$id = $db->loadResult();
 
-					if(!$id)
+					if (!$id)
 					{
 						JError::raiseError(404, JText::_('COM_VOLUNTEERS_ERROR_VOLUNTEER_NOT_FOUND'));
 					}
@@ -494,6 +510,13 @@ class VolunteersRouter extends JComponentRouterBase
 					$vars['layout'] = 'edit';
 				}
 
+				break;
+
+			case 'home':
+				if (isset($segments[0]))
+				{
+					JError::raiseError(404, JText::_('COM_VOLUNTEERS_ERROR_NOT_FOUND'));
+				}
 				break;
 		}
 

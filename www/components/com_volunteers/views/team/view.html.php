@@ -145,6 +145,12 @@ class VolunteersViewTeam extends JViewLegacy
 		$app    = JFactory::getApplication();
 		$teamId = $app->input->getInt('id');
 
+		// Clear date ended field if not set
+		if ($this->item->date_ended == '0000-00-00')
+		{
+			$this->form->setValue('date_ended', null, null);
+		}
+
 		// If editing existing team
 		if ($teamId)
 		{
@@ -162,6 +168,12 @@ class VolunteersViewTeam extends JViewLegacy
 			$this->form->setValue('department', null, $departmentId);
 			$this->form->setValue('parent_id', null, $teamId);
 			$this->form->setValue('date_started', null, JFactory::getDate());
+			$this->form->setFieldAttribute('department', 'readonly', 'true');
+			if ($teamId)
+			{
+				$this->form->setFieldAttribute('parent_id', 'readonly', 'true');
+			}
+
 		}
 
 		// Transition specific

@@ -36,7 +36,7 @@ if (JDEBUG)
 }
 else
 {
-	$this->addStyleSheet('https://cdn.joomla.org/template/css/template_2.0.0.min.css');
+	$this->addStyleSheet('https://cdn.joomla.org/template/css/template_2.1.0.min.css');
 }
 
 // Optional site specific CSS override
@@ -98,26 +98,37 @@ elseif (!$this->countModules($rightPosition) && $this->countModules($leftPositio
 
 $templateBaseUrl = $this->baseurl . '/templates/' . $this->template;
 
-// Set template metadata
+// Set default template metadata
 $this->setMetaData('viewport', 'width=device-width, initial-scale=1.0');
 $this->setMetaData('apple-mobile-web-app-capable', 'yes');
 $this->setMetaData('apple-mobile-web-app-status-bar-style', 'blue');
-$this->setMetaData('twitter:card', 'summary_large_image');
-$this->setMetaData('twitter:site', '@joomla');
-$this->setMetaData('og:site_name', $sitename, 'property');
 $this->addHeadLink("$templateBaseUrl/images/apple-touch-icon-144-precomposed.png", 'apple-touch-icon-precomposed', 'rel', ['sizes' => '144x144']);
 $this->addHeadLink("$templateBaseUrl/images/apple-touch-icon-114-precomposed.png", 'apple-touch-icon-precomposed', 'rel', ['sizes' => '114x114']);
 $this->addHeadLink("$templateBaseUrl/images/apple-touch-icon-72-precomposed.png", 'apple-touch-icon-precomposed', 'rel', ['sizes' => '72x72']);
 $this->addHeadLink("$templateBaseUrl/images/apple-touch-icon-57-precomposed.png", 'apple-touch-icon-precomposed');
 
-// Check if Open Graph metadata was set by content otherwise add template defaults
-// Note: Even though Open Graph may support multiple tags, Joomla doesn't, so it's either this or back to custom tags and I'd rather do this
-if (!$this->getMetaData('og:image', 'property'))
+// Check if social metadata was set by content otherwise add template defaults
+// Note: Even though Open Graph may support multiple tags, Joomla doesn't, so we need to check them anyway or go to custom tags
+if (!$this->getMetaData('twitter:card'))
 {
-	$this->setMetaData('og:image', 'https://cdn.joomla.org/images/joomla-org-og.jpg', 'property');
+	$this->setMetaData('twitter:card', 'summary_large_image');
 }
 
-// Check if Twitter metadata was set by content otherwise add template defaults
+if (!$this->getMetaData('twitter:site'))
+{
+	$this->setMetaData('twitter:site', '@joomla');
+}
+
+if (!$this->getMetaData('og:site_name', 'property'))
+{
+	$this->setMetaData('og:site_name', $sitename, 'property');
+}
+
+if (!$this->getMetaData('og:image', 'property'))
+{
+	$this->setMetaData('og:image', $this->params->get('ogImage', 'https://cdn.joomla.org/images/joomla-org-og.jpg'), 'property');
+}
+
 if (!$this->getMetaData('twitter:description'))
 {
 	$this->setMetaData('twitter:description', $this->params->get('twitterCardDescription', 'The Platform Millions of Websites Are Built On'));
@@ -125,7 +136,7 @@ if (!$this->getMetaData('twitter:description'))
 
 if (!$this->getMetaData('twitter:image'))
 {
-	$this->setMetaData('twitter:image', 'https://cdn.joomla.org/images/joomla-twitter-card.jpg');
+	$this->setMetaData('twitter:image', $this->params->get('twitterCardImage', 'https://cdn.joomla.org/images/joomla-twitter-card.jpg'));
 }
 
 if (!$this->getMetaData('twitter:title'))
@@ -162,7 +173,7 @@ $gtmId = JoomlaTemplateHelper::getGtmId(JUri::getInstance()->toString(['host']))
 						<span class="icon-bar"></span>
 					</a>
 
-					<?php echo file_get_contents('https://cdn.joomla.org/template/menu/v3_menu.php'); ?>
+					<?php echo JoomlaTemplateHelper::getTemplateMenu($this->language); ?>
 				</div>
 			</div>
 		</div>
@@ -239,52 +250,7 @@ $gtmId = JoomlaTemplateHelper::getGtmId(JUri::getInstance()->toString(['host']))
 			<hr />
 			<jdoc:include type="modules" name="footer" style="none" />
 
-			<div class="social">
-				<ul class="soc">
-					<li><a href="https://twitter.com/joomla" target="_blank" class="soc-twitter2" title="<?php echo JText::_('TPL_JOOMLA_FOLLOW_ON_TWITTER'); ?>"><span class="element-invisible"><?php echo JText::_('TPL_JOOMLA_FOLLOW_ON_TWITTER'); ?></span></a></li>
-					<li><a href="https://www.facebook.com/joomla" target="_blank" class="soc-facebook" title="<?php echo JText::_('TPL_JOOMLA_FOLLOW_ON_FACEBOOK'); ?>"><span class="element-invisible"><?php echo JText::_('TPL_JOOMLA_FOLLOW_ON_FACEBOOK'); ?></span></a></li>
-					<li><a href="https://plus.google.com/+joomla/posts" target="_blank" class="soc-google" title="<?php echo JText::_('TPL_JOOMLA_FOLLOW_ON_GOOGLE_PLUS'); ?>"><span class="element-invisible"><?php echo JText::_('TPL_JOOMLA_FOLLOW_ON_GOOGLE_PLUS'); ?></span></a></li>
-					<li><a href="https://www.youtube.com/user/joomla" target="_blank" class="soc-youtube3" title="<?php echo JText::_('TPL_JOOMLA_FOLLOW_ON_YOUTUBE'); ?>"><span class="element-invisible"><?php echo JText::_('TPL_JOOMLA_FOLLOW_ON_YOUTUBE'); ?></span></a></li>
-					<li><a href="https://www.linkedin.com/company/joomla" target="_blank" class="soc-linkedin" title="<?php echo JText::_('TPL_JOOMLA_FOLLOW_ON_LINKEDIN'); ?>"><span class="element-invisible"><?php echo JText::_('TPL_JOOMLA_FOLLOW_ON_LINKEDIN'); ?></span></a></li>
-					<li><a href="https://www.pinterest.com/joomla" target="_blank" class="soc-pinterest" title="<?php echo JText::_('TPL_JOOMLA_FOLLOW_ON_PINTEREST'); ?>"><span class="element-invisible"><?php echo JText::_('TPL_JOOMLA_FOLLOW_ON_PINTEREST'); ?></span></a></li>
-					<li><a href="https://github.com/joomla" target="_blank" class="soc-github3 soc-icon-last" title="<?php echo JText::_('TPL_JOOMLA_FOLLOW_ON_GITHUB'); ?>"><span class="element-invisible"><?php echo JText::_('TPL_JOOMLA_FOLLOW_ON_GITHUB'); ?></span></a></li>
-				</ul>
-			</div>
-
-			<div class="footer-menu">
-				<ul class="nav-inline">
-					<li><a href="https://www.joomla.org"><span><?php echo JText::_('TPL_JOOMLA_FOOTER_LINK_HOME'); ?></span></a></li>
-					<li><a href="https://www.joomla.org/about-joomla.html"><span><?php echo JText::_('TPL_JOOMLA_FOOTER_LINK_ABOUT'); ?></span></a></li>
-					<li><a href="https://community.joomla.org"><span><?php echo JText::_('TPL_JOOMLA_FOOTER_LINK_COMMUNITY'); ?></span></a></li>
-					<li><a href="http://forum.joomla.org"><span><?php echo JText::_('TPL_JOOMLA_FOOTER_LINK_FORUM'); ?></span></a></li>
-					<li><a href="http://extensions.joomla.org"><span><?php echo JText::_('TPL_JOOMLA_FOOTER_LINK_JED'); ?></span></a></li>
-					<li><a href="http://resources.joomla.org"><span><?php echo JText::_('TPL_JOOMLA_FOOTER_LINK_JRD'); ?></span></a></li>
-					<li><a href="https://docs.joomla.org"><span><?php echo JText::_('TPL_JOOMLA_FOOTER_LINK_DOCS'); ?></span></a></li>
-					<li><a href="https://developer.joomla.org"><span><?php echo JText::_('TPL_JOOMLA_FOOTER_LINK_DEVELOPER'); ?></span></a></li>
-					<li><a href="https://shop.joomla.org"><span><?php echo JText::_('TPL_JOOMLA_FOOTER_LINK_SHOP'); ?></span></a></li>
-				</ul>
-
-				<ul class="nav-inline">
-					<li><a href="https://www.joomla.org/accessibility-statement.html"><?php echo JText::_('TPL_JOOMLA_FOOTER_LINK_ACCESSIBILITY_STATEMENT'); ?></a></li>
-					<li><a href="https://www.joomla.org/privacy-policy.html"><?php echo JText::_('TPL_JOOMLA_FOOTER_LINK_PRIVACY_POLICY'); ?></a></li>
-					<li><a href="<?php echo JoomlaTemplateHelper::getIssueLink(JUri::getInstance()->toString(['host'])); ?>"><?php echo JText::_('TPL_JOOMLA_FOOTER_LINK_REPORT_AN_ISSUE'); ?></a></li>
-					<li><a href="<?php echo JRoute::_(JoomlaTemplateHelper::getLoginRoute()); ?>"><?php echo JFactory::getUser()->guest ? JText::_('TPL_JOOMLA_FOOTER_LINK_LOG_IN') : JText::_('TPL_JOOMLA_FOOTER_LINK_LOG_OUT'); ?></a></li>
-				</ul>
-
-				<p class="copyright"><?php echo JText::sprintf('TPL_JOOMLA_FOOTER_LINK_COPYRIGHT', 2005, date('Y'), '<a href="http://opensourcematters.org">Open Source Matters, Inc.</a>'); ?></p>
-
-				<div class="hosting">
-					<div class="hosting-image"><a href="https://www.rochen.com/joomla-hosting" target="_blank"><img class="rochen" src="https://cdn.joomla.org/rochen/rochen_footer_logo_white.png" alt="Rochen" /></a></div>
-					<div class="hosting-text"><a href="https://www.rochen.com/joomla-hosting" target="_blank"><?php echo JText::sprintf('TPL_JOOMLA_FOOTER_LINK_HOSTING', 'Rochen'); ?></a></div>
-				</div>
-			</div>
-
-			<div id="adblock-msg" class="navbar navbar-fixed-bottom hide">
-				<div class="navbar-inner">
-					<i class="icon-warning"></i>
-					<?php echo JText::_('TPL_JOOMLA_AD_BLOCK_BLURB'); ?>
-				</div>
-			</div>
+			<?php echo JoomlaTemplateHelper::getTemplateFooter($this->language); ?>
 		</div>
 	</footer>
 

@@ -32,14 +32,25 @@ class VolunteersControllerTeam extends JControllerForm
 	public function add($key = null, $urlVar = null)
 	{
 		// Get variables
-		$teamId       = $this->input->getInt('team');
-		$departmentId = $this->getModel()->getItem($teamId)->department;
+		$department = $this->input->getInt('department');
+		$team       = $this->input->getInt('team');
 
-		$acl = VolunteersHelper::acl('team', $teamId);
+		if ($department)
+		{
+			$departmentId = $department;
+			$teamId       = null;
+			$acl          = VolunteersHelper::acl('team', $departmentId);
+		}
+
+		if ($team)
+		{
+			$teamId       = $team;
+			$departmentId = $this->getModel()->getItem($teamId)->department;
+			$acl          = VolunteersHelper::acl('team', $teamId);
+		}
 
 		JFactory::getApplication()->setUserState('com_volunteers.edit.team.departmentid', $departmentId);
 		JFactory::getApplication()->setUserState('com_volunteers.edit.team.teamid', $teamId);
-
 
 		// Check if the user is authorized to edit this team
 		if (!$acl->create_team)

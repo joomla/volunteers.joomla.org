@@ -74,9 +74,8 @@
 
         <field
                 name="website"
-                type="textprepend"
+                type="text"
                 label="COM_VOLUNTEERS_FIELD_WEBSITE"
-                prepend="COM_VOLUNTEERS_FIELD_WEBSITE_URL"
         />
 
         <field

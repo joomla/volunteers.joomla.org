@@ -200,8 +200,8 @@ defined('_JEXEC') or die;
 						</div>
 						<div class="span4 social">
 							<?php if ($this->item->website): ?>
-								<a class="btn btn-block" target="_blank" href="http://<?php echo($this->item->website) ?>">
-									<span class="icon-link"></span> <?php echo($this->item->website) ?>
+								<a class="btn btn-block" target="_blank" href="<?php echo($this->item->website) ?>">
+									<span class="icon-link"></span> <?php echo preg_replace('(^https?://)', '', $this->item->website) ?>
 								</a>
 							<?php endif; ?>
 							<?php if ($this->item->twitter): ?>

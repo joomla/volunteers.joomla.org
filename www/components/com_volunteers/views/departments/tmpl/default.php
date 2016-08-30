@@ -19,7 +19,15 @@ $active = $this->state->get('filter.active', 1);
 				<label class="filter-search-lbl element-invisible" for="filter-search">
 					<?php echo JText::_('COM_VOLUNTEERS_SEARCH_DEPARTMENT') . '&#160;'; ?>
 				</label>
-				<input type="text" name="filter_search" id="filter-search" value="<?php echo $this->escape($this->state->get('filter.search')); ?>" class="inputbox" onchange="document.adminForm.submit();" placeholder="<?php echo JText::_('COM_VOLUNTEERS_SEARCH_DEPARTMENT'); ?>"/>
+				<div class="input-append">
+					<input type="text" name="filter_search" id="filter-search" value="<?php echo $this->escape($this->state->get('filter.search')); ?>" class="inputbox" onchange="document.adminForm.submit();" placeholder="<?php echo JText::_('COM_VOLUNTEERS_SEARCH_DEPARTMENT'); ?>"/>
+					<button class="btn btn-primary" type="submit"><span class="icon-search"></span></button>
+					<?php if ($this->state->get('filter.search')): ?>
+						<button class="btn" type="reset" onclick="jQuery('#filter-search').attr('value', null);document.adminForm.submit();">
+							<span class="icon-remove"></span>
+						</button>
+					<?php endif; ?>
+				</div>
 			</div>
 		</div>
 		<div class="page-header">

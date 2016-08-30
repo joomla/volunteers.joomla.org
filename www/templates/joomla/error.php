@@ -164,7 +164,7 @@ $gtmId = JoomlaTemplateHelper::getGtmId(JUri::getInstance()->toString(['host']))
 						<span class="icon-bar"></span>
 					</a>
 
-					<?php echo str_replace($search, $replacement, JoomlaTemplateHelper::getTemplateFooter($this->language)); ?>
+					<?php echo str_replace($search, $replacement, JoomlaTemplateHelper::getTemplateMenu($this->language)); ?>
 				</div>
 			</div>
 		</div>

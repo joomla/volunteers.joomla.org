@@ -49,7 +49,6 @@ class VolunteersControllerTeam extends JControllerForm
 			$acl          = VolunteersHelper::acl('team', $teamId);
 		}
 
-
 		JFactory::getApplication()->setUserState('com_volunteers.edit.team.departmentid', $departmentId);
 		JFactory::getApplication()->setUserState('com_volunteers.edit.team.teamid', $teamId);
 
@@ -70,7 +69,6 @@ class VolunteersControllerTeam extends JControllerForm
 	 */
 	public function edit($key = null, $urlVar = null)
 	{
-		break;
 		// Get variables
 		$teamId = $this->input->getInt('id');
 		$acl    = VolunteersHelper::acl('team', $teamId);

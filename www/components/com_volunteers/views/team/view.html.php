@@ -145,6 +145,12 @@ class VolunteersViewTeam extends JViewLegacy
 		$app    = JFactory::getApplication();
 		$teamId = $app->input->getInt('id');
 
+		// Clear date ended field if not set
+		if ($this->item->date_ended == '0000-00-00')
+		{
+			$this->form->setValue('date_ended', null, null);
+		}
+
 		// If editing existing team
 		if ($teamId)
 		{

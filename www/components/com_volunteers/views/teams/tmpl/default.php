@@ -81,7 +81,7 @@ $active = $this->state->get('filter.active', 1);
 							<?php $i = 0; ?>
 							<?php if (!empty($item->members)) foreach ($item->members as $member): ?>
 								<a class="tip hasTooltip" title="<?php echo $member->volunteer_name; ?>" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $member->volunteer) ?>">
-									<?php echo VolunteersHelper::image($member->volunteer_image, 'small', false, $member->volunteer_image); ?>
+									<?php echo VolunteersHelper::image($member->volunteer_image, 'small', false, $member->volunteer_name); ?>
 								</a>
 								<?php $i++;
 								if ($i == 14)

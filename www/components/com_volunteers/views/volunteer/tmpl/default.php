@@ -22,7 +22,7 @@ defined('_JEXEC') or die;
 
 <div class="row-fluid profile">
 	<div class="span3 volunteer-image">
-		<?php echo VolunteersHelper::image($this->item->image, 'large'); ?>
+		<?php echo VolunteersHelper::image($this->item->image, 'large', false, $this->item->name); ?>
 	</div>
 	<div class="span9">
 		<div class="filter-bar">
@@ -33,7 +33,7 @@ defined('_JEXEC') or die;
 			<?php endif; ?>
 		</div>
 		<div class="page-header">
-			<h1><?php echo $this->item->firstname . ' ' . $this->item->lastname ?></h1>
+			<h1><?php echo $this->item->name; ?></h1>
 		</div>
 		<?php if ($this->item->city || $this->item->country): ?>
 			<p class="muted">
@@ -173,7 +173,7 @@ defined('_JEXEC') or die;
 								<div class="control-group">
 									<label class="control-label span2" for="to_name"><?php echo JText::_('COM_VOLUNTEERS_MESSAGE_TO') ?></label>
 									<div class="controls span10">
-										<input type="text" name="to_name" id="to_name" value="<?php echo $this->item->firstname ?> <?php echo $this->item->lastname ?>" class="input-block-level" disabled="disabled"/>
+										<input type="text" name="to_name" id="to_name" value="<?php echo $this->item->name; ?>" class="input-block-level" disabled="disabled"/>
 									</div>
 								</div>
 								<div class="control-group">
@@ -188,10 +188,10 @@ defined('_JEXEC') or die;
 									</div>
 								</div>
 								<div class="control-group">
-									<textarea rows="10" name="message" id="message" class="input-block-level" placeholder="<?php echo JText::sprintf('COM_VOLUNTEERS_MESSAGE_BODY', $this->item->firstname . ' ' . $this->item->lastname) ?>" required></textarea>
+									<textarea rows="10" name="message" id="message" class="input-block-level" placeholder="<?php echo JText::sprintf('COM_VOLUNTEERS_MESSAGE_BODY', $this->item->name) ?>" required></textarea>
 								</div>
 								<div class="alert alert-info">
-									<?php echo JText::sprintf('COM_VOLUNTEERS_MESSAGE_NOTICE', $this->item->firstname . ' ' . $this->item->lastname) ?>
+									<?php echo JText::sprintf('COM_VOLUNTEERS_MESSAGE_NOTICE', $this->item->name) ?>
 								</div>
 								<div class="control-group">
 									<input type="submit" value="<?php echo JText::_('COM_VOLUNTEERS_MESSAGE_SUBMIT') ?>" name="submit" id="submitButton" class="btn btn-success pull-right"/>

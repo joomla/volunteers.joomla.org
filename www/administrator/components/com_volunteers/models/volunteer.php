@@ -254,7 +254,7 @@ class VolunteersModelVolunteer extends JModelAdmin
 			{
 				$db    = $this->getDbo();
 				$query = $db->getQuery(true)
-					->select($this->getState('item.select', 'a.*'))
+					->select($this->getState('item.select', 'a.*, CONCAT(a.firstname, \' \', a.lastname) AS name'))
 					->from('#__volunteers_volunteers AS a')
 					->where('a.id = ' . (int) $pk);
 

@@ -120,12 +120,12 @@ defined('_JEXEC') or die;
 							<tr>
 								<td class="volunteer-image">
 									<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $volunteer->volunteer) ?>">
-										<?php echo VolunteersHelper::image($volunteer->volunteer_image, 'small'); ?>
+										<?php echo VolunteersHelper::image($volunteer->volunteer_image, 'small', false, $volunteer->volunteer_image); ?>
 									</a>
 								</td>
 								<td>
 									<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $volunteer->volunteer) ?>">
-										<?php echo $volunteer->volunteer_firstname . ' ' . $volunteer->volunteer_lastname; ?>
+										<?php echo $volunteer->volunteer_name; ?>
 									</a>
 								</td>
 								<td>
@@ -178,12 +178,12 @@ defined('_JEXEC') or die;
 							<tr>
 								<td class="volunteer-image">
 									<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $volunteer->volunteer) ?>">
-										<?php echo VolunteersHelper::image($volunteer->volunteer_image, 'small'); ?>
+										<?php echo VolunteersHelper::image($volunteer->volunteer_image, 'small', false, $volunteer->volunteer_image); ?>
 									</a>
 								</td>
 								<td>
 									<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $volunteer->volunteer) ?>">
-										<?php echo $volunteer->volunteer_firstname . ' ' . $volunteer->volunteer_lastname; ?>
+										<?php echo $volunteer->volunteer_name; ?>
 									</a>
 								</td>
 								<td>
@@ -244,8 +244,8 @@ defined('_JEXEC') or die;
 										<div class="members">
 											<?php $i = 0; ?>
 											<?php if (!empty($item->members)) foreach ($item->members as $member): ?>
-												<a class="tip hasTooltip" title="<?php echo($member->volunteer_firstname); ?> <?php echo($member->volunteer_lastname); ?>" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $member->volunteer) ?>">
-													<?php echo VolunteersHelper::image($member->volunteer_image, 'small'); ?>
+												<a class="tip hasTooltip" title="<?php echo $member->volunteer_name; ?>" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $member->volunteer) ?>">
+													<?php echo VolunteersHelper::image($member->volunteer_image, 'small', false, $member->volunteer_image); ?>
 												</a>
 												<?php $i++;
 												if ($i == 14)
@@ -298,8 +298,8 @@ defined('_JEXEC') or die;
 									<div class="span4">
 										<div class="members">
 											<?php if (!empty($role->volunteers)) foreach ($role->volunteers as $rolevolunteer): ?>
-												<a class="tip hasTooltip" title="<?php echo($rolevolunteer->volunteer_firstname); ?> <?php echo($rolevolunteer->volunteer_lastname); ?>" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $rolevolunteer->volunteer) ?>">
-													<?php echo VolunteersHelper::image($rolevolunteer->volunteer_image, 'small'); ?>
+												<a class="tip hasTooltip" title="<?php echo $rolevolunteer->volunteer_name; ?>" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $rolevolunteer->volunteer) ?>">
+													<?php echo VolunteersHelper::image($rolevolunteer->volunteer_image, 'small', false, $rolevolunteer->volunteer_image); ?>
 												</a>
 											<?php endforeach; ?>
 											<?php if ($role->open): ?>
@@ -336,7 +336,7 @@ defined('_JEXEC') or die;
 						<div class="row-fluid report">
 							<div class="span2 volunteer-image">
 								<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $report->volunteer_id) ?>">
-									<?php echo VolunteersHelper::image($report->volunteer_image, 'large'); ?>
+									<?php echo VolunteersHelper::image($report->volunteer_image, 'large', false, $report->volunteer_name); ?>
 								</a>
 							</div>
 							<div class="span10">
@@ -352,7 +352,7 @@ defined('_JEXEC') or die;
 								</h2>
 								<p class="muted">
 									<?php echo JText::_('COM_VOLUNTEERS_BY') ?>
-									<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $report->volunteer_id) ?>"><?php echo $report->author_name; ?></a>
+									<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $report->volunteer_id) ?>"><?php echo $report->volunteer_name; ?></a>
 									<?php echo JText::_('COM_VOLUNTEERS_ON') ?> <?php echo VolunteersHelper::date($report->created, 'Y-m-d H:i'); ?>
 									<?php echo JText::_('COM_VOLUNTEERS_IN') ?>
 									<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=team&id=' . $report->team) ?>"><?php echo $report->team_title; ?></a>

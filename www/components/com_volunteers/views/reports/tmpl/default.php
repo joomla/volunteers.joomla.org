@@ -33,7 +33,7 @@ JHtml::_('formbehavior.chosen', 'select');
 			<div class="row-fluid report">
 				<div class="span2">
 					<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $item->volunteer_id) ?>">
-						<?php echo VolunteersHelper::image($item->volunteer_image, 'large'); ?>
+						<?php echo VolunteersHelper::image($item->volunteer_image, 'large', false, $item->volunteer_name); ?>
 					</a>
 				</div>
 				<div class="span10">
@@ -49,7 +49,7 @@ JHtml::_('formbehavior.chosen', 'select');
 					</h2>
 					<p class="muted">
 						<?php echo JText::_('COM_VOLUNTEERS_BY') ?>
-						<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $item->volunteer_id) ?>"><?php echo $item->author_name; ?></a>
+						<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $item->volunteer_id) ?>"><?php echo $item->volunteer_name; ?></a>
 						<?php echo JText::_('COM_VOLUNTEERS_ON') ?> <?php echo VolunteersHelper::date($item->created, 'Y-m-d H:i'); ?>
 						<?php echo JText::_('COM_VOLUNTEERS_IN') ?>
 						<?php if ($item->team): ?>

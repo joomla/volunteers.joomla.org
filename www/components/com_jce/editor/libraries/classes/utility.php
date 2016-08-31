@@ -92,21 +92,8 @@ abstract class WFUtility
         return self::cleanPath($a . $ds . $b, $ds);
     }
 
-    private static function utf8_latin_to_ascii($subject)
+    public static function utf8_latin_to_ascii($subject)
     {
-        if (function_exists('transliterator_transliterate')) {
-
-          if (is_array($subject)) {
-              array_walk($subject, function(&$string) {
-                $string = WFUtility::utf8_latin_to_ascii($string);
-              });
-
-              return $subject;
-          }
-
-          return transliterator_transliterate('Any-Latin; Latin-ASCII;', $subject);
-        }
-
         static $CHARS = NULL;
 
         if (is_null($CHARS)) {
@@ -133,10 +120,29 @@ abstract class WFUtility
             );
         }
 
+        if (function_exists('transliterator_transliterate')) {
+
+          if (is_array($subject)) {
+              array_walk($subject, function(&$string) {
+                $string = WFUtility::utf8_latin_to_ascii($string);
+              });
+
+              return $subject;
+          }
+
+          $transformed = transliterator_transliterate('Any-Latin; Latin-ASCII;', $subject);
+
+          if ($transformed !== false) {
+              return $transformed;
+          }
+
+          return str_replace(array_keys($CHARS), array_values($CHARS), $subject);
+        }
+
         return str_replace(array_keys($CHARS), array_values($CHARS), $subject);
     }
 
-    protected static function changeCase($string, $case)
+    public static function changeCase($string, $case)
     {
         if (!function_exists('mb_strtolower') || !function_exists('mb_strtoupper')) {
             return $string;

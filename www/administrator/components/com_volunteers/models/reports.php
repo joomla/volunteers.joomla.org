@@ -109,14 +109,9 @@ class VolunteersModelReports extends JModelList
 			->select('checked_out.name AS editor')
 			->join('LEFT', '#__users AS ' . $db->quoteName('checked_out') . ' ON checked_out.id = a.checked_out');
 
-		// Join over the users for the author name.
-		$query
-			->select('author.name AS author_name')
-			->join('LEFT', '#__users AS ' . $db->quoteName('author') . ' ON author.id = a.created_by');
-
 		// Join over the volunteers
 		$query
-			->select('volunteer.image AS volunteer_image, volunteer.id AS volunteer_id')
+			->select('volunteer.image AS volunteer_image, volunteer.id AS volunteer_id, CONCAT(volunteer.firstname, \' \', volunteer.lastname) AS volunteer_name')
 			->join('LEFT', '#__volunteers_volunteers AS ' . $db->quoteName('volunteer') . ' ON volunteer.user_id = a.created_by');
 
 		// Join over the teams.

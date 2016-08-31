@@ -12,14 +12,14 @@ JHtml::script('com_volunteers/markerclusterer.js', false, true);
 ?>
 
 <div class="row-fluid">
-	<img style="width: 100%" src="/images/volunteer-header.png">
+	<img style="width: 100%" src="/images/volunteer-header.png" alt="Become a Joomla! contributor">
 </div>
 
 <br>
 
 <div class="row-fluid">
 	<div class="span6">
-		<h3><?php echo JText::_('COM_VOLUNTEERS_HOME_INTRO_HOW_TITLE'); ?></h3>
+		<h2><?php echo JText::_('COM_VOLUNTEERS_HOME_INTRO_HOW_TITLE'); ?></h2>
 		<p><?php echo JText::_('COM_VOLUNTEERS_HOME_INTRO_HOW_DESC'); ?></p>
 		<p><?php echo JText::_('COM_VOLUNTEERS_HOME_INTRO_HOW_ACTION'); ?></p>
 		<p>
@@ -28,7 +28,7 @@ JHtml::script('com_volunteers/markerclusterer.js', false, true);
 		</p>
 	</div>
 	<div class="span6">
-		<h3><?php echo JText::_('COM_VOLUNTEERS_HOME_INTRO_WHY_TITLE'); ?></h3>
+		<h2><?php echo JText::_('COM_VOLUNTEERS_HOME_INTRO_WHY_TITLE'); ?></h2>
 		<p><?php echo JText::_('COM_VOLUNTEERS_HOME_INTRO_WHY_DESC'); ?></p>
 		<p><?php echo JText::_('COM_VOLUNTEERS_HOME_INTRO_WHY_ACTION'); ?></p>
 		<p>
@@ -47,7 +47,7 @@ JHtml::script('com_volunteers/markerclusterer.js', false, true);
 			<div class="row-fluid report">
 				<div class="span2">
 					<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $item->volunteer_id) ?>">
-						<?php echo VolunteersHelper::image($item->volunteer_image, 'large'); ?>
+						<?php echo VolunteersHelper::image($item->volunteer_image, 'large', false, $item->volunteer_name); ?>
 					</a>
 				</div>
 				<div class="span10">
@@ -58,7 +58,7 @@ JHtml::script('com_volunteers/markerclusterer.js', false, true);
 					</h3>
 					<p class="muted">
 						<?php echo JText::_('COM_VOLUNTEERS_BY') ?>
-						<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $item->volunteer_id) ?>"><?php echo $item->author_name; ?></a>
+						<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $item->volunteer_id) ?>"><?php echo $item->volunteer_name; ?></a>
 						<?php echo JText::_('COM_VOLUNTEERS_ON') ?> <?php echo VolunteersHelper::date($item->created, 'Y-m-d H:i'); ?>
 						<?php echo JText::_('COM_VOLUNTEERS_IN') ?>
 						<?php if ($item->team): ?>
@@ -84,14 +84,14 @@ JHtml::script('com_volunteers/markerclusterer.js', false, true);
 			<ul class="media-list">
 				<li class="media">
 					<a class="pull-left" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $this->volunteerstory->id) ?>">
-						<?php echo VolunteersHelper::image($this->volunteerstory->image, 'small'); ?>
+						<?php echo VolunteersHelper::image($this->volunteerstory->image, 'small', false, $this->volunteerstory->name); ?>
 					</a>
 					<div class="media-body">
-						<h4 class="media-heading">
+						<h3 class="media-heading">
 							<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $this->volunteerstory->id) ?>">
-								<?php echo($this->volunteerstory->firstname . ' ' . $this->volunteerstory->lastname); ?>
+								<?php echo $this->volunteerstory->name; ?>
 							</a>
-						</h4>
+						</h3>
 						<p class="muted">
 							<span class="icon-location"></span> <?php echo VolunteersHelper::location($this->volunteerstory->city, $this->volunteerstory->country); ?>
 						</p>
@@ -110,19 +110,19 @@ JHtml::script('com_volunteers/markerclusterer.js', false, true);
 		<?php if (!empty($this->volunteers)) foreach ($this->volunteers as $i => $item): ?>
 			<ul class="media-list">
 				<li class="media">
-					<a class="pull-left" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $item->id) ?>">
-						<?php echo VolunteersHelper::image($item->image, 'small'); ?>
+					<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $item->id) ?>">
+						<span class="pull-left">
+							<?php echo VolunteersHelper::image($item->image, 'small', false, $item->name); ?>
+						</span>
+						<div class="media-body">
+							<h3 class="media-heading">
+								<?php echo $item->name; ?>
+							</h3>
+							<p class="muted">
+								<span class="icon-location"></span> <?php echo VolunteersHelper::location($item->city, $item->country); ?>
+							</p>
+						</div>
 					</a>
-					<div class="media-body">
-						<h4 class="media-heading">
-							<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $item->id) ?>">
-								<?php echo($item->firstname . ' ' . $item->lastname); ?>
-							</a>
-						</h4>
-						<p class="muted">
-							<span class="icon-location"></span> <?php echo VolunteersHelper::location($item->city, $item->country); ?>
-						</p>
-					</div>
 				</li>
 			</ul>
 		<?php endforeach; ?>

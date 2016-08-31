@@ -135,7 +135,7 @@ if ($saveOrder)
 							</td>
 							<td class="small hidden-phone">
 								<a class="hasTooltip" href="<?php echo JRoute::_('index.php?option=com_users&task=user.edit&id=' . (int) $item->created_by); ?>" title="<?php echo JText::_('JAUTHOR'); ?>">
-									<?php echo $this->escape($item->author_name); ?></a>
+									<?php echo $this->escape($item->volunteer_name); ?></a>
 							</td>
 							<td class="nowrap small hidden-phone">
 								<?php echo JHtml::_('date', $item->created, JText::_('DATE_FORMAT_LC4')); ?>

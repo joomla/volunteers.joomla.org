@@ -36,7 +36,7 @@ abstract class VolunteersHelper
 		return $text;
 	}
 
-	public static function image($image, $size, $urlonly = false)
+	public static function image($image, $size, $urlonly = false, $alt = '')
 	{
 		// No image, size small
 		if (empty($image) && ($size == 'small'))
@@ -72,7 +72,7 @@ abstract class VolunteersHelper
 		}
 		else
 		{
-			$html = '<img class="img-rounded" src="' . $image_path . '"/>';
+			$html = '<img class="img-rounded" alt="' . $alt . '" src="' . $image_path . '"/>';
 		}
 
 		return $html;

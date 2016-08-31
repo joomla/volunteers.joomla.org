@@ -61,7 +61,7 @@ class VolunteersViewVolunteer extends JViewLegacy
 	protected function _prepareDocument()
 	{
 		// Prepare variables
-		$title       = JText::_('COM_VOLUNTEERS_TITLE_VOLUNTEER') . ': ' . $this->item->firstname . ' ' . $this->item->lastname;
+		$title       = JText::_('COM_VOLUNTEERS_TITLE_VOLUNTEER') . ': ' . $this->item->name;
 		$description = JHtml::_('string.truncate', $this->item->intro, 160, true, false);
 		$image       = VolunteersHelper::image($this->item->image, 'large', true);
 		$itemURL     = JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $this->item->id);
@@ -102,6 +102,6 @@ class VolunteersViewVolunteer extends JViewLegacy
 
 		// Add to pathway
 		$pathway = JFactory::getApplication()->getPathway();
-		$pathway->addItem($this->item->firstname . ' ' . $this->item->lastname, $itemURL);
+		$pathway->addItem($this->item->name, $itemURL);
 	}
 }

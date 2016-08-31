@@ -94,3 +94,7 @@
 .media-list li.media:hover a {
 	text-decoration: none;
 }
+
+.volunteer-image {
+	width: 60px;
+}

@@ -23,7 +23,7 @@ require_once(JPATH_ADMINISTRATOR . '/components/com_jce/includes/base.php');
 class WFEditor extends JObject {
 
     // Editor version
-    protected $_version = '2.5.24';
+    protected $_version = '2.5.25';
 
     // Editor instance
     protected static $instance;

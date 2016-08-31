@@ -106,8 +106,7 @@ defined('_JEXEC') or die;
 				<?php if ($this->item->members->active): ?>
 					<table class="table table-striped table-hover table-vertical-align">
 						<thead>
-						<th width="50px"></th>
-						<th width="25%"><?php echo JText::_('COM_VOLUNTEERS_FIELD_VOLUNTEER') ?></th>
+						<th width="25%" colspan="2"><?php echo JText::_('COM_VOLUNTEERS_FIELD_VOLUNTEER') ?></th>
 						<th width="20%"><?php echo JText::_('COM_VOLUNTEERS_FIELD_POSITION') ?></th>
 						<th><?php echo JText::_('COM_VOLUNTEERS_FIELD_ROLE') ?></th>
 						<th width="12%"><?php echo JText::_('COM_VOLUNTEERS_FIELD_DATE_STARTED') ?></th>
@@ -163,8 +162,7 @@ defined('_JEXEC') or die;
 					<?php endif; ?>
 					<table class="table table-striped table-hover table-vertical-align">
 						<thead>
-						<th width="50px"></th>
-						<th width="25%"><?php echo JText::_('COM_VOLUNTEERS_FIELD_VOLUNTEER') ?></th>
+						<th width="25%" colspan="2"><?php echo JText::_('COM_VOLUNTEERS_FIELD_VOLUNTEER') ?></th>
 						<th width="20%"><?php echo JText::_('COM_VOLUNTEERS_FIELD_POSITION') ?></th>
 						<th><?php echo JText::_('COM_VOLUNTEERS_FIELD_ROLE') ?></th>
 						<th width="12%"><?php echo JText::_('COM_VOLUNTEERS_FIELD_DATE_STARTED') ?></th>

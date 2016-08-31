@@ -56,7 +56,7 @@ if ($saveOrder)
 							<?php echo JHtml::_('searchtools.sort', 'JSTATUS', 'a.state', $listDirn, $listOrder); ?>
 						</th>
 						<th width="20%" class="role">
-							<?php echo JHtml::_('searchtools.sort', 'COM_VOLUNTEERS_FIELD_ROLE', 'a.firstname', $listDirn, $listOrder); ?>
+							<?php echo JHtml::_('searchtools.sort', 'COM_VOLUNTEERS_FIELD_ROLE', 'a.name', $listDirn, $listOrder); ?>
 						</th>
 						<th class="team">
 							<?php echo JHtml::_('searchtools.sort', 'COM_VOLUNTEERS_FIELD_TEAM', 'a.team', $listDirn, $listOrder); ?>

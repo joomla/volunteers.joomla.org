@@ -19,7 +19,7 @@ defined('_JEXEC') or die;
 				</label>
 				<div class="input-append">
 					<input type="text" name="filter_search" id="filter-search" value="<?php echo $this->escape($this->state->get('filter.search')); ?>" class="inputbox" onchange="document.adminForm.submit();" placeholder="<?php echo JText::_('COM_VOLUNTEERS_SEARCH_VOLUNTEER'); ?>"/>
-					<button class="btn btn-primary" type="submit"><span class="icon-search"></span></button>
+					<button class="btn btn-primary" type="submit" value="<?php echo JText::_('COM_VOLUNTEERS_SEARCH_VOLUNTEER'); ?>"><span class="icon-search"></span></button>
 					<?php if ($this->state->get('filter.search')): ?>
 						<button class="btn" type="reset" onclick="jQuery('#filter-search').attr('value', null);document.adminForm.submit();">
 							<span class="icon-remove"></span>
@@ -39,11 +39,11 @@ defined('_JEXEC') or die;
 		<div class="span3">
 			<div class="well well-small">
 				<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $item->id) ?>">
-					<?php echo VolunteersHelper::image($item->image, 'large'); ?>
+					<?php echo VolunteersHelper::image($item->image, 'large', false, $item->name); ?>
 				</a>
 				<h4 class="text-center">
 					<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $item->id) ?>">
-						<?php echo($item->firstname . ' ' . $item->lastname); ?>
+						<?php echo $item->name; ?>
 					</a>
 				</h4>
 			</div>

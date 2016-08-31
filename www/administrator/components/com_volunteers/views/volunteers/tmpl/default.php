@@ -63,7 +63,7 @@ if ($saveOrder)
 						</th>
 						<th width="75" class="nowrap"></th>
 						<th width="15%" class="volunteer">
-							<?php echo JHtml::_('searchtools.sort', 'COM_VOLUNTEERS_FIELD_VOLUNTEER', 'a.firstname', $listDirn, $listOrder); ?>
+							<?php echo JHtml::_('searchtools.sort', 'COM_VOLUNTEERS_FIELD_VOLUNTEER', 'a.name', $listDirn, $listOrder); ?>
 						</th>
 						<th></th>
 						<th width="6%" class="nowrap hidden-phone">
@@ -137,9 +137,9 @@ if ($saveOrder)
 								<?php endif; ?>
 								<?php if ($canEdit) : ?>
 									<a href="<?php echo JRoute::_('index.php?option=com_volunteers&task=volunteer.edit&id=' . (int) $item->id); ?>">
-										<?php echo $this->escape($item->firstname) . ' ' . $this->escape($item->lastname); ?></a>
+										<?php echo $this->escape($item->name); ?></a>
 								<?php else : ?>
-									<?php echo $this->escape($item->firstname) . ' ' . $this->escape($item->lastname); ?>
+									<?php echo $this->escape($item->name); ?>
 								<?php endif; ?>
 								<div class="small">
 									<span class="icon-user"></span>

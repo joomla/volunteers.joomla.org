@@ -147,10 +147,10 @@ if ($saveOrder)
 								<?php endif; ?>
 								<?php if ($canEdit) : ?>
 									<a href="<?php echo JRoute::_('index.php?option=com_volunteers&task=volunteer.edit&id=' . (int) $item->volunteer); ?>">
-										<?php echo $this->escape($item->volunteer_firstname) . ' ' . $this->escape($item->volunteer_lastname); ?>
+										<?php echo $this->escape($item->volunteer_name); ?>
 									</a>
 								<?php else : ?>
-									<?php echo $this->escape($item->volunteer_firstname) . ' ' . $this->escape($item->volunteer_lastname); ?>
+									<?php echo $this->escape($item->volunteer_name); ?>
 								<?php endif; ?>
 							</td>
 							<td class="nowrap">

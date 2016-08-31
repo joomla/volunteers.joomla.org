@@ -89,7 +89,7 @@ class VolunteersModelHome extends JModelList
 		if($items) array_walk($items, function ($item) use (&$markers)
 		{
 			array_push($markers, json_encode(array(
-				'title'   => $item->firstname . ' ' . $item->lastname,
+				'title'   => $item->name,
 				'lat'     => $item->latitude,
 				'lng'     => $item->longitude,
 				'url'     => JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $item->id),

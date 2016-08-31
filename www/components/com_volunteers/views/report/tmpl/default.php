@@ -12,7 +12,7 @@ defined('_JEXEC') or die;
 <div class="row-fluid report">
 	<div class="span2 volunteer-image">
 		<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $this->item->volunteer_id) ?>">
-			<?php echo VolunteersHelper::image($this->item->volunteer_image, 'large'); ?>
+			<?php echo VolunteersHelper::image($this->item->volunteer_image, 'large', false, $this->item->volunteer_name); ?>
 		</a>
 	</div>
 	<div class="span10">
@@ -30,7 +30,7 @@ defined('_JEXEC') or die;
 
 		<p class="muted">
 			<?php echo JText::_('COM_VOLUNTEERS_BY') ?>
-			<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $this->item->volunteer_id) ?>"><?php echo($this->item->volunteer_firstname) ?>&nbsp;<?php echo($this->item->volunteer_lastname) ?></a>
+			<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $this->item->volunteer_id) ?>"><?php echo $this->item->volunteer_name; ?></a>
 			<?php echo JText::_('COM_VOLUNTEERS_ON') ?>
 			<?php echo VolunteersHelper::date($this->item->created, 'Y-m-d H:i'); ?>
 			<?php echo JText::_('COM_VOLUNTEERS_IN') ?>

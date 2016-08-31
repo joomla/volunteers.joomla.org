@@ -114,7 +114,7 @@ class VolunteersModelMembers extends JModelList
 			->from($db->quoteName('#__volunteers_members') . ' AS a');
 
 		// Join over the volunteers.
-		$query->select('volunteer.firstname AS volunteer_firstname, volunteer.lastname AS volunteer_lastname, volunteer.image AS volunteer_image')
+		$query->select('CONCAT(volunteer.firstname, \' \', volunteer.lastname) AS volunteer_name, volunteer.image AS volunteer_image')
 			->join('LEFT', '#__volunteers_volunteers AS ' . $db->quoteName('volunteer') . ' ON volunteer.id = a.volunteer');
 
 		// Join over the teams.

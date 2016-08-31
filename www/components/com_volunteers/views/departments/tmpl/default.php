@@ -21,7 +21,7 @@ $active = $this->state->get('filter.active', 1);
 				</label>
 				<div class="input-append">
 					<input type="text" name="filter_search" id="filter-search" value="<?php echo $this->escape($this->state->get('filter.search')); ?>" class="inputbox" onchange="document.adminForm.submit();" placeholder="<?php echo JText::_('COM_VOLUNTEERS_SEARCH_DEPARTMENT'); ?>"/>
-					<button class="btn btn-primary" type="submit"><span class="icon-search"></span></button>
+					<button class="btn btn-primary" type="submit" value="<?php echo JText::_('COM_VOLUNTEERS_SEARCH_DEPARTMENT'); ?>"><span class="icon-search"></span></button>
 					<?php if ($this->state->get('filter.search')): ?>
 						<button class="btn" type="reset" onclick="jQuery('#filter-search').attr('value', null);document.adminForm.submit();">
 							<span class="icon-remove"></span>
@@ -53,8 +53,8 @@ $active = $this->state->get('filter.active', 1);
 						<div class="members">
 							<?php $i = 0; ?>
 							<?php if (!empty($item->members)) foreach ($item->members as $member): ?>
-								<a class="tip hasTooltip" title="<?php echo($member->volunteer_firstname); ?> <?php echo($member->volunteer_lastname); ?>" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $member->volunteer) ?>">
-									<?php echo VolunteersHelper::image($member->volunteer_image, 'small'); ?>
+								<a class="tip hasTooltip" title="<?php echo $member->volunteer_name; ?>" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $member->volunteer) ?>">
+									<?php echo VolunteersHelper::image($member->volunteer_image, 'small', false, $member->volunteer_name); ?>
 								</a>
 								<?php $i++;
 								if ($i == 14)

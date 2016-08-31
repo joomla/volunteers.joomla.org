@@ -106,7 +106,7 @@ class VolunteersModelVolunteers extends JModelList
 
 		// Select the required fields from the table.
 		$query
-			->select($this->getState('list.select', array('a.*')))
+			->select($this->getState('list.select', array('a.*, CONCAT(a.firstname, \' \', a.lastname) AS name')))
 			->from($db->quoteName('#__volunteers_volunteers') . ' AS a');
 
 		// Join over the users for the checked_out user.

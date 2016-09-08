@@ -285,6 +285,10 @@ class VolunteersModelTeams extends JModelList
 			$query->where('parent_id = ' . (int) $parent);
 		}
 
+		// Only active teams
+		$nullDate = $db->quote($db->getNullDate());
+		$query->where('date_ended = ' . $nullDate);
+
 		$query->order('title ASC');
 
 		$db->setQuery($query);

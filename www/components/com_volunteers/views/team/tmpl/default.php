@@ -28,7 +28,7 @@ defined('_JEXEC') or die;
 		</h1>
 	</div>
 
-	<p class="lead"><?php echo strip_tags($this->item->description) ?></p>
+	<div class="lead"><?php echo $this->item->description; ?></div>
 
 	<dl class="dl-horizontal">
 		<?php if ($this->item->website): ?>

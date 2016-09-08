@@ -92,9 +92,9 @@
 
         <field
                 name="description"
-                type="textarea"
-                rows="4"
-                class="span12"
+                type="editor"
+                buttons="false"
+                filter="JComponentHelper::filterText"
                 label="JGLOBAL_DESCRIPTION"
         />
 

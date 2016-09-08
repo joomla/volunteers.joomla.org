@@ -135,7 +135,7 @@ JHtml::script('com_volunteers/markerclusterer.js', false, true);
 <div class="row-fluid">
 	<div class="span12">
 		<h2><?php echo count($this->markers) . ' ' . JText::_('COM_VOLUNTEERS_VOLUNTEERS_WORLD') ?></h2>
-		<div id="map-canvas" style="height: 400px; width: 100%"></div>
+		<div id="map-canvas"></div>
 	</div>
 </div>
 

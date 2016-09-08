@@ -153,6 +153,15 @@
 		padding-left: 10px;
 	}
 
+	.volunteers .row-fluid .span3 {
+		width: 50%;
+		float: left;
+	}
+
+	.volunteers .row-fluid .span3 .well {
+		margin: 5px;
+	}
+
 	.members {
 		margin-top: 10px;
 	}

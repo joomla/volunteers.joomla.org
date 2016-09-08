@@ -1,10 +1,7 @@
-.volunteer-image {
-	width: 60px;
-}
-
 .table .volunteer-image img {
 	width: 50px;
 	height: 50px;
+	padding-right: 5px;
 }
 
 .members img {
@@ -99,6 +96,10 @@
 	height: 200px;
 }
 
+.report-title {
+	margin-top: 0;
+}
+
 @media (min-width: 481px) {
 	#map-canvas {
 		height: 300px;
@@ -108,5 +109,55 @@
 @media (min-width: 767px) {
 	#map-canvas {
 		height: 400px;
+	}
+}
+
+@media (max-width: 766px) {
+	thead {
+		display: none;
+	}
+
+	tr td:first-child {
+		border-top: 1px solid #333;
+	}
+
+	tbody td {
+		display: block;
+		text-align: center;
+	}
+
+	tbody td:before {
+		content: attr(data-th) ':';
+		font-weight: bold;
+	}
+
+	.table .volunteer-image img {
+		float: right;
+		padding-right: 0;
+	}
+
+	.joomlastory .media .pull-left,
+	.latest-volunteers .media .pull-left {
+		float: left;
+		margin-bottom: 0;
+	}
+
+	.row-fluid .report .span2 {
+		width: 15%;
+		float: left;
+	}
+
+	.row-fluid .report .span10 {
+		width: 85%;
+		float: right;
+		padding-left: 10px;
+	}
+
+	.members {
+		margin-top: 10px;
+	}
+
+	.well {
+		margin-top: 10px;
 	}
 }

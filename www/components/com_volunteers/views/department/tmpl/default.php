@@ -68,11 +68,11 @@ defined('_JEXEC') or die;
 				<?php if ($this->item->members->active): ?>
 					<table class="table table-striped table-hover table-vertical-align">
 						<thead>
-						<th width="25%" colspan="2"><?php echo JText::_('COM_VOLUNTEERS_FIELD_VOLUNTEER') ?></th>
+						<th width="30%"><?php echo JText::_('COM_VOLUNTEERS_FIELD_VOLUNTEER') ?></th>
 						<th><?php echo JText::_('COM_VOLUNTEERS_FIELD_POSITION') ?></th>
 						<th width="12%"><?php echo JText::_('COM_VOLUNTEERS_FIELD_DATE_STARTED') ?></th>
 						<?php if ($this->acl->edit): ?>
-							<th width="10%"></th>
+							<th width="10%"><?php echo JText::_('COM_VOLUNTEERS_TITLE_MEMBERS_EDIT') ?></th>
 						<?php endif; ?>
 						</thead>
 						<tbody>
@@ -81,10 +81,6 @@ defined('_JEXEC') or die;
 								<td class="volunteer-image">
 									<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $volunteer->volunteer) ?>">
 										<?php echo VolunteersHelper::image($volunteer->volunteer_image, 'small', false, $volunteer->volunteer_name); ?>
-									</a>
-								</td>
-								<td>
-									<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $volunteer->volunteer) ?>">
 										<?php echo $volunteer->volunteer_name; ?>
 									</a>
 								</td>
@@ -120,12 +116,12 @@ defined('_JEXEC') or die;
 					<?php endif; ?>
 					<table class="table table-striped table-hover table-vertical-align">
 						<thead>
-						<th width="25%" colspan="2"><?php echo JText::_('COM_VOLUNTEERS_FIELD_VOLUNTEER') ?></th>
+						<th width="30%"><?php echo JText::_('COM_VOLUNTEERS_FIELD_VOLUNTEER') ?></th>
 						<th><?php echo JText::_('COM_VOLUNTEERS_FIELD_POSITION') ?></th>
 						<th width="12%"><?php echo JText::_('COM_VOLUNTEERS_FIELD_DATE_STARTED') ?></th>
 						<th width="12%"><?php echo JText::_('COM_VOLUNTEERS_FIELD_DATE_ENDED') ?></th>
 						<?php if ($this->acl->edit): ?>
-							<th width="10%"></th>
+							<th width="10%"><?php echo JText::_('COM_VOLUNTEERS_TITLE_MEMBERS_EDIT') ?></th>
 						<?php endif; ?>
 						</thead>
 						<tbody>
@@ -134,10 +130,6 @@ defined('_JEXEC') or die;
 								<td class="volunteer-image">
 									<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $volunteer->volunteer) ?>">
 										<?php echo VolunteersHelper::image($volunteer->volunteer_image, 'small', false, $volunteer->volunteer_name); ?>
-									</a>
-								</td>
-								<td>
-									<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $volunteer->volunteer) ?>">
 										<?php echo $volunteer->volunteer_name; ?>
 									</a>
 								</td>
@@ -338,4 +330,25 @@ defined('_JEXEC') or die;
 		var target = this.href.split('#');
 		jQuery('.nav-tabs a').filter('[href="#' + target[1] + '"]').tab('show');
 	});
+
+	// Responsive tables
+	var headertext = [];
+	var headers = document.querySelectorAll("thead");
+	var tablebody = document.querySelectorAll("tbody");
+
+	for (var i = 0; i < headers.length; i++) {
+		headertext[i]=[];
+		for (var j = 0, headrow; headrow = headers[i].rows[0].cells[j]; j++) {
+			var current = headrow;
+			headertext[i].push(current.textContent);
+		}
+	}
+
+	for (var h = 0, tbody; tbody = tablebody[h]; h++) {
+		for (var i = 0, row; row = tbody.rows[i]; i++) {
+			for (var j = 0, col; col = row.cells[j]; j++) {
+				col.setAttribute("data-th", headertext[h][j]);
+			}
+		}
+	}
 </script>

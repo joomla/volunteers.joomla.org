@@ -79,7 +79,7 @@ JHtml::script('com_volunteers/markerclusterer.js', false, true);
 	</div>
 
 	<div class="span4">
-		<div class="well">
+		<div class="well joomlastory">
 			<h2><?php echo JText::_('COM_VOLUNTEERS_JOOMLASTORY') ?></h2>
 			<ul class="media-list">
 				<li class="media">
@@ -108,7 +108,7 @@ JHtml::script('com_volunteers/markerclusterer.js', false, true);
 
 		<h2><?php echo JText::_('COM_VOLUNTEERS_LATEST_VOLUNTEERS') ?></h2>
 		<?php if (!empty($this->volunteers)) foreach ($this->volunteers as $i => $item): ?>
-			<ul class="media-list">
+			<ul class="media-list latest-volunteers">
 				<li class="media">
 					<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $item->id) ?>">
 						<span class="pull-left">

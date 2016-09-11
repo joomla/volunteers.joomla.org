@@ -24,10 +24,14 @@ class JoomlaInstallerScript extends JInstallerScript
 		$this->minimumJoomla = '3.6';
 		$this->minimumPhp    = '5.4';
 
-		$this->deleteFiles = array(
+		$this->deleteFiles = [
 			'/language/en-GB/en-GB.tpl_joomla.ini',
 			'/language/en-GB/en-GB.tpl_joomla.sys.ini',
-		);
+			'/templates/joomla/images/apple-touch-icon-114-precomposed.png',
+			'/templates/joomla/images/apple-touch-icon-144-precomposed.png',
+			'/templates/joomla/images/apple-touch-icon-57-precomposed.png',
+			'/templates/joomla/images/apple-touch-icon-72-precomposed.png',
+		];
 	}
 
 	/**

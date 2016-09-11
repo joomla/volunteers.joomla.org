@@ -19,7 +19,7 @@
 @import "../../joomla-cms/media/jui/less/component-animations.less";
 @import "../../joomla-cms/media/jui/less/close.less";
 // Components: Buttons & Alerts
-@import "../../joomla-cms/media/jui/less/buttons.less";
+@import "buttons.less";
 @import "../../joomla-cms/media/jui/less/button-groups.less";
 @import "../../joomla-cms/media/jui/less/alerts.less";
 // Note: alerts share common CSS with buttons and thus have styles in buttons.less
@@ -81,6 +81,12 @@
 .pagination ul > li:last-child > a,
 .pagination ul > li:last-child > span {
   .border-right-radius(0);
+}
+
+.btn-group > .btn:last-child,
+.btn-group > .dropdown-toggle {
+  .border-top-radius(0);
+  .border-bottom-radius(0);
 }
 
 /* Input Append Chosen Select Boxes, remove once integrated into CMS bootstrap-extended */
@@ -299,25 +305,14 @@ aside .nav .nav-child {
   /*header btn*/
   .btn-group {
     > .btn:last-child {
-      background-image: none;
       border: none;
-      .border-radius(0);
-      text-shadow: none;
-    }
-
-    > .btn-warning {
-      background-color: #faa732;
-
-      &:hover {
-        background-color: #f89409;
-      }
     }
   }
 }
 
 .navbar .btn-navbar {
-  background: #17568c; /* Old browsers */
-  #gradient > .vertical(#17568c, #1a3867);
+  background: @headerBackgroundHighlight; /* Old browsers */
+  #gradient > .vertical(@headerBackgroundHighlight, @headerBackground);
   border: 1px solid #0D2242;
   margin-bottom: 2px;
 }
@@ -578,41 +573,6 @@ div#nav-search form {
   > a, > span {
     .border-radius(0);
   }
-}
-
-/* Buttons */
-
-.btn {
-  .border-radius(0);
-  .box-shadow(none);
-  border: 1px solid #dfdfdf;
-  background-image: none;
-  text-shadow: none;
-}
-
-.btn-block {
-  background-color: #eee;
-  border: 1px solid #dfdfdf;
-  text-align: center;
-  vertical-align: middle;
-}
-
-.btn-primary {
-  background-color: #006dcc;
-  border-color: #04c;
-  color: @white;
-}
-
-.btn-info {
-  background-color: #49afcd;
-  border-color: #2f96b4;
-  color: @white;
-}
-
-.btn-warning {
-  background-color: #faa732;
-  border-color: #f89406;
-  color: @white;
 }
 
 /* Social */

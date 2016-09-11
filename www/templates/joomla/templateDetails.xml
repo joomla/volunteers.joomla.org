@@ -2,8 +2,8 @@
 <!DOCTYPE install PUBLIC "-//Joomla! 2.5//DTD template 1.0//EN" "https://www.joomla.org/xml/dtd/2.5/template-install.dtd">
 <extension version="3.6" type="template" client="site" method="upgrade">
 	<name>joomla</name>
-	<version>2.1.0</version>
-	<creationDate>6/14/2013</creationDate>
+	<version>2.1.0.1</version>
+	<creationDate>30-Aug-2016</creationDate>
 	<author>Kyle Ledbetter</author>
 	<authorEmail>kyle@kyleledbetter.com</authorEmail>
 	<copyright>Copyright (C) 2005 - 2016 Open Source Matters, Inc. All rights reserved.</copyright>

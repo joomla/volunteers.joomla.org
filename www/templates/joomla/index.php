@@ -102,10 +102,15 @@ $templateBaseUrl = $this->baseurl . '/templates/' . $this->template;
 $this->setMetaData('viewport', 'width=device-width, initial-scale=1.0');
 $this->setMetaData('apple-mobile-web-app-capable', 'yes');
 $this->setMetaData('apple-mobile-web-app-status-bar-style', 'blue');
-$this->addHeadLink("$templateBaseUrl/images/apple-touch-icon-144-precomposed.png", 'apple-touch-icon-precomposed', 'rel', ['sizes' => '144x144']);
-$this->addHeadLink("$templateBaseUrl/images/apple-touch-icon-114-precomposed.png", 'apple-touch-icon-precomposed', 'rel', ['sizes' => '114x114']);
-$this->addHeadLink("$templateBaseUrl/images/apple-touch-icon-72-precomposed.png", 'apple-touch-icon-precomposed', 'rel', ['sizes' => '72x72']);
-$this->addHeadLink("$templateBaseUrl/images/apple-touch-icon-57-precomposed.png", 'apple-touch-icon-precomposed');
+$this->addHeadLink("$templateBaseUrl/images/apple-touch-icon-180x180.png", 'apple-touch-icon', 'rel', ['sizes' => '180x180']);
+$this->addHeadLink("$templateBaseUrl/images/apple-touch-icon-152x152.png", 'apple-touch-icon', 'rel', ['sizes' => '152x152']);
+$this->addHeadLink("$templateBaseUrl/images/apple-touch-icon-144x144.png", 'apple-touch-icon', 'rel', ['sizes' => '144x144']);
+$this->addHeadLink("$templateBaseUrl/images/apple-touch-icon-120x120.png", 'apple-touch-icon', 'rel', ['sizes' => '120x120']);
+$this->addHeadLink("$templateBaseUrl/images/apple-touch-icon-114x114.png", 'apple-touch-icon', 'rel', ['sizes' => '114x114']);
+$this->addHeadLink("$templateBaseUrl/images/apple-touch-icon-76x76.png", 'apple-touch-icon', 'rel', ['sizes' => '76x76']);
+$this->addHeadLink("$templateBaseUrl/images/apple-touch-icon-72x72.png", 'apple-touch-icon', 'rel', ['sizes' => '72x72']);
+$this->addHeadLink("$templateBaseUrl/images/apple-touch-icon-57x57.png", 'apple-touch-icon', 'rel', ['sizes' => '57x57']);
+$this->addHeadLink("$templateBaseUrl/images/apple-touch-icon.png", 'apple-touch-icon');
 
 // Check if social metadata was set by content otherwise add template defaults
 // Note: Even though Open Graph may support multiple tags, Joomla doesn't, so we need to check them anyway or go to custom tags

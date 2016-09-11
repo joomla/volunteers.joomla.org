@@ -53,6 +53,10 @@ if ($displayData['active'])
 		$attribs['class'] .= ' hasTooltip';
 		$attribs['title'] = $item->text;
 	}
+	else
+	{
+		$attribs['class'] .= ' hidden-phone';
+	}
 }
 ?>
 <?php if ($displayData['active']) : ?>
@@ -60,7 +64,7 @@ if ($displayData['active'])
 		<?php echo JHtml::_('link', $item->link, $display, $attribs); ?>
 	</li>
 <?php else : ?>
-	<li class="<?php echo (property_exists($item, 'active') && $item->active) ? 'active' : 'disabled'; ?>">
+	<li class="<?php echo (property_exists($item, 'active') && $item->active) ? 'active' : 'disabled'; ?><?php echo $icon === null ? ' hidden-phone' : ''; ?>">
 		<span><?php echo $display; ?></span>
 	</li>
 <?php endif;

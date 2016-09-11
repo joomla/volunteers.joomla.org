@@ -138,16 +138,9 @@ class JoomlaTemplateHelper
 				break;
 			}
 
-			case 'shop.joomla.org':
-			{
-				$id = 'GTM-NZ9B7F';
-
-				break;
-			}
-
 			case 'showcase.joomla.org':
 			{
-				$id = false;
+				$id = 'GTM-NKT9FP';
 
 				break;
 			}
@@ -318,13 +311,6 @@ class JoomlaTemplateHelper
 			case 'resources.joomla.org':
 			{
 				$tag = 'jrd';
-
-				break;
-			}
-
-			case 'shop.joomla.org':
-			{
-				$tag = 'jshop';
 
 				break;
 			}

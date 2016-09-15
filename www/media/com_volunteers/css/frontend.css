@@ -100,7 +100,8 @@
 	margin-top: 0;
 }
 
-.report p {
+.report p,
+.item-page p {
 	word-wrap: break-word;
 }
 

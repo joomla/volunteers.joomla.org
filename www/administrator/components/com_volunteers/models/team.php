@@ -288,12 +288,43 @@ class VolunteersModelTeam extends JModelAdmin
 		$model->setState('filter.team', $pk);
 		$items = $model->getItems();
 
+		// Sorting the results
+		$leaders    = array();
+		$assistants = array();
+		$volunteers = array();
+
+		foreach ($items as $item)
+		{
+			switch ($item->position)
+			{
+				case 2:
+					$leaders[$item->volunteer_name] = $item;
+					break;
+
+				case 7:
+					$assistants[$item->volunteer_name] = $item;
+					break;
+
+				default:
+					$volunteers[$item->volunteer_name] = $item;
+					break;
+			}
+		}
+
+		// Sort all members by name
+		ksort($leaders);
+		ksort($assistants);
+		ksort($volunteers);
+
+		// Group them again
+		$groupmembers = $leaders + $assistants + $volunteers;
+
 		$members            = new stdClass();
 		$members->active    = array();
 		$members->honorroll = array();
 
 		// Check for active or inactive members
-		foreach ($items as $item)
+		foreach ($groupmembers as $item)
 		{
 			if ($item->date_ended == '0000-00-00')
 			{

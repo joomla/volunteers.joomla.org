@@ -225,35 +225,38 @@ class VolunteersModelReports extends JModelList
 	public function getCategory()
 	{
 		$category = $this->getState('filter.category');
-
-		if (empty($category))
-		{
-			return;
-		}
+		$title    = '';
 
 		// Get the name from the category
 		$selection = explode('.', $category);
 
-		$db = $this->getDbo();
-
-		if ($selection[0] == 'd')
+		if ($selection)
 		{
-			$query = $db->getQuery(true)
-				->select('title')
-				->from('#__volunteers_departments')
-				->where($db->quoteName('id') . ' = ' . (int) $selection[1]);
+			$db = $this->getDbo();
+
+			if ($selection[0] == 'd')
+			{
+				$query = $db->getQuery(true)
+					->select('title')
+					->from('#__volunteers_departments')
+					->where($db->quoteName('id') . ' = ' . (int) $selection[1]);
+				$db->setQuery($query);
+
+				$title = $db->loadResult();
+			}
+
+			if ($selection[0] == 't')
+			{
+				$query = $db->getQuery(true)
+					->select('title')
+					->from('#__volunteers_teams')
+					->where($db->quoteName('id') . ' = ' . (int) $selection[1]);
+				$db->setQuery($query);
+
+				$title = $db->loadResult();
+			}
 		}
 
-		if ($selection[0] == 't')
-		{
-			$query = $db->getQuery(true)
-				->select('title')
-				->from('#__volunteers_teams')
-				->where($db->quoteName('id') . ' = ' . (int) $selection[1]);
-		}
-
-		$db->setQuery($query);
-
-		return $db->loadResult();
+		return $title;
 	}
 }

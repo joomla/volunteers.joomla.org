@@ -1,0 +1,92 @@
+//
+// Button groups
+// --------------------------------------------------
+
+
+// Space out series of button groups
+.btn-group + .btn-group {
+  margin-left: 0;
+  margin-right: 5px;
+}
+
+// Optional: Group multiple button groups together for a toolbar
+.btn-toolbar {
+  > .btn + .btn,
+  > .btn-group + .btn,
+  > .btn + .btn-group {
+    margin-left: 0;
+    margin-right: 5px;
+  }
+}
+
+.btn-group > .btn + .btn {
+  margin-left: 0;
+  margin-right: -1px;
+}
+
+// Set corners individual because sometimes a single button can be in a .btn-group and we need :first-child and :last-child to both match
+.btn-group > .btn:first-child {
+  margin-left: inherit;
+  margin-right: 0;
+  .border-top-left-radius(0);
+  .border-bottom-left-radius(0);
+  .border-top-right-radius(@baseBorderRadius);
+  .border-bottom-right-radius(@baseBorderRadius);
+}
+// Need .dropdown-toggle since :last-child doesn't apply given a .dropdown-menu immediately after it
+.btn-group > .btn:last-child,
+.btn-group > .dropdown-toggle {
+  .border-top-left-radius(@baseBorderRadius);
+  .border-bottom-left-radius(@baseBorderRadius);
+  .border-top-right-radius(0);
+  .border-bottom-right-radius(0);
+}
+// Reset corners for large buttons
+.btn-group > .btn.large:first-child {
+  margin-left: inherit;
+  margin-right: 0;
+  .border-top-left-radius(0);
+  .border-bottom-left-radius(0);
+  .border-top-right-radius(@borderRadiusLarge);
+  .border-bottom-right-radius(@borderRadiusLarge);
+}
+.btn-group > .btn.large:last-child,
+.btn-group > .large.dropdown-toggle {
+  .border-top-left-radius(@borderRadiusLarge);
+  .border-bottom-left-radius(@borderRadiusLarge);
+  .border-top-right-radius(0);
+  .border-bottom-right-radius(0);
+}
+
+
+
+// Split button dropdowns
+// ----------------------
+
+// Reposition the caret
+.btn .caret {
+  margin-left: inherit;
+  margin-right: 0;
+}
+
+
+
+// Vertical button groups
+// ----------------------
+
+.btn-group-vertical > .btn + .btn {
+  margin-left: inherit;
+  margin-right: 0;
+}
+.btn-group-vertical > .btn:first-child {
+  .border-radius(@baseBorderRadius 0 0 @baseBorderRadius);
+}
+.btn-group-vertical > .btn:last-child {
+  .border-radius(0 @baseBorderRadius @baseBorderRadius 0);
+}
+.btn-group-vertical > .btn-large:first-child {
+  .border-radius(@borderRadiusLarge 0 0 @borderRadiusLarge);
+}
+.btn-group-vertical > .btn-large:last-child {
+  .border-radius(0 @borderRadiusLarge @borderRadiusLarge 0);
+}

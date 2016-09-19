@@ -1,0 +1,24 @@
+//
+// Thumbnails
+// --------------------------------------------------
+
+
+// Note: `.thumbnails` and `.thumbnails > li` are overriden in responsive files
+
+// Make wrapper ul behave like the grid
+.thumbnails {
+  margin-left: inherit;
+  margin-right: -@gridGutterWidth;
+}
+// Fluid rows have no right margin
+.row-fluid .thumbnails {
+  margin-left: inherit;
+  margin-right: 0;
+}
+
+// Float li to make thumbnails appear in a row
+.thumbnails > li {
+  float: right; // Explicity set the float since we don't require .span* classes
+  margin-left: inherit;
+  margin-right: @gridGutterWidth;
+}

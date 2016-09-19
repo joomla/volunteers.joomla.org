@@ -1,0 +1,31 @@
+//
+// Responsive: Navbar
+// --------------------------------------------------
+
+
+// TABLETS AND BELOW
+// -----------------
+@media (max-width: @navbarCollapseWidth) {
+
+  // Account for brand name
+  .navbar .brand {
+    margin: 0 -5px 0 0;
+  }
+
+  // Buttons
+  .nav-collapse .btn {
+    padding: 4px 0 4px 10px;
+  }
+  // Dropdowns in the navbar
+  .nav-collapse .dropdown-menu {
+    right: auto;
+  }
+
+  // Pull right (secondary) nav content
+  .navbar .nav-collapse .nav.pull-right {
+    margin-left: inherit;
+    margin-right: 0;
+  }
+
+
+}

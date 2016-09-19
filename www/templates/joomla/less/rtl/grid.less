@@ -1,0 +1,16 @@
+//
+// Grid system
+// --------------------------------------------------
+
+
+// Fixed (940px)
+#grid-rtl > .core(@gridColumnWidth, @gridGutterWidth);
+
+// Fluid (940px)
+#grid-rtl > .fluid(@fluidGridColumnWidth, @fluidGridGutterWidth);
+
+// Reset utility classes due to specificity
+[class*="span"].pull-right,
+.row-fluid [class*="span"].pull-right {
+  float: left;
+}

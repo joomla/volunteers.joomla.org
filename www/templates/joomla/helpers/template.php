@@ -296,7 +296,7 @@ class JoomlaTemplateHelper
 
 			case 'magazine.joomla.org':
 			{
-				$tag = 'jmag';
+				$tag = 'jcm';
 
 				break;
 			}

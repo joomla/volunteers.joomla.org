@@ -1,0 +1,68 @@
+//
+// Pagination (multiple pages)
+// --------------------------------------------------
+
+.pagination ul {
+  // Reset default ul styles
+  margin-left: inherit;
+  margin-right: 0;
+}
+.pagination ul > li > a,
+.pagination ul > li > span {
+  float: right; // Collapse white-space
+  border-left-width: inherit;
+  border-right-width: 0;
+}
+.pagination ul > li:first-child > a,
+.pagination ul > li:first-child > span {
+  border-left-width: inherit;
+  border-right-width: 1px;
+  .border-left-radius(inherit);
+  .border-right-radius(@baseBorderRadius);
+}
+.pagination ul > li:last-child > a,
+.pagination ul > li:last-child > span {
+  .border-left-radius(@baseBorderRadius);
+  .border-right-radius(inherit);
+}
+
+
+// Alignment
+// --------------------------------------------------
+
+.pagination-right {
+  text-align: left;
+}
+
+
+// Sizing
+// --------------------------------------------------
+
+// Large
+.pagination-large {
+  ul > li:first-child > a,
+  ul > li:first-child > span {
+    .border-left-radius(inherit);
+    .border-right-radius(@borderRadiusLarge);
+  }
+  ul > li:last-child > a,
+  ul > li:last-child > span {
+    .border-left-radius(@borderRadiusLarge);
+    .border-right-radius(inherit);
+  }
+}
+
+// Small and mini
+.pagination-mini,
+.pagination-small {
+  ul > li:first-child > a,
+  ul > li:first-child > span {
+    .border-left-radius(inherit);
+    .border-right-radius(@borderRadiusSmall);
+  }
+  ul > li:last-child > a,
+  ul > li:last-child > span {
+    .border-left-radius(@borderRadiusSmall);
+    .border-right-radius(inherit);
+  }
+}

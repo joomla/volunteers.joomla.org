@@ -1,0 +1,118 @@
+//
+// Navbars (Redux)
+// --------------------------------------------------
+
+
+// Brand: website or project name
+// -------------------------
+.navbar .brand {
+  float: right;
+  // Vertically center the text given @navbarHeight
+  padding: ((@navbarHeight - @baseLineHeight) / 2) 0 ((@navbarHeight - @baseLineHeight) / 2) 20px;
+  margin-left: inherit;
+  margin-right: -20px; // negative indent to right-align the text down the page
+}
+
+// Dividers in navbar
+// -------------------------
+.navbar .divider-vertical {
+  height: @navbarHeight;
+  margin: 0 9px;
+  border-left: 1px solid @navbarBackgroundHighlight;
+  border-right: 1px solid @navbarBackground;
+}
+
+// Navbar search
+// -------------------------
+.navbar-search {
+  float: right;
+}
+
+
+
+// NAVIGATION
+// ----------
+
+.navbar .nav {
+  left: auto;
+  right: 0;
+  float: right;
+  margin: 0 0 0 10px;
+}
+.navbar .nav.pull-right {
+  float: left; // redeclare due to specificity
+  margin-left: 0; // remove margin on float right nav
+  margin-right: inherit;
+}
+.navbar .nav > li {
+  float: right;
+}
+
+// Links
+.navbar .nav > li > a {
+  // Vertically center the text given @navbarHeight
+  padding: ((@navbarHeight - @baseLineHeight) / 2) 0 ((@navbarHeight - @baseLineHeight) / 2) 15px;
+}
+
+// Navbar button for toggling navbar items in responsive layouts
+// These definitions need to come after '.navbar .btn'
+.navbar .btn-navbar {
+  float: left;
+}
+
+
+
+// Dropdown menus
+// --------------
+
+// Menu position and menu carets
+.navbar .nav > li > .dropdown-menu {
+  &:before {
+    left: auto;
+    right: 9px;
+  }
+  &:after {
+    left: auto;
+    right: 10px;
+  }
+}
+
+// Right aligned menus need alt position
+.navbar .pull-right > li > .dropdown-menu,
+.navbar .nav > li > .dropdown-menu.pull-right {
+  left: auto;
+  right: 0;
+  &:before {
+    left: 12px;
+    right: auto;
+  }
+  &:after {
+    left: 13px;
+    right: auto;
+  }
+  .dropdown-menu {
+    left: 100%;
+    right: auto;
+    margin-left: -1px;
+    margin-right: inherit;
+    .border-radius(6px 6px 6px 0);
+  }
+}
+
+
+// Inverted navbar
+// -------------------------
+
+.navbar-inverse {
+
+  // Dividers in navbar
+  .divider-vertical {
+    border-left-color: @navbarInverseBackgroundHighlight;
+    border-right-color: @navbarInverseBackground;
+  }
+
+}
+
+.dropdown-menu {
+  text-align: right;
+}

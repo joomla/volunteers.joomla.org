@@ -1,0 +1,119 @@
+//
+// Tables
+// --------------------------------------------------
+
+
+// BASELINE STYLES
+// ---------------
+
+.table {
+  // Cells
+  th,
+  td {
+    text-align: right;
+  }
+}
+
+
+
+// BORDERED VERSION
+// ----------------
+
+.table-bordered {
+  border: 1px solid @tableBorder;
+  border-right: 0;
+  th,
+  td {
+    border-left: inherit;
+    border-right: 1px solid @tableBorder;
+  }
+  // For first th/td in the first row in the first thead or tbody
+  thead:first-child tr:first-child > th:first-child,
+  tbody:first-child tr:first-child > td:first-child,
+  tbody:first-child tr:first-child > th:first-child {
+    .border-top-left-radius(inherit);
+    .border-top-right-radius(@baseBorderRadius);
+  }
+  // For last th/td in the first row in the first thead or tbody
+  thead:first-child tr:first-child > th:last-child,
+  tbody:first-child tr:first-child > td:last-child,
+  tbody:first-child tr:first-child > th:last-child {
+    .border-top-left-radius(@baseBorderRadius);
+    .border-top-right-radius(inherit);
+  }
+  // For first th/td (can be either) in the last row in the last thead, tbody, and tfoot
+  thead:last-child tr:last-child > th:first-child,
+  tbody:last-child tr:last-child > td:first-child,
+  tbody:last-child tr:last-child > th:first-child,
+  tfoot:last-child tr:last-child > td:first-child,
+  tfoot:last-child tr:last-child > th:first-child {
+    .border-bottom-left-radius(inherit);
+    .border-bottom-right-radius(@baseBorderRadius);
+  }
+  // For last th/td (can be either) in the last row in the last thead, tbody, and tfoot
+  thead:last-child tr:last-child > th:last-child,
+  tbody:last-child tr:last-child > td:last-child,
+  tbody:last-child tr:last-child > th:last-child,
+  tfoot:last-child tr:last-child > td:last-child,
+  tfoot:last-child tr:last-child > th:last-child {
+    .border-bottom-left-radius(@baseBorderRadius);
+    .border-bottom-right-radius(inherit);
+  }
+
+  // Clear border-radius for first and last td in the last row in the last tbody for table with tfoot
+  tfoot + tbody:last-child tr:last-child td:first-child {
+    .border-bottom-left-radius(inherit);
+    .border-bottom-right-radius(0);
+  }
+  tfoot + tbody:last-child tr:last-child td:last-child {
+    .border-bottom-left-radius(0);
+    .border-bottom-right-radius(right);
+  }
+
+  // Special fixes to round the left border on the first td/th
+  caption + thead tr:first-child th:first-child,
+  caption + tbody tr:first-child td:first-child,
+  colgroup + thead tr:first-child th:first-child,
+  colgroup + tbody tr:first-child td:first-child {
+    .border-top-left-radius(inherit);
+    .border-top-right-radius(@baseBorderRadius);
+  }
+  caption + thead tr:first-child th:last-child,
+  caption + tbody tr:first-child td:last-child,
+  colgroup + thead tr:first-child th:last-child,
+  colgroup + tbody tr:first-child td:last-child {
+    .border-top-left-radius(@baseBorderRadius);
+    .border-top-right-radius(inherit);
+  }
+
+}
+
+
+// TABLE CELL SIZING
+// -----------------
+
+// Reset default grid behavior
+table td[class*="span"],
+table th[class*="span"],
+.row-fluid table td[class*="span"],
+.row-fluid table th[class*="span"] {
+  margin-left: inherit;
+  margin-right: 0; // undo default grid column styles
+}
+
+// Change the column widths to account for td/th padding
+.table td,
+.table th {
+  &.span1     { .tableColumnsRtl(); }
+  &.span2     { .tableColumnsRtl(); }
+  &.span3     { .tableColumnsRtl(); }
+  &.span4     { .tableColumnsRtl(); }
+  &.span5     { .tableColumnsRtl(); }
+  &.span6     { .tableColumnsRtl(); }
+  &.span7     { .tableColumnsRtl(); }
+  &.span8     { .tableColumnsRtl(); }
+  &.span9     { .tableColumnsRtl(); }
+  &.span10    { .tableColumnsRtl(); }
+  &.span11    { .tableColumnsRtl(); }
+  &.span12    { .tableColumnsRtl(); }
+}

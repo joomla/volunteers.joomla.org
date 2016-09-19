@@ -1,0 +1,219 @@
+//
+// Forms
+// --------------------------------------------------
+
+
+// CHECKBOXES & RADIOS
+// -------------------
+
+// Indent the labels to position radios/checkboxes as hanging
+.radio,
+.checkbox {
+  padding-left: 0;
+  right: 20px;
+}
+.radio input[type="radio"],
+.checkbox input[type="checkbox"] {
+  float: right;
+  margin-left: 0;
+  margin-right: -20px;
+}
+.radio.inline + .radio.inline,
+.checkbox.inline + .checkbox.inline {
+  margin-left: 0;
+  margin-right: 10px; // space out consecutive inline controls
+}
+
+
+// INPUT SIZES
+// -----------
+
+// Grid style input sizes
+input[class*="span"],
+select[class*="span"],
+textarea[class*="span"],
+.uneditable-input[class*="span"],
+// Redeclare since the fluid row class is more specific
+.row-fluid input[class*="span"],
+.row-fluid select[class*="span"],
+.row-fluid textarea[class*="span"],
+.row-fluid .uneditable-input[class*="span"] {
+  float: none;
+  margin-left: inherit;
+  margin-right: 0;
+}
+
+
+// GRID SIZING FOR INPUTS
+// ----------------------
+
+// Grid sizes
+#grid-rtl > .input(@gridColumnWidth, @gridGutterWidth);
+
+// Float to collapse white-space for proper grid alignment
+.controls-row [class*="span"],
+// Redeclare the fluid grid collapse since we undo the float for inputs
+.row-fluid .controls-row [class*="span"] {
+  float: right;
+}
+
+
+// HELP TEXT
+// ---------
+
+.help-inline {
+  padding-left: 0;
+  padding-right: 5px;
+}
+
+
+// INPUT GROUPS
+// ------------
+
+// Allow us to put symbols and text within the input field for a cleaner look
+.input-append,
+.input-prepend {
+  input,
+  select,
+  .uneditable-input {
+    *margin-left: inherit;
+    *margin-right: 0;
+    .border-radius(0 @inputBorderRadius @inputBorderRadius);
+  }
+}
+
+.input-prepend {
+  .add-on,
+  .btn {
+    margin-left: 0;
+    margin-right: -1px;
+  }
+  .add-on:first-child,
+  .btn:first-child {
+    // FYI, `.btn:first-child` accounts for a button group that's prepended
+    .border-radius(0 @inputBorderRadius @inputBorderRadius 0);
+  }
+}
+
+.input-append {
+  input,
+  select,
+  .uneditable-input {
+    .border-radius(0 @inputBorderRadius @inputBorderRadius 0);
+    + .btn-group .btn:last-child {
+      .border-radius(0 0 @inputBorderRadius @inputBorderRadius);
+    }
+  }
+  .add-on,
+  .btn,
+  .btn-group {
+    margin-left: 0;
+    margin-right: -1px;
+  }
+  .add-on:last-child,
+  .btn:last-child,
+  .btn-group:last-child > .dropdown-toggle {
+    .border-radius(@inputBorderRadius 0 0 @inputBorderRadius);
+  }
+}
+
+// Remove all border-radius for inputs with both prepend and append
+.input-prepend.input-append {
+  input,
+  select,
+  .uneditable-input {
+    .border-radius(0);
+    + .btn-group .btn {
+      .border-radius(0 @inputBorderRadius @inputBorderRadius 0);
+    }
+  }
+  .add-on:first-child,
+  .btn:first-child {
+    margin-left: -1px;
+    margin-right: inherit;
+    .border-radius(0 @inputBorderRadius @inputBorderRadius 0);
+  }
+  .add-on:last-child,
+  .btn:last-child {
+    margin-right: -1px;
+    margin-left: inherit;
+    .border-radius(@inputBorderRadius 0 0 @inputBorderRadius);
+  }
+  .btn-group:first-child {
+    margin-left: inherit;
+    margin-right: 0;
+  }
+}
+
+
+// SEARCH FORM
+// -----------
+
+.form-search .input-append .search-query {
+  .border-radius(14px 14px 0 0);
+}
+.form-search .input-append .btn {
+  .border-radius(0 0 14px 14px);
+}
+.form-search .input-prepend .search-query {
+  .border-radius(0 0 14px 14px);
+}
+.form-search .input-prepend .btn {
+  .border-radius(14px 14px 0 0);
+}
+
+
+// HORIZONTAL & VERTICAL FORMS
+// ---------------------------
+
+// Common properties
+// -----------------
+
+// Inline checkbox/radio labels (remove padding on left)
+.form-search .radio,
+.form-search .checkbox,
+.form-inline .radio,
+.form-inline .checkbox {
+  padding-left: inherit;
+  padding-right: 0;
+}
+// Remove float and margin, set to inline-block
+.form-search .radio input[type="radio"],
+.form-search .checkbox input[type="checkbox"],
+.form-inline .radio input[type="radio"],
+.form-inline .checkbox input[type="checkbox"] {
+  float: right;
+  margin-right: 0;
+  margin-left: 3px;
+}
+
+// Horizontal-specific styles
+// --------------------------
+
+.form-horizontal {
+  // Float the labels right
+  .control-label {
+    float: right;
+    text-align: left;
+  }
+  // Move over all input controls and content
+  .controls {
+    // Super jank IE7 fix to ensure the inputs in .input-append and input-prepend
+    // don't inherit the margin of the parent, in this case .controls
+    *padding-left: inherit;
+    *padding-right: 20px;
+    margin-left: inherit;
+    margin-right: @horizontalComponentOffset;
+    *margin-left: inherit;
+    *margin-right: 0;
+    &:first-child {
+      *padding-left: inherit;
+      *padding-right: @horizontalComponentOffset;
+    }
+  }
+  // Move over buttons in .form-actions to align with .controls
+  .form-actions {
+    padding-left: inherit;
+    padding-right: @horizontalComponentOffset;
+  }
+}

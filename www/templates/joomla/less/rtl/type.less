@@ -1,0 +1,82 @@
+//
+// Typography
+// --------------------------------------------------
+
+
+// Emphasis & misc
+// -------------------------
+
+// Utility classes
+.text-left           { text-align: right; }
+.text-right          { text-align: left; }
+
+
+// Lists
+// --------------------------------------------------
+
+// Unordered and Ordered lists
+ul, ol {
+  margin: 0 25px @baseLineHeight / 2 0;
+}
+
+// Remove default list styles
+ul.unstyled,
+ol.unstyled {
+  margin-left: inherit;
+  margin-right: 0;
+}
+
+// Single-line list items
+ul.inline,
+ol.inline {
+  margin-left: inherit;
+  margin-right: 0;
+}
+
+dd {
+  margin-left: inherit;
+  margin-right: @baseLineHeight / 2;
+}
+// Horizontal layout (like forms)
+.dl-horizontal {
+  dt {
+    float: right;
+    clear: right;
+    text-align: left;
+  }
+  dd {
+    margin-left: inherit;
+    margin-right: @horizontalComponentOffset;
+  }
+}
+
+// MISC
+// ----
+
+// Blockquotes
+blockquote {
+  padding: 0 15px 0 0;
+  border-left: inherit;
+  border-right: 5px solid @grayLighter;
+
+  // Float right with text-align: right
+  &.pull-right {
+    float: left;
+    padding-right: 0;
+    padding-left: 15px;
+    border-right: 0;
+    border-left: 5px solid @grayLighter;
+    p,
+    small {
+      text-align: left;
+    }
+    small {
+      &:before {
+        content: '\00A0 \2014';
+      }
+      &:after {
+        content: '';
+      }
+    }
+  }
+}

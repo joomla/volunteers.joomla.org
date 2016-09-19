@@ -1,0 +1,31 @@
+//
+// Responsive: Large desktop and up
+// --------------------------------------------------
+
+
+@media (min-width: 1200px) {
+
+  // Fixed grid
+  #grid-rtl > .core(@gridColumnWidth1200, @gridGutterWidth1200);
+
+  // Fluid grid
+  #grid-rtl > .fluid(@fluidGridColumnWidth1200, @fluidGridGutterWidth1200);
+
+  // Input grid
+  #grid-rtl > .input(@gridColumnWidth1200, @gridGutterWidth1200);
+
+  // Thumbnails
+  .thumbnails {
+    margin-left: inherit;
+    margin-right: -@gridGutterWidth1200;
+  }
+  .thumbnails > li {
+    margin-left: inherit;
+    margin-right: @gridGutterWidth1200;
+  }
+  .row-fluid .thumbnails {
+    margin-left: inherit;
+    margin-right: 0;
+  }
+
+}

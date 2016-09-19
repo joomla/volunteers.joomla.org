@@ -1,0 +1,123 @@
+//
+// Mixins for RTL
+// --------------------------------------------------
+
+
+// Grid System
+// -----------
+
+// Table columns
+.tableColumnsRtl() {
+  margin-left: inherit;
+  margin-right: 0; // undo default grid column styles
+}
+
+// Make a Grid
+// Use .makeRow and .makeColumn to assign semantic layouts grid system behavior
+.makeRowRtl() {
+  margin-right: @gridGutterWidth * -1;
+  .clearfix();
+}
+.makeColumnRtl(@columns: 1, @offset: 0) {
+  float: right;
+  margin-right: (@gridColumnWidth * @offset) + (@gridGutterWidth * (@offset - 1)) + (@gridGutterWidth * 2);
+  width: (@gridColumnWidth * @columns) + (@gridGutterWidth * (@columns - 1));
+}
+
+// The Grid
+#grid-rtl {
+
+  .core (@gridColumnWidth, @gridGutterWidth) {
+
+    .offsetX (@index) when (@index > 0) {
+      .offset@{index} { .offset(@index); }
+      .offsetX(@index - 1);
+    }
+    .offsetX (0) {}
+
+    .offset (@columns) {
+      margin-left: inherit;
+      margin-right: (@gridColumnWidth * @columns) + (@gridGutterWidth * (@columns + 1));
+    }
+
+    .row {
+      margin-left: inherit;
+      margin-right: @gridGutterWidth * -1;
+    }
+
+    [class*="span"] {
+      float: right;
+      margin-left: inherit;
+      margin-right: @gridGutterWidth;
+    }
+
+    // generate .offsetX
+    .offsetX (@gridColumns);
+
+  }
+
+  .fluid (@fluidGridColumnWidth, @fluidGridGutterWidth) {
+
+    .offsetX (@index) when (@index > 0) {
+      .offset@{index} { .offset(@index); }
+      .offset@{index}:first-child { .offsetFirstChild(@index); }
+      .offsetX(@index - 1);
+    }
+    .offsetX (0) {}
+
+    .offset (@columns) {
+      margin-left: inherit;
+      *margin-left: inherit;
+      margin-right: (@fluidGridColumnWidth * @columns) + (@fluidGridGutterWidth * (@columns - 1)) + (@fluidGridGutterWidth*2);
+  	  *margin-right: (@fluidGridColumnWidth * @columns) + (@fluidGridGutterWidth * (@columns - 1)) - (.5 / @gridRowWidth * 100 * 1%) + (@fluidGridGutterWidth*2) - (.5 / @gridRowWidth * 100 * 1%);
+    }
+
+    .offsetFirstChild (@columns) {
+      margin-left: inherit;
+      *margin-left: inherit;
+      margin-right: (@fluidGridColumnWidth * @columns) + (@fluidGridGutterWidth * (@columns - 1)) + (@fluidGridGutterWidth);
+      *margin-right: (@fluidGridColumnWidth * @columns) + (@fluidGridGutterWidth * (@columns - 1)) - (.5 / @gridRowWidth * 100 * 1%) + @fluidGridGutterWidth - (.5 / @gridRowWidth * 100 * 1%);
+    }
+
+    .row-fluid {
+      [class*="span"] {
+        float: right;
+        margin-left: 0;
+        *margin-left: 0;
+        margin-right: @fluidGridGutterWidth;
+        *margin-right: @fluidGridGutterWidth - (.5 / @gridRowWidth * 100 * 1%);
+      }
+      [class*="span"]:first-child {
+        margin-left: inherit;
+        margin-right: 0;
+      }
+
+      // Space grid-sized controls properly if multiple per line
+      .controls-row [class*="span"] + [class*="span"] {
+        margin-left: inherit;
+        margin-right: @fluidGridGutterWidth;
+      }
+
+      // generate .offsetX
+      .offsetX (@gridColumns);
+    }
+
+  }
+
+  .input(@gridColumnWidth, @gridGutterWidth) {
+
+    input,
+    textarea,
+    .uneditable-input {
+      margin-left: inherit;
+      margin-right: 0; // override margin-right from core grid system
+    }
+
+    // Space grid-sized controls properly if multiple per line
+    .controls-row [class*="span"] + [class*="span"] {
+      margin-left: inherit;
+      margin-right: @gridGutterWidth;
+    }
+
+  }
+}

@@ -1,3 +1,9 @@
+/*
+ * Joomla.org site template
+ *
+ * @copyright  Copyright (C) 2005 - 2016 Open Source Matters, Inc. All rights reserved.
+ * @license    GNU General Public License version 2 or later
+ */
 /* >>> JUI >>> */
 
 /* <<< JUI <<< */
@@ -9233,6 +9239,10 @@ h6 {
   margin: 0 0 10px 10px;
 }
 
+.item-page {
+  word-wrap: break-word;
+}
+
 /* List */
 
 .list-item-title {
@@ -9702,6 +9712,12 @@ div#nav-search form input[type="text"] {
 
 .soc-github3:before {
   content: "\ef0f";
+}
+
+@media (min-width: 321px) and (max-width: 480px) {
+  .btn-toolbar .btn-group {
+    width: 100%;
+  }
 }
 
 @media (max-width: 480px) {

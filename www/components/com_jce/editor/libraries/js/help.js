@@ -1,4 +1,4 @@
-/* JCE Editor - 2.5.25 | 25 August 2016 | http://www.joomlacontenteditor.net | Copyright (C) 2006 - 2016 Ryan Demmer. All rights reserved | GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html */
+/* JCE Editor - 2.5.26 | 15 September 2016 | http://www.joomlacontenteditor.net | Copyright (C) 2006 - 2016 Ryan Demmer. All rights reserved | GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html */
 (function($){$.jce={Help:{options:{url:'',key:[],pattern:''},init:function(options){var key,id,n,self=this;$.extend(this.options,options);$('body').addClass('ui-jce');if($('#help-menu')){$('dd.subtopics','#help-menu').click(function(){$(this).parent('dl').children('dl').addClass('hidden');$(this).next('dl').removeClass('hidden');});this.nodes=$('dd[id]','#help-menu').click(function(e){if(this.id==''){return;}
 $('dd.loading','#help-menu').removeClass('loading');self.loadItem(e.target);});$('iframe#help-iframe').load(function(){$('.loading','#help-menu').removeClass('loading');});key=this.options.key;if(!key.length){n=this.nodes[0];}else{id=key.join('.');n=document.getElementById(id)||this.nodes[0];}
 if(n){this.loadItem(n);}}

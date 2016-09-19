@@ -1,4 +1,4 @@
-/* JCE Editor - 2.5.25 | 25 August 2016 | http://www.joomlacontenteditor.net | Copyright (C) 2006 - 2016 Ryan Demmer. All rights reserved | GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html */
+/* JCE Editor - 2.5.26 | 15 September 2016 | http://www.joomlacontenteditor.net | Copyright (C) 2006 - 2016 Ryan Demmer. All rights reserved | GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html */
 (function(tinymce,tinyMCEPopup,$){function selectByValue(form_obj,field_name,value,add_custom,ignore_case){if(!form_obj||!form_obj.elements[field_name])
 return;if(!value)
 value="";var sel=form_obj.elements[field_name];var found=false;for(var i=0;i<sel.options.length;i++){var option=sel.options[i];if(option.value==value||(ignore_case&&option.value.toLowerCase()==value.toLowerCase())){option.selected=true;found=true;}else

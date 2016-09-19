@@ -2,12 +2,12 @@
 <extension type="component" version="2.5" method="upgrade">
     <name>JCE</name>
     <author>Ryan Demmer</author>
-    <creationDate>25 August 2016</creationDate>
+    <creationDate>15 September 2016</creationDate>
     <copyright>Copyright (C) 2006 - 2016 Ryan Demmer. All rights reserved</copyright>
     <license>GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html</license>
     <authorEmail>info@joomlacontenteditor.net</authorEmail>
     <authorUrl>www.joomlacontenteditor.net</authorUrl>
-    <version>2.5.25</version>
+    <version>2.5.26</version>
     <description>WF_ADMIN_DESC</description>
 
     <scriptfile>install.script.php</scriptfile>

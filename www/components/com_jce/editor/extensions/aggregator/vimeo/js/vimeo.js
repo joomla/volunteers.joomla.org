@@ -1,4 +1,4 @@
-/* JCE Editor - 2.5.25 | 25 August 2016 | http://www.joomlacontenteditor.net | Copyright (C) 2006 - 2016 Ryan Demmer. All rights reserved | GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html */
+/* JCE Editor - 2.5.26 | 15 September 2016 | http://www.joomlacontenteditor.net | Copyright (C) 2006 - 2016 Ryan Demmer. All rights reserved | GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html */
 WFAggregator.add('vimeo',{params:{width:400,height:225,embed:true},props:{color:'',autoplay:0,loop:0,portrait:1,title:1,byline:1,fullscreen:1},setup:function(){$('#vimeo_embed').toggle(this.params.embed);},getTitle:function(){return this.title||this.name;},getType:function(){return $('#vimeo_embed').is(':checked')?'flash':'iframe';},isSupported:function(v){if(typeof v=='object'){v=v.src||v.data||'';}
 if(/vimeo(.+)?\/(.+)/.test(v)){if(/\/external\//.test(v)){return false;}
 return'vimeo';}

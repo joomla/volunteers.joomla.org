@@ -1,4 +1,4 @@
-/* JCE Editor - 2.5.25 | 25 August 2016 | http://www.joomlacontenteditor.net | Copyright (C) 2006 - 2016 Ryan Demmer. All rights reserved | GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html */
+/* JCE Editor - 2.5.26 | 15 September 2016 | http://www.joomlacontenteditor.net | Copyright (C) 2006 - 2016 Ryan Demmer. All rights reserved | GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html */
 (function(tinymce,tinyMCEPopup,$){function convertRGBToHex(col){var re=new RegExp("rgb\\s*\\(\\s*([0-9]+).*,\\s*([0-9]+).*,\\s*([0-9]+).*\\)","gi");var rgb=col.replace(re,"$1,$2,$3").split(',');if(rgb.length==3){r=parseInt(rgb[0]).toString(16);g=parseInt(rgb[1]).toString(16);b=parseInt(rgb[2]).toString(16);r=r.length==1?'0'+r:r;g=g.length==1?'0'+g:g;b=b.length==1?'0'+b:b;return"#"+r+g+b;}
 return col;}
 function convertHexToRGB(col){if(col.indexOf('#')!=-1){col=col.replace(new RegExp('[^0-9A-F]','gi'),'');r=parseInt(col.substring(0,2),16);g=parseInt(col.substring(2,4),16);b=parseInt(col.substring(4,6),16);return"rgb("+r+","+g+","+b+")";}

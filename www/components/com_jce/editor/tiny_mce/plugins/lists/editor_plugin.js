@@ -1,4 +1,4 @@
-/* JCE Editor - 2.5.25 | 25 August 2016 | http://www.joomlacontenteditor.net | Copyright (C) 2006 - 2016 Ryan Demmer. All rights reserved | © Copyright, Moxiecode Systems AB | http://www.tinymce.com/license */
+/* JCE Editor - 2.5.26 | 15 September 2016 | http://www.joomlacontenteditor.net | Copyright (C) 2006 - 2016 Ryan Demmer. All rights reserved | © Copyright, Moxiecode Systems AB | http://www.tinymce.com/license */
 (function(){function isListNode(node){return node&&(/^(OL|UL|DL)$/).test(node.nodeName);}
 function isFirstChild(node){return node.parentNode.firstChild==node;}
 function isLastChild(node){return node.parentNode.lastChild==node;}

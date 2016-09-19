@@ -1,4 +1,4 @@
-/* JCE Editor - 2.5.25 | 25 August 2016 | http://www.joomlacontenteditor.net | Copyright (C) 2006 - 2016 Ryan Demmer. All rights reserved | © Copyright, Moxiecode Systems AB | http://www.tinymce.com/license */
+/* JCE Editor - 2.5.26 | 15 September 2016 | http://www.joomlacontenteditor.net | Copyright (C) 2006 - 2016 Ryan Demmer. All rights reserved | © Copyright, Moxiecode Systems AB | http://www.tinymce.com/license */
 (function(){var Event=tinymce.dom.Event,each=tinymce.each,DOM=tinymce.DOM;tinymce.create('tinymce.plugins.ContextMenu',{init:function(ed){var t=this,showMenu,contextmenuNeverUseNative,realCtrlKey,hideMenu;t.editor=ed;contextmenuNeverUseNative=ed.settings.contextmenu_never_use_native;t.onContextMenu=new tinymce.util.Dispatcher(this);hideMenu=function(e){hide(ed,e);};showMenu=ed.onContextMenu.add(function(ed,e){if((realCtrlKey!==0?realCtrlKey:e.ctrlKey)&&!contextmenuNeverUseNative)
 return;Event.cancel(e);if(e.target.nodeName=='IMG'){ed.selection.select(e.target);}
 if(e.target.nodeName=='TD'||e.target.nodeName=='TH'){if(tinymce.isWebKit){var n=e.target,rng=ed.selection.getRng();var end=n.lastChild;while(end.lastChild){end=end.lastChild;}

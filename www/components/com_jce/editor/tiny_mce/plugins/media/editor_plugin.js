@@ -1,4 +1,4 @@
-/* JCE Editor - 2.5.25 | 25 August 2016 | http://www.joomlacontenteditor.net | Copyright (C) 2006 - 2016 Ryan Demmer. All rights reserved | GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html */
+/* JCE Editor - 2.5.26 | 15 September 2016 | http://www.joomlacontenteditor.net | Copyright (C) 2006 - 2016 Ryan Demmer. All rights reserved | GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html */
 (function(){var each=tinymce.each,extend=tinymce.extend,JSON=tinymce.util.JSON;var Node=tinymce.html.Node;var Styles=new tinymce.html.Styles();function toArray(obj){var undef,out,i;if(obj&&!obj.splice){out=[];for(i=0;true;i++){if(obj[i])
 out[i]=obj[i];else
 break;}
@@ -14,7 +14,7 @@ if(o.name==='img'&&/mceItemIframe/.test(o.node.className)){o.name='iframe';}});}
 if(!ed.settings.compress.css)
 ed.dom.loadCSS(url+"/css/content.css");});ed.onBeforeSetContent.add(function(ed,o){var h=o.content;h=h.replace(/<(audio|embed|object|video|iframe)([^>]*?)>([\w\W]+?)<\/\1>/gi,function(a,b,c,d){d=d.replace(/<!--\[if([^\]]*)\]>(<!)?-->/gi,'<![if$1]>');d=d.replace(/<!\[if([^\]]+)\]>/gi,function(a,b){return'<comment data-comment-condition="[if'+b+']">';});d=d.replace(/<!(--<!)?\[endif\](--)?>/gi,'</comment>');return'<'+b+c+'>'+d+'</'+b+'>';});if(ed.settings.schema==="html5-strict"){h=h.replace(/frameborder="(0|1)"/gi,function(a,b){if(parseInt(b)===0){return'seamless="seamless"';}
 return"";});}
-o.content=h;});},getInfo:function(){return{longname:'Media',author:'Ryan Demmer',authorurl:'http://www.joomlacontenteditor.net',infourl:'http://www.joomlacontenteditor.net',version:'2.5.25'};},convertUrl:function(url,force_absolute){var self=this,ed=self.editor,settings=ed.settings,converter=settings.url_converter,scope=settings.url_converter_scope||self;if(!url)
+o.content=h;});},getInfo:function(){return{longname:'Media',author:'Ryan Demmer',authorurl:'http://www.joomlacontenteditor.net',infourl:'http://www.joomlacontenteditor.net',version:'2.5.26'};},convertUrl:function(url,force_absolute){var self=this,ed=self.editor,settings=ed.settings,converter=settings.url_converter,scope=settings.url_converter_scope||self;if(!url)
 return url;var parts,query='',n=url.indexOf('?');if(n===-1){url=url.replace(/&amp;/g,'&');n=url.indexOf('&');}
 if(n>0){query=url.substring(n+1,url.length),url=url.substr(0,n);}
 if(force_absolute){url=ed.documentBaseURI.toAbsolute(url);}else{url=converter.call(scope,url,'src','object');}

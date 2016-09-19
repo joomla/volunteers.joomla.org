@@ -1,4 +1,4 @@
-/* JCE Editor - 2.5.25 | 25 August 2016 | http://www.joomlacontenteditor.net | Copyright (C) 2006 - 2016 Ryan Demmer. All rights reserved | GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html */
+/* JCE Editor - 2.5.26 | 15 September 2016 | http://www.joomlacontenteditor.net | Copyright (C) 2006 - 2016 Ryan Demmer. All rights reserved | GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html */
 WFAggregator.add('youtube',{params:{width:560,height:315,embed:true},props:{rel:1,autohide:2,autoplay:0,controls:1,enablejsapi:0,loop:0,playlist:'',start:'',privacy:0},setup:function(){},getTitle:function(){return this.title||this.name;},getType:function(){return $('#youtube_embed:visible').is(':checked')?'flash':'iframe';},isSupported:function(v){if(typeof v=='object'){v=v.src||v.data||'';}
 if(/youtu(\.)?be(.+)?\/(.+)/.test(v)){return'youtube';}
 return false;},getValues:function(src){var self=this,data={},args={},type=this.getType(),id,query={};var u=this.parseURL(src);if(u.query){query=$.String.query(u.query);}

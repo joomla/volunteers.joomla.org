@@ -1,4 +1,4 @@
-/* JCE Editor - 2.5.25 | 25 August 2016 | http://www.joomlacontenteditor.net | Copyright (C) 2006 - 2016 Ryan Demmer. All rights reserved | GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html */
+/* JCE Editor - 2.5.26 | 15 September 2016 | http://www.joomlacontenteditor.net | Copyright (C) 2006 - 2016 Ryan Demmer. All rights reserved | GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html */
 WFAggregator.add('dailymotion',{params:{width:480,height:270,autoPlay:false},props:{autoPlay:0,start:0},setup:function(){$('#dailymotion_autoPlay').toggle(this.params.autoPlay);},getTitle:function(){return this.title||this.name;},getType:function(){return'iframe';},isSupported:function(v){if(typeof v=='object'){v=v.src||v.data||'';}
 if(/dai\.?ly(motion)?(\.com)?/.test(v)){return'dailymotion';}
 return false;},getValues:function(src){var self=this,data={},args={},type=this.getType(),id='';if(src.indexOf('=')!==-1){$.extend(args,$.String.query(src));}

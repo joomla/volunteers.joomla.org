@@ -1,4 +1,4 @@
-/* JCE Editor - 2.5.25 | 25 August 2016 | http://www.joomlacontenteditor.net | Copyright (C) 2006 - 2016 Ryan Demmer. All rights reserved | © Copyright, Moxiecode Systems AB | http://www.tinymce.com/license */
+/* JCE Editor - 2.5.26 | 15 September 2016 | http://www.joomlacontenteditor.net | Copyright (C) 2006 - 2016 Ryan Demmer. All rights reserved | © Copyright, Moxiecode Systems AB | http://www.tinymce.com/license */
 (function(){var cookie=tinymce.util.Cookie;tinymce.create('tinymce.plugins.VisualBlocks',{init:function(ed,url){var cssId;if(!window.NodeList){return;}
 var state=cookie.get('wf_visualblocks_state');if(state&&tinymce.is(state,'string')){if(state=='null'){state=0;}
 state=parseFloat(state);}

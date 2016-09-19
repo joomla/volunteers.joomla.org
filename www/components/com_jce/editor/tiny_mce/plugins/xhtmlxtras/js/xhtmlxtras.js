@@ -1,4 +1,4 @@
-/* JCE Editor - 2.5.25 | 25 August 2016 | http://www.joomlacontenteditor.net | Copyright (C) 2006 - 2016 Ryan Demmer. All rights reserved | GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html */
+/* JCE Editor - 2.5.26 | 15 September 2016 | http://www.joomlacontenteditor.net | Copyright (C) 2006 - 2016 Ryan Demmer. All rights reserved | GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html */
 var XHTMLXtrasDialog={settings:{},init:function(){tinyMCEPopup.resizeToInnerSize();var ed=tinyMCEPopup.editor,se=ed.selection,n=se.getNode(),element=tinyMCEPopup.getWindowArg('element');if(element){n=ed.dom.getParent(n,element);}
 TinyMCE_Utils.fillClassList('classlist');$.Plugin.init();if(n){var text=n.textContent||n.innerText||'';if(!se.isCollapsed()||text==se.getContent({format:'text'})){$(':input').each(function(){var k=$(this).attr('id');if(/on(click|dblclick)/.test(k)){k='data-mce-'+k;}
 if(k==="classes"||k==="classlist"){k="class";}

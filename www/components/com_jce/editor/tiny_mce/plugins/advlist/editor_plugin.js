@@ -1,4 +1,4 @@
-/* JCE Editor - 2.5.25 | 25 August 2016 | http://www.joomlacontenteditor.net | Copyright (C) 2006 - 2016 Ryan Demmer. All rights reserved | © Copyright, Moxiecode Systems AB | http://www.tinymce.com/license */
+/* JCE Editor - 2.5.26 | 15 September 2016 | http://www.joomlacontenteditor.net | Copyright (C) 2006 - 2016 Ryan Demmer. All rights reserved | © Copyright, Moxiecode Systems AB | http://www.tinymce.com/license */
 (function(){var each=tinymce.each,undef;tinymce.create('tinymce.plugins.AdvListPlugin',{init:function(ed,url){var t=this;t.editor=ed;function buildFormats(str){var formats=[];each(str.split(/,/),function(type){var title=type.replace(/-/g,'_');if(type==='default'){title='def';}
 formats.push({title:'advlist.'+title,styles:{listStyleType:type==='default'?'':type}});});return formats;}
 var numlist=ed.getParam("advlist_number_styles","default,lower-alpha,lower-greek,lower-roman,upper-alpha,upper-roman");if(numlist){t.numlist=buildFormats(numlist);}

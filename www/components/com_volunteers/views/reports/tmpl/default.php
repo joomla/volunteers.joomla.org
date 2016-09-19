@@ -75,7 +75,7 @@ JHtml::_('formbehavior.chosen', 'select');
 	<?php endif; ?>
 
 	<div class="row-fluid">
-		<a class="btn pull-right btn-warning" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=reports&filter_category=&format=feed&type=rss') ?>">
+		<a class="btn pull-right btn-warning" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=reports&filter_category=' . $this->state->get('filter.category') . '&format=feed&type=rss') ?>">
 			<span class="icon-feed"></span> <?php echo JText::_('COM_VOLUNTEERS_RSSFEED') ?>
 		</a>
 	</div>

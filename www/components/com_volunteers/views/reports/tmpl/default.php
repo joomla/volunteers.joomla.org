@@ -24,7 +24,7 @@ JHtml::_('formbehavior.chosen', 'select');
 			</div>
 		</div>
 		<div class="page-header">
-			<h1><?php echo JText::_('COM_VOLUNTEERS_TITLE_REPORTS') ?></h1>
+			<h1><?php echo JText::_('COM_VOLUNTEERS_TITLE_REPORTS') ?><?php if ($this->category): ?>: <?php echo $this->category; ?><?php endif; ?></h1>
 		</div>
 	</div>
 

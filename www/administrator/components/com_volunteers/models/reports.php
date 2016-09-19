@@ -216,4 +216,44 @@ class VolunteersModelReports extends JModelList
 
 		return $items;
 	}
+
+	/**
+	 * Method to get Report Category.
+	 *
+	 * @return  mixed  Data object on success, false on failure.
+	 */
+	public function getCategory()
+	{
+		$category = $this->getState('filter.category');
+
+		if (empty($category))
+		{
+			return;
+		}
+
+		// Get the name from the category
+		$selection = explode('.', $category);
+
+		$db = $this->getDbo();
+
+		if ($selection[0] == 'd')
+		{
+			$query = $db->getQuery(true)
+				->select('title')
+				->from('#__volunteers_departments')
+				->where($db->quoteName('id') . ' = ' . (int) $selection[1]);
+		}
+
+		if ($selection[0] == 't')
+		{
+			$query = $db->getQuery(true)
+				->select('title')
+				->from('#__volunteers_teams')
+				->where($db->quoteName('id') . ' = ' . (int) $selection[1]);
+		}
+
+		$db->setQuery($query);
+
+		return $db->loadResult();
+	}
 }

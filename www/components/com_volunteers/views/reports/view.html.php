@@ -34,6 +34,7 @@ class VolunteersViewReports extends JViewLegacy
 		$this->items      = $this->get('Items');
 		$this->pagination = $this->get('Pagination');
 		$this->user       = JFactory::getUser();
+		$this->category   = $this->get('Category');
 
 		// Check for errors.
 		if (count($errors = $this->get('Errors')))

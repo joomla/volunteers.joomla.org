@@ -21,10 +21,14 @@ class VolunteersViewReports extends JViewLegacy
 	public function display($tpl = null)
 	{
 		// Parameters
-		$app       = JFactory::getApplication();
-		$doc       = JFactory::getDocument();
-		$siteEmail = $app->get('mailfrom');
-		$doc->link = JRoute::_('index.php?option=com_volunteers&view=reports');
+		$app            = JFactory::getApplication();
+		$doc            = JFactory::getDocument();
+		$siteEmail      = $app->get('mailfrom');
+		$this->category = $this->get('Category');
+
+		// Set document data
+		$doc->title = ($this->category) ? JText::_('COM_VOLUNTEERS_TITLE_REPORTS') . ': ' . $this->category : JText::_('COM_VOLUNTEERS_TITLE_REPORTS');
+		$doc->link  = JRoute::_('index.php?option=com_volunteers&view=reports');
 
 		// Get some data from the model
 		$app->input->set('limit', $app->get('feed_limit'));
@@ -36,8 +40,8 @@ class VolunteersViewReports extends JViewLegacy
 			$item              = new JFeedItem;
 			$item->title       = $this->escape($row->title);
 			$item->link        = JRoute::_('index.php?option=com_volunteers&view=report&id=' . $row->id);
-			$item->description = $row->description;
-			$item->date        = $row->publish_up;
+			$item->description = JHTML::_('string.truncate', $row->description, 1000);
+			$item->date        = $row->created;
 			$item->category    = $row->department_title;
 			$item->author      = $row->volunteer_name;
 			$item->authorEmail = $siteEmail;

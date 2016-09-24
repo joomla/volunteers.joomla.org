@@ -174,4 +174,8 @@
 	.well {
 		margin-top: 10px;
 	}
+
+	.volunteers .span3:nth-child(3n) {
+		clear: left
+	}
 }

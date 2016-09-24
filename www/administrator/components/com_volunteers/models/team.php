@@ -298,15 +298,15 @@ class VolunteersModelTeam extends JModelAdmin
 			switch ($item->position)
 			{
 				case 2:
-					$leaders[$item->volunteer_name] = $item;
+					$leaders[$item->volunteer_name . $item->date_ended] = $item;
 					break;
 
 				case 7:
-					$assistants[$item->volunteer_name] = $item;
+					$assistants[$item->volunteer_name . $item->date_ended] = $item;
 					break;
 
 				default:
-					$volunteers[$item->volunteer_name] = $item;
+					$volunteers[$item->volunteer_name . $item->date_ended] = $item;
 					break;
 			}
 		}

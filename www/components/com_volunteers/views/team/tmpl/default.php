@@ -7,6 +7,10 @@
 
 // No direct access.
 defined('_JEXEC') or die;
+
+JHtml::_('bootstrap.framework');
+$this->document->addScriptDeclaration("jQuery(function($){$('#tab-container a').click(function(e){e.preventDefault();$(this).tab('show');});});");
+
 ?>
 <div class="row-fluid">
 	<div class="filter-bar">
@@ -65,7 +69,7 @@ defined('_JEXEC') or die;
 <div class="row-fluid">
 	<div class="span12">
 
-		<ul class="nav nav-tabs">
+		<ul id="tab-container" class="nav nav-tabs">
 			<?php if ($this->item->active): ?>
 				<li>
 					<a href="#members" data-toggle="tab"><?php echo JText::_('COM_VOLUNTEERS_TAB_MEMBERS') ?></a>

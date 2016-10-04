@@ -9,7 +9,7 @@
 defined('_JEXEC') or die;
 
 JHtml::_('bootstrap.framework');
-$this->document->addScriptDeclaration("jQuery(function($){$('#tab-container a').click(function(e){e.preventDefault();$(this).tab('show');});});");
+$this->document->addScriptDeclaration("jQuery(function(\$){\$('#tab-container a').click(function(e){e.preventDefault();\$(this).tab('show');});});");
 
 ?>
 <div class="row-fluid">

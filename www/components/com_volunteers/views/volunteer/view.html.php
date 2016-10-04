@@ -47,6 +47,9 @@ class VolunteersViewVolunteer extends JViewLegacy
 			return false;
 		}
 
+		// Manipulate form
+		$this->_manipulateForm();
+
 		// Prepare document
 		$this->_prepareDocument();
 
@@ -103,5 +106,19 @@ class VolunteersViewVolunteer extends JViewLegacy
 		// Add to pathway
 		$pathway = JFactory::getApplication()->getPathway();
 		$pathway->addItem($this->item->name, $itemURL);
+	}
+
+	/**
+	 * Manipulates the form.
+	 *
+	 * @return  void.
+	 */
+	protected function _manipulateForm()
+	{
+		// Clear birthday field if not set
+		if ($this->item->birthday == '0000-00-00')
+		{
+			$this->form->setValue('birthday', null, null);
+		}
 	}
 }

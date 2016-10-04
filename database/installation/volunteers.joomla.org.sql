@@ -2520,6 +2520,7 @@ CREATE TABLE `vol_volunteers_volunteers` (
   `linkedin` varchar(255) NOT NULL,
   `website` varchar(255) NOT NULL,
   `github` varchar(255) NOT NULL,
+  `birthday` DATE  NOT NULL DEFAULT '0000-00-00',
   `notes` mediumtext NOT NULL,
   `spam` int(10) NOT NULL DEFAULT '0',
   `state` tinyint(3) NOT NULL DEFAULT '1',

@@ -55,6 +55,20 @@ JFactory::getDocument()->addScriptDeclaration("
 
 		<hr>
 
+		<h3><?php echo JText::_('COM_VOLUNTEERS_PROFILE_BIRTHDAY') ?></h3>
+
+		<div class="control-group">
+			<div class="controls">
+				<div class="alert alert-info">
+					<?php echo JText::_('COM_VOLUNTEERS_FIELD_BIRTHDAY_DESC') ?>
+				</div>
+			</div>
+		</div>
+
+		<?php echo $this->form->renderField('birthday'); ?>
+
+		<hr>
+
 		<h3><?php echo JText::_('COM_VOLUNTEERS_PROFILE_PHOTO') ?></h3>
 
 		<div class="control-group">

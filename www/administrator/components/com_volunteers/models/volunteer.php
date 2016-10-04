@@ -165,8 +165,8 @@ class VolunteersModelVolunteer extends JModelAdmin
 		$dataUser = array(
 			'name'      => $data['firstname'] . ' ' . $data['lastname'],
 			'username'  => JStringPunycode::emailToPunycode($data['email']),
-			'password'  => $data['password1'],
-			'password2' => $data['password2'],
+			'password'  => (isset($data['password1'])) ? $data['password1'] : '',
+			'password2' => (isset($data['password2'])) ? $data['password2'] : '',
 			'email'     => JStringPunycode::emailToPunycode($data['email'])
 		);
 

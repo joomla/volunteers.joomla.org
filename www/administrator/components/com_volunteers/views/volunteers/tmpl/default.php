@@ -163,6 +163,10 @@ if ($saveOrder)
 										<?php echo $item->country; ?>
 									<?php endif; ?>
 								</div>
+								<div class="small">
+									<span class="icon-calendar-3"></span>
+									<?php echo $item->birthday; ?>
+								</div>
 							</td>
 							<td>
 								<?php echo JHtml::_('string.truncate', $item->intro, 250); ?>

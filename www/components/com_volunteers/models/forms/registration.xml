@@ -154,6 +154,13 @@
                 filter="JComponentHelper::filterText"
                 label="COM_VOLUNTEERS_FIELD_JOOMLASTORY"
         />
+
+        <field
+                name="birthday"
+                type="calendar"
+                label="COM_VOLUNTEERS_FIELD_BIRTHDAY"
+                format="%b-%d"
+        />
     </fieldset>
 
     <field

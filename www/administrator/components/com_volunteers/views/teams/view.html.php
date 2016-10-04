@@ -93,19 +93,4 @@ class VolunteersViewTeams extends JViewLegacy
 			JToolbarHelper::preferences('com_volunteers');
 		}
 	}
-
-	/**
-	 * Returns an array of fields the table can be sorted by
-	 *
-	 * @return  array  Array containing the field name to sort by as the key and display text as value
-	 */
-	protected function getSortFields()
-	{
-		return array(
-			'a.ordering' => JText::_('JGRID_HEADING_ORDERING'),
-			'a.state'    => JText::_('JSTATUS'),
-			'a.title'    => JText::_('JGLOBAL_TITLE'),
-			'a.id'       => JText::_('JGRID_HEADING_ID')
-		);
-	}
 }

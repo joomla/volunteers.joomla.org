@@ -8,7 +8,9 @@
 // No direct access.
 defined('_JEXEC') or die;
 
-JHtml::script('com_volunteers/markerclusterer.js', false, true);
+JFactory::getDocument()->addScript('https://maps.googleapis.com/maps/api/js?key=AIzaSyC04czYnPuPFkO6eDAKX-j_lfrpanAAo-U');
+JFactory::getDocument()->addScript('media/com_volunteers/js/markerclusterer.js', 'text/javascript', true);
+JFactory::getDocument()->addScript('media/com_volunteers/js/oms.js', 'text/javascript', true);
 ?>
 
 <div class="row-fluid">
@@ -139,8 +141,6 @@ JHtml::script('com_volunteers/markerclusterer.js', false, true);
 	</div>
 </div>
 
-<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC04czYnPuPFkO6eDAKX-j_lfrpanAAo-U"></script>
-
 <script>
 	function initialise() {
 		var mapOptions = {
@@ -160,6 +160,7 @@ JHtml::script('com_volunteers/markerclusterer.js', false, true);
 				draggable: !("ontouchend" in document)
 			},
 			mcOptions = {
+				maxZoom: 14,
 				styles: [{
 					height: 53,
 					url: "media/com_volunteers/images/m1.png",
@@ -189,6 +190,7 @@ JHtml::script('com_volunteers/markerclusterer.js', false, true);
 			}
 
 		var map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+		var oms = new OverlappingMarkerSpiderfier(map, {keepSpiderfied: true, circleFootSeparation: 100});
 
 		map.addListener('click', function () {
 			map.set('draggable', true);
@@ -222,6 +224,7 @@ JHtml::script('com_volunteers/markerclusterer.js', false, true);
 
 			markers.push(marker);
 			bounds.extend(marker.position);
+			oms.addMarker(marker);
 		}
 
 		var markerCluster = new MarkerClusterer(map, markers, mcOptions);

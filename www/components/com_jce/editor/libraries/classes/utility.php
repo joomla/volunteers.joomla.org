@@ -359,7 +359,7 @@ abstract class WFUtility
                         $handle = imagecreatefromjpeg($image);
 
                         if (is_resource($handle)) {
-                            imagejpeg($handle, $image, 100);
+                            imagejpeg($handle, $image);
                             @imagedestroy($handle);
 
                             return true;
@@ -374,7 +374,7 @@ abstract class WFUtility
                             imagealphablending($handle, false);
                             imagesavealpha($handle, true);
 
-                            imagepng($handle, $image, 0);
+                            imagepng($handle, $image);
                             @imagedestroy($handle);
 
                             return true;

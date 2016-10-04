@@ -24,7 +24,7 @@ class WFEditor extends JObject
 {
     
     // Editor version
-    protected $_version = '2.5.26';
+    protected $_version = '2.5.27';
     
     // Editor instance
     protected static $instance;
@@ -112,16 +112,16 @@ class WFEditor extends JObject
         
         // Joomla! 1.6+
         if (method_exists('JUser', 'getAuthorisedGroups')) {
-            $keys = $user->getAuthorisedGroups();
+            $groups = $user->getAuthorisedGroups();
         } else {
-            $keys = array($user->gid);
+            $groups = array($user->gid);
         }
         
         return array(
             "option"  => $option,
             "area"    => $area,
             "device"  => $device,
-            "keys"    => $keys,
+            "groups"  => $groups,
             "plugin"  => $plugin
         );
     }
@@ -138,6 +138,8 @@ class WFEditor extends JObject
         
         if (!isset(self::$profile[$signature])) {
             $db = JFactory::getDBO();
+            $user = JFactory::getUser();
+            
             $query = $db->getQuery(true);
             
             if (is_object($query)) {
@@ -158,10 +160,10 @@ class WFEditor extends JObject
                 }
                 
                 // check user groups - a value should always be set
-                $groups = array_intersect($options["keys"], explode(',', $item->types));
+                $groups = array_intersect($options["groups"], explode(',', $item->types));
                 
                 // user not in the current group...
-                if (empty($groups)) {
+                if (empty($groups)) {                    
                     // no additional users set or no user match
                     if (empty($item->users) || in_array($user->id, explode(',', $item->users)) === false) {
                         continue;

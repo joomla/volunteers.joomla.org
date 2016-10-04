@@ -7,10 +7,6 @@
 
 // No direct access.
 defined('_JEXEC') or die;
-
-JHtml::_('bootstrap.framework');
-$this->document->addScriptDeclaration("jQuery(function(\$){\$('#tab-container a').click(function(e){e.preventDefault();\$(this).tab('show');});});");
-
 ?>
 <div class="row-fluid">
 	<div class="filter-bar">
@@ -320,15 +316,6 @@ $this->document->addScriptDeclaration("jQuery(function(\$){\$('#tab-container a'
 	if (url.match('#')) {
 		jQuery('.nav-tabs a[href="#' + url.split('#')[1] + '"]').tab('show');
 	}
-
-	// With HTML5 history API, we can easily prevent scrolling!
-	jQuery('.nav-tabs a').on('shown.bs.tab', function (e) {
-		if (history.pushState) {
-			history.pushState(null, null, e.target.hash);
-		} else {
-			window.location.hash = e.target.hash; //Polyfill for old browsers
-		}
-	});
 
 	jQuery('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
 		var target = this.href.split('#');

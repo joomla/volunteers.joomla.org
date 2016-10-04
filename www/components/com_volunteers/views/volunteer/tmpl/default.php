@@ -49,7 +49,7 @@ defined('_JEXEC') or die;
 <div class="row-fluid">
 	<div class="span12">
 
-		<ul class="nav nav-tabs">
+		<ul id="tab-container" class="nav nav-tabs">
 			<?php if ($this->item->teams->active): ?>
 				<li>
 					<a href="#teams" data-toggle="tab"><?php echo JText::_('COM_VOLUNTEERS_TAB_TEAMSINVOLVED') ?></a>
@@ -255,15 +255,6 @@ defined('_JEXEC') or die;
 	if (url.match('#')) {
 		jQuery('.nav-tabs a[href="#' + url.split('#')[1] + '"]').tab('show');
 	}
-
-	// With HTML5 history API, we can easily prevent scrolling!
-	jQuery('.nav-tabs a').on('shown.bs.tab', function (e) {
-		if (history.pushState) {
-			history.pushState(null, null, e.target.hash);
-		} else {
-			window.location.hash = e.target.hash; //Polyfill for old browsers
-		}
-	});
 
 	jQuery('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
 		var target = this.href.split('#');

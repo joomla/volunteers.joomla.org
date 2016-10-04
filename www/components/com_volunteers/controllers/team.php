@@ -39,7 +39,7 @@ class VolunteersControllerTeam extends JControllerForm
 		{
 			$departmentId = $department;
 			$teamId       = null;
-			$acl          = VolunteersHelper::acl('team', $departmentId);
+			$acl          = VolunteersHelper::acl('department', $departmentId);
 		}
 
 		if ($team)

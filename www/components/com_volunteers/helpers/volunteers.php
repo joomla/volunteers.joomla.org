@@ -141,26 +141,48 @@ abstract class VolunteersHelper
 		// Check for department involvement
 		$positionId = (int) JModelLegacy::getInstance('Member', 'VolunteersModel', array('ignore_request' => true))->getPosition($volunteerId, $departmentId, $teamId);
 
-		// Check for parent team involvement
-		if (!$positionId && $type == 'team' && $parentTeamId)
-		{
-			$positionId = (int) JModelLegacy::getInstance('Member', 'VolunteersModel', array('ignore_request' => true))->getPosition($volunteerId, null, $parentTeamId);
-		}
-
-		// Check for team involvement
-		if (!$positionId && $type == 'team')
-		{
-			$positionId = (int) JModelLegacy::getInstance('Member', 'VolunteersModel', array('ignore_request' => true))->getPosition($volunteerId, null, $teamId);
-		}
-
 		// Get ACL for position
-		$position = JModelLegacy::getInstance('Position', 'VolunteersModel', array('ignore_request' => true))->getItem($positionId);
+		$positionDepartment = JModelLegacy::getInstance('Position', 'VolunteersModel', array('ignore_request' => true))->getItem($positionId);
 
 		foreach ($acl as $action => $value)
 		{
-			if ($position->{$action})
+			if ($positionDepartment->{$action})
 			{
 				$acl->{$action} = true;
+			}
+		}
+
+		// Check for parent team involvement
+		if ($type == 'team' && $parentTeamId)
+		{
+			$positionId = (int) JModelLegacy::getInstance('Member', 'VolunteersModel', array('ignore_request' => true))->getPosition($volunteerId, null, $parentTeamId);
+
+			// Get ACL for position
+			$positionTeamParent = JModelLegacy::getInstance('Position', 'VolunteersModel', array('ignore_request' => true))->getItem($positionId);
+
+			foreach ($acl as $action => $value)
+			{
+				if ($positionTeamParent->{$action})
+				{
+					$acl->{$action} = true;
+				}
+			}
+		}
+
+		// Check for team involvement
+		if ($type == 'team')
+		{
+			$positionId = (int) JModelLegacy::getInstance('Member', 'VolunteersModel', array('ignore_request' => true))->getPosition($volunteerId, null, $teamId);
+
+			// Get ACL for position
+			$positionTeam = JModelLegacy::getInstance('Position', 'VolunteersModel', array('ignore_request' => true))->getItem($positionId);
+
+			foreach ($acl as $action => $value)
+			{
+				if ($positionTeam->{$action})
+				{
+					$acl->{$action} = true;
+				}
 			}
 		}
 

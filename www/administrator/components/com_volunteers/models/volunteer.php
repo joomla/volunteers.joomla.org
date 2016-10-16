@@ -299,6 +299,10 @@ class VolunteersModelVolunteer extends JModelAdmin
 				return false;
 			}
 		}
+		else
+		{
+			JError::raiseError(404, JText::_('COM_VOLUNTEERS_ERROR_VOLUNTEER_NOT_FOUND'));
+		}
 
 		// Convert to the JObject before adding other data.
 		$properties = $this->getTable()->getProperties(1);

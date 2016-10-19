@@ -64,7 +64,10 @@ class VolunteersTableVolunteer extends JTable
 		}
 
 		// Birthday format
-		$this->birthday = JFactory::getDate('0000-'.$this->birthday)->format("Y-m-d");
+		if ($this->birthday)
+		{
+			$this->birthday = JFactory::getDate('0000-' . $this->birthday)->format("Y-m-d");
+		}
 
 		// Verify that the alias is unique
 		$table = JTable::getInstance('Volunteer', 'VolunteersTable');

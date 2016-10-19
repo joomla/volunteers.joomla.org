@@ -24,9 +24,6 @@ class VolunteersTableReport extends JTable
 
 		// Set the published column alias
 		$this->setColumnAlias('published', 'state');
-
-		JTableObserverTags::createObserver($this, array('typeAlias' => 'com_volunteers.report'));
-		JTableObserverContenthistory::createObserver($this, array('typeAlias' => 'com_volunteers.report'));
 	}
 
 	/**
@@ -61,16 +58,6 @@ class VolunteersTableReport extends JTable
 			{
 				$this->created_by = $user->id;
 			}
-		}
-
-		// Verify that the alias is unique
-		$table = JTable::getInstance('Report', 'VolunteersTable');
-
-		if ($table->load(array('alias' => $this->alias)) && ($table->id != $this->id || $this->id == 0))
-		{
-			$this->setError(JText::_('COM_VOLUNTEERS_ERROR_UNIQUE_ALIAS'));
-
-			return false;
 		}
 
 		return parent::store($updateNulls);

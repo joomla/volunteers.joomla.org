@@ -24,9 +24,6 @@ class VolunteersTableTeam extends JTable
 
 		// Set the published column alias
 		$this->setColumnAlias('published', 'state');
-
-		JTableObserverTags::createObserver($this, array('typeAlias' => 'com_volunteers.team'));
-		JTableObserverContenthistory::createObserver($this, array('typeAlias' => 'com_volunteers.team'));
 	}
 
 	/**

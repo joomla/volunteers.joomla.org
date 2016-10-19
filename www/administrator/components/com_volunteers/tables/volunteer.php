@@ -24,9 +24,6 @@ class VolunteersTableVolunteer extends JTable
 
 		// Set the published column alias
 		$this->setColumnAlias('published', 'state');
-
-		JTableObserverTags::createObserver($this, array('typeAlias' => 'com_volunteers.team'));
-		JTableObserverContenthistory::createObserver($this, array('typeAlias' => 'com_volunteers.team'));
 	}
 
 	/**
@@ -67,16 +64,6 @@ class VolunteersTableVolunteer extends JTable
 		if ($this->birthday)
 		{
 			$this->birthday = JFactory::getDate('0000-' . $this->birthday)->format("Y-m-d");
-		}
-
-		// Verify that the alias is unique
-		$table = JTable::getInstance('Volunteer', 'VolunteersTable');
-
-		if ($table->load(array('alias' => $this->alias)) && ($table->id != $this->id || $this->id == 0))
-		{
-			$this->setError(JText::_('COM_VOLUNTEERS_ERROR_UNIQUE_ALIAS'));
-
-			return false;
 		}
 
 		return parent::store($updateNulls);

@@ -24,9 +24,6 @@ class VolunteersTableRole extends JTable
 
 		// Set the published column alias
 		$this->setColumnAlias('published', 'state');
-
-		JTableObserverTags::createObserver($this, array('typeAlias' => 'com_volunteers.role'));
-		JTableObserverContenthistory::createObserver($this, array('typeAlias' => 'com_volunteers.role'));
 	}
 
 	/**

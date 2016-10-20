@@ -1044,6 +1044,7 @@ abstract class WFInstall {
             'editor'    => array('jce'),
             'system'    => array('jce'),
             'content'   => array('jce'),
+            'installer' => array('jce'),
             'quickicon' => array('jcefilebrowser'),
             'module'    => array('mod_jcefilebrowser')
         );
@@ -1054,9 +1055,16 @@ abstract class WFInstall {
                 if ($folder == 'module') {
                     continue;
                 }
+
+                $version = new JVersion;
+                // skip for Joomla 2.5
+                if (!$version->isCompatible('3.1') && $folder == 'installer') {
+                    continue;
+                }
+
                 // Joomla! 1.5
             } else {
-                if ($folder == 'quickicon' || $folder == 'system' || $folder == 'content') {
+                if ($folder == 'quickicon' || $folder == 'system' || $folder == 'content' || $folder == 'installer') {
                     continue;
                 }
             }
@@ -1100,7 +1108,7 @@ abstract class WFInstall {
                 }
 
                 // enable jce system plugin
-                if ($folder == 'system' || $folder == 'content') {
+                if ($folder == 'system' || $folder == 'content' || $folder == 'installer') {
                     $plugin = JTable::getInstance('extension');
 
                     foreach ($element as $item) {

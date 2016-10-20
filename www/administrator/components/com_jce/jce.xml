@@ -2,12 +2,12 @@
 <extension type="component" version="2.5" method="upgrade">
     <name>JCE</name>
     <author>Ryan Demmer</author>
-    <creationDate>22 September 2016</creationDate>
+    <creationDate>17 October 2016</creationDate>
     <copyright>Copyright (C) 2006 - 2016 Ryan Demmer. All rights reserved</copyright>
     <license>GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html</license>
     <authorEmail>info@joomlacontenteditor.net</authorEmail>
     <authorUrl>www.joomlacontenteditor.net</authorUrl>
-    <version>2.5.27</version>
+    <version>2.5.30</version>
     <description>WF_ADMIN_DESC</description>
 
     <scriptfile>install.script.php</scriptfile>
@@ -84,6 +84,8 @@
             <language tag="en-GB">en-GB.plg_system_jce.sys.ini</language>
             <language tag="en-GB">en-GB.plg_content_jce.ini</language>
             <language tag="en-GB">en-GB.plg_content_jce.sys.ini</language>
+            <language tag="en-GB">en-GB.plg_installer_jce.ini</language>
+            <language tag="en-GB">en-GB.plg_installer_jce.sys.ini</language>
             <language tag="en-GB">en-GB.plg_quickicon_jcefilebrowser.ini</language>
             <language tag="en-GB">en-GB.plg_quickicon_jcefilebrowser.sys.ini</language>
         </languages>

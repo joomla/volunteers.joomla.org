@@ -24,7 +24,7 @@ class WFEditor extends JObject
 {
     
     // Editor version
-    protected $_version = '2.5.27';
+    protected $_version = '2.5.30';
     
     // Editor instance
     protected static $instance;

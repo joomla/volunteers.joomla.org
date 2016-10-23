@@ -29,7 +29,7 @@ _Note: please read `Departments` as `Leadership` until the new organizational st
 ## Departments
 `com_volunteers/departments`
 
-An Department has an _Departmental Coordination Team Leader_, _Assistant Departmental Coordination Team Leader_ and _Departmental Coordinators_. A department has several teams within their department. Within the department Reports can be created. Volunteers are assigned to an department as Member.
+An Department has an _Departmental Coordination Team Leader_, _Assistant Departmental Coordination Team Leader_ and _Departmental Coordinators_. A department has several teams within their department. Within the department Reports can be created. Volunteers are assigned to a department as Member.
 
 ## Teams
 `com_volunteers/teams`

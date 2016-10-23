@@ -7,12 +7,12 @@ Please use the [Issue tracker](https://github.com/joomla/volunteers.joomla.org/i
 ---
 
 # Contributing code
-Code contributions are much welcome! Browse the [Issue tracker](https://github.com/joomla/volunteers.joomla.org/issues) for issues that need code and/or come up with your own ideas & code. Please open a [Pull Request](https://github.com/joomla/volunteers.joomla.org/pulls) to contribute your own code.
+Code contributions are very welcome! Browse the [Issue tracker](https://github.com/joomla/volunteers.joomla.org/issues) for issues that need code and/or come up with your own ideas & code. Please open a [Pull Request](https://github.com/joomla/volunteers.joomla.org/pulls) to contribute your own code.
 
 ## Local Development
 You can fork & clone the repository for local development. To get started you need to:
  - Clone the repository
- - Setup the [sample database](https://github.com/joomla/volunteers.joomla.org/tree/master/database/installation/)
+ - Set up the [sample database](https://github.com/joomla/volunteers.joomla.org/tree/master/database/installation/)
  - Rename `configuration.php.dist` into `configuration.php`, add the database credentials and paths to the `logs` and `tmp` folder. All marked with `[XXXXXXXXXX]`.
  - Rename `htaccess.txt` into `.htaccess`
 
@@ -29,7 +29,7 @@ _Note: please read `Departments` as `Leadership` until the new organizational st
 ## Departments
 `com_volunteers/departments`
 
-An Department has an _Departmental Coordination Team Leader_, _Assistant Departmental Coordination Team Leader_ and _Departmental Coordinators_. A department has several teams within their department. Within the department Reports can be created. Volunteers are assigned to a department as Member.
+A Department has a _Departmental Coordination Team Leader_, _Assistant Departmental Coordination Team Leader_ and _Departmental Coordinators_. A department has several teams within their department. Within the department Reports can be created. Volunteers are assigned to a department as Member.
 
 ## Teams
 `com_volunteers/teams`
@@ -44,12 +44,12 @@ A Volunteer (_Joomler_) is a user with an account on the website. A volunteer ha
 ## Members
 `com_volunteers/members`
 
-A Member is the relation between an Department or Team and a Volunteer. It also contains its Position and (optional) Role within the Department or Team. Each member has a Start Date. Once someone steps down an End Date will be set and the volunteer will move to the Honor Roll. Permissions connected with their Position will become inactive. 
+A Member is the relation between a Department or Team and a Volunteer. It also contains their Position and (optional) Role within the Department or Team. Each member has a Start Date. Once someone steps down an End Date will be set and the volunteer will move to the Honour Roll. Permissions connected with their Position will become inactive. 
 
 ## Reports
 `com_volunteers/reports`
 
-A Report is an article reporting about the progress of an Department or Team and written by a Volunteer.
+A Report is an article reporting about the progress of a Department or Team and written by a Volunteer.
 
 ## Positions
 `com_volunteers/positions`
@@ -59,13 +59,13 @@ A Position is the relation between a Volunteer and its permissions. Departments 
 ### Departments
 
 * **Departmental Coordination Team Leader**
-The _Departmental Coordination Team Leader_ is the leader of an department.
+The _Departmental Coordination Team Leader_ is the leader of a department.
 
 * **Assistant Departmental Coordination Team Leader**
-The _Assistant Departmental Coordination Team Leader_ is the assistant of an Departmental Coordination Team Leader.
+The _Assistant Departmental Coordination Team Leader_ is the assistant of a Departmental Coordination Team Leader.
 
 * **Departmental Coordinator**
-The _Departmental Coordinator_ is a general member of an department.
+The _Departmental Coordinator_ is a general member of a department.
 
 #### Permissions
 
@@ -89,7 +89,7 @@ The _Departmental Coordination Team Leader_, _Assistant Departmental Coordinatio
 The _Team Leader_ is the leader of a (sub)team.
 
 * **Assistant Team Leader** 
-The _Assistant Team Leader_ is the assistant of the leader of a (sub)team.
+The _Assistant Team Leader_ is the assistant to the leader of a (sub)team.
 
 * **Member** 
 The _Member_ is a general member of a team.

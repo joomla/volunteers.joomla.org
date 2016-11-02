@@ -560,9 +560,21 @@ div#nav-search form {
     background: #da4f49;
     min-height: 20px;
     color: @white;
-    padding: 10px;
+    padding: 10px 50px;
     font-size: 16px;
     border: none;
+    position: relative;
+    margin: 0;
+
+    .close {
+      position: absolute;
+      left: 20px;
+      top: 10px;
+      right: auto;
+      opacity: .9;
+      font-size: 30px;
+      text-shadow: none;
+    }
   }
 
   .footer-menu {
@@ -935,6 +947,12 @@ div#nav-search form {
 
   .footer #adblock-msg .navbar-inner {
     margin: 0 10px;
+    padding: 10px 30px;
+
+    .close {
+      left: 10px;
+      top: 10px;
+    }
   }
 }
 
@@ -966,6 +984,17 @@ div#nav-search form {
   .well {
     padding: 10px;
   }
+
+  .footer {
+    #adblock-msg .navbar-inner {
+      padding: 10px 40px;
+
+      .close {
+        left: 15px;
+        top: 15px;
+      }
+    }
+  }
 }
 
 @media (min-width: 768px) and (max-width: 979px) {
@@ -974,6 +1003,6 @@ div#nav-search form {
   }
 
   .navbar-fixed-top .search-query {
-    width: 100px;
+    display:none;
   }
 }

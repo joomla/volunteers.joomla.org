@@ -41,7 +41,7 @@ if (JDEBUG)
 }
 else
 {
-	$cssURL = 'https://cdn.joomla.org/template/css/template_2.1.0.min.css';
+	$cssURL = 'https://cdn.joomla.org/template/css/template_2.1.1.min.css';
 }
 
 // Optional site specific CSS override, prefer a minified custom.css file first
@@ -70,6 +70,7 @@ if (JModuleHelper::isEnabled('mod_languages'))
 // Load template JavaScript
 $templateJs = JHtml::_('script', 'template.js', false, true, true, false, (bool) JDEBUG);
 $adBlockJs  = JHtml::_('script', 'blockadblock.js', false, true, true, false, (bool) JDEBUG);
+$cookieJs   = JHtml::_('script', 'js.cookie.js', false, true, true, false, (bool) JDEBUG);
 
 // Load jQuery and Bootstrap JavaScript
 $jQueryJs     = JHtml::_('script', 'jui/jquery.min.js', false, true, true, false, (bool) JDEBUG);
@@ -140,6 +141,9 @@ $gtmId = JoomlaTemplateHelper::getGtmId(JUri::getInstance()->toString(['host']))
 	<?php if ($adBlockJs) : ?>
 		<script src="<?php echo $adBlockJs ?>"></script>
 	<?php endif; ?>
+	<?php if ($cookieJs) : ?>
+		<script src="<?php echo $cookieJs ?>"></script>
+	<?php endif; ?>
 	<?php if ($html5Shim) : ?>
 		<!--[if lt IE 9]><script src="<?php echo $html5Shim ?>"></script><![endif]-->
 	<?php endif; ?>
@@ -181,7 +185,7 @@ $gtmId = JoomlaTemplateHelper::getGtmId(JUri::getInstance()->toString(['host']))
 				<div class="span5">
 					<div class="btn-toolbar pull-right">
 						<div class="btn-group">
-							<a href="https://www.joomla.org/download.html" class="btn btn-large btn-warning"><?php echo JText::_('TPL_JOOMLA_DOWNLOAD_BUTTON'); ?></a>
+							<a href="https://downloads.joomla.org" class="btn btn-large btn-warning"><?php echo JText::_('TPL_JOOMLA_DOWNLOAD_BUTTON'); ?></a>
 						</div>
 						<div class="btn-group">
 							<a href="https://demo.joomla.org" class="btn btn-large btn-primary"><?php echo JText::_('TPL_JOOMLA_DEMO_BUTTON'); ?></a>

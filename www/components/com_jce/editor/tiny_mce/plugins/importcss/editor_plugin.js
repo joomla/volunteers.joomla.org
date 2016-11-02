@@ -1,4 +1,4 @@
-/* JCE Editor - 2.5.30 | 17 October 2016 | http://www.joomlacontenteditor.net | Copyright (C) 2006 - 2016 Ryan Demmer. All rights reserved | GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html */
+/* JCE Editor - 2.5.31 | 25 October 2016 | http://www.joomlacontenteditor.net | Copyright (C) 2006 - 2016 Ryan Demmer. All rights reserved | GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html */
 (function(){var each=tinymce.each,PreviewCss=tinymce.util.PreviewCss,DOM=tinymce.DOM;function toAbsolute(u,p){return u.replace(/url\(["']?(.+?)["']?\)/gi,function(a,b){if(b.indexOf('://')<0){return'url("'+p+b+'")';}
 return a;});}
 tinymce.create('tinymce.plugins.ImportCSS',{convertSelectorToFormat:function(selectorText){var format,ed=this.editor;if(!selectorText){return;}

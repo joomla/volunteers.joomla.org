@@ -1340,9 +1340,11 @@ class WFFileBrowser extends JObject {
         // get upload size
         $size = intval(preg_replace('/[^0-9]/', '', $upload['max_size'])) . 'kb';
 
-        // must not exceed server maximum
-        if ((int) $size * 1024 > (int) $upload_max) {
-            $size = $upload_max / 1024 . 'kb';
+        // must not exceed server maximum, if server maximum is > 0
+        if (!empty($upload_max)) {
+            if ((int) $size * 1024 > (int) $upload_max) {
+                $size = $upload_max / 1024 . 'kb';
+            }
         }
 
         $runtimes = array();

@@ -36,7 +36,7 @@ if (JDEBUG)
 }
 else
 {
-	$this->addStyleSheet('https://cdn.joomla.org/template/css/template_2.1.0.min.css');
+	$this->addStyleSheet('https://cdn.joomla.org/template/css/template_2.1.1.min.css');
 }
 
 // Optional site specific CSS override
@@ -67,6 +67,7 @@ CSS
 // Load template JavaScript
 JHtml::_('script', 'template.js', false, true, false, false, (bool) JDEBUG);
 JHtml::_('script', 'blockadblock.js', false, true, false, false, (bool) JDEBUG);
+JHtml::_('script', 'js.cookie.js', false, true, false, false, (bool) JDEBUG);
 
 // Get the path for the HTML5 shim with optional override
 $html5Shim = JHtml::_('script', 'jui/html5.js', false, true, true, false, (bool) JDEBUG);
@@ -149,6 +150,11 @@ if (!$this->getMetaData('twitter:title'))
 	$this->setMetaData('twitter:title', $this->params->get('twitterCardTitle', $sitename));
 }
 
+if (!$this->getMetaData('referrer'))
+{
+	$this->setMetaData('referrer', 'unsafe-url');
+}
+
 // Get the GTM property ID
 $gtmId = JoomlaTemplateHelper::getGtmId(JUri::getInstance()->toString(['host']));
 ?>
@@ -195,7 +201,7 @@ $gtmId = JoomlaTemplateHelper::getGtmId(JUri::getInstance()->toString(['host']))
 				<div class="span5">
 					<div class="btn-toolbar pull-right">
 						<div class="btn-group">
-							<a href="https://www.joomla.org/download.html" class="btn btn-large btn-warning"><?php echo JText::_('TPL_JOOMLA_DOWNLOAD_BUTTON'); ?></a>
+							<a href="https://downloads.joomla.org/" class="btn btn-large btn-warning"><?php echo JText::_('TPL_JOOMLA_DOWNLOAD_BUTTON'); ?></a>
 						</div>
 						<div class="btn-group">
 							<a href="https://demo.joomla.org" class="btn btn-large btn-primary"><?php echo JText::_('TPL_JOOMLA_DEMO_BUTTON'); ?></a>

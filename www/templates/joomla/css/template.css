@@ -4010,6 +4010,10 @@ input[type="submit"].btn.btn-mini {
   background-color: transparent;
 }
 
+.navbar .nav > li > a:focus {
+  outline: 2px solid #5e9ed6;
+}
+
 .navbar .nav > .active > a,
 .navbar .nav > .active > a:hover,
 .navbar .nav > .active > a:focus {
@@ -6896,7 +6900,8 @@ hr.hr-condensed {
 }
 
 .row-striped .row-fluid {
-  width: 97%;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .row-striped .row-fluid [class*="span"] {
@@ -7093,6 +7098,17 @@ fieldset.radio.btn-group {
   margin: 0;
   overflow: hidden;
   border: 0;
+}
+
+/* Make Accessible Hidden Elements visible on focus */
+
+.element-invisible:focus {
+  width: auto;
+  height: auto;
+  padding: 1em;
+  overflow: auto;
+  color: #000;
+  background: #eee;
 }
 
 /* Form Vertical Overrides Form Horizontal */
@@ -9608,12 +9624,24 @@ div#nav-search form input[type="text"] {
 }
 
 .footer #adblock-msg .navbar-inner {
+  position: relative;
   min-height: 20px;
-  padding: 10px;
+  padding: 10px 50px;
+  margin: 0;
   font-size: 16px;
   color: #ffffff;
   background: #da4f49;
   border: none;
+}
+
+.footer #adblock-msg .navbar-inner .close {
+  position: absolute;
+  top: 10px;
+  right: auto;
+  left: 20px;
+  font-size: 30px;
+  text-shadow: none;
+  opacity: .9;
 }
 
 .footer .footer-menu p.copyright {
@@ -9949,7 +9977,12 @@ div#nav-search form input[type="text"] {
     margin: 0;
   }
   .footer #adblock-msg .navbar-inner {
+    padding: 10px 30px;
     margin: 0 10px;
+  }
+  .footer #adblock-msg .navbar-inner .close {
+    top: 10px;
+    left: 10px;
   }
 }
 
@@ -9972,6 +10005,13 @@ div#nav-search form input[type="text"] {
   .well {
     padding: 10px;
   }
+  .footer #adblock-msg .navbar-inner {
+    padding: 10px 40px;
+  }
+  .footer #adblock-msg .navbar-inner .close {
+    top: 15px;
+    left: 15px;
+  }
 }
 
 @media (min-width: 768px) and (max-width: 979px) {
@@ -9979,6 +10019,6 @@ div#nav-search form input[type="text"] {
     width: 62px;
   }
   .navbar-fixed-top .search-query {
-    width: 100px;
+    display: none;
   }
 }

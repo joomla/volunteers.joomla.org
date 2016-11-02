@@ -20,7 +20,7 @@ if (JDEBUG)
 }
 else
 {
-	$this->addStyleSheet('https://cdn.joomla.org/template/css/template_2.0.0.min.css');
+	$this->addStyleSheet('https://cdn.joomla.org/template/css/template_2.1.1.min.css');
 }
 
 // Optional site specific CSS override

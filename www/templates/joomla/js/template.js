@@ -6,8 +6,8 @@
  */
 
 jQuery(document).ready(function ($) {
-    var navTop;
-    var isFixed = false;
+    var navTop,
+        isFixed = false;
 
     $('.hasTooltip').tooltip();
     processScrollInit();
@@ -20,8 +20,17 @@ jQuery(document).ready(function ($) {
         blockAdBlock.on(true, adBlockDetected);
     }
 
+    $('#adblock-msg .close').click(function (e) {
+        e.preventDefault();
+        Cookies.set('joomla-adblock', 'closed', { expires: 30, domain: 'joomla.org' });
+    });
+
     function adBlockDetected() {
         $('#adblock-msg').removeClass('hide');
+
+        if (Cookies.get('joomla-adblock') === 'closed') {
+            $('#adblock-msg').addClass('hide');
+        }
     }
 
     function processScrollInit() {

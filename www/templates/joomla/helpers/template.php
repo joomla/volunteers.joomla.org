@@ -75,12 +75,6 @@ class JoomlaTemplateHelper
 				break;
 			}
 
-			case 'events.joomla.org':
-			{
-				$id = 'GTM-KNQ6RP';
-
-				break;
-			}
 
 			case 'exam.joomla.org':
 			{
@@ -246,12 +240,6 @@ class JoomlaTemplateHelper
 				break;
 			}
 
-			case 'events.joomla.org':
-			{
-				$tag = 'jevnt';
-
-				break;
-			}
 
 			case 'exam.joomla.org':
 			{

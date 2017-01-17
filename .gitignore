@@ -33,3 +33,6 @@
 # Windows #
 Thumbs.db
 Desktop.ini
+
+# Images
+/www/images

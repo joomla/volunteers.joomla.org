@@ -153,6 +153,9 @@ class VolunteersControllerTeam extends JControllerForm
 		// Get team
 		$team = $this->getModel()->getItem($teamId);
 
+		// Prefix the subject with the team name for easier identification where this comes from
+		$subject = '[' . $team->title . '] ' . $subject;
+
 		// Fallback for missing team email
 		if (empty($team->email))
 		{

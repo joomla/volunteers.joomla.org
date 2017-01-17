@@ -175,7 +175,6 @@ class VolunteersControllerTeam extends JControllerForm
 		$mailer = JFactory::getMailer();
 
 		// Set the sender
-		$mailer->setSender(array($user->email, $user->name));
 		$mailer->addReplyTo($user->email, $user->name);
 
 		// Set the recipient

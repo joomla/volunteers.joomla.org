@@ -36,7 +36,8 @@ if (JDEBUG)
 }
 else
 {
-	$this->addStyleSheet('https://cdn.joomla.org/template/css/template_2.1.1.min.css');
+	//$this->addStyleSheet('https://cdn.joomla.org/template/css/template_2.1.1.min.css');
+	JHtml::_('stylesheet', 'template.min.css', [], true, false, false, false);
 }
 
 // Optional site specific CSS override

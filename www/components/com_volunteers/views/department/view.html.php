@@ -41,6 +41,9 @@ class VolunteersViewDepartment extends JViewLegacy
 		$this->item->members = $this->get('DepartmentMembers');
 		$this->acl           = VolunteersHelper::acl('department', $this->item->id);
 
+		// Set department id in session
+		JFactory::getSession()->set('department', $this->item->id);
+
 		// Check for errors.
 		if (count($errors = $this->get('Errors')))
 		{

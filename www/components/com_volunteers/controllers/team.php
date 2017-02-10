@@ -90,6 +90,9 @@ class VolunteersControllerTeam extends JControllerForm
 	 */
 	public function save($key = null, $urlVar = null)
 	{
+		// Check for request forgeries.
+		JSession::checkToken() or jexit(JText::_('JINVALID_TOKEN'));
+
 		// Get variables
 		$app    = JFactory::getApplication();
 		$teamId = $this->input->getInt('id');
@@ -143,10 +146,14 @@ class VolunteersControllerTeam extends JControllerForm
 	 */
 	public function sendMail()
 	{
+		// Check for request forgeries.
+		JSession::checkToken() or jexit(JText::_('JINVALID_TOKEN'));
+
 		// Get variables
 		$app     = JFactory::getApplication();
 		$user    = JFactory::getUser();
-		$teamId  = $this->input->getString('team', '');
+		$session = JFactory::getSession();
+		$teamId  = $session->get('team');
 		$subject = $this->input->getString('subject', '');
 		$message = $this->input->getString('message', '');
 

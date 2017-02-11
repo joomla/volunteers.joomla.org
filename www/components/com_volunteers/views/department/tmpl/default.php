@@ -306,10 +306,6 @@ defined('_JEXEC') or die;
     </div>
 </div>
 
-<div class="share">
-	<?php echo $this->share; ?>
-</div>
-
 <script type="text/javascript">
     jQuery('.nav-tabs a:first').tab('show');
 

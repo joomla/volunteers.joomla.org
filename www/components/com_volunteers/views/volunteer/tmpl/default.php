@@ -201,7 +201,7 @@ defined('_JEXEC') or die;
                             </form>
                         </div>
                         <div class="span4 social">
-							<?php if ($this->item->website): ?>
+							<?php if ($this->item->website && ($this->item->website != 'http://')): ?>
                                 <a class="btn btn-block" target="_blank" href="<?php echo($this->item->website) ?>">
                                     <span class="icon-link"></span> <?php echo preg_replace('(^https?://)', '', $this->item->website) ?>
                                 </a>

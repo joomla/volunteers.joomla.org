@@ -35,6 +35,15 @@ class VolunteersViewReport extends JViewLegacy
 		$this->form  = $this->get('Form');
 		$this->user  = JFactory::getUser();
 
+		if ($this->item->department)
+		{
+			$this->acl            = VolunteersHelper::acl('department', $this->item->department);
+		}
+		elseif ($this->item->team)
+		{
+			$this->acl            = VolunteersHelper::acl('team', $this->item->team);
+		}
+
 		// Check for errors.
 		if (count($errors = $this->get('Errors')))
 		{

@@ -36,6 +36,32 @@
         />
 
         <field
+                name="password1"
+                type="password"
+                autocomplete="off"
+                class="validate-password"
+                field="password1"
+                filter="raw"
+                label="COM_USERS_PROFILE_PASSWORD1_LABEL"
+                size="30"
+                validate="password"
+        />
+
+        <field
+                name="password2"
+                type="password"
+                autocomplete="off"
+                class="validate-password"
+                field="password1"
+                filter="raw"
+                label="COM_USERS_PROFILE_PASSWORD2_LABEL"
+                message="COM_USERS_PROFILE_PASSWORD1_MESSAGE"
+                size="30"
+                validate="equals"
+        />
+
+
+        <field
                 name="user_id"
                 type="user"
                 label="COM_VOLUNTEERS_FIELD_SELECT_USER"

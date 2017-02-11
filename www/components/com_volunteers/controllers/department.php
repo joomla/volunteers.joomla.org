@@ -52,6 +52,9 @@ class VolunteersControllerDepartment extends JControllerForm
 	 */
 	public function save($key = null, $urlVar = null)
 	{
+		// Check for request forgeries.
+		JSession::checkToken() or jexit(JText::_('JINVALID_TOKEN'));
+
 		// Get variables
 		$departmentId = $this->input->getInt('id');
 		$acl          = VolunteersHelper::acl('department', $departmentId);
@@ -79,15 +82,22 @@ class VolunteersControllerDepartment extends JControllerForm
 	 */
 	public function sendMail()
 	{
+		// Check for request forgeries.
+		JSession::checkToken() or jexit(JText::_('JINVALID_TOKEN'));
+
 		// Get variables
 		$app          = JFactory::getApplication();
 		$user         = JFactory::getUser();
-		$departmentId = $this->input->getString('department', '');
+		$session      = JFactory::getSession();
+		$departmentId = $session->get('department');
 		$subject      = $this->input->getString('subject', '');
 		$message      = $this->input->getString('message', '');
 
 		// Get department
 		$department = $this->getModel()->getItem($departmentId);
+
+		// Prefix the subject with the team name for easier identification where this comes from
+		$subject = '[' . $department->title . '] ' . $subject;
 
 		// Fallback for missing department email
 		if (empty($department->email))
@@ -107,7 +117,6 @@ class VolunteersControllerDepartment extends JControllerForm
 		$mailer = JFactory::getMailer();
 
 		// Set the sender
-		$mailer->setSender(array($user->email, $user->name));
 		$mailer->addReplyTo($user->email, $user->name);
 
 		// Set the recipient

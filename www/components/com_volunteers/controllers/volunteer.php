@@ -57,6 +57,9 @@ class VolunteersControllerVolunteer extends JControllerForm
 	 */
 	public function save($key = null, $urlVar = null)
 	{
+		// Check for request forgeries.
+		JSession::checkToken() or jexit(JText::_('JINVALID_TOKEN'));
+
 		// Get variables
 		$volunteerId     = $this->input->getInt('id');
 		$volunteerUserId = (int) $this->getModel()->getItem($volunteerId)->user_id;
@@ -103,10 +106,14 @@ class VolunteersControllerVolunteer extends JControllerForm
 	 */
 	public function sendMail()
 	{
+		// Check for request forgeries.
+		JSession::checkToken() or jexit(JText::_('JINVALID_TOKEN'));
+
 		// Get variables
 		$app         = JFactory::getApplication();
 		$user        = JFactory::getUser();
-		$volunteerId = $this->input->getInt('volunteer');
+		$session     = JFactory::getSession();
+		$volunteerId = $session->get('volunteer');
 		$subject     = $this->input->getString('subject', '');
 		$message     = $this->input->getString('message', '');
 
@@ -118,7 +125,6 @@ class VolunteersControllerVolunteer extends JControllerForm
 		$mailer = JFactory::getMailer();
 
 		// Set the sender
-		$mailer->setSender(array($user->email, $user->name));
 		$mailer->addReplyTo($user->email, $user->name);
 
 		// Set the recipient

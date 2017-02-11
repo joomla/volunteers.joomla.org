@@ -39,6 +39,9 @@ class VolunteersViewVolunteer extends JViewLegacy
 		$this->item->teams = $this->get('VolunteerTeams');
 		$this->item->new   = JFactory::getApplication()->input->getInt('new', '0');
 
+		// Set volunteer id in session
+		JFactory::getSession()->set('volunteer', $this->item->id);
+
 		// Check for errors.
 		if (count($errors = $this->get('Errors')))
 		{

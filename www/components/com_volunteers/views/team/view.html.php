@@ -42,6 +42,9 @@ class VolunteersViewTeam extends JViewLegacy
 		$this->item->roles    = $this->get('TeamRoles');
 		$this->acl            = VolunteersHelper::acl('team', $this->item->id);
 
+		// Set team id in session
+		JFactory::getSession()->set('team', $this->item->id);
+
 		// Active / inactive
 		$this->item->active = ($this->item->date_ended == '0000-00-00');
 

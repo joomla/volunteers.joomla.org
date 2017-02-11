@@ -17,7 +17,7 @@ defined('_JEXEC') or die;
 	</div>
 	<div class="span10">
 		<div class="filter-bar">
-			<?php if ($this->item->created_by == $this->user->id): ?>
+			<?php if ($this->acl->edit || ($this->item->created_by == $this->user->id)): ?>
 				<a class="btn pull-right" href="<?php echo JRoute::_('index.php?option=com_volunteers&task=report.edit&id=' . $this->item->id) ?>">
 					<span class="icon-edit"></span> <?php echo JText::_('COM_VOLUNTEERS_EDIT') ?>
 				</a>

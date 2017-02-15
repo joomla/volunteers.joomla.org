@@ -30,11 +30,16 @@ class VolunteersViewReport extends JViewLegacy
 	 */
 	public function display($tpl = null)
 	{
-		$this->item      = $this->get('Item');
-		$this->state     = $this->get('State');
-		$this->form      = $this->get('Form');
-		$this->user      = JFactory::getUser();
-		$this->volunteer = $this->get('Volunteer');
+		$this->item  = $this->get('Item');
+		$this->state = $this->get('State');
+		$this->form  = $this->get('Form');
+		$this->user  = JFactory::getUser();
+
+		// Load volunteer data for new report
+		if (!$this->item->id)
+		{
+			$this->volunteer = $this->get('Volunteer');
+		}
 
 		if ($this->item->department)
 		{

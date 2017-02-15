@@ -144,4 +144,31 @@ class VolunteersModelRole extends JModelAdmin
 		// Increment the version number.
 		$table->version++;
 	}
+
+	/**
+	 * Method to delete the role from the database
+	 *
+	 * @return  boolean  True on success
+	 */
+	public function delete(&$pks)
+	{
+		// Reset role for members
+		$db    = $this->getDbo();
+		$query = $db->getQuery(true);
+		$query
+			->update('#__volunteers_members')
+			->set('role = 0')
+			->where('role = ' . $db->quote($pks));
+
+		try
+		{
+			$db->setQuery($query)->execute();
+		}
+		catch (RuntimeException $e)
+		{
+			JError::raiseError(500, $e->getMessage());
+		}
+
+		parent::delete($pks);
+	}
 }

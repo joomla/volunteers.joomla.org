@@ -273,4 +273,23 @@ class VolunteersModelReport extends JModelAdmin
 
 		return $item;
 	}
+
+	/**
+	 * Method to get volunteer info.
+	 *
+	 * @param   integer $pk The id of the team.
+	 *
+	 * @return  mixed  Data object on success, false on failure.
+	 */
+	public function getVolunteer()
+	{
+		// Get user
+		$user = JFactory::getUser();
+
+		// Get subteams
+		$model = JModelLegacy::getInstance('Volunteer', 'VolunteersModel', array('ignore_request' => true));
+		$volunteerId = $model->getVolunteerId($user->id);
+
+		return $model->getItem($volunteerId);
+	}
 }

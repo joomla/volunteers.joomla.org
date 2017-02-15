@@ -284,6 +284,9 @@ defined('_JEXEC') or die;
                                     <div class="row-fluid">
                                         <div class="span8">
 											<?php if ($this->acl->edit): ?>
+                                                <a class="btn btn-small pull-right" href="<?php echo JRoute::_('index.php?option=com_volunteers&task=role.delete&id=' . $role->id) ?>">
+                                                    <span class="icon-delete"></span> <?php echo JText::_('COM_VOLUNTEERS_DELETE') ?>
+                                                </a>
                                                 <a class="btn btn-small pull-right" href="<?php echo JRoute::_('index.php?option=com_volunteers&task=role.edit&id=' . $role->id) ?>">
                                                     <span class="icon-edit"></span> <?php echo JText::_('COM_VOLUNTEERS_EDIT') ?>
                                                 </a>

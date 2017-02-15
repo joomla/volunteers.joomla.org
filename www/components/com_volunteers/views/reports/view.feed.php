@@ -44,7 +44,7 @@ class VolunteersViewReports extends JViewLegacy
 			$item->date        = $row->created;
 			$item->category    = $row->department_title;
 			$item->author      = $row->volunteer_name;
-			$item->authorEmail = $siteEmail;
+			$item->authorEmail = ($row->volunteer_email_feed) ? $row->volunteer_email : $siteEmail;
 
 			// Loads item info into rss array
 			$doc->addItem($item);

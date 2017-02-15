@@ -36,6 +36,9 @@ class VolunteersViewVolunteer extends JViewLegacy
 			return false;
 		}
 
+		// Manipulate form
+		$this->_manipulateForm();
+
 		$this->addToolbar();
 		parent::display($tpl);
 	}
@@ -84,5 +87,16 @@ class VolunteersViewVolunteer extends JViewLegacy
 
 			JToolbarHelper::cancel('volunteer.cancel', 'JTOOLBAR_CLOSE');
 		}
+	}
+
+	/**
+	 * Manipulates the form.
+	 *
+	 * @return  void.
+	 */
+	protected function _manipulateForm()
+	{
+		$this->form->removeField('password1');
+		$this->form->removeField('password2');
 	}
 }

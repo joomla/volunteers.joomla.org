@@ -74,6 +74,36 @@ class VolunteersControllerRole extends JControllerForm
 	}
 
 	/**
+	 * Method to edit role data
+	 *
+	 * @return  boolean
+	 */
+	public function delete($key = null, $urlVar = null)
+	{
+		// Get variables
+		$roleId = $this->input->getInt('id');
+		$teamId = (int) $this->getModel()->getItem($roleId)->team;
+		$acl    = VolunteersHelper::acl('team', $teamId);
+
+		// Check if the user is authorized to edit this team
+		if (!$acl->edit)
+		{
+			return JError::raiseError(403, JText::sprintf('JLIB_APPLICATION_ERROR_UNHELD_ID', $teamId));
+		}
+
+		// Delete role
+		$model  = $this->getModel();
+		$return = $model->delete($roleId);
+
+		// Redirect to the team
+		$this->setMessage(JText::_('COM_VOLUNTEERS_LBL_ROLE_DELETED'));
+		$this->setRedirect(JRoute::_('index.php?option=com_volunteers&view=team&id=' . $teamId . '#roles', false));
+
+		return $return;
+	}
+
+
+	/**
 	 * Method to save role data.
 	 *
 	 * @return  boolean

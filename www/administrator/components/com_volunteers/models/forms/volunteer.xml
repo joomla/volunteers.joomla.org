@@ -161,6 +161,16 @@
                 label="COM_VOLUNTEERS_FIELD_BIRTHDAY"
                 format="%b-%d"
         />
+
+        <field
+                name="email_feed"
+                type="radio"
+                label="COM_VOLUNTEERS_FIELD_EMAIL_FEED"
+                default="0"
+        >
+            <option value="1">JYES</option>
+            <option value="0">JNO</option>
+        </field>
     </fieldset>
 
     <fieldset

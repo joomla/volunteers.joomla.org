@@ -167,6 +167,30 @@ class VolunteersModelTeam extends JModelAdmin
 			$data['state'] = 0;
 		}
 
+		// Move team members to the honour roll if team end-date is set
+		if ($data['date_ended'])
+		{
+			$members    = $this->getTeamMembers($data['id']);
+			$membersIds = array_map(create_function('$member', 'return $member->id;'), $members->active);
+
+			// Set date_ended for active members
+			$db    = $this->getDbo();
+			$query = $db->getQuery(true);
+			$query
+				->update('#__volunteers_members')
+				->set('date_ended = ' . $db->quote($data['date_ended']))
+				->where('id IN (' . implode($membersIds, ',') . ')');
+
+			try
+			{
+				$db->setQuery($query)->execute();
+			}
+			catch (RuntimeException $e)
+			{
+				JError::raiseError(500, $e->getMessage());
+			}
+		}
+
 		return parent::save($data);
 	}
 

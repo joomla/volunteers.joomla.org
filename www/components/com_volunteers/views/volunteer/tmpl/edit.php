@@ -128,6 +128,20 @@ JFactory::getDocument()->addScriptDeclaration("
 
 		<?php echo $this->form->renderField('joomlastory'); ?>
 
+        <hr>
+
+        <h3><?php echo JText::_('COM_VOLUNTEERS_PROFILE_SETTINGS') ?></h3>
+
+        <div class="control-group">
+            <div class="controls">
+                <div class="alert alert-info">
+					<?php echo JText::_('COM_VOLUNTEERS_FIELD_EMAIL_FEED_DESC') ?>
+                </div>
+            </div>
+        </div>
+
+		<?php echo $this->form->renderField('email_feed'); ?>
+
 		<hr>
 
 		<div class="row-fluid">

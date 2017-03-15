@@ -95,7 +95,7 @@ JFactory::getDocument()->addScript('media/com_volunteers/js/oms.js', 'text/javas
 							</a>
 						</h3>
 						<p class="muted">
-							<span class="icon-location"></span> <?php echo VolunteersHelper::location($this->volunteerstory->city, $this->volunteerstory->country); ?>
+							<span class="icon-location"></span> <?php echo VolunteersHelper::location($this->volunteerstory->country, $this->volunteerstory->city); ?>
 						</p>
 					</div>
 				</li>
@@ -121,7 +121,7 @@ JFactory::getDocument()->addScript('media/com_volunteers/js/oms.js', 'text/javas
 								<?php echo $item->name; ?>
 							</h3>
 							<p class="muted">
-								<span class="icon-location"></span> <?php echo VolunteersHelper::location($item->city, $item->country); ?>
+								<span class="icon-location"></span> <?php echo VolunteersHelper::location($item->country, $item->city); ?>
 							</p>
 						</div>
 					</a>

@@ -79,10 +79,15 @@ defined('_JEXEC') or die;
 						<?php foreach ($this->item->members->active as $volunteer): ?>
                             <tr>
                                 <td class="volunteer-image">
-                                    <a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $volunteer->volunteer) ?>">
-										<?php echo VolunteersHelper::image($volunteer->volunteer_image, 'small', false, $volunteer->volunteer_name); ?>
-										<?php echo $volunteer->volunteer_name; ?>
+                                    <a class="pull-left" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $volunteer->volunteer) ?>">
+			                            <?php echo VolunteersHelper::image($volunteer->volunteer_image, 'small', false, $volunteer->volunteer_image); ?>
                                     </a>
+                                    <a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $volunteer->volunteer) ?>">
+			                            <?php echo $volunteer->volunteer_name; ?>
+                                    </a>
+                                    <span class="muted volunteer-location">
+                                        <span class="icon-location"></span><?php echo VolunteersHelper::location($volunteer->volunteer_country); ?>
+                                    </span>
                                 </td>
                                 <td>
 									<?php echo $volunteer->position_title; ?>
@@ -128,10 +133,15 @@ defined('_JEXEC') or die;
 						<?php foreach ($this->item->members->honorroll as $volunteer): ?>
                             <tr>
                                 <td class="volunteer-image">
-                                    <a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $volunteer->volunteer) ?>">
-										<?php echo VolunteersHelper::image($volunteer->volunteer_image, 'small', false, $volunteer->volunteer_name); ?>
-										<?php echo $volunteer->volunteer_name; ?>
+                                    <a class="pull-left" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $volunteer->volunteer) ?>">
+			                            <?php echo VolunteersHelper::image($volunteer->volunteer_image, 'small', false, $volunteer->volunteer_image); ?>
                                     </a>
+                                    <a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $volunteer->volunteer) ?>">
+			                            <?php echo $volunteer->volunteer_name; ?>
+                                    </a>
+                                    <span class="muted volunteer-location">
+                                        <span class="icon-location"></span><?php echo VolunteersHelper::location($volunteer->volunteer_country); ?>
+                                    </span>
                                 </td>
                                 <td>
 									<?php echo $volunteer->position_title; ?>

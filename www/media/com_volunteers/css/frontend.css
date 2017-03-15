@@ -1,7 +1,12 @@
 .table .volunteer-image img {
 	width: 50px;
 	height: 50px;
-	padding-right: 5px;
+	padding-right: 10px;
+}
+
+.table .volunteer-image .volunteer-location {
+	margin-top: 5px;
+	display: block;
 }
 
 .members img {

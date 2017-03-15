@@ -79,10 +79,15 @@ defined('_JEXEC') or die;
 						<?php foreach ($this->item->members->active as $volunteer): ?>
                             <tr>
                                 <td class="volunteer-image">
-                                    <a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $volunteer->volunteer) ?>">
-										<?php echo VolunteersHelper::image($volunteer->volunteer_image, 'small', false, $volunteer->volunteer_name); ?>
-										<?php echo $volunteer->volunteer_name; ?>
+                                    <a class="pull-left" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $volunteer->volunteer) ?>">
+			                            <?php echo VolunteersHelper::image($volunteer->volunteer_image, 'small', false, $volunteer->volunteer_image); ?>
                                     </a>
+                                    <a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $volunteer->volunteer) ?>">
+			                            <?php echo $volunteer->volunteer_name; ?>
+                                    </a>
+                                    <span class="muted volunteer-location">
+                                        <span class="icon-location"></span><?php echo VolunteersHelper::location($volunteer->volunteer_country); ?>
+                                    </span>
                                 </td>
                                 <td>
 									<?php echo $volunteer->position_title; ?>
@@ -128,10 +133,15 @@ defined('_JEXEC') or die;
 						<?php foreach ($this->item->members->honorroll as $volunteer): ?>
                             <tr>
                                 <td class="volunteer-image">
-                                    <a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $volunteer->volunteer) ?>">
-										<?php echo VolunteersHelper::image($volunteer->volunteer_image, 'small', false, $volunteer->volunteer_name); ?>
-										<?php echo $volunteer->volunteer_name; ?>
+                                    <a class="pull-left" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $volunteer->volunteer) ?>">
+			                            <?php echo VolunteersHelper::image($volunteer->volunteer_image, 'small', false, $volunteer->volunteer_image); ?>
                                     </a>
+                                    <a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $volunteer->volunteer) ?>">
+			                            <?php echo $volunteer->volunteer_name; ?>
+                                    </a>
+                                    <span class="muted volunteer-location">
+                                        <span class="icon-location"></span><?php echo VolunteersHelper::location($volunteer->volunteer_country); ?>
+                                    </span>
                                 </td>
                                 <td>
 									<?php echo $volunteer->position_title; ?>
@@ -269,14 +279,14 @@ defined('_JEXEC') or die;
 				<?php else : ?>
                     <form class="form form-horizontal" name="sendmail" action="<?php echo JRoute::_('index.php') ?>" method="post" enctype="multipart/form-data">
                         <div class="control-group">
-                            <label class="control-label span2" for="to_name"><?php echo JText::_('COM_VOLUNTEERS_MESSAGE_TO') ?></label>
-                            <div class="controls span10">
+                            <label class="control-label" for="to_name"><?php echo JText::_('COM_VOLUNTEERS_MESSAGE_TO') ?></label>
+                            <div class="controls">
                                 <input type="text" name="to_name" id="to_name" value="<?php echo $this->item->title ?>" class="input-block-level" disabled="disabled"/>
                             </div>
                         </div>
                         <div class="control-group">
-                            <label class="control-label span2" for="from_name"><?php echo JText::_('COM_VOLUNTEERS_MESSAGE_FROM') ?></label>
-                            <div class="controls span10">
+                            <label class="control-label" for="from_name"><?php echo JText::_('COM_VOLUNTEERS_MESSAGE_FROM') ?></label>
+                            <div class="controls">
                                 <input type="text" name="from_name" id="from_name" value="<?php echo($this->user->name); ?> <<?php echo($this->user->email); ?>>" class="input-block-level" disabled="disabled"/>
                             </div>
                         </div>

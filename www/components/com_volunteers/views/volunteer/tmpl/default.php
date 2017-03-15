@@ -38,7 +38,7 @@ defined('_JEXEC') or die;
 
 		<?php if ($this->item->city || $this->item->country): ?>
             <p class="muted">
-                <span class="icon-location"></span> <?php echo VolunteersHelper::location($this->item->city, $this->item->country); ?>
+                <span class="icon-location"></span> <?php echo VolunteersHelper::location($this->item->country, $this->item->city); ?>
             </p>
 		<?php endif; ?>
 
@@ -100,9 +100,11 @@ defined('_JEXEC') or die;
                     <a href="#joomlastory" data-toggle="tab"><?php echo JText::_('COM_VOLUNTEERS_TAB_JOOMLASTORY') ?></a>
                 </li>
 			<?php endif; ?>
+	        <?php if ($this->user->id != $this->item->user_id): ?>
             <li>
                 <a href="#contact" data-toggle="tab"><?php echo JText::_('COM_VOLUNTEERS_TAB_CONTACT') ?></a>
             </li>
+	        <?php endif; ?>
         </ul>
 
         <div class="tab-content">
@@ -194,6 +196,7 @@ defined('_JEXEC') or die;
                 </div>
 			<?php endif; ?>
 
+	        <?php if ($this->user->id != $this->item->user_id): ?>
             <div class="tab-pane" id="contact">
 				<?php if ($this->user->guest) : ?>
                     <p class="alert alert-info">
@@ -202,14 +205,14 @@ defined('_JEXEC') or die;
 				<?php else : ?>
                     <form class="form form-horizontal" name="sendmail" action="<?php echo JRoute::_('index.php') ?>" method="post" enctype="multipart/form-data">
                         <div class="control-group">
-                            <label class="control-label span2" for="to_name"><?php echo JText::_('COM_VOLUNTEERS_MESSAGE_TO') ?></label>
-                            <div class="controls span10">
+                            <label class="control-label" for="to_name"><?php echo JText::_('COM_VOLUNTEERS_MESSAGE_TO') ?></label>
+                            <div class="controls">
                                 <input type="text" name="to_name" id="to_name" value="<?php echo $this->item->name; ?>" class="input-block-level" disabled="disabled"/>
                             </div>
                         </div>
                         <div class="control-group">
-                            <label class="control-label span2" for="from_name"><?php echo JText::_('COM_VOLUNTEERS_MESSAGE_FROM') ?></label>
-                            <div class="controls span10">
+                            <label class="control-label" for="from_name"><?php echo JText::_('COM_VOLUNTEERS_MESSAGE_FROM') ?></label>
+                            <div class="controls">
                                 <input type="text" name="from_name" id="from_name" value="<?php echo($this->user->name); ?> <<?php echo($this->user->email); ?>>" class="input-block-level" disabled="disabled"/>
                             </div>
                         </div>
@@ -234,6 +237,7 @@ defined('_JEXEC') or die;
                     </form>
 				<?php endif; ?>
             </div>
+	        <?php endif; ?>
         </div>
 
 		<?php if ($this->user->id && ($this->user->id != $this->item->user_id)): ?>

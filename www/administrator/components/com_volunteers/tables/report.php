@@ -78,24 +78,6 @@ class VolunteersTableReport extends JTable
 			return false;
 		}
 
-		// Check for existing name
-		$db = $this->getDbo();
-
-		$query = $db->getQuery(true)
-			->select($db->quoteName('id'))
-			->from($db->quoteName('#__volunteers_reports'))
-			->where($db->quoteName('title') . ' = ' . $db->quote($this->title));
-		$db->setQuery($query);
-
-		$xid = (int) $db->loadResult();
-
-		if ($xid && $xid != (int) $this->id)
-		{
-			$this->setError(JText::_('COM_VOLUNTEERS_ERR_TABLES_NAME'));
-
-			return false;
-		}
-
 		if (empty($this->alias))
 		{
 			$this->alias = $this->title;

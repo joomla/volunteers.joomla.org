@@ -12,7 +12,7 @@ JLoader::register('JHtmlVolunteers', JPATH_ADMINISTRATOR . '/components/com_volu
 
 abstract class VolunteersHelper
 {
-	public static function location($city, $country)
+	public static function location($country = null, $city = null)
 	{
 		$countries = JHtmlVolunteers::$countries;
 

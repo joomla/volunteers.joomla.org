@@ -51,6 +51,23 @@ class PlgSystemVolunteers extends JPlugin
 			}
 		}
 
+		// Check if this is the volunteers own profile
+		if ($option == 'com_volunteers' && $view == 'volunteer')
+		{
+			JModelLegacy::addIncludePath(JPATH_ADMINISTRATOR . '/components/com_volunteers/models', 'VolunteersModel');
+			$model       = JModelLegacy::getInstance('Volunteer', 'VolunteersModel', array('ignore_request' => true));
+			$userId      = JFactory::getUser()->get('id');
+			$volunteerId = (int) $model->getVolunteerId($userId);
+
+			// Change active menu for own profile
+			if ($volunteerId == $id)
+			{
+				$menu     = $this->app->getMenu();
+				$menuItem = $menu->getItems('link', 'index.php?option=com_volunteers&view=my', true);
+				$menu->setActive($menuItem->id);
+			}
+		}
+
 		return true;
 	}
 }

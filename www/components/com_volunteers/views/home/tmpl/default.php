@@ -34,7 +34,7 @@ JFactory::getDocument()->addScript('media/com_volunteers/js/oms.js', 'text/javas
 		<p><?php echo JText::_('COM_VOLUNTEERS_HOME_INTRO_WHY_DESC'); ?></p>
 		<p><?php echo JText::_('COM_VOLUNTEERS_HOME_INTRO_WHY_ACTION'); ?></p>
 		<p>
-			<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=joomlers'); ?>" class="btn"><span class="icon-chevron-right"></span><?php echo JText::_('COM_VOLUNTEERS_HOME_INTRO_WHY_BUTTON'); ?>
+			<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteers'); ?>" class="btn"><span class="icon-chevron-right"></span><?php echo JText::_('COM_VOLUNTEERS_HOME_INTRO_WHY_BUTTON'); ?>
 			</a>
 		</p>
 	</div>
@@ -95,7 +95,7 @@ JFactory::getDocument()->addScript('media/com_volunteers/js/oms.js', 'text/javas
 							</a>
 						</h3>
 						<p class="muted">
-							<span class="icon-location"></span> <?php echo VolunteersHelper::location($this->volunteerstory->city, $this->volunteerstory->country); ?>
+							<span class="icon-location"></span> <?php echo VolunteersHelper::location($this->volunteerstory->country, $this->volunteerstory->city); ?>
 						</p>
 					</div>
 				</li>
@@ -121,7 +121,7 @@ JFactory::getDocument()->addScript('media/com_volunteers/js/oms.js', 'text/javas
 								<?php echo $item->name; ?>
 							</h3>
 							<p class="muted">
-								<span class="icon-location"></span> <?php echo VolunteersHelper::location($item->city, $item->country); ?>
+								<span class="icon-location"></span> <?php echo VolunteersHelper::location($item->country, $item->city); ?>
 							</p>
 						</div>
 					</a>

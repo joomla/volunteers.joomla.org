@@ -11,7 +11,7 @@ defined('_JEXEC') or die;
 // Volunteers helper
 require_once JPATH_ROOT . '/components/com_volunteers/helpers/volunteers.php';
 
-JFactory::getDocument()->addStyleSheet(JURI::root(true) . '/media/com_volunteers/css/frontend.css');
+JFactory::getDocument()->addStyleSheet(JURI::root(true) . '/media/com_volunteers/css/frontend.css?v=20170315');
 
 // New structure
 $newstructure = JComponentHelper::getParams('com_volunteers')->get('new_structure', 0);

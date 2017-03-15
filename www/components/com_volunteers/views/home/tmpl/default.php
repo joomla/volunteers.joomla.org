@@ -34,7 +34,7 @@ JFactory::getDocument()->addScript('media/com_volunteers/js/oms.js', 'text/javas
 		<p><?php echo JText::_('COM_VOLUNTEERS_HOME_INTRO_WHY_DESC'); ?></p>
 		<p><?php echo JText::_('COM_VOLUNTEERS_HOME_INTRO_WHY_ACTION'); ?></p>
 		<p>
-			<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=joomlers'); ?>" class="btn"><span class="icon-chevron-right"></span><?php echo JText::_('COM_VOLUNTEERS_HOME_INTRO_WHY_BUTTON'); ?>
+			<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteers'); ?>" class="btn"><span class="icon-chevron-right"></span><?php echo JText::_('COM_VOLUNTEERS_HOME_INTRO_WHY_BUTTON'); ?>
 			</a>
 		</p>
 	</div>

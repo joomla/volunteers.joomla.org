@@ -100,9 +100,11 @@ defined('_JEXEC') or die;
                     <a href="#joomlastory" data-toggle="tab"><?php echo JText::_('COM_VOLUNTEERS_TAB_JOOMLASTORY') ?></a>
                 </li>
 			<?php endif; ?>
+	        <?php if ($this->user->id != $this->item->user_id): ?>
             <li>
                 <a href="#contact" data-toggle="tab"><?php echo JText::_('COM_VOLUNTEERS_TAB_CONTACT') ?></a>
             </li>
+	        <?php endif; ?>
         </ul>
 
         <div class="tab-content">
@@ -194,6 +196,7 @@ defined('_JEXEC') or die;
                 </div>
 			<?php endif; ?>
 
+	        <?php if ($this->user->id != $this->item->user_id): ?>
             <div class="tab-pane" id="contact">
 				<?php if ($this->user->guest) : ?>
                     <p class="alert alert-info">
@@ -234,6 +237,7 @@ defined('_JEXEC') or die;
                     </form>
 				<?php endif; ?>
             </div>
+	        <?php endif; ?>
         </div>
 
 		<?php if ($this->user->id && ($this->user->id != $this->item->user_id)): ?>

@@ -47,14 +47,6 @@ JFactory::getDocument()->addScriptDeclaration("
 
 		</div>
 
-		<?php if ($this->item->transition): ?>
-			<div class="alert alert-info">
-				<h3><?php echo JText::_('COM_VOLUNTEERS_FIELD_READY_TRANSITION_TITLE'); ?></h3>
-				<p><?php echo JText::_('COM_VOLUNTEERS_FIELD_READY_TRANSITION_DESC'); ?></p>
-				<?php echo $this->form->renderFieldset('transition'); ?>
-			</div>
-		<?php endif; ?>
-
 		<?php echo $this->form->renderField('title'); ?>
 		<?php echo $this->form->renderField('alias'); ?>
 

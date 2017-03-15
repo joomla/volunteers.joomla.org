@@ -16,18 +16,6 @@
     />
 
     <fieldset
-            name="transition"
-    >
-        <field
-                name="ready_transition"
-                type="calendar"
-                label="COM_VOLUNTEERS_FIELD_READY_TRANSITION"
-                format="%Y-%m-%d %H:%M:%S"
-                filter="user_utc"
-        />
-    </fieldset>
-
-    <fieldset
             name="item"
             addfieldpath="/administrator/components/com_volunteers/models/fields"
     >

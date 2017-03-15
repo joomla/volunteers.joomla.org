@@ -21,7 +21,7 @@ class JoomlaInstallerScript extends JInstallerScript
 	 */
 	public function __construct()
 	{
-		$this->minimumJoomla = '3.6';
+		$this->minimumJoomla = '3.6.3';
 		$this->minimumPhp    = '5.4';
 
 		$this->deleteFiles = [

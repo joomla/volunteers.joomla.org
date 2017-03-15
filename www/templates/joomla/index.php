@@ -177,7 +177,7 @@ $gtmId = JoomlaTemplateHelper::getGtmId(JUri::getInstance()->toString(['host']))
 	<nav class="navigation" role="navigation">
 		<div id="mega-menu" class="navbar navbar-inverse navbar-fixed-top">
 			<div class="navbar-inner">
-				<div class="container">
+				<div class="container<?php echo $this->params->get('fluidContainer') ? '-fluid' : ''; ?>">
 					<a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
 						<span class="icon-bar"></span>
 						<span class="icon-bar"></span>
@@ -191,7 +191,7 @@ $gtmId = JoomlaTemplateHelper::getGtmId(JUri::getInstance()->toString(['host']))
 	</nav>
 	<!-- Header -->
 	<header class="header">
-		<div class="container">
+		<div class="container<?php echo $this->params->get('fluidContainer') ? '-fluid' : ''; ?>">
 			<div class="row-fluid">
 				<div class="span7">
 					<h1 class="page-title">
@@ -213,7 +213,7 @@ $gtmId = JoomlaTemplateHelper::getGtmId(JUri::getInstance()->toString(['host']))
 	</header>
 	<nav class="subnav-wrapper">
 		<div class="subnav">
-			<div class="container">
+			<div class="container<?php echo $this->params->get('fluidContainer') ? '-fluid' : ''; ?>">
 				<jdoc:include type="modules" name="position-1" style="none" />
 			</div>
 		</div>

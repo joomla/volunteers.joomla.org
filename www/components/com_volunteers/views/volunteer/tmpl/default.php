@@ -205,14 +205,14 @@ defined('_JEXEC') or die;
 				<?php else : ?>
                     <form class="form form-horizontal" name="sendmail" action="<?php echo JRoute::_('index.php') ?>" method="post" enctype="multipart/form-data">
                         <div class="control-group">
-                            <label class="control-label span2" for="to_name"><?php echo JText::_('COM_VOLUNTEERS_MESSAGE_TO') ?></label>
-                            <div class="controls span10">
+                            <label class="control-label" for="to_name"><?php echo JText::_('COM_VOLUNTEERS_MESSAGE_TO') ?></label>
+                            <div class="controls">
                                 <input type="text" name="to_name" id="to_name" value="<?php echo $this->item->name; ?>" class="input-block-level" disabled="disabled"/>
                             </div>
                         </div>
                         <div class="control-group">
-                            <label class="control-label span2" for="from_name"><?php echo JText::_('COM_VOLUNTEERS_MESSAGE_FROM') ?></label>
-                            <div class="controls span10">
+                            <label class="control-label" for="from_name"><?php echo JText::_('COM_VOLUNTEERS_MESSAGE_FROM') ?></label>
+                            <div class="controls">
                                 <input type="text" name="from_name" id="from_name" value="<?php echo($this->user->name); ?> <<?php echo($this->user->email); ?>>" class="input-block-level" disabled="disabled"/>
                             </div>
                         </div>

@@ -56,6 +56,12 @@ class VolunteersRouter extends JComponentRouterBase
 
 				break;
 
+			case 'board':
+				$query['Itemid'] = $this->getItemid('board');
+				unset($query['id']);
+
+				break;
+
 			case 'team':
 				if (isset($query['id']))
 				{
@@ -278,13 +284,23 @@ class VolunteersRouter extends JComponentRouterBase
 					if ($report->department)
 					{
 						$dbQuery = $db->getQuery(true)
-							->select($db->qn('alias'))
+							->select('alias, parent_id')
 							->from('#__volunteers_departments')
 							->where('id=' . (int) $report->department);
 						$db->setQuery($dbQuery);
-						$alias = $db->loadResult();
+						$item = $db->loadObject();
 
-						$query['Itemid'] = $this->getItemid('departments');
+						if ($item->parent_id == 0)
+						{
+							$query['Itemid'] = $this->getItemid('board');
+							$segments[]      = 'reports';
+						}
+						else
+						{
+							$query['Itemid'] = $this->getItemid('departments');
+							$segments[]      = $item->alias;
+							$segments[]      = 'reports';
+						}
 					}
 
 					if ($report->team)
@@ -297,10 +313,10 @@ class VolunteersRouter extends JComponentRouterBase
 						$alias = $db->loadResult();
 
 						$query['Itemid'] = $this->getItemid('teams');
-					}
 
-					$segments[] = $alias;
-					$segments[] = 'reports';
+						$segments[] = $alias;
+						$segments[] = 'reports';
+					}
 
 					if ($layout == 'edit')
 					{
@@ -476,6 +492,18 @@ class VolunteersRouter extends JComponentRouterBase
 					{
 						$vars['layout'] = 'edit';
 					}
+				}
+
+				break;
+
+			case 'board':
+				// Reports
+				if (isset($segments[0]) && ($segments[0] == 'reports'))
+				{
+					$vars['view'] = 'report';
+
+					list($id) = explode('-', $segments[1], 2);
+					$vars['id'] = $id;
 				}
 
 				break;

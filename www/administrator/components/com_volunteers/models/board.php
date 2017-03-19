@@ -9,19 +9,18 @@
 defined('_JEXEC') or die;
 
 use Joomla\Registry\Registry;
-use Joomla\Utilities\ArrayHelper;
 
 /**
- * Report model.
+ * Department model.
  */
-class VolunteersModelReport extends JModelAdmin
+class VolunteersModelBoard extends JModelAdmin
 {
 	/**
 	 * The type alias for this content type.
 	 *
 	 * @var    string
 	 */
-	public $typeAlias = 'com_volunteers.report';
+	public $typeAlias = 'com_volunteers.board';
 
 	/**
 	 * The prefix to use with controller messages.
@@ -39,7 +38,7 @@ class VolunteersModelReport extends JModelAdmin
 	 *
 	 * @return  JTable  A JTable object
 	 */
-	public function getTable($type = 'Report', $prefix = 'VolunteersTable', $config = array())
+	public function getTable($type = 'Department', $prefix = 'VolunteersTable', $config = array())
 	{
 		return JTable::getInstance($type, $prefix, $config);
 	}
@@ -55,7 +54,7 @@ class VolunteersModelReport extends JModelAdmin
 	public function getForm($data = array(), $loadData = true)
 	{
 		// Get the form.
-		$form = $this->loadForm('com_volunteers.report', 'report', array('control' => 'jform', 'load_data' => $loadData));
+		$form = $this->loadForm('com_volunteers.department', 'department', array('control' => 'jform', 'load_data' => $loadData));
 
 		if (empty($form))
 		{
@@ -85,14 +84,14 @@ class VolunteersModelReport extends JModelAdmin
 	protected function loadFormData()
 	{
 		// Check the session for previously entered form data.
-		$data = JFactory::getApplication()->getUserState('com_volunteers.edit.report.data', array());
+		$data = JFactory::getApplication()->getUserState('com_volunteers.edit.department.data', array());
 
 		if (empty($data))
 		{
 			$data = $this->getItem();
 		}
 
-		$this->preprocessData('com_volunteers.report', $data);
+		$this->preprocessData('com_volunteers.department', $data);
 
 		return $data;
 	}
@@ -127,7 +126,7 @@ class VolunteersModelReport extends JModelAdmin
 				$db    = $this->getDbo();
 				$query = $db->getQuery(true)
 					->select('MAX(ordering)')
-					->from($db->quoteName('#__volunteers_reports'));
+					->from($db->quoteName('#__volunteers_departments'));
 
 				$db->setQuery($query);
 				$max = $db->loadResult();
@@ -145,7 +144,6 @@ class VolunteersModelReport extends JModelAdmin
 		// Increment the version number.
 		$table->version++;
 	}
-
 
 	/**
 	 * Method to save the form data.
@@ -198,98 +196,99 @@ class VolunteersModelReport extends JModelAdmin
 	}
 
 	/**
-	 * Method to get team data.
+	 * Method to get Department Members.
 	 *
 	 * @param   integer $pk The id of the team.
 	 *
 	 * @return  mixed  Data object on success, false on failure.
 	 */
-	public function &getItem($pk = null)
+	public function getDepartmentMembers($pk = null)
 	{
-		$pk = (!empty($pk)) ? $pk : (int) $this->getState($this->getName() . '.id');
+		// Get members
+		$model = JModelLegacy::getInstance('Members', 'VolunteersModel', array('ignore_request' => true));
+		$model->setState('filter.position', array(11, 13));
+		$items = $model->getItems();
 
-		$item = new JObject;
+		// Sorting the results
+		$president     = array();
+		$vicepresident = array();
+		$secretary     = array();
+		$treasurer     = array();
+		$coordinator   = array();
 
-		if ($pk > 0)
+		foreach ($items as $item)
 		{
-			try
+			switch ($item->role)
 			{
-				$db    = $this->getDbo();
-				$query = $db->getQuery(true)
-					->select($this->getState('item.select', 'a.*'))
-					->from('#__volunteers_reports AS a')
-					->where('a.id = ' . (int) $pk);
+				case 286:
+					$president['president-'.$item->volunteer_name . $item->date_ended] = $item;
+					break;
 
-				// Join on volunteer table.
-				$query->select('volunteer.id AS volunteer_id, volunteer.image AS volunteer_image, CONCAT(volunteer.firstname, \' \', volunteer.lastname) AS volunteer_name')
-					->join('LEFT', '#__volunteers_volunteers AS ' . $db->quoteName('volunteer') . ' on volunteer.user_id = a.created_by');
+				case 287:
+					$vicepresident['vicepresident-'.$item->volunteer_name . $item->date_ended] = $item;
+					break;
 
-				// Join on department table.
-				$query->select('department.title AS department_title, department.parent_id AS department_parent_id')
-					->join('LEFT', '#__volunteers_departments AS ' . $db->quoteName('department') . ' on department.id = a.department');
+				case 288:
+					$secretary['secretary-'.$item->volunteer_name . $item->date_ended] = $item;
+					break;
 
-				// Join on team table.
-				$query->select('team.title AS team_title')
-					->join('LEFT', '#__volunteers_teams AS ' . $db->quoteName('team') . ' on team.id = a.team');
-
-				// Filter by published state.
-				$published = $this->getState('filter.published');
-				$archived  = $this->getState('filter.archived');
-
-				if (is_numeric($published))
-				{
-					$query->where('(a.published = ' . (int) $published . ' OR a.published =' . (int) $archived . ')')
-						->where('(c.published = ' . (int) $published . ' OR c.published =' . (int) $archived . ')');
-				}
-
-				$db->setQuery($query);
-
-				$data = $db->loadObject();
-
-				if (empty($data))
-				{
-					JError::raiseError(404, JText::_('COM_VOLUNTEERS_ERROR_REPORT_NOT_FOUND'));
-				}
-
-				// Check for published state if filter set.
-				if (((is_numeric($published)) || (is_numeric($archived))) && (($data->published != $published) && ($data->published != $archived)))
-				{
-					JError::raiseError(404, JText::_('COM_VOLUNTEERS_ERROR_REPORT_NOT_FOUND'));
-				}
-
-				return $data;
+				case 289:
+					$treasurer['treasurer-'.$item->volunteer_name . $item->date_ended] = $item;
+					break;
 			}
-			catch (Exception $e)
-			{
-				$this->setError($e);
 
-				return false;
+			switch ($item->position)
+			{
+				case 11:
+					$coordinator[$item->volunteer_name . $item->date_ended] = $item;
+					break;
 			}
 		}
 
-		// Convert to the JObject before adding other data.
-		$properties = $this->getTable()->getProperties(1);
-		$item       = ArrayHelper::toObject($properties, 'JObject');
 
-		return $item;
+
+		// Sort all members by name
+		ksort($coordinator);
+
+		// Group them again
+		$groupmembers = $president + $vicepresident + $secretary + $treasurer + $coordinator;
+
+		$members            = new stdClass();
+		$members->active    = array();
+		$members->honorroll = array();
+
+		// Check for active or inactive members
+		foreach ($groupmembers as $item)
+		{
+			if ($item->date_ended == '0000-00-00')
+			{
+				$members->active[] = $item;
+			}
+			else
+			{
+				$members->honorroll[] = $item;
+			}
+		}
+
+		return $members;
 	}
 
 	/**
-	 * Method to get volunteer info.
+	 * Method to get Department Reports.
 	 *
 	 * @param   integer $pk The id of the team.
 	 *
 	 * @return  mixed  Data object on success, false on failure.
 	 */
-	public function getVolunteer()
+	public function getDepartmentReports($pk = null)
 	{
-		// Get user
-		$user = JFactory::getUser();
+		$pk = (!empty($pk)) ? $pk : (int) $this->getState($this->getName() . '.id');
 
-		// Get subteams
-		$model = JModelLegacy::getInstance('Volunteer', 'VolunteersModel', array('ignore_request' => true));
-		$volunteerId = $model->getVolunteerId($user->id);
+		// Get reports
+		$model = JModelLegacy::getInstance('Reports', 'VolunteersModel', array('ignore_request' => true));
+		$model->setState('filter.department', $pk);
+		$model->setState('list.limit', 10);
 
-		return $model->getItem($volunteerId);
+		return $model->getItems();
 	}
 }

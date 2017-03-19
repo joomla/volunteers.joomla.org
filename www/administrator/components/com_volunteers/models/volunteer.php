@@ -353,6 +353,22 @@ class VolunteersModelVolunteer extends JModelAdmin
 		// Check for active or inactive members
 		foreach ($items as $item)
 		{
+			if ($item->department && ($item->department_parent_id == 0))
+			{
+				$item->link = JRoute::_('index.php?option=com_volunteers&view=board&id=' . $item->department);
+				$item->name = $item->department_title;
+			}
+			elseif ($item->department)
+			{
+				$item->link = JRoute::_('index.php?option=com_volunteers&view=department&id=' . $item->department);
+				$item->name = $item->department_title;
+			}
+			elseif ($item->team)
+			{
+				$item->link = JRoute::_('index.php?option=com_volunteers&view=team&id=' . $item->team);
+				$item->name = $item->team_title;
+			}
+
 			if ($item->date_ended == '0000-00-00')
 			{
 				$teams->active[] = $item;

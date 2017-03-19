@@ -13,10 +13,15 @@
             addfieldpath="/administrator/components/com_volunteers/models/fields"
     >
         <field
+                name="department"
+                type="departments"
+                label="COM_VOLUNTEERS_FIELD_DEPARTMENTS"
+        />
+
+        <field
                 name="team"
                 type="teams"
                 label="COM_VOLUNTEERS_FIELD_TEAM"
-                required="true"
         />
 
         <field

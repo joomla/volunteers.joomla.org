@@ -34,11 +34,7 @@ defined('_JEXEC') or die;
 			<?php echo JText::_('COM_VOLUNTEERS_ON') ?>
 			<?php echo VolunteersHelper::date($this->item->created, 'Y-m-d H:i'); ?>
 			<?php echo JText::_('COM_VOLUNTEERS_IN') ?>
-			<?php if ($this->item->team): ?>
-				<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=team&id=' . $this->item->team) ?>"><?php echo $this->item->team_title; ?></a>
-			<?php elseif ($this->item->department): ?>
-				<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=department&id=' . $this->item->department) ?>"><?php echo $this->item->department_title; ?></a>
-			<?php endif; ?>
+            <a href="<?php echo $this->item->link; ?>"><?php echo $this->item->name; ?></a>
 		</p>
 
 		<?php echo($this->item->description) ?>

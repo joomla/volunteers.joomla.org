@@ -10,6 +10,8 @@ defined('_JEXEC') or die;
 
 JFormHelper::loadFieldClass('list');
 
+JLoader::register('JHtmlVolunteers', JPATH_ADMINISTRATOR . '/components/com_volunteers/helpers/html/volunteers.php');
+
 /**
  * Departments Field class.
  */

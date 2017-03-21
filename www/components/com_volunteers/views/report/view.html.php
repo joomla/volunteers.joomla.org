@@ -41,13 +41,23 @@ class VolunteersViewReport extends JViewLegacy
 			$this->volunteer = $this->get('Volunteer');
 		}
 
-		if ($this->item->department)
+		if ($this->item->department && ($this->item->department_parent_id == 0))
 		{
-			$this->acl = VolunteersHelper::acl('department', $this->item->department);
+			$this->acl        = VolunteersHelper::acl('department', $this->item->department);
+			$this->item->link = JRoute::_('index.php?option=com_volunteers&view=board&id=' . $this->item->department);
+			$this->item->name = $this->item->department_title;
+		}
+		elseif ($this->item->department)
+		{
+			$this->acl        = VolunteersHelper::acl('department', $this->item->department);
+			$this->item->link = JRoute::_('index.php?option=com_volunteers&view=department&id=' . $this->item->department);
+			$this->item->name = $this->item->department_title;
 		}
 		elseif ($this->item->team)
 		{
-			$this->acl = VolunteersHelper::acl('team', $this->item->team);
+			$this->acl        = VolunteersHelper::acl('team', $this->item->team);
+			$this->item->link = JRoute::_('index.php?option=com_volunteers&view=team&id=' . $this->item->team);
+			$this->item->name = $this->item->team_title;
 		}
 
 		// Check for errors.

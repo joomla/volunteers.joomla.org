@@ -121,15 +121,7 @@ defined('_JEXEC') or die;
 						<?php foreach ($this->item->teams->active as $team): ?>
                             <tr>
                                 <td>
-									<?php if ($team->team): ?>
-                                        <a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=team&id=' . $team->team) ?>">
-											<?php echo($team->team_title) ?>
-                                        </a>
-									<?php else: ?>
-                                        <a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=department&id=' . $team->department) ?>">
-											<?php echo($team->department_title) ?>
-                                        </a>
-									<?php endif; ?>
+                                    <a href="<?php echo $team->link; ?>"><?php echo $team->name; ?></a>
                                 </td>
                                 <td>
 									<?php echo($team->position_title) ?>
@@ -161,15 +153,7 @@ defined('_JEXEC') or die;
 						<?php foreach ($this->item->teams->honorroll as $team): ?>
                             <tr>
                                 <td>
-									<?php if ($team->team): ?>
-                                        <a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=team&id=' . $team->team) ?>">
-											<?php echo($team->team_title) ?>
-                                        </a>
-									<?php else: ?>
-                                        <a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=department&id=' . $team->department) ?>">
-											<?php echo($team->department_title) ?>
-                                        </a>
-									<?php endif; ?>
+                                    <a href="<?php echo $team->link; ?>"><?php echo $team->name; ?></a>
                                 </td>
                                 <td>
 									<?php echo($team->position_title) ?>

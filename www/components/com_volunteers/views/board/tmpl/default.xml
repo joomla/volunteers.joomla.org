@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<metadata>
+    <layout title="COM_VOLUNTEERS_TITLE_BOARD">
+        <message>
+            <![CDATA[COM_VOLUNTEERS_TITLE_BOARD_DESC]]>
+        </message>
+    </layout>
+
+    <!-- Add fields to the request variables for the layout. -->
+    <fields name="request">
+        <fieldset name="request"
+                  addfieldpath="/administrator/components/com_volunteers/models/fields">
+
+            <field
+                    name="id"
+                    type="departments"
+                    label="COM_VOLUNTEERS_FIELD_DEPARTMENT"
+                    required="true"
+                    edit="true"
+                    clear="false"
+            />
+        </fieldset>
+    </fields>
+</metadata>

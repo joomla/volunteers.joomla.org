@@ -33,12 +33,6 @@ JFactory::getDocument()->addScriptDeclaration("
 	<div class="row-fluid">
 		<div class="span9">
 			<div class="form-horizontal">
-
-				<div class="alert alert-info">
-					<h3><?php echo JText::_('COM_VOLUNTEERS_FIELD_READY_TRANSITION_TITLE'); ?></h3>
-					<p><?php echo JText::_('COM_VOLUNTEERS_FIELD_READY_TRANSITION_DESC'); ?></p>
-					<?php echo $this->form->renderFieldset('transition'); ?>
-				</div>
 				<?php echo $this->form->renderFieldset('item'); ?>
 			</div>
 		</div>

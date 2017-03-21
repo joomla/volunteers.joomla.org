@@ -118,7 +118,7 @@ class VolunteersModelMembers extends JModelList
 			->join('LEFT', '#__volunteers_volunteers AS ' . $db->quoteName('volunteer') . ' ON volunteer.id = a.volunteer');
 
 		// Join over the teams.
-		$query->select('department.title AS department_title')
+		$query->select('department.title AS department_title, department.parent_id AS department_parent_id')
 			->join('LEFT', '#__volunteers_departments AS ' . $db->quoteName('department') . ' ON department.id = a.department');
 
 		// Join over the teams.

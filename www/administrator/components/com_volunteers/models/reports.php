@@ -115,7 +115,7 @@ class VolunteersModelReports extends JModelList
 			->join('LEFT', '#__volunteers_volunteers AS ' . $db->quoteName('volunteer') . ' ON volunteer.user_id = a.created_by');
 
 		// Join over the teams.
-		$query->select('department.title AS department_title')
+		$query->select('department.title AS department_title, department.parent_id AS department_parent_id')
 			->join('LEFT', '#__volunteers_departments AS ' . $db->quoteName('department') . ' ON department.id = a.department');
 
 		// Join over the teams.
@@ -208,13 +208,23 @@ class VolunteersModelReports extends JModelList
 		{
 			foreach ($items as $item)
 			{
-				if ($item->department)
+				if ($item->department && ($item->department_parent_id == 0))
 				{
 					$item->acl = VolunteersHelper::acl('department', $item->department);
+					$item->link = JRoute::_('index.php?option=com_volunteers&view=board&id=' . $item->department);
+					$item->name = $item->department_title;
+				}
+				elseif ($item->department)
+				{
+					$item->acl = VolunteersHelper::acl('department', $item->department);
+					$item->link = JRoute::_('index.php?option=com_volunteers&view=department&id=' . $item->department);
+					$item->name = $item->department_title;
 				}
 				elseif ($item->team)
 				{
 					$item->acl = VolunteersHelper::acl('team', $item->team);
+					$item->link = JRoute::_('index.php?option=com_volunteers&view=team&id=' . $item->team);
+					$item->name = $item->team_title;
 				}
 			}
 		}

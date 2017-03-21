@@ -127,6 +127,14 @@ class VolunteersModelDepartments extends JModelList
 			}
 		}
 
+		// Filter by active state
+		$board = (JFactory::getApplication()->isSite() ? 0 : 1);
+
+		if (!$board)
+		{
+			$query->where('a.parent_id != 0');
+		}
+
 		// Add the list ordering clause.
 		$orderCol  = $this->state->get('list.ordering', 'a.ordering');
 		$orderDirn = $this->state->get('list.direction', 'asc');

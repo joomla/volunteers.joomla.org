@@ -52,11 +52,7 @@ JHtml::_('formbehavior.chosen', 'select');
 						<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $item->volunteer_id) ?>"><?php echo $item->volunteer_name; ?></a>
 						<?php echo JText::_('COM_VOLUNTEERS_ON') ?> <?php echo VolunteersHelper::date($item->created, 'Y-m-d H:i'); ?>
 						<?php echo JText::_('COM_VOLUNTEERS_IN') ?>
-						<?php if ($item->team): ?>
-							<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=team&id=' . $item->team) ?>"><?php echo $item->team_title; ?></a>
-						<?php elseif ($item->department): ?>
-							<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=department&id=' . $item->department) ?>"><?php echo $item->department_title; ?></a>
-						<?php endif; ?>
+                        <a href="<?php echo $item->link; ?>"><?php echo $item->name; ?></a>
 					</p>
 					<p><?php echo JHtml::_('string.truncate', strip_tags(trim($item->description)), 500); ?></p>
 					<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=report&id=' . $item->id) ?>" class="btn">

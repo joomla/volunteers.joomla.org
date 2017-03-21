@@ -110,19 +110,19 @@
 	word-wrap: break-word;
 }
 
-@media (min-width: 481px) {
+@media (min-width: 480px) {
 	#map-canvas {
 		height: 300px;
 	}
 }
 
-@media (min-width: 767px) {
+@media (min-width: 768px) {
 	#map-canvas {
 		height: 400px;
 	}
 }
 
-@media (max-width: 766px) {
+@media (max-width: 767px) {
 	thead {
 		display: none;
 	}

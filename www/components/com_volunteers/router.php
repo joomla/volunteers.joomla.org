@@ -504,6 +504,22 @@ class VolunteersRouter extends JComponentRouterBase
 
 					list($id) = explode('-', $segments[1], 2);
 					$vars['id'] = $id;
+
+					if (isset($segments[1]) && ($segments[1] == 'new'))
+					{
+						$vars['layout'] = 'edit';
+					}
+					elseif (isset($segments[1]) && ($segments[1] == 'edit'))
+					{
+						$vars['layout'] = 'edit';
+						list($id) = explode('-', $segments[2], 2);
+						$vars['id'] = $id;
+					}
+					else
+					{
+						list($id) = explode('-', $segments[1], 2);
+						$vars['id'] = $id;
+					}
 				}
 
 				break;

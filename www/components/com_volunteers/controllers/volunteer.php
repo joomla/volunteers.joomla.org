@@ -74,6 +74,9 @@ class VolunteersControllerVolunteer extends JControllerForm
 		// Use parent save method
 		$return = parent::save($key, $urlVar);
 
+		// Remove session variable
+		JFactory::getSession()->set('updateprofile', 0);
+
 		// Redirect to the list screen.
 		$this->setMessage(JText::_('COM_VOLUNTEERS_LBL_VOLUNTEER_SAVED'));
 		$this->setRedirect(JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $volunteerId, false));

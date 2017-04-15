@@ -94,6 +94,7 @@ class VolunteersViewMember extends JViewLegacy
 		if ($memberId)
 		{
 			$this->form->setFieldAttribute('volunteer', 'readonly', 'true');
+			$this->form->setFieldAttribute('position', 'readonly', 'true');
 
 			if ($departmentId)
 			{

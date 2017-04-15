@@ -148,4 +148,35 @@ class VolunteersModelRoles extends JModelList
 
 		return $query;
 	}
+
+	/**
+	 * Method to get an array of open roles.
+	 *
+	 * @return  mixed  An array of data items on success, false on failure.
+	 */
+	public function getOpenRoles()
+	{
+		// Create a new query object.
+		$db = $this->getDbo();
+
+		// Get the list query and add the extra WHERE clause.
+		$query = $this->getListQuery();
+		$query->where('a.open = 1');
+
+		// Get the item to index.
+		$db->setQuery($query);
+		$items = $db->loadObjectList();
+
+		$roles = array();
+
+		foreach ($items as $item)
+		{
+			$roles[$item->team_title][] = $item;
+		}
+
+		// Sort by team name
+		ksort($roles);
+
+		return $roles;
+	}
 }

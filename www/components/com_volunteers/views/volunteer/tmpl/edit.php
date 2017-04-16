@@ -24,28 +24,28 @@ JFactory::getDocument()->addScriptDeclaration("
 
 <div class="volunteer-edit">
 
-	<form id="volunteer" action="<?php echo JRoute::_('index.php?option=com_volunteers&task=volunteer.save&id=' . (int) $this->item->id); ?>" method="post" class="form-validate form-horizontal" enctype="multipart/form-data">
-		<div class="row-fluid">
-			<div class="filter-bar">
-				<div class="btn-toolbar pull-right">
-					<div id="toolbar-cancel" class="btn-group">
-						<button class="btn btn-danger" onclick="Joomla.submitbutton('volunteer.cancel')">
-							<span class="icon-cancel"></span> <?php echo JText::_('JCANCEL') ?>
-						</button>
-					</div>
-					<div id="toolbar-apply" class="btn-group">
-						<button class="btn btn-success" type="submit">
-							<span class="icon-pencil"></span> <?php echo JText::_('JSAVE') ?>
-						</button>
-					</div>
-				</div>
-			</div>
-			<div class="page-header">
-				<h1><?php echo JText::_('COM_VOLUNTEERS_TITLE_VOLUNTEERS_EDIT_MY') ?></h1>
-			</div>
-		</div>
+    <form id="volunteer" action="<?php echo JRoute::_('index.php?option=com_volunteers&task=volunteer.save&id=' . (int) $this->item->id); ?>" method="post" class="form-validate form-horizontal" enctype="multipart/form-data">
+        <div class="row-fluid">
+            <div class="filter-bar">
+                <div class="btn-toolbar pull-right">
+                    <div id="toolbar-cancel" class="btn-group">
+                        <button class="btn btn-danger" onclick="Joomla.submitbutton('volunteer.cancel')">
+                            <span class="icon-cancel"></span> <?php echo JText::_('JCANCEL') ?>
+                        </button>
+                    </div>
+                    <div id="toolbar-apply" class="btn-group">
+                        <button class="btn btn-success" type="submit">
+                            <span class="icon-pencil"></span> <?php echo JText::_('JSAVE') ?>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="page-header">
+                <h1><?php echo JText::_('COM_VOLUNTEERS_TITLE_VOLUNTEERS_EDIT_MY') ?></h1>
+            </div>
+        </div>
 
-		<h3><?php echo JText::_('COM_VOLUNTEERS_PROFILE_ACCOUNT') ?></h3>
+        <h3><?php echo JText::_('COM_VOLUNTEERS_PROFILE_ACCOUNT') ?></h3>
 
 		<?php echo $this->form->renderField('firstname'); ?>
 		<?php echo $this->form->renderField('lastname'); ?>
@@ -53,49 +53,75 @@ JFactory::getDocument()->addScriptDeclaration("
 		<?php echo $this->form->renderField('password1'); ?>
 		<?php echo $this->form->renderField('password2'); ?>
 
-		<hr>
+        <hr>
 
-		<h3><?php echo JText::_('COM_VOLUNTEERS_PROFILE_BIRTHDAY') ?></h3>
+        <h3><?php echo JText::_('COM_VOLUNTEERS_PROFILE_BIRTHDAY') ?></h3>
 
-		<div class="control-group">
-			<div class="controls">
-				<div class="alert alert-info">
+        <div class="control-group">
+            <div class="controls">
+                <div class="alert alert-info">
 					<?php echo JText::_('COM_VOLUNTEERS_FIELD_BIRTHDAY_DESC') ?>
-				</div>
-			</div>
-		</div>
+                </div>
+            </div>
+        </div>
 
 		<?php echo $this->form->renderField('birthday'); ?>
 
-		<hr>
+        <hr>
 
-		<h3><?php echo JText::_('COM_VOLUNTEERS_PROFILE_PHOTO') ?></h3>
+        <h3><?php echo JText::_('COM_VOLUNTEERS_PROFILE_PHOTO') ?></h3>
 
-		<div class="control-group">
-			<div class="controls">
-				<div class="alert alert-info">
+        <div class="control-group">
+            <div class="controls">
+                <div class="alert alert-info">
 					<?php echo JText::_('COM_VOLUNTEERS_FIELD_IMAGE_DESC') ?>
-				</div>
-			</div>
-		</div>
+                </div>
+            </div>
+        </div>
 
 		<?php echo $this->form->renderField('image'); ?>
 
-		<hr>
+        <hr>
 
-		<h3><?php echo JText::_('COM_VOLUNTEERS_PROFILE_LOCATION') ?></h3>
+        <h3><?php echo JText::_('COM_VOLUNTEERS_PROFILE_LOCATION') ?></h3>
 
 		<?php echo $this->form->renderField('country'); ?>
 		<?php echo $this->form->renderField('city'); ?>
 		<?php echo $this->form->renderField('location'); ?>
 
-		<div class="address">
+        <div class="address">
 			<?php echo $this->form->renderField('address'); ?>
-		</div>
+        </div>
 
-		<hr>
+        <hr>
 
-		<h3><?php echo JText::_('COM_VOLUNTEERS_PROFILE_SOCIAL') ?></h3>
+        <h3><?php echo JText::_('COM_VOLUNTEERS_PROFILE_ADDRESS') ?></h3>
+
+        <div class="control-group">
+            <div class="controls">
+                <div class="alert alert-info">
+					<?php echo JText::_('COM_VOLUNTEERS_PROFILE_ADDRESS_DESC') ?>
+                </div>
+            </div>
+        </div>
+
+		<?php if ($this->item->teams->activemember): ?>
+            <div class="control-group">
+                <div class="controls">
+                    <div class="alert alert-warning">
+						<?php echo JText::_('COM_VOLUNTEERS_PROFILE_ACTIVEMEMBER_DESC') ?>
+                    </div>
+                </div>
+            </div>
+		<?php endif; ?>
+
+		<?php echo $this->form->renderField('address'); ?>
+		<?php echo $this->form->renderField('region'); ?>
+		<?php echo $this->form->renderField('zip'); ?>
+
+        <hr>
+
+        <h3><?php echo JText::_('COM_VOLUNTEERS_PROFILE_SOCIAL') ?></h3>
 
 		<?php echo $this->form->renderField('website'); ?>
 		<?php echo $this->form->renderField('github'); ?>
@@ -104,27 +130,27 @@ JFactory::getDocument()->addScriptDeclaration("
 		<?php echo $this->form->renderField('googleplus'); ?>
 		<?php echo $this->form->renderField('linkedin'); ?>
 
-		<hr>
+        <hr>
 
-		<h3><?php echo JText::_('COM_VOLUNTEERS_PROFILE_INTRODUCTION') ?></h3>
+        <h3><?php echo JText::_('COM_VOLUNTEERS_PROFILE_INTRODUCTION') ?></h3>
 
-		<div class="control-group">
-			<div class="controls">
-				<div class="alert alert-info">
+        <div class="control-group">
+            <div class="controls">
+                <div class="alert alert-info">
 					<?php echo JText::_('COM_VOLUNTEERS_FIELD_INTRO_DESC') ?>
-				</div>
-			</div>
-		</div>
+                </div>
+            </div>
+        </div>
 
 		<?php echo $this->form->renderField('intro'); ?>
 
-		<div class="control-group">
-			<div class="controls">
-				<div class="alert alert-info">
+        <div class="control-group">
+            <div class="controls">
+                <div class="alert alert-info">
 					<?php echo JText::_('COM_VOLUNTEERS_FIELD_JOOMLASTORY_DESC') ?>
-				</div>
-			</div>
-		</div>
+                </div>
+            </div>
+        </div>
 
 		<?php echo $this->form->renderField('joomlastory'); ?>
 
@@ -142,38 +168,38 @@ JFactory::getDocument()->addScriptDeclaration("
 
 		<?php echo $this->form->renderField('email_feed'); ?>
 
-		<hr>
+        <hr>
 
-		<div class="row-fluid">
-			<div class="btn-toolbar pull-right">
+        <div class="row-fluid">
+            <div class="btn-toolbar pull-right">
 
-				<div id="toolbar-cancel" class="btn-group">
-					<a class="btn btn-danger" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=my') ?>">
-						<span class="icon-cancel"></span> <?php echo JText::_('JCANCEL') ?>
-					</a>
-				</div>
-				<div id="toolbar-apply" class="btn-group">
-					<button class="btn btn-success" type="submit">
-						<span class="icon-pencil"></span> <?php echo JText::_('JSAVE') ?>
-					</button>
-				</div>
+                <div id="toolbar-cancel" class="btn-group">
+                    <a class="btn btn-danger" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=my') ?>">
+                        <span class="icon-cancel"></span> <?php echo JText::_('JCANCEL') ?>
+                    </a>
+                </div>
+                <div id="toolbar-apply" class="btn-group">
+                    <button class="btn btn-success" type="submit">
+                        <span class="icon-pencil"></span> <?php echo JText::_('JSAVE') ?>
+                    </button>
+                </div>
 
-			</div>
-		</div>
+            </div>
+        </div>
 
-		<input type="hidden" name="option" value="com_volunteers"/>
-		<input type="hidden" name="task" value="volunteer.save"/>
+        <input type="hidden" name="option" value="com_volunteers"/>
+        <input type="hidden" name="task" value="volunteer.save"/>
 		<?php echo JHtml::_('form.token'); ?>
-	</form>
+    </form>
 </div>
 
 <script>
-	jQuery(document).ready(function () {
-		jQuery('.location').on('change', function (e) {
-			var city = jQuery('.location-city').val();
-			var country = jQuery('.location-country').val();
-			jQuery('.gllpSearchField').val(city + ', ' + country);
-			jQuery('.gllpSearchButton').click();
-		});
-	});
+    jQuery(document).ready(function () {
+        jQuery('.location').on('change', function (e) {
+            var city = jQuery('.location-city').val();
+            var country = jQuery('.location-country').val();
+            jQuery('.gllpSearchField').val(city + ', ' + country);
+            jQuery('.gllpSearchButton').click();
+        });
+    });
 </script>

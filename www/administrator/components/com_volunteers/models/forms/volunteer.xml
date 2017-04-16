@@ -69,11 +69,9 @@
         />
 
         <field
-                name="country"
-                type="countries"
-                label="COM_VOLUNTEERS_FIELD_COUNTRY"
-                required="true"
-                class="location-country location"
+                name="address"
+                type="text"
+                label="COM_VOLUNTEERS_FIELD_ADDRESS"
         />
 
         <field
@@ -81,6 +79,26 @@
                 type="text"
                 label="COM_VOLUNTEERS_FIELD_CITY"
                 class="location-city location"
+        />
+
+        <field
+                name="region"
+                type="text"
+                label="COM_VOLUNTEERS_FIELD_REGION"
+        />
+
+        <field
+                name="zip"
+                type="text"
+                label="COM_VOLUNTEERS_FIELD_ZIP"
+        />
+
+        <field
+                name="country"
+                type="countries"
+                label="COM_VOLUNTEERS_FIELD_COUNTRY"
+                required="true"
+                class="location-country location"
         />
 
         <field

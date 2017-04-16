@@ -482,7 +482,7 @@ class VolunteersRouter extends JComponentRouterBase
 
 					if (!$id)
 					{
-						JError::raiseError(404, JText::_('COM_VOLUNTEERS_ERROR_TEAM_NOT_FOUND'));
+						JError::raiseError(404, JText::_('JERROR_PAGE_NOT_FOUND'));
 					}
 
 					$vars['view'] = substr($view, 0, -1);
@@ -537,7 +537,7 @@ class VolunteersRouter extends JComponentRouterBase
 
 					if (!$id)
 					{
-						JError::raiseError(404, JText::_('COM_VOLUNTEERS_ERROR_VOLUNTEER_NOT_FOUND'));
+						JError::raiseError(404, JText::_('JERROR_PAGE_NOT_FOUND'));
 					}
 
 					$vars['view'] = 'volunteer';
@@ -559,7 +559,7 @@ class VolunteersRouter extends JComponentRouterBase
 			case 'home':
 				if (isset($segments[0]))
 				{
-					JError::raiseError(404, JText::_('COM_VOLUNTEERS_ERROR_NOT_FOUND'));
+					JError::raiseError(404, JText::_('JERROR_PAGE_NOT_FOUND'));
 				}
 				break;
 		}

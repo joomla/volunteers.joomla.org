@@ -346,9 +346,10 @@ class VolunteersModelVolunteer extends JModelAdmin
 		$model->setState('filter.volunteer', $pk);
 		$items = $model->getItems();
 
-		$teams            = new stdClass();
-		$teams->active    = array();
-		$teams->honorroll = array();
+		$teams               = new stdClass();
+		$teams->active       = array();
+		$teams->honorroll    = array();
+		$teams->activemember = false;
 
 		// Check for active or inactive members
 		foreach ($items as $item)
@@ -376,6 +377,11 @@ class VolunteersModelVolunteer extends JModelAdmin
 			else
 			{
 				$teams->honorroll[] = $item;
+			}
+
+			if ($item->date_ended == '0000-00-00' && $item->position != 8)
+			{
+				$teams->activemember = true;
 			}
 		}
 

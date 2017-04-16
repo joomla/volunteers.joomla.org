@@ -89,10 +89,6 @@ JFactory::getDocument()->addScriptDeclaration("
 		<?php echo $this->form->renderField('city'); ?>
 		<?php echo $this->form->renderField('location'); ?>
 
-        <div class="address">
-			<?php echo $this->form->renderField('address'); ?>
-        </div>
-
         <hr>
 
         <h3><?php echo JText::_('COM_VOLUNTEERS_PROFILE_ADDRESS') ?></h3>

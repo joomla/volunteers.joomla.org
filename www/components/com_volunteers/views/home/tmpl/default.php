@@ -25,7 +25,7 @@ JFactory::getDocument()->addScript('media/com_volunteers/js/oms.js', 'text/javas
         <p><?php echo JText::_('COM_VOLUNTEERS_HOME_INTRO_HOW_DESC'); ?></p>
         <p><?php echo JText::_('COM_VOLUNTEERS_HOME_INTRO_HOW_ACTION'); ?></p>
         <p>
-            <a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=registration'); ?>" class="btn"><span class="icon-chevron-right"></span><?php echo JText::_('COM_VOLUNTEERS_HOME_INTRO_HOW_BUTTON'); ?>
+            <a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=roles'); ?>" class="btn"><span class="icon-chevron-right"></span><?php echo JText::_('COM_VOLUNTEERS_HOME_INTRO_HOW_BUTTON'); ?>
             </a>
         </p>
     </div>

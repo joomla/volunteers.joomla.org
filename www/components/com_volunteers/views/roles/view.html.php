@@ -53,7 +53,6 @@ class VolunteersViewRoles extends JViewLegacy
 	{
 		// Prepare variables
 		$title   = JText::_('COM_VOLUNTEERS_TITLE_ROLESOPEN');
-		$image   = 'https://cdn.joomla.org/images/joomla-org-og.jpg';
 		$itemURL = JRoute::_('index.php?option=com_volunteers&view=roles');
 		$url     = JUri::getInstance()->toString(['scheme', 'host', 'port']) . $itemURL;
 
@@ -62,11 +61,11 @@ class VolunteersViewRoles extends JViewLegacy
 
 		// Twitter Card metadata
 		$this->document->setMetaData('twitter:title', $title);
-		$this->document->setMetaData('twitter:image', $image);
+		$this->document->setMetaData('twitter:image', JUri::getInstance()->toString(['scheme', 'host', 'port']) . '/images/volunteers-help-wanted-twitter.jpg');
 
 		// OpenGraph metadata
 		$this->document->setMetaData('og:title', $title, 'property');
-		$this->document->setMetaData('og:image', $image, 'property');
+		$this->document->setMetaData('og:image', JUri::getInstance()->toString(['scheme', 'host', 'port']) . '/images/volunteers-help-wanted.jpg', 'property');
 		$this->document->setMetaData('og:type', 'article', 'property');
 		$this->document->setMetaData('og:url', $url, 'property');
 	}

@@ -35,7 +35,7 @@ if ($displayData->shorten && $displayData->shortenKey && !JDEBUG)
 
 	try
 	{
-		$response = JHttpFactory::getHttp()->post('http://joom.la/yourls-api.php', $data);
+		$response = JHttpFactory::getHttp()->post('https://joom.la/yourls-api.php', $data);
 
 		if ($response->code == 200)
 		{

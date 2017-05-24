@@ -1,8 +1,8 @@
 <?xml version="1.0" ?>
 <install version="2.0" type="plugin" plugin="article" core="1" editable="1">
     <name>WF_ARTICLE_TITLE</name>
-    <version>2.5.31</version>
-    <creationDate>25 October 2016</creationDate>
+    <version>2.6.12</version>
+    <creationDate>27-04-2017</creationDate>
     <author>Ryan Demmer</author>
     <authorEmail>info@joomlacontenteditor.net</authorEmail>
     <authorUrl>http://www.joomlacontenteditor.net/</authorUrl>
@@ -26,8 +26,8 @@
     </params>
     <params group="buttons">
             <param name="buttons" class="checklist buttonlist" type="list" multiple="multiple" default="readmore,pagebreak" label="WF_PARAM_BUTTONS" description="WF_PARAM_BUTTONS_DESC">
-                <option value="readmore">Readmore</option>
-                <option value="pagebreak">Pagebreak</option>
+                <option value="readmore">WF_ARTICLE_READMORE</option>
+                <option value="pagebreak">WF_ARTICLE_PAGEBREAK</option>
             </param>
         </params>
     <help>

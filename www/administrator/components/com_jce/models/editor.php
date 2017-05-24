@@ -1,125 +1,142 @@
 <?php
 
 /**
- * @package   	JCE
- * @copyright 	Copyright (c) 2009-2016 Ryan Demmer. All rights reserved.
- * @license   	GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+ * @copyright     Copyright (c) 2009-2017 Ryan Demmer. All rights reserved
+ * @license       GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  * JCE is free software. This version may have been modified pursuant
  * to the GNU General Public License, and as distributed it includes or
  * is derivative of works licensed under the GNU General Public License or
- * other free or open source software licenses.
+ * other free or open source software licenses
  */
 defined('_JEXEC') or die('RESTRICTED');
 
 wfimport('admin.classes.model');
 wfimport('admin.classes.text');
 wfimport('admin.helpers.xml');
-wfimport('admin.helpers.extension');
+wfimport('admin.models.plugins');
 wfimport('editor.libraries.classes.token');
 wfimport('editor.libraries.classes.editor');
 wfimport('editor.libraries.classes.language');
 
 jimport('joomla.application.component.model');
 
-class WFModelEditor extends WFModelBase {
-
+class WFModelEditor extends WFModelBase
+{
     /**
-     * Editor version
-     * @var string
-     */
-    public static $version = null;
-
-    /**
-     * Profile object
+     * Profile object.
      *
-     * @var    object
+     * @var object
      */
     private $profile = null;
 
     /**
-     * Array of linked scripts
+     * Array of linked scripts.
      *
-     * @var    array
+     * @var array
      */
     protected $scripts = array();
 
     /**
-     * Array of linked style sheets
+     * Array of linked style sheets.
      *
-     * @var    array
+     * @var array
      */
     protected $stylesheets = array();
 
     /**
-     * Array of included style declarations
+     * Array of included style declarations.
      *
-     * @var    array
+     * @var array
      */
     protected $styles = array();
 
     /**
-     * Array of scripts placed in the header
+     * Context hash.
      *
-     * @var    array
+     * @var string
+     */
+    protected $context = '';
+
+    /**
+     * Array of scripts placed in the header.
+     *
+     * @var array
      */
     protected $javascript = array();
 
-    private function addScript($url) {
+    private function addScript($url)
+    {
         $this->scripts[] = $url;
     }
 
-    private function addStyleSheet($url) {
+    private function addStyleSheet($url)
+    {
         $this->stylesheets[] = $url;
     }
 
-    private function addScriptDeclaration($text) {
+    private function addScriptDeclaration($text)
+    {
         $this->javascript[] = $text;
     }
 
-    private function addStyleDeclaration($text) {
+    private function addStyleDeclaration($text)
+    {
         $this->styles[] = $text;
     }
 
-    public function __construct() {
+    public function __construct()
+    {
+        $app = JFactory::getApplication();
         $wf = WFEditor::getInstance();
 
-        // set language
-        $this->language = WFLanguage::getCode();
         // set profile
         $this->profile = $wf->getProfile();
+
+        $this->context = $wf->getContext();
     }
 
-    public function buildEditor() {
-        // get document
-        $document = JFactory::getDocument();
-
+    public function getEditorSettings()
+    {
         // get an editor instance
         $wf = WFEditor::getInstance();
 
         // create token
         $token = WFToken::getToken();
 
-        // get current component
-        $option = JRequest::getCmd('option');
-        $component = WFExtensionHelper::getComponent(null, $option);
-
-        // get default settings
-        $settings = $this->getEditorSettings();
-
-        // set default component id
-        $component_id = 0;
-        $component_id = isset($component->extension_id) ? $component->extension_id : ($component->id ? $component->id : 0);
-
+        // get editor version
         $version = self::getVersion();
 
-        // settings array for jce, tinymce etc
-        $init = array();
+        $settings = array(
+            'token' => WFToken::getToken(),
+            'etag' => md5($version),
+            'context' => $this->context,
+            'base_url' => JURI::root(),
+            'language' => WFLanguage::getCode(),
+            'directionality' => WFLanguage::getDir(),
+            'theme' => 'none',
+            'plugins' => '',
+        );
+
+        $settings['language_load'] = false;
 
         // if a profile is set
         if (is_object($this->profile)) {
             jimport('joomla.filesystem.folder');
 
-            $settings = array_merge($settings, array('theme' => 'advanced', 'component_id' => $component_id, 'plugins' => $this->getPlugins()), $this->getToolbar());
+            $settings = array_merge($settings, array('theme' => 'advanced'), $this->getToolbar());
+
+            // add plugins
+            $plugins = $this->getPlugins();
+
+            // add core plugins
+            if (!empty($plugins['core'])) {
+                $settings['plugins'] = array_values($plugins['core']);
+            }
+
+            // add external plugins
+            if (!empty($plugins['external'])) {
+                $settings['external_plugins'] = $plugins['external'];
+            }
 
             // Theme and skins
             $theme = array(
@@ -129,7 +146,7 @@ class WFModelEditor extends WFModelBase {
                 'path' => array(1, 1, 'boolean'),
                 'resizing' => array(1, 0, 'boolean'),
                 'resize_horizontal' => array(1, 1, 'boolean'),
-                'resizing_use_cookie' => array(1, 1, 'boolean')
+                'resizing_use_cookie' => array(1, 1, 'boolean'),
             );
 
             // set rows key to pass to plugin config
@@ -139,18 +156,23 @@ class WFModelEditor extends WFModelBase {
                 $settings['theme_advanced_' . $k] = $wf->getParam('editor.' . $k, $v[0], $v[1], $v[2]);
             }
 
-            if (!$wf->getParam('editor.use_cookies', 1)) {
-                $settings['theme_advanced_resizing_use_cookie'] = false;
-            }
-
             $settings['width'] = $wf->getParam('editor.width');
             $settings['height'] = $wf->getParam('editor.height');
 
-            // 'Look & Feel'
+            // assign skin
+            $settings['skin'] = $wf->getParam('editor.toolbar_theme', 'default', 'default');
 
-            $skin = explode('.', $wf->getParam('editor.toolbar_theme', 'default', 'default'));
-            $settings['skin'] = $skin[0];
-            $settings['skin_variant'] = isset($skin[1]) ? $skin[1] : '';
+            if ($settings['skin'] && strpos($settings['skin'], '.') !== false) {
+                $parts = explode('.', $settings['skin']);
+
+                $settings['skin'] = $parts[0];
+                $settings['skin_variant'] = $parts[1];
+            }
+
+            // classic has been removed
+            if ($settings['skin'] === 'classic') {
+                $settings['skin'] = 'default';
+            }
 
             // get body class if any
             $body_class = $wf->getParam('editor.body_class', '');
@@ -168,9 +190,17 @@ class WFModelEditor extends WFModelBase {
 
             // Editor Toggle
             $settings['toggle'] = $wf->getParam('editor.toggle', 1, 1);
-            $settings['toggle_label'] = htmlspecialchars($wf->getParam('editor.toggle_label', '[Toggle Editor]', '[Toggle Editor]'));
+            $settings['toggle_label'] = htmlspecialchars($wf->getParam('editor.toggle_label', ''));
             $settings['toggle_state'] = $wf->getParam('editor.toggle_state', 1, 1);
-        }// end profile
+
+            // Get all optional plugin configuration options
+            $this->getPluginConfig($settings);
+
+            // clean up invalid_elements
+            if (!empty($settings['invalid_elements'])) {
+                $settings['invalid_elements'] = array_values($settings['invalid_elements']);
+            }
+        } // end profile
         // check for joomla debug mode
         $config = JFactory::getConfig();
 
@@ -189,30 +219,25 @@ class WFModelEditor extends WFModelBase {
 
         // set compression
         if ($compress['css']) {
-            $this->addStyleSheet(JURI::base(true) . '/index.php?option=com_jce&view=editor&layout=editor&task=pack&type=css&component_id=' . $component_id . '&' . $token . '=1');
+            $this->addStyleSheet(JURI::base(true) . '/index.php?option=com_jce&view=editor&task=pack&type=css&context=' . $this->context . '&' . $token . '=1');
         } else {
             // CSS
-            $this->addStyleSheet($this->getURL(true) . '/libraries/css/editor.css');
-            // get plugin styles
-            $this->getPluginStyles($settings);
+            $this->addStyleSheet($this->getURL(true) . '/libraries/css/editor.min.css');
         }
 
         // set compression
         if ($compress['javascript']) {
-            $this->addScript(JURI::base(true) . '/index.php?option=com_jce&view=editor&layout=editor&task=pack&component_id=' . $component_id . '&' . $token . '=1');
+            $this->addScript(JURI::base(true) . '/index.php?option=com_jce&view=editor&task=pack&context=' . $this->context . '&' . $token . '=1');
         } else {
             $this->addScript($this->getURL(true) . '/tiny_mce/tiny_mce.js');
             // Editor
-            $this->addScript($this->getURL(true) . '/libraries/js/editor.js');
+            $this->addScript($this->getURL(true) . '/libraries/js/editor.min.js');
 
             if (array_key_exists('language_load', $settings)) {
                 // language
-                $this->addScript(JURI::base(true) . '/index.php?option=com_jce&view=editor&layout=editor&task=loadlanguages&lang=' . $this->language . '&component_id=' . $component_id . '&' . $token . '=1');
+                $this->addScript(JURI::base(true) . '/index.php?option=com_jce&view=editor&task=loadlanguages&lang=' . $settings['language'] . '&context=' . $this->context . '&' . $token . '=1');
             }
         }
-
-        // Get all optional plugin configuration options
-        $this->getPluginConfig($settings);
 
         // remove 'rows' key from $settings
         unset($settings['rows']);
@@ -222,75 +247,61 @@ class WFModelEditor extends WFModelBase {
 
         //Other - user specified
         $userParams = $wf->getParam('editor.custom_config', '');
-        $baseParams = array('mode', 'cleanup_callback', 'save_callback', 'file_browser_callback', 'urlconverter_callback', 'onpageload', 'oninit', 'editor_selector');
 
         if ($userParams) {
             $userParams = explode(';', $userParams);
             foreach ($userParams as $userParam) {
                 $keys = explode(':', $userParam);
-                if (!in_array(trim($keys[0]), $baseParams)) {
-                    $settings[trim($keys[0])] = count($keys) > 1 ? trim($keys[1]) : '';
-                }
+                $settings[trim($keys[0])] = count($keys) > 1 ? trim($keys[1]) : '';
             }
         }
 
         // check for language files
         $this->checkLanguages($settings);
 
-        $output = "";
-        $i = 1;
-
-        foreach ($settings as $k => $v) {
-            // If the value is an array, implode!
-            if (is_array($v)) {
-                $v = ltrim(implode(',', $v), ',');
+        // process settings
+        array_walk($settings, function (&$value) {
+            if (is_array($value) && $value === array_values($value)) {
+                $value = implode(',', $value);
             }
-            // Value must be set
-            if ($v !== '') {
-                // objects or arrays or functions or regular expression
-                if (preg_match('/(\[[^\]*]\]|\{[^\}]*\}|function\([^\}]*\}|^#(.*)#$)/', $v)) {
-                    // replace hash delimiters with / for javascript regular expression
-                    $v = preg_replace('@^#(.*)#$@', '/$1/', $v);
-                }
-                // boolean
-                else if (is_bool($v) === true) {
-                    $v = $v ? 'true' : 'false';
-                }
-                // stringified booleans
-                else if ($v === "true" || $v === "false") {
-                    $v = $v === "true" ? 'true' : 'false';
-                }
-                // anything that is not solely an integer
-                else if (!is_numeric($v)) {
-                    if (strpos($v, '"') === 0) {
-                        $v = '"' . trim($v, '"') . '"';
-                    } else {
-                        $v = '"' . str_replace('"', '\"', $v) . '"';
-                    }
-                }
 
-                $output .= "\t\t\t" . $k . ": " . $v . "";
-                if ($i < count($settings)) {
-                    $output .= ",\n";
+            // convert json strings to objects to prevent encoding
+            if (is_string($value)) {
+                // decode string
+                $val = json_decode($value);
+
+                // valid json
+                if ($val) {
+                    $value = $val;
                 }
             }
-            // Must have 3 rows, even if 2 are blank!
-            if (preg_match('/theme_advanced_buttons([1-3])/', $k) && $v == '') {
-                $output .= "\t\t\t" . $k . ": \"\"";
-                if ($i < count($settings)) {
-                    $output .= ",\n";
-                }
+
+            // convert stringified booleans to booleans
+            if ($value === 'true') {
+                $value = true;
             }
-            $i++;
-        }
+            if ($value === 'false') {
+                $value = false;
+            }
+        });
 
-        $tinymce = "{\n";
-        $tinymce .= preg_replace('/,?\n?$/', '', $output) . "
-        }";
+        // Remove empty values
+        $settings = array_filter($settings, function ($value) {
+            return $value !== '';
+        });
 
-        $init[] = $tinymce;
+        return $settings;
+    }
 
-        $this->addScriptDeclaration("\n\t\ttry{WFEditor.init(" . implode(',', $init) . ");}catch(e){console.debug(e);}\n");
+    public function render($settings)
+    {
+        // get an editor instance
+        $wf = WFEditor::getInstance();
+
+        // encode as json string
+        $tinymce = json_encode($settings, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
+
+        $this->addScriptDeclaration('try{WFEditor.init(' . $tinymce . ');}catch(e){console.debug(e);}');
 
         if (is_object($this->profile)) {
             if ($wf->getParam('editor.callback_file')) {
@@ -310,7 +321,8 @@ class WFModelEditor extends WFModelBase {
         return $this->getOutput();
     }
 
-    private function getOutput() {
+    private function getOutput()
+    {
         $document = JFactory::getDocument();
 
         $end = $document->_getLineEnd();
@@ -340,7 +352,6 @@ class WFModelEditor extends WFModelBase {
 
             // don't add hash to dynamic php url
             if (strpos($script, 'index.php') === false) {
-
                 $version = md5(basename($script) . $version);
 
                 if (strpos($script, '?') === false) {
@@ -364,11 +375,12 @@ class WFModelEditor extends WFModelBase {
     }
 
     /**
-     * Check the current language pack exists and is complete
+     * Check the current language pack exists and is complete.
+     *
      * @param array $settings Settings array
-     * @return void
      */
-    private function checkLanguages(&$settings) {
+    private function checkLanguages(&$settings)
+    {
         $plugins = array();
         $language = $settings['language'];
 
@@ -397,62 +409,24 @@ class WFModelEditor extends WFModelBase {
     }
 
     /**
-     * Get the current version from the editor manifest
+     * Get the current version from the editor manifest.
+     *
      * @return Version
      */
-    private static function getVersion() {
-        if (!isset(self::$version)) {
-            $xml = WFXMLHelper::parseInstallManifest(JPATH_ADMINISTRATOR . '/components/com_jce/jce.xml');
-
-            // return cleaned version number or date
-            self::$version = preg_replace('/[^0-9a-z]/i', '', $xml['version']);
-
-            if (!self::$version) {
-                self::$version = date('Y-m-d', strtotime('today'));
-            }
-        }
-
-        return self::$version;
+    private static function getVersion()
+    {
+        return WF_VERSION;
     }
 
     /**
-     * Get default settings array
-     * @return array
-     */
-    public function getEditorSettings() {
-        wfimport('editor.libraries.classes.token');
-
-        $wf = WFEditor::getInstance();
-
-        $language = JFactory::getLanguage();
-
-        $settings = array(
-            'token' => WFToken::getToken(),
-            'etag' => md5($this->getVersion()),
-            'base_url' => JURI::root(),
-            'language' => $this->language,
-            //'language_load'		=> false,
-            'directionality' => $language->isRTL() ? 'rtl' : 'ltr',
-            'theme' => 'none',
-            'plugins' => ''
-        );
-
-        $settings['language_load'] = false;
-
-        return $settings;
-    }
-
-    /**
-     * Return a list of icons for each JCE editor row
+     * Return a list of icons for each JCE editor row.
      *
-     * @access public
      * @param string  The number of rows
+     *
      * @return The row array
      */
-    private function getToolbar() {
-        wfimport('admin.models.plugins');
-        $model = new WFModelPlugins();
-
+    private function getToolbar()
+    {
         $wf = WFEditor::getInstance();
         $rows = array('theme_advanced_buttons1' => '', 'theme_advanced_buttons2' => '', 'theme_advanced_buttons3' => '');
 
@@ -462,9 +436,9 @@ class WFModelEditor extends WFModelBase {
         }
 
         // get plugins
-        $plugins = $model->getPlugins();
+        $plugins = WFModelPlugins::getPlugins();
         // get core commands
-        $commands = $model->getCommands();
+        $commands = WFModelPlugins::getCommands();
 
         // merge plugins and commands
         $icons = array_merge($commands, $plugins);
@@ -477,11 +451,11 @@ class WFModelEditor extends WFModelBase {
             'paste' => 'clipboard',
             'spacer' => '|',
             'forecolor' => 'fontcolor',
-            'backcolor' => 'backcolor'
+            'backcolor' => 'backcolor',
         );
 
         $x = 0;
-        for ($i = 1; $i <= count($lists); $i++) {
+        for ($i = 1; $i <= count($lists); ++$i) {
             $buttons = array();
             $items = explode(',', $lists[$x]);
 
@@ -495,7 +469,7 @@ class WFModelEditor extends WFModelBase {
                 }
 
                 // check if button should be in toolbar
-                if ($item !== "|") {
+                if ($item !== '|') {
                     if (array_key_exists($item, $icons) === false) {
                         continue;
                     }
@@ -512,12 +486,12 @@ class WFModelEditor extends WFModelBase {
                         $custom = array_filter((array) $custom);
 
                         if (empty($custom)) {
-                            $item = "";
+                            $item = '';
                         } else {
                             $a = array();
 
                             foreach (explode(',', $item) as $s) {
-                                if (in_array($s, $custom) || $s == "|") {
+                                if (in_array($s, $custom) || $s == '|') {
                                     $a[] = $s;
                                 }
                             }
@@ -540,94 +514,146 @@ class WFModelEditor extends WFModelBase {
                 $rows['theme_advanced_buttons' . $i] = implode(',', $buttons);
             }
 
-            $x++;
+            ++$x;
         }
 
         return $rows;
     }
 
     /**
-     * Return a list of published JCE plugins
+     * Get dependencies for each plugin from its config.php file.
      *
-     * @access public
+     * @param string $plugin Plugin name
+     * @param string $path   Optional pah to plugin folder
+     *
+     * @return mixed Array of dependencies or false
+     */
+    protected static function getDependencies($plugin, $path)
+    {
+        $file = $path . '/' . $plugin . '/classes/config.php';
+
+        // check if plugin has a config file
+        if (is_file($file)) {
+            include_once $file;
+            // create className
+            $classname = 'WF' . ucfirst($plugin) . 'PluginConfig';
+
+            if (method_exists($classname, 'getDependencies')) {
+                return (array) $classname::getDependencies();
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Add dependencies for each plugin to the main plugins array.
+     *
+     * @param array  $items Array of plugin names
+     * @param string $path  Optional path to check, defaults to TinyMCE plugin path
+     */
+    protected static function addDependencies(&$items, $path = '')
+    {
+        // set default path
+        if (empty($path)) {
+            $path = WF_EDITOR_PLUGINS;
+        }
+
+        $x = count($items);
+
+        // loop backwards through items
+        while ($x--) {
+            // get dependencies for each item
+            $dependencies = self::getDependencies($items[$x], $path);
+
+            if (!empty($dependencies)) {
+                foreach ($dependencies as $dependency) {
+                    // add to beginning of items
+                    array_unshift($items, $dependency);
+                }
+            }
+        }
+    }
+
+    /**
+     * Return a list of published JCE plugins.
+     *
      * @return string list
      */
-    public function getPlugins() {
-        jimport('joomla.filesystem.file');
-
+    public function getPlugins()
+    {
         static $plugins;
+
+        $wf = WFEditor::getInstance();
 
         if (is_object($this->profile)) {
             if (!is_array($plugins)) {
-                $wf = WFEditor::getInstance();
+                // get plugin items from profile
+                $items = explode(',', $this->profile->plugins);
 
-                $plugins = explode(',', $this->profile->plugins);
-                $core = array('autolink', 'cleanup', 'core', 'code', 'colorpicker', 'upload', 'format');
-                $plugins = array_unique(array_merge($core, $plugins));
+                // get core and installed plugins list
+                $list = WFModelPlugins::getPlugins();
 
-                // add formatselect
-                if (in_array('formatselect', $plugins) === false && strpos($this->profile->rows, 'formatselect') !== false) {
-                    $plugins[] = 'formatselect';
-                }
+                // check that the plugin is available
+                $items = array_filter($items, function ($item) use ($list) {
+                    return in_array($item, array_keys($list));
+                });
 
-                // add styleselect
-                if (in_array('styleselect', $plugins) === false && strpos($this->profile->rows, 'styleselect') !== false) {
-                    $plugins[] = 'styleselect';
-                }
-
-                // add fontselect
-                if (in_array('fontselect', $plugins) === false && strpos($this->profile->rows, 'fontselect') !== false) {
-                    $plugins[] = 'fontselect';
-                }
-
-                // add formatselect
-                if (in_array('fontsizeselect', $plugins) === false && strpos($this->profile->rows, 'fontsizeselect') !== false) {
-                    $plugins[] = 'fontsizeselect';
-                }
-
-                // add font colours
-                if (in_array('fontcolor', $plugins) === false && preg_match('#(forecolor|backcolor)#', $this->profile->rows)) {
-                    $plugins[] = 'fontcolor';
-                }
-
-                // add importcss
-                if (in_array('styleselect', $plugins) || in_array('fontselect', $plugins)) {
-                    $plugins[] = 'importcss';
-                }
-
-                // add hr
-                if (in_array('hr', $plugins) === false && strpos($this->profile->rows, 'hr') !== false) {
-                    $plugins[] = 'hr';
-                }
+                // core plugins
+                $core = array('core', 'autolink', 'cleanup', 'code', 'format', 'importcss', 'colorpicker', 'upload');
 
                 // add advlists plugin if lists are loaded
-                if (in_array('lists', $plugins)) {
-                    $plugins[] = 'advlist';
+                if (in_array('lists', $items)) {
+                    $items[] = 'advlist';
                 }
 
                 // Load wordcount if path is enabled
                 if ($wf->getParam('editor.path', 1)) {
-                    $plugins[] = 'wordcount';
+                    $items[] = 'wordcount';
                 }
 
-                // add legacy "charmap"
-                if (in_array('charmap', $plugins) === false && strpos($this->profile->rows, 'charmap') !== true) {
-                    $plugins[] = 'charmap';
-                }
+                // reset index
+                $items = array_values($items);
 
-                foreach ($plugins as $k => $v) {
-                    if (in_array($v, $core)) {
+                // add plugin dependencies
+                self::addDependencies($items);
+
+                // add core plugins
+                $items = array_merge($core, $items);
+
+                // remove duplicates and empty values
+                $items = array_unique(array_filter($items));
+
+                // create plugins array
+                $plugins = array('core' => array(), 'external' => array());
+
+                // check installed plugins are valid
+                foreach ($list as $name => $attribs) {
+                    // skip core plugins
+                    if ($attribs->core) {
                         continue;
                     }
 
-                    // check plugin is correctly installed and is a tinymce plugin, ie: it has an editor_plugin.js file
-                    if (!JFile::exists(WF_EDITOR_PLUGINS . '/' . $v . '/editor_plugin.js')) {
-                        unset($plugins[$k]);
+                    // find plugin key in plugins list
+                    $pos = array_search($name, $items);
+
+                    // check it is in profile plugin list
+                    if ($pos === false) {
+                        continue;
                     }
+
+                    // remove from items array
+                    unset($items[$pos]);
+
+                    // reset index
+                    $items = array_values($items);
+
+                    // add to array
+                    $plugins['external'][$name] = JURI::root(true) . $attribs->path . '/editor_plugin.js';
                 }
 
-                // remove empty values
-                $plugins = array_filter($plugins);
+                // update core plugins
+                $plugins['core'] = $items;
             }
         }
 
@@ -635,67 +661,58 @@ class WFModelEditor extends WFModelBase {
     }
 
     /**
-     * Get all loaded plugins config options
+     * Get all loaded plugins config options.
      *
-     * @access      public
-     * @param array   $settings passed by reference
+     * @param array $settings passed by reference
      */
-    private function getPluginConfig(&$settings) {
-        $plugins = $settings['plugins'];
+    private function getPluginConfig(&$settings)
+    {
+        $core = (array) $settings['plugins'];
+        $items = array();
 
-        if ($plugins && is_array($plugins)) {
-            foreach ($plugins as $plugin) {
-                $file = WF_EDITOR_PLUGINS . '/' . $plugin . '/classes/config.php';
+        // Core Tinymce plugins
+        foreach ($core as $plugin) {
+            $file = WF_EDITOR_PLUGINS . '/' . $plugin . '/classes/config.php';
 
-                if (file_exists($file)) {
-                    require_once ($file);
-                    // Create class name
-                    $classname = 'WF' . ucfirst($plugin) . 'PluginConfig';
+            if (is_file($file)) {
+                require_once $file;
+                // add plugin name to array
+                $items[] = $plugin;
+            }
+        }
 
-                    // Check class and method
-                    if (class_exists($classname) && method_exists($classname, 'getConfig')) {
-                        call_user_func_array(array($classname, 'getConfig'), array(&$settings));
-                    }
+        // Installed Tinymce plugins
+        if (array_key_exists('external_plugins', $settings)) {
+            $installed = (array) $settings['external_plugins'];
+
+            foreach ($installed as $plugin => $path) {
+                $file = $path . '/classes/config.php';
+
+                if (is_file($file)) {
+                    require_once $file;
+                    // add plugin name to array
+                    $items[] = $plugin;
                 }
+            }
+        }
+
+        // loop through list and create/call method
+        foreach ($items as $plugin) {
+            // Create class name
+            $classname = 'WF' . ucfirst($plugin) . 'PluginConfig';
+
+            // Check class and method are callable, and call
+            if (class_exists($classname) && method_exists($classname, 'getConfig')) {
+                call_user_func_array(array($classname, 'getConfig'), array(&$settings));
             }
         }
     }
 
     /**
-     * Get all loaded plugins styles
-     *
-     * @access      public
-     * @param array   $settings passed by reference
+     * Remove keys from an array.
      */
-    private function getPluginStyles($settings) {
-        $plugins = $settings['plugins'];
-
-        if ($plugins && is_array($plugins)) {
-            foreach ($plugins as $plugin) {
-                $file = WF_EDITOR_PLUGINS . '/' . $plugin . '/classes/config.php';
-
-                if (file_exists($file)) {
-                    require_once ($file);
-                    // Create class name
-                    $classname = 'WF' . ucfirst($plugin) . 'PluginConfig';
-
-                    // Check class and method
-                    if (class_exists($classname) && method_exists($classname, 'getStyles')) {
-                        call_user_func(array($classname, 'getStyles'));
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * Remove keys from an array
-     *
-     * @return $array by reference
-     * @param arrau $array Array to edit
-     * @param array $keys Keys to remove
-     */
-    public function removeKeys(&$array, $keys) {
+    public function removeKeys(&$array, $keys)
+    {
         if (!is_array($keys)) {
             $keys = array($keys);
         }
@@ -704,13 +721,15 @@ class WFModelEditor extends WFModelBase {
     }
 
     /**
-     * Add keys to an array
+     * Add keys to an array.
      *
      * @return The string list with added key or the key
+     *
      * @param string  The array
      * @param string  The keys to add
      */
-    public function addKeys(&$array, $keys) {
+    public function addKeys(&$array, $keys)
+    {
         if (!is_array($keys)) {
             $keys = array($keys);
         }
@@ -718,24 +737,25 @@ class WFModelEditor extends WFModelBase {
     }
 
     /**
-     * Get a list of editor font families
+     * Get a list of editor font families.
      *
      * @return string font family list
-     * @param string $add Font family to add
+     *
+     * @param string $add    Font family to add
      * @param string $remove Font family to remove
      *
      * Deprecated in 2.3.4
      */
-    public function getEditorFonts() {
-        return "";
+    public function getEditorFonts()
+    {
+        return '';
     }
 
     /**
-     * Return the current site template name
-     *
-     * @access public
+     * Return the current site template name.
      */
-    private static function getSiteTemplates() {
+    private static function getSiteTemplates()
+    {
         $db = JFactory::getDBO();
         $app = JFactory::getApplication();
         $id = 0;
@@ -752,11 +772,11 @@ class WFModelEditor extends WFModelBase {
         $query = $db->getQuery(true);
 
         if (is_object($query)) {
-            $query->select('id, template')->from('#__template_styles')->where(array("client_id = 0", "home = '1'"));
+            $query->select('id, template')->from('#__template_styles')->where(array('client_id = 0', "home = '1'"));
         } else {
             $query = 'SELECT menuid as id, template'
-                    . ' FROM #__templates_menu'
-                    . ' WHERE client_id = 0';
+                . ' FROM #__templates_menu'
+                . ' WHERE client_id = 0';
         }
 
         $db->setQuery($query);
@@ -776,24 +796,8 @@ class WFModelEditor extends WFModelBase {
         return $assigned;
     }
 
-    private static function getYoothemePath($template) {
-        $warp7 = JPATH_SITE . '/templates/' . $template . '/warp.php';
-
-        if (is_file($warp7)) {
-            // get warp
-            $warp = require($warp7);
-            $layouts = $warp['config']->get('layouts');
-            $style = $layouts['default']['style'];
-
-            if (!empty($style)) {
-                return "templates/" . $template . "/styles/" . $style . "/css";
-            }
-        }
-
-        return "templates/" . $template . "/css";
-    }
-
-    private static function getStyleSheetsList($absolute = false) {
+    private static function getStyleSheetsList($absolute = false)
+    {
         jimport('joomla.filesystem.folder');
         jimport('joomla.filesystem.file');
 
@@ -813,20 +817,15 @@ class WFModelEditor extends WFModelBase {
 
         foreach ($templates as $item) {
             // Template CSS
-            $path = JPATH_SITE . '/templates/' . $item;
+            $path = JPATH_SITE . '/templates/' . $item . '/css';
 
             // get the first path that exists
             if (is_dir($path)) {
                 // assign template
                 $template = $item;
 
-                if (substr($template, 0, 4) === "yoo_") {
-                    $url = self::getYoothemePath($template);
-                    $path = JPATH_SITE . '/' . $url;
-                } else {
-                    // assign url
-                    $url = "templates/" . $template . "/css";
-                }
+                // assign url
+                $url = 'templates/' . $template . '/css';
 
                 break;
             }
@@ -839,21 +838,27 @@ class WFModelEditor extends WFModelBase {
 
         switch ($global) {
             // Custom template css files
-            case 0 :
+            case 0:
                 // use getParam so result is cleaned
                 $global_custom = $wf->getParam('editor.content_css_custom', '');
                 // Replace $template variable with site template name
                 $global_custom = str_replace('$template', $template, $global_custom);
 
                 foreach (explode(',', $global_custom) as $tmp) {
-                    $tmp    = trim($tmp);
+                    $tmp = trim($tmp);
 
                     if (empty($tmp)) {
                         continue;
                     }
 
-                    $file   = JPATH_SITE . '/' . $tmp;
-                    $list   = array();
+                    // external url
+                    if (strpos($tmp, '://') !== false) {
+                        $files[] = $tmp;
+                        continue;
+                    }
+
+                    $file = JPATH_SITE . '/' . $tmp;
+                    $list = array();
 
                     // check if path is a file
                     if (is_file($file)) {
@@ -874,7 +879,7 @@ class WFModelEditor extends WFModelBase {
 
                 break;
             // Template css (template.css or template_css.css)
-            case 1 :
+            case 1:
                 // Joomla! 1.5 standard
                 $file = 'template.css';
                 $css = array();
@@ -889,8 +894,8 @@ class WFModelEditor extends WFModelBase {
                 }
 
                 // check for editor.css file
-                if (JFile::exists($path . '/css/editor.css')) {
-                    $file = 'editor.css';    
+                if (JFile::exists($path . '/editor.css')) {
+                    $file = 'editor.css';
                 }
 
                 // check for php version
@@ -901,15 +906,15 @@ class WFModelEditor extends WFModelBase {
                 $files[] = $url . '/' . basename($file);
                 break;
             // Nothing, use system default
-            case 2 :
+            case 2:
                 $files[] = 'templates/system/css/editor.css';
                 break;
         }
 
         switch ($profile) {
             // add to global config value
-            case 0 :
-            case 1 :
+            case 0:
+            case 1:
                 $profile_custom = $wf->getParam('editor.profile_content_css_custom', '');
                 // Replace $template variable with site template name (defaults to 'system')
                 $profile_custom = str_replace('$template', $template, $profile_custom);
@@ -917,8 +922,15 @@ class WFModelEditor extends WFModelBase {
                 $custom = array();
 
                 foreach (explode(',', $profile_custom) as $tmp) {
-                    $file = JPATH_SITE . '/' . $tmp;
                     $list = array();
+
+                    // external url
+                    if (strpos($tmp, '://') !== false) {
+                        $list[] = $tmp;
+                        continue;
+                    }
+
+                    $file = JPATH_SITE . '/' . $tmp;
 
                     // check if path is a file
                     if (is_file($file)) {
@@ -946,7 +958,7 @@ class WFModelEditor extends WFModelBase {
                 }
                 break;
             // inherit global config value
-            case 2 :
+            case 2:
                 break;
         }
         // remove duplicates
@@ -961,11 +973,16 @@ class WFModelEditor extends WFModelBase {
                 continue;
             }
 
+            if (strpos($file, '://') !== false) {
+                $stylesheets[] = $file;
+                continue;
+            }
+
             // remove leading slash
             $file = ltrim($file, '/');
 
             if (JFile::exists(JPATH_SITE . '/' . $file)) {
-                $etag = "";
+                $etag = '';
 
                 // add etag
                 if ($absolute === false) {
@@ -986,10 +1003,12 @@ class WFModelEditor extends WFModelBase {
     /**
      * Get an array of stylesheets used by the editor.
      * References the WFEditor class.
-     * If the list contains any LESS stylesheets, the list is returned as a URL to compile
+     * If the list contains any LESS stylesheets, the list is returned as a URL to compile.
+     *
      * @return string
      */
-    public static function getStyleSheets() {
+    public static function getStyleSheets()
+    {
         $stylesheets = self::getStyleSheetsList();
 
         // check for less files in the array
@@ -1001,18 +1020,21 @@ class WFModelEditor extends WFModelBase {
             $token = WFToken::getToken();
             $version = self::getVersion();
 
-            return JURI::base(true) . '/index.php?option=com_jce&view=editor&layout=editor&task=compileless&' . $token . '=1';
+            return JURI::base(true) . '/index.php?option=com_jce&view=editor&task=compileless&' . $token . '=1';
         }
 
         return $stylesheets;
     }
 
     /**
-     * Get the URL of the editor
-     * @param boolean $relative
+     * Get the URL of the editor.
+     *
+     * @param bool $relative
+     *
      * @return string
      */
-    private function getURL($relative = false) {
+    private function getURL($relative = false)
+    {
         if ($relative) {
             return JURI::root(true) . '/components/com_jce/editor';
         }
@@ -1021,9 +1043,10 @@ class WFModelEditor extends WFModelBase {
     }
 
     /**
-     * Pack / compress editor files
+     * Pack / compress editor files.
      */
-    public function pack() {
+    public function pack()
+    {
         // check token
         WFToken::checkToken('GET') or die('RESTRICTED');
 
@@ -1040,7 +1063,7 @@ class WFModelEditor extends WFModelBase {
         $plugins = array();
 
         $suffix = JRequest::getWord('suffix', '');
-        $component_id = JRequest::getInt('component_id', 0);
+        //$component_id = JRequest::getInt('component_id', 0);
 
         // if a profile is set
         if ($this->profile) {
@@ -1054,40 +1077,38 @@ class WFModelEditor extends WFModelBase {
         $toolbar = explode('.', $wf->getParam('editor.toolbar_theme', 'default'));
 
         switch ($type) {
-            case 'language' :
+            case 'language':
                 $files = array();
 
                 $data = $this->loadLanguages(array(), array(), '(^dlg$|_dlg$)', true);
                 $packer->setText($data);
 
                 break;
-            case 'javascript' :
+            case 'javascript':
                 $files = array();
 
                 // add core file
-                $files[] = WF_EDITOR . "/tiny_mce/tiny_mce" . $suffix . ".js";
+                $files[] = WF_EDITOR . '/tiny_mce/tiny_mce' . $suffix . '.js';
 
                 // Add themes in dev mode
-                if (!self::$version) {
-                    foreach ($themes as $theme) {
-                        $files[] = WF_EDITOR . "/tiny_mce/themes/" . $theme . "/editor_template" . $suffix . ".js";
-                    }
+                foreach ($themes as $theme) {
+                    $files[] = WF_EDITOR . '/tiny_mce/themes/' . $theme . '/editor_template' . $suffix . '.js';
                 }
 
                 $core = array('autolink', 'cleanup', 'core', 'code', 'colorpicker', 'upload', 'format');
 
-                // Add plugins
-                foreach ($plugins as $plugin) {
-                    // skip core plugins in production mode
-                    if (self::$version && in_array($plugin, $core)) {
-                        continue;
-                    }
+                // Add core plugins
+                foreach ($plugins['core'] as $plugin) {
+                    $files[] = WF_EDITOR_PLUGINS . '/' . $plugin . '/editor_plugin' . $suffix . '.js';
+                }
 
-                    $files[] = WF_EDITOR . "/tiny_mce/plugins/" . $plugin . "/editor_plugin" . $suffix . ".js";
+                // add external plugins
+                foreach ($plugins['external'] as $plugin => $path) {
+                    $files[] = $path . '/' . $plugin . '/editor_plugin' . $suffix . '.js';
                 }
 
                 // add Editor file
-                $files[] = WF_EDITOR . '/libraries/js/editor.js';
+                $files[] = WF_EDITOR . '/libraries/js/editor.min.js';
 
                 // parse ini language files
                 $parser = new WFLanguageParser();
@@ -1097,10 +1118,10 @@ class WFModelEditor extends WFModelBase {
                 $packer->setContentEnd($data);
 
                 break;
-            case 'css' :
-                $context = JRequest::getWord('context', 'editor');
+            case 'css':
+                $layout = JRequest::getWord('layout', 'editor');
 
-                if ($context == 'content') {
+                if ($layout == 'content') {
                     $files = array();
 
                     $files[] = WF_EDITOR_THEMES . '/' . $themes[0] . '/skins/' . $toolbar[0] . '/content.css';
@@ -1114,14 +1135,23 @@ class WFModelEditor extends WFModelBase {
                         }
                     }
 
-                    // load content styles dor each plugin if they exist
-                    foreach ($plugins as $plugin) {
+                    // Add core plugins
+                    foreach ($plugins['core'] as $plugin) {
                         $content = WF_EDITOR_PLUGINS . '/' . $plugin . '/css/content.css';
                         if (JFile::exists($content)) {
                             $files[] = $content;
                         }
                     }
-                } else if ($context == 'preview') {
+
+                    // add external plugins
+                    foreach ($plugins['external'] as $plugin => $path) {
+                        $content = $path . '/' . $plugin . '/css/content.css';
+
+                        if (JFile::exists($content)) {
+                            $files[] = $content;
+                        }
+                    }
+                } elseif ($layout == 'preview') {
                     $files = array();
                     $files[] = WF_EDITOR_PLUGINS . '/preview/css/preview.css';
                     // get template stylesheets
@@ -1134,25 +1164,13 @@ class WFModelEditor extends WFModelBase {
                 } else {
                     $files = array();
 
-                    $files[] = WF_EDITOR_LIBRARIES . '/css/editor.css';
-                    $dialog = $wf->getParam('editor.dialog_theme', 'jce');
+                    $files[] = WF_EDITOR_LIBRARIES . '/css/editor.min.css';
+                    $files[] = WF_EDITOR_PLUGINS . '/inlinepopups/css/window.css';
 
                     $files[] = WF_EDITOR_THEMES . '/' . $themes[0] . '/skins/' . $toolbar[0] . '/ui.css';
 
                     if (isset($toolbar[1])) {
                         $files[] = WF_EDITOR_THEMES . '/' . $themes[0] . '/skins/' . $toolbar[0] . '/ui_' . $toolbar[1] . '.css';
-                    }
-
-                    // get external styles from config class for each plugin
-                    foreach ($plugins as $plugin) {
-                        $class = WF_EDITOR_PLUGINS . '/' . $plugin . '/classes/config.php';
-                        if (JFile::exists($class)) {
-                            require_once ($class);
-                            $classname = 'WF' . ucfirst($plugin) . 'PluginConfig';
-                            if (class_exists($classname) && method_exists(new $classname, 'getStyles')) {
-                                $files = array_merge($files, (array) call_user_func(array($classname, 'getStyles')));
-                            }
-                        }
                     }
                 }
 
@@ -1163,7 +1181,8 @@ class WFModelEditor extends WFModelBase {
         $packer->pack();
     }
 
-    public function loadLanguages() {
+    public function loadLanguages()
+    {
         // check token
         WFToken::checkToken('GET') or die('RESTRICTED');
 
@@ -1174,7 +1193,8 @@ class WFModelEditor extends WFModelBase {
         $parser->output($data);
     }
 
-    public function compileLess() {
+    public function compileLess()
+    {
         // check token
         WFToken::checkToken('GET') or die('RESTRICTED');
 
@@ -1189,10 +1209,8 @@ class WFModelEditor extends WFModelBase {
         }
     }
 
-    public function getToken($id) {
+    public function getToken($id)
+    {
         return '<input type="hidden" id="wf_' . $id . '_token" name="' . WFToken::getToken() . '" value="1" />';
     }
-
 }
-
-?>

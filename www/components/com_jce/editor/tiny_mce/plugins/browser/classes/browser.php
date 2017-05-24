@@ -1,96 +1,95 @@
 <?php
 
 /**
- * @package   	JCE
- * @copyright 	Copyright (c) 2009-2016 Ryan Demmer. All rights reserved.
- * @license   	GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+ * @copyright     Copyright (c) 2009-2017 Ryan Demmer. All rights reserved
+ * @license       GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  * JCE is free software. This version may have been modified pursuant
  * to the GNU General Public License, and as distributed it includes or
  * is derivative of works licensed under the GNU General Public License or
- * other free or open source software licenses.
+ * other free or open source software licenses
  */
 defined('_JEXEC') or die('RESTRICTED');
 
-require_once(WF_EDITOR_LIBRARIES . '/classes/manager.php');
+require_once WF_EDITOR_LIBRARIES.'/classes/manager.php';
 
-final class WFFileBrowserPlugin extends WFMediaManager {
+class WFFileBrowserPlugin extends WFMediaManager
+{
     /*
      * @var string
      */
+    protected $_filetypes = 'doc,docx,ppt,pptx,xls,xlsx,gif,jpeg,jpg,png,pdf,zip,tar,gz,swf,rar,mov,mp4,qt,wmv,asx,asf,avi,wav,mp3,aiff,odt,odg,odp,ods,odf,rtf,txt,csv';
 
-    protected $_filetypes = 'word=doc,docx;powerpoint=ppt,pptx;excel=xls,xlsx;image=gif,jpeg,jpg,png;acrobat=pdf;archive=zip,tar,gz;flash=swf;winrar=rar;quicktime=mov,mp4,qt;windowsmedia=wmv,asx,asf,avi;audio=wav,mp3,aiff;openoffice=odt,odg,odp,ods,odf;text=rtf,txt,csv';
+    public function __construct($config = array())
+    {
+        $config = array(
+            'layout' => 'browser',
+            'can_edit_images' => 1,
+            'show_view_mode' => 1,
+        );
 
-    /**
-     * @access	protected
-     */
-    public function __construct() {
-        parent::__construct();
+        parent::__construct($config);
 
-        $browser = $this->getBrowser();
+        // get the plugin that opened the file browser
+        $caller = $this->get('caller', 'browser');
+        $filter = JRequest::getVar('filter', 'files');
 
-        if (JRequest::getWord('type', 'file') == 'file') {
-            // Add all files
-            $browser->addFileTypes(array('WF_FILEGROUP_ALL' => '*.*'));
-        } else {
-            $browser->setFileTypes('images=jpg,jpeg,png,gif');
+        // clean filter value
+        $filter = (string) preg_replace('/[^\w_,]/i', '', $filter);
+
+        // get filetypes from params
+        $filetypes = $this->getParam('browser.extensions', $this->get('_filetypes'));
+
+        if ($filter == 'images') {
+            $filetypes = 'jpg,jpeg,png,gif';
+        } elseif ($filter === 'media') {
+            $filetypes = 'avi,wmv,wm,asf,asx,wmx,wvx,mov,qt,mpg,mpeg,m4a,swf,dcr,rm,ra,ram,divx,mp4,ogv,ogg,webm,flv,f4v,mp3,ogg,wav,xap';
+        } elseif ($filter === 'html') {
+            $filetypes = 'html,htm,txt';
+        } else if (strpos($filter, ',') !== false) {
+            $filetypes = $filter;
         }
 
-        $filter = JRequest::getString('filter');
-
-        if ($filter) {
-            if ($filter === 'images') {
-                $filetypes = 'images=jpg,jpeg,png,gif';
-            } else if ($filter === 'media') {
-                $filetypes = 'windowsmedia=avi,wmv,wm,asf,asx,wmx,wvx;quicktime=mov,qt,mpg,mpeg,m4a;flash=swf;shockwave=dcr;real=rm,ra,ram;divx=divx;video=mp4,ogv,ogg,webm,flv,f4v;audio=mp3,ogg,wav;silverlight=xap';
-            } else if ($filter === 'html') {
-                $filetypes = 'html=html,htm,txt';
-            } else {
-                // custom filter list, eg: jpg,jpeg,png,pdf
-                if (strpos($filter, ',') !== false) {
-                  $filetypes = 'files=' . $filter;
-                } else {
-                  $filetypes = $this->get('_filetypes');
-                }
-            }
-
-            $browser->setFileTypes($filetypes);
-        }
-        // remove insert button
-        $browser->removeButton('file', 'insert');
+        // set filetypes
+        $this->setFileTypes($filetypes);
     }
 
     /**
-     * Display the plugin
-     * @access public
+     * Display the plugin.
      */
-    public function display() {
+    public function display()
+    {
         parent::display();
 
         $document = WFDocument::getInstance();
-        $settings = $this->getSettings();
-
-        $document->addScript(array('browser'), 'plugins');
+        $layout = JRequest::getCmd('layout', 'plugin');
 
         if ($document->get('standalone') == 1) {
-            $document->addScript(array('browser'), 'component');
+            if ($layout === 'plugin') {
+                $document->addScript(array('window.min'), 'plugins');
 
-            $element = JRequest::getCmd('element', JRequest::getCmd('fieldid', ''));
+                $element = JRequest::getCmd('element', JRequest::getCmd('fieldid', ''));
+                $callback = JRequest::getCmd('callback', '');
 
-            $options = array(
-                'plugin' => array(
-                    'root' => JURI::root(),
-                    'site' => JURI::base(true) . '/'
-                ),
-                'manager' => $settings,
-                'element' => $element
-            );
+                $settings = array(
+                    'site_url' => JURI::base(true).'/',
+                    'language' => WFLanguage::getCode(),
+                    'element' => $element,
+                    'token' => WFToken::getToken(),
+                );
 
-            $document->addScriptDeclaration('jQuery(document).ready(function($){$.WFBrowserWidget.init(' . json_encode($options) . ');});');
+                if ($callback) {
+                    $settings['callback'] = $callback;
+                }
 
-        } else {
-            $document->addScriptDeclaration('BrowserDialog.settings=' . json_encode($settings) . ';');
+                $document->addScriptDeclaration('tinymce.settings='.json_encode($settings).';');
+            }
+
+            $document->addScript(array('popup.min'), 'plugins');
+            $document->addStyleSheet(array('browser.min'), 'plugins');
+        }
+
+        if ($layout === 'plugin') {
+            $document->addScript(array('browser'), 'plugins');
         }
     }
 }
-
-?>

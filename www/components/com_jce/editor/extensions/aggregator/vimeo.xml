@@ -1,12 +1,12 @@
 <?xml version="1.0" ?>
 <install version="2.0" type="extension" extension="vimeo" folder="aggregator" method="upgrade" core="1">
 	<name>WF_AGGREGATOR_VIMEO_TITLE</name>
-	<version>2.5.31</version>
-	<creationDate>25 October 2016</creationDate>
+	<version>2.6.12</version>
+	<creationDate>27-04-2017</creationDate>
 	<author>Ryan Demmer</author>
 	<authorEmail>info@joomlacontenteditor.net</authorEmail>
 	<authorUrl>http://www.joomlacontenteditor.net/</authorUrl>
-	<copyright>Copyright (C) 2006 - 2016 Ryan Demmer. All rights reserved</copyright>
+	<copyright>Copyright (C) 2006 - 2017 Ryan Demmer. All rights reserved</copyright>
 	<license>GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html</license>
 	<description>WF_AGGREGATOR_VIMEO_DESC</description>
 	<files>

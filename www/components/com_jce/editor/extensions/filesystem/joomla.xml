@@ -1,12 +1,12 @@
 <?xml version="1.0" ?>
 <install version="1.5" type="extension" extension="joomla" folder="filesystem" method="upgrade" core="1">
     <name>WF_FILESYSTEM_JOOMLA_TITLE</name>
-    <version>2.5.31</version>
-    <creationDate>25 October 2016</creationDate>
+    <version>2.6.12</version>
+    <creationDate>27-04-2017</creationDate>
     <author>Ryan Demmer</author>
     <authorEmail>info@joomlacontenteditor.net</authorEmail>
     <authorUrl>http://www.joomlacontenteditor.net/</authorUrl>
-    <copyright>Copyright (C) 2006 - 2016 Ryan Demmer. All rights reserved</copyright>
+    <copyright>Copyright (C) 2006 - 2017 Ryan Demmer. All rights reserved</copyright>
     <license>GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html</license>
     <description>WF_FILESYSTEM_JOOMLA_DESC</description>
     <files>
@@ -17,6 +17,6 @@
             <option value="1">WF_OPTION_YES</option>
             <option value="0">WF_OPTION_NO</option>
         </param>
-        <param name="restrict_dir" type="textarea" rows="3" cols="50" default="administrator,cache,components,includes,language,libraries,logs,media,modules,plugins,templates,xmlrpc" size="150" label="WF_PARAM_DIRECTORY_RESTRICTED" description="WF_PARAM_DIRECTORY_RESTRICTED_DESC" parent="allow_root[0]" />
+        <param name="restricted_dir" type="text" default="" label="WF_PARAM_DIRECTORY_RESTRICTED" description="WF_PARAM_DIRECTORY_RESTRICTED_DESC" />
     </params>
 </install>

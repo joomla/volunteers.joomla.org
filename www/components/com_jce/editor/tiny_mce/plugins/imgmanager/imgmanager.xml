@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <install version="2.0" type="plugin" plugin="imgmanager" core="1" editable="1">
     <name>WF_IMGMANAGER_TITLE</name>
-    <version>2.5.31</version>
-    <creationDate>25 October 2016</creationDate>
+    <version>2.6.12</version>
+    <creationDate>27-04-2017</creationDate>
     <author>Ryan Demmer</author>
     <authorEmail>info@joomlacontenteditor.net</authorEmail>
     <authorUrl>http://www.joomlacontenteditor.net/</authorUrl>
@@ -14,7 +14,7 @@
     <params group="standard">
         <param name="dir" type="text" default="" size="50" label="WF_PARAM_DIRECTORY" description="WF_PARAM_DIRECTORY_DESC"/>
         <param name="max_size" class="upload_size" max="" type="text" default="" label="WF_PARAM_UPLOAD_SIZE" description="WF_PARAM_UPLOAD_SIZE_DESC" />
-        <param name="extensions" type="extension" class="extensions" default="image=jpeg,jpg,png,gif" label="WF_PARAM_EXTENSIONS" description="WF_PARAM_EXTENSIONS_DESC" />
+        <param name="extensions" type="extension" class="extensions" default="jpeg,jpg,png,gif" label="WF_PARAM_EXTENSIONS" description="WF_PARAM_EXTENSIONS_DESC" />
         <!--param name="hide_xtd_btns" type="radio" default="0" label="WF_IMGMANAGER_HIDE_BUTTONS" description="WF_IMGMANAGER_HIDE_BUTTONS_DESC">
             <option value="1">WF_OPTION_YES</option>
             <option value="0">WF_OPTION_NO</option>
@@ -23,7 +23,7 @@
     </params>
     <params group="defaults">
         <param name="alt" type="text" default="" size="50" label="WF_LABEL_ALT" description="WF_LABEL_ALT_DESC" />
-        
+
         <param name="margin_top" type="list" default="" pattern="[0-9]+" class="editable" label="WF_PARAM_MARGIN_TOP" description="WF_PARAM_MARGIN_TOP_DESC">
             <option value="">WF_OPTION_NOT_SET</option>
             <option value="0">0</option>
@@ -126,7 +126,7 @@
             <option value="1">WF_OPTION_YES</option>
             <option value="0">WF_OPTION_NO</option>
         </param>
-        
+
         <param name="style" type="text" default="" size="50" label="WF_LABEL_STYLE" description="WF_LABEL_STYLE_DESC" />
         <param name="classes" type="text" default="" size="50" label="WF_LABEL_CLASSES" description="WF_LABEL_CLASSES_DESC" />
         <param name="title" type="text" default="" size="50" label="WF_LABEL_TITLE" description="WF_LABEL_TITLE_DESC" />
@@ -135,10 +135,10 @@
             <option value="">WF_OPTION_NOT_SET</option>
             <option value="ltr">WF_OPTION_LTR</option>
             <option value="rtl">WF_OPTION_RTL</option>
-        </param>       
-        <param name="usemap" type="text" default="" size="50" label="WF_LABEL_USEMAP" description="WF_LABEL_USEMAP_DESC" />       
+        </param>
+        <param name="usemap" type="text" default="" size="50" label="WF_LABEL_USEMAP" description="WF_LABEL_USEMAP_DESC" />
         <param name="longdesc" type="browser" default="" size="50" class="browser" label="WF_LABEL_LONGDESC" description="WF_LABEL_LONGDESC_DESC" />
-        
+
     </params>
     <params group="access">
         <param name="tabs_rollover" type="radio" default="1" label="WF_IMGMANAGER_PARAM_TAB_ROLLOVER" description="WF_IMGMANAGER_PARAM_TAB_ROLLOVER_DESC">
@@ -197,7 +197,7 @@
             <option value="1">WF_OPTION_YES</option>
             <option value="0">WF_OPTION_NO</option>
         </param>
-        
+
         <param name="inline_upload" type="radio" default="1" label="WF_PARAM_INLINE_UPLOAD" description="WF_PARAM_INLINE_UPLOAD_DESC">
             <option value="1">WF_OPTION_YES</option>
             <option value="0">WF_OPTION_NO</option>

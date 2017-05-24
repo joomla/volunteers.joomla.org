@@ -1,8 +1,8 @@
 <?xml version="1.0" ?>
 <install version="2.0" type="plugin" plugin="link" core="1" editable="1">
     <name>WF_LINK_TITLE</name>
-    <version>2.5.31</version>
-    <creationDate>25 October 2016</creationDate>
+    <version>2.6.12</version>
+    <creationDate>27-04-2017</creationDate>
     <author>Ryan Demmer</author>
     <authorEmail>info@joomlacontenteditor.net</authorEmail>
     <authorUrl>http://www.joomlacontenteditor.net/</authorUrl>
@@ -24,7 +24,7 @@
         <param type="text" name="id" default="" size="50" label="WF_LABEL_ID" description="WF_LABEL_ID_DESC" />
         <param type="text" name="style" default="" size="50" label="WF_LABEL_STYLE" description="WF_LABEL_STYLE_DESC" />
         <param type="text" name="classes" default="" size="50" label="WF_LABEL_CLASSES" description="WF_LABEL_CLASSES_DESC" />
-        <param type="list" name="dir" default="" label="WF_LABEL_DIR" description="WF_LABEL_DIR_DESC">
+        <param type="list" name="direction" default="" label="WF_LABEL_DIR" description="WF_LABEL_DIR_DESC">
             <option value="">WF_OPTION_NOT_SET</option>
             <option value="ltr">WF_OPTION_LTR</option>
             <option value="rtl">WF_OPTION_RTL</option>

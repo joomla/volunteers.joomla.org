@@ -1,26 +1,27 @@
 <?php
 
 /**
- * @package   	JCE
- * @copyright 	Copyright (c) 2009-2016 Ryan Demmer. All rights reserved.
- * @license   	GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+ * @copyright     Copyright (c) 2009-2017 Ryan Demmer. All rights reserved
+ * @license       GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  * JCE is free software. This version may have been modified pursuant
  * to the GNU General Public License, and as distributed it includes or
  * is derivative of works licensed under the GNU General Public License or
- * other free or open source software licenses.
+ * other free or open source software licenses
  */
 defined('_JEXEC') or die('RESTRICTED');
 
-require_once(dirname(dirname(__FILE__)) . '/classes/model.php');
+require_once dirname(__DIR__).'/classes/model.php';
+require_once dirname(__DIR__).'/helpers/extension.php';
 
-class WFModel extends WFModelBase {
-
-    public static function authorize($task) {
+class WFModel extends WFModelBase
+{
+    public static function authorize($task)
+    {
         $user = JFactory::getUser();
 
         // Joomla! 1.7+
         if (method_exists('JUser', 'getAuthorisedViewLevels')) {
-            $action = ($task == 'admin' || $task == 'manage') ? 'core.' . $task : 'jce.' . $task;
+            $action = ($task == 'admin' || $task == 'manage') ? 'core.'.$task : 'jce.'.$task;
             if (!$user->authorise($action, 'com_jce')) {
                 return false;
             }
@@ -31,7 +32,7 @@ class WFModel extends WFModelBase {
             $rules = isset($params->access) ? $params->access : null;
 
             if (is_object($rules)) {
-                $action = ($task == 'admin' || $task == 'manage') ? 'core.' . $task : 'jce.' . $task;
+                $action = ($task == 'admin' || $task == 'manage') ? 'core.'.$task : 'jce.'.$task;
 
                 if (isset($rules->$action)) {
                     $rule = $rules->$action;
@@ -47,33 +48,37 @@ class WFModel extends WFModelBase {
     }
 
     /**
-     * Get the current version
+     * Get the current version.
+     *
      * @return Version
      */
-    public function getVersion() {
-        $xml = WFXMLHelper::parseInstallManifest(JPATH_ADMINISTRATOR . '/components/com_jce/jce.xml');
+    public function getVersion()
+    {
+        $xml = WFXMLHelper::parseInstallManifest(JPATH_ADMINISTRATOR.'/components/com_jce/jce.xml');
 
         // return cleaned version number or date
         $version = preg_replace('/[^0-9a-z]/i', '', $xml['version']);
         if (!$version) {
             return date('Y-m-d', strtotime('today'));
         }
+
         return $version;
     }
 
-    public function getStyles() {
+    public function getStyles()
+    {
         $view = JRequest::getCmd('view');
 
         $params = JComponentHelper::getParams('com_jce');
         $theme = $params->get('theme', 'smoothness');
-        $path = JPATH_COMPONENT . '/media/css';
+        $path = JPATH_COMPONENT.'/media/css';
 
         // Load styles
         $styles = array();
 
-        $files = JFolder::files($path . '/' . $theme, '\.css');
+        $files = JFolder::files($path.'/'.$theme, '\.css');
         foreach ($files as $file) {
-            $styles[] = $theme . '/' . $file;
+            $styles[] = $theme.'/'.$file;
         }
 
         $styles = array_merge($styles, array('styles.css', 'tips.css', 'icons.css', 'select.css'));
@@ -84,51 +89,59 @@ class WFModel extends WFModelBase {
         if ($browser->getBrowser() == 'msie' && $browser->getMajor() < 8) {
             $styles[] = 'styles_ie.css';
         }
-        if (JFile::exists($path . '/' . $view . '.css')) {
-            $styles[] = $view . '.css';
+        if (JFile::exists($path.'/'.$view.'.css')) {
+            $styles[] = $view.'.css';
         }
 
         return $styles;
     }
 
-    public function loadStyles() {
+    public function loadStyles()
+    {
         $styles = $this->getStyles();
 
         foreach ($styles as $style) {
-            echo '<link rel="stylesheet" type="text/css" href="components/com_jce/media/css/' . $style . '" />' . "\n";
+            echo '<link rel="stylesheet" type="text/css" href="components/com_jce/media/css/'.$style.'" />'."\n";
         }
     }
 
-    public static function getBrowserLink($element = null, $filter = '') {
+    public static function getBrowserLink($element = null, $filter = '', $callback = '')
+    {
         // load base classes
-        require_once(JPATH_ADMINISTRATOR . '/components/com_jce/includes/base.php');
+        require_once JPATH_ADMINISTRATOR.'/components/com_jce/includes/base.php';
 
         // set $url as empty string
         $url = '';
 
         wfimport('editor.libraries.classes.editor');
         wfimport('editor.libraries.classes.token');
-        
+
         $wf = WFEditor::getInstance();
+        $app = JFactory::getApplication();
+
+        $profile = $wf->getProfile('browser');
 
         // check the current user is in a profile
-        if ($wf->getProfile('browser')) {
+        if ($profile) {
+            // get token
             $token = WFToken::getToken();
+            $context = $wf->getContext();
 
-            $url = 'index.php?option=com_jce&view=editor&layout=plugin&plugin=browser&standalone=1&' . $token . '=1';
+            $url = 'index.php?option=com_jce&view=editor&plugin=browser&standalone=1&'.$token.'=1&context='.$context;
 
             if ($element) {
-                $url .= '&element=' . $element;
+                $url .= '&element='.$element;
             }
 
             if ($filter) {
-                $url .= '&filter=' . $filter;
+                $url .= '&filter='.$filter;
+            }
+
+            if ($callback) {
+                $url .= '&callback='.$callback;
             }
         }
 
         return $url;
     }
-
 }
-
-?>

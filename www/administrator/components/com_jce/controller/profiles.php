@@ -1,22 +1,22 @@
 <?php
 
 /**
- * @package   	JCE
- * @copyright 	Copyright (c) 2009-2016 Ryan Demmer. All rights reserved.
- * @license   	GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+ * @copyright     Copyright (c) 2009-2017 Ryan Demmer. All rights reserved
+ * @license       GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  * JCE is free software. This version may have been modified pursuant
  * to the GNU General Public License, and as distributed it includes or
  * is derivative of works licensed under the GNU General Public License or
- * other free or open source software licenses.
+ * other free or open source software licenses
  */
 defined('_JEXEC') or die('RESTRICTED');
 
-class WFControllerProfiles extends WFController {
-
+class WFControllerProfiles extends WFController
+{
     /**
-     * Custom Constructor
+     * Custom Constructor.
      */
-    public function __construct($default = array()) {
+    public function __construct($default = array())
+    {
         parent::__construct();
 
         $this->registerTask('apply', 'save');
@@ -27,7 +27,8 @@ class WFControllerProfiles extends WFController {
         $this->registerTask('orderdown', 'order');
     }
 
-    public function remove() {
+    public function remove()
+    {
         // Check for request forgeries
         JRequest::checkToken() or die('RESTRICTED');
 
@@ -43,7 +44,7 @@ class WFControllerProfiles extends WFController {
         $cids = implode(',', $cid);
 
         $query = 'DELETE FROM #__wf_profiles'
-                . ' WHERE id IN ( ' . $cids . ' )'
+            .' WHERE id IN ( '.$cids.' )'
         ;
         $db->setQuery($query);
         if (!$db->query()) {
@@ -54,7 +55,8 @@ class WFControllerProfiles extends WFController {
         $this->setRedirect('index.php?option=com_jce&view=profiles', $msg);
     }
 
-    public function copy() {
+    public function copy()
+    {
         // Check for request forgeries
         JRequest::checkToken() or die('RESTRICTED');
 
@@ -84,13 +86,33 @@ class WFControllerProfiles extends WFController {
                 return JError::raiseWarning(500, $row->getError());
             }
             $row->checkin();
-            $row->reorder('ordering=' . $db->Quote($row->ordering));
+            $row->reorder('ordering='.$db->Quote($row->ordering));
         }
         $msg = JText::sprintf('WF_PROFILES_COPIED', $n);
         $this->setRedirect('index.php?option=com_jce&view=profiles', $msg);
     }
 
-    public function save() {
+    private static function cleanParamData($data)
+    {
+        // clean up link plugin parameters
+        if (isset($data['link'])) {
+            $params = $data['link'];
+
+            if (isset($params['dir'])) {
+                if (!empty($params['dir']) && empty($params['direction'])) {
+                    $params['direction'] = $params['dir'];
+                }
+                unset($params['dir']);
+            }
+
+            $data['link'] = $params;
+        }
+
+        return $data;
+    }
+
+    public function save()
+    {
         // Check for request forgeries
         JRequest::checkToken() or die('RESTRICTED');
 
@@ -128,8 +150,8 @@ class WFControllerProfiles extends WFController {
                     $value = implode(',', $this->cleanInput($value));
                     break;
                 case 'usergroups':
-                    $key    = 'types';
-                    $value  = implode(',', $this->cleanInput(array_filter($value), 'int'));
+                    $key = 'types';
+                    $value = implode(',', $this->cleanInput(array_filter($value), 'int'));
                     break;
                 case 'users':
                     $value = implode(',', $this->cleanInput(array_filter($value), 'int'));
@@ -153,6 +175,9 @@ class WFControllerProfiles extends WFController {
                     $params = isset($row->params) ? $row->params : '';
                     // convert params to json data array
                     $data = (array) json_decode($params, true);
+
+                    // clean up data
+                    $data = self::cleanParamData($data);
 
                     // assign editor data
                     if (array_key_exists('editor', $value)) {
@@ -192,7 +217,7 @@ class WFControllerProfiles extends WFController {
         switch ($task) {
             case 'apply':
                 $msg = JText::sprintf('WF_PROFILES_SAVED_CHANGES', $row->name);
-                $this->setRedirect('index.php?option=com_jce&view=profiles&task=edit&cid[]=' . $row->id, $msg);
+                $this->setRedirect('index.php?option=com_jce&view=profiles&task=edit&cid[]='.$row->id, $msg);
                 break;
 
             case 'save':
@@ -204,10 +229,10 @@ class WFControllerProfiles extends WFController {
     }
 
     /**
-     * Generic publish method
-     * @return
+     * Generic publish method.
      */
-    public function publish() {
+    public function publish()
+    {
         // Check for request forgeries
         JRequest::checkToken() or die('Invalid Token');
 
@@ -237,9 +262,9 @@ class WFControllerProfiles extends WFController {
 
         $cids = implode(',', $cid);
 
-        $query = 'UPDATE #__wf_profiles SET published = ' . (int) $publish
-                . ' WHERE id IN ( ' . $cids . ' )'
-                . ' AND ( checked_out = 0 OR ( checked_out = ' . (int) $user->get('id') . ' ))'
+        $query = 'UPDATE #__wf_profiles SET published = '.(int) $publish
+        .' WHERE id IN ( '.$cids.' )'
+        .' AND ( checked_out = 0 OR ( checked_out = '.(int) $user->get('id').' ))'
         ;
         $db->setQuery($query);
 
@@ -254,7 +279,8 @@ class WFControllerProfiles extends WFController {
         $this->setRedirect('index.php?option=com_jce&view=profiles');
     }
 
-    public function order() {
+    public function order()
+    {
         // Check for request forgeries
         JRequest::checkToken() or jexit('Invalid Token');
 
@@ -264,7 +290,7 @@ class WFControllerProfiles extends WFController {
         JArrayHelper::toInteger($cid, array(0));
 
         $uid = $cid[0];
-        $inc = ( $this->getTask() == 'orderup' ? -1 : 1 );
+        $inc = ($this->getTask() == 'orderup' ? -1 : 1);
 
         $row = JTable::getInstance('profiles', 'WFTable');
         $row->load($uid);
@@ -273,9 +299,10 @@ class WFControllerProfiles extends WFController {
         $this->setRedirect('index.php?option=com_jce&view=profiles');
     }
 
-    public function saveorder() {
+    public function saveorder()
+    {
         // Check for request forgeries
-        JRequest::checkToken() or jexit('RESTRICTED');
+        JRequest::checkToken() or jexit('Invalid Token');
 
         $cid = JRequest::getVar('cid', array(0), 'post', 'array');
         $order = JRequest::getVar('order', array(0), 'post', 'array');
@@ -295,7 +322,8 @@ class WFControllerProfiles extends WFController {
         $this->setRedirect('index.php?option=com_jce&view=profiles', $msg);
     }
 
-    public function cancelEdit() {
+    public function cancelEdit()
+    {
         // Check for request forgeries
         JRequest::checkToken() or die('RESTRICTED');
 
@@ -306,10 +334,11 @@ class WFControllerProfiles extends WFController {
         $row->bind(JRequest::get('post'));
         $row->checkin();
 
-        $this->setRedirect(JRoute::_('index.php?option=com_jce&view=' . $view, false));
+        $this->setRedirect(JRoute::_('index.php?option=com_jce&view='.$view, false));
     }
 
-    public function export() {
+    public function export()
+    {
         wfimport('admin.helpers.encrypt');
 
         $mainframe = JFactory::getApplication();
@@ -317,8 +346,8 @@ class WFControllerProfiles extends WFController {
         $tmp = $mainframe->getCfg('tmp_path');
 
         $buffer = '<?xml version="1.0" encoding="utf-8" standalone="yes"?>';
-        $buffer .= "\n" . '<export type="profiles">';
-        $buffer .= "\n\t" . '<profiles>';
+        $buffer .= "\n".'<export type="profiles">';
+        $buffer .= "\n\t".'<profiles>';
 
         $cid = JRequest::getVar('cid', array(0), 'post', 'array');
         JArrayHelper::toInteger($cid, array(0));
@@ -332,9 +361,9 @@ class WFControllerProfiles extends WFController {
         $query = $db->getQuery(true);
         // check for name
         if (is_object($query)) {
-            $query->select('*')->from('#__wf_profiles')->where('id IN (' . $cids . ')');
+            $query->select('*')->from('#__wf_profiles')->where('id IN ('.$cids.')');
         } else {
-            $query = 'SELECT * FROM #__wf_profiles WHERE id IN (' . $cids . ')';
+            $query = 'SELECT * FROM #__wf_profiles WHERE id IN ('.$cids.')';
         }
 
         $db->setQuery($query);
@@ -353,7 +382,7 @@ class WFControllerProfiles extends WFController {
 
             foreach ($profile as $key => $value) {
                 if ($key == 'params') {
-                    $buffer .= "\n\t\t\t" . '<' . $key . '>';
+                    $buffer .= "\n\t\t\t".'<'.$key.'>';
                     if ($value) {
                         // decrypt if necessary
                         $value = WFEncryptHelper::decrypt($value);
@@ -368,15 +397,15 @@ class WFControllerProfiles extends WFController {
 
                             foreach ($params as $param) {
                                 if ($param !== '') {
-                                    $buffer .= "\n\t\t\t\t" . '<param>' . $param . '</param>';
+                                    $buffer .= "\n\t\t\t\t".'<param>'.$param.'</param>';
                                 }
                             }
                             $buffer .= "\n\t\t\t\t";
                         }
                     }
-                    $buffer .= '</' . $key . '>';
+                    $buffer .= '</'.$key.'>';
                 } else {
-                    $buffer .= "\n\t\t\t" . '<' . $key . '>' . $this->encodeData($value) . '</' . $key . '>';
+                    $buffer .= "\n\t\t\t".'<'.$key.'>'.$this->encodeData($value).'</'.$key.'>';
                 }
             }
             $buffer .= "\n\t\t</profile>";
@@ -389,15 +418,15 @@ class WFControllerProfiles extends WFController {
             @set_time_limit(0);
         }
 
-        $name = 'jce_profile_' . date('Y_m_d') . '.xml';
+        $name = 'jce_profile_'.date('Y_m_d').'.xml';
 
-        header("Pragma: public");
-        header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
-        header("Expires: 0");
-        header("Content-Transfer-Encoding: binary");
-        header("Content-Type: text/xml");
+        header('Pragma: public');
+        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+        header('Expires: 0');
+        header('Content-Transfer-Encoding: binary');
+        header('Content-Type: text/xml');
         header('Content-Disposition: attachment;'
-                . ' filename="' . $name . '";'
+            .' filename="'.$name.'";'
         );
 
         echo $buffer;
@@ -406,11 +435,14 @@ class WFControllerProfiles extends WFController {
     }
 
     /**
-     * Process XML restore file
+     * Process XML restore file.
+     *
      * @param object $xml
-     * @return boolean
+     *
+     * @return bool
      */
-    public function import() {
+    public function import()
+    {
         // Check for request forgeries
         JRequest::checkToken() or die('RESTRICTED');
 
@@ -430,8 +462,8 @@ class WFControllerProfiles extends WFController {
             // check for valid uploaded file
             if (is_uploaded_file($file['tmp_name']) && $file['name']) {
                 // create destination path
-                $destination = $tmp . '/' . $file['name'];
-                
+                $destination = $tmp.'/'.$file['name'];
+
                 if (JFile::upload($file['tmp_name'], $destination)) {
                     // check it exists, was uploaded properly
                     if (JFile::exists($destination)) {
@@ -468,20 +500,20 @@ class WFControllerProfiles extends WFController {
     }
 
     /**
-     * CDATA encode a parameter if it contains & < > characters, eg: <![CDATA[index.php?option=com_content&view=article&id=1]]>
+     * CDATA encode a parameter if it contains & < > characters, eg: <![CDATA[index.php?option=com_content&view=article&id=1]]>.
+     *
      * @param object $param
+     *
      * @return CDATA encoded parameter or parameter
      */
-    private function encodeData($data) {
+    private function encodeData($data)
+    {
         if (preg_match('/[<>&]/', $data)) {
-            $data = '<![CDATA[' . $data . ']]>';
+            $data = '<![CDATA['.$data.']]>';
         }
 
         $data = preg_replace('/"/', '\"', $data);
 
         return $data;
     }
-
 }
-
-?>

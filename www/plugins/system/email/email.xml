@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension version="2.5" type="plugin" group="system" method="upgrade">
+	<name>plg_system_email</name>
+	<author>Michael Richey</author>
+	<creationDate>August 2013</creationDate>
+	<copyright>Copyright (C) 2005 - 2011 Michael Richey. All rights reserved.</copyright>
+	<license>GNU General Public License version 2 or later; see LICENSE.txt</license>
+	<authorEmail>authemail@richeyweb.com</authorEmail>
+	<authorUrl>www.richeyweb.com</authorUrl>
+	<version>2.3.1</version>
+	<description>PLG_SYS_EMAIL_XML_DESCRIPTION</description>
+	<files>
+		<filename plugin="email">email.php</filename>
+		<filename>index.html</filename>
+	</files>
+	<languages folder="language">
+		<language tag="en-GB">en-GB/en-GB.plg_system_email.ini</language>
+		<language tag="en-GB">en-GB/en-GB.plg_system_email.sys.ini</language>
+	</languages>
+</extension>

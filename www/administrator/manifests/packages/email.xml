@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<extension type="package" version="2.5">
+    <name>Authentication - Email</name>
+    <creationDate>March 2011</creationDate>
+    <packagename>email</packagename>
+    <version>2.3.1</version>
+    <url>http://www.richeyweb.com</url>
+    <author>Michael Richey</author>
+    <authorEmail>auth_email@richeyweb.com</authorEmail>
+    <authorUrl>http://www.richeyweb.com</authorUrl>
+    <description>Authentication - Email , authentication and system plugins</description>
+    <files folder="packages">
+        <file type="plugin" id="email" client="system">plg_sys_email-2.3.1.zip</file>
+        <file type="plugin" id="email" client="authentication">plg_auth_email-2.3.1.zip</file>
+    </files>
+    <updateservers>
+        <server type="extension" priority="1" name="RicheyWeb Update Site">https://www.richeyweb.com/updates/authemail.xml</server>
+    </updateservers>
+</extension>

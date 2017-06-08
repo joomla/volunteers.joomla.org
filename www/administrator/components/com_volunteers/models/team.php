@@ -173,21 +173,24 @@ class VolunteersModelTeam extends JModelAdmin
 			$members    = $this->getTeamMembers($data['id']);
 			$membersIds = array_map(create_function('$member', 'return $member->id;'), $members->active);
 
-			// Set date_ended for active members
-			$db    = $this->getDbo();
-			$query = $db->getQuery(true);
-			$query
-				->update('#__volunteers_members')
-				->set('date_ended = ' . $db->quote($data['date_ended']))
-				->where('id IN (' . implode($membersIds, ',') . ')');
+			if (count($membersIds))
+			{
+				// Set date_ended for active members
+				$db    = $this->getDbo();
+				$query = $db->getQuery(true);
+				$query
+					->update('#__volunteers_members')
+					->set('date_ended = ' . $db->quote($data['date_ended']))
+					->where('id IN (' . implode($membersIds, ',') . ')');
 
-			try
-			{
-				$db->setQuery($query)->execute();
-			}
-			catch (RuntimeException $e)
-			{
-				JError::raiseError(500, $e->getMessage());
+				try
+				{
+					$db->setQuery($query)->execute();
+				}
+				catch (RuntimeException $e)
+				{
+					JError::raiseError(500, $e->getMessage());
+				}
 			}
 		}
 

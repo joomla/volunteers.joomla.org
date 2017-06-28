@@ -78,25 +78,39 @@ class VolunteersModelHome extends JModelList
 	 */
 	public function getMapMarkers()
 	{
-		// Get reports
-		$model = JModelLegacy::getInstance('Volunteers', 'VolunteersModel', array('ignore_request' => true));
-		$model->setState('filter.location', 1);
-		$items = $model->getItems();
+		// Create a new query object.
+		$db    = $this->getDbo();
+		$query = $db->getQuery(true);
+
+		$query
+			->select($db->quoteName(array('id', 'alias', 'firstname', 'lastname', 'latitude', 'longitude', 'country', 'city', 'image')))
+			->from($db->quoteName('#__volunteers_volunteers'))
+			->where($db->quoteName('latitude') . ' not like \'\'')
+			->where($db->quoteName('longitude') . ' not like \'\'');
+
+		$db->setQuery($query);
+
+		$volunteers = $db->loadObjectList();
 
 		// Map markers
 		$markers = array();
 
-		if($items) array_walk($items, function ($item) use (&$markers)
+		if ($volunteers)
 		{
-			array_push($markers, json_encode(array(
-				'title'   => $item->name,
-				'lat'     => $item->latitude,
-				'lng'     => $item->longitude,
-				'url'     => JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $item->id),
-				'address' => VolunteersHelper::location($item->country, $item->city),
-				'image'    => VolunteersHelper::image($item->image, 'small', true)
-			)));
-		});
+			// Base Joomlers url
+			$joomlers = JRoute::_('index.php?option=com_volunteers&view=volunteers');
+
+			foreach ($volunteers as $volunteer)
+			{
+				$markers[] = json_encode(array(
+					'title' => $volunteer->firstname . ' ' . $volunteer->lastname,
+					'lat'   => $volunteer->latitude,
+					'lng'   => $volunteer->longitude,
+					'url'   => $joomlers . '/' . $volunteer->id . '-' . $volunteer->alias,
+					'image' => VolunteersHelper::image($volunteer->image, 'small', true)
+				));
+			}
+		}
 
 		return $markers;
 	}

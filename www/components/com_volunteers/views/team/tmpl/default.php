@@ -25,6 +25,15 @@ defined('_JEXEC') or die;
 			<?php if (!$this->item->active): ?>
                 <small><?php echo JText::_('COM_VOLUNTEERS_ARCHIVED') ?></small>
 			<?php endif; ?>
+            <span class="label label-info">
+                <?php if ($this->item->status == '0'): ?>
+                    <?php echo JText::_('COM_VOLUNTEERS_FIELD_STATUS_INFORMATION') ?>
+                <?php elseif ($this->item->status == '1'): ?>
+                    <?php echo JText::_('COM_VOLUNTEERS_FIELD_STATUS_OFFICIAL') ?>
+                <?php elseif ($this->item->status == '2'): ?>
+                    <?php echo JText::_('COM_VOLUNTEERS_FIELD_STATUS_UNOFFICIAL') ?>
+                <?php endif; ?>
+            </span>
         </h1>
     </div>
 

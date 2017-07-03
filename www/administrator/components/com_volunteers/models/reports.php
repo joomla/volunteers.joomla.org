@@ -120,7 +120,7 @@ class VolunteersModelReports extends JModelList
 
 		// Join over the teams.
 		$query
-			->select('team.title AS team_title')
+			->select('team.title AS team_title', 'team.department AS team_deaprtment')
 			->join('LEFT', '#__volunteers_teams AS ' . $db->quoteName('team') . ' ON team.id = a.team');
 
 		// Join over the users for the user email.
@@ -157,7 +157,7 @@ class VolunteersModelReports extends JModelList
 
 		if (is_numeric($department) && ($department > 0))
 		{
-			$query->where('a.department = ' . (int) $department);
+			$query->where('(a.department = ' . (int) $department .' OR team.department = ' . (int) $department.')');
 		}
 
 		// Filter by team

@@ -244,7 +244,11 @@ defined('_JEXEC') or die;
                                     <a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $report->volunteer_id) ?>"><?php echo $report->volunteer_name; ?></a>
 									<?php echo JText::_('COM_VOLUNTEERS_ON') ?> <?php echo VolunteersHelper::date($report->created, 'Y-m-d H:i'); ?>
 									<?php echo JText::_('COM_VOLUNTEERS_IN') ?>
-                                    <a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=department&id=' . $report->department) ?>"><?php echo $report->department_title; ?></a>
+                                    <?php if($report->department):?>
+                                        <a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=department&id=' . $report->department) ?>"><?php echo $report->department_title; ?></a>
+                                    <?php elseif($report->team):?>
+                                        <a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=team&id=' . $report->team) ?>"><?php echo $report->team_title; ?></a>
+                                    <?php endif;?>
                                 </p>
                                 <p><?php echo JHtml::_('string.truncate', strip_tags(trim($report->description)), 300); ?></p>
                                 <a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=report&id=' . $report->id) ?>" class="btn">

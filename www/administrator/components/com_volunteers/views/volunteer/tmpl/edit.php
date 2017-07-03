@@ -26,40 +26,46 @@ JFactory::getDocument()->addScriptDeclaration("
 
 <form action="<?php echo JRoute::_('index.php?option=com_volunteers&layout=edit&id=' . (int) $this->item->id); ?>" method="post" name="adminForm" id="volunteer-form" class="form-validate">
 
-	<div class="form-inline form-inline-header">
+    <div class="form-inline form-inline-header">
 		<?php
 		echo $this->form->renderField('firstname');
 		echo $this->form->renderField('lastname');
 		echo $this->form->renderField('alias');
 		?>
-	</div>
+    </div>
 
-	<hr>
+    <hr>
 
-	<div class="row-fluid">
-		<div class="span9">
-			<div class="form-horizontal">
+    <div class="row-fluid">
+        <div class="span9">
+            <div class="form-horizontal">
 				<?php echo $this->form->renderFieldset('item'); ?>
-			</div>
-		</div>
-		<div class="span3">
-			<div class="form-vertical well">
+            </div>
+        </div>
+        <div class="span3">
+			<?php if (JFactory::getUser()->authorise('core.admin')): ?>
+                <div class="form-vertical well">
+                    <h3><?php echo JText::_('COM_VOLUNTEERS_SECRETARY_ONLY') ?></h3>
+					<?php echo $this->form->renderFieldset('secretary'); ?>
+                </div>
+			<?php endif; ?>
+            <div class="form-vertical well">
 				<?php echo $this->form->renderFieldset('details'); ?>
-			</div>
-		</div>
-	</div>
+            </div>
+        </div>
+    </div>
 
-	<input type="hidden" name="task" value=""/>
+    <input type="hidden" name="task" value=""/>
 	<?php echo JHtml::_('form.token'); ?>
 </form>
 
 <script>
-	jQuery(document).ready(function () {
-		jQuery('.location').on('change', function (e) {
-			var city = jQuery('.location-city').val();
-			var country = jQuery('.location-country').val();
-			jQuery('.gllpSearchField').val(city + ', ' + country);
-			jQuery('.gllpSearchButton').click();
-		});
-	});
+    jQuery(document).ready(function () {
+        jQuery('.location').on('change', function (e) {
+            var city = jQuery('.location-city').val();
+            var country = jQuery('.location-country').val();
+            jQuery('.gllpSearchField').val(city + ', ' + country);
+            jQuery('.gllpSearchButton').click();
+        });
+    });
 </script>

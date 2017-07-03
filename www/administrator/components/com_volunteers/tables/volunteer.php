@@ -42,6 +42,12 @@ class VolunteersTableVolunteer extends JTable
 			$array['send_permission'] = 0;
 		}
 
+		// coc checkbox default
+		if (!isset($array['coc']))
+		{
+			$array['coc'] = 0;
+		}
+
 		return parent::bind($array, $ignore);
 	}
 

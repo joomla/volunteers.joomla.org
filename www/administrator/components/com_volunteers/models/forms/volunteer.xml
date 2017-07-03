@@ -199,6 +199,17 @@
     </fieldset>
 
     <fieldset
+            name="secretary"
+    >
+        <field
+                name="coc"
+                type="checkbox"
+                label="COM_VOLUNTEERS_FIELD_COC"
+                default="0"
+        />
+    </fieldset>
+
+    <fieldset
             name="details"
     >
         <field

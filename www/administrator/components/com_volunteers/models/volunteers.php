@@ -62,6 +62,7 @@ class VolunteersModelVolunteers extends JModelList
 		$this->setState('filter.image', $this->getUserStateFromRequest($this->context . '.filter.image', 'filter_image'));
 		$this->setState('filter.joomlastory', $this->getUserStateFromRequest($this->context . '.filter.joomlastory', 'filter_joomlastory'));
 		$this->setState('filter.location', $this->getUserStateFromRequest($this->context . '.filter.location', 'filter_location'));
+		$this->setState('filter.coc', $this->getUserStateFromRequest($this->context . '.filter.coc', 'filter_coc'));
 
 		// Load the parameters.
 		$params = JComponentHelper::getParams('com_volunteers');
@@ -90,6 +91,7 @@ class VolunteersModelVolunteers extends JModelList
 		$id .= ':' . $this->getState('filter.image');
 		$id .= ':' . $this->getState('filter.joomlastory');
 		$id .= ':' . $this->getState('filter.location');
+		$id .= ':' . $this->getState('filter.coc');
 
 		return parent::getStoreId($id);
 	}
@@ -171,6 +173,14 @@ class VolunteersModelVolunteers extends JModelList
 		{
 			$query->where('a.latitude <> \'\'');
 			$query->where('a.longitude <> \'\'');
+		}
+
+		// Filter by coc
+		$coc = $this->getState('filter.coc');
+
+		if (is_numeric($coc) && $coc == 1)
+		{
+			$query->where('a.coc = 1');
 		}
 
 		// Group by ID

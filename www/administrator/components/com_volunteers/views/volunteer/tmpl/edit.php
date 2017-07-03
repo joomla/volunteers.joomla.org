@@ -45,7 +45,12 @@ JFactory::getDocument()->addScriptDeclaration("
 			<?php if (JFactory::getUser()->authorise('core.admin')): ?>
                 <div class="form-vertical well">
                     <h3><?php echo JText::_('COM_VOLUNTEERS_SECRETARY_ONLY') ?></h3>
-					<?php echo $this->form->renderFieldset('secretary'); ?>
+                    <div class="control-group checkbox">
+                        <div class="controls">
+			                <?php echo $this->form->getInput('coc'); ?>
+			                <?php echo $this->form->getLabel('coc'); ?>
+                        </div>
+                    </div>
                 </div>
 			<?php endif; ?>
             <div class="form-vertical well">

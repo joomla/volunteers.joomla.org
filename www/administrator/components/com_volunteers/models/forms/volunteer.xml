@@ -165,6 +165,27 @@
         />
 
         <field
+                name="crowdin"
+                type="textprepend"
+                label="COM_VOLUNTEERS_FIELD_CROWDIN"
+                prepend="COM_VOLUNTEERS_FIELD_CROWDIN_URL"
+        />
+
+        <field
+                name="joomlaforum"
+                type="textprepend"
+                label="COM_VOLUNTEERS_FIELD_JOOMLAFORUM"
+                prepend="COM_VOLUNTEERS_FIELD_JOOMLAFORUM_URL"
+        />
+
+        <field
+                name="joomladocs"
+                type="textprepend"
+                label="COM_VOLUNTEERS_FIELD_JOOMLADOCS"
+                prepend="COM_VOLUNTEERS_FIELD_JOOMLADOCS_URL"
+        />
+
+        <field
                 name="intro"
                 type="textarea"
                 rows="4"

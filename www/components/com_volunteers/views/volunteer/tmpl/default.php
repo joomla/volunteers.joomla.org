@@ -44,38 +44,69 @@ defined('_JEXEC') or die;
 
         <p class="lead"><?php echo($this->item->intro) ?></p>
 
+        <p>
+        <div class="btn-group">
+			<?php if ($this->item->joomlaforum): ?>
+                <a class="btn btn-joomlaforum" target="_blank" href="https://forum.joomla.org/memberlist.php?mode=viewprofile&u=<?php echo($this->item->joomlaforum) ?>">
+                <span class="icon-joomla"></span>
+                <span class="hidden-phone"><?php echo JText::_('COM_VOLUNTEERS_CONNECT_JOOMLAFORUM') ?></span>
+                </a>
+			<?php endif; ?>
+			<?php if ($this->item->joomladocs): ?>
+                <a class="btn btn-joomladocs" target="_blank" href="https://docs.joomla.org/User:<?php echo($this->item->crowdin) ?>">
+                <span class="icon-joomla"></span>
+                <span class="hidden-phone"><?php echo JText::_('COM_VOLUNTEERS_CONNECT_JOOMLADOCS') ?></span>
+                </a>
+			<?php endif; ?>
+        </div>
+        </p>
+
+        <p>
         <div class="btn-group">
 			<?php if ($this->item->website && ($this->item->website != 'http://')): ?>
                 <a class="btn" target="_blank" href="<?php echo($this->item->website) ?>">
-                    <span class="icon-link"></span> <span class="hidden-phone"><?php echo JText::_('COM_VOLUNTEERS_CONNECT_WEBSITE') ?></span>
+                    <span class="icon-link"></span>
+                    <span class="hidden-phone"><?php echo JText::_('COM_VOLUNTEERS_CONNECT_WEBSITE') ?></span>
                 </a>
 			<?php endif; ?>
 			<?php if ($this->item->twitter): ?>
                 <a class="btn btn-twitter" target="_blank" href="https://twitter.com/<?php echo($this->item->twitter) ?>">
-                    <span class="icon-twitter"></span> <span class="hidden-phone"><?php echo JText::_('COM_VOLUNTEERS_CONNECT_TWITTER') ?></span>
+                    <span class="icon-twitter"></span>
+                    <span class="hidden-phone"><?php echo JText::_('COM_VOLUNTEERS_CONNECT_TWITTER') ?></span>
                 </a>
 			<?php endif; ?>
 			<?php if ($this->item->facebook): ?>
                 <a class="btn btn-facebook" target="_blank" href="https://www.facebook.com/<?php echo($this->item->facebook) ?>">
-                    <span class="icon-facebook"></span> <span class="hidden-phone"><?php echo JText::_('COM_VOLUNTEERS_CONNECT_FACEBOOK') ?></span>
+                    <span class="icon-facebook"></span>
+                    <span class="hidden-phone"><?php echo JText::_('COM_VOLUNTEERS_CONNECT_FACEBOOK') ?></span>
                 </a>
 			<?php endif; ?>
 			<?php if ($this->item->googleplus): ?>
                 <a class="btn btn-google-plus" target="_blank" href="https://plus.google.com/<?php echo($this->item->googleplus) ?>">
-                    <span class="icon-google-plus"></span> <span class="hidden-phone"><?php echo JText::_('COM_VOLUNTEERS_CONNECT_GOOGLEPLUS') ?></span>
+                    <span class="icon-google-plus"></span>
+                    <span class="hidden-phone"><?php echo JText::_('COM_VOLUNTEERS_CONNECT_GOOGLEPLUS') ?></span>
                 </a>
 			<?php endif; ?>
 			<?php if ($this->item->linkedin): ?>
                 <a class="btn btn-linkedin" target="_blank" href="https://www.linkedin.com/in/<?php echo($this->item->linkedin) ?>">
-                    <span class="icon-linkedin"></span> <span class="hidden-phone"><?php echo JText::_('COM_VOLUNTEERS_CONNECT_LINKEDIN') ?></span>
+                    <span class="icon-linkedin"></span>
+                    <span class="hidden-phone"><?php echo JText::_('COM_VOLUNTEERS_CONNECT_LINKEDIN') ?></span>
                 </a>
 			<?php endif; ?>
 			<?php if ($this->item->github): ?>
                 <a class="btn btn-gtihub" target="_blank" href="https://github.com/<?php echo($this->item->github) ?>">
-                    <span class="icon-github"></span> <span class="hidden-phone"><?php echo JText::_('COM_VOLUNTEERS_CONNECT_GITHUB') ?></span>
+                    <span class="icon-github"></span>
+                    <span class="hidden-phone"><?php echo JText::_('COM_VOLUNTEERS_CONNECT_GITHUB') ?></span>
+                </a>
+			<?php endif; ?>
+			<?php if ($this->item->crowdin): ?>
+                <a class="btn btn-crowdin" target="_blank" href="https://crowdin.com/profile/<?php echo($this->item->crowdin) ?>">
+                <span class="icon-crowdin"></span>
+                <span class="hidden-phone"><?php echo JText::_('COM_VOLUNTEERS_CONNECT_CROWDIN') ?></span>
                 </a>
 			<?php endif; ?>
         </div>
+        </p>
     </div>
 </div>
 
@@ -100,11 +131,11 @@ defined('_JEXEC') or die;
                     <a href="#joomlastory" data-toggle="tab"><?php echo JText::_('COM_VOLUNTEERS_TAB_JOOMLASTORY') ?></a>
                 </li>
 			<?php endif; ?>
-	        <?php if ($this->user->id != $this->item->user_id): ?>
-            <li>
-                <a href="#contact" data-toggle="tab"><?php echo JText::_('COM_VOLUNTEERS_TAB_CONTACT') ?></a>
-            </li>
-	        <?php endif; ?>
+			<?php if ($this->user->id != $this->item->user_id): ?>
+                <li>
+                    <a href="#contact" data-toggle="tab"><?php echo JText::_('COM_VOLUNTEERS_TAB_CONTACT') ?></a>
+                </li>
+			<?php endif; ?>
         </ul>
 
         <div class="tab-content">
@@ -180,48 +211,48 @@ defined('_JEXEC') or die;
                 </div>
 			<?php endif; ?>
 
-	        <?php if ($this->user->id != $this->item->user_id): ?>
-            <div class="tab-pane" id="contact">
-				<?php if ($this->user->guest) : ?>
-                    <p class="alert alert-info">
-						<?php echo JText::_('COM_VOLUNTEERS_NOTE_LOGIN_CONTACT_VOLUNTEER') ?>
-                    </p>
-				<?php else : ?>
-                    <form class="form form-horizontal" name="sendmail" action="<?php echo JRoute::_('index.php') ?>" method="post" enctype="multipart/form-data">
-                        <div class="control-group">
-                            <label class="control-label" for="to_name"><?php echo JText::_('COM_VOLUNTEERS_MESSAGE_TO') ?></label>
-                            <div class="controls">
-                                <input type="text" name="to_name" id="to_name" value="<?php echo $this->item->name; ?>" class="input-block-level" disabled="disabled"/>
+			<?php if ($this->user->id != $this->item->user_id): ?>
+                <div class="tab-pane" id="contact">
+					<?php if ($this->user->guest) : ?>
+                        <p class="alert alert-info">
+							<?php echo JText::_('COM_VOLUNTEERS_NOTE_LOGIN_CONTACT_VOLUNTEER') ?>
+                        </p>
+					<?php else : ?>
+                        <form class="form form-horizontal" name="sendmail" action="<?php echo JRoute::_('index.php') ?>" method="post" enctype="multipart/form-data">
+                            <div class="control-group">
+                                <label class="control-label" for="to_name"><?php echo JText::_('COM_VOLUNTEERS_MESSAGE_TO') ?></label>
+                                <div class="controls">
+                                    <input type="text" name="to_name" id="to_name" value="<?php echo $this->item->name; ?>" class="input-block-level" disabled="disabled"/>
+                                </div>
                             </div>
-                        </div>
-                        <div class="control-group">
-                            <label class="control-label" for="from_name"><?php echo JText::_('COM_VOLUNTEERS_MESSAGE_FROM') ?></label>
-                            <div class="controls">
-                                <input type="text" name="from_name" id="from_name" value="<?php echo($this->user->name); ?> <<?php echo($this->user->email); ?>>" class="input-block-level" disabled="disabled"/>
+                            <div class="control-group">
+                                <label class="control-label" for="from_name"><?php echo JText::_('COM_VOLUNTEERS_MESSAGE_FROM') ?></label>
+                                <div class="controls">
+                                    <input type="text" name="from_name" id="from_name" value="<?php echo($this->user->name); ?> <<?php echo($this->user->email); ?>>" class="input-block-level" disabled="disabled"/>
+                                </div>
                             </div>
-                        </div>
-                        <div class="control-group">
-                            <div class="controls span12">
-                                <input type="text" name="subject" id="subject" class="input-block-level" placeholder="<?php echo JText::_('COM_VOLUNTEERS_MESSAGE_SUBJECT') ?>" required/>
+                            <div class="control-group">
+                                <div class="controls span12">
+                                    <input type="text" name="subject" id="subject" class="input-block-level" placeholder="<?php echo JText::_('COM_VOLUNTEERS_MESSAGE_SUBJECT') ?>" required/>
+                                </div>
                             </div>
-                        </div>
-                        <div class="control-group">
-                            <textarea rows="10" name="message" id="message" class="input-block-level" placeholder="<?php echo JText::sprintf('COM_VOLUNTEERS_MESSAGE_BODY', $this->item->name) ?>" required></textarea>
-                        </div>
-                        <div class="alert alert-info">
-							<?php echo JText::sprintf('COM_VOLUNTEERS_MESSAGE_NOTICE', $this->item->name) ?>
-                        </div>
-                        <div class="control-group">
-                            <input type="submit" value="<?php echo JText::_('COM_VOLUNTEERS_MESSAGE_SUBMIT') ?>" name="submit" id="submitButton" class="btn btn-success pull-right"/>
-                        </div>
+                            <div class="control-group">
+                                <textarea rows="10" name="message" id="message" class="input-block-level" placeholder="<?php echo JText::sprintf('COM_VOLUNTEERS_MESSAGE_BODY', $this->item->name) ?>" required></textarea>
+                            </div>
+                            <div class="alert alert-info">
+								<?php echo JText::sprintf('COM_VOLUNTEERS_MESSAGE_NOTICE', $this->item->name) ?>
+                            </div>
+                            <div class="control-group">
+                                <input type="submit" value="<?php echo JText::_('COM_VOLUNTEERS_MESSAGE_SUBMIT') ?>" name="submit" id="submitButton" class="btn btn-success pull-right"/>
+                            </div>
 
-                        <input type="hidden" name="option" value="com_volunteers"/>
-                        <input type="hidden" name="task" value="volunteer.sendmail"/>
-						<?php echo JHtml::_('form.token'); ?>
-                    </form>
-				<?php endif; ?>
-            </div>
-	        <?php endif; ?>
+                            <input type="hidden" name="option" value="com_volunteers"/>
+                            <input type="hidden" name="task" value="volunteer.sendmail"/>
+							<?php echo JHtml::_('form.token'); ?>
+                        </form>
+					<?php endif; ?>
+                </div>
+			<?php endif; ?>
         </div>
 
 		<?php if ($this->user->id && ($this->user->id != $this->item->user_id)): ?>

@@ -5,18 +5,10 @@
             addfieldpath="/administrator/components/com_volunteers/models/fields"
     >
         <field
-                name="firstname"
+                name="name"
                 type="text"
                 class="input-large input-large-text"
-                label="COM_VOLUNTEERS_FIELD_FIRSTNAME"
-                required="true"
-        />
-
-        <field
-                name="lastname"
-                type="text"
-                class="input-large input-large-text"
-                label="COM_VOLUNTEERS_FIELD_LASTNAME"
+                label="COM_VOLUNTEERS_FIELD_NAME"
                 required="true"
         />
 

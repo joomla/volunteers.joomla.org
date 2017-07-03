@@ -26,8 +26,6 @@ class VolunteersModelVolunteers extends JModelList
 		{
 			$config['filter_fields'] = array(
 				'id', 'a.id',
-				'firstname', 'a.firstname',
-				'lastname', 'a.lastname',
 				'alias', 'a.alias',
 				'checked_out', 'a.checked_out',
 				'checked_out_time', 'a.checked_out_time',
@@ -54,7 +52,7 @@ class VolunteersModelVolunteers extends JModelList
 	 *
 	 * @note    Calling getState in this method will result in recursion.
 	 */
-	protected function populateState($ordering = 'a.firstname', $direction = 'asc')
+	protected function populateState($ordering = 'user.name', $direction = 'asc')
 	{
 		// Load the filter state.
 		$this->setState('filter.search', $this->getUserStateFromRequest($this->context . '.filter.search', 'filter_search'));
@@ -109,7 +107,7 @@ class VolunteersModelVolunteers extends JModelList
 
 		// Select the required fields from the table.
 		$query
-			->select($this->getState('list.select', array('a.*, CONCAT(a.firstname, \' \', a.lastname) AS name')))
+			->select($this->getState('list.select', array('a.*')))
 			->from($db->quoteName('#__volunteers_volunteers') . ' AS a');
 
 		// Join over the users for the checked_out user.
@@ -119,7 +117,7 @@ class VolunteersModelVolunteers extends JModelList
 
 		// Join over the users for the related user.
 		$query
-			->select('user.username AS user_username, user.email AS user_email')
+			->select('user.name AS name, user.username AS user_username, user.email AS user_email')
 			->join('LEFT', '#__users AS ' . $db->quoteName('user') . ' ON user.id = a.user_id');
 
 		// Self-join to count teams involved.
@@ -146,7 +144,7 @@ class VolunteersModelVolunteers extends JModelList
 			else
 			{
 				$search = $db->quote('%' . str_replace(' ', '%', $db->escape(trim($search), true) . '%'));
-				$query->where('(a.firstname LIKE ' . $search . ' OR a.lastname LIKE \' . $search . \' OR a.alias LIKE ' . $search . ')');
+				$query->where('(user.name LIKE ' . $search . ' OR a.alias LIKE ' . $search . ')');
 			}
 		}
 
@@ -187,7 +185,7 @@ class VolunteersModelVolunteers extends JModelList
 		$query->group('a.id');
 
 		// Add the list ordering clause.
-		$orderCol  = $this->state->get('list.ordering', 'a.firstname');
+		$orderCol  = $this->state->get('list.ordering', 'user.name');
 		$orderDirn = $this->state->get('list.direction', 'asc');
 
 		$query->order($db->escape($orderCol . ' ' . $orderDirn));

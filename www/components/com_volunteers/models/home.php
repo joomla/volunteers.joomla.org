@@ -83,8 +83,9 @@ class VolunteersModelHome extends JModelList
 		$query = $db->getQuery(true);
 
 		$query
-			->select($db->quoteName(array('id', 'alias', 'firstname', 'lastname', 'latitude', 'longitude', 'country', 'city', 'image')))
-			->from($db->quoteName('#__volunteers_volunteers'))
+			->select($db->quoteName(array('a.id', 'a.alias', 'user.name', 'a.latitude', 'a.longitude', 'a.country', 'a.city', 'a.image')))
+			->from($db->quoteName('#__volunteers_volunteers') . ' AS a')
+			->join('LEFT', '#__users AS ' . $db->quoteName('user') . ' ON user.id = a.user_id')
 			->where($db->quoteName('latitude') . ' not like \'\'')
 			->where($db->quoteName('longitude') . ' not like \'\'');
 
@@ -103,7 +104,7 @@ class VolunteersModelHome extends JModelList
 			foreach ($volunteers as $volunteer)
 			{
 				$markers[] = json_encode(array(
-					'title' => $volunteer->firstname . ' ' . $volunteer->lastname,
+					'title' => $volunteer->name,
 					'lat'   => $volunteer->latitude,
 					'lng'   => $volunteer->longitude,
 					'url'   => $joomlers . '/' . $volunteer->id . '-' . $volunteer->alias,

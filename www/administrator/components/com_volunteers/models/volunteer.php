@@ -109,10 +109,6 @@ class VolunteersModelVolunteer extends JModelAdmin
 		$date = JFactory::getDate();
 		$user = JFactory::getUser();
 
-		$table->firstname = htmlspecialchars_decode($table->firstname, ENT_QUOTES);
-		$table->lastname  = htmlspecialchars_decode($table->lastname, ENT_QUOTES);
-		$table->alias     = JApplicationHelper::stringURLSafe($table->firstname . ' ' . $table->lastname);
-
 		if (empty($table->id))
 		{
 			// Set the values
@@ -153,17 +149,9 @@ class VolunteersModelVolunteer extends JModelAdmin
 	{
 		$app = JFactory::getApplication();
 
-		// Alter the title for save as copy
-		if ($app->input->get('task') == 'save2copy')
-		{
-			list($name, $alias) = $this->generateNewTitle(0, $data['alias'], $data['firstname'] . ' ' . $data['lastname']);
-			$data['alias'] = $alias;
-			$data['state'] = 0;
-		}
-
 		// Joomla User
 		$dataUser = array(
-			'name'      => $data['firstname'] . ' ' . $data['lastname'],
+			'name'      => $data['name'],
 			'username'  => JStringPunycode::emailToPunycode($data['email']),
 			'password'  => (isset($data['password1'])) ? $data['password1'] : '',
 			'password2' => (isset($data['password2'])) ? $data['password2'] : '',
@@ -204,6 +192,9 @@ class VolunteersModelVolunteer extends JModelAdmin
 		unset($data['password1']);
 		unset($data['password2']);
 
+		// Set alias
+		$data['alias'] = JApplicationHelper::stringURLSafe($data['name']);
+
 		$return = parent::save($data);
 
 		// Store the newly created volunteer ID
@@ -211,28 +202,6 @@ class VolunteersModelVolunteer extends JModelAdmin
 		$app->setUserState('com_volunteers.registration.id', $volunteerId);
 
 		return $return;
-	}
-
-	/**
-	 * Method to change the title & alias.
-	 *
-	 * @param   integer $category_id The id of the parent.
-	 * @param   string  $alias       The alias.
-	 * @param   string  $name        The title.
-	 *
-	 * @return  array  Contains the modified title and alias.
-	 */
-	protected function generateNewTitle($category_id, $alias, $name)
-	{
-		// Alter the title & alias
-		$table = $this->getTable();
-
-		while ($table->load(array('alias' => $alias)))
-		{
-			$alias = String::increment($alias, 'dash');
-		}
-
-		return array($name, $alias);
 	}
 
 	/**
@@ -254,7 +223,7 @@ class VolunteersModelVolunteer extends JModelAdmin
 			{
 				$db    = $this->getDbo();
 				$query = $db->getQuery(true)
-					->select($this->getState('item.select', 'a.*, CONCAT(a.firstname, \' \', a.lastname) AS name'))
+					->select($this->getState('item.select', 'a.*, user.name AS name'))
 					->from('#__volunteers_volunteers AS a')
 					->where('a.id = ' . (int) $pk);
 

@@ -28,8 +28,14 @@ JHtml::_('formbehavior.chosen', 'select');
 
 		<h3><?php echo JText::_('COM_VOLUNTEERS_PROFILE_ACCOUNT') ?></h3>
 
-		<?php echo $this->form->renderField('firstname'); ?>
-		<?php echo $this->form->renderField('lastname'); ?>
+        <div class="control-group">
+            <div class="controls">
+                <div class="alert alert-info">
+					<?php echo JText::_('COM_VOLUNTEERS_FIELD_NAME_DESC') ?>
+                </div>
+            </div>
+        </div>
+		<?php echo $this->form->renderField('name'); ?>
 		<?php echo $this->form->renderField('email'); ?>
 		<?php echo $this->form->renderField('password1'); ?>
 		<?php echo $this->form->renderField('password2'); ?>

@@ -66,8 +66,7 @@ class plgSearchVolunteers_volunteers extends JPlugin
 			case 'exact':
 				$text      = $db->quote('%' . $db->escape($text, true) . '%', false);
 				$wheres2   = array();
-				$wheres2[] = 'firstname LIKE ' . $text;
-				$wheres2[] = 'lastname LIKE ' . $text;
+				$wheres2[] = 'name LIKE ' . $text;
 				$wheres2[] = 'intro LIKE ' . $text;
 				$wheres2[] = 'joomlastory LIKE ' . $text;
 				$where     = '(' . implode(') OR (', $wheres2) . ')';
@@ -83,8 +82,7 @@ class plgSearchVolunteers_volunteers extends JPlugin
 				{
 					$word      = $db->quote('%' . $db->escape($word, true) . '%', false);
 					$wheres2   = array();
-					$wheres2[] = 'LOWER(firstname) LIKE LOWER(' . $word . ')';
-					$wheres2[] = 'LOWER(lastname) LIKE LOWER(' . $word . ')';
+					$wheres2[] = 'LOWER(name) LIKE LOWER(' . $word . ')';
 					$wheres2[] = 'LOWER(intro) LIKE LOWER(' . $word . ')';
 					$wheres2[] = 'LOWER(joomlastory) LIKE LOWER(' . $word . ')';
 					$wheres[]  = implode(' OR ', $wheres2);
@@ -102,7 +100,7 @@ class plgSearchVolunteers_volunteers extends JPlugin
 				break;
 
 			case 'alpha':
-				$order = 'firstname ASC';
+				$order = 'name ASC';
 				break;
 
 			case 'newest':
@@ -114,8 +112,9 @@ class plgSearchVolunteers_volunteers extends JPlugin
 		$query = $db->getQuery(true);
 
 		$query
-			->select('id, ' . $query->concatenate(array('firstname', $db->quote(' '), 'lastname')) . ' AS title, created, intro AS text, \'' . JText::_('COM_VOLUNTEERS_TITLE_VOLUNTEERS') . '\' AS section, \'1\' AS browsernav')
-			->from($db->qn('#__volunteers_volunteers'))
+			->select('a.id, user.name AS title, a.created, a.intro AS text, \'' . JText::_('COM_VOLUNTEERS_TITLE_VOLUNTEERS') . '\' AS section, \'1\' AS browsernav')
+			->from($db->quoteName('#__volunteers_volunteers') . ' AS a')
+			->join('LEFT', '#__users AS ' . $db->quoteName('user') . ' ON user.id = a.user_id')
 			->where('(' . $where . ') AND state = 1')
 			->order($order);
 

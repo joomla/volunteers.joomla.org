@@ -114,7 +114,7 @@ class VolunteersModelMembers extends JModelList
 			->from($db->quoteName('#__volunteers_members') . ' AS a');
 
 		// Join over the volunteers.
-		$query->select('CONCAT(volunteer.firstname, \' \', volunteer.lastname) AS volunteer_name, volunteer.image AS volunteer_image, volunteer.country AS volunteer_country')
+		$query->select('volunteer.image AS volunteer_image, volunteer.country AS volunteer_country')
 			->join('LEFT', '#__volunteers_volunteers AS ' . $db->quoteName('volunteer') . ' ON volunteer.id = a.volunteer');
 
 		// Join over the teams.
@@ -135,7 +135,7 @@ class VolunteersModelMembers extends JModelList
 
 		// Join over the users.
 		$query
-			->select('user.email AS user_email')
+			->select('user.name AS volunteer_name, user.email AS user_email')
 			->join('LEFT', '#__users AS ' . $db->quoteName('user') . ' ON user.id = volunteer.user_id');
 
 		// Join over the users for the checked_out user.
@@ -163,7 +163,7 @@ class VolunteersModelMembers extends JModelList
 			else
 			{
 				$search = $db->quote('%' . str_replace(' ', '%', $db->escape(trim($search), true) . '%'));
-				$query->where('(volunteer.firstname LIKE ' . $search . ' OR volunteer.lastname LIKE ' . $search . ')');
+				$query->where('user.name LIKE ' . $search);
 			}
 		}
 

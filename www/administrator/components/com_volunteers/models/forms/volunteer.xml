@@ -1,18 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <form>
     <field
-            name="firstname"
+            name="name"
             type="text"
             class="input-large input-large-text"
-            label="COM_VOLUNTEERS_FIELD_FIRSTNAME"
-            required="true"
-    />
-
-    <field
-            name="lastname"
-            type="text"
-            class="input-large input-large-text"
-            label="COM_VOLUNTEERS_FIELD_LASTNAME"
+            label="COM_VOLUNTEERS_FIELD_NAME"
             required="true"
     />
 

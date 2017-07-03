@@ -28,8 +28,7 @@ JFactory::getDocument()->addScriptDeclaration("
 
     <div class="form-inline form-inline-header">
 		<?php
-		echo $this->form->renderField('firstname');
-		echo $this->form->renderField('lastname');
+		echo $this->form->renderField('name');
 		echo $this->form->renderField('alias');
 		?>
     </div>

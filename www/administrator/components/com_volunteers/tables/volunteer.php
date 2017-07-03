@@ -95,44 +95,6 @@ class VolunteersTableVolunteer extends JTable
 	}
 
 	/**
-	 * Overloaded check method to ensure data integrity.
-	 *
-	 * @return  boolean  True on success.
-	 */
-	public function check()
-	{
-		// check for valid firstname
-		if (trim($this->firstname) == '')
-		{
-			$this->setError(JText::_('COM_VOLUNTEERS_ERR_TABLES_NAME'));
-
-			return false;
-		}
-
-		// check for valid lastname
-		if (trim($this->lastname) == '')
-		{
-			$this->setError(JText::_('COM_VOLUNTEERS_ERR_TABLES_NAME'));
-
-			return false;
-		}
-
-		if (empty($this->alias))
-		{
-			$this->alias = $this->title;
-		}
-
-		$this->alias = JApplicationHelper::stringURLSafe($this->alias);
-
-		if (trim(str_replace('-', '', $this->alias)) == '')
-		{
-			$this->alias = JFactory::getDate()->format("Y-m-d-H-i-s");
-		}
-
-		return true;
-	}
-
-	/**
 	 * Overloaded delete method
 	 *
 	 * @param   mixed $pk An optional primary key value to delete.  If not set the instance property value is used.

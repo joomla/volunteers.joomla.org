@@ -50,7 +50,7 @@ JFactory::getDocument()->addScriptDeclaration("
         <div class="control-group">
             <div class="controls">
                 <div class="alert alert-info">
-				    <?php echo JText::_('COM_VOLUNTEERS_FIELD_NAME_DESC') ?>
+					<?php echo JText::_('COM_VOLUNTEERS_FIELD_NAME_DESC') ?>
                 </div>
             </div>
         </div>
@@ -121,12 +121,10 @@ JFactory::getDocument()->addScriptDeclaration("
 		<?php echo $this->form->renderField('region'); ?>
 		<?php echo $this->form->renderField('zip'); ?>
 
-        <div class="control-group">
+        <div class="control-group checkbox">
             <div class="controls">
-                <input type="checkbox" name="jform[send_permission]" id="jform_send_permission" value="1" checked="" class="pull-left">
-                <label id="jform_send_permission-lbl" for="jform_send_permission">&nbsp;
-					<?php echo JText::_('COM_VOLUNTEERS_FIELD_SENDPERMISSION') ?>
-                </label>
+				<?php echo $this->form->getInput('send_permission'); ?>
+				<?php echo $this->form->getLabel('send_permission'); ?>
             </div>
         </div>
 

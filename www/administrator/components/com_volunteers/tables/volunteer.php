@@ -27,6 +27,31 @@ class VolunteersTableVolunteer extends JTable
 	}
 
 	/**
+	 * Method to bind the data.
+	 *
+	 * @param   array $array  The data to bind.
+	 * @param   mixed $ignore An array or space separated list of fields to ignore.
+	 *
+	 * @return  boolean  True on success, false on failure.
+	 */
+	public function bind($array, $ignore = array())
+	{
+		// send_permission checkbox default
+		if (!isset($array['send_permission']))
+		{
+			$array['send_permission'] = 0;
+		}
+
+		// coc checkbox default
+		if (!isset($array['coc']))
+		{
+			$array['coc'] = 0;
+		}
+
+		return parent::bind($array, $ignore);
+	}
+
+	/**
 	 * Overload the store method for the table.
 	 *
 	 * @param   boolean    Toggle whether null values should be updated.
@@ -67,44 +92,6 @@ class VolunteersTableVolunteer extends JTable
 		}
 
 		return parent::store($updateNulls);
-	}
-
-	/**
-	 * Overloaded check method to ensure data integrity.
-	 *
-	 * @return  boolean  True on success.
-	 */
-	public function check()
-	{
-		// check for valid firstname
-		if (trim($this->firstname) == '')
-		{
-			$this->setError(JText::_('COM_VOLUNTEERS_ERR_TABLES_NAME'));
-
-			return false;
-		}
-
-		// check for valid lastname
-		if (trim($this->lastname) == '')
-		{
-			$this->setError(JText::_('COM_VOLUNTEERS_ERR_TABLES_NAME'));
-
-			return false;
-		}
-
-		if (empty($this->alias))
-		{
-			$this->alias = $this->title;
-		}
-
-		$this->alias = JApplicationHelper::stringURLSafe($this->alias);
-
-		if (trim(str_replace('-', '', $this->alias)) == '')
-		{
-			$this->alias = JFactory::getDate()->format("Y-m-d-H-i-s");
-		}
-
-		return true;
 	}
 
 	/**

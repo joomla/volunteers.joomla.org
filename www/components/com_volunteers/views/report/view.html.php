@@ -127,6 +127,7 @@ class VolunteersViewReport extends JViewLegacy
 			'title'            => $title,
 			'image'            => $image,
 			'url'              => $url,
+			'text'             => $description,
 			'displayEmail'     => true,
 			'displayFacebook'  => true,
 			'displayTwitter'   => true,

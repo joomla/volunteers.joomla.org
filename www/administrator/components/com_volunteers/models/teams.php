@@ -118,10 +118,6 @@ class VolunteersModelTeams extends JModelList
 			->select('parentteam.title AS parent_title')
 			->join('LEFT', '#__volunteers_teams AS ' . $db->quoteName('parentteam') . ' ON parentteam.id = a.parent_id');
 
-		// Self-join to count subteams.
-		$query->select('COUNT(DISTINCT subteams.id) AS num_subteams')
-			->join('LEFT', '#__volunteers_teams AS ' . $db->quoteName('subteams') . ' ON subteams.parent_id = a.id');
-
 		// Filter by published state
 		$state = $this->getState('filter.state', 1);
 
@@ -216,32 +212,27 @@ class VolunteersModelTeams extends JModelList
 
 		if (JFactory::getApplication()->isSite())
 		{
-			$teams      = array();
-			$teamIds    = array();
-			$subteamIds = array();
+			$teams   = array();
+			$teamIds = array();
 
 			foreach ($items as $item)
 			{
-				$teamIds[]                 = $item->id;
-				$teams[$item->id]          = $item;
-				$teams[$item->id]->members = array();
-
-				if ($item->num_subteams)
-				{
-					$subteamIds[] = $item->id;
-				}
+				$teamIds[]                  = $item->id;
+				$teams[$item->id]           = $item;
+				$teams[$item->id]->members  = array();
+				$teams[$item->id]->subteams = array();
 			}
 
 			// Get Subteams
-			if ($subteamIds)
-			{
-				$subteams = $this->getSubteams($subteamIds);
-			}
+			$subteams = $this->getSubteams();
 
 			// Add Subteams
-			if (count($subteamIds)) foreach ($subteams as $subteam)
+			foreach ($subteams as $subteam)
 			{
-				$teams[$subteam->parent_id]->subteams[] = $subteam;
+				if (isset($teams[$subteam->parent_id]))
+				{
+					$teams[$subteam->parent_id]->subteams[] = $subteam;
+				}
 			}
 
 			// Get members
@@ -265,7 +256,7 @@ class VolunteersModelTeams extends JModelList
 		return $items;
 	}
 
-	public function getSubteams($parent, $getmembers = false)
+	public function getSubteams($parent = null, $getmembers = false)
 	{
 		$db = $this->getDbo();
 
@@ -274,6 +265,11 @@ class VolunteersModelTeams extends JModelList
 		$query
 			->select('*')
 			->from('#__volunteers_teams');
+
+		if (!$parent)
+		{
+			$query->where('parent_id > 0');
+		}
 
 		if (is_array($parent))
 		{
@@ -294,12 +290,6 @@ class VolunteersModelTeams extends JModelList
 		$db->setQuery($query);
 
 		$subteams = $db->loadObjectList();
-
-		// Get the team members
-		if ($getmembers)
-		{
-
-		}
 
 		return $subteams;
 	}

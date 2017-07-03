@@ -111,7 +111,7 @@ class VolunteersModelReports extends JModelList
 
 		// Join over the volunteers
 		$query
-			->select('volunteer.image AS volunteer_image, volunteer.id AS volunteer_id, CONCAT(volunteer.firstname, \' \', volunteer.lastname) AS volunteer_name, volunteer.email_feed AS volunteer_email_feed')
+			->select('volunteer.image AS volunteer_image, volunteer.id AS volunteer_id, volunteer.email_feed AS volunteer_email_feed')
 			->join('LEFT', '#__volunteers_volunteers AS ' . $db->quoteName('volunteer') . ' ON volunteer.user_id = a.created_by');
 
 		// Join over the teams.
@@ -120,12 +120,12 @@ class VolunteersModelReports extends JModelList
 
 		// Join over the teams.
 		$query
-			->select('team.title AS team_title')
+			->select('team.title AS team_title', 'team.department AS team_deaprtment')
 			->join('LEFT', '#__volunteers_teams AS ' . $db->quoteName('team') . ' ON team.id = a.team');
 
 		// Join over the users for the user email.
 		$query
-			->select('user.email AS volunteer_email')
+			->select('user.name AS volunteer_name, user.email AS volunteer_email')
 			->join('LEFT', '#__users AS ' . $db->quoteName('user') . ' ON user.id = a.created_by');
 
 		// Filter by published state
@@ -157,7 +157,7 @@ class VolunteersModelReports extends JModelList
 
 		if (is_numeric($department) && ($department > 0))
 		{
-			$query->where('a.department = ' . (int) $department);
+			$query->where('(a.department = ' . (int) $department .' OR team.department = ' . (int) $department.')');
 		}
 
 		// Filter by team

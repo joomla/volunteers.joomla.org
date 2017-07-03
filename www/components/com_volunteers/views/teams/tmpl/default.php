@@ -57,16 +57,34 @@ $active = $this->state->get('filter.active', 1);
 							<?php if ($item->date_ended != '0000-00-00'): ?>
 								<small><?php echo JText::_('COM_VOLUNTEERS_ARCHIVED') ?></small>
 							<?php endif; ?>
+                            <span class="label label-info">
+                                <?php if ($item->status == '0'): ?>
+                                    <?php echo JText::_('COM_VOLUNTEERS_FIELD_STATUS_INFORMATION') ?>
+                                <?php elseif ($item->status == '1'): ?>
+                                    <?php echo JText::_('COM_VOLUNTEERS_FIELD_STATUS_OFFICIAL') ?>
+                                <?php elseif ($item->status == '2'): ?>
+                                    <?php echo JText::_('COM_VOLUNTEERS_FIELD_STATUS_UNOFFICIAL') ?>
+                                <?php endif; ?>
+                            </span>
 						</h2>
 						<p><?php echo($item->description); ?></p>
 
-						<?php if ($item->num_subteams): ?>
+						<?php if (count($item->subteams)): ?>
 							<h3><?php echo JText::_('COM_VOLUNTEERS_SUBTEAMS') ?></h3>
 							<ul class="nav nav-tabs nav-stacked">
 								<?php foreach ($item->subteams as $subteam): ?>
 									<li>
 										<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=team&id=' . $subteam->id) ?>">
 											<?php echo($subteam->title); ?><?php if ($subteam->acronym): ?> (<?php echo($subteam->acronym) ?>)<?php endif; ?>
+                                            <span class="label label-info">
+                                                <?php if ($subteam->status == '0'): ?>
+                                                    <?php echo JText::_('COM_VOLUNTEERS_FIELD_STATUS_INFORMATION') ?>
+                                                <?php elseif ($subteam->status == '1'): ?>
+                                                    <?php echo JText::_('COM_VOLUNTEERS_FIELD_STATUS_OFFICIAL') ?>
+                                                <?php elseif ($subteam->status == '2'): ?>
+                                                    <?php echo JText::_('COM_VOLUNTEERS_FIELD_STATUS_UNOFFICIAL') ?>
+                                                <?php endif; ?>
+                                            </span>
 										</a>
 									</li>
 								<?php endforeach; ?>

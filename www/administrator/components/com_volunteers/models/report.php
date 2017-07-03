@@ -221,8 +221,13 @@ class VolunteersModelReport extends JModelAdmin
 					->where('a.id = ' . (int) $pk);
 
 				// Join on volunteer table.
-				$query->select('volunteer.id AS volunteer_id, volunteer.image AS volunteer_image, CONCAT(volunteer.firstname, \' \', volunteer.lastname) AS volunteer_name')
+				$query->select('volunteer.id AS volunteer_id, volunteer.image AS volunteer_image')
 					->join('LEFT', '#__volunteers_volunteers AS ' . $db->quoteName('volunteer') . ' on volunteer.user_id = a.created_by');
+
+				// Join over the users for the related user.
+				$query
+					->select('user.name AS volunteer_name')
+					->join('LEFT', '#__users AS ' . $db->quoteName('user') . ' ON user.id = a.created_by');
 
 				// Join on department table.
 				$query->select('department.title AS department_title, department.parent_id AS department_parent_id')

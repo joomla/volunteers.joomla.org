@@ -28,8 +28,14 @@ JHtml::_('formbehavior.chosen', 'select');
 
 		<h3><?php echo JText::_('COM_VOLUNTEERS_PROFILE_ACCOUNT') ?></h3>
 
-		<?php echo $this->form->renderField('firstname'); ?>
-		<?php echo $this->form->renderField('lastname'); ?>
+        <div class="control-group">
+            <div class="controls">
+                <div class="alert alert-info">
+					<?php echo JText::_('COM_VOLUNTEERS_FIELD_NAME_DESC') ?>
+                </div>
+            </div>
+        </div>
+		<?php echo $this->form->renderField('name'); ?>
 		<?php echo $this->form->renderField('email'); ?>
 		<?php echo $this->form->renderField('password1'); ?>
 		<?php echo $this->form->renderField('password2'); ?>
@@ -76,10 +82,18 @@ JHtml::_('formbehavior.chosen', 'select');
 
 		<hr>
 
+        <h3><?php echo JText::_('COM_VOLUNTEERS_PROFILE_JOOMLA') ?></h3>
+
+		<?php echo $this->form->renderField('joomlaforum'); ?>
+		<?php echo $this->form->renderField('joomladocs'); ?>
+
+        <hr>
+
 		<h3><?php echo JText::_('COM_VOLUNTEERS_PROFILE_SOCIAL') ?></h3>
 
 		<?php echo $this->form->renderField('website'); ?>
 		<?php echo $this->form->renderField('github'); ?>
+		<?php echo $this->form->renderField('crowdin'); ?>
 		<?php echo $this->form->renderField('twitter'); ?>
 		<?php echo $this->form->renderField('facebook'); ?>
 		<?php echo $this->form->renderField('googleplus'); ?>

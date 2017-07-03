@@ -1,18 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <form>
     <field
-            name="firstname"
+            name="name"
             type="text"
             class="input-large input-large-text"
-            label="COM_VOLUNTEERS_FIELD_FIRSTNAME"
-            required="true"
-    />
-
-    <field
-            name="lastname"
-            type="text"
-            class="input-large input-large-text"
-            label="COM_VOLUNTEERS_FIELD_LASTNAME"
+            label="COM_VOLUNTEERS_FIELD_NAME"
             required="true"
     />
 
@@ -94,6 +86,13 @@
         />
 
         <field
+                name="send_permission"
+                type="checkbox"
+                label="COM_VOLUNTEERS_FIELD_SENDPERMISSION"
+                default="0"
+        />
+
+        <field
                 name="country"
                 type="countries"
                 label="COM_VOLUNTEERS_FIELD_COUNTRY"
@@ -158,6 +157,27 @@
         />
 
         <field
+                name="crowdin"
+                type="textprepend"
+                label="COM_VOLUNTEERS_FIELD_CROWDIN"
+                prepend="COM_VOLUNTEERS_FIELD_CROWDIN_URL"
+        />
+
+        <field
+                name="joomlaforum"
+                type="textprepend"
+                label="COM_VOLUNTEERS_FIELD_JOOMLAFORUM"
+                prepend="COM_VOLUNTEERS_FIELD_JOOMLAFORUM_URL"
+        />
+
+        <field
+                name="joomladocs"
+                type="textprepend"
+                label="COM_VOLUNTEERS_FIELD_JOOMLADOCS"
+                prepend="COM_VOLUNTEERS_FIELD_JOOMLADOCS_URL"
+        />
+
+        <field
                 name="intro"
                 type="textarea"
                 rows="4"
@@ -189,6 +209,17 @@
             <option value="1">JYES</option>
             <option value="0">JNO</option>
         </field>
+    </fieldset>
+
+    <fieldset
+            name="secretary"
+    >
+        <field
+                name="coc"
+                type="checkbox"
+                label="COM_VOLUNTEERS_FIELD_COC"
+                default="0"
+        />
     </fieldset>
 
     <fieldset

@@ -68,10 +68,11 @@ abstract class JHtmlVolunteers
 	{
 		$db    = JFactory::getDbo();
 		$query = $db->getQuery(true)
-			->select('id AS value, CONCAT(firstname, \' \', lastname) AS text')
-			->from('#__volunteers_volunteers')
+			->select('a.id AS value, user.name AS text')
+			->from($db->quoteName('#__volunteers_volunteers') . ' AS a')
+			->join('LEFT', '#__users AS ' . $db->quoteName('user') . ' ON user.id = a.user_id')
 			->where('state = 1')
-			->order('firstname asc');
+			->order('name asc');
 
 		// Get the options.
 		$db->setQuery($query);

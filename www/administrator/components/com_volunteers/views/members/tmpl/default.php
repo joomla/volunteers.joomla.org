@@ -59,7 +59,7 @@ if ($saveOrder)
 						<th width="15%" class="team">
 							<?php echo JHtml::_('searchtools.sort', 'COM_VOLUNTEERS_FIELD_TEAM_DEPARTMENT', 'a.team', $listDirn, $listOrder); ?>
 						</th>
-						<th width="15%" class="firstname">
+						<th width="15%" class="name">
 							<?php echo JHtml::_('searchtools.sort', 'COM_VOLUNTEERS_FIELD_VOLUNTEER', 'a.volunteer', $listDirn, $listOrder); ?>
 						</th>
 						<th>

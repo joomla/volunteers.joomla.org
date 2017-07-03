@@ -26,8 +26,6 @@ class VolunteersModelVolunteers extends JModelList
 		{
 			$config['filter_fields'] = array(
 				'id', 'a.id',
-				'firstname', 'a.firstname',
-				'lastname', 'a.lastname',
 				'alias', 'a.alias',
 				'checked_out', 'a.checked_out',
 				'checked_out_time', 'a.checked_out_time',
@@ -54,7 +52,7 @@ class VolunteersModelVolunteers extends JModelList
 	 *
 	 * @note    Calling getState in this method will result in recursion.
 	 */
-	protected function populateState($ordering = 'a.firstname', $direction = 'asc')
+	protected function populateState($ordering = 'user.name', $direction = 'asc')
 	{
 		// Load the filter state.
 		$this->setState('filter.search', $this->getUserStateFromRequest($this->context . '.filter.search', 'filter_search'));
@@ -62,6 +60,7 @@ class VolunteersModelVolunteers extends JModelList
 		$this->setState('filter.image', $this->getUserStateFromRequest($this->context . '.filter.image', 'filter_image'));
 		$this->setState('filter.joomlastory', $this->getUserStateFromRequest($this->context . '.filter.joomlastory', 'filter_joomlastory'));
 		$this->setState('filter.location', $this->getUserStateFromRequest($this->context . '.filter.location', 'filter_location'));
+		$this->setState('filter.coc', $this->getUserStateFromRequest($this->context . '.filter.coc', 'filter_coc'));
 
 		// Load the parameters.
 		$params = JComponentHelper::getParams('com_volunteers');
@@ -90,6 +89,7 @@ class VolunteersModelVolunteers extends JModelList
 		$id .= ':' . $this->getState('filter.image');
 		$id .= ':' . $this->getState('filter.joomlastory');
 		$id .= ':' . $this->getState('filter.location');
+		$id .= ':' . $this->getState('filter.coc');
 
 		return parent::getStoreId($id);
 	}
@@ -107,7 +107,7 @@ class VolunteersModelVolunteers extends JModelList
 
 		// Select the required fields from the table.
 		$query
-			->select($this->getState('list.select', array('a.*, CONCAT(a.firstname, \' \', a.lastname) AS name')))
+			->select($this->getState('list.select', array('a.*')))
 			->from($db->quoteName('#__volunteers_volunteers') . ' AS a');
 
 		// Join over the users for the checked_out user.
@@ -117,7 +117,7 @@ class VolunteersModelVolunteers extends JModelList
 
 		// Join over the users for the related user.
 		$query
-			->select('user.username AS user_username, user.email AS user_email')
+			->select('user.name AS name, user.username AS user_username, user.email AS user_email')
 			->join('LEFT', '#__users AS ' . $db->quoteName('user') . ' ON user.id = a.user_id');
 
 		// Self-join to count teams involved.
@@ -144,7 +144,7 @@ class VolunteersModelVolunteers extends JModelList
 			else
 			{
 				$search = $db->quote('%' . str_replace(' ', '%', $db->escape(trim($search), true) . '%'));
-				$query->where('(a.firstname LIKE ' . $search . ' OR a.lastname LIKE \' . $search . \' OR a.alias LIKE ' . $search . ')');
+				$query->where('(user.name LIKE ' . $search . ' OR a.alias LIKE ' . $search . ')');
 			}
 		}
 
@@ -173,11 +173,19 @@ class VolunteersModelVolunteers extends JModelList
 			$query->where('a.longitude <> \'\'');
 		}
 
+		// Filter by coc
+		$coc = $this->getState('filter.coc');
+
+		if (is_numeric($coc) && $coc == 1)
+		{
+			$query->where('a.coc = 1');
+		}
+
 		// Group by ID
 		$query->group('a.id');
 
 		// Add the list ordering clause.
-		$orderCol  = $this->state->get('list.ordering', 'a.firstname');
+		$orderCol  = $this->state->get('list.ordering', 'user.name');
 		$orderDirn = $this->state->get('list.direction', 'asc');
 
 		$query->order($db->escape($orderCol . ' ' . $orderDirn));

@@ -166,13 +166,13 @@ class VolunteersModelRegistration extends JModelForm
 
 		$emailSubject = JText::sprintf(
 			'COM_USERS_EMAIL_ACCOUNT_DETAILS',
-			$data['firstname'] . ' ' . $data['lastname'],
+			$data['name'],
 			$data['sitename']
 		);
 
 		$emailBody = JText::sprintf(
 			'COM_USERS_EMAIL_REGISTERED_BODY_NOPW',
-			$data['firstname'] . ' ' . $data['lastname'],
+			$data['name'],
 			$data['sitename'],
 			$data['siteurl']
 		);

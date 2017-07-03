@@ -76,10 +76,18 @@ JHtml::_('formbehavior.chosen', 'select');
 
 		<hr>
 
+        <h3><?php echo JText::_('COM_VOLUNTEERS_PROFILE_JOOMLA') ?></h3>
+
+		<?php echo $this->form->renderField('joomlaforum'); ?>
+		<?php echo $this->form->renderField('joomladocs'); ?>
+
+        <hr>
+
 		<h3><?php echo JText::_('COM_VOLUNTEERS_PROFILE_SOCIAL') ?></h3>
 
 		<?php echo $this->form->renderField('website'); ?>
 		<?php echo $this->form->renderField('github'); ?>
+		<?php echo $this->form->renderField('crowdin'); ?>
 		<?php echo $this->form->renderField('twitter'); ?>
 		<?php echo $this->form->renderField('facebook'); ?>
 		<?php echo $this->form->renderField('googleplus'); ?>

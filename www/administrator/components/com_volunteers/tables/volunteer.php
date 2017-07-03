@@ -27,6 +27,25 @@ class VolunteersTableVolunteer extends JTable
 	}
 
 	/**
+	 * Method to bind the data.
+	 *
+	 * @param   array $array  The data to bind.
+	 * @param   mixed $ignore An array or space separated list of fields to ignore.
+	 *
+	 * @return  boolean  True on success, false on failure.
+	 */
+	public function bind($array, $ignore = array())
+	{
+		// send_permission checkbox default
+		if (!isset($array['send_permission']))
+		{
+			$array['send_permission'] = 0;
+		}
+
+		return parent::bind($array, $ignore);
+	}
+
+	/**
 	 * Overload the store method for the table.
 	 *
 	 * @param   boolean    Toggle whether null values should be updated.

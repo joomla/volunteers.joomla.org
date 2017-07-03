@@ -94,6 +94,13 @@
         />
 
         <field
+                name="send_permission"
+                type="checkbox"
+                label="COM_VOLUNTEERS_FIELD_SENDPERMISSION"
+                default="0"
+        />
+
+        <field
                 name="country"
                 type="countries"
                 label="COM_VOLUNTEERS_FIELD_COUNTRY"

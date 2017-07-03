@@ -69,7 +69,7 @@ $active = $this->state->get('filter.active', 1);
 						</h2>
 						<p><?php echo($item->description); ?></p>
 
-						<?php if ($item->num_subteams): ?>
+						<?php if (count($item->subteams)): ?>
 							<h3><?php echo JText::_('COM_VOLUNTEERS_SUBTEAMS') ?></h3>
 							<ul class="nav nav-tabs nav-stacked">
 								<?php foreach ($item->subteams as $subteam): ?>

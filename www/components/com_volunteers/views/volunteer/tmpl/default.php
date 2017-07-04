@@ -53,7 +53,7 @@ defined('_JEXEC') or die;
                 </a>
 			<?php endif; ?>
 			<?php if ($this->item->joomladocs): ?>
-                <a class="btn btn-joomladocs" target="_blank" href="https://docs.joomla.org/User:<?php echo($this->item->crowdin) ?>">
+                <a class="btn btn-joomladocs" target="_blank" href="https://docs.joomla.org/User:<?php echo($this->item->joomladocs) ?>">
                 <span class="icon-joomla"></span>
                 <span class="hidden-phone"><?php echo JText::_('COM_VOLUNTEERS_CONNECT_JOOMLADOCS') ?></span>
                 </a>

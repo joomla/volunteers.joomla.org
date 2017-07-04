@@ -2,7 +2,7 @@
 /**
  * Joomla.org site template
  *
- * @copyright   Copyright (C) 2005 - 2016 Open Source Matters, Inc. All rights reserved.
+ * @copyright   Copyright (C) 2005 - 2017 Open Source Matters, Inc. All rights reserved.
  * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
 
@@ -27,18 +27,26 @@ $task     = $app->input->getCmd('task', 'display');
 $itemid   = $app->input->getUint('Itemid', 0);
 $sitename = $app->get('sitename');
 
-// Set the CSS URL based on whether we're in debug mode
-if (JDEBUG)
+// Set the CSS URL based on whether we're in debug mode or it was explicitly chosen to not use the CDN
+if (JDEBUG || !$params->get('useCdn'))
 {
-	$cssURL = JHtml::_('stylesheet', 'template.min.css', [], true, true, false, (bool) JDEBUG);
+	$cssURL = JHtml::_('stylesheet', 'template.min.css', ['pathOnly' => true, 'relative' => true, 'detectDebug' => (bool) JDEBUG, 'version' => '2.2.0']);
 }
 else
 {
-	$cssURL = 'https://cdn.joomla.org/template/css/template_2.1.1.min.css';
+	$cssURL = 'https://cdn.joomla.org/template/css/template_2.2.0.min.css';
+}
+
+$bs3Css = false;
+
+// Bootstrap 3 polyfill
+if ($params->get('bs3Grid', '0'))
+{
+    $bs3Css = JHtml::_('stylesheet', 'bs3-polyfill.css', ['pathOnly' => true, 'version' => 'auto', 'relative' => true, 'detectDebug' => false], []);
 }
 
 // Optional site specific CSS override, prefer a minified custom.css file first
-$customCss = JHtml::_('stylesheet', 'custom.css', [], true, true, false, false);
+$customCss = JHtml::_('stylesheet', 'custom.css', ['pathOnly' => true, 'version' => 'auto', 'relative' => true, 'detectDebug' => false], []);
 
 $rtlCss       = false;
 $customRtlCss = false;
@@ -46,10 +54,10 @@ $customRtlCss = false;
 // Load optional RTL Bootstrap CSS
 if ($this->direction === 'rtl')
 {
-	$rtlCss = JHtml::_('stylesheet', 'template-rtl.min.css', [], true, true, false, (bool) JDEBUG);
+	$rtlCss = JHtml::_('stylesheet', 'template-rtl.min.css', ['pathOnly' => true, 'version' => 'auto', 'relative' => true, 'detectDebug' => (bool) JDEBUG], []);
 
 	// Optional support for custom RTL CSS rules
-	$customRtlCss = JHtml::_('stylesheet', 'custom-rtl.css', [], true, true, false, false);
+	$customRtlCss = JHtml::_('stylesheet', 'custom-rtl.css', ['pathOnly' => true, 'version' => 'auto', 'relative' => true, 'detectDebug' => false], []);
 }
 
 $languageModCss = false;
@@ -57,22 +65,22 @@ $languageModCss = false;
 // If the multilanguage module is enabled, load its CSS - We do this solely by an isEnabled check because there isn't efficient API to do more checks
 if (JModuleHelper::isEnabled('mod_languages'))
 {
-	$languageModCss = JHtml::_('stylesheet', 'mod_languages/template.css', [], true, true, false, (bool) JDEBUG);
+	$languageModCss = JHtml::_('stylesheet', 'mod_languages/template.css', ['pathOnly' => true, 'version' => 'auto', 'relative' => true, 'detectDebug' => (bool) JDEBUG], []);
 }
 
 // Load template JavaScript
-$templateJs = JHtml::_('script', 'template.js', false, true, true, false, (bool) JDEBUG);
-$adBlockJs  = JHtml::_('script', 'blockadblock.js', false, true, true, false, (bool) JDEBUG);
-$cookieJs   = JHtml::_('script', 'js.cookie.js', false, true, true, false, (bool) JDEBUG);
+$templateJs = JHtml::_('script', 'template.js', ['pathOnly' => true, 'version' => 'auto', 'relative' => true, 'detectDebug' => (bool) JDEBUG], []);
+$adBlockJs  = JHtml::_('script', 'blockadblock.js', ['pathOnly' => true, 'version' => 'auto', 'relative' => true, 'detectDebug' => (bool) JDEBUG], []);
+$cookieJs   = JHtml::_('script', 'js.cookie.js', ['pathOnly' => true, 'version' => 'auto', 'relative' => true, 'detectDebug' => (bool) JDEBUG], []);
 
 // Load jQuery and Bootstrap JavaScript
-$jQueryJs     = JHtml::_('script', 'jui/jquery.min.js', false, true, true, false, (bool) JDEBUG);
-$noConflictJs = JHtml::_('script', 'jui/jquery-noconflict.js', false, true, true, false, (bool) JDEBUG);
-$migrateJs    = JHtml::_('script', 'jui/jquery-migrate.min.js', false, true, true, false, (bool) JDEBUG);
-$bootstrapJs  = JHtml::_('script', 'jui/bootstrap.min.js', false, true, true, false, (bool) JDEBUG);
+$jQueryJs     = JHtml::_('script', 'jui/jquery.min.js', ['pathOnly' => true, 'version' => 'auto', 'relative' => true, 'detectDebug' => (bool) JDEBUG], []);
+$noConflictJs = JHtml::_('script', 'jui/jquery-noconflict.min.js', ['pathOnly' => true, 'version' => 'auto', 'relative' => true, 'detectDebug' => (bool) JDEBUG], []);
+$migrateJs    = JHtml::_('script', 'jui/jquery-migrate.min.js', ['pathOnly' => true, 'version' => 'auto', 'relative' => true, 'detectDebug' => (bool) JDEBUG], []);
+$bootstrapJs  = JHtml::_('script', 'jui/bootstrap.min.js', ['pathOnly' => true, 'version' => 'auto', 'relative' => true, 'detectDebug' => (bool) JDEBUG], []);
 
 // Get the path for the HTML5 shim with optional override
-$html5Shim = JHtml::_('script', 'jui/html5.js', false, true, true, false, (bool) JDEBUG);
+$html5Shim = JHtml::_('script', 'jui/html5.js', ['pathOnly' => true, 'version' => 'auto', 'relative' => true, 'detectDebug' => (bool) JDEBUG], []);
 
 // Set the replacement for the position-0 module loaded from the CDN'd menu
 $search      = '<jdoc:include type="modules" name="position-0" style="none" />';
@@ -96,6 +104,9 @@ $gtmId = JoomlaTemplateHelper::getGtmId(JUri::getInstance()->toString(['host']))
 	<title><?php echo $this->title; ?> <?php echo $this->error->getMessage();?></title>
 	<link href="/templates/joomla/favicon.ico" rel="shortcut icon" type="image/vnd.microsoft.icon" />
 	<link href="<?php echo $cssURL ?>" rel="stylesheet" />
+	<?php if ($bs3Css) : ?>
+		<link href="<?php echo $bs3Css ?>" rel="stylesheet" />
+	<?php endif; ?>
 	<?php if ($customCss) : ?>
 		<link href="<?php echo $customCss ?>" rel="stylesheet" />
 	<?php endif; ?>
@@ -203,25 +214,21 @@ $gtmId = JoomlaTemplateHelper::getGtmId(JUri::getInstance()->toString(['host']))
 			<div class="row-fluid">
 				<main id="content" class="span12">
 					<!-- Begin Content -->
-					<h1 class="page-header"><?php echo JText::_('JERROR_LAYOUT_PAGE_NOT_FOUND'); ?></h1>
-					<div class="well">
-						<div class="row-fluid">
+					<div class="marge">
+						<div class="row-fluid center">
 							<div class="span6">
-								<p><strong><?php echo JText::_('JERROR_LAYOUT_ERROR_HAS_OCCURRED_WHILE_PROCESSING_YOUR_REQUEST'); ?></strong></p>
-								<p><?php echo JText::_('JERROR_LAYOUT_NOT_ABLE_TO_VISIT'); ?></p>
-								<ul>
-									<li><?php echo JText::_('JERROR_LAYOUT_AN_OUT_OF_DATE_BOOKMARK_FAVOURITE'); ?></li>
-									<li><?php echo JText::_('JERROR_LAYOUT_MIS_TYPED_ADDRESS'); ?></li>
-									<li><?php echo JText::_('JERROR_LAYOUT_SEARCH_ENGINE_OUT_OF_DATE_LISTING'); ?></li>
-									<li><?php echo JText::_('JERROR_LAYOUT_YOU_HAVE_NO_ACCESS_TO_THIS_PAGE'); ?></li>
-								</ul>
+								<img src="/templates/joomla/images/error.jpg" alt="Joomla">
 							</div>
 							<div class="span6">
-								<p><strong><?php echo JText::_('JERROR_LAYOUT_SEARCH'); ?></strong></p>
-								<p><?php echo JText::_('JERROR_LAYOUT_SEARCH_PAGE'); ?></p>
+								<div class="errorborder">
+									<h2><?php echo JText::_('TPL_JOOMLA_ERROR_LAYOUT_ERROR_HAS_OCCURRED'); ?></h2>
+									<p><?php echo JText::_('TPL_JOOMLA_ERROR_LAYOUT_DONT_WORRY'); ?></p>
+								</div>
+								<h3><?php echo JText::_('TPL_JOOMLA_ERROR_LAYOUT_SEARCH'); ?></h3>
+								<p><?php echo JText::_('TPL_JOOMLA_ERROR_LAYOUT_SEARCH_SITE'); ?></p>
 								<?php echo JModuleHelper::renderModule(JModuleHelper::getModule($params->get('searchModule', 'search'))); ?>
-								<p><?php echo JText::_('JERROR_LAYOUT_GO_TO_THE_HOME_PAGE'); ?></p>
-								<p><a href="<?php echo JUri::root(); ?>" class="btn"><i class="icon-home"></i> <?php echo JText::_('JERROR_LAYOUT_HOME_PAGE'); ?></a></p>
+								<p><?php echo JText::_('TPL_JOOMLA_ERROR_LAYOUT_START_AGAIN'); ?></p>
+								<p><a href="<?php echo JUri::root(); ?>" class="btn btn-primary btn-large error"> <?php echo JText::_('JERROR_LAYOUT_HOME_PAGE'); ?></a></p>
 							</div>
 						</div>
 						<hr />
@@ -242,7 +249,7 @@ $gtmId = JoomlaTemplateHelper::getGtmId(JUri::getInstance()->toString(['host']))
 									<?php // Make the first assignment to setError() outside the loop so the loop does not skip Exceptions ?>
 									<?php $this->setError($this->_error->getPrevious()); ?>
 									<?php while ($loop === true) : ?>
-										<p><strong>Previous Error</strong></p>
+										<p><strong><?php echo JText::_('JERROR_LAYOUT_PREVIOUS_ERROR'); ?></strong></p>
 										<blockquote>
 											<span class="label label-inverse"><?php echo $this->_error->getCode(); ?></span> <?php echo htmlspecialchars($this->_error->getMessage(), ENT_QUOTES, 'UTF-8'); ?> in <?php echo $this->_error->getFile(); ?> on line <?php echo $this->_error->getLine(); ?>
 										</blockquote>

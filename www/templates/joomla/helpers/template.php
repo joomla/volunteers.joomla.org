@@ -2,7 +2,7 @@
 /**
  * Joomla.org site template
  *
- * @copyright   Copyright (C) 2005 - 2016 Open Source Matters, Inc. All rights reserved.
+ * @copyright   Copyright (C) 2005 - 2017 Open Source Matters, Inc. All rights reserved.
  * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
 
@@ -252,7 +252,7 @@ class JoomlaTemplateHelper
 			{
 				$hasCustom = true;
 				$tag       = 'jed';
-				$url       = 'https://joomlaextensionsdirectory.atlassian.net/secure/Dashboard.jspa';
+				$url       = 'https://github.com/joomla/jed-issues/issues/new?body=Please%20describe%20the%20problem%20or%20your%20issue';
 
 				break;
 			}
@@ -423,35 +423,6 @@ class JoomlaTemplateHelper
 	}
 
 	/**
-	 * Execute the HTTP request to load the remote data
-	 *
-	 * @param   string  $url  The URL to request
-	 *
-	 * @return  string
-	 *
-	 * @deprecated  Will become a lambda function inside the loadTemplateSection method when Joomla! 3.7 is the minimum supported version
-	 */
-	public static function loadRemoteData($url)
-	{
-		try
-		{
-			// Set a very short timeout to try and not bring the site down
-			$response = JHttpFactory::getHttp()->get($url, [], 2);
-		}
-		catch (RuntimeException $e)
-		{
-			return 'Could not load template section.';
-		}
-
-		if ($response->code !== 200)
-		{
-			return 'Could not load template section.';
-		}
-
-		return $response->body;
-	}
-
-	/**
 	 * Load the template section, caching the result if needed
 	 *
 	 * @param   string  $section  The section to be loaded
@@ -473,6 +444,27 @@ class JoomlaTemplateHelper
 		// Build the remote URL
 		$url = "https://cdn.joomla.org/template/renderer.php?section=$section&language=$lang";
 
-		return $cache->get(['JoomlaTemplateHelper', 'loadRemoteData'], [$url]);
+		return $cache->get(
+			function ($url)
+			{
+				try
+				{
+					// Set a very short timeout to try and not bring the site down
+					$response = JHttpFactory::getHttp()->get($url, [], 2);
+				}
+				catch (RuntimeException $e)
+				{
+					return 'Could not load template section.';
+				}
+
+				if ($response->code !== 200)
+				{
+					return 'Could not load template section.';
+				}
+
+				return $response->body;
+			},
+			[$url]
+		);
 	}
 }

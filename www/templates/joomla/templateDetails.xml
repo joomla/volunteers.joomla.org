@@ -2,11 +2,11 @@
 <!DOCTYPE install PUBLIC "-//Joomla! 2.5//DTD template 1.0//EN" "https://www.joomla.org/xml/dtd/2.5/template-install.dtd">
 <extension version="3.6" type="template" client="site" method="upgrade">
 	<name>joomla</name>
-	<version>2.1.1</version>
+	<version>2.2.0</version>
 	<creationDate>30-Aug-2016</creationDate>
 	<author>Kyle Ledbetter</author>
 	<authorEmail>kyle@kyleledbetter.com</authorEmail>
-	<copyright>Copyright (C) 2005 - 2016 Open Source Matters, Inc. All rights reserved.</copyright>
+	<copyright>Copyright (C) 2005 - 2017 Open Source Matters, Inc. All rights reserved.</copyright>
 	<description>TPL_JOOMLA_XML_DESCRIPTION</description>
 	<scriptfile>script.php</scriptfile>
 	<files>
@@ -51,6 +51,16 @@
 	<config>
 		<fields name="params">
 			<fieldset name="advanced">
+				<field name="useCDN" type="radio" class="btn-group btn-group-yesno" default="1" label="TPL_JOOMLA_USE_CDN_LABEL" description="TPL_JOOMLA_USE_CDN_DESC">
+					<option value="0">JNO</option>
+					<option value="1">JYES</option>
+				</field>
+
+				<field name="bs3Grid" type="radio" class="btn-group btn-group-yesno" default="0" label="TPL_JOOMLA_BS3_GRID_LABEL" description="TPL_JOOMLA_BS3_GRID_DESC">
+					<option value="0">JNO</option>
+					<option value="1">JYES</option>
+				</field>
+
 				<field name="googleFont" type="radio" class="btn-group btn-group-yesno" default="1" label="TPL_JOOMLA_FONT_LABEL" description="TPL_JOOMLA_FONT_DESC">
 					<option value="0">JNO</option>
 					<option value="1">JYES</option>

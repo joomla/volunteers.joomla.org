@@ -2,7 +2,7 @@
 /**
  * Joomla.org site template
  *
- * @copyright   Copyright (C) 2005 - 2016 Open Source Matters, Inc. All rights reserved.
+ * @copyright   Copyright (C) 2005 - 2017 Open Source Matters, Inc. All rights reserved.
  * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
 
@@ -13,21 +13,33 @@ defined('_JEXEC') or die;
 // Declare the template as HTML5
 $this->setHtml5(true);
 
-// Add Stylesheets - if the site is in debug mode, load the local media, otherwise pull from the CDN
-if (JDEBUG)
+// Add Stylesheets - if the site is in debug mode or has explicitly chosen to not use the CDN, load the local media
+if (JDEBUG || !$this->params->get('useCdn'))
 {
-	JHtml::_('stylesheet', 'template.min.css', [], true, false, false, (bool) JDEBUG);
+    JHtml::_('stylesheet', 'template.min.css', ['relative' => true, 'detectDebug' => (bool) JDEBUG, 'version' => '2.2.0']);
 }
 else
 {
-	$this->addStyleSheet('https://cdn.joomla.org/template/css/template_2.1.1.min.css');
+	$this->addStyleSheet('https://cdn.joomla.org/template/css/template_2.2.0.min.css');
+}
+
+// Bootstrap 3 polyfill
+if ($this->params->get('bs3Grid', '0'))
+{
+    JHtml::_('stylesheet', 'bs3-polyfill.css', ['version' => 'auto', 'relative' => true, 'detectDebug' => false], []);
 }
 
 // Optional site specific CSS override
-JHtml::_('stylesheet', 'custom.css', [], true, false, false, false);
+JHtml::_('stylesheet', 'custom.css', ['version' => 'auto', 'relative' => true, 'detectDebug' => false], []);
 
 // Load optional RTL Bootstrap CSS
-JHtml::_('bootstrap.loadCss', false, $this->direction);
+if ($this->direction === 'rtl')
+{
+	JHtml::_('stylesheet', 'template-rtl.min.css', ['version' => 'auto', 'relative' => true, 'detectDebug' => (bool) JDEBUG], []);
+
+	// Optional support for custom RTL CSS rules
+	JHtml::_('stylesheet', 'custom-rtl.css', ['version' => 'auto', 'relative' => true, 'detectDebug' => false], []);
+}
 
 // Load Google Font if defined
 if ($this->params->get('googleFont'))
@@ -42,8 +54,8 @@ CSS
 	);
 }
 
-// Get the path for the HTML5 shim with optional override
-$html5Shim = JHtml::_('script', 'jui/html5.js', false, true, true, false, (bool) JDEBUG);
+// Load the HTML5 shim with optional override
+JHtml::_('script', 'jui/html5.js', ['version' => 'auto', 'relative' => true, 'detectDebug' => (bool) JDEBUG, 'conditional' => 'lt IE 9'], []);
 
 // Set template metadata
 $this->setMetaData('viewport', 'width=device-width, initial-scale=1.0');
@@ -53,7 +65,6 @@ $this->setMetaData('viewport', 'width=device-width, initial-scale=1.0');
 <html lang="<?php echo $this->language; ?>" dir="<?php echo $this->direction; ?>">
 <head>
 	<jdoc:include type="head" />
-	<!--[if lt IE 9]><script src="<?php echo $html5Shim ?>"></script><![endif]-->
 </head>
 <body class="contentpane modal">
 	<jdoc:include type="message" />

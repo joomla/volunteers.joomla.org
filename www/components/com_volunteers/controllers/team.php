@@ -170,6 +170,7 @@ class VolunteersControllerTeam extends JControllerForm
 			$lead = JModelLegacy::getInstance('Members', 'VolunteersModel', array('ignore_request' => true));
 			$lead->setState('filter.team', $teamId);
 			$lead->setState('filter.position', array(2, 3, 5, 6));
+			$lead->setState('filter.active', 1);
 			$lead->setState('list.limit', 1);
 			$lead->setState('list.ordering', 'position');
 			$lead->setState('list.direction', 'asc');

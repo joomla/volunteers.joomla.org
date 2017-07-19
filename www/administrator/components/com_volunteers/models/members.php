@@ -114,7 +114,7 @@ class VolunteersModelMembers extends JModelList
 			->from($db->quoteName('#__volunteers_members') . ' AS a');
 
 		// Join over the volunteers.
-		$query->select('volunteer.image AS volunteer_image, volunteer.country AS volunteer_country')
+		$query->select('volunteer.image AS volunteer_image, volunteer.address AS volunteer_address, volunteer.city AS volunteer_city, volunteer.zip AS volunteer_zip, volunteer.country AS volunteer_country')
 			->join('LEFT', '#__volunteers_volunteers AS ' . $db->quoteName('volunteer') . ' ON volunteer.id = a.volunteer');
 
 		// Join over the teams.
@@ -247,5 +247,32 @@ class VolunteersModelMembers extends JModelList
 		$query->order($db->escape($orderCol . ' ' . $orderDirn));
 
 		return $query;
+	}
+
+	/**
+	 * Method to get an array of data items.
+	 *
+	 * @return  mixed  An array of data items on success, false on failure.
+	 */
+	public function getItems()
+	{
+		$items = parent::getItems();
+
+		if ($items) foreach ($items as $item)
+		{
+			$item->address = false;
+
+			// Check if address is filled in
+			if ($item->volunteer_address && $item->volunteer_city && $item->volunteer_zip && $item->volunteer_country)
+			{
+				$item->address = true;
+			}
+
+			unset($item->volunteer_address);
+			unset($item->volunteer_city);
+			unset($item->volunteer_zip);
+		}
+
+		return $items;
 	}
 }

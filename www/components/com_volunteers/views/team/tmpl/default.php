@@ -27,11 +27,11 @@ defined('_JEXEC') or die;
 			<?php endif; ?>
             <span class="label label-info">
                 <?php if ($this->item->status == '0'): ?>
-                    <?php echo JText::_('COM_VOLUNTEERS_FIELD_STATUS_INFORMATION') ?>
+	                <?php echo JText::_('COM_VOLUNTEERS_FIELD_STATUS_INFORMATION') ?>
                 <?php elseif ($this->item->status == '1'): ?>
-                    <?php echo JText::_('COM_VOLUNTEERS_FIELD_STATUS_OFFICIAL') ?>
+	                <?php echo JText::_('COM_VOLUNTEERS_FIELD_STATUS_OFFICIAL') ?>
                 <?php elseif ($this->item->status == '2'): ?>
-                    <?php echo JText::_('COM_VOLUNTEERS_FIELD_STATUS_UNOFFICIAL') ?>
+	                <?php echo JText::_('COM_VOLUNTEERS_FIELD_STATUS_UNOFFICIAL') ?>
                 <?php endif; ?>
             </span>
         </h1>
@@ -129,7 +129,8 @@ defined('_JEXEC') or die;
                             <th><?php echo JText::_('COM_VOLUNTEERS_FIELD_ROLE') ?></th>
                             <th width="12%"><?php echo JText::_('COM_VOLUNTEERS_FIELD_DATE_STARTED') ?></th>
 							<?php if ($this->acl->edit): ?>
-                                <th width="10%"><?php echo JText::_('COM_VOLUNTEERS_TITLE_MEMBERS_EDIT') ?></th>
+                                <th width="10%" class="center"><?php echo JText::_('COM_VOLUNTEERS_FIELD_ADDRESS') ?></th>
+                                <th width="10%"></th>
 							<?php endif; ?>
                             </thead>
                             <tbody>
@@ -156,6 +157,13 @@ defined('_JEXEC') or die;
 										<?php echo VolunteersHelper::date($volunteer->date_started, 'M Y'); ?>
                                     </td>
 									<?php if ($this->acl->edit): ?>
+                                        <td class="center">
+											<?php if ($volunteer->address): ?>
+                                                <span class="icon-checkbox-checked"></span>
+											<?php else: ?>
+                                                <span class="icon-checkbox-unchecked"></span>
+											<?php endif; ?>
+                                        </td>
                                         <td>
                                             <a class="btn btn-small pull-right" href="<?php echo JRoute::_('index.php?option=com_volunteers&task=member.edit&id=' . $volunteer->id) ?>">
                                                 <span class="icon-edit"></span> <?php echo JText::_('COM_VOLUNTEERS_EDIT') ?>
@@ -188,7 +196,7 @@ defined('_JEXEC') or die;
                         <th width="12%"><?php echo JText::_('COM_VOLUNTEERS_FIELD_DATE_STARTED') ?></th>
                         <th width="12%"><?php echo JText::_('COM_VOLUNTEERS_FIELD_DATE_ENDED') ?></th>
 						<?php if ($this->acl->edit): ?>
-                            <th width="10%"><?php echo JText::_('COM_VOLUNTEERS_TITLE_MEMBERS_EDIT') ?></th>
+                            <th width="10%"></th>
 						<?php endif; ?>
                         </thead>
                         <tbody>

@@ -49,13 +49,13 @@ defined('_JEXEC') or die;
 			<?php if ($this->item->joomlaforum): ?>
                 <a class="btn btn-joomlaforum" target="_blank" href="https://forum.joomla.org/memberlist.php?mode=viewprofile&u=<?php echo($this->item->joomlaforum) ?>">
                 <span class="icon-joomla"></span>
-                <span class="hidden-phone"><?php echo JText::_('COM_VOLUNTEERS_CONNECT_JOOMLAFORUM') ?></span>
+                <?php echo JText::_('COM_VOLUNTEERS_CONNECT_JOOMLAFORUM') ?></span>
                 </a>
 			<?php endif; ?>
 			<?php if ($this->item->joomladocs): ?>
                 <a class="btn btn-joomladocs" target="_blank" href="https://docs.joomla.org/User:<?php echo($this->item->joomladocs) ?>">
                 <span class="icon-joomla"></span>
-                <span class="hidden-phone"><?php echo JText::_('COM_VOLUNTEERS_CONNECT_JOOMLADOCS') ?></span>
+                <?php echo JText::_('COM_VOLUNTEERS_CONNECT_JOOMLADOCS') ?>
                 </a>
 			<?php endif; ?>
         </div>
@@ -101,7 +101,7 @@ defined('_JEXEC') or die;
 			<?php endif; ?>
 			<?php if ($this->item->crowdin): ?>
                 <a class="btn btn-crowdin" target="_blank" href="https://crowdin.com/profile/<?php echo($this->item->crowdin) ?>">
-                <span class="icon-crowdin"></span>
+                <span class="icon-comments-2"></span>
                 <span class="hidden-phone"><?php echo JText::_('COM_VOLUNTEERS_CONNECT_CROWDIN') ?></span>
                 </a>
 			<?php endif; ?>

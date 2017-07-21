@@ -423,6 +423,8 @@ class WFJoomlaFileSystem extends WFFileSystem
                 );
             }
 
+            $data['preview'] .= '?' . $date;
+
             return array_merge_recursive($data, $image);
         }
 

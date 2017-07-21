@@ -17,6 +17,7 @@ wfimport('admin.models.plugins');
 wfimport('editor.libraries.classes.token');
 wfimport('editor.libraries.classes.editor');
 wfimport('editor.libraries.classes.language');
+wfimport('editor.libraries.classes.utility');
 
 jimport('joomla.application.component.model');
 
@@ -84,13 +85,21 @@ class WFModelEditor extends WFModelBase
         $this->styles[] = $text;
     }
 
-    public function __construct()
+    public function __construct($config = array())
     {
         $app = JFactory::getApplication();
         $wf = WFEditor::getInstance();
 
+        if (!isset($config['plugin'])) {
+            $config['plugin'] = '';
+        }
+
+        if (!isset($config['id'])) {
+            $config['id'] = 0;
+        }
+
         // set profile
-        $this->profile = $wf->getProfile();
+        $this->profile = $wf->getProfile($config['plugin'], $config['id']);
 
         $this->context = $wf->getContext();
     }

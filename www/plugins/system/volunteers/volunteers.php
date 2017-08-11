@@ -48,7 +48,7 @@ class PlgSystemVolunteers extends JPlugin
 
 			if ($correctURL != $currentURL)
 			{
-				$this->app->redirect('index.php?option=com_volunteers&view=volunteer&id=' . $id, 301);
+				$this->app->redirect(JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $id, false), 301);
 			}
 		}
 

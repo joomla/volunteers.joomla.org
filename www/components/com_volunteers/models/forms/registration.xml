@@ -102,8 +102,6 @@
                 label="COM_VOLUNTEERS_FIELD_PEAKON"
                 default="1"
                 class="peakon"
-                value="1"
-                description="COM_VOLUNTEERS_FIELD_PEAKON_DESC"
         >
             <option value="1">JYES</option>
             <option value="0">JNO</option>

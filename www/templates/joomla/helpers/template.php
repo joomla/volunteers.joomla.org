@@ -444,27 +444,28 @@ class JoomlaTemplateHelper
 		// Build the remote URL
 		$url = "https://cdn.joomla.org/template/renderer.php?section=$section&language=$lang";
 
-		return $cache->get(
-			function ($url)
-			{
-				try
+		try
+		{
+			return $cache->get(
+				function ($url)
 				{
 					// Set a very short timeout to try and not bring the site down
 					$response = JHttpFactory::getHttp()->get($url, [], 2);
-				}
-				catch (RuntimeException $e)
-				{
-					return 'Could not load template section.';
-				}
 
-				if ($response->code !== 200)
-				{
-					return 'Could not load template section.';
-				}
+					if ($response->code !== 200)
+					{
+						throw new RuntimeException('Could not load template section.');
+					}
 
-				return $response->body;
-			},
-			[$url]
-		);
+					return $response->body;
+				},
+				[$url],
+				md5(__METHOD__ . $section . $lang)
+			);
+		}
+		catch (RuntimeException $e)
+		{
+			return 'Could not load template section.';
+		}
 	}
 }

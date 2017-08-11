@@ -209,6 +209,18 @@
             <option value="1">JYES</option>
             <option value="0">JNO</option>
         </field>
+
+        <field
+                name="peakon"
+                type="radio"
+                label="COM_VOLUNTEERS_FIELD_PEAKON"
+                default="1"
+                class="peakon"
+                value="1"
+        >
+            <option value="1">JYES</option>
+            <option value="0">JNO</option>
+        </field>
     </fieldset>
 
     <fieldset

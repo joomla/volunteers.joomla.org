@@ -86,9 +86,9 @@ class VolunteersTableVolunteer extends JTable
 		}
 
 		// Birthday format
-		if ($this->birthday)
+		if ($this->birthday && $this->birthday != '0000-00-00 00:00:00')
 		{
-			$this->birthday = JFactory::getDate('0000-' . $this->birthday)->format("Y-m-d");
+			$this->birthday = JFactory::getDate('0000-' . $this->birthday)->format('Y-m-d');
 		}
 
 		return parent::store($updateNulls);

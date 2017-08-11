@@ -178,20 +178,10 @@ JFactory::getDocument()->addScriptDeclaration("
         <div class="control-group">
             <div class="controls">
                 <div class="alert alert-info">
-					<?php echo JText::_('COM_VOLUNTEERS_FIELD_EMAIL_FEED_DESC') ?>
+					<?php echo JText::_('COM_VOLUNTEERS_FIELD_PEAKON_INTRO'); ?>
                 </div>
             </div>
         </div>
-
-		<?php echo $this->form->renderField('email_feed'); ?>
-
-		<div class="control-group">
-			<div class="controls">
-				<div class="alert alert-info">
-				    <?php echo JText::_('COM_VOLUNTEERS_FIELD_PEAKON_INTRO'); ?>
-				</div>
-			</div>
-		</div>
 
 		<?php echo $this->form->renderField('peakon'); ?>
 

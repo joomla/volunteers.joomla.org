@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form>
+    <fieldset name="message">
+        <field
+                name="subject"
+                type="text"
+                class="input-xxlarge input-large-text"
+                label="COM_VOLUNTEERS_FIELD_SUBJECT"
+                required="true"
+        />
+        <field
+                name="message"
+                type="textarea"
+                rows="6"
+                label="COM_VOLUNTEERS_FIELD_TEXT"
+                required="true"
+        />
+    </fieldset>
+</form>

@@ -1,7 +1,7 @@
 <?php
 /**
  * @package    Joomla! Volunteers
- * @copyright  Copyright (C) 2016 Open Source Matters, Inc. All rights reserved.
+ * @copyright  Copyright (C) 2017 Open Source Matters, Inc. All rights reserved.
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
@@ -64,6 +64,14 @@ class VolunteersHelper extends JHelperContent
 			JText::_('COM_VOLUNTEERS_TITLE_POSITIONS'),
 			'index.php?option=com_volunteers&view=positions',
 			$vName == 'positions'
+		);
+
+		JHtmlSidebar::addEntry('<hr>', '');
+
+		JHtmlSidebar::addEntry(
+			JText::_('COM_VOLUNTEERS_TITLE_CONTACT'),
+			'index.php?option=com_volunteers&view=contact',
+			$vName == 'contact'
 		);
 	}
 }

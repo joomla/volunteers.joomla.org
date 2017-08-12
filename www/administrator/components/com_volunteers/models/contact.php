@@ -1,7 +1,7 @@
 <?php
 /**
  * @package    Joomla! Volunteers
- * @copyright  Copyright (C) 2016 Open Source Matters, Inc. All rights reserved.
+ * @copyright  Copyright (C) 2017 Open Source Matters, Inc. All rights reserved.
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
@@ -10,8 +10,6 @@ defined('_JEXEC') or die;
 
 /**
  * Contact model.
- *
- * @since  __DEPLOY_VERSION__
  */
 class VolunteersModelContact extends JModelAdmin
 {
@@ -40,8 +38,6 @@ class VolunteersModelContact extends JModelAdmin
 	 * Get active volunteers
 	 *
 	 * @return  mixed
-	 *
-	 * @since   __DEPLOY_VERSION__
 	 */
 	public function getActiveVolunteers()
 	{

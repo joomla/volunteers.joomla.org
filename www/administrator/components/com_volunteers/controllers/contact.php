@@ -1,7 +1,7 @@
 <?php
 /**
  * @package    Joomla! Volunteers
- * @copyright  Copyright (C) 2016 Open Source Matters, Inc. All rights reserved.
+ * @copyright  Copyright (C) 2017 Open Source Matters, Inc. All rights reserved.
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
@@ -10,8 +10,6 @@ defined('_JEXEC') or die;
 
 /**
  * Contact controller class.
- *
- * @since  __DEPLOY_VERSION__
  */
 class VolunteersControllerContact extends JControllerForm
 {
@@ -21,8 +19,6 @@ class VolunteersControllerContact extends JControllerForm
 	 * @throws  Exception
 	 *
 	 * @return  void
-	 *
-	 * @since   __DEPLOY_VERSION__
 	 */
 	public function send()
 	{
@@ -72,5 +68,15 @@ class VolunteersControllerContact extends JControllerForm
 		}
 
 		$this->setRedirect('index.php?option=com_volunteers&view=contact', JText::_('COM_VOLUNTEERS_MESSAGE_SEND_SUCCESS'));
+	}
+
+	/**
+	 * Method for closing the contact form.
+	 *
+	 * @return  void
+	 */
+	public function cancel()
+	{
+		$this->setRedirect(JRoute::_('index.php?option=com_volunteers&view=volunteers', false));
 	}
 }

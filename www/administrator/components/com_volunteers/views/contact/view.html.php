@@ -10,8 +10,6 @@ defined('_JEXEC') or die;
 
 /**
  * View to contact active volunteers.
- *
- * @since  __DEPLOY_VERSION__
  */
 class VolunteersViewContact extends JViewLegacy
 {
@@ -23,15 +21,11 @@ class VolunteersViewContact extends JViewLegacy
 	 * @param   string  $tpl  Template
 	 *
 	 * @return  void
-	 *
-	 * @since   __DEPLOY_VERSION__
 	 */
 	public function display($tpl = null)
 	{
 		/** @var JForm form */
 		$this->form  = $this->get('Form');
-
-
 
 		// Check for errors.
 		if (count($errors = $this->get('Errors')))
@@ -49,8 +43,6 @@ class VolunteersViewContact extends JViewLegacy
 	 * Add the page title and toolbar.
 	 *
 	 * @return  void
-	 *
-	 * @since   __DEPLOY_VERSION__
 	 */
 	protected function addToolbar()
 	{
@@ -59,11 +51,11 @@ class VolunteersViewContact extends JViewLegacy
 		$canDo = JHelperContent::getActions('com_volunteers');
 
 		// Set toolbar title
-		JToolbarHelper::title(JText::_('COM_VOLUNTEERS') . ': ' . JText::_('COM_VOLUNTEERS_CONTACT_ACTIVE_VOLUNTEERS'), 'joomla');
+		JToolbarHelper::title(JText::_('COM_VOLUNTEERS') . ': ' . JText::_('COM_VOLUNTEERS_TITLE_CONTACT'), 'joomla');
 
 		if ($canDo->get('core.manage'))
 		{
-			JToolbarHelper::custom('contact.send', 'mail', 'mail', 'COM_VOLUNTEERS_CONTACT', false);
+			JToolbarHelper::custom('contact.send', 'mail', 'mail', 'COM_VOLUNTEERS_CONTACT_SEND', false);
 		}
 
 		JToolbarHelper::cancel('contact.cancel');

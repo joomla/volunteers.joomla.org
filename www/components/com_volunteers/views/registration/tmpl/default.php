@@ -86,6 +86,7 @@ JHtml::_('formbehavior.chosen', 'select');
 
 		<?php echo $this->form->renderField('joomlaforum'); ?>
 		<?php echo $this->form->renderField('joomladocs'); ?>
+		<?php echo $this->form->renderField('certification'); ?>
 
         <hr>
 
@@ -98,7 +99,6 @@ JHtml::_('formbehavior.chosen', 'select');
 		<?php echo $this->form->renderField('facebook'); ?>
 		<?php echo $this->form->renderField('googleplus'); ?>
 		<?php echo $this->form->renderField('linkedin'); ?>
-		<?php echo $this->form->renderField('certification'); ?>
 
 		<hr>
 

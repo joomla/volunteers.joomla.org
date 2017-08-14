@@ -146,6 +146,7 @@ JFactory::getDocument()->addScriptDeclaration("
 		<?php echo $this->form->renderField('facebook'); ?>
 		<?php echo $this->form->renderField('googleplus'); ?>
 		<?php echo $this->form->renderField('linkedin'); ?>
+		<?php echo $this->form->renderField('certification'); ?>
 
         <hr>
 

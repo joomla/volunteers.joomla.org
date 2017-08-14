@@ -134,7 +134,7 @@ JFactory::getDocument()->addScriptDeclaration("
 
 		<?php echo $this->form->renderField('joomlaforum'); ?>
 		<?php echo $this->form->renderField('joomladocs'); ?>
-	    <?php echo $this->form->renderField('certification'); ?>
+		<?php echo $this->form->renderField('certification'); ?>
 
         <hr>
 

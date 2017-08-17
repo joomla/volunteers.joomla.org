@@ -48,14 +48,14 @@ defined('_JEXEC') or die;
         <div class="btn-group">
 			<?php if ($this->item->joomlaforum): ?>
                 <a class="btn btn-joomlaforum" target="_blank" href="https://forum.joomla.org/memberlist.php?mode=viewprofile&u=<?php echo($this->item->joomlaforum) ?>">
-                <span class="icon-joomla"></span>
-                <?php echo JText::_('COM_VOLUNTEERS_CONNECT_JOOMLAFORUM') ?></span>
+                    <span class="icon-joomla"></span>
+					<?php echo JText::_('COM_VOLUNTEERS_CONNECT_JOOMLAFORUM') ?></span>
                 </a>
 			<?php endif; ?>
 			<?php if ($this->item->joomladocs): ?>
                 <a class="btn btn-joomladocs" target="_blank" href="https://docs.joomla.org/User:<?php echo($this->item->joomladocs) ?>">
-                <span class="icon-joomla"></span>
-                <?php echo JText::_('COM_VOLUNTEERS_CONNECT_JOOMLADOCS') ?>
+                    <span class="icon-joomla"></span>
+					<?php echo JText::_('COM_VOLUNTEERS_CONNECT_JOOMLADOCS') ?>
                 </a>
 			<?php endif; ?>
         </div>
@@ -101,8 +101,8 @@ defined('_JEXEC') or die;
 			<?php endif; ?>
 			<?php if ($this->item->crowdin): ?>
                 <a class="btn btn-crowdin" target="_blank" href="https://crowdin.com/profile/<?php echo($this->item->crowdin) ?>">
-                <span class="icon-comments-2"></span>
-                <span class="hidden-phone"><?php echo JText::_('COM_VOLUNTEERS_CONNECT_CROWDIN') ?></span>
+                    <span class="icon-comments-2"></span>
+                    <span class="hidden-phone"><?php echo JText::_('COM_VOLUNTEERS_CONNECT_CROWDIN') ?></span>
                 </a>
 			<?php endif; ?>
         </div>
@@ -222,13 +222,13 @@ defined('_JEXEC') or die;
                             <div class="control-group">
                                 <label class="control-label" for="to_name"><?php echo JText::_('COM_VOLUNTEERS_MESSAGE_TO') ?></label>
                                 <div class="controls">
-                                    <input type="text" name="to_name" id="to_name" value="<?php echo $this->item->name; ?>" class="input-block-level" disabled="disabled"/>
+                                    <input type="text" name="to_name" id="to_name" value="<?php echo $this->escape($this->item->name); ?>" class="input-block-level" disabled="disabled"/>
                                 </div>
                             </div>
                             <div class="control-group">
                                 <label class="control-label" for="from_name"><?php echo JText::_('COM_VOLUNTEERS_MESSAGE_FROM') ?></label>
                                 <div class="controls">
-                                    <input type="text" name="from_name" id="from_name" value="<?php echo($this->user->name); ?> <<?php echo($this->user->email); ?>>" class="input-block-level" disabled="disabled"/>
+                                    <input type="text" name="from_name" id="from_name" value="<?php echo $this->escape($this->user->name); ?> <<?php echo $this->escape($this->user->email); ?>>" class="input-block-level" disabled="disabled"/>
                                 </div>
                             </div>
                             <div class="control-group">
@@ -237,10 +237,10 @@ defined('_JEXEC') or die;
                                 </div>
                             </div>
                             <div class="control-group">
-                                <textarea rows="10" name="message" id="message" class="input-block-level" placeholder="<?php echo JText::sprintf('COM_VOLUNTEERS_MESSAGE_BODY', $this->item->name) ?>" required></textarea>
+                                <textarea rows="10" name="message" id="message" class="input-block-level" placeholder="<?php echo JText::sprintf('COM_VOLUNTEERS_MESSAGE_BODY', $this->escape($this->item->name)) ?>" required></textarea>
                             </div>
                             <div class="alert alert-info">
-								<?php echo JText::sprintf('COM_VOLUNTEERS_MESSAGE_NOTICE', $this->item->name) ?>
+								<?php echo JText::sprintf('COM_VOLUNTEERS_MESSAGE_NOTICE', $this->escape($this->item->name)) ?>
                             </div>
                             <div class="control-group">
                                 <input type="submit" value="<?php echo JText::_('COM_VOLUNTEERS_MESSAGE_SUBMIT') ?>" name="submit" id="submitButton" class="btn btn-success pull-right"/>

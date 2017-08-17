@@ -435,13 +435,13 @@ defined('_JEXEC') or die;
                             <div class="control-group">
                                 <label class="control-label" for="to_name"><?php echo JText::_('COM_VOLUNTEERS_MESSAGE_TO') ?></label>
                                 <div class="controls">
-                                    <input type="text" name="to_name" id="to_name" value="<?php echo $this->item->title ?>" class="input-block-level" disabled="disabled"/>
+                                    <input type="text" name="to_name" id="to_name" value="<?php echo $this->escape($this->item->title); ?>" class="input-block-level" disabled="disabled"/>
                                 </div>
                             </div>
                             <div class="control-group">
                                 <label class="control-label" for="from_name"><?php echo JText::_('COM_VOLUNTEERS_MESSAGE_FROM') ?></label>
                                 <div class="controls">
-                                    <input type="text" name="from_name" id="from_name" value="<?php echo($this->user->name); ?> <<?php echo($this->user->email); ?>>" class="input-block-level" disabled="disabled"/>
+                                    <input type="text" name="from_name" id="from_name" value="<?php echo $this->escape($this->user->name); ?> <<?php echo $this->escape($this->user->email); ?>>" class="input-block-level" disabled="disabled"/>
                                 </div>
                             </div>
                             <div class="control-group">
@@ -450,10 +450,10 @@ defined('_JEXEC') or die;
                                 </div>
                             </div>
                             <div class="control-group">
-                                <textarea rows="10" name="message" id="message" class="input-block-level" placeholder="<?php echo JText::sprintf('COM_VOLUNTEERS_MESSAGE_BODY', $this->item->title) ?>" required></textarea>
+                                <textarea rows="10" name="message" id="message" class="input-block-level" placeholder="<?php echo JText::sprintf('COM_VOLUNTEERS_MESSAGE_BODY', $this->escape($this->item->title)) ?>" required></textarea>
                             </div>
                             <div class="alert alert-info">
-								<?php echo JText::sprintf('COM_VOLUNTEERS_MESSAGE_NOTICE', $this->item->title) ?>
+								<?php echo JText::sprintf('COM_VOLUNTEERS_MESSAGE_NOTICE', $this->escape($this->item->title)) ?>
                             </div>
                             <div class="control-group">
                                 <input type="submit" value="<?php echo JText::_('COM_VOLUNTEERS_MESSAGE_SUBMIT') ?>" name="submit" id="submitButton" class="btn btn-success pull-right"/>

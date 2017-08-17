@@ -86,6 +86,7 @@ JHtml::_('formbehavior.chosen', 'select');
 
 		<?php echo $this->form->renderField('joomlaforum'); ?>
 		<?php echo $this->form->renderField('joomladocs'); ?>
+		<?php echo $this->form->renderField('certification'); ?>
 
         <hr>
 

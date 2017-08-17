@@ -164,6 +164,13 @@
         />
 
         <field
+                name="certification"
+                type="textprepend"
+                label="COM_VOLUNTEERS_FIELD_CERTIFICATION"
+                prepend="COM_VOLUNTEERS_FIELD_CERTIFICATION_URL"
+        />
+
+        <field
                 name="intro"
                 type="textarea"
                 rows="4"

@@ -110,6 +110,10 @@
 	word-wrap: break-word;
 }
 
+.volunteer-certificated {
+	margin-top: 15px;
+}
+
 @media (min-width: 480px) {
 	#map-canvas {
 		height: 300px;

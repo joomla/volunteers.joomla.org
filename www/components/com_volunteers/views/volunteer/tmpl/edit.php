@@ -134,7 +134,8 @@ JFactory::getDocument()->addScriptDeclaration("
 
 		<?php echo $this->form->renderField('joomlaforum'); ?>
 		<?php echo $this->form->renderField('joomladocs'); ?>
-		<?php echo $this->form->renderField('certification'); ?>
+		<?php // Disabled until there is a api we can check against ?>
+		<?php //echo $this->form->renderField('certification'); ?>
 
         <hr>
 

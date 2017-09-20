@@ -8,7 +8,12 @@
 
 defined('_JEXEC') or die;
 
-/** @var JDocumentHtml $this */
+use Joomla\CMS\Factory;
+use Joomla\CMS\HTML\HTMLHelper;
+use Joomla\CMS\Language\Text;
+use Joomla\CMS\Uri\Uri;
+
+/** @var \Joomla\CMS\Document\HtmlDocument $this */
 
 // Load the template helper
 JLoader::register('JoomlaTemplateHelper', __DIR__ . '/helpers/template.php');
@@ -16,7 +21,7 @@ JLoader::register('JoomlaTemplateHelper', __DIR__ . '/helpers/template.php');
 // Declare the template as HTML5
 $this->setHtml5(true);
 
-$app = JFactory::getApplication();
+$app = Factory::getApplication();
 
 // Detecting Active Variables
 $option   = $app->input->getCmd('option', '');
@@ -27,34 +32,34 @@ $itemid   = $app->input->getUint('Itemid', 0);
 $sitename = $app->get('sitename');
 
 // Add JavaScript Frameworks
-JHtml::_('bootstrap.framework');
+HTMLHelper::_('bootstrap.framework');
 
 // Add Stylesheets - if the site is in debug mode or has explicitly chosen to not use the CDN, load the local media
-if (JDEBUG || !$this->params->get('useCdn'))
+if (JDEBUG || !$this->params->get('useCdn', '1'))
 {
-	JHtml::_('stylesheet', 'template.min.css', ['relative' => true, 'detectDebug' => (bool) JDEBUG, 'version' => '2.2.0']);
+	HTMLHelper::_('stylesheet', 'template.min.css', ['relative' => true, 'detectDebug' => (bool) JDEBUG, 'version' => '2.3.0']);
 }
 else
 {
-	$this->addStyleSheet('https://cdn.joomla.org/template/css/template_2.2.0.min.css');
+	$this->addStyleSheet('https://cdn.joomla.org/template/css/template_2.3.0.min.css');
 }
 
 // Bootstrap 3 polyfill
 if ($this->params->get('bs3Grid', '0'))
 {
-    JHtml::_('stylesheet', 'bs3-polyfill.css', ['version' => 'auto', 'relative' => true, 'detectDebug' => false], []);
+    HTMLHelper::_('stylesheet', 'bs3-polyfill.css', ['version' => 'auto', 'relative' => true, 'detectDebug' => false], []);
 }
 
 // Optional site specific CSS override
-JHtml::_('stylesheet', 'custom.css', ['version' => 'auto', 'relative' => true, 'detectDebug' => false], []);
+HTMLHelper::_('stylesheet', 'custom.css', ['version' => 'auto', 'relative' => true, 'detectDebug' => false], []);
 
 // Load optional RTL Bootstrap CSS
 if ($this->direction === 'rtl')
 {
-	JHtml::_('stylesheet', 'template-rtl.min.css', ['version' => 'auto', 'relative' => true, 'detectDebug' => (bool) JDEBUG], []);
+	HTMLHelper::_('stylesheet', 'template-rtl.min.css', ['version' => 'auto', 'relative' => true, 'detectDebug' => (bool) JDEBUG], []);
 
 	// Optional support for custom RTL CSS rules
-	JHtml::_('stylesheet', 'custom-rtl.css', ['version' => 'auto', 'relative' => true, 'detectDebug' => false], []);
+	HTMLHelper::_('stylesheet', 'custom-rtl.css', ['version' => 'auto', 'relative' => true, 'detectDebug' => false], []);
 }
 
 // Load Google Font if defined
@@ -71,12 +76,12 @@ CSS
 }
 
 // Load template JavaScript
-JHtml::_('script', 'template.js', ['version' => 'auto', 'relative' => true, 'detectDebug' => (bool) JDEBUG], []);
-JHtml::_('script', 'blockadblock.js', ['version' => 'auto', 'relative' => true, 'detectDebug' => (bool) JDEBUG], []);
-JHtml::_('script', 'js.cookie.js', ['version' => 'auto', 'relative' => true, 'detectDebug' => (bool) JDEBUG], []);
+HTMLHelper::_('script', 'template.js', ['version' => 'auto', 'relative' => true, 'detectDebug' => (bool) JDEBUG], []);
+HTMLHelper::_('script', 'blockadblock.js', ['version' => 'auto', 'relative' => true, 'detectDebug' => (bool) JDEBUG], []);
+HTMLHelper::_('script', 'js.cookie.js', ['version' => 'auto', 'relative' => true, 'detectDebug' => (bool) JDEBUG], []);
 
 // Load the HTML5 shim with optional override
-JHtml::_('script', 'jui/html5.js', ['version' => 'auto', 'relative' => true, 'detectDebug' => (bool) JDEBUG, 'conditional' => 'lt IE 9'], []);
+HTMLHelper::_('script', 'jui/html5.js', ['version' => 'auto', 'relative' => true, 'detectDebug' => (bool) JDEBUG, 'conditional' => 'lt IE 9'], []);
 
 $leftPosition  = 'position-8';
 $rightPosition = 'position-7';
@@ -162,12 +167,23 @@ if (!$this->getMetaData('referrer'))
 }
 
 // Get the GTM property ID
-$gtmId = JoomlaTemplateHelper::getGtmId(JUri::getInstance()->toString(['host']));
+$gtmId = JoomlaTemplateHelper::getGtmId(Uri::getInstance()->toString(['host']));
 ?>
 <!DOCTYPE html>
 <html lang="<?php echo $this->language; ?>" dir="<?php echo $this->direction; ?>">
 <head>
 	<jdoc:include type="head" />
+	<script>
+	var _prum = [['id', '59300ad15992c776ad970068'],
+	             ['mark', 'firstbyte', (new Date()).getTime()]];
+	(function() {
+	    var s = document.getElementsByTagName('script')[0]
+	      , p = document.createElement('script');
+	    p.async = 'async';
+	    p.src = '//rum-static.pingdom.net/prum.min.js';
+	    s.parentNode.insertBefore(p, s);
+	})();
+	</script>
 </head>
 <body class="<?php echo "site $option view-$view layout-$layout task-$task itemid-$itemid" . ($this->params->get('fluidContainer') ? ' fluid' : '') . ($this->direction == 'rtl' ? ' rtl' : ''); ?>">
 	<?php
@@ -200,16 +216,16 @@ $gtmId = JoomlaTemplateHelper::getGtmId(JUri::getInstance()->toString(['host']))
 			<div class="row-fluid">
 				<div class="span7">
 					<h1 class="page-title">
-						<a href="<?php echo $this->baseurl; ?>/"><?php echo JHtml::_('string.truncate', $sitename, 40, false, false);?></a>
+						<a href="<?php echo $this->baseurl; ?>/"><?php echo HTMLHelper::_('string.truncate', $sitename, 40, false, false);?></a>
 					</h1>
 				</div>
 				<div class="span5">
 					<div class="btn-toolbar pull-right">
 						<div class="btn-group">
-							<a href="https://downloads.joomla.org/" class="btn btn-large btn-warning"><?php echo JText::_('TPL_JOOMLA_DOWNLOAD_BUTTON'); ?></a>
+							<a href="https://downloads.joomla.org/" class="btn btn-large btn-warning"><?php echo Text::_('TPL_JOOMLA_DOWNLOAD_BUTTON'); ?></a>
 						</div>
 						<div class="btn-group">
-							<a href="https://demo.joomla.org" class="btn btn-large btn-primary"><?php echo JText::_('TPL_JOOMLA_DEMO_BUTTON'); ?></a>
+							<a href="https://demo.joomla.org" class="btn btn-large btn-primary"><?php echo Text::_('TPL_JOOMLA_DEMO_BUTTON'); ?></a>
 						</div>
 					</div>
 				</div>

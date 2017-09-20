@@ -9,6 +9,8 @@
 
 defined('_JEXEC') or die;
 
+use Joomla\CMS\Language\Text;
+
 $msgList = $displayData['msgList'];
 
 $alert = array('error' => 'alert-error', 'warning' => '', 'notice' => 'alert-info', 'message' => 'alert-success');
@@ -22,7 +24,7 @@ $alert = array('error' => 'alert-error', 'warning' => '', 'notice' => 'alert-inf
 					<a class="close" data-dismiss="alert">×</a>
 
 					<?php if (!empty($msgs)) : ?>
-						<h4 class="alert-heading"><?php echo JText::_($type); ?></h4>
+						<h4 class="alert-heading"><?php echo Text::_($type); ?></h4>
 						<div>
 							<?php foreach ($msgs as $msg) : ?>
 								<p class="alert-message"><?php echo $msg; ?></p>

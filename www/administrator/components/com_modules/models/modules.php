@@ -103,12 +103,19 @@ class ModulesModelModules extends JModelList
 		if ($app->isClient('site') || $layout === 'modal')
 		{
 			$this->setState('client_id', 0);
+			$clientId = 0;
 		}
 		else
 		{
 			$clientId = (int) $this->getUserStateFromRequest($this->context . '.client_id', 'client_id', 0, 'int');
 			$clientId = (!in_array($clientId, array (0, 1))) ? 0 : $clientId;
 			$this->setState('client_id', $clientId);
+		}
+
+		// Use a different filter file when client is administrator
+		if ($clientId == 1)
+		{
+			$this->filterFormName = 'filter_modulesadmin';
 		}
 
 		// Load the parameters.

@@ -9,7 +9,10 @@
 
 defined('JPATH_BASE') or die;
 
-/** @var JPaginationObject $item */
+use Joomla\CMS\HTML\HTMLHelper;
+use Joomla\CMS\Language\Text;
+
+/** @var \Joomla\CMS\Pagination\PaginationObject $item */
 $item = $displayData['data'];
 
 $display = $item->text;
@@ -18,22 +21,22 @@ $icon    = null;
 switch ((string) $item->text)
 {
 	// Check for "Start" item
-	case JText::_('JLIB_HTML_START') :
+	case Text::_('JLIB_HTML_START') :
 		$icon = 'icon-first';
 		break;
 
 	// Check for "Prev" item
-	case JText::_('JPREV') :
+	case Text::_('JPREV') :
 		$icon = 'icon-previous';
 		break;
 
 	// Check for "Next" item
-	case JText::_('JNEXT') :
+	case Text::_('JNEXT') :
 		$icon = 'icon-next';
 		break;
 
 	// Check for "End" item
-	case JText::_('JLIB_HTML_END') :
+	case Text::_('JLIB_HTML_END') :
 		$icon = 'icon-last';
 		break;
 }
@@ -49,7 +52,7 @@ if ($displayData['active'])
 
 	if (!is_numeric($item->text))
 	{
-		JHtml::_('bootstrap.tooltip');
+		HTMLHelper::_('bootstrap.tooltip');
 		$attribs['class'] .= ' hasTooltip';
 		$attribs['title'] = $item->text;
 	}
@@ -61,7 +64,7 @@ if ($displayData['active'])
 ?>
 <?php if ($displayData['active']) : ?>
 	<li>
-		<?php echo JHtml::_('link', $item->link, $display, $attribs); ?>
+		<?php echo HTMLHelper::_('link', $item->link, $display, $attribs); ?>
 	</li>
 <?php else : ?>
 	<li class="<?php echo (property_exists($item, 'active') && $item->active) ? 'active' : 'disabled'; ?><?php echo $icon === null ? ' hidden-phone' : ''; ?>">

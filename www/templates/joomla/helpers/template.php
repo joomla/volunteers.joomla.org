@@ -8,6 +8,12 @@
 
 defined('_JEXEC') or die;
 
+use Joomla\CMS\Factory;
+use Joomla\CMS\Http\HttpFactory;
+use Joomla\CMS\Language\Text;
+use Joomla\CMS\Router\Route;
+use Joomla\CMS\Uri\Uri;
+
 /**
  * Helper class for the Joomla template
  */
@@ -402,9 +408,9 @@ class JoomlaTemplateHelper
 		return strtr(
 			$result,
 			[
-				'%reportroute%' => static::getIssueLink(JUri::getInstance()->toString(['host'])),
-				'%loginroute%'  => JRoute::_(static::getLoginRoute()),
-				'%logintext%'   => JFactory::getUser()->guest ? JText::_('TPL_JOOMLA_FOOTER_LINK_LOG_IN') : JText::_('TPL_JOOMLA_FOOTER_LINK_LOG_OUT'),
+				'%reportroute%' => static::getIssueLink(Uri::getInstance()->toString(['host'])),
+				'%loginroute%'  => Route::_(static::getLoginRoute()),
+				'%logintext%'   => Factory::getUser()->guest ? Text::_('TPL_JOOMLA_FOOTER_LINK_LOG_IN') : Text::_('TPL_JOOMLA_FOOTER_LINK_LOG_OUT'),
 				'%currentyear%' => date('Y'),
 			]
 		);
@@ -432,8 +438,8 @@ class JoomlaTemplateHelper
 	 */
 	private static function loadTemplateSection($section, $lang)
 	{
-		/** @var JCacheControllerCallback $cache */
-		$cache = JFactory::getCache('tpl_joomla', 'callback');
+		/** @var \Joomla\CMS\Cache\Controller\CallbackController $cache */
+		$cache = Factory::getCache('tpl_joomla', 'callback');
 
 		// This is always cached regardless of the site's global setting
 		$cache->setCaching(true);
@@ -450,7 +456,7 @@ class JoomlaTemplateHelper
 				function ($url)
 				{
 					// Set a very short timeout to try and not bring the site down
-					$response = JHttpFactory::getHttp()->get($url, [], 2);
+					$response = HttpFactory::getHttp()->get($url, [], 2);
 
 					if ($response->code !== 200)
 					{

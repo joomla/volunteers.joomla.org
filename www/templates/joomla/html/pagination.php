@@ -8,6 +8,8 @@
 
 defined('_JEXEC') or die;
 
+use Joomla\CMS\Layout\LayoutHelper;
+
 /**
  * This is a file to add template specific chrome to pagination rendering.
  *
@@ -70,13 +72,13 @@ defined('_JEXEC') or die;
  */
 function pagination_list_render($list)
 {
-	return JLayoutHelper::render('joomla.pagination.list', ['list' => $list]);
+	return LayoutHelper::render('joomla.pagination.list', ['list' => $list]);
 }
 
 /**
  * Renders an active item in the pagination block
  *
- * @param   JPaginationObject  $item  The current pagination object
+ * @param   \Joomla\CMS\Pagination\PaginationObject  $item  The current pagination object
  *
  * @return  string  HTML markup for active item
  *
@@ -84,13 +86,13 @@ function pagination_list_render($list)
  */
 function pagination_item_active(&$item)
 {
-	return JLayoutHelper::render('joomla.pagination.link', ['data' => $item, 'active' => true]);
+	return LayoutHelper::render('joomla.pagination.link', ['data' => $item, 'active' => true]);
 }
 
 /**
  * Renders an inactive item in the pagination block
  *
- * @param   JPaginationObject  $item  The current pagination object
+ * @param   \Joomla\CMS\Pagination\PaginationObject  $item  The current pagination object
  *
  * @return  string  HTML markup for inactive item
  *
@@ -98,5 +100,5 @@ function pagination_item_active(&$item)
  */
 function pagination_item_inactive(&$item)
 {
-	return JLayoutHelper::render('joomla.pagination.link', ['data' => $item, 'active' => false]);
+	return LayoutHelper::render('joomla.pagination.link', ['data' => $item, 'active' => false]);
 }

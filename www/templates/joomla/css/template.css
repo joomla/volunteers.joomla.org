@@ -2032,6 +2032,17 @@ legend + .control-group {
   display: table;
 }
 
+/*Fix for floating 3 columns without overlapping */
+
+@media (min-width: 980px) and (max-width: 1215px) {
+  .float-cols .control-label {
+    float: none;
+  }
+  .float-cols .controls {
+    margin-left: 0;
+  }
+}
+
 table {
   max-width: 100%;
   background-color: transparent;
@@ -7159,6 +7170,7 @@ fieldset.radio.btn-group {
 }
 
 input.invalid {
+  background: #f2dede;
   border: 1px solid #9d261d;
 }
 
@@ -9668,15 +9680,15 @@ div#nav-search form input[type="text"] {
 
 /* Error Page */
 
-.error .marge {
+body.error .marge {
   margin-top: 50px;
 }
 
-.error p {
+body.error p {
   font-size: 15px;
 }
 
-.errorborder {
+body.error .errorborder {
   padding: 15px 0;
   margin-bottom: 50px;
   color: #555555;
@@ -9692,12 +9704,12 @@ div#nav-search form input[type="text"] {
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffffff', endColorstr='#ffffffff', GradientType=0);
 }
 
-.error #content input.search-query {
+body.error #content input.search-query {
   box-shadow: none;
 }
 
-.error #content input.search-query,
-.btn.error {
+body.error #content input.search-query,
+body.error .btn.error {
   min-width: 200px;
   padding: 10px 15px;
   margin: 7px 0 14px 0;
@@ -9706,7 +9718,7 @@ div#nav-search form input[type="text"] {
           border-radius: 50px;
 }
 
-.btn.error {
+body.error .btn.error {
   color: #ffffff;
   border: 1px solid #006dcc;
 }
@@ -9714,21 +9726,6 @@ div#nav-search form input[type="text"] {
 /* Social */
 
 /* Social Buttons */
-
-@font-face {
-  font-family: 'si';
-  font-style: normal;
-  font-weight: normal;
-  src: url('../fonts/icomoon-joomla.eot');
-  src: url('../fonts/icomoon-joomla.eot?#iefix') format('embedded-opentype'), url('../fonts/icomoon-joomla.woff') format('woff'), url('../fonts/icomoon-joomla.ttf') format('truetype'), url('../fonts/icomoon-joomla.svg#icomoon-joomla') format('svg');
-}
-
-@media screen and (-webkit-min-device-pixel-ratio: 0) {
-  @font-face {
-    font-family: si;
-    src: url(../fonts/icomoon-joomla.svg#icomoon-joomla) format(svg);
-  }
-}
 
 .soc {
   padding: 0;
@@ -9749,7 +9746,6 @@ div#nav-search form input[type="text"] {
   width: 32px;
   height: 32px;
   overflow: hidden;
-  font-family: si !important;
   font-size: 22px;
   -webkit-font-smoothing: antialiased;
   font-style: normal;
@@ -9762,42 +9758,6 @@ div#nav-search form input[type="text"] {
      -moz-box-sizing: border-box;
           box-sizing: border-box;
   -moz-osx-font-smoothing: grayscale;
-}
-
-.soc-icon-last {
-  margin: 0 !important;
-}
-
-.soc-twitter2:before {
-  content: "\eeee";
-}
-
-.soc-facebook:before {
-  content: "\eee9";
-}
-
-.soc-google:before {
-  content: "\eee5";
-}
-
-.soc-youtube3:before {
-  content: "\eef5";
-}
-
-.soc-linkedin:before {
-  content: "\ef24";
-}
-
-.soc-pinterest:before {
-  content: "\ef2d";
-}
-
-.soc-github3:before {
-  content: "\ef0f";
-}
-
-.soc-instagram:before {
-  content: "\eeec";
 }
 
 @media (min-width: 321px) and (max-width: 480px) {

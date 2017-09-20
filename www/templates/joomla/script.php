@@ -6,13 +6,17 @@
  * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
 
+defined('_JEXEC') or die;
+
+use Joomla\CMS\Installer\InstallerScript;
+
 /**
  * Installation class to perform additional changes during install/uninstall/update
  *
  * @since  2.0
  * @note   This class name collides with the Joomla core installer script class, if we start hitting issues this class goes away
  */
-class JoomlaInstallerScript extends JInstallerScript
+class JoomlaInstallerScript extends InstallerScript
 {
 	/**
 	 * Extension script constructor.
@@ -21,7 +25,7 @@ class JoomlaInstallerScript extends JInstallerScript
 	 */
 	public function __construct()
 	{
-		$this->minimumJoomla = '3.7';
+		$this->minimumJoomla = '3.8';
 		$this->minimumPhp    = '5.4';
 
 		$this->deleteFiles = [
@@ -37,8 +41,8 @@ class JoomlaInstallerScript extends JInstallerScript
 	/**
 	 * Function to perform changes during postflight
 	 *
-	 * @param   string                     $type    The action being performed
-	 * @param   JInstallerAdapterTemplate  $parent  The class calling this method
+	 * @param   string                                        $type    The action being performed
+	 * @param   Joomla\CMS\Installer\Adapter\TemplateAdapter  $parent  The class calling this method
 	 *
 	 * @return  void
 	 *

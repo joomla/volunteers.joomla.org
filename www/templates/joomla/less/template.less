@@ -605,7 +605,7 @@ div#nav-search form {
 }
 
 /* Error Page */
-.error {
+body.error {
   .marge {
     margin-top: 50px;
   }
@@ -613,52 +613,37 @@ div#nav-search form {
   p {
     font-size: 15px;
   }
-}
 
-.errorborder {
-  border-top: 1px dotted @grayLight;
-  border-bottom: 1px dotted @grayLight;
-  padding: 15px 0;
-  margin-bottom: 50px;
-  color: @gray;
-  #gradient > .horizontal-three-colors(@white, @grayLighter, 50%, @white);
-}
+  .errorborder {
+    border-top: 1px dotted @grayLight;
+    border-bottom: 1px dotted @grayLight;
+    padding: 15px 0;
+    margin-bottom: 50px;
+    color: @gray;
+    #gradient > .horizontal-three-colors(@white, @grayLighter, 50%, @white);
+  }
 
-.error #content input.search-query {
-  box-shadow: none;
-}
+  #content input.search-query {
+    box-shadow: none;
+  }
 
-.error #content input.search-query,
-.btn.error {
-  min-width: 200px;
-  padding: 10px 15px;
-  margin: 7px 0 14px 0;
-  .border-radius(50px);
-}
+  #content input.search-query,
+  .btn.error {
+    min-width: 200px;
+    padding: 10px 15px;
+    margin: 7px 0 14px 0;
+    .border-radius(50px);
+  }
 
-.btn.error {
-  color: @white;
-  border: 1px solid @btnPrimaryBackground;
+  .btn.error {
+    color: @white;
+    border: 1px solid @btnPrimaryBackground;
+  }
 }
 
 /* Social */
 
 /* Social Buttons */
-@font-face {
-  font-family: 'si';
-  src: url('../fonts/icomoon-joomla.eot');
-  src: url('../fonts/icomoon-joomla.eot?#iefix') format('embedded-opentype'), url('../fonts/icomoon-joomla.woff') format('woff'), url('../fonts/icomoon-joomla.ttf') format('truetype'), url('../fonts/icomoon-joomla.svg#icomoon-joomla') format('svg');
-  font-weight: normal;
-  font-style: normal;
-}
-
-@media screen and (-webkit-min-device-pixel-ratio: 0) {
-  @font-face {
-    font-family: si;
-    src: url(../fonts/icomoon-joomla.svg#icomoon-joomla) format(svg);
-  }
-}
-
 .soc {
   margin: 0;
   padding: 0;
@@ -670,7 +655,6 @@ div#nav-search form {
     zoom: 1;
 
     a {
-      font-family: si !important;
       font-style: normal;
       font-weight: 400;
       -webkit-font-smoothing: antialiased;
@@ -689,42 +673,6 @@ div#nav-search form {
       color: #1b63a2;
     }
   }
-}
-
-.soc-icon-last {
-  margin: 0 !important;
-}
-
-.soc-twitter2:before {
-  content: "\eeee";
-}
-
-.soc-facebook:before {
-  content: "\eee9";
-}
-
-.soc-google:before {
-  content: "\eee5";
-}
-
-.soc-youtube3:before {
-  content: "\eef5";
-}
-
-.soc-linkedin:before {
-  content: "\ef24";
-}
-
-.soc-pinterest:before {
-  content: "\ef2d";
-}
-
-.soc-github3:before {
-  content: "\ef0f";
-}
-
-.soc-instagram:before {
-  content: "\eeec";
 }
 
 @media (min-width: 321px) and (max-width: 480px) {

@@ -260,7 +260,7 @@ defined('_JEXEC') or die;
 					<?php endforeach; ?>
 					<?php if (count($this->item->reports) == 10): ?>
                         <a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=reports') ?>?filter_category=d.<?php echo $this->item->id; ?>" class="btn">
-                            <span class="icon-chevron-right"></span><?php echo JText::_('COM_VOLUNTEERS_REPORTS_BROWSE') ?>&nbsp
+                            <span class="icon-chevron-right"></span><?php echo  JText::sprintf('COM_VOLUNTEERS_REPORTS_BROWSE_DEPARTMENT', $this->item->title); ?>&nbsp
                         </a>
 					<?php endif; ?>
                     <a class="btn btn-warning pull-right" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=reports&filter_category=d.' . $this->item->id . '&format=feed&type=rss') ?>">

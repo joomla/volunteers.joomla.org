@@ -101,7 +101,6 @@ class VolunteersViewReport extends JViewLegacy
 		$typeTitle   = ($this->item->team) ? $this->item->team_title : $this->item->department_title;
 		$title       = $this->item->title . ' - ' . $typeTitle;
 		$description = JHtml::_('string.truncate', $this->item->description, 160, true, false);
-		$image       = 'https://cdn.joomla.org/images/joomla-org-og.jpg';
 		$itemURL     = JRoute::_('index.php?option=com_volunteers&view=report&id=' . $this->item->id);
 		$url         = JUri::getInstance()->toString(['scheme', 'host', 'port']) . $itemURL;
 
@@ -112,12 +111,12 @@ class VolunteersViewReport extends JViewLegacy
 		// Twitter Card metadata
 		$this->document->setMetaData('twitter:title', $title);
 		$this->document->setMetaData('twitter:description', $description);
-		$this->document->setMetaData('twitter:image', $image);
+		$this->document->setMetaData('twitter:image', JUri::base() . 'images/reports-twitter.jpg');
 
 		// OpenGraph metadata
 		$this->document->setMetaData('og:title', $title, 'property');
 		$this->document->setMetaData('og:description', $description, 'property');
-		$this->document->setMetaData('og:image', $image, 'property');
+		$this->document->setMetaData('og:image', JUri::base() . 'images/reports-og.jpg', 'property');
 		$this->document->setMetaData('og:type', 'article', 'property');
 		$this->document->setMetaData('og:url', $url, 'property');
 
@@ -125,7 +124,7 @@ class VolunteersViewReport extends JViewLegacy
 		$layout      = new JLayoutFile('joomlarrssb');
 		$data        = (object) array(
 			'title'            => $title,
-			'image'            => $image,
+			'image'            => JUri::base() . 'images/reports-og.jpg',
 			'url'              => $url,
 			'text'             => $description,
 			'displayEmail'     => true,

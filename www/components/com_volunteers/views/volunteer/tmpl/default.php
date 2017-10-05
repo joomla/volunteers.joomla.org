@@ -23,14 +23,6 @@ defined('_JEXEC') or die;
 <div class="row-fluid profile">
     <div class="span3 volunteer-image">
 		<?php echo VolunteersHelper::image($this->item->image, 'large', false, $this->item->name); ?>
-
-		<?php if ($this->item->certification): ?>
-            <div class="volunteer-certificated">
-                <a href="https://exam.joomla.org/directory/user/<?php echo($this->item->certification) ?>" target="_blank">
-                    <img src="https://exam.joomla.org/images/badge.png" class="img-responsive"/>
-                </a>
-            </div>
-		<?php endif; ?>
     </div>
     <div class="span9">
         <div class="filter-bar">

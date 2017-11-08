@@ -10,11 +10,56 @@
  */
 class WFStyleselectPluginConfig
 {
+    /**
+     * Return the current site template name.
+     */
+    private static function getSiteTemplates()
+    {
+        $db = JFactory::getDBO();
+        $app = JFactory::getApplication();
+        $id = 0;
+
+        if ($app->isSite()) {
+            $menus = $app->getMenu();
+            $menu = $menus->getActive();
+
+            if ($menu) {
+                $id = isset($menu->template_style_id) ? $menu->template_style_id : $menu->id;
+            }
+        }
+
+        $query = $db->getQuery(true);
+
+        if (is_object($query)) {
+            $query->select('id, template')->from('#__template_styles')->where(array('client_id = 0', "home = '1'"));
+        } else {
+            $query = 'SELECT menuid as id, template'
+                . ' FROM #__templates_menu'
+                . ' WHERE client_id = 0';
+        }
+
+        $db->setQuery($query);
+        $templates = $db->loadObjectList();
+
+        $assigned = array();
+
+        foreach ($templates as $template) {
+            if ($id == $template->id) {
+                array_unshift($assigned, $template->template);
+            } else {
+                $assigned[] = $template->template;
+            }
+        }
+
+        // return templates
+        return $assigned;
+    }
+
     public static function getConfig(&$settings)
     {
         $wf = WFEditor::getInstance();
 
-        $include = (array) $wf->getParam('styleselect.styles', array('stylesheet', 'custom'));
+        $include = (array)$wf->getParam('styleselect.styles', array('stylesheet', 'custom'));
 
         if (in_array('custom', $include)) {
             // theme styles list (legacy)
@@ -42,7 +87,7 @@ class WFStyleselectPluginConfig
 
                 $blocks = array('section', 'nav', 'article', 'aside', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'header', 'footer', 'address', 'main', 'p', 'pre', 'blockquote', 'figure', 'figcaption', 'div');
 
-                foreach ((array) $custom_styles as $style) {
+                foreach ((array)$custom_styles as $style) {
                     // clean up title
                     if (isset($style->title)) {
                         $style->title = self::cleanString($style->title);
@@ -57,7 +102,7 @@ class WFStyleselectPluginConfig
                     if (isset($style->classes)) {
                         $style->classes = self::cleanString($style->classes);
                     }
-                    
+
                     if (isset($style->styles)) {
                         $style->styles = self::cleanJSON($style->styles);
                     }
@@ -87,7 +132,6 @@ class WFStyleselectPluginConfig
                     } else {
                         // match all if not set
                         if (!isset($style->selector)) {
-
                             $style->selector = '*';
 
                             // set to element
@@ -104,20 +148,49 @@ class WFStyleselectPluginConfig
                 }
 
                 if (!empty($styles)) {
-                    $settings['style_formats'] = json_encode($styles, JSON_UNESCAPED_SLASHES, JSON_NUMERIC_CHECK);
+                    $settings['style_formats'] = json_encode($styles, JSON_UNESCAPED_SLASHES | JSON_NUMERIC_CHECK);
                 }
             }
         }
 
         // set this value false if stylesheet not included
         if (in_array('stylesheet', $include) === false) {
-            $settings['styleselect_stylesheet'] = false;
+            $settings['styleselect_stylesheets'] = false;
+        } else {
+            $stylesheet = $wf->getParam('styleselect.stylesheet', '', '');
+            $templates = self::getSiteTemplates();
+
+            if (!empty($stylesheet)) {
+                $stylesheet = trim($stylesheet);
+                $stylesheet = str_replace('$template', $templates[0], $stylesheet);
+                $settings['styleselect_stylesheet'] = $stylesheet;
+
+                // add the stylesheet to the content_css setting
+                $stylesheet = ltrim('/', $stylesheet);
+                $etag = "";
+
+                if (is_file(JPATH_SITE . '/' . $stylesheet)) {
+                    // create hash
+                    $etag = '?' . filemtime(JPATH_SITE . '/' . $stylesheet);
+
+                    // explode to array
+                    $content_css = explode(",", $settings['content_css']);
+                    $content_css[] = JURI::root(true) . '/' . $stylesheet . $etag;
+
+                    // remove duplicates
+                    $content_css = array_unique($content_css);
+                    
+                    // implode to string
+                    $settings['content_css'] = implode(",", $content_css);
+                }
+            }
         }
 
         $settings['styleselect_sort'] = $wf->getParam('styleselect.sort', 1, 1);
     }
 
-    protected static function cleanString($string) {
+    protected static function cleanString($string)
+    {
         $string = trim($string, '"');
         $string = trim($string, "'");
         $string = htmlentities($string, ENT_NOQUOTES, 'UTF-8');
@@ -139,11 +212,11 @@ class WFStyleselectPluginConfig
                 continue;
             }
 
-            $key    = $parts[0];
-            $value  = $parts[1];
+            $key = $parts[0];
+            $value = $parts[1];
 
-            $key    = self::cleanString($key);
-            $value  = self::cleanString($value);
+            $key = self::cleanString($key);
+            $value = self::cleanString($value);
 
             $ret[$key] = $value;
         }

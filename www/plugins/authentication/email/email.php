@@ -12,6 +12,14 @@ defined('_JEXEC') or die;
 jimport('joomla.plugin.plugin');
 
 class plgAuthenticationEmail extends JPlugin {
+    private $_paj;
+    
+    public function __construct(&$subject, $config = array()) {
+	    parent::__construct($subject, $config = array());
+            require_once JPATH_PLUGINS . '/authentication/joomla/joomla.php';
+	    $paj = JPluginHelper::getPlugin('authentication','joomla');
+	    $this->_paj = new PlgAuthenticationJoomla($subject,(array)$paj);
+    }
 
     /**
      * This method should handle any authentication and report back to the subject
@@ -31,8 +39,7 @@ class plgAuthenticationEmail extends JPlugin {
         if ($result) {
             // why mess with re-creating authentication - just use the system.
             $credentials['username'] = $result->username;
-            require_once JPATH_PLUGINS . '/authentication/joomla/joomla.php';
-            PlgAuthenticationJoomla::onUserAuthenticate($credentials, $options, $response);
+            $this->_paj->onUserAuthenticate($credentials, $options, $response);
         } else {
             $response->status = JAuthentication::STATUS_FAILURE;
             $response->error_message = JText::_('JGLOBAL_AUTH_INVALID_PASS');            

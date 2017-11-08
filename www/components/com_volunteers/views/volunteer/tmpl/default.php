@@ -263,11 +263,9 @@ defined('_JEXEC') or die;
 			<?php endif; ?>
         </div>
 
-		<?php if ($this->user->id && ($this->user->id != $this->item->user_id)): ?>
             <a class="btn btn-danger js-reportspam" data-volunteer="<?php echo $this->item->id; ?>" data-success="<?php echo JText::_('COM_VOLUNTEERS_SPAM_REPORT_SUCCESS') ?>">
                 <span class="icon-warning"></span> <?php echo JText::_('COM_VOLUNTEERS_SPAM_REPORT') ?>
             </a>
-		<?php endif; ?>
     </div>
 </div>
 

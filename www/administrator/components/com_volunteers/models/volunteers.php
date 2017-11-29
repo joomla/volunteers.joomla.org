@@ -192,4 +192,34 @@ class VolunteersModelVolunteers extends JModelList
 
 		return $query;
 	}
+
+	/**
+	 * Method to reset Spam Counter
+	 *
+	 * @return bool
+	 *
+	 * @since version
+	 */
+	public function resetSpam()
+	{
+		$db    = $this->getDbo();
+		$query = $db->getQuery(true)
+			->update($db->quoteName('#__volunteers_volunteers'))
+			->set($db->quoteName('spam') . ' = 0')
+			->where($db->quoteName('spam') . ' <> 0');
+		$db->setQuery($query);
+
+		try
+		{
+			$db->execute();
+		}
+		catch (JDatabaseExceptionExecuting $e)
+		{
+			JError::raiseError(500, $e->getMessage());
+
+			return false;
+		}
+
+		return true;
+	}
 }

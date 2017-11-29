@@ -26,4 +26,22 @@ class VolunteersControllerVolunteers extends JControllerAdmin
 	{
 		return parent::getModel($name, $prefix, $config);
 	}
+
+	/**
+	 * Reset spam counter
+	 *
+	 * @since 1.0
+	 */
+	public function resetspam()
+	{
+		// Check for request forgeries.
+		JSession::checkToken() or jexit(JText::_('JINVALID_TOKEN'));
+
+		/** @var $model VolunteersModelVolunteers */
+		$model = $this->getModel('volunteers');
+		$model->resetSpam();
+
+		$this->setMessage(JText::_('COM_VOLUNTEERS_MESSAGE_RESET_SUCCESS'));
+		$this->setRedirect(JRoute::_('index.php?option=com_volunteers&view=volunteers', false));
+	}
 }

@@ -92,5 +92,10 @@ class VolunteersViewVolunteers extends JViewLegacy
 		{
 			JToolbarHelper::preferences('com_volunteers');
 		}
+
+		if ($canDo->get('core.edit'))
+		{
+			JToolbarHelper::custom('volunteers.resetspam', 'refresh', 'refresh2.png', 'COM_VOLUNTEERS_TOOLBAR_RESET', false);
+		}
 	}
 }

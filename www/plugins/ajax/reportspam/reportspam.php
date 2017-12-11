@@ -25,11 +25,6 @@ class PlgAjaxReportspam extends JPlugin
 		{
 			return false;
 		}
-		// Don't track spam reports from guests
-		if (JFactory::getUser()->guest)
-		{
-			return false;
-		}
 
 		// +1 on the spam column in database
 		$db    = JFactory::getDbo();

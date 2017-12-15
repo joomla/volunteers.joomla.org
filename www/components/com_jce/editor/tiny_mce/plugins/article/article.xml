@@ -1,8 +1,8 @@
 <?xml version="1.0" ?>
 <install version="2.0" type="plugin" plugin="article" core="1" editable="1">
     <name>WF_ARTICLE_TITLE</name>
-    <version>2.6.21</version>
-    <creationDate>29-11-2017</creationDate>
+    <version>2.6.23</version>
+    <creationDate>07-12-2017</creationDate>
     <author>Ryan Demmer</author>
     <authorEmail>info@joomlacontenteditor.net</authorEmail>
     <authorUrl>http://www.joomlacontenteditor.net/</authorUrl>

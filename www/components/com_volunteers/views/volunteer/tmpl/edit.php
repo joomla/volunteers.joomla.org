@@ -188,6 +188,27 @@ JFactory::getDocument()->addScriptDeclaration("
 
         <hr>
 
+        <h3><?php echo JText::_('COM_VOLUNTEERS_PROFILE_CONSENT') ?></h3>
+        <div class="control-group">
+            <div class="controls">
+                <div class="pull-left" style="margin-right: 10px">
+					<?php echo $this->form->getInput('coc'); ?>
+                </div>
+				<?php echo $this->form->getLabel('coc'); ?>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <div class="controls">
+                <div class="pull-left" style="margin-right: 10px">
+					<?php echo $this->form->getInput('jca'); ?>
+                </div>
+				<?php echo $this->form->getLabel('jca'); ?>
+            </div>
+        </div>
+
+        <hr>
+
         <div class="row-fluid">
             <div class="btn-toolbar pull-right">
 

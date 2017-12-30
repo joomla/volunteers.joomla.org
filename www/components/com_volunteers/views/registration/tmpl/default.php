@@ -15,18 +15,18 @@ JHtml::_('formbehavior.chosen', 'select');
 
 <div class="volunteer-edit">
 
-	<form id="volunteer" action="<?php echo JRoute::_('index.php?option=com_volunteers&task=registration.register'); ?>" method="post" class="form-validate form-horizontal" enctype="multipart/form-data">
-		<div class="row-fluid">
-			<div class="page-header">
-				<h1><?php echo JText::_('COM_VOLUNTEERS_PROFILE_NEW') ?></h1>
-			</div>
+    <form id="volunteer" action="<?php echo JRoute::_('index.php?option=com_volunteers&task=registration.register'); ?>" method="post" class="form-validate form-horizontal" enctype="multipart/form-data">
+        <div class="row-fluid">
+            <div class="page-header">
+                <h1><?php echo JText::_('COM_VOLUNTEERS_PROFILE_NEW') ?></h1>
+            </div>
 
-			<p class="lead">
+            <p class="lead">
 				<?php echo JText::_('COM_VOLUNTEERS_PROFILE_INTRO') ?>
-			</p>
-		</div>
+            </p>
+        </div>
 
-		<h3><?php echo JText::_('COM_VOLUNTEERS_PROFILE_ACCOUNT') ?></h3>
+        <h3><?php echo JText::_('COM_VOLUNTEERS_PROFILE_ACCOUNT') ?></h3>
 
         <div class="control-group">
             <div class="controls">
@@ -40,47 +40,47 @@ JHtml::_('formbehavior.chosen', 'select');
 		<?php echo $this->form->renderField('password1'); ?>
 		<?php echo $this->form->renderField('password2'); ?>
 
-		<hr>
+        <hr>
 
-		<h3><?php echo JText::_('COM_VOLUNTEERS_PROFILE_BIRTHDAY') ?></h3>
+        <h3><?php echo JText::_('COM_VOLUNTEERS_PROFILE_BIRTHDAY') ?></h3>
 
-		<div class="control-group">
-			<div class="controls">
-				<div class="alert alert-info">
+        <div class="control-group">
+            <div class="controls">
+                <div class="alert alert-info">
 					<?php echo JText::_('COM_VOLUNTEERS_FIELD_BIRTHDAY_DESC') ?>
-				</div>
-			</div>
-		</div>
+                </div>
+            </div>
+        </div>
 
 		<?php echo $this->form->renderField('birthday'); ?>
 
-		<hr>
+        <hr>
 
-		<h3><?php echo JText::_('COM_VOLUNTEERS_PROFILE_PHOTO') ?></h3>
+        <h3><?php echo JText::_('COM_VOLUNTEERS_PROFILE_PHOTO') ?></h3>
 
-		<div class="control-group">
-			<div class="controls">
-				<div class="alert alert-info">
+        <div class="control-group">
+            <div class="controls">
+                <div class="alert alert-info">
 					<?php echo JText::_('COM_VOLUNTEERS_FIELD_IMAGE_DESC') ?>
-				</div>
-			</div>
-		</div>
+                </div>
+            </div>
+        </div>
 
 		<?php echo $this->form->renderField('image'); ?>
 
-		<hr>
+        <hr>
 
-		<h3><?php echo JText::_('COM_VOLUNTEERS_PROFILE_LOCATION') ?></h3>
+        <h3><?php echo JText::_('COM_VOLUNTEERS_PROFILE_LOCATION') ?></h3>
 
 		<?php echo $this->form->renderField('country'); ?>
 		<?php echo $this->form->renderField('city'); ?>
 		<?php echo $this->form->renderField('location'); ?>
 
-		<div class="address">
+        <div class="address">
 			<?php echo $this->form->renderField('address'); ?>
-		</div>
+        </div>
 
-		<hr>
+        <hr>
 
         <h3><?php echo JText::_('COM_VOLUNTEERS_PROFILE_JOOMLA') ?></h3>
 
@@ -90,7 +90,7 @@ JHtml::_('formbehavior.chosen', 'select');
 
         <hr>
 
-		<h3><?php echo JText::_('COM_VOLUNTEERS_PROFILE_SOCIAL') ?></h3>
+        <h3><?php echo JText::_('COM_VOLUNTEERS_PROFILE_SOCIAL') ?></h3>
 
 		<?php echo $this->form->renderField('website'); ?>
 		<?php echo $this->form->renderField('github'); ?>
@@ -100,67 +100,88 @@ JHtml::_('formbehavior.chosen', 'select');
 		<?php echo $this->form->renderField('googleplus'); ?>
 		<?php echo $this->form->renderField('linkedin'); ?>
 
-		<hr>
+        <hr>
 
-		<h3><?php echo JText::_('COM_VOLUNTEERS_PROFILE_INTRODUCTION') ?></h3>
+        <h3><?php echo JText::_('COM_VOLUNTEERS_PROFILE_INTRODUCTION') ?></h3>
 
-		<div class="control-group">
-			<div class="controls">
-				<div class="alert alert-info">
+        <div class="control-group">
+            <div class="controls">
+                <div class="alert alert-info">
 					<?php echo JText::_('COM_VOLUNTEERS_FIELD_INTRO_DESC') ?>
-				</div>
-			</div>
-		</div>
+                </div>
+            </div>
+        </div>
 
 		<?php echo $this->form->renderField('intro'); ?>
 
-		<div class="control-group">
-			<div class="controls">
-				<div class="alert alert-info">
+        <div class="control-group">
+            <div class="controls">
+                <div class="alert alert-info">
 					<?php echo JText::_('COM_VOLUNTEERS_FIELD_JOOMLASTORY_DESC') ?>
-				</div>
-			</div>
-		</div>
+                </div>
+            </div>
+        </div>
 
 		<?php echo $this->form->renderField('joomlastory'); ?>
 
-		<hr>
+        <hr>
 
-		<div class="control-group">
-			<div class="controls">
-				<div class="alert alert-info">
+        <div class="control-group">
+            <div class="controls">
+                <div class="alert alert-info">
 					<?php echo JText::_('COM_VOLUNTEERS_FIELD_PEAKON_INTRO'); ?>
-				</div>
-			</div>
-		</div>
+                </div>
+            </div>
+        </div>
 
 		<?php echo $this->form->renderField('peakon'); ?>
 
+        <hr>
+
+        <h3><?php echo JText::_('COM_VOLUNTEERS_PROFILE_CONSENT') ?></h3>
+        <div class="control-group">
+            <div class="controls">
+                <div class="pull-left" style="margin-right: 10px">
+					<?php echo $this->form->getInput('coc'); ?>
+                </div>
+				<?php echo $this->form->getLabel('coc'); ?>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <div class="controls">
+                <div class="pull-left" style="margin-right: 10px">
+				    <?php echo $this->form->getInput('jca'); ?>
+                </div>
+			    <?php echo $this->form->getLabel('jca'); ?>
+            </div>
+        </div>
+
         <div class="row-fluid">
-			<div class="btn-toolbar pull-right">
+            <div class="btn-toolbar pull-right">
 
-				<div id="toolbar-apply" class="btn-group">
-					<button class="btn btn-large btn-success" type="submit">
+                <div id="toolbar-apply" class="btn-group">
+                    <button class="btn btn-large btn-success" type="submit">
 						<?php echo JText::_('COM_VOLUNTEERS_PROFILE_CREATE') ?>
-					</button>
-				</div>
+                    </button>
+                </div>
 
-			</div>
-		</div>
+            </div>
+        </div>
 
-		<input type="hidden" name="option" value="com_volunteers"/>
-		<input type="hidden" name="task" value="registration.register"/>
+        <input type="hidden" name="option" value="com_volunteers"/>
+        <input type="hidden" name="task" value="registration.register"/>
 		<?php echo JHtml::_('form.token'); ?>
-	</form>
+    </form>
 </div>
 
 <script>
-	jQuery(document).ready(function () {
-		jQuery('.location').on('change', function (e) {
-			var city = jQuery('.location-city').val();
-			var country = jQuery('.location-country').val();
-			jQuery('.gllpSearchField').val(city + ', ' + country);
-			jQuery('.gllpSearchButton').click();
-		});
-	});
+    jQuery(document).ready(function () {
+        jQuery('.location').on('change', function (e) {
+            var city = jQuery('.location-city').val();
+            var country = jQuery('.location-country').val();
+            jQuery('.gllpSearchField').val(city + ', ' + country);
+            jQuery('.gllpSearchButton').click();
+        });
+    });
 </script>

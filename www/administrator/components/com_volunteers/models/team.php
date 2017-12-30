@@ -192,6 +192,22 @@ class VolunteersModelTeam extends JModelAdmin
 					JError::raiseError(500, $e->getMessage());
 				}
 			}
+
+			// Close all open positions for team
+			$query = $db->getQuery(true);
+			$query
+				->update('#__volunteers_roles')
+				->set('open = 0')
+				->where('team = ' . $db->quote($data['id']));
+
+			try
+			{
+				$db->setQuery($query)->execute();
+			}
+			catch (RuntimeException $e)
+			{
+				JError::raiseError(500, $e->getMessage());
+			}
 		}
 
 		return parent::save($data);

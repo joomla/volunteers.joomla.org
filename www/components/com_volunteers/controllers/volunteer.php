@@ -78,8 +78,11 @@ class VolunteersControllerVolunteer extends JControllerForm
 		JFactory::getSession()->set('updateprofile', 0);
 
 		// Redirect to the list screen.
-		$this->setMessage(JText::_('COM_VOLUNTEERS_LBL_VOLUNTEER_SAVED'));
-		$this->setRedirect(JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $volunteerId, false));
+		if ($return == true)
+		{
+			$this->setMessage(JText::_('COM_VOLUNTEERS_LBL_VOLUNTEER_SAVED'));
+			$this->setRedirect(JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $volunteerId, false));
+		}
 
 		return $return;
 	}

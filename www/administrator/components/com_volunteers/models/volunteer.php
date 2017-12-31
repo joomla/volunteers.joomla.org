@@ -8,11 +8,11 @@
 // No direct access.
 defined('_JEXEC') or die;
 
-use Joomla\Registry\Registry;
 use Joomla\Utilities\ArrayHelper;
+use Joomla\CMS\Http\HttpFactory;
 
 /**
- * Team model.
+ * Volunteer model.
  */
 class VolunteersModelVolunteer extends JModelAdmin
 {
@@ -29,6 +29,13 @@ class VolunteersModelVolunteer extends JModelAdmin
 	 * @var    string
 	 */
 	protected $text_prefix = 'COM_VOLUNTEERS';
+
+	/**
+	 * The fields containing an url, only those that we can check on a 200 code
+	 *
+	 * @var    array
+	 */
+	protected $url_fields = array('website', 'github', 'twitter', 'googleplus', 'crowdin', 'joomladocs', 'certification');
 
 	/**
 	 * Method to get a table object, load it if necessary.
@@ -147,6 +154,65 @@ class VolunteersModelVolunteer extends JModelAdmin
 	 */
 	public function save($data)
 	{
+		// Check the url fields
+		foreach ($data as $field => $value)
+		{
+			if (in_array($field, $this->url_fields))
+			{
+				switch ($field)
+				{
+					case 'github':
+						$url = 'https://github.com/' . $value;
+						break;
+
+					case 'twitter':
+						$url = 'https://twitter.com/' . $value;
+						break;
+
+					case 'googleplus':
+						$url = 'https://plus.google.com/' . $value;
+						break;
+
+					case 'certification':
+						$url = 'https://exam.joomla.org/directory/user/' . $value;
+						break;
+
+					case 'joomladocs':
+						$url = 'https://docs.joomla.org/User:' . $value;
+						break;
+
+					case 'crowdin':
+						$url = 'https://crowdin.com/profile/' . $value;
+						break;
+
+					default:
+						$url = $value;
+						break;
+				}
+
+				if ($value)
+				{
+					try
+					{
+						if ($field == 'certification')
+						{
+							$this->checkCertification($url);
+						}
+						else
+						{
+							$this->checkLink($url);
+						}
+					}
+					catch (\RuntimeException $e)
+					{
+						$this->setError(JText::sprintf('COM_VOLUNTEERS_ERROR_URL_INVALID', $url, ucfirst($field)));
+
+						return false;
+					}
+				}
+			}
+		}
+
 		$app = JFactory::getApplication();
 
 		// Joomla User
@@ -257,7 +323,7 @@ class VolunteersModelVolunteer extends JModelAdmin
 				}
 
 				// Make sure we have http:// or https://
-				if($data->website)
+				if ($data->website)
 				{
 					$data->website = parse_url($data->website, PHP_URL_SCHEME) == '' ? 'http://' . $data->website : $data->website;
 				}
@@ -358,5 +424,67 @@ class VolunteersModelVolunteer extends JModelAdmin
 		}
 
 		return $teams;
+	}
+
+	/**
+	 * Method to check a link for a 200 response code
+	 *
+	 * @param $url
+	 *
+	 * @return bool
+	 *
+	 * @since 1.0.1
+	 */
+	public function checkLink($url)
+	{
+		// JHttp transport throws an exception when there's no response.
+		try
+		{
+			$http     = HttpFactory::getHttp();
+			$response = $http->head($url, array(), 5);
+		}
+		catch (\RuntimeException $e)
+		{
+			$response = null;
+		}
+
+		// Check for response code
+		if ($response->code !== 200)
+		{
+			throw new \RuntimeException();
+		}
+
+		return true;
+	}
+
+	/**
+	 * Method to check for valid certification link
+	 *
+	 * @param $url
+	 *
+	 * @return bool
+	 *
+	 * @since 1.0.1
+	 */
+	public function checkCertification($url)
+	{
+		// JHttp transport throws an exception when there's no response.
+		try
+		{
+			$http     = HttpFactory::getHttp();
+			$response = $http->get($url, array(), 5);
+		}
+		catch (\RuntimeException $e)
+		{
+			$response = null;
+		}
+
+		// Check for error text (most likely this will break at some point in the future...)
+		if ((strpos($response->body, 'You do not have any certifications.') !== false))
+		{
+			throw new \RuntimeException();
+		}
+
+		return true;
 	}
 }

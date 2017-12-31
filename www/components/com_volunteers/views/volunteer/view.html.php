@@ -110,7 +110,6 @@ class VolunteersViewVolunteer extends JViewLegacy
 		// Make mailing address required for active team members
 		if($this->item->teams->activemember)
 		{
-			$this->form->setFieldAttribute('city', 'required', 'true');
 			$this->form->setFieldAttribute('address', 'required', 'true');
 			$this->form->setFieldAttribute('zip', 'required', 'true');
 		}

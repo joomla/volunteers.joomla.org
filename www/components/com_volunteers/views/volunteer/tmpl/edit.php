@@ -92,7 +92,7 @@ JFactory::getDocument()->addScriptDeclaration("
         <h3><?php echo JText::_('COM_VOLUNTEERS_PROFILE_LOCATION') ?></h3>
 
 		<?php echo $this->form->renderField('country'); ?>
-		<?php echo $this->form->renderField('city'); ?>
+		<?php echo $this->form->renderField('city-location'); ?>
 		<?php echo $this->form->renderField('location'); ?>
 
         <hr>
@@ -117,7 +117,17 @@ JFactory::getDocument()->addScriptDeclaration("
             </div>
 		<?php endif; ?>
 
-		<?php echo $this->form->renderField('address'); ?>
+        <div class="control-group">
+            <div class="control-label">
+				<?php echo $this->form->getLabel('address'); ?>
+            </div>
+            <div class="controls">
+				<?php echo $this->form->getInput('address'); ?>
+                <br><small><em>Street address / P.O. Box</em></small>
+            </div>
+        </div>
+
+		<?php echo $this->form->renderField('city'); ?>
 		<?php echo $this->form->renderField('region'); ?>
 		<?php echo $this->form->renderField('zip'); ?>
 

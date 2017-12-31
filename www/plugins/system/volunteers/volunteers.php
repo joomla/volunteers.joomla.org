@@ -85,6 +85,9 @@ class PlgSystemVolunteers extends JPlugin
 			return true;
 		}
 
+		// Load backend language file
+		$this->loadLanguage('com_volunteers', JPATH_ADMINISTRATOR);
+
 		JModelLegacy::addIncludePath(JPATH_ADMINISTRATOR . '/components/com_volunteers/models', 'VolunteersModel');
 		$model       = JModelLegacy::getInstance('Volunteer', 'VolunteersModel', array('ignore_request' => true));
 		$userId      = JFactory::getUser()->get('id');
@@ -103,8 +106,17 @@ class PlgSystemVolunteers extends JPlugin
 				JFactory::getSession()->set('updateprofile', 1);
 
 				// Redirect to profile
-				$this->loadLanguage('com_volunteers', JPATH_ADMINISTRATOR);
 				$this->app->enqueueMessage(JText::_('COM_VOLUNTEERS_PROFILE_ACTIVEMEMBERFIELDS'), 'warning');
+				$this->app->redirect('index.php?option=com_volunteers&task=volunteer.edit&id=' . $volunteerId);
+			}
+
+			if ($volunteer->coc == 0 || $volunteer->jca == 0)
+			{
+				// Set session variable
+				JFactory::getSession()->set('updateprofile', 1);
+
+				// Redirect to profile
+				$this->app->enqueueMessage(JText::_('COM_VOLUNTEERS_PROFILE_COCJCAREQUIRED'), 'warning');
 				$this->app->redirect('index.php?option=com_volunteers&task=volunteer.edit&id=' . $volunteerId);
 			}
 		}
@@ -125,6 +137,9 @@ class PlgSystemVolunteers extends JPlugin
 			return true;
 		}
 
+		// Load backend language file
+		$this->loadLanguage('com_volunteers', JPATH_ADMINISTRATOR);
+
 		// Get variables
 		$view = $this->app->input->getString('view');
 		$task = $this->app->input->getString('task');
@@ -138,11 +153,22 @@ class PlgSystemVolunteers extends JPlugin
 			$model       = JModelLegacy::getInstance('Volunteer', 'VolunteersModel', array('ignore_request' => true));
 			$userId      = JFactory::getUser()->get('id');
 			$volunteerId = (int) $model->getVolunteerId($userId);
+			$volunteer   = $model->getItem($volunteerId);
+
+			// Member fields required
+			if (empty($volunteer->address) || empty($volunteer->city) || empty($volunteer->zip))
+			{
+				$this->app->enqueueMessage(JText::_('COM_VOLUNTEERS_PROFILE_ACTIVEMEMBERFIELDS'), 'warning');
+			}
+
+			// CoC & JCA required
+			if ($volunteer->coc == 0 || $volunteer->jca == 0)
+			{
+				$this->app->enqueueMessage(JText::_('COM_VOLUNTEERS_PROFILE_COCJCAREQUIRED'), 'warning');
+			}
 
 			// Redirect to profile
-			$this->loadLanguage('com_volunteers', JPATH_ADMINISTRATOR);
-			$this->app->enqueueMessage(JText::_('COM_VOLUNTEERS_PROFILE_ACTIVEMEMBERFIELDS'), 'warning');
-			$this->app->redirect('index.php?option=com_volunteers&task=volunteer.edit&id=' . $volunteerId);
+			$this->app->redirect('index.php?option=com_volunteers&task=volunteer.edit&id=' . $volunteer->id);
 		}
 
 		return true;

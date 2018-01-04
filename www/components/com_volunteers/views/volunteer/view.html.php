@@ -113,6 +113,13 @@ class VolunteersViewVolunteer extends JViewLegacy
 			$this->form->setFieldAttribute('city', 'required', 'true');
 			$this->form->setFieldAttribute('address', 'required', 'true');
 			$this->form->setFieldAttribute('zip', 'required', 'true');
+			$this->form->setFieldAttribute('jca', 'required', 'true');
+		}
+
+		// Make fields required once filled in
+		if($this->item->jca)
+		{
+			$this->form->setFieldAttribute('jca', 'required', 'true');
 		}
 	}
 }

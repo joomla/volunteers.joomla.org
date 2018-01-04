@@ -92,14 +92,13 @@ class PlgSystemVolunteers extends JPlugin
 		$model       = JModelLegacy::getInstance('Volunteer', 'VolunteersModel', array('ignore_request' => true));
 		$userId      = JFactory::getUser()->get('id');
 		$volunteerId = (int) $model->getVolunteerId($userId);
+		$volunteer   = $model->getItem($volunteerId);
 		$teams       = $model->getVolunteerTeams($volunteerId);
 
 		// If active team member, check fields
 		if ($teams->activemember)
 		{
-			// Get volunteer data
-			$volunteer = $model->getItem($volunteerId);
-
+			// Check if mailing address is set for member
 			if (empty($volunteer->address) || empty($volunteer->city) || empty($volunteer->zip))
 			{
 				// Set session variable
@@ -110,6 +109,7 @@ class PlgSystemVolunteers extends JPlugin
 				$this->app->redirect('index.php?option=com_volunteers&task=volunteer.edit&id=' . $volunteerId);
 			}
 
+			// Check if member agreed with CoC & JCA
 			if ($volunteer->coc == 0 || $volunteer->jca == 0)
 			{
 				// Set session variable
@@ -117,6 +117,19 @@ class PlgSystemVolunteers extends JPlugin
 
 				// Redirect to profile
 				$this->app->enqueueMessage(JText::_('COM_VOLUNTEERS_PROFILE_COCJCAREQUIRED'), 'warning');
+				$this->app->redirect('index.php?option=com_volunteers&task=volunteer.edit&id=' . $volunteerId);
+			}
+		}
+		else
+		{
+			// Check if contributor agreed with CoC
+			if ($volunteer->coc == 0)
+			{
+				// Set session variable
+				JFactory::getSession()->set('updateprofile', 1);
+
+				// Redirect to profile
+				$this->app->enqueueMessage(JText::_('COM_VOLUNTEERS_PROFILE_COCREQUIRED'), 'warning');
 				$this->app->redirect('index.php?option=com_volunteers&task=volunteer.edit&id=' . $volunteerId);
 			}
 		}

@@ -232,7 +232,6 @@
                 type="checkbox"
                 label="COM_VOLUNTEERS_FIELD_JCA"
                 default="0"
-                required="true"
         />
 
     </fieldset>

@@ -194,6 +194,7 @@ class VolunteersModelTeam extends JModelAdmin
 			}
 
 			// Close all open positions for team
+			$db    = $this->getDbo();
 			$query = $db->getQuery(true);
 			$query
 				->update('#__volunteers_roles')

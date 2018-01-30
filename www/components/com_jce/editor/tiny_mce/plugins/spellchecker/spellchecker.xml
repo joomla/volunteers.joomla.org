@@ -1,12 +1,12 @@
 <?xml version="1.0" ?>
 <install version="2.0" type="plugin" plugin="spellchecker" core="1" editable="1">
     <name>WF_SPELLCHECKER_TITLE</name>
-    <version>2.6.23</version>
-    <creationDate>07-12-2017</creationDate>
+    <version>2.6.24</version>
+    <creationDate>24-01-2018</creationDate>
     <author>Ryan Demmer</author>
     <authorEmail>info@joomlacontenteditor.net</authorEmail>
     <authorUrl>http://www.joomlacontenteditor.net/</authorUrl>
-    <copyright>Copyright (C) 2006 - 2017 Ryan Demmer. All rights reserved</copyright>
+    <copyright>Copyright (C) 2006 - 2018 Ryan Demmer. All rights reserved</copyright>
     <license>GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html</license>
     <description>WF_SPELLCHECKER_DESC</description>
     <icon>spellchecker</icon>

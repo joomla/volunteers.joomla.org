@@ -17,7 +17,7 @@ class WFFileBrowserPlugin extends WFMediaManager
     /*
      * @var string
      */
-    protected $_filetypes = 'doc,docx,ppt,pptx,xls,xlsx,gif,jpeg,jpg,png,pdf,zip,tar,gz,swf,rar,mov,mp4,qt,wmv,asx,asf,avi,wav,mp3,aiff,odt,odg,odp,ods,odf,rtf,txt,csv';
+    protected $_filetypes = 'doc,docx,ppt,pps,pptx,ppsx,xls,xlsx,gif,jpeg,jpg,png,pdf,zip,tar,gz,swf,rar,mov,mp4,qt,wmv,asx,asf,avi,wav,mp3,aiff,odt,odg,odp,ods,odf,rtf,txt,csv';
 
     public function __construct($config = array())
     {
@@ -31,10 +31,12 @@ class WFFileBrowserPlugin extends WFMediaManager
 
         // get the plugin that opened the file browser
         $caller = $this->get('caller', 'browser');
-        $filter = JRequest::getVar('filter', 'files');
+
+        // get mediatype from xml
+        $mediatype = JRequest::getVar('mediatype', 'files');
 
         // clean filter value
-        $filter = (string) preg_replace('/[^\w_,]/i', '', $filter);
+        $mediatype = (string) preg_replace('/[^\w_,]/i', '', $mediatype);
 
         // get filetypes from params
         $filetypes = $this->getParam('browser.extensions', $this->get('_filetypes'));
@@ -46,10 +48,10 @@ class WFFileBrowserPlugin extends WFMediaManager
             "files"  => $filetypes
         );
 
-        if (array_key_exists($filter, $map)) {
-            $filetypes = $map[$filter];
+        if (array_key_exists($mediatype, $map)) {
+            $filetypes = $map[$mediatype];
         } else {
-            $filetypes = $filter;
+            $filetypes = $mediatype;
         }
 
         // set filetypes

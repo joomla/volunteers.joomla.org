@@ -113,6 +113,18 @@ defined('_JEXEC') or die;
                     <span class="hidden-phone"><?php echo JText::_('COM_VOLUNTEERS_CONNECT_CROWDIN') ?></span>
                 </a>
 			<?php endif; ?>
+			<?php if ($this->item->stackexchange): ?>
+                <a class="btn btn-stackexchange" target="_blank" href="https://stackexchange.com/users/<?php echo($this->item->stackexchange) ?>">
+                    <span class="icon-comments-2"></span>
+                    <span class="hidden-phone"><?php echo JText::_('COM_VOLUNTEERS_CONNECT_STACKEXCHANGE') ?></span>
+                </a>
+			<?php endif; ?>
+			<?php if ($this->item->joomlastackexchange): ?>
+                <a class="btn btn-joomlastackexchange" target="_blank" href="https://joomla.stackexchange.com/users/<?php echo($this->item->joomlastackexchange) ?>">
+                    <span class="icon-comments-2"></span>
+                    <span class="hidden-phone"><?php echo JText::_('COM_VOLUNTEERS_CONNECT_JOOMLASTACKEXCHANGE') ?></span>
+                </a>
+			<?php endif; ?>
         </div>
         </p>
     </div>

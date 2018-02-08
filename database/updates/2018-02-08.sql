@@ -1,0 +1,2 @@
+ALTER TABLE `#__volunteers_volunteers` ADD `stackexchange` VARCHAR(255) NOT NULL DEFAULT '' AFTER `certification`;
+ALTER TABLE `#__volunteers_volunteers` ADD `joomlastackexchange` VARCHAR(255) NOT NULL DEFAULT '' AFTER `stackexchange`;

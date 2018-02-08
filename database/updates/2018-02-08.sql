@@ -1,2 +1,2 @@
-ALTER TABLE `#__volunteers_volunteers` ADD `stackexchange` VARCHAR(255) NOT NULL DEFAULT '' AFTER `certification`;
-ALTER TABLE `#__volunteers_volunteers` ADD `joomlastackexchange` VARCHAR(255) NOT NULL DEFAULT '' AFTER `stackexchange`;
+ALTER TABLE `#__volunteers_volunteers` ADD `stackexchange` int(10) NOT NULL DEFAULT '0' AFTER `certification`;
+ALTER TABLE `#__volunteers_volunteers` ADD `joomlastackexchange` int(10) NOT NULL DEFAULT '0' AFTER `stackexchange`;

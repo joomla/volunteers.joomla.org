@@ -14,72 +14,67 @@ JFactory::getDocument()->addScript('media/com_volunteers/js/oms.js', 'text/javas
 ?>
 
 <div class="row-fluid">
-    <div class="span12">
-        <div class="row-fluid">
-            <img style="width: 100%" src="/images/volunteer-header.png" alt="Become a Joomla! contributor">
-        </div>
-        <div class="row-fluid">
-            <div class="span6">
-                <h2><?php echo JText::_('COM_VOLUNTEERS_HOME_INTRO_HOW_TITLE'); ?></h2>
-                <p><?php echo JText::_('COM_VOLUNTEERS_HOME_INTRO_HOW_DESC'); ?></p>
-                <p><?php echo JText::_('COM_VOLUNTEERS_HOME_INTRO_HOW_ACTION'); ?></p>
-                <p>
-                    <a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=roles'); ?>" class="btn"><span class="icon-chevron-right"></span><?php echo JText::_('COM_VOLUNTEERS_HOME_INTRO_HOW_BUTTON'); ?></a>
-                </p>
-            </div>
-            <div class="span6">
-                <h2><?php echo JText::_('COM_VOLUNTEERS_HOME_INTRO_WHY_TITLE'); ?></h2>
-                <p><?php echo JText::_('COM_VOLUNTEERS_HOME_INTRO_WHY_DESC'); ?></p>
-                <p><?php echo JText::_('COM_VOLUNTEERS_HOME_INTRO_WHY_ACTION'); ?></p>
-                <p>
-                    <a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteers'); ?>" class="btn"><span class="icon-chevron-right"></span><?php echo JText::_('COM_VOLUNTEERS_HOME_INTRO_WHY_BUTTON'); ?></a>
-                </p>
-            </div>
-        </div>
-        <div class="row-fluid">
-            <div class="span12">
-                <h2><?php echo JText::_('COM_VOLUNTEERS_LATEST_REPORTS') ?></h2>
-        		<?php if (!empty($this->reports)) foreach ($this->reports as $i => $item): ?>
-                    <div class="row-fluid report">
-                        <div class="span2">
-                            <a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $item->volunteer_id) ?>">
-        						<?php echo VolunteersHelper::image($item->volunteer_image, 'large', false, $item->volunteer_name); ?>
-                            </a>
-                        </div>
-                        <div class="span10">
-                            <h3 class="report-title">
-                                <a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=report&id=' . $item->id) ?>">
-        							<?php echo($item->title); ?>
-                                </a>
-                            </h3>
-                            <p class="muted">
-        						<?php echo JText::_('COM_VOLUNTEERS_BY') ?>
-                                <a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $item->volunteer_id) ?>"><?php echo $item->volunteer_name; ?></a>
-        						<?php echo JText::_('COM_VOLUNTEERS_ON') ?> <?php echo VolunteersHelper::date($item->created, 'Y-m-d H:i'); ?>
-        						<?php echo JText::_('COM_VOLUNTEERS_IN') ?>
-                                <a href="<?php echo $item->link; ?>"><?php echo $item->name; ?></a>
-                            </p>
-                            <p><?php echo JHtml::_('string.truncate', strip_tags(trim($item->description)), 380); ?></p>
-                            <a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=report&id=' . $item->id) ?>" class="btn">
-                                <span class="icon-chevron-right"></span><?php echo JText::_('COM_VOLUNTEERS_READ_MORE') ?>&nbsp;<?php echo JHtml::_('string.truncate', $item->title, 55); ?>
-                            </a>
-                        </div>
-                    </div>
-                    <hr>
-        		<?php endforeach; ?>
-                <a class="btn btn-large btn-block" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=reports'); ?>"><?php echo JText::_('COM_VOLUNTEERS_READ_MORE_REPORTS') ?></a>
-            </div>
-        </div>
-    </div>
+    <img style="width: 100%" src="/images/volunteer-header.png" alt="Become a Joomla! contributor">
 </div>
-
+<br>
 <div class="row-fluid">
-    <div class="span12">
-        <h2><?php echo count($this->markers) . ' ' . JText::_('COM_VOLUNTEERS_VOLUNTEERS_WORLD') ?></h2>
-        <div id="map-canvas"></div>
+    <div class="span6">
+        <h2><?php echo JText::_('COM_VOLUNTEERS_HOME_INTRO_HOW_TITLE'); ?></h2>
+        <p><?php echo JText::_('COM_VOLUNTEERS_HOME_INTRO_HOW_DESC'); ?></p>
+        <p><?php echo JText::_('COM_VOLUNTEERS_HOME_INTRO_HOW_ACTION'); ?></p>
+        <p>
+            <a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=roles'); ?>" class="btn"><span class="icon-chevron-right"></span><?php echo JText::_('COM_VOLUNTEERS_HOME_INTRO_HOW_BUTTON'); ?>
+            </a>
+        </p>
+    </div>
+    <div class="span6">
+        <h2><?php echo JText::_('COM_VOLUNTEERS_HOME_INTRO_WHY_TITLE'); ?></h2>
+        <p><?php echo JText::_('COM_VOLUNTEERS_HOME_INTRO_WHY_DESC'); ?></p>
+        <p><?php echo JText::_('COM_VOLUNTEERS_HOME_INTRO_WHY_ACTION'); ?></p>
+        <p>
+            <a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteers'); ?>" class="btn"><span class="icon-chevron-right"></span><?php echo JText::_('COM_VOLUNTEERS_HOME_INTRO_WHY_BUTTON'); ?>
+            </a>
+        </p>
     </div>
 </div>
-
+<br>
+<div class="row-fluid">
+    <h2><?php echo JText::_('COM_VOLUNTEERS_LATEST_REPORTS') ?></h2>
+	<?php if (!empty($this->reports)) foreach ($this->reports as $i => $item): ?>
+        <div class="row-fluid report">
+            <div class="span2">
+                <a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $item->volunteer_id) ?>">
+					<?php echo VolunteersHelper::image($item->volunteer_image, 'large', false, $item->volunteer_name); ?>
+                </a>
+            </div>
+            <div class="span10">
+                <h3 class="report-title">
+                    <a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=report&id=' . $item->id) ?>">
+						<?php echo($item->title); ?>
+                    </a>
+                </h3>
+                <p class="muted">
+					<?php echo JText::_('COM_VOLUNTEERS_BY') ?>
+                    <a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $item->volunteer_id) ?>"><?php echo $item->volunteer_name; ?></a>
+					<?php echo JText::_('COM_VOLUNTEERS_ON') ?> <?php echo VolunteersHelper::date($item->created, 'Y-m-d H:i'); ?>
+					<?php echo JText::_('COM_VOLUNTEERS_IN') ?>
+                    <a href="<?php echo $item->link; ?>"><?php echo $item->name; ?></a>
+                </p>
+                <p><?php echo JHtml::_('string.truncate', strip_tags(trim($item->description)), 380); ?></p>
+                <a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=report&id=' . $item->id) ?>" class="btn">
+                    <span class="icon-chevron-right"></span><?php echo JText::_('COM_VOLUNTEERS_READ_MORE') ?>&nbsp;<?php echo JHtml::_('string.truncate', $item->title, 55); ?>
+                </a>
+            </div>
+        </div>
+        <hr>
+	<?php endforeach; ?>
+    <a class="btn btn-large btn-block" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=reports'); ?>"><?php echo JText::_('COM_VOLUNTEERS_READ_MORE_REPORTS') ?></a>
+</div>
+<br>
+<div class="row-fluid">
+    <h2><?php echo count($this->markers) . ' ' . JText::_('COM_VOLUNTEERS_VOLUNTEERS_WORLD') ?></h2>
+    <div id="map-canvas"></div>
+</div>
 <script>
     function initialise() {
         var mapOptions = {

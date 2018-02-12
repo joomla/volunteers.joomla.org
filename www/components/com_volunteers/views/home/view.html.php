@@ -26,9 +26,7 @@ class VolunteersViewHome extends JViewLegacy
 	 */
 	public function display($tpl = null)
 	{
-		$this->volunteers     = $this->get('LatestVolunteers');
 		$this->reports        = $this->get('LatestReports');
-		$this->volunteerstory = $this->get('VolunteerStory');
 		$this->markers        = $this->get('MapMarkers');
 
 		// Check for errors.

@@ -192,6 +192,20 @@
         />
 
         <field
+                name="stackexchange"
+                type="textprepend"
+                label="COM_VOLUNTEERS_FIELD_STACKEXCHANGE"
+                prepend="COM_VOLUNTEERS_FIELD_STACKEXCHANGE_URL"
+        />
+
+        <field
+                name="joomlastackexchange"
+                type="textprepend"
+                label="COM_VOLUNTEERS_FIELD_JOOMLASTACKEXCHANGE"
+                prepend="COM_VOLUNTEERS_FIELD_JOOMLASTACKEXCHANGE_URL"
+        />
+
+        <field
                 name="intro"
                 type="textarea"
                 rows="4"

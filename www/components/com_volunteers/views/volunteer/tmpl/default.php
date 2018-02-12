@@ -52,7 +52,7 @@ defined('_JEXEC') or die;
 
         <p class="lead"><?php echo($this->item->intro) ?></p>
 
-        <p>
+
         <div class="btn-group">
 			<?php if ($this->item->joomlaforum): ?>
                 <a class="btn btn-joomlaforum" target="_blank" href="https://forum.joomla.org/memberlist.php?mode=viewprofile&u=<?php echo($this->item->joomlaforum) ?>">
@@ -66,6 +66,35 @@ defined('_JEXEC') or die;
 					<?php echo JText::_('COM_VOLUNTEERS_CONNECT_JOOMLADOCS') ?>
                 </a>
 			<?php endif; ?>
+        </div>
+        </p>
+
+        <p>
+        <div class="btn-group">
+		    <?php if ($this->item->github): ?>
+                <a class="btn btn-gtihub" target="_blank" href="https://github.com/<?php echo($this->item->github) ?>">
+                    <span class="icon-github"></span>
+                    <span class="hidden-phone"><?php echo JText::_('COM_VOLUNTEERS_CONNECT_GITHUB') ?></span>
+                </a>
+		    <?php endif; ?>
+		    <?php if ($this->item->crowdin): ?>
+                <a class="btn btn-crowdin" target="_blank" href="https://crowdin.com/profile/<?php echo($this->item->crowdin) ?>">
+                    <span class="icon-comments-2"></span>
+                    <span class="hidden-phone"><?php echo JText::_('COM_VOLUNTEERS_CONNECT_CROWDIN') ?></span>
+                </a>
+		    <?php endif; ?>
+		    <?php if ($this->item->stackexchange): ?>
+                <a class="btn btn-stackexchange" target="_blank" href="https://stackexchange.com/users/<?php echo($this->item->stackexchange) ?>">
+                    <span class="icon-comments-2"></span>
+                    <span class="hidden-phone"><?php echo JText::_('COM_VOLUNTEERS_CONNECT_STACKEXCHANGE') ?></span>
+                </a>
+		    <?php endif; ?>
+		    <?php if ($this->item->joomlastackexchange): ?>
+                <a class="btn btn-joomlastackexchange" target="_blank" href="https://joomla.stackexchange.com/users/<?php echo($this->item->joomlastackexchange) ?>">
+                    <span class="icon-comments-2"></span>
+                    <span class="hidden-phone"><?php echo JText::_('COM_VOLUNTEERS_CONNECT_JOOMLASTACKEXCHANGE') ?></span>
+                </a>
+		    <?php endif; ?>
         </div>
         </p>
 
@@ -99,18 +128,6 @@ defined('_JEXEC') or die;
                 <a class="btn btn-linkedin" target="_blank" href="https://www.linkedin.com/in/<?php echo($this->item->linkedin) ?>">
                     <span class="icon-linkedin"></span>
                     <span class="hidden-phone"><?php echo JText::_('COM_VOLUNTEERS_CONNECT_LINKEDIN') ?></span>
-                </a>
-			<?php endif; ?>
-			<?php if ($this->item->github): ?>
-                <a class="btn btn-gtihub" target="_blank" href="https://github.com/<?php echo($this->item->github) ?>">
-                    <span class="icon-github"></span>
-                    <span class="hidden-phone"><?php echo JText::_('COM_VOLUNTEERS_CONNECT_GITHUB') ?></span>
-                </a>
-			<?php endif; ?>
-			<?php if ($this->item->crowdin): ?>
-                <a class="btn btn-crowdin" target="_blank" href="https://crowdin.com/profile/<?php echo($this->item->crowdin) ?>">
-                    <span class="icon-comments-2"></span>
-                    <span class="hidden-phone"><?php echo JText::_('COM_VOLUNTEERS_CONNECT_CROWDIN') ?></span>
                 </a>
 			<?php endif; ?>
         </div>
@@ -263,9 +280,9 @@ defined('_JEXEC') or die;
 			<?php endif; ?>
         </div>
 
-            <a class="btn btn-danger js-reportspam" data-volunteer="<?php echo $this->item->id; ?>" data-success="<?php echo JText::_('COM_VOLUNTEERS_SPAM_REPORT_SUCCESS') ?>">
-                <span class="icon-warning"></span> <?php echo JText::_('COM_VOLUNTEERS_SPAM_REPORT') ?>
-            </a>
+        <a class="btn btn-danger js-reportspam" data-volunteer="<?php echo $this->item->id; ?>" data-success="<?php echo JText::_('COM_VOLUNTEERS_SPAM_REPORT_SUCCESS') ?>">
+            <span class="icon-warning"></span> <?php echo JText::_('COM_VOLUNTEERS_SPAM_REPORT') ?>
+        </a>
     </div>
 </div>
 

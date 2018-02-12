@@ -48,6 +48,11 @@ class WFFileBrowserPlugin extends WFMediaManager
             "files"  => $filetypes
         );
 
+        // add svg support to images if it is allowed in filetypes
+        if (in_array('svg', explode(",", $filetypes))) {
+            $map['images'] = "jpg,jpeg,png,gif,svg";
+        }
+
         if (array_key_exists($mediatype, $map)) {
             $filetypes = $map[$mediatype];
         } else {

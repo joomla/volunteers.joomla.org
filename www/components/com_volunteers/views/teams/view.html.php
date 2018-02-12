@@ -54,7 +54,7 @@ class VolunteersViewTeams extends JViewLegacy
 	protected function _prepareDocument()
 	{
 		// Prepare variables
-		$title   = JText::_('COM_VOLUNTEERS_TITLE_TEAMS');
+		$title   = ($this->state->get('filter.governance')) ? JText::_('COM_VOLUNTEERS_TITLE_GOVERNANCE') : JText::_('COM_VOLUNTEERS_TITLE_TEAMS');
 		$image   = 'https://cdn.joomla.org/images/joomla-org-og.jpg';
 		$itemURL = JRoute::_('index.php?option=com_volunteers&view=teams');
 		$url     = JUri::getInstance()->toString(['scheme', 'host', 'port']) . $itemURL;

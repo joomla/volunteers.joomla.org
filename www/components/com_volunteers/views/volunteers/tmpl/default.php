@@ -7,6 +7,8 @@
 
 // No direct access.
 defined('_JEXEC') or die;
+
+$active = $this->state->get('filter.active', 1);
 ?>
 
 <form action="<?php echo htmlspecialchars(JUri::getInstance()->toString()); ?>" method="post" name="adminForm" id="adminForm">
@@ -29,6 +31,14 @@ defined('_JEXEC') or die;
 						<?php endif; ?>
 					</div>
 				</div>
+
+                <fieldset id="filter_active" class="btn-group radio pull-right" onchange="document.adminForm.submit();">
+                    <input type="radio" id="filter_active1" name="filter_active" value="1" <?php if ($active == 1): ?>selected="selected"<?php endif; ?>>
+                    <label for="filter_active1" class="btn<?php if ($active == 1): ?> btn-success<?php endif; ?>"><?php echo JText::_('COM_VOLUNTEERS_ACTIVE') ?></label>
+
+                    <input type="radio" id="filter_active2" name="filter_active" value="2" <?php if ($active == 2): ?>selected="selected"<?php endif; ?>>
+                    <label for="filter_active2" class="btn<?php if ($active == 2): ?> btn-inverse<?php endif; ?>"><?php echo JText::_('COM_VOLUNTEERS_ALL') ?></label>
+                </fieldset>
 			</div>
 			<div class="page-header">
 				<h1><?php echo JText::_('COM_VOLUNTEERS_TITLE_VOLUNTEERS') ?></h1>

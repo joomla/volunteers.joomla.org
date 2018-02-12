@@ -61,6 +61,7 @@ class VolunteersModelVolunteers extends JModelList
 		$this->setState('filter.joomlastory', $this->getUserStateFromRequest($this->context . '.filter.joomlastory', 'filter_joomlastory'));
 		$this->setState('filter.location', $this->getUserStateFromRequest($this->context . '.filter.location', 'filter_location'));
 		$this->setState('filter.coc', $this->getUserStateFromRequest($this->context . '.filter.coc', 'filter_coc'));
+		$this->setState('filter.active', $this->getUserStateFromRequest($this->context . '.filter.active', 'filter_active'));
 
 		// Load the parameters.
 		$params = JComponentHelper::getParams('com_volunteers');
@@ -90,6 +91,7 @@ class VolunteersModelVolunteers extends JModelList
 		$id .= ':' . $this->getState('filter.joomlastory');
 		$id .= ':' . $this->getState('filter.location');
 		$id .= ':' . $this->getState('filter.coc');
+		$id .= ':' . $this->getState('filter.active');
 
 		return parent::getStoreId($id);
 	}
@@ -145,6 +147,17 @@ class VolunteersModelVolunteers extends JModelList
 			{
 				$search = $db->quote('%' . str_replace(' ', '%', $db->escape(trim($search), true) . '%'));
 				$query->where('(user.name LIKE ' . $search . ' OR a.alias LIKE ' . $search . ')');
+			}
+		}
+
+		// Filter by active state
+		$active = $this->getState('filter.active', (JFactory::getApplication()->isSite()) ? 1 : null);
+
+		if (is_numeric($active))
+		{
+			if ($active == 1)
+			{
+				$query->where($db->quoteName('member.date_ended') . ' = ' . $db->quote('0000-00-00'));
 			}
 		}
 

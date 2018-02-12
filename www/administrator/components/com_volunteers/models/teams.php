@@ -56,6 +56,7 @@ class VolunteersModelTeams extends JModelList
 		$this->setState('filter.department', $this->getUserStateFromRequest($this->context . '.filter.department', 'filter_department'));
 		$this->setState('filter.active', $this->getUserStateFromRequest($this->context . '.filter.active', 'filter_active'));
 		$this->setState('filter.parent', $this->getUserStateFromRequest($this->context . '.filter.parent', 'filter_parent'));
+		$this->setState('filter.governance', JFactory::getApplication('site')->input->getInt('id'));
 
 		// Load the parameters.
 		$params = JComponentHelper::getParams('com_volunteers');
@@ -83,6 +84,7 @@ class VolunteersModelTeams extends JModelList
 		$id .= ':' . $this->getState('filter.state');
 		$id .= ':' . $this->getState('filter.department');
 		$id .= ':' . $this->getState('filter.active');
+		$id .= ':' . $this->getState('filter.governance');
 
 		return parent::getStoreId($id);
 	}
@@ -140,6 +142,18 @@ class VolunteersModelTeams extends JModelList
 				$search = $db->quote('%' . str_replace(' ', '%', $db->escape(trim($search), true) . '%'));
 				$query->where('(a.title LIKE ' . $search . ' OR a.alias LIKE ' . $search . ')');
 			}
+		}
+
+		// Filter by governance
+		$governance = $this->getState('filter.governance');
+
+		if (is_numeric($governance) && ($governance > 0))
+		{
+			$query->where('a.department = ' . (int) $governance);
+		}
+		else
+		{
+			$query->where('a.department <> 58');
 		}
 
 		// Filter by department

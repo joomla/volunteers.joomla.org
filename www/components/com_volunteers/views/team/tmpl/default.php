@@ -45,7 +45,7 @@ defined('_JEXEC') or die;
             <dd><a href="<?php echo($this->item->website) ?>"><?php echo($this->item->website) ?></a></dd>
 		<?php endif; ?>
 
-		<?php if (($this->item->department_title) && ($this->item->department_title != 1)): ?>
+		<?php if (($this->item->department_title) && ($this->item->department != 58)): ?>
             <dt><?php echo JText::_('COM_VOLUNTEERS_FIELD_DEPARTMENT') ?></dt>
             <dd>
                 <a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=department&id=' . $this->item->department); ?>"><?php echo $this->item->department_title; ?></a>

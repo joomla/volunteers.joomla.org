@@ -374,11 +374,13 @@ class VolunteersRouter extends JComponentRouterBase
 
 				break;
 
-			case 'reports':
-			case 'volunteers':
 			case 'teams':
+				$query['Itemid'] = $this->getItemid($view);
 				unset($query['id']);
 				break;
+
+			case 'reports':
+			case 'volunteers':
 			case 'registration':
 			case 'home':
 			case 'roles':

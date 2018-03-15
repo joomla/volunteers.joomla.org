@@ -255,12 +255,13 @@ abstract class WFInstall
             $site.'/editor/libraries/js/plugin.full.js',
             $site.'/editor/libraries/mediaplayer/license.txt',
             $site.'/editor/tiny_mce/plugins/inlinepopups/css/dialog.css',
-            $site.'/editor/tiny_mce/plugins/media/img/iframe.png',
             $site.'/editor/tiny_mce/themes/advanced/img/icons.gif',
             $site.'/editor/tiny_mce/plugins/source/css/editor.css',
             $site.'/editor/tiny_mce/plugins/source/codemirror/css/codemirror.css',
             $site.'/editor/tiny_mce/plugins/source/js/editor.js',
-            $site.'/editor/tiny_mce/plugins/source/js/format.js'
+            $site.'/editor/tiny_mce/plugins/source/js/format.js',
+
+            $site.'/editor/tiny_mce/plugins/visualblocks/css/visualblocks.css'
         );
 
         $folders = array(

@@ -1,8 +1,8 @@
 <?xml version="1.0" ?>
 <install version="2.0" type="plugin" plugin="emotions" editable="1" core="0" row="4">
 	<name>WF_EMOTIONS_TITLE</name>
-	<version>2.6.26</version>
-	<creationDate>31-01-2018</creationDate>
+	<version>2.6.27</version>
+	<creationDate>15-03-2018</creationDate>
 	<author>Moxiecode / Ryan Demmer</author>
 	<authorEmail>info@joomlacontenteditor.net</authorEmail>
 	<authorUrl>http://www.joomlacontenteditor.net/</authorUrl>

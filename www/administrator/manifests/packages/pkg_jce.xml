@@ -2,9 +2,9 @@
 <extension type="package" version="2.5" method="upgrade">
   <name>PKG_JCE</name>
   <author>Ryan Demmer</author>
-  <creationDate>31-01-2018</creationDate>
+  <creationDate>15-03-2018</creationDate>
   <packagename>jce</packagename>
-  <version>2.6.26</version>
+  <version>2.6.27</version>
   <url>https://www.joomlacontenteditor.net</url>
   <packager>Widget Factory Limited</packager>
   <packagerurl>https://www.joomlacontenteditor.net</packagerurl>
@@ -20,6 +20,7 @@
     <file type="plugin" id="jce" group="editors">plg_editors_jce.zip</file>
     <file type="plugin" id="jce" group="content">plg_content_jce.zip</file>
     <file type="plugin" id="jce" group="extension">plg_extension_jce.zip</file>
+    <file type="plugin" id="jce" group="fields">plg_fields_mediajce.zip</file>
     <file type="plugin" id="jce" group="installer">plg_installer_jce.zip</file>
     <file type="plugin" id="jce" group="quickicon">plg_quickicon_jce.zip</file>
     <file type="plugin" id="jce" group="system">plg_system_jce.zip</file>

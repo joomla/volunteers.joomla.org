@@ -146,8 +146,7 @@ class VolunteersViewTeam extends JViewLegacy
 			if (!$this->acl->edit_department)
 			{
 				$this->form->setFieldAttribute('department', 'readonly', 'true');
-				// This should be activated again once we have department coordinators
-				// $this->form->setFieldAttribute('status', 'readonly', 'true');
+				$this->form->setFieldAttribute('status', 'readonly', 'true');
 			}
 		}
 		else

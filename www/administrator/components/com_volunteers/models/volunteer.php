@@ -8,6 +8,7 @@
 // No direct access.
 defined('_JEXEC') or die;
 
+use Joomla\Registry\Registry;
 use Joomla\Utilities\ArrayHelper;
 use Joomla\CMS\Http\HttpFactory;
 
@@ -437,11 +438,13 @@ class VolunteersModelVolunteer extends JModelAdmin
 	 */
 	public function checkLink($url)
 	{
-		// JHttp transport throws an exception when there's no response.
+		// Adding a valid user agent string, otherwise some feed-servers returning an error
+		$options = new Registry;
+		$options->set('userAgent', 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:41.0) Gecko/20100101 Firefox/41.0');
+
 		try
 		{
-			$http     = HttpFactory::getHttp();
-			$response = $http->head($url, array(), 5);
+			$response = HttpFactory::getHttp($options)->get($url, array(), 5);
 		}
 		catch (\RuntimeException $e)
 		{

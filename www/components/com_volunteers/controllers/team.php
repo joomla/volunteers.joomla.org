@@ -179,6 +179,27 @@ class VolunteersControllerTeam extends JControllerForm
 			$team->email = $lead[0]->user_email;
 		}
 
+		// Get email department coordinator for CC
+		$db    = JFactory::getDbo();
+		$query = $db->getQuery(true);
+		$query
+			->select('user.email, user.name')
+			->from('#__volunteers_members as member')
+			->join('LEFT', $db->quoteName('#__volunteers_volunteers', 'volunteer') . ' ON ' . $db->qn('member.volunteer') . ' = ' . $db->qn('volunteer.id'))
+			->join('LEFT', $db->quoteName('#__users', 'user') . ' ON ' . $db->qn('volunteer.user_id') . ' = ' . $db->qn('user.id'))
+			->where($db->quoteName('member.department') . ' = ' . (int) $team->department)
+			->where($db->quoteName('member.position') . ' = ' . (int) 11)
+			->where($db->quoteName('member.date_ended') . ' = ' . $db->quote('0000-00-00'));
+
+		try
+		{
+			$coordinator = $db->setQuery($query)->loadObject();
+		}
+		catch (RuntimeException $e)
+		{
+			$app->enqueueMessage(JText::_('JERROR_SENDING_EMAIL'), 'warning');
+		}
+
 		// Get a reference to the Joomla! mailer object
 		$mailer = JFactory::getMailer();
 
@@ -187,6 +208,7 @@ class VolunteersControllerTeam extends JControllerForm
 
 		// Set the recipient
 		$mailer->addRecipient($team->email, $team->title);
+		$mailer->addCc($coordinator->email, $coordinator->name);
 
 		// Set the subject
 		$mailer->setSubject($subject);

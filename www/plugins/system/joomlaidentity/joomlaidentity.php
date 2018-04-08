@@ -7,9 +7,7 @@
  * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
 
-use Joomla\CMS\Date\Date;
 use Joomla\CMS\Factory;
-use Joomla\CMS\Language\Text;
 use Joomla\CMS\Plugin\CMSPlugin;
 
 // No direct access.
@@ -23,189 +21,135 @@ defined('_JEXEC') or die;
 class PlgSystemJoomlaIdentity extends CMSPlugin
 {
 	/**
-	 * JFactory::getApplication();
+	 * Application object.
 	 *
-	 * @var    object  Joomla application object
+	 * @var    JApplicationCms
 	 * @since  1.0
 	 */
 	protected $app;
 
 	/**
-	 * Extend the user object with identity data
+	 * Triggered before Joomla! renders the page
 	 *
-	 * @param   object $user Joomla User Object
-	 *
-	 * @return  boolean
-	 *
-	 * @since   1.0
-	 * @throws  Exception
-	 */
-	public function onUserAfterLoad($user)
-	{
-		$userId = isset($user->id) ? $user->id : 0;
-
-		// Only continue for users with id
-		if ($userId > 0)
-		{
-			// Get Identity from cache
-			$identity = $this->getIdentityCache($user->username);
-
-			// Set consent
-			$user->consent = $identity->consent;
-
-			// Override User Object data
-			$user->name  = $identity->data->name;
-			$user->email = $identity->data->email;
-
-			// Unset in identity data
-			unset($identity->data->name);
-			unset($identity->data->email);
-
-			// Add identity fields to User Object
-			$user->identity = $identity->data;
-		}
-
-		return true;
-	}
-
-	/**
-	 * Method to get identity data from cache
-	 *
-	 * @param   string $guid User GUID
-	 *
-	 * @return  object
-	 *
-	 * @since   1.0
-	 * @throws  Exception
-	 */
-	private function getIdentityCache($guid)
-	{
-		$db      = Factory::getDbo();
-		$nowDate = Factory::getDate()->toSql();
-
-		// Load data from cache
-		$query = $db->getQuery(true)
-			->select($db->quoteName(array('data', 'consent')))
-			->from($db->quoteName('#__identity_cache'))
-			->where($db->quoteName('guid') . ' = ' . $db->quote($guid))
-			->where($db->quoteName('expires') . ' >= ' . $db->quote($nowDate));
-
-		try
-		{
-			$identity = $db->setQuery($query)->loadObject();
-		}
-		catch (RuntimeException $e)
-		{
-			Factory::getApplication()->enqueueMessage(Text::_('JERROR_AN_ERROR_HAS_sOCCURRED'), 'error');
-
-			return new stdClass;
-		}
-
-		// Decode JSON
-		if (isset($identity->data))
-		{
-			$identity->data = json_decode($identity->data);
-		}
-
-		// No data from cache, we need to get it from the API
-		if (empty($identity))
-		{
-			$identity = $this->getIdentityApi($guid);
-		}
-
-		// Prepare identity data for rendering
-		$identity = $this->prepareIdentity($guid, $identity);
-
-		return $identity;
-	}
-
-	/**
-	 * Method to get identity data from API
-	 *
-	 * @param   string $guid User GUID
-	 *
-	 * @return  object
-	 *
-	 * @since   1.0
-	 * @throws  Exception
-	 */
-	private function getIdentityApi($guid)
-	{
-		// Dummy API Response CONSENT OK @TODO
-		//$response = file_get_contents(JPATH_ROOT . '/identity-consent-ok.json');
-
-		// Dummy API Response CONSENT NOT OK @TODO
-		$response = file_get_contents(JPATH_ROOT . '/identity-consent-notok.json');
-
-		// Decode response to identity
-		$identity = json_decode($response);
-
-		// Store in cache
-		$this->saveIdentityCache($guid, $identity->data, $identity->consent);
-
-		return $identity;
-	}
-
-
-	/**
-	 * Method to prepare Identity data
-	 *
-	 * @param   string $guid     User GUID
-	 * @param   object $identity Identity data
-	 *
-	 * @return  object $identity profile
+	 * @return  void
 	 *
 	 * @since   1.0
 	 */
-	private function prepareIdentity($guid, $identity)
+	public function onAfterRoute()
 	{
-		// Add guest name and email
-		if ($identity->consent == 0)
+		// Run on frontend only
+		if ($this->app->isClient('administrator'))
 		{
-			$identity->data->name  = 'Guest ' . substr($guid, 0, 8);
-			$identity->data->email = substr($guid, 0, 8) . '@identity.joomla.org';
+			return;
 		}
 
-		// @TODO we might want to add a plugin trigger here
+		// Check for Joomla Identity
+		$joomlaIdentity = $this->app->input->getCmd('joomlaidentity');
 
-		return $identity;
+		// Only continue for Joomla Identity
+		if (!isset($joomlaIdentity))
+		{
+			return;
+		}
+
+		// Get the data from the payload
+		$guid    = $this->app->input->json->getString('guid');
+		$consent = $this->app->input->json->getInt('consent');
+		$data    = (object) $this->app->input->json->get('data', array(), 'array');
+
+		if ($guid && $data)
+		{
+			$this->processIdentity($guid, $consent, $data);
+
+			$this->app->close();
+		}
 	}
 
 	/**
-	 * Method to save Identity Cache
+	 * Method to process the Joomla Identity data
 	 *
-	 * @param   string  $guid     User GUID
-	 * @param   array   $identity Identity data
-	 * @param   integer $consent  Consent for property
+	 * @param   string  $guid    The User ID
+	 * @param   integer $consent Consent given or nog
+	 * @param   object  $data    Object containing user data
 	 *
-	 * @return boolean
+	 * @return  void
 	 *
-	 * @since 1.0
-	 * @throws Exception
+	 * @since   1.0
 	 */
-	private function saveIdentityCache($guid, $identity, $consent)
+	protected function processIdentity($guid, $consent, $data)
 	{
-		$db = Factory::getDbo();
+		// Set anonymize name if no consent is provided
+		if ($consent == 0)
+		{
+			$data->name  = 'Guest ' . substr($guid, 0, 8);
+			$data->email = substr($guid, 0, 8) . '@identity.joomla.org';
+		}
 
-		// Set expire time
-		$date = new Date('now +1 day');
+		// Update the Joomla user
+		$this->updateJoomlaUser($guid, $data->name, $data->email);
 
+		// Get Joomla user ID
+		$userId = (int) JUserHelper::getUserId($guid);
+
+		// Plugin trigger onProcessIdentity for site specific processing
+		\JEventDispatcher::getInstance()->trigger('onProcessIdentity', array($userId, $guid, $data));
+	}
+
+	/**
+	 * Method to update the Joomla User
+	 *
+	 * @param   string $username Username (guid)
+	 * @param   string $name     Name of user
+	 * @param   string $email    Email of user
+	 *
+	 * @return  void
+	 *
+	 * @since   1.0
+	 */
+	protected function updateJoomlaUser($username, $name, $email)
+	{
 		// Consent date
-		$data = (object) array(
-			'guid'    => $guid,
-			'data'    => json_encode($identity),
-			'consent' => $consent,
-			'expires' => $date->toSql(),
+		$user = (object) array(
+			'username' => $username,
+			'name'     => $name,
+			'email'    => $email,
 		);
 
 		try
 		{
-			$db->insertObject('#__identity_cache', $data, 'guid');
+			Factory::getDbo()->updateObject('#__users', $user, 'username');
 		}
 		catch (Exception $e)
 		{
-			$db->updateObject('#__identity_cache', $data, 'guid');
+			$this->setError($e->getMessage());
 		}
+	}
+
+	/**
+	 * We prevent editing the user properties via the site itself
+	 *
+	 * @param   JForm $form The form to be altered.
+	 * @param   mixed $data The associated data for the form.
+	 *
+	 * @return  boolean
+	 *
+	 * @since   1.0
+	 */
+	public function onContentPrepareForm($form, $data)
+	{
+		// Check we are manipulating a valid form.
+		if (!in_array($form->getName(), array('com_admin.profile', 'com_users.user', 'com_users.profile', 'com_users.registration')))
+		{
+			return true;
+		}
+
+		// Disable editing the name, username, email, password and requireReset fields
+		$form->setFieldAttribute('name', 'readonly', 'readonly');
+		$form->setFieldAttribute('username', 'readonly', 'readonly');
+		$form->setFieldAttribute('email', 'readonly', 'readonly');
+		$form->setFieldAttribute('password', 'readonly', 'readonly');
+		$form->setFieldAttribute('password2', 'readonly', 'readonly');
+		$form->setFieldAttribute('requireReset', 'readonly', 'readonly');
 
 		return true;
 	}

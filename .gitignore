@@ -5,7 +5,6 @@
 /www/logs
 /www/tmp
 /www/configuration.php
-/www/.htaccess
 /www/LICENSE.txt
 /www/README.txt
 /www/robots.txt.dist

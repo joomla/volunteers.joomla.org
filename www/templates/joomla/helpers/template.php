@@ -390,13 +390,14 @@ class JoomlaTemplateHelper
 	/**
 	 * Load the template's footer section
 	 *
-	 * @param   string  $lang  The language to request
+	 * @param   string   $lang    The language to request
+	 * @param   boolean  $useCdn  True to load resource from the cdn, false from local instance
 	 *
 	 * @return  string
 	 */
-	public static function getTemplateFooter($lang)
+	public static function getTemplateFooter($lang, $useCdn = true)
 	{
-		$result = self::loadTemplateSection('footer', $lang);
+		$result = self::loadTemplateSection('footer', $lang, $useCdn);
 
 		// Check for an error
 		if ($result === 'Could not load template section.')
@@ -419,33 +420,47 @@ class JoomlaTemplateHelper
 	/**
 	 * Load the template's CDN menu section
 	 *
-	 * @param   string  $lang  The language to request
+	 * @param   string   $lang    The language to request
+	 * @param   boolean  $useCdn  True to load resource from the cdn, false from local instance
 	 *
 	 * @return  string
 	 */
-	public static function getTemplateMenu($lang)
+	public static function getTemplateMenu($lang, $useCdn = true)
 	{
-		return self::loadTemplateSection('menu', $lang);
+		return self::loadTemplateSection('menu', $lang, $useCdn);
 	}
 
 	/**
 	 * Load the template section, caching the result if needed
 	 *
-	 * @param   string  $section  The section to be loaded
-	 * @param   string  $lang     The language to request
+	 * @param   string   $section  The section to be loaded
+	 * @param   string   $lang     The language to request
+	 * @param   boolean  $useCdn   True to load resource from the cdn, false from local instance
 	 *
 	 * @return  string
 	 */
-	private static function loadTemplateSection($section, $lang)
+	private static function loadTemplateSection($section, $lang, $useCdn = true)
 	{
+		if (JDEBUG || !$useCdn)
+		{
+			$path = dirname(__DIR__) . "/cdn/layouts/$section/$lang.$section.html";
+
+			if (!file_exists($path))
+			{
+				$path = dirname(__DIR__) . "/cdn/layouts/$section/en-GB.$section.html";
+			}
+
+			return file_get_contents($path);
+		}
+
 		/** @var \Joomla\CMS\Cache\Controller\CallbackController $cache */
 		$cache = Factory::getCache('tpl_joomla', 'callback');
 
 		// This is always cached regardless of the site's global setting
 		$cache->setCaching(true);
 
-		// Cache this for one hour
-		$cache->setLifeTime(60);
+		// Cache this for one day
+		$cache->setLifeTime(1440);
 
 		// Build the remote URL
 		$url = "https://cdn.joomla.org/template/renderer.php?section=$section&language=$lang";

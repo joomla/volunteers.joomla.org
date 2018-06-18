@@ -465,6 +465,19 @@ body {
       > a {
         padding: 11px 15px 11px;
       }
+      &:first-of-type > a {
+        border-left: inherit;
+        box-shadow: inherit;
+      }
+      &:last-of-type > a {
+        border-left: 1px solid rgba(0, 0, 0, 0.3);
+        box-shadow: 1px 0 0 #1e3b63 inset, -1px 0 0 rgba(0, 0, 0, 0.4) inset;
+      }
     }
   }
+}
+
+.subnav .nav-pills > li > a {
+  margin-left: 1px;
+  margin-right: 0;
 }

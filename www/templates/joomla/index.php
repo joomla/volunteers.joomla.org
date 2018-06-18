@@ -2,7 +2,7 @@
 /**
  * Joomla.org site template
  *
- * @copyright   Copyright (C) 2005 - 2017 Open Source Matters, Inc. All rights reserved.
+ * @copyright   Copyright (C) 2005 - 2018 Open Source Matters, Inc. All rights reserved.
  * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
 
@@ -37,11 +37,11 @@ HTMLHelper::_('bootstrap.framework');
 // Add Stylesheets - if the site is in debug mode or has explicitly chosen to not use the CDN, load the local media
 if (JDEBUG || !$this->params->get('useCdn', '1'))
 {
-	HTMLHelper::_('stylesheet', 'template.min.css', ['relative' => true, 'detectDebug' => (bool) JDEBUG, 'version' => '2.3.0']);
+	HTMLHelper::_('stylesheet', 'template.min.css', ['relative' => true, 'detectDebug' => (bool) JDEBUG, 'version' => '3.0.0']);
 }
 else
 {
-	$this->addStyleSheet('https://cdn.joomla.org/template/css/template_2.3.0.min.css');
+	$this->addStyleSheet('https://cdn.joomla.org/template/css/template_3.0.0.min.css');
 }
 
 // Bootstrap 3 polyfill
@@ -174,15 +174,15 @@ $gtmId = JoomlaTemplateHelper::getGtmId(Uri::getInstance()->toString(['host']));
 <head>
 	<jdoc:include type="head" />
 	<script>
-	var _prum = [['id', '59300ad15992c776ad970068'],
-	             ['mark', 'firstbyte', (new Date()).getTime()]];
-	(function() {
-	    var s = document.getElementsByTagName('script')[0]
-	      , p = document.createElement('script');
-	    p.async = 'async';
-	    p.src = '//rum-static.pingdom.net/prum.min.js';
-	    s.parentNode.insertBefore(p, s);
-	})();
+		var _prum = [['id', '59300ad15992c776ad970068'],
+					['mark', 'firstbyte', (new Date()).getTime()]];
+		(function() {
+			var s = document.getElementsByTagName('script')[0]
+			, p = document.createElement('script');
+			p.async = 'async';
+			p.src = 'https://rum-static.pingdom.net/prum.min.js';
+			s.parentNode.insertBefore(p, s);
+		})();
 	</script>
 </head>
 <body class="<?php echo "site $option view-$view layout-$layout task-$task itemid-$itemid" . ($this->params->get('fluidContainer') ? ' fluid' : '') . ($this->direction == 'rtl' ? ' rtl' : ''); ?>">
@@ -190,8 +190,8 @@ $gtmId = JoomlaTemplateHelper::getGtmId(Uri::getInstance()->toString(['host']));
 	// Add Google Tag Manager code if one is set
 	if ($gtmId) : ?>
 	<!-- Google Tag Manager -->
-	<noscript><iframe src="//www.googletagmanager.com/ns.html?id=<?php echo $gtmId; ?>" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-	<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','<?php echo $gtmId; ?>');</script>
+	<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=<?php echo $gtmId; ?>" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+	<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','<?php echo $gtmId; ?>');</script>
 	<!-- End Google Tag Manager -->
 	<?php endif; ?>
 	<!-- Top Nav -->
@@ -205,7 +205,7 @@ $gtmId = JoomlaTemplateHelper::getGtmId(Uri::getInstance()->toString(['host']));
 						<span class="icon-bar"></span>
 					</a>
 
-					<?php echo JoomlaTemplateHelper::getTemplateMenu($this->language); ?>
+					<?php echo JoomlaTemplateHelper::getTemplateMenu($this->language, (bool) $this->params->get('useCdn', '1')); ?>
 				</div>
 			</div>
 		</div>
@@ -225,7 +225,7 @@ $gtmId = JoomlaTemplateHelper::getGtmId(Uri::getInstance()->toString(['host']));
 							<a href="https://downloads.joomla.org/" class="btn btn-large btn-warning"><?php echo Text::_('TPL_JOOMLA_DOWNLOAD_BUTTON'); ?></a>
 						</div>
 						<div class="btn-group">
-							<a href="https://demo.joomla.org" class="btn btn-large btn-primary"><?php echo Text::_('TPL_JOOMLA_DEMO_BUTTON'); ?></a>
+							<a href="https://launch.joomla.org" class="btn btn-large btn-primary"><?php echo Text::_('TPL_JOOMLA_DEMO_BUTTON'); ?></a>
 						</div>
 					</div>
 				</div>
@@ -282,7 +282,7 @@ $gtmId = JoomlaTemplateHelper::getGtmId(Uri::getInstance()->toString(['host']));
 			<hr />
 			<jdoc:include type="modules" name="footer" style="none" />
 
-			<?php echo JoomlaTemplateHelper::getTemplateFooter($this->language); ?>
+			<?php echo JoomlaTemplateHelper::getTemplateFooter($this->language, (bool) $this->params->get('useCdn', '1')); ?>
 		</div>
 	</footer>
 

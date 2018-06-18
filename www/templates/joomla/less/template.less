@@ -161,46 +161,60 @@ body {
   margin: 0 0 5px 0;
 }
 
-/* Headings */
-
+/* Typography */
 h1,
 h2,
 h3,
 h4,
 h5,
 h6 {
-  margin: (@baseLineHeight / 1.5) 0;
+    margin: 0 0 .6rem;
+    line-height: 1.4;
 }
-
 h1 {
-  font-size: 26px;
-  line-height: 28px;
+  font-size: 1.8rem;
 }
 
 h2 {
-  font-size: 22px;
-  line-height: 24px;
+  font-size: 1.4rem;
 }
 
 h3 {
-  font-size: 18px;
-  line-height: 20px;
+  font-size: 1.15rem;
 }
 
 h4 {
-  font-size: 14px;
-  line-height: 16px;
+  font-size: 1.1rem;
 }
 
 h5 {
-  font-size: 13px;
-  line-height: 15px;
+  font-size: 1rem;
 }
 
 h6 {
-  font-size: 12px;
-  line-height: 14px;
+  font-size: .9rem;
 }
+
+body {
+  p {
+    margin: 0 0 1.4rem 0;
+  }
+  .lead {
+    line-height: 1.4rem;
+  }
+  .item-page h2 {
+    margin-top: 1.6em;
+  }
+}
+
+ul:not([class]) {
+  margin-bottom: 1rem;
+} 
+
+.page-header {
+  margin: 0 0 .8rem 0
+}
+
 
 /* Module */
 .module-header {
@@ -300,19 +314,24 @@ h6 {
 }
 
 /* Aside Subnavs */
-aside .nav .nav-child {
-  border-left: 2px solid @tableBorder;
-  padding-left: 5px;
+aside {
+    padding: 1em 0 2em 0;
+    .nav .nav-child {
+    border-left: 2px solid @tableBorder;
+    padding-left: 5px;
+  }
 }
 
 /* Header */
 .header {
   #gradient > .radial(@headerBackgroundHighlight, @headerBackground);
-  border-top: 1px solid lighten(@headerBackground, 20%);
-  border-bottom: 1px solid darken(@headerBackground, 10%);
-  padding: 5px;
+  padding: 9px;
 
   /*header btn*/
+  .btn-toolbar {
+    margin-top: 10px;
+    margin-bottom: 6px;
+  }
   .btn-group {
     > .btn:last-child {
       border: none;
@@ -325,6 +344,38 @@ aside .nav .nav-child {
   #gradient > .vertical(@headerBackgroundHighlight, @headerBackground);
   border: 1px solid #0D2242;
   margin-bottom: 2px;
+}
+
+// Navbar Fixed Top
+.navbar-fixed-top {
+  .navbar-inner {
+    border-color: #0b172a;
+    #gradient > .vertical(#192c4a, #10223e);
+    .box-shadow(0 1px 5px rgba(0, 0, 0, 0.3));
+  }
+  .nav {
+    > li {
+      > a {
+        border-right: 1px solid #1e3b63;
+        color: #fff;
+        text-shadow: none;
+        .box-shadow(-1px 0 0 rgba(0, 0, 0, 0.4) inset);
+        &:hover {
+          background-color: rgba(19, 73, 118, 0.5);
+          box-shadow: inset 3px 0 2px -2px rgba(0, 0, 0, 0.25), inset -3px 0 2px -2px rgba(0, 0, 0, 0.25), 0 1px 0 #112f50;
+        }
+      }
+      &:first-of-type > a {
+        border-left: 1px solid rgba(0, 0, 0, 0.3);
+        box-shadow: 1px 0 0 #1e3b63 inset, -1px 0 0 rgba(0, 0, 0, 0.4) inset;
+      }
+    }
+  }
+}
+
+.navbar-inverse .navbar-search .search-query {
+    background-color: #fff;
+    margin: 2px 0;
 }
 
 /* Logo */
@@ -346,6 +397,7 @@ aside .nav .nav-child {
   font-weight: normal;
   font-size: 30px;
   line-height: 50px;
+  padding: 0 10px;
   margin: 0;
 
   a {
@@ -369,39 +421,32 @@ aside .nav .nav-child {
 /* Subnav */
 .subnav {
   background-color: lighten(@headerBackgroundHighlight, 5%);
-  border-top: 1px solid lighten(@headerBackgroundHighlight, 20%);
-  border-bottom: 1px solid darken(@headerBackground, 10%);
-  padding: 5px;
-
+  background-image: linear-gradient(0deg, rgba(0, 0, 0, 0.03), rgba(255, 255, 255, 0.05));
+  border-bottom: 0 none;
+  border-top: 0 none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4), 0 0 1px rgba(0, 0, 0, 0.2), 0 1px 0 #2f89d3 inset, 0 -1px 0 #368ad8 inset;
   .nav-pills {
     margin-bottom: 0;
 
     > li {
       > a {
+        padding-top: 13px;
+        padding-bottom: 13px;
+        margin-top: 0px;
+        margin-bottom: 0px;
+        margin-right: 1px;
         color: @white;
         text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5);
         border: 1px solid transparent;
-        .transition(all .5s ease-in-out);
+        .transition(all .2s ease-in-out);
         .border-radius(0);
 
-        &:hover,
-        &:focus {
-          .box-shadow(inset 0 -1px 0 rgba(255, 255, 255, 0.2));
-          background-color: darken(@headerBackgroundHighlight, 10%);
-          border: 1px solid darken(@headerBackgroundHighlight, 20%);
-        }
       }
 
-      &.active {
+      &.active, &.focus, &:hover, &:focus {
         > a {
-          .box-shadow(inset 0 1px 0 rgba(255, 255, 255, 0.5));
-          border: 1px solid darken(@headerBackgroundHighlight, 10%);
-          background-color: lighten(@headerBackgroundHighlight, 10%);
-
-          &:hover {
-            background-color: darken(@headerBackgroundHighlight, 5%);
-            border: 1px solid darken(@headerBackgroundHighlight, 10%);
-          }
+          background-color: rgba(19, 42, 76, 0.5);
+          box-shadow: inset 3px 0 2px -2px rgba(0, 0, 0, 0.15), inset -3px 0 2px -2px rgba(0, 0, 0, 0.15);
         }
       }
     }
@@ -416,6 +461,7 @@ aside .nav .nav-child {
 }
 
 .subnav-wrapper {
+  position: relative;
   margin-bottom: 10px;
 }
 

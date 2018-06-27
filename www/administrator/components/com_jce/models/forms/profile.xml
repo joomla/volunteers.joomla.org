@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form>
+    <fields>
+        <fieldset name="setup" addfieldpath="/administrator/components/com_categories/models/fields">
+            <field name="id" type="text" default="0" label="JGLOBAL_FIELD_ID_LABEL" readonly="true" class="readonly" description="JGLOBAL_FIELD_ID_DESC"/>
+            <field name="name" type="text" class="input-xxlarge input-large-text" size="40" label="JGLOBAL_TITLE" description="COM_JCE_PROFILE_FIELD_TITLE_DESC" required="true"/>
+            <field name="description" type="text" class="input-xxlarge" label="JGLOBAL_DESCRIPTION" description="COM_JCE_PROFILE_FIELD_DESCRIPTION_DESC"/>
+            <field name="published" type="radio" label="JSTATUS" description="COM_JCE_PROFILE_FIELD_PUBLISHED_DESC" class="btn-group btn-group-yesno" default="1">
+                <option value="1">JPUBLISHED</option>
+                <option value="0">JUNPUBLISHED</option>
+            </field>
+            <field name="ordering" type="Profileordering" label="JFIELD_ORDERING_LABEL" description="JFIELD_ORDERING_DESC"/>
+            <field name="area" type="checkboxes" multiple="multiple" label="COM_JCE_PROFILE_AREA" description="COM_JCE_PROFILE_FIELD_AREA_DESC" class="" default="">
+                <option value="1">COM_JCE_PROFILE_AREA_SITE</option>
+                <option value="2">COM_JCE_PROFILE_AREA_ADMIN</option>
+            </field>
+            <field name="device" type="checkboxes" multiple="multiple" label="COM_JCE_PROFILE_DEVICE" description="COM_JCE_PROFILE_FIELD_DEVICE_DESC" class="" default="">
+                <option value="phone">COM_JCE_PROFILE_DEVICE_PHONE</option>
+                <option value="tablet">COM_JCE_PROFILE_DEVICE_TABLET</option>
+                <option value="desktop">COM_JCE_PROFILE_DEVICE_DESKTOP</option>
+            </field>
+            <field name="extensions_select" type="radio" label="COM_JCE_PROFILE_EXTENSIONS" description="COM_JCE_PROFILE_FIELD_EXTENSIONS_DESC" class="extensions-select" default="0">
+                <option value="0">All Components</option>
+                <option value="1">Selected Only</option>
+            </field>
+            <field name="extensions" type="components" multiple="multiple" label="" description="" disabled="true" />
+            <field name="groups" type="usergroup" multiple="multiple" label="COM_JCE_PROFILE_GROUPS" description="" />
+            <field name="users" type="list" multiple="multiple" label="COM_JCE_PROFILE_USERS" description=""></field>
+            <field name="checked_out" type="hidden" filter="unset"/>
+            <field name="checked_out_time" type="hidden" filter="unset"/>
+        </fieldset>
+    </fields>
+    <fields name="config">
+        <fields name="editor">
+            <fieldset name="features" addfieldpath="/administrator/components/com_categories/models/fields">
+                <field name="width" type="text" class="input-small" label="COM_JCE_EDITOR_WIDTH" description="COM_JCE_EDITOR_WIDTH_DESC"/>
+                <field name="height" type="text" class="input-small" label="COM_JCE_EDITOR_HEIGHT" description="COM_JCE_EDITOR_HEIGHT_DESC"/>
+                <field name="theme" type="list" default="clasic" label="COM_JCE_EDITOR_TOOLBAR_THEME" description="COM_JCE_EDITOR_TOOLBAR_THEME_DESC">
+                    <option value="classic">COM_JCE_EDITOR_SKIN_CLASSIC</option>
+                    <option value="classic-blue">COM_JCE_EDITOR_SKIN_CLASSIC_BLUE</option>
+                    <option value="classic-black">COM_JCE_EDITOR_SKIN_CLASSIC_BLACK</option>
+                    <option value="classic-silver">COM_JCE_EDITOR_SKIN_CLASSIC_SILVER</option>
+                    <option value="modern">COM_JCE_EDITOR_SKIN_MODERN</option>
+                    <option value="mobile">COM_JCE_EDITOR_SKIN_MOBILE</option>
+                </field>
+                <field name="path" type="radio" default="1" class="btn-group btn-group-yesno" label="COM_JCE_EDITOR_PATH" description="COM_JCE_EDITOR_PATH_DESC" parent="statusbar_location[top,bottom]">
+                    <option value="1">JYES</option>
+                    <option value="0">JNO</option>
+                </field>
+                <field name="resizing" type="radio" default="1" class="btn-group btn-group-yesno" label="COM_JCE_EDITOR_RESIZING" description="COM_JCE_EDITOR_RESIZING_DESC" parent="statusbar_location[top,bottom]">
+                    <option value="1">JYES</option>
+                    <option value="0">JNO</option>
+                </field>
+                <field name="toggle" type="radio" default="1" class="btn-group btn-group-yesno" label="COM_JCE_EDITOR_TOGGLE" description="COM_JCE_EDITOR_TOGGLE_DESC">
+                    <option value="1">JYES</option>
+                    <option value="0">JNO</option>
+                </field>
+                <field name="toggle_label" type="text" default="[Toggle Editor]" label="COM_JCE_EDITOR_TOGGLE_LABEL" description="COM_JCE_EDITOR_TOGGLE_LABEL_DESC" parent="toggle[1]"/>
+                <field name="toggle_state" type="radio" default="1" class="btn-group btn-group-yesno" label="COM_JCE_EDITOR_STATE" description="COM_JCE_EDITOR_STATE_DESC" parent="toggle[1]">
+                    <option value="1">JON</option>
+                    <option value="0">JOFF</option>
+                </field>
+            </fieldset>
+            <fieldset name="features" addfieldpath="/administrator/components/com_categories/models/fields"></fieldset>
+            <fieldset name="editor.setup">
+                <field name="relative_urls" type="radio" default="1" label="COM_JCE_PROFILE_RELATIVE" description="COM_JCE_PROFILE_RELATIVE_DESC" class="btn-group btn-group-yesno">
+                    <option value="1">JYES</option>
+                    <option value="0">JNO</option>
+                </field>
+                <field name="verify_html" type="list" default="" label="COM_JCE_CONFIG_CLEANUP" description="COM_JCE_PROFILE_CLEANUP_DESC">
+                    <option value="">JGLOBAL_USE_GLOBAL</option>
+                    <option value="0">JNO</option>
+                    <option value="1">JYES</option>
+                </field>
+                <field name="schema" type="list" default="" label="COM_JCE_CONFIG_DOCTYPE" description="COM_JCE_PROFILE_DOCTYPE_DESC">
+                    <option value="">JGLOBAL_USE_GLOBAL</option>
+                    <option value="mixed">COM_JCE_CONFIG_DOCTYPE_MIXED</option>
+                    <option value="html4">HTML4</option>
+                    <option value="html5">HTML5</option>
+                </field>
+            </fieldset>
+            <fieldset name="editor.typography">
+                <field name="forced_root_block" type="list" default="" label="COM_JCE_CONFIG_ROOT_BLOCK" description="COM_JCE_PROFILE_EDITOR_ROOT_BLOCK_DESC">
+                    <option value="">JGLOBAL_USE_GLOBAL</option>
+                    <option value="p">COM_JCE_CONFIG_ROOT_BLOCK_PARAGRAPH</option>
+                    <option value="div">COM_JCE_CONFIG_ROOT_BLOCK_DIV</option>
+                    <option value="forced_root_block:0|force_p_newlines:1">COM_JCE_CONFIG_ROOT_BLOCK_MIXED</option>
+                    <option value="0">COM_JCE_CONFIG_ROOT_BLOCK_LINEBREAK</option>
+                </field>
+                <field name="profile_content_css" type="list" default="2" label="COM_JCE_CONFIG_EDITOR_GLOBAL_CSS" description="COM_JCE_PROFILE_EDITOR_CSS_DESC">
+                    <option value="0">COM_JCE_PROFILE_EDITOR_CSS_ADD</option>
+                    <option value="1">COM_JCE_PROFILE_EDITOR_CSS_OVERWRITE</option>
+                    <option value="2">COM_JCE_PROFILE_EDITOR_CSS_INHERIT</option>
+                </field>
+                <field name="profile_content_css_custom" placeholder="eg: templates/$template/css/content.css" type="textarea" rows="2" default="" label="COM_JCE_CONFIG_EDITOR_GLOBAL_CSS_CUSTOM" description="COM_JCE_PROFILE_EDITOR_CSS_CUSTOM_DESC"/>
+                <field name="custom_colors" type="textarea" rows="3" cols="50" default="" label="COM_JCE_PROFILE_EDITOR_CUSTOM_COLORS" description="COM_JCE_PROFILE_EDITOR_CUSTOM_COLORS_DESC" placeholder="eg: #CC0000,#FF0000"/>
+            </fieldset>
+            <fieldset name="editor.filesystem">
+                <field name="filesystem" type="filesystem" default="joomla" label="COM_JCE_PROFILE_FILESYSTEM" description="COM_JCE_PROFILE_FILESYSTEM_DESC"/>
+                <field name="max_size" class="input-small" hint="1024" max="" type="uploadmaxsize" step="128" default="" label="COM_JCE_PROFILE_FILESYSTEM_UPLOAD_SIZE" description="COM_JCE_PROFILE_FILESYSTEM_UPLOAD_SIZE_DESC"/>
+                <field name="upload_conflict" type="list" default="overwrite" label="COM_JCE_PROFILE_FILESYSTEM_UPLOAD_EXISTS" description="COM_JCE_PROFILE_FILESYSTEM_UPLOAD_EXISTS_DESC">
+                    <option value="unique">COM_JCE_PROFILE_FILESYSTEM_UPLOAD_EXISTS_UNIQUE</option>
+                    <option value="overwrite">COM_JCE_PROFILE_FILESYSTEM_UPLOAD_EXISTS_OVERWRITE</option>
+                </field>
+                <field name="upload_suffix" class="input-small" hint="_copy" type="text" default="" label="COM_JCE_PROFILE_FILESYSTEM_UPLOAD_SUFFIX" description="COM_JCE_PROFILE_FILESYSTEM_UPLOAD_SUFFIX_DESC"/>
+                <field name="folder_tree" type="radio" default="1" label="COM_JCE_PROFILE_FILESYSTEM_FOLDER_TREE" description="COM_JCE_PROFILE_FILESYSTEM_FOLDER_TREE_DESC" class="btn-group btn-group-yesno">
+                    <option value="1">JYES</option>
+                    <option value="0">JNO</option>
+                </field>
+                <field name="list_limit" type="list" default="all" label="COM_JCE_PROFILE_FILESYSTEM_LIST_LIMIT" description="COM_JCE_PROFILE_FILESYSTEM_LIST_LIMIT_DESC">
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="75">75</option>
+                    <option value="100">100</option>
+                    <option value="all">JALL</option>
+                </field>
+                <field name="validate_mimetype" type="radio" default="1" label="COM_JCE_PROFILE_FILESYSTEM_VALIDATE_MIMETYPE" description="COM_JCE_PROFILE_FILESYSTEM_VALIDATE_MIMETYPE_DESC" class="btn-group btn-group-yesno">
+                    <option value="1">JYES</option>
+                    <option value="0">JNO</option>
+                </field>
+                <field name="websafe_mode" type="list" default="utf-8" label="COM_JCE_PROFILE_FILESYSTEM_WEBSAFE_MODE" description="COM_JCE_PROFILE_FILESYSTEM_WEBSAFE_MODE_DESC">
+                    <option value="utf-8">UTF-8</option>
+                    <option value="ascii">ASCII</option>
+                </field>
+                <field name="websafe_allow_spaces" type="list" default="_" label="COM_JCE_PROFILE_FILESYSTEM_WEBSAFE_ALLOW_SPACES" description="COM_JCE_PROFILE_FILESYSTEM_WEBSAFE_ALLOW_SPACES_DESC">
+                    <option value="1">JYES</option>
+                    <option value="_">COM_JCE_WEBSAFE_ALLOW_SPACES_UNDERSCORE</option>
+                    <option value="-">COM_JCE_WEBSAFE_ALLOW_SPACES_DASH</option>
+                    <option value=".">COM_JCE_WEBSAFE_ALLOW_SPACES_PERIOD</option>
+                </field>
+                <field name="websafe_textcase" type="checkboxes" multiple="multiple" default="uppercase,lowercase" label="COM_JCE_PROFILE_FILESYSTEM_WEBSAFE_TEXTCASE" description="COM_JCE_PROFILE_FILESYSTEM_WEBSAFE_TEXTCASE_DESC">
+                    <option value="uppercase">COM_JCE_WEBSAFE_UPPERCASE</option>
+                    <option value="lowercase">COM_JCE_WEBSAFE_LOWERCASE</option>
+                </field>
+                <field name="upload_add_random" type="number" default="" label="COM_JCE_PROFILE_FILESYSTEM_UPLOAD_ADD_RANDOM" description="COM_JCE_PROFILE_FILESYSTEM_UPLOAD_ADD_RANDOM_DESC" class="input-small" max="32" step="1"/>
+                <field name="date_format" type="text" default="" hint="eg: %d/%m/%Y, %H:%M" label="COM_JCE_PROFILE_FILESYSTEM_DATE_FORMAT" description="COM_JCE_PROFILE_FILESYSTEM_DATE_FORMAT_DESC" />
+                <field name="total_files" type="number" default="" label="COM_JCE_PROFILE_FILESYSTEM_TOTAL_FILES_LIMIT" description="COM_JCE_PROFILE_FILESYSTEM_TOTAL_FILES_LIMIT_DESC" class="input-small" step="1"/>
+                <field name="total_size" type="number" default="" label="COM_JCE_PROFILE_FILESYSTEM_TOTAL_FILES_SIZE_LIMIT" description="COM_JCE_PROFILE_FILESYSTEM_TOTAL_FILES_SIZE_LIMIT_DESC" class="input-small" step="1"/>
+            </fieldset>
+            <fieldset name="editor.advanced">
+                <!-- Elements -->
+                <field name="invalid_elements" type="elementlist" default="" label="COM_JCE_PROFILE_EDITOR_NO_ELEMENTS" description="COM_JCE_PROFILE_EDITOR_NO_ELEMENTS_DESC" multiple="true" />
+                <field name="invalid_attributes" type="text" default="" label="COM_JCE_PROFILE_EDITOR_INVALID_ATTRIBUTES" description="COM_JCE_PROFILE_EDITOR_INVALID_ATTRIBUTES_DESC"/>
+                <field name="invalid_attribute_values" type="text" default="" label="COM_JCE_PROFILE_EDITOR_INVALID_ATTRIBUTE_VALUES" description="COM_JCE_PROFILE_EDITOR_INVALID_ATTRIBUTE_VALUES_DESC"/>
+                <field name="extended_elements" type="textarea" rows="2" default="" label="COM_JCE_PROFILE_EDITOR_ELEMENTS" description="COM_JCE_PROFILE_EDITOR_ELEMENTS_DESC"/>
+                <field name="allow_javascript" type="radio" default="0" label="COM_JCE_PROFILE_EDITOR_JAVASCRIPT" description="COM_JCE_PROFILE_EDITOR_JAVASCRIPT_DESC" class="btn-group btn-group-yesno">
+                    <option value="1">JYES</option>
+                    <option value="0">JNO</option>
+                </field>
+                <field name="allow_css" type="radio" default="0" label="COM_JCE_PROFILE_EDITOR_CSS" description="COM_JCE_PROFILE_EDITOR_CSS_DESC" class="btn-group btn-group-yesno">
+                    <option value="1">JYES</option>
+                    <option value="0">JNO</option>
+                </field>
+            </fieldset>
+        </fields>
+    </fields>
+</form>

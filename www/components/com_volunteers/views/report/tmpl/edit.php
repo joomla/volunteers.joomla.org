@@ -20,12 +20,6 @@ JFactory::getDocument()->addScriptDeclaration("
 		}
 	}
 ");
-
-// Show notice to display email in feed
-if (!$this->item->id && $this->volunteer->email_feed == 0)
-{
-	JFactory::getApplication()->enqueueMessage(JText::_('COM_VOLUNTEERS_MESSAGE_SET_FEED_EMAIL'), 'notice');
-}
 ?>
 
 <div class="report-edit">

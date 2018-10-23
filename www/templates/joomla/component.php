@@ -2,7 +2,7 @@
 /**
  * Joomla.org site template
  *
- * @copyright   Copyright (C) 2005 - 2017 Open Source Matters, Inc. All rights reserved.
+ * @copyright   Copyright (C) 2005 - 2018 Open Source Matters, Inc. All rights reserved.
  * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
 
@@ -18,11 +18,11 @@ $this->setHtml5(true);
 // Add Stylesheets - if the site is in debug mode or has explicitly chosen to not use the CDN, load the local media
 if (JDEBUG || !$this->params->get('useCdn', '1'))
 {
-    HTMLHelper::_('stylesheet', 'template.min.css', ['relative' => true, 'detectDebug' => (bool) JDEBUG, 'version' => '2.3.0']);
+    HTMLHelper::_('stylesheet', 'template.min.css', ['relative' => true, 'detectDebug' => (bool) JDEBUG, 'version' => '3.0.0']);
 }
 else
 {
-	$this->addStyleSheet('https://cdn.joomla.org/template/css/template_2.3.0.min.css');
+	$this->addStyleSheet('https://cdn.joomla.org/template/css/template_3.0.0.min.css');
 }
 
 // Bootstrap 3 polyfill
@@ -68,15 +68,15 @@ $this->setMetaData('viewport', 'width=device-width, initial-scale=1.0');
 <head>
 	<jdoc:include type="head" />
 	<script>
-	var _prum = [['id', '59300ad15992c776ad970068'],
-	             ['mark', 'firstbyte', (new Date()).getTime()]];
-	(function() {
-	    var s = document.getElementsByTagName('script')[0]
-	      , p = document.createElement('script');
-	    p.async = 'async';
-	    p.src = '//rum-static.pingdom.net/prum.min.js';
-	    s.parentNode.insertBefore(p, s);
-	})();
+		var _prum = [['id', '59300ad15992c776ad970068'],
+					['mark', 'firstbyte', (new Date()).getTime()]];
+		(function() {
+			var s = document.getElementsByTagName('script')[0]
+			, p = document.createElement('script');
+			p.async = 'async';
+			p.src = 'https://rum-static.pingdom.net/prum.min.js';
+			s.parentNode.insertBefore(p, s);
+		})();
 	</script>
 </head>
 <body class="contentpane modal">

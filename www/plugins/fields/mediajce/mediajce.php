@@ -10,20 +10,26 @@
 
 defined('_JEXEC') or die;
 
-require_once(JPATH_PLUGINS . '/fields/media/media.php');
+JLoader::import('components.com_fields.libraries.fieldsplugin', JPATH_ADMINISTRATOR);
+
+JForm::addFieldPath(JPATH_PLUGINS . '/system/jce/fields');
 
 /**
  * Fields MediaJce Plugin
  *
  * @since  2.6.27
  */
-class PlgFieldsMediaJce extends PlgFieldsMedia
+class PlgFieldsMediaJce extends FieldsPlugin
 {
-	/**
-	 * Returns the result of the media field onCustomFieldsPrepareDom method
-	 */
 	public function onCustomFieldsPrepareDom($field, DOMElement $parent, JForm $form)
-	{		
-		return parent::onCustomFieldsPrepareDom($field, $parent, $form);
+	{
+		$fieldNode = parent::onCustomFieldsPrepareDom($field, $parent, $form);
+
+		if (!$fieldNode)
+		{
+			return $fieldNode;
+		}
+
+		return $fieldNode;
 	}
 }

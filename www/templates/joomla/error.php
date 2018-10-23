@@ -2,7 +2,7 @@
 /**
  * Joomla.org site template
  *
- * @copyright   Copyright (C) 2005 - 2017 Open Source Matters, Inc. All rights reserved.
+ * @copyright   Copyright (C) 2005 - 2018 Open Source Matters, Inc. All rights reserved.
  * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
 
@@ -36,11 +36,11 @@ $sitename = $app->get('sitename');
 // Set the CSS URL based on whether we're in debug mode or it was explicitly chosen to not use the CDN
 if (JDEBUG || !$params->get('useCdn', '1'))
 {
-	$cssURL = HTMLHelper::_('stylesheet', 'template.min.css', ['pathOnly' => true, 'relative' => true, 'detectDebug' => (bool) JDEBUG, 'version' => '2.3.0']);
+	$cssURL = HTMLHelper::_('stylesheet', 'template.min.css', ['pathOnly' => true, 'relative' => true, 'detectDebug' => (bool) JDEBUG, 'version' => '3.0.0']);
 }
 else
 {
-	$cssURL = 'https://cdn.joomla.org/template/css/template_2.3.0.min.css';
+	$cssURL = 'https://cdn.joomla.org/template/css/template_3.0.0.min.css';
 }
 
 $bs3Css = false;
@@ -158,15 +158,15 @@ $gtmId = JoomlaTemplateHelper::getGtmId(Uri::getInstance()->toString(['host']));
 		<!--[if lt IE 9]><script src="<?php echo $html5Shim ?>"></script><![endif]-->
 	<?php endif; ?>
 	<script>
-	var _prum = [['id', '59300ad15992c776ad970068'],
-	             ['mark', 'firstbyte', (new Date()).getTime()]];
-	(function() {
-	    var s = document.getElementsByTagName('script')[0]
-	      , p = document.createElement('script');
-	    p.async = 'async';
-	    p.src = '//rum-static.pingdom.net/prum.min.js';
-	    s.parentNode.insertBefore(p, s);
-	})();
+		var _prum = [['id', '59300ad15992c776ad970068'],
+					['mark', 'firstbyte', (new Date()).getTime()]];
+		(function() {
+			var s = document.getElementsByTagName('script')[0]
+			, p = document.createElement('script');
+			p.async = 'async';
+			p.src = 'https://rum-static.pingdom.net/prum.min.js';
+			s.parentNode.insertBefore(p, s);
+		})();
 	</script>
 </head>
 <body class="<?php echo "site error $option view-$view layout-$layout task-$task itemid-$itemid" . ($params->get('fluidContainer') ? ' fluid' : '') . ($this->direction == 'rtl' ? ' rtl' : ''); ?>">
@@ -174,8 +174,8 @@ $gtmId = JoomlaTemplateHelper::getGtmId(Uri::getInstance()->toString(['host']));
 	// Add Google Tag Manager code if one is set
 	if ($gtmId) : ?>
 	<!-- Google Tag Manager -->
-	<noscript><iframe src="//www.googletagmanager.com/ns.html?id=<?php echo $gtmId; ?>" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-	<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','<?php echo $gtmId; ?>');</script>
+	<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=<?php echo $gtmId; ?>" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+	<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','<?php echo $gtmId; ?>');</script>
 	<!-- End Google Tag Manager -->
 	<?php endif; ?>
 	<!-- Top Nav -->
@@ -189,7 +189,7 @@ $gtmId = JoomlaTemplateHelper::getGtmId(Uri::getInstance()->toString(['host']));
 						<span class="icon-bar"></span>
 					</a>
 
-					<?php echo str_replace($search, $replacement, JoomlaTemplateHelper::getTemplateMenu($this->language)); ?>
+					<?php echo str_replace($search, $replacement, JoomlaTemplateHelper::getTemplateMenu($this->language, (bool) $params->get('useCdn', '1'))); ?>
 				</div>
 			</div>
 		</div>
@@ -289,7 +289,7 @@ $gtmId = JoomlaTemplateHelper::getGtmId(Uri::getInstance()->toString(['host']));
 		<div class="container<?php echo $params->get('fluidContainer') ? '-fluid' : ''; ?>">
 			<hr />
 
-			<?php echo JoomlaTemplateHelper::getTemplateFooter($this->language); ?>
+			<?php echo JoomlaTemplateHelper::getTemplateFooter($this->language, (bool) $params->get('useCdn', '1')); ?>
 		</div>
 	</footer>
 </body>

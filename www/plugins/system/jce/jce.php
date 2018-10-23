@@ -94,17 +94,21 @@ class PlgSystemJce extends JPlugin
 
             // avoid processing twice
             if (strpos($form->getFieldAttribute($name, 'class'), 'wf-media-input') !== false) {
-                return;
+                continue;
             }
 
             $type = $field->getAttribute('type');
 
             if (strtolower($type) === 'media') {
                 $group = (string) $field->group;
-                
-                $form->addFieldPath(JPATH_PLUGINS . '/system/jce/fields');
                 $form->setFieldAttribute($name, 'type', 'mediajce', $group);
+                $hasMedia = true;
             }
+        }
+        
+        // form has a converted media field
+        if ($hasMedia) {
+            $form->addFieldPath(JPATH_PLUGINS . '/system/jce/fields');
         }
 
         return true;

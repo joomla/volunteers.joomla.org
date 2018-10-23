@@ -208,6 +208,9 @@ class WFModelEditor extends WFModelBase
             $settings['toggle_label'] = htmlspecialchars($wf->getParam('editor.toggle_label', ''));
             $settings['toggle_state'] = $wf->getParam('editor.toggle_state', 1, 1);
 
+            // Set active tab
+            $settings['active_tab'] = 'wf-editor-' . $wf->getParam('editor.active_tab', 'wysiwyg');
+
             // Get all optional plugin configuration options
             $this->getPluginConfig($settings);
 
@@ -617,6 +620,11 @@ class WFModelEditor extends WFModelBase
                 // core plugins
                 $core = array('core', 'autolink', 'cleanup', 'code', 'format', 'importcss', 'colorpicker', 'upload');
 
+                // load branding
+                if (!WF_EDITOR_PRO) {
+                    $core[] = 'branding';
+                }
+
                 // add advlists plugin if lists are loaded
                 if (in_array('lists', $items)) {
                     $items[] = 'advlist';
@@ -662,10 +670,15 @@ class WFModelEditor extends WFModelBase
 
                     // reset index
                     $items = array_values($items);
-
+                    
                     // add to array
-                    $plugins['external'][$name] = JURI::root(true) . $attribs->path . '/editor_plugin.js';
+                    $plugins['external'][$name] = JURI::root(true) . '/' . $attribs->url . '/editor_plugin.js';
                 }
+
+                // remove missing plugins
+                $items = array_filter($items, function($item) {
+                    return is_file(WF_EDITOR_PLUGINS . '/' . $item . '/editor_plugin.js');
+                });
 
                 // update core plugins
                 $plugins['core'] = $items;

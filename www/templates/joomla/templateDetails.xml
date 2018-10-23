@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE install PUBLIC "-//Joomla! 2.5//DTD template 1.0//EN" "https://www.joomla.org/xml/dtd/2.5/template-install.dtd">
-<extension version="3.6" type="template" client="site" method="upgrade">
+<extension version="3.8" type="template" client="site" method="upgrade">
 	<name>joomla</name>
-	<version>2.3.0</version>
+	<version>3.0.0</version>
 	<creationDate>30-Aug-2016</creationDate>
 	<author>Kyle Ledbetter</author>
 	<authorEmail>kyle@kyleledbetter.com</authorEmail>
-	<copyright>Copyright (C) 2005 - 2017 Open Source Matters, Inc. All rights reserved.</copyright>
+	<copyright>Copyright (C) 2005 - 2018 Open Source Matters, Inc. All rights reserved.</copyright>
 	<description>TPL_JOOMLA_XML_DESCRIPTION</description>
 	<scriptfile>script.php</scriptfile>
 	<files>
@@ -18,6 +18,7 @@
 		<filename>templateDetails.xml</filename>
 		<filename>template_preview.png</filename>
 		<filename>template_thumbnail.png</filename>
+		<folder>cdn</folder>
 		<folder>css</folder>
 		<folder>fonts</folder>
 		<folder>helpers</folder>
@@ -51,41 +52,131 @@
 	<config>
 		<fields name="params">
 			<fieldset name="advanced">
-				<field name="useCDN" type="radio" class="btn-group btn-group-yesno" default="1" label="TPL_JOOMLA_USE_CDN_LABEL" description="TPL_JOOMLA_USE_CDN_DESC">
+				<field
+					name="useCDN"
+					type="radio"
+					label="TPL_JOOMLA_USE_CDN_LABEL"
+					description="TPL_JOOMLA_USE_CDN_DESC"
+					class="btn-group btn-group-yesno"
+					default="1"
+					filter="int"
+					>
 					<option value="0">JNO</option>
 					<option value="1">JYES</option>
 				</field>
 
-				<field name="bs3Grid" type="radio" class="btn-group btn-group-yesno" default="0" label="TPL_JOOMLA_BS3_GRID_LABEL" description="TPL_JOOMLA_BS3_GRID_DESC">
+				<field
+					name="bs3Grid"
+					type="radio"
+					label="TPL_JOOMLA_BS3_GRID_LABEL"
+					description="TPL_JOOMLA_BS3_GRID_DESC"
+					class="btn-group btn-group-yesno"
+					default="0"
+					filter="int"
+					>
 					<option value="0">JNO</option>
 					<option value="1">JYES</option>
 				</field>
 
-				<field name="googleFont" type="radio" class="btn-group btn-group-yesno" default="1" label="TPL_JOOMLA_FONT_LABEL" description="TPL_JOOMLA_FONT_DESC">
+				<field
+					name="googleFont"
+					type="radio"
+					label="TPL_JOOMLA_FONT_LABEL"
+					description="TPL_JOOMLA_FONT_DESC"
+					class="btn-group btn-group-yesno"
+					default="1"
+					filter="int"
+					>
 					<option value="0">JNO</option>
 					<option value="1">JYES</option>
 				</field>
 
-				<field name="googleFontName" type="text" default="Open+Sans" label="TPL_JOOMLA_FONT_NAME_LABEL" description="TPL_JOOMLA_FONT_NAME_DESC" showon="googleFont:1" />
+				<field
+					name="googleFontName"
+					type="text"
+					label="TPL_JOOMLA_FONT_NAME_LABEL"
+					description="TPL_JOOMLA_FONT_NAME_DESC"
+					default="Open+Sans:400"
+					showon="googleFont:1"
+				/>
 
-				<field name="fluidContainer" type="radio" class="btn-group btn-group-yesno" default="0" label="TPL_JOOMLA_FLUID_LABEL" description="TPL_JOOMLA_FLUID_DESC">
+				<field
+					name="fluidContainer"
+					type="radio"
+					label="TPL_JOOMLA_FLUID_LABEL"
+					description="TPL_JOOMLA_FLUID_DESC"
+					class="btn-group btn-group-yesno"
+					default="0"
+					filter="int"
+					>
 					<option value="0">TPL_JOOMLA_STATIC</option>
 					<option value="1">TPL_JOOMLA_FLUID</option>
 				</field>
 
-				<field name="leftColumnWidth" type="integer" default="3" first="1" last="12" step="1" label="TPL_JOOMLA_LEFT_COLUMN_WIDTH_LABEL" description="TPL_JOOMLA_COLUMN_WIDTH_DESC" />
+				<field
+					name="leftColumnWidth"
+					type="integer"
+					label="TPL_JOOMLA_LEFT_COLUMN_WIDTH_LABEL"
+					description="TPL_JOOMLA_COLUMN_WIDTH_DESC"
+					default="3"
+					first="1"
+					last="12"
+					step="1"
+				/>
 
-				<field name="rightColumnWidth" type="integer" default="3" first="1" last="12" step="1" label="TPL_JOOMLA_RIGHT_COLUMN_WIDTH_LABEL" description="TPL_JOOMLA_COLUMN_WIDTH_DESC" />
+				<field
+					name="rightColumnWidth"
+					type="integer"
+					label="TPL_JOOMLA_RIGHT_COLUMN_WIDTH_LABEL"
+					description="TPL_JOOMLA_COLUMN_WIDTH_DESC"
+					default="3"
+					first="1"
+					last="12"
+					step="1"
+				/>
 
-				<field name="twitterCardTitle" type="text" default="Joomla.org" label="TPL_JOOMLA_TWITTER_CARD_TITLE_LABEL" description="TPL_JOOMLA_TWITTER_CARD_TITLE_DESC" />
+				<field
+					name="twitterCardTitle"
+					type="text"
+					label="TPL_JOOMLA_TWITTER_CARD_TITLE_LABEL"
+					description="TPL_JOOMLA_TWITTER_CARD_TITLE_DESC"
+					default="Joomla.org"
+				/>
 
-				<field name="twitterCardDescription" type="text" default="The Platform Millions of Websites Are Built On" label="TPL_JOOMLA_TWITTER_CARD_DESC_LABEL" description="TPL_JOOMLA_TWITTER_CARD_DESC_DESC" />
+				<field
+					name="twitterCardDescription"
+					type="text"
+					label="TPL_JOOMLA_TWITTER_CARD_DESC_LABEL"
+					description="TPL_JOOMLA_TWITTER_CARD_DESC_DESC"
+					default="The Platform Millions of Websites Are Built On"
+				/>
 
-				<field name="twitterCardImage" type="url" filter="url" default="https://cdn.joomla.org/images/joomla-twitter-card.jpg" label="TPL_JOOMLA_TWITTER_CARD_IMAGE_LABEL" description="TPL_JOOMLA_TWITTER_CARD_IMAGE_DESC" />
+				<field
+					name="twitterCardImage"
+					type="url"
+					label="TPL_JOOMLA_TWITTER_CARD_IMAGE_LABEL"
+					description="TPL_JOOMLA_TWITTER_CARD_IMAGE_DESC"
+					default="https://cdn.joomla.org/images/joomla-twitter-card.jpg"
+					filter="url"
+				/>
 
-				<field name="ogImage" type="url" filter="url" default="https://cdn.joomla.org/images/joomla-org-og.jpg" label="TPL_JOOMLA_OPENGRAPH_IMAGE_LABEL" description="TPL_JOOMLA_OPENGRAPH_IMAGE_DESC" />
+				<field
+					name="ogImage"
+					type="url"
+					label="TPL_JOOMLA_OPENGRAPH_IMAGE_LABEL"
+					description="TPL_JOOMLA_OPENGRAPH_IMAGE_DESC"
+					default="https://cdn.joomla.org/images/joomla-org-og.jpg"
+					filter="url"
+				/>
 
-				<field name="searchModule" type="radio" class="btn-group" default="search" label="TPL_JOOMLA_SEARCH_MODULE_LABEL" description="TPL_JOOMLA_SEARCH_MODULE_DESC">
+				<field
+					name="searchModule"
+					type="radio"
+					label="TPL_JOOMLA_SEARCH_MODULE_LABEL"
+					description="TPL_JOOMLA_SEARCH_MODULE_DESC"
+					class="btn-group"
+					default="search"
+					>
 					<option value="finder">TPL_JOOMLA_FINDER</option>
 					<option value="search">TPL_JOOMLA_SEARCH</option>
 				</field>

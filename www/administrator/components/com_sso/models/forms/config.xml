@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form>
+	<fieldset name="sso" label="COM_SSO_CONFIG_SSO">
+		<fields name="sso">
+			<field name="adminpassword"
+				   type="text"
+				   label="COM_SSO_CONFIG_ADMINPASSWORD_LABEL"
+				   description="COM_SSO_CONFIG_ADMINPASSWORD_DESC"
+				   required="true"
+				   class="input-medium"/>
+
+			<field name="secretsalt"
+				   type="text"
+				   label="COM_SSO_CONFIG_SECRETSALT_LABEL"
+				   description="COM_SSO_CONFIG_SECRETSALT_DESC"
+				   required="true"
+				   class="input-medium"/>
+
+			<field name="technicalcontact_name"
+				   type="text"
+				   label="COM_SSO_CONFIG_TECHNICALCONTACT_NAME_LABEL"
+				   description="COM_SSO_CONFIG_TECHNICALCONTACT_NAME_DESC"
+				   required="true"
+				   class="input-large"/>
+
+			<field name="technicalcontact_email"
+				   type="text"
+				   label="COM_SSO_CONFIG_TECHNICALCONTACT_EMAIL_LABEL"
+				   description="COM_SSO_CONFIG_TECHNICALCONTACT_EMAIL_DESC"
+				   required="true"
+				   class="input-large"/>
+
+			<field
+					name="idp"
+					type="radio"
+					label="COM_SSO_CONFIG_SETIDP_LABEL"
+					description="COM_SSO_CONFIG_SETIDP_DESC"
+					default="0"
+					class="btn-group btn-group-yesno"
+					filter="integer"
+			>
+				<option value="1">JYES</option>
+				<option value="0">JNO</option>
+			</field>
+
+			<field name="privatekey"
+				   type="text"
+				   label="COM_SSO_CONFIG_PRIVATEKEY_LABEL"
+				   description="COM_SSO_CONFIG_PRIVATEKEY_DESC"
+				   required="false"
+				   showon="idp:1"
+				   class="input-medium" />
+
+			<field name="certificate"
+				   type="text"
+				   label="COM_SSO_CONFIG_CERTIFICATE_LABEL"
+				   description="COM_SSO_CONFIG_CERTIFICATE_DESC"
+				   required="false"
+				   showon="idp:1"
+				   class="input-medium" />
+
+			<field name="theme"
+				   type="text"
+				   label="COM_SSO_CONFIG_THEME_LABEL"
+				   description="COM_SSO_CONFIG_THEME_DESC"
+				   required="false"
+				   class="input-large" />
+
+			<field name="consent"
+				   type="text"
+				   label="COM_SSO_CONFIG_CONSENT_LABEL"
+				   description="COM_SSO_CONFIG_CONSENT_DESC"
+				   required="false"
+				   class="input-large" />
+
+			<field
+					name="debug"
+					type="radio"
+					label="COM_SSO_CONFIG_DEBUG_LABEL"
+					description="COM_SSO_CONFIG_DEBUG_DESC"
+					default="0"
+					class="btn-group btn-group-yesno"
+			>
+				<option value="1">JYES</option>
+				<option value="0">JNO</option>
+			</field>
+		</fields>
+	</fieldset>
+</form>

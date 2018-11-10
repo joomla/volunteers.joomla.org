@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form>
+	<fieldset name="fields" label="COM_SSO_CONFIG_FIELDS">
+		<fields name="fields">
+			<field name="idpName"
+				   type="text"
+				   label="COM_SSO_CONFIG_IDPNAME_LABEL"
+				   description="COM_SSO_CONFIG_IDPNAME_DESC"
+				   required="true"
+				   class="input-xxlarge"/>
+
+			<field name="localName"
+				   type="text"
+				   label="COM_SSO_CONFIG_LOCALNAME_LABEL"
+				   description="COM_SSO_CONFIG_LOCALNAME_DESC"
+				   required="true"
+				   class="input-xxlarge"/>
+		</fields>
+	</fieldset>
+</form>

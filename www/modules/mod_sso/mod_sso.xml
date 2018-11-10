@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension version="3.8" type="module" client="site" method="upgrade">
+	<name>MOD_SSO</name>
+	<creationDate>10 November 2018</creationDate>
+	<author>RolandD Cyber Produksi</author>
+	<authorEmail>contact@rolandd.com</authorEmail>
+	<authorUrl>https://rolandd.com</authorUrl>
+	<copyright>Copyright (C) 2017 - 2018 RolandD Cyber Produksi. All rights reserved.</copyright>
+	<license>GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html</license>
+	<version>1.0.0</version>
+	<description>MOD_SSO_XML_DESCRIPTION</description>
+
+	<files>
+		<filename module="mod_sso">mod_sso.php</filename>
+		<folder>tmpl</folder>
+		<folder>language</folder>
+		<filename>mod_sso.xml</filename>
+	</files>
+
+	<config>
+		<fields name="params">
+			<fieldset name="basic">
+				<field
+						addfieldpath="administrator/components/com_sso/models/fields"
+						name="profile"
+						type="sso.profile"
+						label="MOD_SSO_PROFILE_LABEL"
+						description="MOD_SSO_PROFILE_DESC" />
+			</fieldset>
+
+			<fieldset name="advanced">
+				<field
+						name="moduleclass_sfx"
+						type="text"
+						label="COM_MODULES_FIELD_MODULECLASS_SFX_LABEL"
+						description="COM_MODULES_FIELD_MODULECLASS_SFX_DESC" />
+			</fieldset>
+		</fields>
+	</config>
+</extension>

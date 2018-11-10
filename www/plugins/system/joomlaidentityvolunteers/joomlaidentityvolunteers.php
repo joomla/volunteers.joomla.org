@@ -7,26 +7,73 @@
  * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
 
-use Joomla\CMS\Factory;
+use Joomla\CMS\Application\ApplicationHelper;
+use Joomla\CMS\Application\CMSApplication;
+use Joomla\CMS\Language\Text;
 use Joomla\CMS\Plugin\CMSPlugin;
 
-// No direct access.
 defined('_JEXEC') or die;
 
 /**
  * Joomla Identity Plugin class
  *
- * @since 1.0
+ * @since 1.0.0
  */
 class PlgSystemJoomlaIdentityVolunteers extends CMSPlugin
 {
 	/**
 	 * Application object.
 	 *
-	 * @var    JApplicationCms
+	 * @var    CMSApplication
 	 * @since  1.0
 	 */
 	protected $app;
+
+	/**
+	 * Application object.
+	 *
+	 * @var    JDatabaseDriver
+	 * @since  1.0.0
+	 */
+	protected $db;
+
+	/**
+	 * Affects constructor behavior. If true, language files will be loaded automatically.
+	 *
+	 * @var    boolean
+	 * @since  1.0.0
+	 */
+	protected $autoloadLanguage = true;
+
+	/**
+	 * The required volunteer data
+	 *
+	 * @var    array
+	 * @since  1.0.0
+	 */
+	private $requiredFields = array(
+		'address',
+		'city',
+		'region',
+		'zip',
+		'country',
+		'intro',
+		'joomlastory',
+		'image',
+		'facebook',
+		'twitter',
+		'linkedin',
+		'website',
+		'github',
+		'certification',
+		'stackexchange',
+		'joomlastackexchange',
+		'latitude',
+		'longitude',
+		'joomlaforum',
+		'joomladocs',
+		'crowdin'
+	);
 
 	/**
 	 * Method triggered in processing Joomla identity data
@@ -37,12 +84,41 @@ class PlgSystemJoomlaIdentityVolunteers extends CMSPlugin
 	 *
 	 * @return  void
 	 *
-	 * @since   1.0
+	 * @since   1.0.0
 	 */
 	public function onProcessIdentity($userId, $guid, $data)
 	{
-		// Update volunteer
-		$this->updateVolunteer($userId, $guid, $data);
+		try
+		{
+			$this->validateData($data);
+			$this->updateVolunteer($userId, $guid, $data);
+		}
+		catch (Exception $exception)
+		{
+			echo $exception->getMessage();
+		}
+	}
+
+	/**
+	 * Validate the posted data containing al the required fields.
+	 *
+	 * @param   object  $data  The data to store
+	 *
+	 * @return  void
+	 *
+	 * @throws  InvalidArgumentException
+	 *
+	 * @since   1.0.0
+	 */
+	private function validateData($data)
+	{
+		foreach ($this->requiredFields as $field)
+		{
+			if (!isset($data->$field))
+			{
+				throw new InvalidArgumentException(Text::sprintf('PLG_SYSTEM_JOOMLAIDENTITYVOLUNTEERS_MISSING_FIELD', $field));
+			}
+		}
 	}
 
 	/**
@@ -54,14 +130,14 @@ class PlgSystemJoomlaIdentityVolunteers extends CMSPlugin
 	 *
 	 * @return  void
 	 *
-	 * @since   1.0
+	 * @since   1.0.0
 	 */
-	protected function updateVolunteer($userId, $guid, $data)
+	private function updateVolunteer($userId, $guid, $data)
 	{
 		// Consent date
 		$volunteer = (object) array(
 			'user_id'             => $userId,
-			'alias'               => JApplicationHelper::stringURLSafe($data->name),
+			'alias'               => ApplicationHelper::stringURLSafe($data->name),
 			'address'             => $data->address,
 			'city'                => $data->city,
 			'city-location'       => $data->city,
@@ -73,7 +149,6 @@ class PlgSystemJoomlaIdentityVolunteers extends CMSPlugin
 			'image'               => $data->image,
 			'facebook'            => $data->facebook,
 			'twitter'             => $data->twitter,
-			'googleplus'          => $data->googleplus,
 			'linkedin'            => $data->linkedin,
 			'website'             => $data->website,
 			'github'              => $data->github,
@@ -90,11 +165,34 @@ class PlgSystemJoomlaIdentityVolunteers extends CMSPlugin
 
 		try
 		{
-			Factory::getDbo()->insertObject('#__volunteers_volunteers', $volunteer, 'user_id');
+			$this->db->insertObject('#__volunteers_volunteers', $volunteer, 'user_id');
 		}
 		catch (Exception $e)
 		{
-			Factory::getDbo()->updateObject('#__volunteers_volunteers', $volunteer, array('user_id'));
+			$this->db->updateObject('#__volunteers_volunteers', $volunteer, array('user_id'));
+		}
+	}
+
+	/**
+	 * Method triggered in deleting a Joomla identity
+	 *
+	 * @param   integer $userId Joomla User ID
+	 * @param   string  $guid   GUID of user
+	 * @param   object  $data   Object containing user data
+	 *
+	 * @return  void
+	 *
+	 * @since   1.0.0
+	 */
+	public function onProcessDelete($userId, $guid, $data)
+	{
+		try
+		{
+
+		}
+		catch (Exception $exception)
+		{
+			echo $exception->getMessage();
 		}
 	}
 }

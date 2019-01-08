@@ -18,7 +18,7 @@
 
     <config>
         <fields name="params">
-            <fieldset name="basic">
+            <fieldset name="basic" addfieldpath="administrator/components/com_identity/models/fields">
                 <field
                         name="isIdentityProvider"
                         type="list"
@@ -39,7 +39,19 @@
                         description="PLG_JOOMLAIDENTITY_APIKEY_DESC"
                         class="input-xlarge"
                         required="false"
+                        showon="isIdentityProvider:0"
                 />
+
+                <field
+                        name="generalConsent"
+                        type="identity.sites"
+                        label="PLG_JOOMLAIDENTITY_GENERAL_CONSENT_LABEL"
+                        description="PLG_JOOMLAIDENTITY_GENERAL_CONSENT_DESC"
+                        class="input-xlarge"
+                        required="false"
+                        showon="isIdentityProvider:1">
+                        <option value="0">PLG_JOOMLAIDENTITY_GENERAL_CONSENT_CHOOSE</option>
+                </field>
             </fieldset>
         </fields>
     </config>

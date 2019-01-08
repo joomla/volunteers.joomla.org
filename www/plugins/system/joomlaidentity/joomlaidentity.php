@@ -8,11 +8,15 @@
  */
 
 use Joomla\CMS\Application\CMSApplication;
+use Joomla\CMS\Date\Date;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Plugin\CMSPlugin;
+use Joomla\CMS\Uri\Uri;
 use Joomla\CMS\User\UserHelper;
 use Joomla\Utilities\ArrayHelper;
+
+require_once JPATH_ADMINISTRATOR . '/components/com_identity/helpers/identity.php';
 
 defined('_JEXEC') or die;
 
@@ -63,7 +67,7 @@ class PlgSystemJoomlaIdentity extends CMSPlugin
 		}
 
 		// Check for Joomla Identity
-		$joomlaIdentity = $this->app->input->getBool('joomlaidp');
+		$joomlaIdentity = $this->app->input->getCmd('joomlaidp');
 
 		// Only continue for Joomla Identity
 		if (!isset($joomlaIdentity))
@@ -73,35 +77,34 @@ class PlgSystemJoomlaIdentity extends CMSPlugin
 
 		try
 		{
-			// Get the hash from the payload
-			$hash       = $this->app->input->getBase64('hash');
-			$encodeData = $this->app->input->get('data', '', 'RAW');
+			// Get the data from the payload
+			$apiKey = $this->app->input->json->get('apiKey');
 
-			// Create the hash
-			$calculatedHash = base64_encode(hash_hmac('sha512', $encodeData, $this->params->get('apikey')));
-
-			// Check if the GUID and the hash matches
-			if ($calculatedHash !== $hash)
+			// Check if the API key matches
+			if (strlen($apiKey) <> 36
+				&& $this->params->get('apikey') !== $apiKey)
 			{
-				throw new InvalidArgumentException(Text::_('PLG_SYSTEM_JOOMLAIDENTITY_INVALID_HASH'));
+				throw new InvalidArgumentException(Text::_('PLG_SYSTEM_JOOMLAIDENTITY_INVALID_APIKEY'));
 			}
 
-			// Get the data
-			$data = (object) json_decode($encodeData, true);
+			$guid    = $this->app->input->json->getString('guid');
+			$consent = $this->app->input->json->getInt('consent', 0);
+			$data    = (object) $this->app->input->json->get('data', array(), 'array');
 
-			if (!isset($data->guid) || strlen($data->guid) <> 36)
+			// Check if we have the minimum required data
+			if (!isset($data->email))
+			{
+				throw new InvalidArgumentException(Text::_('PLG_SYSTEM_JOOMLAIDENTITY_MISSING_EMAIL'));
+			}
+
+			if (!$guid || strlen($guid) <> 36)
 			{
 				throw new InvalidArgumentException(Text::_('PLG_SYSTEM_JOOMLAIDENTITY_INVALID_GUID'));
 			}
 
-			switch ($data->task)
+			if ($data)
 			{
-				case 'profile.delete':
-					$this->processDelete($data->guid);
-					break;
-				case 'profile.save':
-					$this->processIdentity($data->guid, $data);
-					break;
+				$this->processIdentity($guid, $consent, $data);
 			}
 		}
 		catch (Exception $exception)
@@ -114,95 +117,33 @@ class PlgSystemJoomlaIdentity extends CMSPlugin
 	}
 
 	/**
-	 * Creates a mapping for the fields used to create a user
-	 *
-	 * @param   string  $authorizationSource  The alias of the IDP profile configured in RO SSO
-	 * @param   array   $attributes           The attributes received from the IDP
-	 * @param   array   &$userFields          The list of user fields to fill
-	 *
-	 * @return  void
-	 *
-	 * @since   1.0.0
-	 */
-	public function onProcessUserGetFieldMap(string $authorizationSource, array $attributes, array &$userFields = array()): void
-	{
-		try
-		{
-			$profile = json_decode($attributes['profile'][0]);
-
-			if (empty($profile[0]))
-			{
-				throw new InvalidArgumentException(Text::_('PLG_SYSTEM_JOOMLAIDENTITY_NO_PROFILE_DATA_PROVIDED'));
-			}
-
-			$data        = $profile[0];
-			$data->email = $attributes['emailaddress'][0];
-			$data->name  = $attributes['name'][0];
-
-			$this->processIdentity($attributes['guid'][0], $data);
-		}
-		catch (Exception $exception)
-		{
-			echo $exception->getMessage();
-		}
-	}
-
-	/**
 	 * Method to process the Joomla Identity data
 	 *
-	 * @param   string  $guid  The User ID
-	 * @param   object  $data  Object containing user data
+	 * @param   string  $guid    The User ID
+	 * @param   integer $consent Consent given or nog
+	 * @param   object  $data    Object containing user data
 	 *
 	 * @return  void
 	 *
 	 * @since   1.0.0
 	 */
-	protected function processIdentity($guid, $data)
+	protected function processIdentity($guid, $consent, $data)
 	{
-		try
+		// Set anonymize name if no consent is provided
+		if ($consent === 0)
 		{
-			// Update the Joomla user
-			$this->updateJoomlaUser($guid, $data->name, $data->email);
-
-			// Get Joomla user ID
-			$userId = (int) UserHelper::getUserId($guid);
-
-			// Plugin trigger onProcessIdentity for site specific processing
-			\JEventDispatcher::getInstance()->trigger('onProcessIdentity', array($userId, $guid, $data));
+			$data->name  = 'Guest ' . substr($guid, 0, 8);
+			$data->email = substr($guid, 0, 8) . '@identity.joomla.org';
 		}
-		catch (Exception $exception)
-		{
-			echo $exception->getMessage();
-		}
-	}
 
-	/**
-	 * Method to process the Joomla Identity data
-	 *
-	 * @param   string  $guid  The User ID
-	 * @param   object  $data  Object containing user data
-	 *
-	 * @return  void
-	 *
-	 * @since   1.0.0
-	 */
-	protected function processDelete($guid, $data)
-	{
-		try
-		{
-			// Get Joomla user ID
-			$userId = (int) UserHelper::getUserId($guid);
+		// Update the Joomla user
+		$this->updateJoomlaUser($guid, $data->name, $data->email);
 
-			// Update the Joomla user
-			$this->updateJoomlaUser($guid, bin2hex(random_bytes(12)), 'UserID' . $userId . 'removed@email.invalid');
+		// Get Joomla user ID
+		$userId = (int) UserHelper::getUserId($guid);
 
-			// Plugin trigger onProcessIdentity for site specific processing
-			\JEventDispatcher::getInstance()->trigger('onProcessDelete', array($userId, $guid, $data));
-		}
-		catch (Exception $exception)
-		{
-			echo $exception->getMessage();
-		}
+		// Plugin trigger onProcessIdentity for site specific processing
+		\JEventDispatcher::getInstance()->trigger('onProcessIdentity', array($userId, $guid, $data));
 	}
 
 	/**
@@ -272,10 +213,10 @@ class PlgSystemJoomlaIdentity extends CMSPlugin
 	/**
 	 * Saves user profile data
 	 *
-	 * @param   array    $data    entered user data
-	 * @param   boolean  $isNew   true if this is a new user
-	 * @param   boolean  $result  true if saving the user worked
-	 * @param   string   $error   error message
+	 * @param   array   $data   entered user data
+	 * @param   boolean $isNew  true if this is a new user
+	 * @param   boolean $result true if saving the user worked
+	 * @param   string  $error  error message
 	 *
 	 * @return  boolean
 	 *
@@ -302,12 +243,11 @@ class PlgSystemJoomlaIdentity extends CMSPlugin
 		}
 
 		// Generate a GUID
-		require_once JPATH_ADMINISTRATOR . '/components/com_identity/helpers/identity.php';
 		$helper = new IdentityHelper;
 		$guid   = $helper->generateGuid();
 
 		// Add the user to the profiles table
-		$db = $this->db;
+		$db    = $this->db;
 		$query = $db->getQuery(true)
 			->insert($db->quoteName('#__identity_profiles'))
 			->columns(
@@ -323,6 +263,14 @@ class PlgSystemJoomlaIdentity extends CMSPlugin
 		$db->setQuery($query)
 			->execute();
 
+		// Update the username with the GUID
+		$query->clear()
+			->update($db->quoteName('#__users'))
+			->set($db->quoteName('username') . ' = ' . $db->quote($guid))
+			->where($db->quoteName('id') . ' = ' . (int) $userId);
+		$db->setQuery($query)
+			->execute();
+
 		// Get the general consents for this site
 		if (!$this->params->get('isIdentityProvider'))
 		{
@@ -333,7 +281,17 @@ class PlgSystemJoomlaIdentity extends CMSPlugin
 		require_once JPATH_ADMINISTRATOR . '/components/com_identity/helpers/identity.php';
 		$helper = new IdentityHelper;
 
-		$consents = $helper->loadSiteConsents(1);
+		// Get the general consent site
+		$siteId = (int) $this->params->get('generalConsent', 0);
+
+		// Check if there is any general consent to store
+		if ($siteId === 0)
+		{
+			return true;
+		}
+
+		// Store the general consents
+		$consents = $helper->loadSiteConsents($siteId);
 
 		foreach ($consents as $consent)
 		{
@@ -351,16 +309,29 @@ class PlgSystemJoomlaIdentity extends CMSPlugin
 	/**
 	 * We do not allow deleting users
 	 *
-	 * @param   array    $user     Holds the user data
-	 * @param   boolean  $success  True if user was succesfully stored in the database
-	 * @param   string   $msg      Message
+	 * @param   array $user Holds the user data
 	 *
-	 * @return  boolean
+	 * @return  void
 	 *
 	 * @since   1.0.0
 	 */
-	public function onUserBeforeDelete($user, $success, $msg)
+	public function onUserBeforeDelete($user): void
 	{
-		return false;
+		// Empty the consents table
+		$db    = $this->db;
+		$query = $db->getQuery(true)
+			->delete($db->quoteName('#__identity_consents'))
+			->where($db->quoteName('guid') . ' = ' . $db->quote($user['username']));
+		$db->setQuery($query)->execute();
+
+		// Empty the profiles table
+		$query->clear()
+			->delete($db->quoteName('#__identity_profiles'))
+			->where($db->quoteName('guid') . ' = ' . $db->quote($user['username']));
+		$db->setQuery($query)->execute();
+
+		// Ping the remote sites
+		$helper = new IdentityHelper;
+		$helper->pingSites($user['username'], 'profile.delete');
 	}
 }

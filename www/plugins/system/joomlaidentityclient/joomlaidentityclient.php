@@ -1,22 +1,16 @@
 <?php
 /**
  * @package     Joomla.Plugin
- * @subpackage  System.joomlaidentity
+ * @subpackage  System.joomlaidentityclient
  *
- * @copyright   Copyright (C) 2005 - 2018 Open Source Matters, Inc. All rights reserved.
+ * @copyright   Copyright (C) 2005 - 2019 Open Source Matters, Inc. All rights reserved.
  * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
 
 use Joomla\CMS\Application\CMSApplication;
-use Joomla\CMS\Date\Date;
-use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Plugin\CMSPlugin;
-use Joomla\CMS\Uri\Uri;
 use Joomla\CMS\User\UserHelper;
-use Joomla\Utilities\ArrayHelper;
-
-require_once JPATH_ADMINISTRATOR . '/components/com_identity/helpers/identity.php';
 
 defined('_JEXEC') or die;
 
@@ -25,7 +19,7 @@ defined('_JEXEC') or die;
  *
  * @since 1.0.0
  */
-class PlgSystemJoomlaIdentity extends CMSPlugin
+class PlgSystemJoomlaidentityclient extends CMSPlugin
 {
 	/**
 	 * Application object.
@@ -67,7 +61,7 @@ class PlgSystemJoomlaIdentity extends CMSPlugin
 		}
 
 		// Check for Joomla Identity
-		$joomlaIdentity = $this->app->input->getCmd('joomlaidp');
+		$joomlaIdentity = $this->app->input->getBool('joomlaidp');
 
 		// Only continue for Joomla Identity
 		if (!isset($joomlaIdentity))
@@ -77,19 +71,28 @@ class PlgSystemJoomlaIdentity extends CMSPlugin
 
 		try
 		{
-			// Get the data from the payload
-			$apiKey = $this->app->input->json->get('apiKey');
+			// Get the API key
+			$apiKey = $this->params->get('apikey');
 
-			// Check if the API key matches
-			if (strlen($apiKey) <> 36
-				&& $this->params->get('apikey') !== $apiKey)
+			// Check API key length
+			if (strlen($apiKey) <> 36)
 			{
-				throw new InvalidArgumentException(Text::_('PLG_SYSTEM_JOOMLAIDENTITY_INVALID_APIKEY'));
+				throw new InvalidArgumentException(Text::_('PLG_SYSTEM_JOOMLAIDENTITYCLIENT_INVALID_APIKEY'));
 			}
 
-			$guid    = $this->app->input->json->getString('guid');
+			// Get the payload
+			$data = $this->app->input->json->get('data', '', 'string');
+			$hash = base64_decode($this->app->input->json->get('hash', '', 'base64'));
+
+			// Validate the hash
+			if ($hash !== hash_hmac('sha512', $data, $apiKey))
+			{
+				throw new InvalidArgumentException(Text::_('PLG_SYSTEM_JOOMLAIDENTITYCLIENT_INVALID_HASH'));
+			}
+
+			$data    = (object) $data;
+			$guid    = $data->guid;
 			$consent = $this->app->input->json->getInt('consent', 0);
-			$data    = (object) $this->app->input->json->get('data', array(), 'array');
 
 			// Check if we have the minimum required data
 			if (!isset($data->email))
@@ -168,7 +171,7 @@ class PlgSystemJoomlaIdentity extends CMSPlugin
 
 		try
 		{
-			Factory::getDbo()->updateObject('#__users', $user, 'username');
+			$this->db->updateObject('#__users', $user, 'username');
 		}
 		catch (Exception $e)
 		{
@@ -195,11 +198,6 @@ class PlgSystemJoomlaIdentity extends CMSPlugin
 		}
 
 		// Disable editing the name, username, email, password and requireReset fields
-		if ($this->params->get('isIdentityProvider'))
-		{
-			return true;
-		}
-
 		$form->setFieldAttribute('name', 'readonly', 'readonly');
 		$form->setFieldAttribute('username', 'readonly', 'readonly');
 		$form->setFieldAttribute('email', 'readonly', 'readonly');
@@ -208,130 +206,5 @@ class PlgSystemJoomlaIdentity extends CMSPlugin
 		$form->setFieldAttribute('requireReset', 'readonly', 'readonly');
 
 		return true;
-	}
-
-	/**
-	 * Saves user profile data
-	 *
-	 * @param   array   $data   entered user data
-	 * @param   boolean $isNew  true if this is a new user
-	 * @param   boolean $result true if saving the user worked
-	 * @param   string  $error  error message
-	 *
-	 * @return  boolean
-	 *
-	 * @throws  Exception
-	 *
-	 * @since   1.0.0
-	 */
-	public function onUserAfterSave($data, $isNew, $result, $error)
-	{
-		// Only act on new users
-		if (!$isNew)
-		{
-			return true;
-		}
-
-		// Check if we have a valid user ID
-		$userId = ArrayHelper::getValue($data, 'id', 0, 'int');
-
-		if (!$userId)
-		{
-			$this->_subject->setError(Text::_('PLG_SYSTEM_JOOMLAIDENTITY_NO_USERID'));
-
-			return false;
-		}
-
-		// Generate a GUID
-		$helper = new IdentityHelper;
-		$guid   = $helper->generateGuid();
-
-		// Add the user to the profiles table
-		$db    = $this->db;
-		$query = $db->getQuery(true)
-			->insert($db->quoteName('#__identity_profiles'))
-			->columns(
-				$db->quoteName(
-					array(
-						'user_id',
-						'guid',
-						'fullname'
-					)
-				)
-			)
-			->values($userId . ',' . $db->quote($guid) . ',' . $db->quote($data['name']));
-		$db->setQuery($query)
-			->execute();
-
-		// Update the username with the GUID
-		$query->clear()
-			->update($db->quoteName('#__users'))
-			->set($db->quoteName('username') . ' = ' . $db->quote($guid))
-			->where($db->quoteName('id') . ' = ' . (int) $userId);
-		$db->setQuery($query)
-			->execute();
-
-		// Get the general consents for this site
-		if (!$this->params->get('isIdentityProvider'))
-		{
-			return true;
-		}
-
-		// Require the helper
-		require_once JPATH_ADMINISTRATOR . '/components/com_identity/helpers/identity.php';
-		$helper = new IdentityHelper;
-
-		// Get the general consent site
-		$siteId = (int) $this->params->get('generalConsent', 0);
-
-		// Check if there is any general consent to store
-		if ($siteId === 0)
-		{
-			return true;
-		}
-
-		// Store the general consents
-		$consents = $helper->loadSiteConsents($siteId);
-
-		foreach ($consents as $consent)
-		{
-			if ($helper->isConsentStored($consent->id, $guid))
-			{
-				continue;
-			}
-
-			$helper->storeConsent($consent->id, $guid);
-		}
-
-		return true;
-	}
-
-	/**
-	 * We do not allow deleting users
-	 *
-	 * @param   array $user Holds the user data
-	 *
-	 * @return  void
-	 *
-	 * @since   1.0.0
-	 */
-	public function onUserBeforeDelete($user): void
-	{
-		// Empty the consents table
-		$db    = $this->db;
-		$query = $db->getQuery(true)
-			->delete($db->quoteName('#__identity_consents'))
-			->where($db->quoteName('guid') . ' = ' . $db->quote($user['username']));
-		$db->setQuery($query)->execute();
-
-		// Empty the profiles table
-		$query->clear()
-			->delete($db->quoteName('#__identity_profiles'))
-			->where($db->quoteName('guid') . ' = ' . $db->quote($user['username']));
-		$db->setQuery($query)->execute();
-
-		// Ping the remote sites
-		$helper = new IdentityHelper;
-		$helper->pingSites($user['username'], 'profile.delete');
 	}
 }

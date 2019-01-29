@@ -1,8 +1,8 @@
 <?xml version="1.0" ?>
 <install version="2.0" type="extension" extension="youtube" folder="aggregator" method="upgrade" core="1">
 	<name>WF_AGGREGATOR_YOUTUBE_TITLE</name>
-	<version>2.6.33</version>
-	<creationDate>10-10-2018</creationDate>
+	<version>2.6.35</version>
+	<creationDate>19-12-2018</creationDate>
 	<author>Ryan Demmer</author>
 	<authorEmail>info@joomlacontenteditor.net</authorEmail>
 	<authorUrl>http://www.joomlacontenteditor.net/</authorUrl>
@@ -46,7 +46,7 @@
         	<option value="0">WF_OPTION_NO</option>
     	</param>
 
-		<param name="showinfo" type="list" default="1" label="WF_AGGREGATOR_YOUTUBE_SHOWINFO" description="WF_AGGREGATOR_YOUTUBE_SHOWINFO_DESC">
+		<param name="modestbranding" type="list" default="0" label="WF_AGGREGATOR_YOUTUBE_MODESTBRANDING" description="WF_AGGREGATOR_YOUTUBE_MODESTBRANDING_DESC">
         	<option value="1">WF_OPTION_YES</option>
         	<option value="0">WF_OPTION_NO</option>
     	</param>

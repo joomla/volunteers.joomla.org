@@ -11,6 +11,7 @@
 use Joomla\CMS\Factory;
 use Joomla\CMS\User\User;
 use Joomla\CMS\User\UserHelper;
+use JoomlaCore\JoomlaCore;
 use SimpleSAML\Logger;
 
 /**
@@ -40,8 +41,10 @@ class sspmod_joomla_Auth_Source_JOOMLA extends sspmod_core_Auth_UserPassBase
 	 */
 	protected function login($username, $password)
 	{
-		// Load Joomla so we can use its functions
-		$this->loadJoomla();
+		// Load the Joomla helper
+		require_once __DIR__ . '/../../../core/joomla.php';
+		$joomlaCore = new JoomlaCore;
+		$joomlaCore->loadDomain();
 
 		// Get the user details
 		$db    = Factory::getDbo();
@@ -49,19 +52,24 @@ class sspmod_joomla_Auth_Source_JOOMLA extends sspmod_core_Auth_UserPassBase
 			->select(
 				$db->quoteName(
 					array(
-						'id',
-						'password'
+						'users.id',
+						'users.password',
+						'profiles.guid'
 					)
 				)
 			)
-			->from($db->quoteName('#__users'))
-			->where($db->quoteName('block') . ' = 0')
-			->where($db->quoteName('username') . ' = ' . $db->quote($username));
+			->from($db->quoteName('#__users', 'users'))
+			->leftJoin(
+				$db->quoteName('#__identity_profiles', 'profiles')
+				. ' ON ' . $db->quoteName('profiles.user_id') . ' = ' . $db->quoteName('users.id')
+			)
+			->where($db->quoteName('users.block') . ' = 0')
+			->where($db->quoteName('users.email') . ' = ' . $db->quote($username));
 
 		$db->setQuery($query);
 		$result = $db->loadObject();
 
-		if (is_null($result))
+		if (is_null($result) || empty($result->guid))
 		{
 			// No rows returned - invalid username/password.
 			Logger::error('Joomla:' .
@@ -72,65 +80,27 @@ class sspmod_joomla_Auth_Source_JOOMLA extends sspmod_core_Auth_UserPassBase
 		}
 
 		// Verify the users password
-		$match      = UserHelper::verifyPassword($password, $result->password, $result->id);
+		$match = UserHelper::verifyPassword($password, $result->password, $result->id);
+
+		if (!$match)
+		{
+			throw new SimpleSAML_Error_Error('WRONGUSERPASS');
+		}
+
 		$attributes = array();
 
-		if ($match === true)
-		{
-			// Bring this in line with the rest of the system
-			$user                         = User::getInstance($result->id);
-			$attributes['emailaddress'][] = $user->email;
-			$attributes['name'][]         = $user->name;
-			$attributes['upn'][]          = $user->username;
-		}
+		// Bring this in line with the rest of the system
+		$user                         = User::getInstance($result->id);
+		$attributes['emailaddress'][] = $user->email;
+		$attributes['name'][]         = $user->name;
+		$attributes['upn'][]          = $result->guid;
 
-		Logger::info('Joomla:' . $this->authId . ': Attributes: ' .
-			implode(',', array_keys($attributes))
-		);
+		// This field is required to handle the consents
+		$attributes['guid'][]         = $result->guid;
+
+		// Trigger the onAfterLogin
+		$joomlaCore->onAfterLogin($result->guid);
 
 		return $attributes;
-	}
-
-	/**
-	 * Minimal configuration to load Joomla.
-	 *
-	 * @return  void
-	 *
-	 * @since   1.0.0
-	 */
-	private function loadJoomla()
-	{
-		// Tell Joomla we can be trusted
-		if (!defined('_JEXEC'))
-		{
-			define('_JEXEC', 1);
-		}
-
-		// Set the base folder
-		$base = dirname(dirname(dirname(dirname(dirname(dirname(dirname(__FILE__)))))));
-
-		// Load the Joomla Framework
-		require_once $base . '/import.php';
-
-		// Require the classmap file so Joomla can match the old names
-		require $base . '/classmap.php';
-
-		// Load system defines
-		if (!defined('JPATH_BASE'))
-		{
-			define('JPATH_BASE', dirname($base));
-		}
-
-		require_once dirname($base) . '/includes/defines.php';
-
-		// Register the library base path for CMS libraries.
-		JLoader::registerPrefix('J', JPATH_PLATFORM . '/cms', false, true);
-
-		JLoader::registerNamespace('Joomla\\CMS', JPATH_PLATFORM . '/src', false, false, 'psr4');
-		$loader = require $base . '/vendor/autoload.php';
-		$loader->unregister();
-
-		// Decorate Composer autoloader
-		spl_autoload_register(array(new JClassLoader($loader), 'loadClass'), true, true);
 	}
 }

@@ -32,7 +32,7 @@ class PlgSystemJoomlaidentityclient extends CMSPlugin
 	/**
 	 * Database object.
 	 *
-	 * @var    JDatabase
+	 * @var    JDatabaseDriverMysqli
 	 * @since  1.0.0
 	 */
 	protected $db;
@@ -81,8 +81,8 @@ class PlgSystemJoomlaidentityclient extends CMSPlugin
 			}
 
 			// Get the payload
-			$data = $this->app->input->json->get('data', '', 'string');
-			$hash = base64_decode($this->app->input->json->get('hash', '', 'base64'));
+			$data = $this->app->input->get('data', '', 'string');
+			$hash = base64_decode($this->app->input->get('hash', '', 'base64'));
 
 			// Validate the hash
 			if ($hash !== hash_hmac('sha512', $data, $apiKey))
@@ -90,24 +90,24 @@ class PlgSystemJoomlaidentityclient extends CMSPlugin
 				throw new InvalidArgumentException(Text::_('PLG_SYSTEM_JOOMLAIDENTITYCLIENT_INVALID_HASH'));
 			}
 
-			$data    = (object) $data;
-			$guid    = $data->guid;
-			$consent = $this->app->input->json->getInt('consent', 0);
+			// Get the data
+			$data = (object) $data;
+			$guid = $data->guid;
 
 			// Check if we have the minimum required data
 			if (!isset($data->email))
 			{
-				throw new InvalidArgumentException(Text::_('PLG_SYSTEM_JOOMLAIDENTITY_MISSING_EMAIL'));
+				throw new InvalidArgumentException(Text::_('PLG_SYSTEM_JOOMLAIDENTITYCLIENT_MISSING_EMAIL'));
 			}
 
 			if (!$guid || strlen($guid) <> 36)
 			{
-				throw new InvalidArgumentException(Text::_('PLG_SYSTEM_JOOMLAIDENTITY_INVALID_GUID'));
+				throw new InvalidArgumentException(Text::_('PLG_SYSTEM_JOOMLAIDENTITYCLIENT_INVALID_GUID'));
 			}
 
 			if ($data)
 			{
-				$this->processIdentity($guid, $consent, $data);
+				$this->processIdentity($guid, $data);
 			}
 		}
 		catch (Exception $exception)
@@ -122,18 +122,17 @@ class PlgSystemJoomlaidentityclient extends CMSPlugin
 	/**
 	 * Method to process the Joomla Identity data
 	 *
-	 * @param   string  $guid    The User ID
-	 * @param   integer $consent Consent given or nog
-	 * @param   object  $data    Object containing user data
+	 * @param   string  $guid  The User ID
+	 * @param   object  $data  Object containing user data
 	 *
 	 * @return  void
 	 *
 	 * @since   1.0.0
 	 */
-	protected function processIdentity($guid, $consent, $data)
+	protected function processIdentity($guid, $data)
 	{
-		// Set anonymize name if no consent is provided
-		if ($consent === 0)
+		// Set anonymize name if user is deleted
+		if ($data->task === 'user.delete')
 		{
 			$data->name  = 'Guest ' . substr($guid, 0, 8);
 			$data->email = substr($guid, 0, 8) . '@identity.joomla.org';
@@ -152,9 +151,9 @@ class PlgSystemJoomlaidentityclient extends CMSPlugin
 	/**
 	 * Method to update the Joomla User
 	 *
-	 * @param   string $username Username (guid)
-	 * @param   string $name     Name of user
-	 * @param   string $email    Email of user
+	 * @param   string  $username  Username (guid)
+	 * @param   string  $name      Name of user
+	 * @param   string  $email     Email of user
 	 *
 	 * @return  void
 	 *
@@ -169,14 +168,7 @@ class PlgSystemJoomlaidentityclient extends CMSPlugin
 			'email'    => $email,
 		);
 
-		try
-		{
-			$this->db->updateObject('#__users', $user, 'username');
-		}
-		catch (Exception $e)
-		{
-			$this->setError($e->getMessage());
-		}
+		$this->db->updateObject('#__users', $user, 'username');
 	}
 
 	/**

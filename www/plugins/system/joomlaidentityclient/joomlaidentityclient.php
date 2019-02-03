@@ -91,23 +91,19 @@ class PlgSystemJoomlaidentityclient extends CMSPlugin
 			}
 
 			// Get the data
-			$data = (object) $data;
-			$guid = $data->guid;
-
-			// Check if we have the minimum required data
-			if (!isset($data->email))
-			{
-				throw new InvalidArgumentException(Text::_('PLG_SYSTEM_JOOMLAIDENTITYCLIENT_MISSING_EMAIL'));
-			}
+			$data     = json_decode($data);
+			$guid     = $data->guid;
+			$task     = $data->task;
+			$userData = $data->userData;
 
 			if (!$guid || strlen($guid) <> 36)
 			{
 				throw new InvalidArgumentException(Text::_('PLG_SYSTEM_JOOMLAIDENTITYCLIENT_INVALID_GUID'));
 			}
 
-			if ($data)
+			if ($userData)
 			{
-				$this->processIdentity($guid, $data);
+				$this->processIdentity($guid, $task, $userData);
 			}
 		}
 		catch (Exception $exception)
@@ -123,21 +119,15 @@ class PlgSystemJoomlaidentityclient extends CMSPlugin
 	 * Method to process the Joomla Identity data
 	 *
 	 * @param   string  $guid  The User ID
+	 * @param   string  $task  The task
 	 * @param   object  $data  Object containing user data
 	 *
 	 * @return  void
 	 *
 	 * @since   1.0.0
 	 */
-	protected function processIdentity($guid, $data)
+	protected function processIdentity($guid, $task, $data)
 	{
-		// Set anonymize name if user is deleted
-		if ($data->task === 'user.delete')
-		{
-			$data->name  = 'Guest ' . substr($guid, 0, 8);
-			$data->email = substr($guid, 0, 8) . '@identity.joomla.org';
-		}
-
 		// Update the Joomla user
 		$this->updateJoomlaUser($guid, $data->name, $data->email);
 
@@ -145,7 +135,7 @@ class PlgSystemJoomlaidentityclient extends CMSPlugin
 		$userId = (int) UserHelper::getUserId($guid);
 
 		// Plugin trigger onProcessIdentity for site specific processing
-		\JEventDispatcher::getInstance()->trigger('onProcessIdentity', array($userId, $guid, $data));
+		\JEventDispatcher::getInstance()->trigger('onProcessIdentity', array($userId, $guid, $task, $data));
 	}
 
 	/**

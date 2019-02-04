@@ -80,13 +80,14 @@ class PlgSystemJoomlaIdentityVolunteers extends CMSPlugin
 	 *
 	 * @param   integer $userId Joomla User ID
 	 * @param   string  $guid   GUID of user
+	 * @param   string  $task   Task triggered
 	 * @param   object  $data   Object containing user data
 	 *
 	 * @return  void
 	 *
 	 * @since   1.0.0
 	 */
-	public function onProcessIdentity($userId, $guid, $data)
+	public function onProcessIdentity($userId, $guid, $task, $data)
 	{
 		try
 		{
@@ -140,7 +141,7 @@ class PlgSystemJoomlaIdentityVolunteers extends CMSPlugin
 			'alias'               => ApplicationHelper::stringURLSafe($data->name),
 			'address'             => $data->address,
 			'city'                => $data->city,
-			'city-location'       => $data->city,
+			'city-location'       => $data->city_location,
 			'region'              => $data->region,
 			'zip'                 => $data->zip,
 			'country'             => $data->country,
@@ -159,8 +160,7 @@ class PlgSystemJoomlaIdentityVolunteers extends CMSPlugin
 			'longitude'           => $data->longitude,
 			'joomlaforum'         => $data->joomlaforum,
 			'joomladocs'          => $data->joomladocs,
-			'crowdin'             => $data->crowdin,
-			'guid'                => $guid
+			'crowdin'             => $data->crowdin
 		);
 
 		try
@@ -170,29 +170,6 @@ class PlgSystemJoomlaIdentityVolunteers extends CMSPlugin
 		catch (Exception $e)
 		{
 			$this->db->updateObject('#__volunteers_volunteers', $volunteer, array('user_id'));
-		}
-	}
-
-	/**
-	 * Method triggered in deleting a Joomla identity
-	 *
-	 * @param   integer $userId Joomla User ID
-	 * @param   string  $guid   GUID of user
-	 * @param   object  $data   Object containing user data
-	 *
-	 * @return  void
-	 *
-	 * @since   1.0.0
-	 */
-	public function onProcessDelete($userId, $guid, $data)
-	{
-		try
-		{
-
-		}
-		catch (Exception $exception)
-		{
-			echo $exception->getMessage();
 		}
 	}
 }

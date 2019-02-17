@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright     Copyright (c) 2009-2017 Ryan Demmer. All rights reserved
+ * @copyright     Copyright (c) 2009-2019 Ryan Demmer. All rights reserved
  * @license       GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  * JCE is free software. This version may have been modified pursuant
  * to the GNU General Public License, and as distributed it includes or
@@ -171,14 +171,16 @@ class plgEditorJCE extends JPlugin
             if ($version->isCompatible('3.2')) {
                 // fix for some buttons that do not include the class
                 foreach ($buttons as $button) {
-                    if (is_object($button)) {
-                        if (isset($button->class)) {
-                            if (preg_match('#\bbtn\b#', $button->class) === false) {
-                                $button->class .= ' btn';
-                            }
-                        } else {
-                            $button->class = 'btn';
+                    if (!is_object($button)) {
+                        continue;
+                    }
+                    
+                    if (isset($button->class)) {
+                        if (preg_match('#\bbtn\b#', $button->class) === false) {
+                            $button->class .= ' btn';
                         }
+                    } else {
+                        $button->class = 'btn';
                     }
                 }
 
@@ -193,6 +195,10 @@ class plgEditorJCE extends JPlugin
                 $return .= "\n<div class=\"btn-toolbar\">\n";
 
                 foreach ($results as $button) {
+                    if (!is_object($button)) {
+                        continue;
+                    }
+                    
                     /*
                      * Results should be an object
                      */
@@ -225,6 +231,10 @@ class plgEditorJCE extends JPlugin
                 }
 
                 foreach ($buttons as $button) {
+                    if (!is_object($button)) {
+                        continue;
+                    }
+                    
                     /*
                      * Results should be an object
                      */

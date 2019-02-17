@@ -8,15 +8,13 @@
  * is derivative of works licensed under the GNU General Public License or
  * other free or open source software licenses
  */
-class WFVisualcharsPluginConfig
+class WFLinkPluginConfig
 {
     public static function getConfig(&$settings)
     {
         $wf = WFEditor::getInstance();
 
-                // legacy
-                $state = $wf->getParam('editor.visualchars', 0);
-
-        $settings['visualchars_default_state'] = $wf->getParam('editor.visualchars_state', $state, 0, 'boolean');
+        // expose globally for use by Autolink and Clipboard
+        $settings['default_link_target'] = $wf->getParam('link.target', '');
     }
 }

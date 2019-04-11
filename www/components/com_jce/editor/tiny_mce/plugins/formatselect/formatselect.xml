@@ -1,18 +1,20 @@
 <?xml version="1.0" ?>
-<install version="2.0" type="plugin" plugin="formatselect" core="1" editable="1">
+<extension version="3.4" type="plugin" group="jce" method="upgrade">
     <name>WF_FORMATSELECT_TITLE</name>
-    <version>2.6.36</version>
-    <creationDate>07-02-2019</creationDate>
+    <version>2.7.7</version>
+    <creationDate>03-04-2019</creationDate>
     <author>Ryan Demmer</author>
     <authorEmail>info@joomlacontenteditor.net</authorEmail>
-    <authorUrl>http://www.joomlacontenteditor.net/</authorUrl>
+    <authorUrl>https://www.joomlacontenteditor.net/</authorUrl>
     <copyright>Ryan Demmer</copyright>
     <license>GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html</license>
     <description>WF_FORMATSELECT_DESC</description>
     <icon>formatselect</icon>
-    <params group="standard">
-        <param name="blockformats" type="blockformats" default="" label="WF_PARAM_BLOCK_FORMAT" description="WF_PARAM_BLOCK_FORMAT_DESC" />
-    </params>
+    <fields name="formatselect">
+        <fieldset name="config">
+            <field name="blockformats" type="blockformats" default="" label="WF_PARAM_BLOCK_FORMAT" description="WF_PARAM_BLOCK_FORMAT_DESC" />
+        </fieldset>
+    </fields>
     <help></help>
     <languages></languages>
-</install>
+</extension>

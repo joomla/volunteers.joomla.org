@@ -6,11 +6,10 @@ JFormHelper::loadFieldClass('list');
 
 class JFormFieldFilesystem extends JFormField
 {
-
     /**
      * The form field type.
      *
-     * @var    string
+     * @var string
      *
      * @since  11.1
      */
@@ -19,13 +18,13 @@ class JFormFieldFilesystem extends JFormField
     /**
      * Method to attach a JForm object to the field.
      *
-     * @param   SimpleXMLElement  $element  The SimpleXMLElement object representing the <field /> tag for the form field object.
-     * @param   mixed             $value    The form field value to validate.
-     * @param   string            $group    The field name group control value. This acts as as an array container for the field.
-     *                                      For example if the field has name="foo" and the group value is set to "bar" then the
-     *                                      full field name would end up being "bar[foo]".
+     * @param SimpleXMLElement $element The SimpleXMLElement object representing the <field /> tag for the form field object
+     * @param mixed            $value   The form field value to validate
+     * @param string           $group   The field name group control value. This acts as as an array container for the field.
+     *                                  For example if the field has name="foo" and the group value is set to "bar" then the
+     *                                  full field name would end up being "bar[foo]"
      *
-     * @return  boolean  True on success.
+     * @return bool True on success
      *
      * @since   11.1
      */
@@ -39,7 +38,7 @@ class JFormFieldFilesystem extends JFormField
     /**
      * Method to get the field input markup.
      *
-     * @return  string  The field input markup.
+     * @return string The field input markup
      *
      * @since   11.1
      */
@@ -54,81 +53,44 @@ class JFormFieldFilesystem extends JFormField
 
         // default
         if (empty($value)) {
-            $type = $this->default;
-            $path = '';
-
-            $value = array(
-                array('type' => $type, 'path' => $path, 'label' => ''),
-            );
+            $value = array('name' => $this->default);
         }
 
         $plugins = $this->getPlugins();
         $options = $this->getOptions();
-        
-        $html = "";
-        $x = 0;
 
-        $html .= '<div class="wf-repeatable span5">';
+        $html = '';
+        $html .= '<div class="controls-row">';
 
-        foreach ($value as $item) {
-            $item = (object) $item;
+        $html .= '<div class="control-group">';
+        $html .= JHtml::_('select.genericlist', $options, $this->name . '[name]', 'data-toggle="filesystem-options"', 'value', 'text', $value['name']);
+        $html .= '</div>';
 
-            $html .= '<div class="wf-repeatable-item well clearfix">';
-            //$html .= '<a class="wf-repeatable-collapse"><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span></a>';
-            $html .= '<a class="close wf-repeatable-clone" href="#"><i class="icon-plus"></i></a>';
+        $html .= '<div class="filesystem-options clearfix">';
 
-            $html .= '<div class="wf-repeatable-item-container">';
+        foreach ($plugins as $plugin) {            
+            $form = JForm::getInstance('plg_jce_' . $this->name . '_' . $plugin->name, $plugin->manifest, array('control' => $this->name . '[' . $plugin->name . ']'), true, '//extension');
 
-            $html .= '<div class="control-group">';
-            $html .= '<div class="control-label"><label class="hasTooltip" title="' . JText::_('COM_JCE_PROFILE_FILESYSTEM_TYPE_DESC') . '">' . JText::_('COM_JCE_PROFILE_FILESYSTEM_TYPE') . '</label></div>';
-            $html .= '<div class="controls controls-row">';
-            $html .= JHtml::_('select.genericlist', $options, null, 'data-name="type" data-toggle="filesystem-options"', 'value', 'text', $item->type, $this->id . '_type_' . $x);
-            $html .= '</div>';
-            $html .= '</div>';
+            if ($form) {
+                // get the data for this form, if set
+                $data = isset($value[$plugin->name]) ? $value[$plugin->name] : array();
+                
+                // bind data to form
+                $form->bind($data);
+                
+                $html .= '<div class="well well-small card card-body" data-toggle-target="filesystem-options-' . $plugin->name . '">';
 
-            $html .= '<div class="filesystem-options">';
+                $fields = $form->getFieldset('filesystem.' . $plugin->name);
 
-            foreach($plugins as $plugin) {
-                $name = (string) str_replace('filesystem-', '', $plugin->element);
-
-                $form = JForm::getInstance('plg_jce_' . $plugin->element, $plugin->manifest, array('control' => $this->name . '[' . $name . ']'), true, '//extension');
-
-                if ($form) {
-                    $html .= '<div data-toggle-target="filesystem-options-' . $name . '">';
-
-                    $fields = $form->getFieldset('filesystem.' . $name);
-
-                    foreach ($fields as $field) {
-                        $key = $field->getAttribute('name');
-
-                        // set repeatable
-                        $field->repeat = true;
-
-                        $field->name  = '';
-
-                        if ($name === $item->type) {
-                            $field->value = isset($item->$key) ? $item->$key : '';
-                        }
-
-                        $string = $field->renderField();
-
-                        $html .= str_replace(' name=""', ' data-name="' . $key . '"', $string);
-                    }
-
-                    $html .= '</div>';
+                foreach ($fields as $field) {
+                     $html .= $field->renderField();
                 }
+
+                $html .= '</div>';
             }
-
-            $html .= '</div>';
-            $html .= '</div>';
-
-            $html .= '<a class="close wf-repeatable-remove" href="#"><i class="icon-trash"></i></a>';
-            $html .= '</div>';
-
-            $x++;
         }
 
-        $html .= '<input type="hidden" name="' . $this->name . '" value="" />';
+        $html .= '</div>';
         $html .= '</div>';
 
         return $html;
@@ -137,7 +99,7 @@ class JFormFieldFilesystem extends JFormField
     /**
      * Method to get the field options.
      *
-     * @return  array  The field option objects.
+     * @return array The field option objects
      *
      * @since   11.1
      */
@@ -146,30 +108,7 @@ class JFormFieldFilesystem extends JFormField
         static $plugins;
 
         if (!isset($plugins)) {
-
-            $language = JFactory::getLanguage();
-
-            $db = JFactory::getDbo();
-            $query = $db->getQuery(true)
-                ->select('name, element')
-                ->from('#__extensions')
-                ->where('enabled = 1')
-                ->where('type =' . $db->quote('plugin'))
-                ->where('state IN (0,1)')
-                ->where('folder = ' . $db->quote('jce'))
-                ->where('element LIKE ' . $db->quote('filesystem-%'))
-                ->order('ordering');
-
-            $plugins = $db->setQuery($query)->loadObjectList();
-
-            foreach($plugins as $plugin) {
-                $name = str_replace('filesystem-', '', $plugin->element);
-                
-                // load language file                
-                $language->load('plg_jce_filesystem_' . $name, JPATH_ADMINISTRATOR);
-                // create manifest path
-                $plugin->manifest = JPATH_PLUGINS . '/jce/' . $plugin->element . '/' . $plugin->element . '.xml';
-            }
+            $plugins = JcePluginsHelper::getExtensions('filesystem');
         }
 
         return $plugins;
@@ -178,7 +117,7 @@ class JFormFieldFilesystem extends JFormField
     /**
      * Method to get the field options.
      *
-     * @return  array  The field option objects.
+     * @return array The field option objects
      *
      * @since   11.1
      */
@@ -196,8 +135,8 @@ class JFormFieldFilesystem extends JFormField
         $plugins = $this->getPlugins();
 
         foreach ($plugins as $plugin) {
-            $value  = (string) str_replace('filesystem-', '', $plugin->element);
-            $text   = (string) $plugin->name;
+            $value = (string)$plugin->name;
+            $text = (string)$plugin->title;
 
             $tmp = array(
                 'value' => $value,
@@ -208,7 +147,7 @@ class JFormFieldFilesystem extends JFormField
             );
 
             // Add the option object to the result set.
-            $options[] = (object) $tmp;
+            $options[] = (object)$tmp;
         }
 
         reset($options);

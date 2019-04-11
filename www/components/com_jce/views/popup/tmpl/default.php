@@ -7,7 +7,7 @@
  * is derivative of works licensed under the GNU General Public License or
  * other free or open source software licenses
  */
-defined('_JEXEC') or die('RESTRICTED');
+defined('JPATH_PLATFORM') or die;
 ?>
 <style type="text/css">
     /* Reset template style sheet */
@@ -22,7 +22,7 @@ defined('_JEXEC') or die('RESTRICTED');
     <?php if ($this->features['mode'] && $this->features['print']) {
     ?>
         <div class="buttonheading"><a href="javascript:;" onClick="window.print();
-                return false"><img src="<?php echo JURI::root(); ?>components/com_jce/media/img/print.png" width="16" height="16" alt="<?php echo WFText::_('Print'); ?>" title="<?php echo WFText::_('Print'); ?>" /></a></div>
+                return false"><img src="<?php echo JURI::root(); ?>components/com_jce/media/img/print.png" width="16" height="16" alt="<?php echo JText::_('Print'); ?>" title="<?php echo JText::_('Print'); ?>" /></a></div>
 <?php 
 } ?>
     <div><img src="<?php echo $this->features['img']; ?>" width="<?php echo $this->features['width']; ?>" height="<?php echo $this->features['height']; ?>" alt="<?php echo $this->features['alt']; ?>" onclick="window.close();" /></div>

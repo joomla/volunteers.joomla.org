@@ -8,7 +8,7 @@
  * is derivative of works licensed under the GNU General Public License or
  * other free or open source software licenses
  */
-defined('_JEXEC') or die('RESTRICTED');
+defined('JPATH_PLATFORM') or die;
 ?>
     <div class="uk-form-row">
         <label class="uk-form-label uk-width-2-10" for="onafterprint">onafterprint</label>

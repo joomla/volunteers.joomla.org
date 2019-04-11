@@ -8,7 +8,7 @@
  * is derivative of works licensed under the GNU General Public License or
  * other free or open source software licenses
  */
-defined('_JEXEC') or die('RESTRICTED');
+defined('JPATH_PLATFORM') or die;
 
 class WFAggregatorExtension_Vimeo extends WFAggregatorExtension
 {
@@ -43,14 +43,14 @@ class WFAggregatorExtension_Vimeo extends WFAggregatorExtension
             'width' => $plugin->getParam('aggregator.vimeo.width', 400),
             'height' => $plugin->getParam('aggregator.vimeo.height', 225),
 
-            'color'     => (string) $plugin->getParam('aggregator.vimeo.color', ''),
-            'loop'      => (int) $plugin->getParam('aggregator.vimeo.loop', 0),
-            'autoplay'  => (int) $plugin->getParam('aggregator.vimeo.autoplay', 0),
-            'intro'     => (int) $plugin->getParam('aggregator.vimeo.intro', 0),
-            'title'     => (int) $plugin->getParam('aggregator.vimeo.title', 0),
-            'byline'    => (int) $plugin->getParam('aggregator.vimeo.byline', 0),
-            'portrait'  => (int) $plugin->getParam('aggregator.vimeo.portrait', 0),
-            'fullscreen'=> (int) $plugin->getParam('aggregator.vimeo.fullscreen', 1)
+            'color' => (string) $plugin->getParam('aggregator.vimeo.color', ''),
+            'loop' => (int) $plugin->getParam('aggregator.vimeo.loop', 0),
+            'autoplay' => (int) $plugin->getParam('aggregator.vimeo.autoplay', 0),
+            'intro' => (int) $plugin->getParam('aggregator.vimeo.intro', 0),
+            'title' => (int) $plugin->getParam('aggregator.vimeo.title', 0),
+            'byline' => (int) $plugin->getParam('aggregator.vimeo.byline', 0),
+            'portrait' => (int) $plugin->getParam('aggregator.vimeo.portrait', 0),
+            'fullscreen' => (int) $plugin->getParam('aggregator.vimeo.fullscreen', 1),
         );
     }
 }

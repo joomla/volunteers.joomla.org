@@ -8,18 +8,11 @@
  * is derivative of works licensed under the GNU General Public License or
  * other free or open source software licenses
  */
-defined('_WF_EXT') or die('RESTRICTED');
+defined('JPATH_PLATFORM') or die;
 
 class JoomlalinksContact extends JObject
 {
-    public $_option = 'com_contact';
-
-    /**
-     * Constructor activating the default information of the class.
-     */
-    public function __construct($options = array())
-    {
-    }
+    private $option = 'com_contact';
 
     /**
      * Returns a reference to a editor object.
@@ -31,12 +24,12 @@ class JoomlalinksContact extends JObject
      *
      * @since    1.5
      */
-    public static function getInstance()
+    public static function getInstance($options = array())
     {
         static $instance;
 
         if (!is_object($instance)) {
-            $instance = new self();
+            $instance = new self($options);
         }
 
         return $instance;
@@ -44,17 +37,12 @@ class JoomlalinksContact extends JObject
 
     public function getOption()
     {
-        return $this->_option;
+        return $this->option;
     }
 
     public function getList()
     {
-        //Reference to JConentEditor (JCE) instance
-        $wf = WFEditorPlugin::getInstance();
-
-        if ($wf->checkAccess('links.joomlalinks.contacts', 1)) {
-            return '<li data-id="index.php?option=com_contact" class="folder contact nolink"><div class="uk-tree-row"><a href="#"><span class="uk-tree-icon"></span><span class="uk-tree-text">' . WFText::_('WF_LINKS_JOOMLALINKS_CONTACTS') . '</span></a></div></li>';
-        }
+        return '<li id="index.php?option=com_contact" class="folder contact nolink"><div class="uk-tree-row"><a href="#"><span class="uk-tree-icon"></span><span class="uk-tree-text">' . JText::_('WF_LINKS_JOOMLALINKS_CONTACTS') . '</span></a></div></li>';
     }
 
     public function getLinks($args)
@@ -64,29 +52,18 @@ class JoomlalinksContact extends JObject
 
         $language = '';
 
-        if (defined('JPATH_PLATFORM')) {
-            require_once JPATH_SITE . '/components/com_contact/helpers/route.php';
-        }
+        require_once JPATH_SITE . '/components/com_contact/helpers/route.php';
 
         switch ($view) {
             default:
-                if (defined('JPATH_PLATFORM')) {
-                    $categories = WFLinkBrowser::getCategory('com_contact');
-                } else {
-                    $categories = WFLinkBrowser::getCategory('com_contact_details');
-                }
+                $categories = WFLinkBrowser::getCategory('com_contact', 1, $this->get('category_alias', 1));
 
                 foreach ($categories as $category) {
-                    if (defined('JPATH_PLATFORM')) {
-                        // language
-                        if (isset($category->language)) {
-                            $language = $category->language;
-                        }
-                        $url = ContactHelperRoute::getCategoryRoute($category->id, $language);
-                    } else {
-                        $itemid = WFLinkBrowser::getItemId('com_contact', array('category' => $category->id));
-                        $url = 'index.php?option=com_contact&view=category&catid=' . $category->slug . $itemid;
+                    // language
+                    if (isset($category->language)) {
+                        $language = $category->language;
                     }
+                    $url = ContactHelperRoute::getCategoryRoute($category->id, $language);
                     // convert to SEF
                     $url = self::route($url);
 
@@ -99,33 +76,31 @@ class JoomlalinksContact extends JObject
                 }
                 break;
             case 'category':
-                if (defined('JPATH_PLATFORM')) {
-                    $categories = WFLinkBrowser::getCategory('com_contact', $args->id);
+                $categories = WFLinkBrowser::getCategory('com_contact', $args->id, $this->get('category_alias', 1));
 
-                    foreach ($categories as $category) {
-                        $children = WFLinkBrowser::getCategory('com_contact', $category->id);
+                foreach ($categories as $category) {
+                    $children = WFLinkBrowser::getCategory('com_contact', $category->id, $this->get('category_alias', 1));
 
-                        // language
-                        if (isset($category->language)) {
-                            $language = $category->language;
-                        }
-
-                        if ($children) {
-                            $id = ContactHelperRoute::getCategoryRoute($category->id, $language);
-                        } else {
-                            $id = ContactHelperRoute::getCategoryRoute($category->slug, $language);
-                        }
-
-                        // convert to SEF
-                        $url = self::route($id);
-
-                        $items[] = array(
-                            'url' => $url,
-                            'id' => $id,
-                            'name' => $category->title . ' / ' . $category->alias,
-                            'class' => 'folder content',
-                        );
+                    // language
+                    if (isset($category->language)) {
+                        $language = $category->language;
                     }
+
+                    if ($children) {
+                        $id = ContactHelperRoute::getCategoryRoute($category->id, $language);
+                    } else {
+                        $id = ContactHelperRoute::getCategoryRoute($category->slug, $language);
+                    }
+
+                    // convert to SEF
+                    $url = $this->route($id);
+
+                    $items[] = array(
+                        'url' => $url,
+                        'id' => $id,
+                        'name' => $category->title . ' / ' . $category->alias,
+                        'class' => 'folder content',
+                    );
                 }
 
                 $contacts = self::_contacts($args->id);
@@ -136,20 +111,8 @@ class JoomlalinksContact extends JObject
                         $language = $contact->language;
                     }
 
-                    if (defined('JPATH_PLATFORM')) {
-                        $id = ContactHelperRoute::getContactRoute($contact->id, $args->id, $language);
-                    } else {
-                        $catid = $args->id ? '&catid=' . $args->id : '';
-                        $itemid = WFLinkBrowser::getItemId('com_contact', array('contact' => $contact->id));
-
-                        if (!$itemid && isset($args->Itemid)) {
-                            // fall back to the parent item's Itemid
-                            $itemid = '&Itemid=' . $args->Itemid;
-                        }
-
-                        $id = 'index.php?option=com_contact&view=contact' . $catid . '&id=' . $contact->id . '-' . $contact->alias . $itemid;
-                    }
-                    $id = self::route($id);
+                    $id = ContactHelperRoute::getContactRoute($contact->id, $args->id, $language);
+                    $id = $this->route($id);
 
                     $items[] = array(
                         'id' => $id,
@@ -163,12 +126,10 @@ class JoomlalinksContact extends JObject
         return $items;
     }
 
-    private static function route($url)
+    private function route($url)
     {
-        $wf = WFEditorPlugin::getInstance();
-
-        if ($wf->getParam('links.joomlalinks.sef_url', 0)) {
-            $url = WFLinkExtension::route($url);
+        if ((int) $this->get('sef_url', 0)) {
+            $url = WFLinkBrowser::route($url);
         }
 
         return $url;
@@ -179,31 +140,11 @@ class JoomlalinksContact extends JObject
         $db = JFactory::getDBO();
         $user = JFactory::getUser();
 
-        $where = '';
-
-        $version = new JVersion();
-        $language = $version->isCompatible('3.0') ? ', language' : '';
-
         $query = $db->getQuery(true);
-
-        if (is_object($query)) {
-            $query->select('id, name, alias' . $language)->from('#__contact_details')->where(array('catid=' . (int) $id, 'published = 1'));
-            
-            if (!$user->authorise('core.admin')) {
-                $query->where('access IN (' . implode(',', $user->getAuthorisedViewLevels()) . ')');
-            }
-
-        } else {
-            $query = 'SELECT id, name, alias'
-            . ' FROM #__contact_details'
-            . ' WHERE catid = ' . (int) $id
-            . ' AND published = 1';
-
-            if ($user->get('gid') != 25) {
-                $query .= ' AND access <= ' . (int) $user->get('aid');
-            }
-
-            $query .= ' ORDER BY name';
+        $query->select('id, name, alias, language')->from('#__contact_details')->where(array('catid=' . (int) $id, 'published = 1'));
+        
+        if (!$user->authorise('core.admin')) {
+            $query->where('access IN (' . implode(',', $user->getAuthorisedViewLevels()) . ')');
         }
 
         $db->setQuery($query);

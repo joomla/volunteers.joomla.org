@@ -11,11 +11,11 @@
 defined('WF_EDITOR') or die('RESTRICTED');
 ?>
 <form onsubmit="return false;" action="#">
-	<h5 id="title"><?php echo WFText::_('WF_PASTE_TITLE'); ?></h5>
+	<h5 id="title"><?php echo JText::_('WF_PASTE_TITLE'); ?></h5>
 	<div id="container"></div>
 
 	<div class="actionPanel">
-	<button id="insert"><?php echo WFText::_('WF_LABEL_INSERT'); ?></button>
-	<button id="cancel"><?php echo WFText::_('WF_LABEL_CANCEL'); ?></button>
+	<button id="insert"><?php echo JText::_('WF_LABEL_INSERT'); ?></button>
+	<button id="cancel"><?php echo JText::_('WF_LABEL_CANCEL'); ?></button>
 	</div>
 </form>

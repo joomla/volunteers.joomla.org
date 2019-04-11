@@ -8,10 +8,10 @@
  * is derivative of works licensed under the GNU General Public License or
  * other free or open source software licenses
  */
-defined('_JEXEC') or die('RESTRICTED');
+defined('JPATH_PLATFORM') or die;
 ?>
 <div id="charmap" role="presentation">
-	<h3><?php echo WFText::_('WF_ADVANCED_CHARMAP_TITLE'); ?></h3>
+	<h3><?php echo JText::_('WF_ADVANCED_CHARMAP_TITLE'); ?></h3>
 	<div id="charmapView"><!-- Chars will be rendered here --></div>
 	<div id="charmapDescription">
 		<div id="codeV"></div>

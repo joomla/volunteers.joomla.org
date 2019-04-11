@@ -8,9 +8,7 @@
  * is derivative of works licensed under the GNU General Public License or
  * other free or open source software licenses
  */
-defined('_JEXEC') or die('RESTRICTED');
-
-wfimport('editor.libraries.classes.extensions');
+defined('JPATH_PLATFORM') or die;
 
 class WFPopupsExtension extends WFExtension
 {
@@ -124,10 +122,10 @@ class WFPopupsExtension extends WFExtension
     {
         $options = array();
 
-        $options[] = JHTML::_('select.option', '', '-- '.WFText::_('WF_POPUP_TYPE_SELECT').' --');
+        $options[] = JHTML::_('select.option', '', '-- '.JText::_('WF_POPUP_TYPE_SELECT').' --');
 
         foreach ($this->getPopups() as $popup) {
-            $options[] = JHTML::_('select.option', $popup->name, WFText::_('WF_POPUPS_'.strtoupper($popup->name).'_TITLE'));
+            $options[] = JHTML::_('select.option', $popup->name, JText::_('WF_POPUPS_'.strtoupper($popup->name).'_TITLE'));
         }
 
         return JHTML::_('select.genericlist', $options, 'popup_list', '', 'value', 'text', $this->get('default'));

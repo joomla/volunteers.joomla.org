@@ -8,7 +8,7 @@
  * is derivative of works licensed under the GNU General Public License or
  * other free or open source software licenses
  */
-defined('_JEXEC') or die('RESTRICTED');
+defined('JPATH_PLATFORM') or die;
 
 final class WFTabs extends JObject
 {
@@ -172,7 +172,7 @@ final class WFTabs extends JObject
                     $class .= ' uk-hidden';
                 }
 
-                $output .= "\t".'<li class="'.$class.'"><a href="#'.$name.'_tab">'.WFText::_('WF_TAB_'.strtoupper($name)).'</a></li>'."\n";
+                $output .= "\t".'<li class="'.$class.'"><a href="#'.$name.'_tab">'.JText::_('WF_TAB_'.strtoupper($name)).'</a></li>'."\n";
                 ++$x;
             }
 

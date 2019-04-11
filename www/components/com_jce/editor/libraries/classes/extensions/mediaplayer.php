@@ -8,9 +8,7 @@
  * is derivative of works licensed under the GNU General Public License or
  * other free or open source software licenses
  */
-defined('_JEXEC') or die('RESTRICTED');
-
-wfimport('editor.libraries.classes.extensions');
+defined('JPATH_PLATFORM') or die;
 
 class WFMediaPlayerExtension extends WFExtension
 {

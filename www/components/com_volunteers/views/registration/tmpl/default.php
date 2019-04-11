@@ -99,7 +99,6 @@ JHtml::_('formbehavior.chosen', 'select');
 		<?php echo $this->form->renderField('joomlastackexchange'); ?>
 		<?php echo $this->form->renderField('twitter'); ?>
 		<?php echo $this->form->renderField('facebook'); ?>
-		<?php echo $this->form->renderField('googleplus'); ?>
 		<?php echo $this->form->renderField('linkedin'); ?>
 
 		<hr>

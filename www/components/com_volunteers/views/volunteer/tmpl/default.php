@@ -118,12 +118,6 @@ defined('_JEXEC') or die;
                     <span class="hidden-phone"><?php echo JText::_('COM_VOLUNTEERS_CONNECT_FACEBOOK') ?></span>
                 </a>
 			<?php endif; ?>
-			<?php if ($this->item->googleplus): ?>
-                <a class="btn btn-google-plus" target="_blank" href="https://plus.google.com/<?php echo($this->item->googleplus) ?>">
-                    <span class="icon-google-plus"></span>
-                    <span class="hidden-phone"><?php echo JText::_('COM_VOLUNTEERS_CONNECT_GOOGLEPLUS') ?></span>
-                </a>
-			<?php endif; ?>
 			<?php if ($this->item->linkedin): ?>
                 <a class="btn btn-linkedin" target="_blank" href="https://www.linkedin.com/in/<?php echo($this->item->linkedin) ?>">
                     <span class="icon-linkedin"></span>

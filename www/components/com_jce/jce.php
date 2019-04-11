@@ -8,6 +8,6 @@
  * is derivative of works licensed under the GNU General Public License or
  * other free or open source software licenses
  */
-defined('_JEXEC') or die('RESTRICTED');
+defined('JPATH_PLATFORM') or die;
 
-require_once JPATH_COMPONENT_ADMINISTRATOR.'/jce.php';
+require_once JPATH_ADMINISTRATOR . '/components/com_jce/jce.php';

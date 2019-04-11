@@ -7,23 +7,26 @@
  * is derivative of works licensed under the GNU General Public License or
  * other free or open source software licenses
  */
-defined('_JEXEC') or die('RESTRICTED');
+defined('JPATH_PLATFORM') or die;
 ?>
-<div class="ui-jce loading">
-  <form action="index.php" method="post" name="adminForm" id="adminForm" class="form-horizontal">
-    <div class="progress progress-striped active">
-      <div class="bar" style="width: 100%;"><?php echo JText :: _('WF_MESSAGE_LOAD'); ?></div>
+
+<form action="index.php" method="post" name="adminForm" id="adminForm" class="form-validate form-horizontal">
+    <div class="ui-jce container-fluid">
+        <?php if (!empty($this->sidebar)) : ?>
+	    <div id="j-sidebar-container" class="span2 col-md-2">
+		    <?php echo $this->sidebar; ?>
+	    </div>
+	    <div id="j-main-container" class="span10 col-md-10">
+        <?php else : ?>
+	    <div id="j-main-container">
+        <?php endif; ?>
+            <fieldset class="adminform panelform">
+                <?php echo JLayoutHelper::render('joomla.content.options_default', $this);?>
+            </fieldset>
+        </div>
     </div>
-    <?php foreach ($this->params->getGroups() as $group): ?>
-      <fieldset class="adminform panelform">
-        <legend><?php echo WFText::_('WF_CONFIG_'.strtoupper($group)); ?></legend>
-        <?php echo $this->params->render('params', $group)?>
-      </fieldset>
-    <?php endforeach; ?>
     <input type="hidden" name="option" value="com_jce" />
-    <input type="hidden" name="client" value="<?php echo $this->client; ?>" />
     <input type="hidden" name="view" value="config" />
     <input type="hidden" name="task" value="" />
     <?php echo JHTML::_('form.token'); ?>
-  </form>
-</div>
+</form>

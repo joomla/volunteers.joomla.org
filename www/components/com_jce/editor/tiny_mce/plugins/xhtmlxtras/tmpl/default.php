@@ -8,7 +8,7 @@
  * is derivative of works licensed under the GNU General Public License or
  * other free or open source software licenses
  */
-defined('_JEXEC') or die('RESTRICTED');
+defined('JPATH_PLATFORM') or die;
 
 $tabs = WFTabs::getInstance();
 ?>
@@ -17,8 +17,8 @@ $tabs = WFTabs::getInstance();
   	<?php $tabs->render(); ?>
   	</div>
 	<div class="mceActionPanel">
-		<button class="uk-button" type="submit" id="insert" onclick="XHTMLXtrasDialog.insert();"><?php echo WFText::_('WF_LABEL_UPDATE'); ?></button>
-		<button class="uk-button" type="button" id="remove" onclick="XHTMLXtrasDialog.remove();"><?php echo WFText::_('WF_XHTMLXTRAS_REMOVE'); ?></button>
-		<button class="uk-button" type="button" id="cancel"><?php echo WFText::_('WF_LABEL_CANCEL'); ?></button>
+		<button class="uk-button" type="submit" id="insert" onclick="XHTMLXtrasDialog.insert();"><?php echo JText::_('WF_LABEL_UPDATE'); ?></button>
+		<button class="uk-button" type="button" id="remove" onclick="XHTMLXtrasDialog.remove();"><?php echo JText::_('WF_XHTMLXTRAS_REMOVE'); ?></button>
+		<button class="uk-button" type="button" id="cancel"><?php echo JText::_('WF_LABEL_CANCEL'); ?></button>
 	</div>
 </form>

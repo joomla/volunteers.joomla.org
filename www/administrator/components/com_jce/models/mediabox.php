@@ -8,11 +8,151 @@
  * is derivative of works licensed under the GNU General Public License or
  * other free or open source software licenses
  */
-defined('_JEXEC') or die('RESTRICTED');
+defined('JPATH_PLATFORM') or die;
 
 // load base model
-require_once dirname(__FILE__).'/model.php';
+jimport('joomla.application.component.modelform');
 
-class WFModelMediabox extends WFModel
+use Joomla\Utilities\ArrayHelper;
+
+class JceModelMediabox extends JModelForm
 {
+    /**
+     * Returns a Table object, always creating it.
+     *
+     * @param type   $type   The table type to instantiate
+     * @param string $prefix A prefix for the table class name. Optional
+     * @param array  $config Configuration array for model. Optional
+     *
+     * @return JTable A database object
+     *
+     * @since   1.6
+     */
+    public function getTable($type = 'Extension', $prefix = 'JTable', $config = array())
+    {
+        return JTable::getInstance($type, $prefix, $config);
+    }
+    
+    /**
+     * Method to get a form object.
+     *
+     * @param array $data     Data for the form
+     * @param bool  $loadData True if the form is to load its own data (default case), false if not
+     *
+     * @return mixed A JForm object on success, false on failure
+     *
+     * @since	1.6
+     */
+    public function getForm($data = array(), $loadData = true)
+    {
+        JForm::addFormPath(JPATH_PLUGINS . '/system/jcemediabox');
+
+        JFactory::getLanguage()->load('plg_system_jcemediabox', JPATH_ADMINISTRATOR);
+
+        // Get the form.
+        $form = $this->loadForm('com_jce.mediabox', 'jcemediabox', array('control' => 'jform', 'load_data' => $loadData), true, '//config');
+
+        if (empty($form)) {
+            return false;
+        }
+
+        return $form;
+    }
+
+    /**
+     * Method to get the data that should be injected in the form.
+     *
+     * @return mixed The data for the form
+     *
+     * @since	1.6
+     */
+    protected function loadFormData()
+    {
+        // Check the session for previously entered form data.
+        $data = JFactory::getApplication()->getUserState('com_jce.mediabox.plugin.data', array());
+
+        if (empty($data)) {
+            $data = $this->getData();
+        }
+
+        return $data;
+    }
+
+    /**
+     * Method to get the configuration data.
+     *
+     * This method will load the global configuration data straight from
+     * JConfig. If configuration data has been saved in the session, that
+     * data will be merged into the original data, overwriting it.
+     *
+     * @return array An array containg all global config data
+     *
+     * @since	1.6
+     */
+    public function getData()
+    {
+        // Get the editor data
+        $plugin = JPluginHelper::getPlugin('system', 'jcemediabox');
+
+        // json_decode
+        $json = json_decode($plugin->params, true);
+
+        array_walk($json, function(&$value, $key) {
+            if (is_numeric($value)) {
+                $value = $value + 0;
+            }
+        });
+
+        $data = new StdClass;
+        $data->params = $json;
+
+        return $data;
+    }
+
+    /**
+     * Method to save the form data.
+     *
+     * @param   array  The form data
+     *
+     * @return bool True on success
+     *
+     * @since    3.0
+     */
+    public function save($data)
+    {
+        $table = JTable::getInstance('extension');
+
+        $plugin = JPluginHelper::getPlugin('system', 'jcemediabox');
+
+        if (!$plugin->id) {
+            $this->setError('Invalid plugin');
+            return false;
+        }
+
+        // Load the previous Data
+        if (!$table->load($plugin->id)) {
+            $this->setError($table->getError());
+            return false;
+        }
+
+		// Bind the data.
+        if (!$table->bind($data)) {
+            $this->setError($table->getError());
+            return false;
+        }
+
+		// Check the data.
+        if (!$table->check()) {
+            $this->setError($table->getError());
+            return false;
+        }
+        
+        // Store the data.
+        if (!$table->store()) {
+            $this->setError($table->getError());
+            return false;
+        }
+
+        return true;
+    }
 }

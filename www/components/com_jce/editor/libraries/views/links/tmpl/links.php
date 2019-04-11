@@ -8,7 +8,7 @@
  * is derivative of works licensed under the GNU General Public License or
  * other free or open source software licenses
  */
-defined('_JEXEC') or die('RESTRICTED');
+defined('JPATH_PLATFORM') or die;
 ?>
 <div id="link-browser" class="tree">
     <ul class="uk-tree-root"><?php echo $this->list; ?></ul>

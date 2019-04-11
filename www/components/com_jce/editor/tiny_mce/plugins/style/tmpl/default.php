@@ -8,7 +8,7 @@
  * is derivative of works licensed under the GNU General Public License or
  * other free or open source software licenses
  */
-defined('_JEXEC') or die('RESTRICTED');
+defined('JPATH_PLATFORM') or die;
 
 $tabs = WFTabs::getInstance();
 ?>
@@ -17,12 +17,12 @@ $tabs = WFTabs::getInstance();
     <div class="mceActionPanel">
       <div class="uk-form-row uk-float-left">
           <input type="checkbox" id="toggle_insert_span" onclick="StyleDialog.toggleApplyAction();" />
-          <label for="toggle_insert_span"><?php echo WFText::_('WF_STYLES_TOGGLE_INSERT_SPAN'); ?></label>
+          <label for="toggle_insert_span"><?php echo JText::_('WF_STYLES_TOGGLE_INSERT_SPAN'); ?></label>
       </div>
 
-        <button type="submit" id="insert"><?php echo WFText::_('WF_LABEL_UPDATE'); ?></button>
-        <button type="button" id="apply"><?php echo WFText::_('WF_STYLES_APPLY'); ?></button>
-        <button type="button" id="cancel"><?php echo WFText::_('WF_LABEL_CANCEL'); ?></button>
+        <button type="submit" id="insert"><?php echo JText::_('WF_LABEL_UPDATE'); ?></button>
+        <button type="button" id="apply"><?php echo JText::_('WF_STYLES_APPLY'); ?></button>
+        <button type="button" id="cancel"><?php echo JText::_('WF_LABEL_CANCEL'); ?></button>
     </div>
 </form>
 <div style="display:none;">

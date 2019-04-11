@@ -1,10 +1,7 @@
 <?php
 
 /**
- * @package     Joomla.Platform
- * @subpackage  Form
- *
- * @copyright   Copyright (C) 2005 - 2013 Open Source Matters, Inc. All rights reserved.
+ * @copyright   Copyright (C) 2005 - 2013 Open Source Matters, Inc. All rights reserved
  * @license     GNU General Public License version 2 or later; see LICENSE
  */
 defined('JPATH_PLATFORM') or die;
@@ -15,18 +12,15 @@ JFormHelper::loadFieldClass('number');
  * Form Field class for the Joomla Platform.
  * Supports a one line text field.
  *
- * @package     Joomla.Platform
- * @subpackage  Form
  * @link        http://www.w3.org/TR/html-markup/input.text.html#input.text
  * @since       11.1
  */
 class JFormFieldUploadMaxSize extends JFormFieldNumber
 {
-
     /**
      * The form field type.
      *
-     * @var    string
+     * @var string
      *
      * @since  11.1
      */
@@ -35,21 +29,23 @@ class JFormFieldUploadMaxSize extends JFormFieldNumber
     /**
      * Method to get the field input markup.
      *
-     * @return  string  The field input markup.
+     * @return string The field input markup
      *
      * @since   11.1
      */
     protected function getInput()
     {
         $this->max = (int) $this->getUploadValue();
-        $this->class = trim($this->class . ' input-small');
+        $this->class = trim($this->class.' input-small');
 
-        $html = '<div class="input-append">';
+        $html = '<div class="input-append input-group">';
 
         $html .= parent::getInput();
-        $html .= '<span class="add-on">Kb</span>';
+        $html .= '  <div class="input-group-append">';
+        $html .= '      <span class="add-on input-group-text">Kb</span>';
+        $html .= '  </div>';
+        $html .= '	<small class="help-inline form-text">&nbsp;<em>'.JText::_('WF_SERVER_UPLOAD_SIZE').' : '.$this->getUploadValue().'</em></small>';
         $html .= '</div>';
-        $html .= '&nbsp;<span class="help-inline"><em>' . JText::_('COM_JCE_SERVER_UPLOAD_SIZE') . ' : ' . $this->getUploadValue() . '</em></span>';
 
         return $html;
     }
@@ -118,7 +114,6 @@ class JFormFieldUploadMaxSize extends JFormFieldNumber
                 break;
         }
 
-        return (int) $value . ' KB';
+        return (int) $value.' KB';
     }
-
 }

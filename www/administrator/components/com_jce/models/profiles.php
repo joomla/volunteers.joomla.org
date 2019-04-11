@@ -8,653 +8,187 @@
  * is derivative of works licensed under the GNU General Public License or
  * other free or open source software licenses
  */
-defined('_JEXEC') or die('RESTRICTED');
+defined('JPATH_PLATFORM') or die;
 
-// load base model
-require_once dirname(__FILE__).'/model.php';
+require_once JPATH_COMPONENT_ADMINISTRATOR . '/helpers/profiles.php';
 
-wfimport('admin.models.plugins');
-
-/**
- * Profiles Model.
- */
-class WFModelProfiles extends WFModel
+class JceModelProfiles extends JModelList
 {
     /**
-     * Convert row string into array.
+     * Constructor.
      *
-     * @param object $rows
+     * @param   array  $config  An optional associative array of configuration settings.
      *
-     * @return array $rows
+     * @see     JControllerLegacy
+     * @since   1.6
      */
-    public function getRowArray($rows)
+    public function __construct($config = array())
     {
-        $out = array();
-        $rows = explode(';', $rows);
-        $i = 1;
-        foreach ($rows as $row) {
-            $out[$i] = $row;
-            ++$i;
-        }
-
-        return $out;
-    }
-
-    /**
-     * Get a plugin's extensions.
-     *
-     * @param object $plugin
-     *
-     * @return array extensions
-     */
-    public function getExtensions($plugin)
-    {
-        wfimport('admin.models.plugins');
-
-        $model = new WFModelplugins();
-
-        $extensions = array();
-        $supported = array();
-
-        $item = null;
-
-        if (is_file($plugin->manifest)) {
-            $xml = WFXMLElement::load($plugin->manifest);
-
-            // get the plugin xml file
-            if ($xml) {
-                // get extensions supported by the plugin
-                if ((string) $xml->extensions) {
-                    $supported = explode(',', (string) $xml->extensions);
-                }
-            }
-        }
-
-        foreach ($model->getExtensions() as $extension) {
-            // the plugin only supports some extensions, move along
-            if (!in_array($extension->folder, $supported)) {
-                continue;
-            }
-
-            // this extension only supports some plugins, move along
-            if (!empty($extension->plugins) && !in_array($plugin->name, $extension->plugins)) {
-                continue;
-            }
-
-            $extensions[$extension->folder][] = $extension;
-        }
-
-        return $extensions;
-    }
-
-    public function getPlugins($plugins = array())
-    {
-        $commands = array();
-
-        if (empty($plugins)) {
-            $commands = WFModelplugins::getCommands();
-        }
-
-        // only need plugins with xml files
-        foreach (WFModelplugins::getPlugins() as $name => $plugin) {
-            if (is_file($plugin->manifest)) {
-                $plugins[$name] = $plugin;
-            }
-        }
-
-        return array_merge($commands, $plugins);
-    }
-
-    public function getUserGroups($area)
-    {
-        $db = JFactory::getDBO();
-
-        if (defined('JPATH_PLATFORM')) {
-            jimport('joomla.access.access');
-
-            $query = $db->getQuery(true);
-
-            if (is_object($query)) {
-                $query->select('id')->from('#__usergroups');
-            } else {
-                $query = 'SELECT id FROM #__usergroups';
-            }
-
-            $db->setQuery($query);
-            if (method_exists($db, 'loadColumn')) {
-                $groups = $db->loadColumn();
-            } else {
-                $groups = $db->loadResultArray();
-            }
-
-            $front = array();
-            $back = array();
-
-            foreach ($groups as $group) {
-                $create = JAccess::checkGroup($group, 'core.create');
-                $admin = JAccess::checkGroup($group, 'core.login.admin');
-                $super = JAccess::checkGroup($group, 'core.admin');
-
-                if ($super) {
-                    $back[] = $group;
-                } else {
-                    // group can create
-                    if ($create) {
-                        // group has admin access
-                        if ($admin) {
-                            $back[] = $group;
-                        } else {
-                            $front[] = $group;
-                        }
-                    }
-                }
-            }
-        } else {
-            $front = array(
-                '19',
-                '20',
-                '21',
-            );
-            $back = array(
-                '23',
-                '24',
-                '25',
+        if (empty($config['filter_fields'])) {
+            $config['filter_fields'] = array(
+                'id', 'id',
+                'name', 'name',
+                'checked_out', 'checked_out',
+                'checked_out_time', 'checked_out_time',
+                'published', 'published',
+                'ordering', 'ordering',
             );
         }
 
-        switch ($area) {
-            case 0:
-                return array_merge($front, $back);
-                break;
-            case 1:
-                return $front;
-                break;
-            case 2:
-                return $back;
-                break;
-        }
-
-        return array();
+        parent::__construct($config);
     }
 
     /**
-     * Create the Profiles table.
+     * Method to auto-populate the model state.
      *
-     * @return bool
+     * @param   string  $ordering   An optional ordering field.
+     * @param   string  $direction  An optional direction (asc|desc).
+     *
+     * @return  void
+     *
+     * @note    Calling getState in this method will result in recursion.
+     * @since   1.6
      */
-    public function createProfilesTable()
+    protected function populateState($ordering = null, $direction = null)
     {
-        jimport('joomla.installer.helper');
+        // Load the filter state.
+        $this->setState('filter.search', $this->getUserStateFromRequest($this->context . '.filter.search', 'filter_search', '', 'string'));
 
-        $mainframe = JFactory::getApplication();
+        // Load the parameters.
+        $params = JComponentHelper::getParams('com_jce');
+        $this->setState('params', $params);
 
-        $db = JFactory::getDBO();
-        $driver = strtolower($db->name);
-
-        switch ($driver) {
-            default:
-            case 'mysql':
-            case 'mysqli':
-                $driver = 'mysql';
-                break;
-            case 'sqlsrv':
-            case 'sqlazure':
-            case 'sqlzure':
-                $driver = 'sqlsrv';
-                break;
-            case 'postgresql':
-                $driver = 'postgresql';
-                break;
-        }
-
-        $file = dirname(dirname(__FILE__)).'/sql/'.$driver.'.sql';
-        $error = null;
-
-        if (is_file($file)) {
-            $query = file_get_contents($file);
-
-            if ($query) {
-                // replace prefix
-                $query = $db->replacePrefix((string) $query);
-
-                // Postgresql needs special attention because of the query syntax
-                if ($driver == 'postgresql') {
-                    $query = "CREATE OR REPLACE FUNCTION create_table_if_not_exists (create_sql text)
-                    RETURNS bool as $$
-                    BEGIN
-                        BEGIN
-                            EXECUTE create_sql;
-                            EXCEPTION WHEN duplicate_table THEN RETURN false;
-                        END;
-                        RETURN true;
-                    END; $$
-                    LANGUAGE plpgsql;
-                    SELECT create_table_if_not_exists ('" .$query."');";
-                }
-                // set query
-                $db->setQuery(trim($query));
-
-                if (!$db->query()) {
-                    $mainframe->enqueueMessage(WFText::_('WF_INSTALL_TABLE_PROFILES_ERROR').$db->stdErr(), 'error');
-
-                    return false;
-                } else {
-                    return true;
-                }
-            } else {
-                $error = 'NO SQL QUERY';
-            }
-        } else {
-            $error = 'SQL FILE MISSING';
-        }
-
-        $mainframe->enqueueMessage(WFText::_('WF_INSTALL_TABLE_PROFILES_ERROR').!is_null($error) ? ' - '.$error : '', 'error');
-
-        return false;
+        // List state information.
+        parent::populateState($ordering, $direction);
     }
 
     /**
-     * Install Profiles.
+     * Method to get a store id based on model configuration state.
      *
-     * @return bool
+     * This is necessary because the model is used by the component and
+     * different modules that might need different sets of data or different
+     * ordering requirements.
      *
-     * @param object $install[optional]
+     * @param   string  $id  A prefix for the store id.
+     *
+     * @return  string  A store id.
+     *
+     * @since   1.6
      */
-    public function installProfiles()
+    protected function getStoreId($id = '')
     {
-        $app = JFactory::getApplication();
-        $db = JFactory::getDBO();
+        // Compile the store id.
+        $id .= ':' . $this->getState('filter.search');
 
-        if ($this->createProfilesTable()) {
-            self::buildCountQuery();
-
-            $profiles = array('Default' => false, 'Front End' => false);
-
-            // No Profiles table data
-            if (!$db->loadResult()) {
-                $xml = dirname(__FILE__).'/profiles.xml';
-
-                if (is_file($xml)) {
-                    if (!$this->processImport($xml)) {
-                        $app->enqueueMessage(WFText::_('WF_INSTALL_PROFILES_ERROR'), 'error');
-
-                        return false;
-                    }
-                } else {
-                    $app->enqueueMessage(WFText::_('WF_INSTALL_PROFILES_NOFILE_ERROR'), 'error');
-
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        return false;
+        return parent::getStoreId($id);
     }
 
-    private static function buildCountQuery($name = '')
+    /**
+     * Build an SQL query to load the list data.
+     *
+     * @return  JDatabaseQuery
+     *
+     * @since   1.6
+     */
+    protected function getListQuery()
     {
-        $db = JFactory::getDBO();
-
+        // Create a new query object.
+        $db = $this->getDbo();
         $query = $db->getQuery(true);
+        $user = JFactory::getUser();
 
-        // check for name
-        if (is_object($query)) {
-            $query->select('COUNT(id)')->from('#__wf_profiles');
+        // Select the required fields from the table.
+        $query->select(
+            $this->getState(
+                'list.select',
+                'id, name, description, ordering, published, checked_out, checked_out_time'
+            )
+        );
 
-            if ($name) {
-                $query->where('name = '.$db->Quote($name));
-            }
-        } else {
-            $query = 'SELECT COUNT(id) FROM #__wf_profiles';
+        $query->from($db->quoteName('#__wf_profiles'));
+        $query->where('(' . $db->quoteName('published') . ' IN (0, 1))');
 
-            if ($name) {
-                $query .= ' WHERE name = '.$db->Quote($name);
-            }
-        }
+        // Filter by search in title
+        $search = $this->getState('filter.search');
 
-        $db->setQuery($query);
-    }
-
-    /**
-     * Process import data from XML file.
-     *
-     * @param object $file    XML file
-     * @param bool   $install Can be used by the package installer
-     *
-     * @return bool
-     */
-    public function processImport($file)
-    {
-        $app = JFactory::getApplication();
-        $db = JFactory::getDBO();
-        $view = JRequest::getCmd('view');
-
-        $language = JFactory::getLanguage();
-        $language->load('com_jce', JPATH_ADMINISTRATOR);
-
-        JTable::addIncludePath(dirname(dirname(__FILE__)).'/tables');
-
-        $xml = WFXMLElement::load($file);
-
-        if ($xml) {
-            $n = 0;
-
-            foreach ($xml->profiles->children() as $profile) {
-                $row = JTable::getInstance('profiles', 'WFTable');
-                // get profile name
-                $name = (string) $profile->attributes()->name;
-
-                // backwards compatability
-                if ($name) {
-                    self::buildCountQuery($name);
-                    // create name copy if exists
-                    while ($db->loadResult()) {
-                        $name = JText::sprintf('WF_PROFILES_COPY_OF', $name);
-
-                        self::buildCountQuery($name);
-                    }
-                    // set name
-                    $row->name = $name;
-                }
-
-                foreach ($profile->children() as $item) {
-                    switch ($item->getName()) {
-                        case 'name':
-                            $name = (string) $item;
-                            // only if name set and table name not set
-                            if ($name && !$row->name) {
-                                self::buildCountQuery($name);
-
-                                // create name copy if exists
-                                while ($db->loadResult()) {
-                                    $name = JText::sprintf('WF_PROFILES_COPY_OF', $name);
-
-                                    self::buildCountQuery($name);
-                                }
-                                // set name
-                                $row->name = $name;
-                            }
-
-                            break;
-                        case 'description':
-                            $row->description = WFText::_((string) $item);
-
-                            break;
-                        case 'types':
-                            if (!(string) $item) {
-                                $area = (string) $profile->area[0];
-
-                                $groups = $this->getUserGroups($area);
-                                $data = implode(',', array_unique($groups));
-                            } else {
-                                $data = (string) $item;
-                            }
-                            $row->types = $data;
-                            break;
-                        case 'params':
-                            $params = array();
-                            foreach ($item->children() as $param) {
-                                $params[] = (string) $param;
-                            }
-                            $row->params = implode("\n", $params);
-
-                            break;
-                        case 'rows':
-
-                            $row->rows = (string) $item;
-
-                            break;
-                        case 'plugins':
-                            $row->plugins = (string) $item;
-                            break;
-                        case 'checked_out_time':
-                            $row->checked_out_time = $db->getNullDate();
-                            break;
-                        default:
-                            $key = $item->getName();
-                            $row->$key = (string) $item;
-
-                            break;
-                    }
-                }
-
-                if (!$row->store()) {
-                    $app->enqueueMessage(WFText::_('WF_PROFILES_IMPORT_ERROR'), $row->getError(), 'error');
-
-                    return false;
-                } else {
-                    ++$n;
-                }
-            }
-
-            return true;
-        }
-    }
-
-    /**
-     * Get default profile data.
-     *
-     * @return object Profile table object
-     */
-    public function getDefaultProfile()
-    {
-        $mainframe = JFactory::getApplication();
-        $file = JPATH_COMPONENT.'/models/profiles.xml';
-
-        $xml = WFXMLElement::load($file);
-
-        if ($xml) {
-            foreach ($xml->profiles->children() as $profile) {
-                if ($profile->attributes()->default) {
-                    $row = JTable::getInstance('profiles', 'WFTable');
-
-                    foreach ($profile->children() as $item) {
-                        switch ($item->getName()) {
-                            case 'rows':
-                                $row->rows = (string) $item;
-                                break;
-                            case 'plugins':
-                                $row->plugins = (string) $item;
-                                break;
-                            default:
-                                $key = $item->getName();
-                                $row->$key = (string) $item;
-
-                                break;
-                        }
-                    }
-                    // reset name and description
-                    $row->name = '';
-                    $row->description = '';
-
-                    return $row;
-                }
-            }
-        }
-
-        return null;
-    }
-
-    public function getEditorParams(&$row)
-    {
-        // get params definitions
-        $xml = WF_EDITOR_LIBRARIES.'/xml/config/profiles.xml';
-
-        // get editor params
-        $params = new WFParameter($row->params, $xml, 'editor');
-        $params->addElementPath(JPATH_COMPONENT.'/elements');
-        $params->addElementPath(WF_EDITOR.'/elements');
-
-        $groups = $params->getGroups();
-
-        $row->editor_params = $params;
-        $row->editor_groups = $groups;
-    }
-
-    public function getLayoutParams(&$row)
-    {
-        // get params definitions
-        $xml = WF_EDITOR_LIBRARIES.'/xml/config/layout.xml';
-
-        // get editor params
-        $params = new WFParameter($row->params, $xml, 'editor');
-        $params->addElementPath(JPATH_COMPONENT.'/elements');
-        $params->addElementPath(WF_EDITOR.'/elements');
-
-        $groups = $params->getGroups();
-
-        $row->layout_params = $params;
-        $row->layout_groups = $groups;
-    }
-
-    public function getPluginParameters()
-    {
-    }
-
-    public function getThemes()
-    {
-        jimport('joomla.filesystem.folder');
-        $path = WF_EDITOR_THEMES.'/advanced/skins';
-
-        return JFolder::folders($path, '.', false, true);
-    }
-
-    /**
-     * Check whether a table exists.
-     *
-     * @return bool
-     *
-     * @param string $table Table name
-     */
-    public static function checkTable()
-    {
-        $db = JFactory::getDBO();
-
-        $tables = $db->getTableList();
-
-        if (!empty($tables)) {
-            // swap array values with keys, convert to lowercase and return array keys as values
-            $tables = array_keys(array_change_key_case(array_flip($tables)));
-            $app = JFactory::getApplication();
-            $match = str_replace('#__', strtolower($app->getCfg('dbprefix', '')), '#__wf_profiles');
-
-            return in_array($match, $tables);
-        }
-
-        // try with query
-        self::buildCountQuery();
-
-        return $db->query();
-    }
-
-    /**
-     * Check table contents.
-     *
-     * @return int
-     *
-     * @param string $table Table name
-     */
-    public static function checkTableContents()
-    {
-        $db = JFactory::getDBO();
-
-        self::buildCountQuery();
-
-        return $db->loadResult();
-    }
-
-    private function getIconType($icon)
-    {
-        // TODO - Enhance this later to get the type from xml
-
-        if (in_array($icon, array('styleselect', 'formatselect', 'fontselect', 'fontsizeselect'))) {
-            return 'mceListBox';
-        }
-
-        if (in_array($icon, array('numlist', 'bullist', 'forecolor', 'backcolor', 'spellchecker', 'textcase'))) {
-            return 'mceSplitButton';
-        }
-
-        return 'mceButton';
-    }
-
-    public function getIcon($plugin)
-    {
-        if ($plugin->type == 'command') {
-            $base = 'components/com_jce/editor/tiny_mce/themes/advanced/img';
-        } else {
-            if (isset($plugin->url)) {
-                $base = $plugin->url . '/img';
+        if (!empty($search)) {
+            if (stripos($search, 'id:') === 0) {
+                $query->where($db->quoteName('id') . ' = ' . (int) substr($search, 3));
             } else {
-                $base = 'components/com_jce/editor/tiny_mce/plugins/' . $plugin->name . '/img';
-            }
-        }
-        // convert backslashes
-        $base = preg_replace('#[/\\\\]+#', '/', $base);
-
-        $span = '';
-        $img = '';
-        $icons = explode(',', $plugin->icon);
-
-        foreach ($icons as $icon) {
-            if ($icon == '|' || $icon == 'spacer') {
-                continue;
-            } else {
-                $path = $base . '/' . $icon . '.png';
-
-                if (JFile::exists(JPATH_SITE.'/'.$path)) {
-                    $img = '<img src="' . JURI::root(true) . '/' . $path . '" alt="' . WFText::_($plugin->title) . '" />';
-                }
-
-                $span .= '<div data-button="' . preg_replace('/[^\w]/i', '', $icon) . '" class="' . self::getIconType($icon) . '"><span class="mceIcon mce_'.preg_replace('/[^\w]/i', '', $icon) . '">' . $img . '</span></div>';
+                $search = $db->quote('%' . str_replace(' ', '%', $db->escape(trim($search), true) . '%'));
+                $query->where('(' . $db->quoteName('name') . ' LIKE ' . $search . ' OR ' . $db->quoteName('description') . ' LIKE ' . $search . ')');
             }
         }
 
-        return $span;
+        // Add the list ordering clause.
+        $listOrder = $this->getState('list.ordering', 'ordering');
+        $listDirn = $this->getState('list.direction', 'ASC');
+
+        $query->order($db->escape($listOrder . ' ' . $listDirn));
+
+        return $query;
     }
 
-    public function saveOrder($cid, $order)
+    public function repair()
     {
-        $db = JFactory::getDBO();
-        $total = count($cid);
+		$file = __DIR__ . '/profiles.xml';
 
-        JArrayHelper::toInteger($cid, array(0));
-        JArrayHelper::toInteger($order, array(0));
+        if (!is_file($file)) {
+            $this->setError(JText::_('WF_PROFILES_REPAIR_ERROR'));
+            return false;
+        }
 
-        $row = JTable::getInstance('profiles', 'WFTable');
-        $conditions = array();
+        $xml = simplexml_load_file($file);
 
-        // update ordering values
-        for ($i = 0; $i < $total; ++$i) {
-            $row->load((int) $cid[$i]);
-            if ($row->ordering != $order[$i]) {
-                $row->ordering = $order[$i];
-                if (!$row->store()) {
-                    return false;
-                }
-                // remember to updateOrder this group
-                $condition = ' ordering > -10000 AND ordering < 10000';
-                $found = false;
-                foreach ($conditions as $cond) {
-                    if ($cond[1] == $condition) {
-                        $found = true;
+        if (!$xml) {
+            $this->setError(JText::_('WF_PROFILES_REPAIR_ERROR'));
+            return false;
+        }
+
+        foreach ($xml->profiles->children() as $profile) {
+			$groups = JceProfilesHelper::getUserGroups((int) $profile->children('area'));
+
+			$table = JTable::getInstance('Profiles', 'JceTable');
+
+            foreach ($profile->children() as $item) {
+                switch ((string) $item->getName()) {
+					case 'description':
+                        $table->description = JText::_((string) $item);
+                    case 'types':
+                        $table->types = implode(',', $groups);
                         break;
-                    }
-                }
-                if (!$found) {
-                    $conditions[] = array($row->id, $condition);
+                    case 'area':
+                        $table->area = (int) $item;
+                        break;
+                    case 'rows':
+                        $table->rows = (string) $item;
+                        break;
+                    case 'plugins':
+                        $table->plugins = (string) $item;
+                        break;
+                    default:
+                        $key = $item->getName();
+                        $table->$key = (string) $item;
+
+                        break;
                 }
             }
-        }
 
-        // execute updateOrder for each group
-        foreach ($conditions as $cond) {
-            $row->load($cond[0]);
-            $row->reorder($cond[1]);
-        }
+            // Check the data.
+            if (!$table->check()) {
+                $this->setError($table->getError());
 
-        return true;
+                return false;
+            }
+
+            // Store the data.
+            if (!$table->store()) {
+                $this->setError($table->getError());
+
+                return false;
+            }
+		}
+		
+		return true;
     }
 }

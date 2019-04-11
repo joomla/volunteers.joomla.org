@@ -8,39 +8,39 @@
  * is derivative of works licensed under the GNU General Public License or
  * other free or open source software licenses
  */
-defined('_JEXEC') or die('RESTRICTED');
+defined('JPATH_PLATFORM') or die;
 ?>
 <div class="uk-grid">
   <div class="uk-width-3-10">
     <fieldset>
-      <legend><?php echo WFText::_('WF_STYLES_STYLE'); ?></legend>
+      <legend><?php echo JText::_('WF_STYLES_STYLE'); ?></legend>
       <div class="uk-form-row">
         <input type="checkbox" id="border_style_same" checked="checked" onclick="StyleDialog.toggleSame(this,'border_style');" />
-        <label for="border_style_same"><?php echo WFText::_('WF_STYLES_SAME'); ?></label>
+        <label for="border_style_same"><?php echo JText::_('WF_STYLES_SAME'); ?></label>
       </div>
     <div class="uk-grid uk-grid-small">
-      <label for="border_style_top" class="uk-form-label uk-width-3-10"><?php echo WFText::_('WF_STYLES_TOP'); ?></label>
+      <label for="border_style_top" class="uk-form-label uk-width-3-10"><?php echo JText::_('WF_STYLES_TOP'); ?></label>
       <div class="uk-form-controls uk-width-7-10 uk-datalist">
         <select id="border_style_top"></select>
       </div>
     </div>
 
     <div class="uk-grid uk-grid-small">
-      <label for="border_style_right" class="uk-form-label uk-width-3-10"><?php echo WFText::_('WF_STYLES_RIGHT'); ?></label>
+      <label for="border_style_right" class="uk-form-label uk-width-3-10"><?php echo JText::_('WF_STYLES_RIGHT'); ?></label>
       <div class="uk-form-controls uk-width-7-10 uk-datalist">
         <select id="border_style_right"></select>
       </div>
     </div>
 
     <div class="uk-grid uk-grid-small">
-      <label for="border_style_bottom" class="uk-form-label uk-width-3-10"><?php echo WFText::_('WF_STYLES_BOTTOM'); ?></label>
+      <label for="border_style_bottom" class="uk-form-label uk-width-3-10"><?php echo JText::_('WF_STYLES_BOTTOM'); ?></label>
       <div class="uk-form-controls uk-width-7-10 uk-datalist">
         <select id="border_style_bottom"></select>
       </div>
     </div>
 
     <div class="uk-grid uk-grid-small">
-      <label for="border_style_left" class="uk-form-label uk-width-3-10"><?php echo WFText::_('WF_STYLES_LEFT'); ?></label>
+      <label for="border_style_left" class="uk-form-label uk-width-3-10"><?php echo JText::_('WF_STYLES_LEFT'); ?></label>
       <div class="uk-form-controls uk-width-7-10 uk-datalist">
         <select id="border_style_left"></select>
       </div>
@@ -49,10 +49,10 @@ defined('_JEXEC') or die('RESTRICTED');
   </div>
   <div class="uk-width-4-10">
     <fieldset>
-      <legend><?php echo WFText::_('WF_STYLES_WIDTH'); ?></legend>
+      <legend><?php echo JText::_('WF_STYLES_WIDTH'); ?></legend>
       <div class="uk-form-row">
         <input type="checkbox" id="border_width_same" checked="checked" onclick="StyleDialog.toggleSame(this,'border_width');" />
-        <label for="border_width_same"><?php echo WFText::_('WF_STYLES_SAME'); ?></label>
+        <label for="border_width_same"><?php echo JText::_('WF_STYLES_SAME'); ?></label>
       </div>
 
       <div class="uk-grid uk-grid-small">
@@ -94,10 +94,10 @@ defined('_JEXEC') or die('RESTRICTED');
   </div>
   <div class="uk-width-3-10">
     <fieldset>
-      <legend><?php echo WFText::_('WF_STYLES_COLOR'); ?></legend>
+      <legend><?php echo JText::_('WF_STYLES_COLOR'); ?></legend>
       <div class="uk-form-row">
         <input type="checkbox" id="border_color_same" checked="checked" onclick="StyleDialog.toggleSame(this,'border_color');" />
-        <label for="border_color_same"><?php echo WFText::_('WF_STYLES_SAME'); ?></label>
+        <label for="border_color_same"><?php echo JText::_('WF_STYLES_SAME'); ?></label>
       </div>
 
       <div class="uk-form-row">

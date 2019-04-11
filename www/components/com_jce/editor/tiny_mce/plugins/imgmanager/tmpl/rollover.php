@@ -8,19 +8,19 @@
  * is derivative of works licensed under the GNU General Public License or
  * other free or open source software licenses
  */
-defined('_JEXEC') or die('RESTRICTED');
+defined('JPATH_PLATFORM') or die;
 ?>
 <div class="uk-form-row">
-	<label for="onmouseover" class="hastip uk-form-label uk-width-3-10" title="<?php echo WFText::_('WF_LABEL_MOUSEOVER_DESC'); ?>">
-		<?php echo WFText::_('WF_LABEL_MOUSEOVER'); ?>
+	<label for="onmouseover" class="hastip uk-form-label uk-width-3-10" title="<?php echo JText::_('WF_LABEL_MOUSEOVER_DESC'); ?>">
+		<?php echo JText::_('WF_LABEL_MOUSEOVER'); ?>
 	</label>
 	<div class="uk-form-controls uk-width-7-10">
 		<input id="onmouseover" type="text" value="" class="focus" />
 	</div>
 </div>
 <div class="uk-form-row">
-	<label for="onmouseout" class="hastip uk-form-label uk-width-3-10" title="<?php echo WFText::_('WF_LABEL_MOUSEOUT_DESC'); ?>">
-		<?php echo WFText::_('WF_LABEL_MOUSEOUT'); ?>
+	<label for="onmouseout" class="hastip uk-form-label uk-width-3-10" title="<?php echo JText::_('WF_LABEL_MOUSEOUT_DESC'); ?>">
+		<?php echo JText::_('WF_LABEL_MOUSEOUT'); ?>
 	</label>
 	<div class="uk-form-controls uk-width-7-10">
 		<input id="onmouseout" type="text" value="" />

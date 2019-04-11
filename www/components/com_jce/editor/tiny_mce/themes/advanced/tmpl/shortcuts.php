@@ -8,9 +8,9 @@
  * is derivative of works licensed under the GNU General Public License or
  * other free or open source software licenses
  */
-defined('_JEXEC') or die('RESTRICTED');
+defined('JPATH_PLATFORM') or die;
 ?>
-<h1><?php echo WFText::_('WF_ACCESSABILITY_USAGE_TITLE'); ?></h1>
+<h1><?php echo JText::_('WF_ACCESSABILITY_USAGE_TITLE'); ?></h1>
 <h2>Toolbars</h2>
 <p>Press ALT-F10 to move focus to the toolbars. Navigate through the buttons using the arrow keys.
     Press enter to activate a button and return focus to the editor.

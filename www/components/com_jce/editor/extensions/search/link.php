@@ -8,9 +8,7 @@
  * is derivative of works licensed under the GNU General Public License or
  * other free or open source software licenses
  */
-defined('_JEXEC') or die('RESTRICTED');
-
-wfimport('editor.libraries.classes.extensions');
+defined('JPATH_PLATFORM') or die;
 
 class WFLinkSearchExtension extends WFSearchExtension
 {
@@ -29,7 +27,9 @@ class WFLinkSearchExtension extends WFSearchExtension
         $request->setRequest(array($this, 'getAreas'));
 
         $wf = WFEditorPlugin::getInstance();
-        $plugins = $wf->getParam('search.link.plugins');
+
+        // get plugins
+        $plugins = $wf->getParam('search.link.plugins', array());
 
         // use tested defaults
         if (empty($plugins)) {
@@ -70,9 +70,7 @@ class WFLinkSearchExtension extends WFSearchExtension
         $areas = array();
         $results = array();
 
-        $event = WF_JOOMLA15 ? 'onSearchAreas' : 'onContentSearchAreas';
-
-        $searchareas = $app->triggerEvent($event);
+        $searchareas = $app->triggerEvent('onContentSearchAreas');
 
         foreach ($searchareas as $area) {
             if (is_array($area)) {
@@ -96,9 +94,9 @@ class WFLinkSearchExtension extends WFSearchExtension
     public function render()
     {
         if (!$this->isEnabled()) {
-            return "";
+            return '';
         }
-        
+
         // built select lists
         $orders = array();
         $orders[] = JHtml::_('select.option', 'newest', JText::_('WF_SEARCH_NEWEST_FIRST'));
@@ -137,33 +135,56 @@ class WFLinkSearchExtension extends WFSearchExtension
     public function doSearch($query)
     {
         $wf = WFEditorPlugin::getInstance();
-        $filter = JFilterInput::getInstance();
+        
+        $results = array();
+        
+        if (empty($query)) {
+            return $results;
+        }
+
+        // search area
+        $area = null;
+
+        // available search areas
+        $areas = $this->getAreas();
+
+        // query using a specific plugin
+        if (strpos($query, ':') !== false) {
+            preg_match('#^(' . implode('|', $areas) . ')\:(.+)#', $query, $matches);
+
+            if ($matches) {
+                $area   = array($matches[1]);
+                $query  = $matches[2];
+            }
+        }
 
         if (!class_exists('JSite')) {
             // Load JSite class
             JLoader::register('JSite', JPATH_SITE.'/includes/application.php');
         }
 
-        $app = JApplication::getInstance('site');
-        $router = $app->getRouter('site');
+        $app = JFactory::getApplication('site');
+        $filter = JFilterInput::getInstance();
+        $router = $app::getRouter('site');
 
         // get SearchHelper
         require_once JPATH_ADMINISTRATOR.'/components/com_search/helpers/search.php';
 
         // get router mode
-        $sef = (int) $wf->getParam('search.link.sef_url', 0);
+        $sef 	= (int) $wf->getParam('search.link.sef_url', 0);
+        
+        $limit 	= (int) $wf->getParam('search.link.limit', 10);
 
         // set router off so a raw url is returned by the Search plugin
         if ($router) {
-            $router->setMode(0);
+            //$router->setMode(0);
         }
 
         // slashes cause errors, <> get stripped anyway later on. # causes problems.
         $searchword = trim(str_replace(array('#', '>', '<', '\\'), '', $filter->clean($query)));
 
-        $ordering = JRequest::getWord('ordering', null, 'post');
-        $searchphrase = JRequest::getWord('searchphrase', 'all', 'post');
-        $areas = JRequest::getVar('areas', null, 'post', 'array');
+        $ordering       = null;
+        $searchphrase   = 'all';
 
         // if searchword enclosed in double quotes, strip quotes and do exact match
         if (substr($searchword, 0, 1) == '"' && substr($searchword, -1) == '"') {
@@ -171,39 +192,27 @@ class WFLinkSearchExtension extends WFSearchExtension
             $searchphrase = 'exact';
         }
 
-        // clean areas
-        if (!empty($areas)) {
-            foreach ($areas as $area) {
-                $areas[] = $filter->clean($area, 'cmd');
-            }
-        }
-
-        $event = WF_JOOMLA15 ? 'onSearch' : 'onContentSearch';
-
         // trigger search on loaded plugins
-        $searches = $app->triggerEvent($event, array(
+        $searches = $app->triggerEvent('onContentSearch', array(
             $searchword,
             $searchphrase,
             $ordering,
-            $areas,
+            $area,
         ));
 
-        $results = array();
         $rows = array();
 
         foreach ($searches as $search) {
             $rows = array_merge((array) $rows, (array) $search);
         }
+        
+        // get first 10
+        $rows = array_slice($rows, 0, $limit);
 
         for ($i = 0, $count = count($rows); $i < $count; ++$i) {
             $row = &$rows[$i];
 
-            // skip empty titles
-            if (empty($row->title)) {
-                continue;
-            }
-
-            $result = new StdClass();
+            $result = new StdClass;
 
             if ($searchphrase == 'exact') {
                 $searchwords = array($searchword);
@@ -214,27 +223,10 @@ class WFLinkSearchExtension extends WFSearchExtension
                 $needle = $searchwords[0];
             }
 
-            // get anchors if any
+            // get anchors if any...
             $row->anchors = self::getAnchors($row->text);
 
-            if (method_exists('SearchHelper', 'getActions')) {
-                $row->text = SearchHelper::prepareSearchContent($row->text, $needle);
-            } else {
-                $row->text = SearchHelper::prepareSearchContent($row->text, 200, $needle);
-            }
-
-            $searchwords = array_unique($searchwords);
-            $searchRegex = '#(';
-            $x = 0;
-
-            foreach ($searchwords as $k => $hlword) {
-                $searchRegex .= ($x == 0 ? '' : '|');
-                $searchRegex .= preg_quote($hlword, '#');
-                ++$x;
-            }
-            $searchRegex .= ')#iu';
-
-            $row->text = preg_replace($searchRegex, '<mark>\0</mark>', $row->text);
+            $row->text = SearchHelper::prepareSearchContent($row->text, $needle);
 
             // remove base url
             if (strpos($row->href, JURI::base(true)) !== false) {
@@ -258,9 +250,9 @@ class WFLinkSearchExtension extends WFSearchExtension
                 $row->href = str_replace('/administrator/', '/', $url);
             }
 
-            $result->title = $row->title;
-            $result->text = $row->text;
-            $result->link = $row->href;
+            $result->title  = $row->title;
+            $result->text   = $row->text;
+            $result->link   = $row->href;
 
             if (!empty($row->anchors)) {
                 $result->anchors = $row->anchors;

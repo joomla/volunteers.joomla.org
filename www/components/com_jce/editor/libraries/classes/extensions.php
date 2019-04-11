@@ -8,7 +8,7 @@
  * is derivative of works licensed under the GNU General Public License or
  * other free or open source software licenses
  */
-defined('_JEXEC') or die('RESTRICTED');
+defined('JPATH_PLATFORM') or die;
 // set as an extension parent
 if (!defined('_WF_EXT')) {
     define('_WF_EXT', 1);
@@ -238,16 +238,16 @@ class WFExtension extends JObject
     /**
      * Return a parameter for the current plugin / group.
      *
-     * @param object $param   Parameter name
+     * @param object $key   Parameter name
      * @param object $default Default value
      *
      * @return string Parameter value
      */
-    public function getParam($param, $default = '')
+    public function getParam($key, $default = '')
     {
-        $wf = WFEditor::getInstance();
+        $wf = WFApplication::getInstance();
 
-        return $wf->getParam($param, $default);
+        return $wf->getParam($key, $default);
     }
 
     public function getView($options = array())

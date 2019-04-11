@@ -6,11 +6,10 @@ JFormHelper::loadFieldClass('list');
 
 class JFormFieldCustomList extends JFormFieldList
 {
-
     /**
      * The form field type.
      *
-     * @var    string
+     * @var string
      *
      * @since  11.1
      */
@@ -19,7 +18,7 @@ class JFormFieldCustomList extends JFormFieldList
     /**
      * Method to get the field input for a tag field.
      *
-     * @return  string  The field input.
+     * @return string The field input
      *
      * @since   3.1
      */
@@ -27,7 +26,7 @@ class JFormFieldCustomList extends JFormFieldList
     {
         // Get the field id
         $id = isset($this->element['id']) ? $this->element['id'] : null;
-        $cssId = '#' . $this->getId($id, $this->element['name']);
+        $cssId = '#'.$this->getId($id, $this->element['name']);
 
         // Load the ajax-chosen customised field
         JHtml::_('tag.ajaxfield', $cssId, true);

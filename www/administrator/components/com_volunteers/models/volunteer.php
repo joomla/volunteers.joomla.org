@@ -36,7 +36,7 @@ class VolunteersModelVolunteer extends JModelAdmin
 	 *
 	 * @var    array
 	 */
-	protected $url_fields = array('website', 'github', 'twitter', 'googleplus', 'crowdin', 'joomladocs', 'certification');
+	protected $url_fields = array('website', 'github', 'twitter', 'crowdin', 'joomladocs', 'certification');
 
 	/**
 	 * Method to get a table object, load it if necessary.
@@ -168,10 +168,6 @@ class VolunteersModelVolunteer extends JModelAdmin
 
 					case 'twitter':
 						$url = 'https://twitter.com/' . $value;
-						break;
-
-					case 'googleplus':
-						$url = 'https://plus.google.com/' . $value;
 						break;
 
 					case 'certification':

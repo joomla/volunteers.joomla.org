@@ -150,13 +150,6 @@
         />
 
         <field
-                name="googleplus"
-                type="textprepend"
-                label="COM_VOLUNTEERS_FIELD_GOOGLEPLUS"
-                prepend="COM_VOLUNTEERS_FIELD_GOOGLEPLUS_URL"
-        />
-
-        <field
                 name="linkedin"
                 type="textprepend"
                 label="COM_VOLUNTEERS_FIELD_LINKEDIN"

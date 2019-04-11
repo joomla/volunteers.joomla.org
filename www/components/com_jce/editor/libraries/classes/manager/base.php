@@ -8,11 +8,7 @@
  * is derivative of works licensed under the GNU General Public License or
  * other free or open source software licenses
  */
-defined('_JEXEC') or die('RESTRICTED');
-
-// Load class dependencies
-wfimport('editor.libraries.classes.plugin');
-wfimport('editor.libraries.classes.browser');
+defined('JPATH_PLATFORM') or die;
 
 class WFMediaManagerBase extends WFEditorPlugin
 {
@@ -97,7 +93,7 @@ class WFMediaManagerBase extends WFEditorPlugin
         parent::display();
 
         $document = WFDocument::getInstance();
-        $layout = JRequest::getCmd('layout', 'plugin');
+        $layout = JFactory::getApplication()->input->getCmd('layout', 'plugin');
 
         $view = $this->getView();
         $browser = $this->getFileBrowser();
@@ -164,7 +160,7 @@ class WFMediaManagerBase extends WFEditorPlugin
         jimport('joomla.filesystem.file');
         clearstatcache();
 
-        $meta = array('width' => '', 'height' => '', 'time' => '');
+        $meta = array('width' => '', 'height' => '', 'time' => '', 'x' => '', 'y' => '');
 
         $ext = JFile::getExt($path);
 
@@ -198,8 +194,8 @@ class WFMediaManagerBase extends WFEditorPlugin
         }
 
         if ($ext == 'wmv' && $meta['x'] == '') {
-            $meta['width']  = round($fileinfo['asf']['video_media']['2']['image_width']);
-            $meta['height'] = round(($fileinfo['asf']['video_media']['2']['image_height']));
+            $meta['width'] = round($fileinfo['asf']['video_media']['1']['image_width']);
+            $meta['height'] = round(($fileinfo['asf']['video_media']['1']['image_height']));
         }
 
         return $meta;
@@ -227,13 +223,13 @@ class WFMediaManagerBase extends WFEditorPlugin
 
             if ($svg && isset($svg['viewBox'])) {
                 list($start_x, $start_y, $end_x, $end_y) = explode(' ', $svg['viewBox']);
-                
-                $width 	= (int) $end_x;
-                $height	= (int) $end_y;
-                
+
+                $width = (int) $end_x;
+                $height = (int) $end_y;
+
                 if ($width && $height) {
-                    $data['width'] 	= $width;
-                    $data['height']	= $height;
+                    $data['width'] = $width;
+                    $data['height'] = $height;
 
                     return $data;
                 }
@@ -269,7 +265,7 @@ class WFMediaManagerBase extends WFEditorPlugin
 
         // implode textcase array to create string
         if (is_array($textcase)) {
-            $textcase = implode(",", $textcase);
+            $textcase = implode(',', $textcase);
         }
 
         $filter = (array) $this->getParam('editor.dir_filter', array());
@@ -282,19 +278,15 @@ class WFMediaManagerBase extends WFEditorPlugin
 
         // fix Link plugin legacy "direction" conflict
         if ($this->get('caller') === 'link') {
-            // get directory from File Browser parameters
-            $dir = $this->getParam('browser.dir');
-            // if value is empty, use editor parameter
-            if (empty($dir)) {
-                $dir = $this->getParam('editor.dir');
-            }
+            $fallback = $this->getParam('editor.dir');
+            $dir = $this->getParam($this->getName().'.dir', $fallback);
         }
 
         $websafe_spaces = $this->getParam('editor.websafe_allow_spaces', '_');
 
         if (is_numeric($websafe_spaces)) {
             // legacy replacement
-            if ($websafe_spaces == 0) {           
+            if ($websafe_spaces == 0) {
                 $websafe_spaces = '_';
             }
             // convert to space

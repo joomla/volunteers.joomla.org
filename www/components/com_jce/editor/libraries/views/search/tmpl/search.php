@@ -8,19 +8,19 @@
  * is derivative of works licensed under the GNU General Public License or
  * other free or open source software licenses
  */
-defined('_JEXEC') or die('RESTRICTED');
+defined('JPATH_PLATFORM') or die;
 ?>
 <div id="search-browser" class="uk-width-1-1">
     <div class="uk-grid uk-grid-collapse">
         <div id="searchbox" class="uk-form-icon uk-form-icon-flip uk-width-3-4">
-            <input type="text" id="search-input" class="uk-width-1-1" placeholder="<?php echo WFText::_('WF_LABEL_SEARCH'); ?>..." />
+            <input type="text" id="search-input" class="uk-width-1-1" aria-label="<?php echo JText::_('WF_LABEL_SEARCH'); ?>" placeholder="<?php echo JText::_('WF_LABEL_SEARCH'); ?>..." />
             <i class="uk-icon uk-icon-close" id="search-clear"></i>
             <i class="uk-icon uk-icon-spinner"></i>
         </div>
 
         <div class="uk-button-group uk-width-1-4">
-            <button class="uk-button uk-width-2-3 uk-width-mini-1-2" id="search-button"><span><?php echo WFText::_('WF_LABEL_SEARCH'); ?></span></button>
-            <button class="uk-button uk-width-1-3 uk-width-mini-1-2" id="search-options-button" title="<?php echo WFText::_('WF_LABEL_SEARCH_OPTIONS'); ?>"><i class="uk-icon uk-icon-cog"></i></button>
+            <button class="uk-button uk-width-2-3 uk-width-mini-1-2" id="search-button"><label class="uk-form-label"><?php echo JText::_('WF_LABEL_SEARCH'); ?></label></button>
+            <button class="uk-button uk-width-1-3 uk-width-mini-1-2" id="search-options-button" title="<?php echo JText::_('WF_LABEL_SEARCH_OPTIONS'); ?>" aria-label="<?php echo JText::_('WF_LABEL_SEARCH_OPTIONS'); ?>" aria-haspopup="true"><i class="uk-icon uk-icon-cog"></i></button>
         </div>
     </div>
 

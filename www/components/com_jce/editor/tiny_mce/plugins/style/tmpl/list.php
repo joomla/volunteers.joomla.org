@@ -8,23 +8,23 @@
  * is derivative of works licensed under the GNU General Public License or
  * other free or open source software licenses
  */
-defined('_JEXEC') or die('RESTRICTED');
+defined('JPATH_PLATFORM') or die;
 ?>
 
 <div class="uk-form-row">
-  <label class="uk-form-label uk-width-2-10" for="list_type"><?php echo WFText::_('WF_STYLES_LIST_TYPE'); ?></label>
+  <label class="uk-form-label uk-width-2-10" for="list_type"><?php echo JText::_('WF_STYLES_LIST_TYPE'); ?></label>
   <div class="uk-form-controls uk-width-4-10 uk-datalist">
     <select id="list_type" name="list_type"></select>
   </div>
 </div>
 <div class="uk-form-row">
-  <label class="uk-form-label uk-width-2-10" for="list_position"><?php echo WFText::_('WF_STYLES_POSITION'); ?></label>
+  <label class="uk-form-label uk-width-2-10" for="list_position"><?php echo JText::_('WF_STYLES_POSITION'); ?></label>
   <div class="uk-form-controls uk-width-4-10 uk-datalist">
     <select id="list_position" name="list_position"></select>
   </div>
 </div>
 <div class="uk-form-row">
-  <label class="uk-form-label uk-width-2-10" for="list_bullet_image"><?php echo WFText::_('WF_STYLES_BULLET_IMAGE'); ?></label>
+  <label class="uk-form-label uk-width-2-10" for="list_bullet_image"><?php echo JText::_('WF_STYLES_BULLET_IMAGE'); ?></label>
   <div class="uk-form-controls uk-width-8-10">
     <input id="list_bullet_image" name="list_bullet_image" type="text" class="browser image" />
   </div>

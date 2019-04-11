@@ -8,7 +8,7 @@
  * is derivative of works licensed under the GNU General Public License or
  * other free or open source software licenses
  */
-defined('_JEXEC') or die('RESTRICTED');
+defined('JPATH_PLATFORM') or die;
 
 class WFAggregatorExtension_Youtube extends WFAggregatorExtension
 {
@@ -40,15 +40,15 @@ class WFAggregatorExtension_Youtube extends WFAggregatorExtension
         $plugin = WFEditorPlugin::getInstance();
 
         return array(
-            'width'     => $plugin->getParam('aggregator.youtube.width', 560),
-            'height'    => $plugin->getParam('aggregator.youtube.height', 315),
+            'width' => $plugin->getParam('aggregator.youtube.width', 560),
+            'height' => $plugin->getParam('aggregator.youtube.height', 315),
 
-            'controls'  => (int) $plugin->getParam('aggregator.youtube.controls', 1),
-            'loop'      => (int) $plugin->getParam('aggregator.youtube.loop', 0),
-            'autoplay'  => (int) $plugin->getParam('aggregator.youtube.autoplay', 0),
-            'rel'       => (int) $plugin->getParam('aggregator.youtube.related', 1),
-            'modestbranding'  => (int) $plugin->getParam('aggregator.youtube.modestbranding', 0),
-            'privacy'   => (int) $plugin->getParam('aggregator.youtube.privacy', 0)
+            'controls' => (int) $plugin->getParam('aggregator.youtube.controls', 1),
+            'loop' => (int) $plugin->getParam('aggregator.youtube.loop', 0),
+            'autoplay' => (int) $plugin->getParam('aggregator.youtube.autoplay', 0),
+            'rel' => (int) $plugin->getParam('aggregator.youtube.related', 1),
+            'modestbranding' => (int) $plugin->getParam('aggregator.youtube.modestbranding', 0),
+            'privacy' => (int) $plugin->getParam('aggregator.youtube.privacy', 0),
         );
     }
 }

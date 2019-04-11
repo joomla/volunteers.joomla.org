@@ -20,6 +20,7 @@
     </help>
     <profiles>
         <profile name="Default" default="default">
+            <name>Default</name>
             <description>WF_PROFILES_DEFAULT_DESC</description>
             <users></users>
             <types></types>
@@ -27,12 +28,13 @@
             <area>0</area>
             <device>desktop,tablet,phone</device>
             <rows>help,newdocument,undo,redo,spacer,bold,italic,underline,strikethrough,justifyfull,justifycenter,justifyleft,justifyright,spacer,blockquote,formatselect,styleselect,removeformat,cleanup;fontselect,fontsizeselect,fontcolor,spacer,clipboard,indent,outdent,lists,sub,sup,textcase,charmap,hr;directionality,fullscreen,print,searchreplace,spacer,table,style,xhtmlxtras;visualaid,visualchars,visualblocks,nonbreaking,anchor,unlink,link,imgmanager,spellchecker,article</rows>
-			      <plugins>formatselect,styleselect,cleanup,fontselect,fontsizeselect,fontcolor,clipboard,lists,textcase,charmap,hr,directionality,fullscreen,print,searchreplace,table,style,xhtmlxtras,visualchars,visualblocks,nonbreaking,anchor,link,imgmanager,spellchecker,article,spellchecker,article,browser,contextmenu,inlinepopups,media,preview,source</plugins>
-			      <published>1</published>
+            <plugins>formatselect,styleselect,cleanup,fontselect,fontsizeselect,fontcolor,clipboard,lists,textcase,charmap,hr,directionality,fullscreen,print,searchreplace,table,style,xhtmlxtras,visualchars,visualblocks,nonbreaking,anchor,link,imgmanager,spellchecker,article,spellchecker,article,browser,contextmenu,inlinepopups,media,preview,source</plugins>
+            <published>1</published>
             <ordering>1</ordering>
             <params></params>
         </profile>
         <profile name="Front End">
+            <name>Front End</name>
             <description>WF_PROFILES_FRONTEND_DESC</description>
             <users></users>
             <types></types>
@@ -78,7 +80,7 @@
             </params>
         </profile>
         <profile>
-      		<name>Markdown</name>
+            <name>Markdown</name>
             <description>Sample Markdown Profile</description>
             <users></users>
             <types>6,7,3,4,5,8</types>
@@ -92,6 +94,6 @@
             <params>
                 <param>{"editor":{"toolbar_theme":"mobile"}}</param>
             </params>
-		</profile>
+        </profile>
     </profiles>
 </profiles>

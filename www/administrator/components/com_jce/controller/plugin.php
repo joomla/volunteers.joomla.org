@@ -1,48 +1,74 @@
 <?php
 
 /**
- * @package       JCE
- * @copyright     Copyright (c) 2009-2019 Ryan Demmer. All rights reserved.
+ * @copyright     Copyright (c) 2009-2019 Ryan Demmer. All rights reserved
  * @license       GNU/GPL 3 - http://www.gnu.org/copyleft/gpl.html
  * JCE is free software. This version may have been modified pursuant
  * to the GNU General Public License, and as distributed it includes or
  * is derivative of works licensed under the GNU General Public License or
- * other free or open source software licenses.
+ * other free or open source software licenses
  */
 defined('JPATH_PLATFORM') or die;
 
-// load app class
-require_once JPATH_SITE . '/libraries/wfeditor/app.php';
+require_once JPATH_SITE . '/components/com_jce/editor/libraries/classes/application.php';
 
 class JceControllerPlugin extends JControllerLegacy
 {
     public function execute($task)
-    {        
-        $app = Wf\Application\Application::getInstance();
-
-        // check for session token
-        $app->platform->checkToken() or die;
+    {
+        $wf = WFApplication::getInstance();
 
         // check a valid profile exists
-        $app->getProfile() or die;
+        $wf->getProfile() or jexit('Invalid Profile');
 
         // load language files
         $language = JFactory::getLanguage();
-        $language->load('com_jce', JPATH_SITE);
-        $language->load('lib_wfeditor', JPATH_SITE);
 
-        $plugin = new Wf\Application\Plugin();
+        $language->load('com_jce', JPATH_ADMINISTRATOR);
 
-        if (strpos($task, '.') !== false) {
-            list($name, $task) = explode('.', $task);
+        if (WF_EDITOR_PRO) {
+            $language->load('com_jce_pro', JPATH_SITE);
         }
 
-        // default to execute if task is not available
-        if (is_callable(array($plugin, $task)) === false) {
-            $task = 'execute';
+        $plugin = $this->input->get('plugin');
+
+        // get plugin name
+        if (strpos($plugin, '.') !== false) {
+            list($plugin, $caller) = explode('.', $plugin);
         }
 
-        $plugin->$task();
+        $path = WF_EDITOR_PLUGINS . '/' . $plugin;
+
+        if (strpos($plugin, 'editor-') !== false) {
+            $path = JPATH_PLUGINS . '/jce/' . $plugin;
+        }
+
+        if (!file_exists($path . '/' . $plugin . '.php')) {
+            throw new InvalidArgumentException(ucfirst($plugin) . '" not found!');
+        }
+
+        include_once $path . '/' . $plugin . '.php';
+
+        $className = 'WF' . ucwords($plugin, '_') . 'Plugin';
+
+        if (class_exists($className)) {
+            $instance = new $className();
+
+            if (strpos($task, '.') !== false) {
+                list($name, $task) = explode('.', $task);
+            }
+
+            if ($task === 'display') {
+                $task = 'execute';
+            }
+    
+            // default to execute if task is not available
+            if (is_callable(array($instance, $task)) === false) {
+                $task = 'execute';
+            }
+    
+            $instance->$task();
+        }
 
         jexit();
     }

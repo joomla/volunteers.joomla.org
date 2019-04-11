@@ -1,16 +1,14 @@
 <?php
 
 /**
- * @copyright 	Copyright (c) 2009-2019 Ryan Demmer. All rights reserved
- * @license   	GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+ * @copyright     Copyright (c) 2009-2019 Ryan Demmer. All rights reserved
+ * @license       GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  * JCE is free software. This version may have been modified pursuant
  * to the GNU General Public License, and as distributed it includes or
  * is derivative of works licensed under the GNU General Public License or
  * other free or open source software licenses
  */
-defined('_JEXEC') or die('RESTRICTED');
-
-wfimport('editor.libraries.classes.extensions');
+defined('JPATH_PLATFORM') or die;
 
 class WFFileSystem extends WFExtension
 {
@@ -26,7 +24,7 @@ class WFFileSystem extends WFExtension
             'upload' => array(
                 'stream' => false,
                 'chunking' => false,
-                'unique_filenames' => false
+                'unique_filenames' => false,
             ),
         )));
     }
@@ -48,12 +46,17 @@ class WFFileSystem extends WFExtension
         if (!is_object($instance)) {
             $fs = parent::loadExtensions('filesystem', $type);
 
+            // load the default...
+            if (empty($fs)) {
+                $fs = parent::loadExtensions('filesystem', 'joomla');
+            }
+
             // get the first filesystem extension only
             if (is_array($fs)) {
                 $fs = array_shift($fs);
             }
 
-            $classname = 'WF'.ucfirst($fs->name).'FileSystem';
+            $classname = 'WF' . ucfirst($fs->name) . 'FileSystem';
 
             if (class_exists($classname)) {
                 $instance = new $classname($config);
@@ -98,7 +101,7 @@ class WFFileSystem extends WFExtension
 
         if (!isset($root)) {
             $user = JFactory::getUser();
-            $wf = WFEditor::getInstance();
+            $wf = WFApplication::getInstance();
             $profile = $wf->getProfile();
 
             // Get base directory as shared parameter
@@ -154,7 +157,7 @@ class WFFileSystem extends WFExtension
 
                 // implode textcase array to create string
                 if (is_array($textcase)) {
-                    $textcase = implode(",", $textcase);
+                    $textcase = implode(',', $textcase);
                 }
 
                 // clean path parts
@@ -175,7 +178,7 @@ class WFFileSystem extends WFExtension
         // set default direction
         $direction = 'asc';
 
-        if ($type[0] === "-") {
+        if ($type[0] === '-') {
             $direction = 'desc';
             $type = substr($type, 1);
         }
@@ -184,7 +187,7 @@ class WFFileSystem extends WFExtension
             $sortable[$key] = isset($item[$type]) ? $item[$type] : $item['properties'][$type];
         }
 
-        array_multisort($sortable, $direction === "desc" ? SORT_DESC : SORT_ASC, SORT_NATURAL | SORT_FLAG_CASE, $items);
+        array_multisort($sortable, $direction === 'desc' ? SORT_DESC : SORT_ASC, SORT_NATURAL | SORT_FLAG_CASE, $items);
 
         return $items;
     }
@@ -345,11 +348,11 @@ final class WFFileSystemResult
 
     public $type = 'files';
     /*
-     * @boolean	Result state
+     * @boolean    Result state
      */
     public $state = false;
     /*
-     * @int	Error code
+     * @int    Error code
      */
     public $code = null;
     /*

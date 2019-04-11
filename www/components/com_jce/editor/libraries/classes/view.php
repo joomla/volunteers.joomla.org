@@ -8,7 +8,7 @@
  * is derivative of works licensed under the GNU General Public License or
  * other free or open source software licenses
  */
-defined('_JEXEC') or die('RESTRICTED');
+defined('JPATH_PLATFORM') or die;
 
 final class WFView extends JObject
 {
@@ -53,7 +53,7 @@ final class WFView extends JObject
     {
         $result = $this->loadTemplate($tpl);
 
-        if (JError::isError($result)) {
+        if ($result instanceof Exception) {
             return $result;
         }
 
@@ -208,7 +208,7 @@ final class WFView extends JObject
 
             return $output;
         } else {
-            return JError::raiseError(500, 'Layout "'.$file.'" not found in Paths '.implode(', ', $path));
+            throw new InvalidArgumentException('Layout "'.$file.'" not found in Paths '.implode(', ', $path));
         }
     }
 }

@@ -10,5 +10,5 @@
 if (is_dir(WF_EDITOR_LIBRARIES.'/pro')) {
     require_once WF_EDITOR_LIBRARIES.'/pro/classes/manager.php';
 } else {
-    require_once dirname(__FILE__).'/manager/manager.php';
+    require_once __DIR__.'/manager/manager.php';
 }

@@ -4,13 +4,12 @@ defined('JPATH_PLATFORM') or die;
 
 JFormHelper::loadFieldClass('filelist');
 
-
-class JFormFieldFontList extends JFormFieldFileList {
-
+class JFormFieldFontList extends JFormFieldFileList
+{
     /**
      * The form field type.
      *
-     * @var    string
+     * @var string
      *
      * @since  11.1
      */
@@ -19,7 +18,7 @@ class JFormFieldFontList extends JFormFieldFileList {
     /**
      * Method to get the field input for a fontlist field.
      *
-     * @return  string  The field input.
+     * @return string The field input
      *
      * @since   3.1
      */
@@ -27,7 +26,7 @@ class JFormFieldFontList extends JFormFieldFileList {
     {
         // Get the field id
         $id = isset($this->element['id']) ? $this->element['id'] : null;
-        $cssId = '#' . $this->getId($id, $this->element['name']);
+        $cssId = '#'.$this->getId($id, $this->element['name']);
 
         // Load the ajax-chosen customised field
         JHtml::_('tag.ajaxfield', $cssId, true);

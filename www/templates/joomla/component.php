@@ -18,7 +18,7 @@ $this->setHtml5(true);
 // Add Stylesheets - if the site is in debug mode or has explicitly chosen to not use the CDN, load the local media
 if (JDEBUG || !$this->params->get('useCdn', '1'))
 {
-    HTMLHelper::_('stylesheet', 'template.min.css', ['relative' => true, 'detectDebug' => (bool) JDEBUG, 'version' => '3.0.0']);
+    HTMLHelper::_('stylesheet', 'template.min.css', ['relative' => true, 'detectDebug' => (bool) JDEBUG, 'version' => '3.0.1-dev']);
 }
 else
 {
@@ -62,22 +62,30 @@ HTMLHelper::_('script', 'jui/html5.js', ['version' => 'auto', 'relative' => true
 // Set template metadata
 $this->setMetaData('viewport', 'width=device-width, initial-scale=1.0');
 
+// If Cookie Control is enabled, we expose the GTM ID as a JavaScript var versus registering GTM directly
+$hasCookieControl = $this->params->get('cookieControlActive', 0);
+
+if (!$hasCookieControl)
+{
+	// Register Pingdom analytics
+	$this->addScriptDeclaration(<<<JS
+var _prum = [['id', '59300ad15992c776ad970068'],
+			['mark', 'firstbyte', (new Date()).getTime()]];
+(function() {
+	var s = document.getElementsByTagName('script')[0]
+	, p = document.createElement('script');
+	p.async = 'async';
+	p.src = 'https://rum-static.pingdom.net/prum.min.js';
+	s.parentNode.insertBefore(p, s);
+})();
+JS
+	);
+}
 ?>
 <!DOCTYPE html>
 <html lang="<?php echo $this->language; ?>" dir="<?php echo $this->direction; ?>">
 <head>
 	<jdoc:include type="head" />
-	<script>
-		var _prum = [['id', '59300ad15992c776ad970068'],
-					['mark', 'firstbyte', (new Date()).getTime()]];
-		(function() {
-			var s = document.getElementsByTagName('script')[0]
-			, p = document.createElement('script');
-			p.async = 'async';
-			p.src = 'https://rum-static.pingdom.net/prum.min.js';
-			s.parentNode.insertBefore(p, s);
-		})();
-	</script>
 </head>
 <body class="contentpane modal">
 	<jdoc:include type="message" />

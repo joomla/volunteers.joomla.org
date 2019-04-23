@@ -13,7 +13,7 @@ use Joomla\CMS\Language\Text;
 
 $msgList = $displayData['msgList'];
 
-$alert = array('error' => 'alert-error', 'warning' => '', 'notice' => 'alert-info', 'message' => 'alert-success');
+$alert = array('error' => 'alert-error', 'warning' => '', 'notice' => 'alert-info', 'message' => 'alert-success', 'info' => 'alert-info',);
 ?>
 <div id="system-message-container">
 	<?php if (is_array($msgList) && !empty($msgList)) : ?>

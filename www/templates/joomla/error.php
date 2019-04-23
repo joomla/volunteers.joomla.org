@@ -36,7 +36,7 @@ $sitename = $app->get('sitename');
 // Set the CSS URL based on whether we're in debug mode or it was explicitly chosen to not use the CDN
 if (JDEBUG || !$params->get('useCdn', '1'))
 {
-	$cssURL = HTMLHelper::_('stylesheet', 'template.min.css', ['pathOnly' => true, 'relative' => true, 'detectDebug' => (bool) JDEBUG, 'version' => '3.0.0']);
+	$cssURL = HTMLHelper::_('stylesheet', 'template.min.css', ['pathOnly' => true, 'relative' => true, 'detectDebug' => (bool) JDEBUG, 'version' => '3.0.1-dev']);
 }
 else
 {
@@ -99,6 +99,9 @@ foreach (ModuleHelper::getModules('position-0') as $module)
 
 // Get the GTM property ID
 $gtmId = JoomlaTemplateHelper::getGtmId(Uri::getInstance()->toString(['host']));
+
+// If Cookie Control is enabled, we expose the GTM ID as a JavaScript var versus registering GTM directly
+$hasCookieControl = $params->get('cookieControlActive', 0);
 ?>
 <!DOCTYPE html>
 <html lang="<?php echo $this->language; ?>" dir="<?php echo $this->direction; ?>">
@@ -157,22 +160,28 @@ $gtmId = JoomlaTemplateHelper::getGtmId(Uri::getInstance()->toString(['host']));
 	<?php if ($html5Shim) : ?>
 		<!--[if lt IE 9]><script src="<?php echo $html5Shim ?>"></script><![endif]-->
 	<?php endif; ?>
-	<script>
-		var _prum = [['id', '59300ad15992c776ad970068'],
-					['mark', 'firstbyte', (new Date()).getTime()]];
-		(function() {
-			var s = document.getElementsByTagName('script')[0]
-			, p = document.createElement('script');
-			p.async = 'async';
-			p.src = 'https://rum-static.pingdom.net/prum.min.js';
-			s.parentNode.insertBefore(p, s);
-		})();
-	</script>
+	<?php if ($gtmId && $hasCookieControl) : ?>
+		<?php // Purposefully declare a global variable versus using the Joomla.options JavaScript API for compatibility with non-Joomla (CMS) installations ?>
+		<script type="text/javascript">var propertyGtmId = '<?php echo $gtmId; ?>';</script>
+	<?php endif; ?>
+	<?php if (!$hasCookieControl) : ?>
+		<script>
+			var _prum = [['id', '59300ad15992c776ad970068'],
+						['mark', 'firstbyte', (new Date()).getTime()]];
+			(function() {
+				var s = document.getElementsByTagName('script')[0]
+				, p = document.createElement('script');
+				p.async = 'async';
+				p.src = 'https://rum-static.pingdom.net/prum.min.js';
+				s.parentNode.insertBefore(p, s);
+			})();
+		</script>
+	<?php endif; ?>
 </head>
 <body class="<?php echo "site error $option view-$view layout-$layout task-$task itemid-$itemid" . ($params->get('fluidContainer') ? ' fluid' : '') . ($this->direction == 'rtl' ? ' rtl' : ''); ?>">
 	<?php
 	// Add Google Tag Manager code if one is set
-	if ($gtmId) : ?>
+	if ($gtmId && !$hasCookieControl) : ?>
 	<!-- Google Tag Manager -->
 	<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=<?php echo $gtmId; ?>" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 	<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','<?php echo $gtmId; ?>');</script>
@@ -204,12 +213,12 @@ $gtmId = JoomlaTemplateHelper::getGtmId(Uri::getInstance()->toString(['host']));
 					</h1>
 				</div>
 				<div class="span5">
-					<div class="btn-toolbar pull-right">
-						<div class="btn-group">
-							<a href="https://downloads.joomla.org" class="btn btn-large btn-warning"><?php echo Text::_('TPL_JOOMLA_DOWNLOAD_BUTTON'); ?></a>
+					<div class="btn-toolbar row-fluid">
+						<div class="span6">
+							<a href="https://downloads.joomla.org/" class="btn btn-block btn-large btn-warning"><?php echo Text::_('TPL_JOOMLA_DOWNLOAD_BUTTON'); ?></a>
 						</div>
-						<div class="btn-group">
-							<a href="https://demo.joomla.org" class="btn btn-large btn-primary"><?php echo Text::_('TPL_JOOMLA_DEMO_BUTTON'); ?></a>
+						<div class="span6">
+							<a href="https://launch.joomla.org" class="btn btn-block btn-large btn-primary"><?php echo Text::_('TPL_JOOMLA_DEMO_BUTTON'); ?> <span aria-hidden="true" class="icon-rocket"></span></a>
 						</div>
 					</div>
 				</div>

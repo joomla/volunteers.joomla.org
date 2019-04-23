@@ -72,7 +72,7 @@ class VolunteersModelReports extends JModelList
 	 * different modules that might need different sets of data or different
 	 * ordering requirements.
 	 *
-	 * @param   string $id A prefix for the store id.
+	 * @param   string  $id  A prefix for the store id.
 	 *
 	 * @return  string  A store id.
 	 */
@@ -157,7 +157,15 @@ class VolunteersModelReports extends JModelList
 
 		if (is_numeric($department) && ($department > 0))
 		{
-			$query->where('(a.department = ' . (int) $department .' OR team.department = ' . (int) $department.')');
+			// Exception for the board department
+			if ($department == 58)
+			{
+				$query->where('a.department = ' . (int) $department);
+			}
+			else
+			{
+				$query->where('(a.department = ' . (int) $department . ' OR team.department = ' . (int) $department . ')');
+			}
 		}
 
 		// Filter by team
@@ -210,19 +218,19 @@ class VolunteersModelReports extends JModelList
 			{
 				if ($item->department && ($item->department_parent_id == 0))
 				{
-					$item->acl = VolunteersHelper::acl('department', $item->department);
+					$item->acl  = VolunteersHelper::acl('department', $item->department);
 					$item->link = JRoute::_('index.php?option=com_volunteers&view=board&id=' . $item->department);
 					$item->name = $item->department_title;
 				}
 				elseif ($item->department)
 				{
-					$item->acl = VolunteersHelper::acl('department', $item->department);
+					$item->acl  = VolunteersHelper::acl('department', $item->department);
 					$item->link = JRoute::_('index.php?option=com_volunteers&view=department&id=' . $item->department);
 					$item->name = $item->department_title;
 				}
 				elseif ($item->team)
 				{
-					$item->acl = VolunteersHelper::acl('team', $item->team);
+					$item->acl  = VolunteersHelper::acl('team', $item->team);
 					$item->link = JRoute::_('index.php?option=com_volunteers&view=team&id=' . $item->team);
 					$item->name = $item->team_title;
 				}

@@ -53,6 +53,9 @@ if ($this->params->get('bs3Grid', '0'))
 // Optional site specific CSS override
 HTMLHelper::_('stylesheet', 'custom.css', ['version' => 'auto', 'relative' => true, 'detectDebug' => false], []);
 
+// @TODO add Cookie CSS to main CSS after initial testing to prevent additional request
+HTMLHelper::_('stylesheet', 'cookiecontrol.css', ['version' => 'auto', 'relative' => true, 'detectDebug' => false], []);
+
 // Load optional RTL Bootstrap CSS
 if ($this->direction === 'rtl')
 {
@@ -172,9 +175,10 @@ $gtmId = JoomlaTemplateHelper::getGtmId(Uri::getInstance()->toString(['host']));
 // If Cookie Control is enabled, we expose the GTM ID as a JavaScript var versus registering GTM directly
 $hasCookieControl = $this->params->get('cookieControlActive', 0);
 
-// TODO - When Cookie Control is fully implemented, add script registration here
 if ($hasCookieControl)
 {
+	HTMLHelper::_('script', 'cookiecontrol.js', ['version' => 'auto', 'relative' => true, 'detectDebug' => (bool) JDEBUG], []);
+
 	// Purposefully declare a global variable versus using the Joomla.options JavaScript API for compatibility with non-Joomla (CMS) installations
 	if ($gtmId)
 	{
@@ -211,6 +215,11 @@ JS
 	<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=<?php echo $gtmId; ?>" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 	<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','<?php echo $gtmId; ?>');</script>
 	<!-- End Google Tag Manager -->
+	<?php endif; ?>
+	<?php
+	// Add CookieControl if activated
+	if ($hasCookieControl): ?>
+		<script src="//cc.cdn.civiccomputing.com/8/cookieControl-8.x.min.js" type="text/javascript"></script>
 	<?php endif; ?>
 	<!-- Top Nav -->
 	<nav class="navigation" role="navigation">

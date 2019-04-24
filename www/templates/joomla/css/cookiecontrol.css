@@ -1,0 +1,71 @@
+/* CIVIC Control */
+#ccc-notify-dismiss {
+	display: none !important;
+}
+
+#ccc h3 {
+	font-family: 'Open Sans', sans-serif;
+}
+
+#ccc p,
+#ccc #ccc-notify p,
+#ccc .ccc-notify-buttons {
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+#ccc[light] button#ccc-icon {
+	fill: #152845;
+}
+
+#ccc[light] button.ccc-notify-button {
+	border: 1px solid #62c462;
+	color: #fff;
+	font-size: 0.95em;
+	border-radius: 0;
+}
+
+#ccc[light] #ccc-notify-accept.ccc-button-solid,
+#ccc button#ccc-recommended-settings {
+	background: #62c462;
+}
+
+#ccc[light] button.ccc-notify-button:hover {
+	border-color: #51a351;
+}
+
+#ccc[light] #ccc-notify-accept.ccc-button-solid:hover,
+#ccc button#ccc-recommended-settings:hover {
+	background: #51a351;
+}
+
+#ccc[light] button.ccc-notify-button:focus,
+#ccc[light] button.ccc-notify-button:active {
+	border-color: #ccc;
+}
+
+#ccc #ccc-content hr {
+	opacity: 0.75;
+}
+
+#ccc #ccc-content hr:nth-of-type(2),
+#ccc #ccc-content #ccc-optional-categories .optional-cookie:nth-child(1) hr,
+#ccc #ccc-content #ccc-optional-categories .optional-cookie:nth-child(2) hr {
+	opacity: 0.25;
+}
+
+#ccc-optional-categories .optional-cookie:nth-child(3) .checkbox-toggle {
+	display: none;
+}
+
+#ccc-optional-categories .optional-cookie:nth-child(3) p {
+	text-align: center;
+}
+
+#ccc-optional-categories .optional-cookie:nth-child(3) p a {
+	font-size: 15px;
+	font-weight: 700;
+}
+
+#ccc-optional-categories .optional-cookie:nth-child(3) p a:hover {
+	text-decoration: none;
+}

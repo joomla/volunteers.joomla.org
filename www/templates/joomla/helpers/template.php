@@ -160,6 +160,8 @@ class JoomlaTemplateHelper
 			}
 
 			case 'volunteers.joomla.org':
+			case 'test.volunteers.joomla.org': // @TODO remove after testing
+			case 'volunteers.joomla.test': // @TODO remove after testing
 			{
 				$id = 'GTM-P2Z55T';
 

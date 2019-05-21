@@ -16,28 +16,58 @@ class JFormFieldCustomList extends JFormFieldList
     protected $type = 'CustomList';
 
     /**
-     * Method to get the field input for a tag field.
+     * Method to attach a JForm object to the field.
      *
-     * @return string The field input
+     * @param SimpleXMLElement $element The SimpleXMLElement object representing the <field /> tag for the form field object
+     * @param mixed            $value   The form field value to validate
+     * @param string           $group   The field name group control value. This acts as as an array container for the field.
+     *                                  For example if the field has name="foo" and the group value is set to "bar" then the
+     *                                  full field name would end up being "bar[foo]"
      *
-     * @since   3.1
+     * @return bool True on success
+     *
+     * @since   11.1
      */
-    protected function getInput()
+    public function setup(SimpleXMLElement $element, $value, $group = null)
     {
-        // Get the field id
-        $id = isset($this->element['id']) ? $this->element['id'] : null;
-        $cssId = '#'.$this->getId($id, $this->element['name']);
+        $return = parent::setup($element, $value, $group);
+        
+        $this->class = trim($this->class.' com_jce_select_custom');
 
-        // Load the ajax-chosen customised field
-        JHtml::_('tag.ajaxfield', $cssId, true);
+        return $return;
+    }
 
-        if (!is_array($this->value) && !empty($this->value)) {
-            // String in format 2,5,4
-            if (is_string($this->value)) {
-                $this->value = explode(',', $this->value);
+    protected function getOptions()
+    {
+        $options = parent::getOptions();
+
+        $this->value = is_array($this->value) ? $this->value : explode(',', $this->value);
+
+        $custom = array();
+
+        foreach ($this->value as $value) {
+            $tmp = array(
+                'value' => $value,
+                'text'  => $value,
+                'selected' => true,
+            );
+
+            $found = false;
+
+            foreach($options as $option) {
+                if ($option->value === $value) {
+                    $found = true;
+                }
+            }
+
+            if (!$found) {
+                $custom[] = (object) $tmp;
             }
         }
 
-        return parent::getInput();
+        // Merge any additional options in the XML definition.
+		$options = array_merge($options, $custom);
+
+        return $options;
     }
 }

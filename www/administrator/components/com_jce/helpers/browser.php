@@ -12,7 +12,7 @@ defined('JPATH_PLATFORM') or die;
 
 abstract class WfBrowserHelper
 {
-    public static function getBrowserLink($element = null, $filter = '')
+    public static function getBrowserLink($element = null, $filter = '', $callback = '')
     {
         $app = JFactory::getApplication();
         
@@ -38,6 +38,10 @@ abstract class WfBrowserHelper
             if ($filter) {
                 $url .= '&filter='.$filter;
             }
+
+            if ($callback) {
+                $url .= '&callback=' . $callback;
+            }
         }
 
         return $url;
@@ -45,8 +49,6 @@ abstract class WfBrowserHelper
 
     public static function getMediaFieldLink($element = null, $filter = 'images', $callback = '')
     {
-        $link = self::getBrowserLink($element, $filter, $callback);
-
-        return $link;
+        return self::getBrowserLink($element, $filter, $callback);
     }
 }

@@ -17,7 +17,7 @@ class WFFormatPluginConfig
         $settings['inline_styles'] = $wf->getParam('editor.inline_styles', 1, 1);
 
         // Paragraph handling
-        $forced_root_block = $wf->getParam('editor.forced_root_block', '', 'p', 'string', false);
+        $forced_root_block = $wf->getParam('editor.forced_root_block', 'p');
 
         // set as boolean if disabled
         if (is_numeric($forced_root_block)) {
@@ -44,7 +44,9 @@ class WFFormatPluginConfig
 
         // Relative urls
         $settings['relative_urls'] = $wf->getParam('editor.relative_urls', 1, 1, 'boolean');
-        if ($settings['relative_urls'] == 0) {
+        
+        // set remove_script_host if relative_urls is disabled
+        if ($settings['relative_urls'] === false) {
             $settings['remove_script_host'] = false;
         }
     }

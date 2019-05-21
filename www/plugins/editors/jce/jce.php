@@ -166,6 +166,16 @@ class plgEditorJCE extends JPlugin
                 $buttons = $this->_subject->getButtons($name, $buttons, $asset, $author);
             }
 
+            // fix some legacy buttons
+            array_walk($buttons, function($button) {
+                $cls = $button->get('class', '');
+
+                if (empty($cls) || strpos($cls, 'btn') === false) {
+                    $cls .= ' btn';
+                    $button->set('class', trim($cls));
+                }
+            });
+
             return JLayoutHelper::render('joomla.editors.buttons', $buttons);
         }
     }

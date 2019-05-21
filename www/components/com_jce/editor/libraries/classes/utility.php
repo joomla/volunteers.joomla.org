@@ -262,7 +262,9 @@ abstract class WFUtility
         }
 
         // replace spaces with specified character or space
-        $subject = preg_replace('#[\s ]+#', $spaces, $subject);
+        if (is_string($spaces)) {
+            $subject = preg_replace('#[\s ]+#', $spaces, $subject);
+        }
 
         if ($mode === 'utf-8') {
             $search[] = '#[^\pL\pM\pN_\.\-~\s ]#u';
@@ -556,6 +558,20 @@ abstract class WFUtility
     }
 
     /**
+     * Method to determine if an array is an associative array.
+     *
+     * @param    array        An array to test
+     *
+     * @return bool True if the array is an associative array
+     *
+     * @link    http://www.php.net/manual/en/function.is-array.php#98305
+     */
+    private static function is_associative_array($array)
+    {
+        return is_array($array) && (count($array) == 0 || 0 !== count(array_diff_key($array, array_keys(array_keys($array)))));
+    }
+
+    /**
      * array_merge_recursive does indeed merge arrays, but it converts values with duplicate
      * keys to arrays rather than overwriting the value in the first array with the duplicate
      * value in the second array, as array_merge does. I.e., with array_merge_recursive,
@@ -576,20 +592,29 @@ abstract class WFUtility
      *
      * @param array $array1
      * @param array $array2
+     * @param boolean $ignore_empty_string
      *
      * @return array
      *
      * @author Daniel <daniel (at) danielsmedegaardbuus (dot) dk>
      * @author Gabriel Sobrinho <gabriel (dot) sobrinho (at) gmail (dot) com>
      */
-    public static function array_merge_recursive_distinct(array &$array1, array &$array2)
+    public static function array_merge_recursive_distinct(array &$array1, array &$array2, $ignore_empty_string = false)
     {
         $merged = $array1;
 
         foreach ($array2 as $key => &$value) {
-            if (is_array($value) && isset($merged[$key]) && is_array($merged[$key])) {
-                $merged[$key] = self::array_merge_recursive_distinct($merged[$key], $value);
+            if (self::is_associative_array($value) && isset($merged[$key]) && is_array($merged[$key])) {
+                $merged[$key] = self::array_merge_recursive_distinct($merged[$key], $value, $ignore_empty_string);
             } else {
+                if (is_null($value)) {
+                    continue;
+                }
+                
+                if (array_key_exists($key, $merged) && $ignore_empty_string && $value === "") {
+                    continue;
+                }
+
                 $merged[$key] = $value;
             }
         }

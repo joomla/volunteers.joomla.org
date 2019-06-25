@@ -1,6 +1,4 @@
 <?php
-use Gantry\Framework\Exception;
-
 /**
  * @copyright     Copyright (c) 2009-2019 Ryan Demmer. All rights reserved
  * @license       GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
@@ -154,8 +152,8 @@ class pkg_jceInstallerScript
 
         $jversion = new JVersion();
 
-        if (version_compare($jversion->getShortVersion(), '3.7', 'lt')) {
-            throw new RuntimeException('JCE requires Joomla 3.7 or later.');
+        if (version_compare($jversion->getShortVersion(), '3.6', 'lt')) {
+            throw new RuntimeException('JCE requires Joomla 3.6 or later.');
         }
 
         $parent = $installer->getParent();
@@ -211,6 +209,17 @@ class pkg_jceInstallerScript
             if ($plugin) {
                 $extension->publish(null, 0);
             }
+        }
+
+        // disable legacy jcefilebrowser quickicon to remove when the install is finished
+        $plugin = $extension->find(array(
+            'type' => 'plugin',
+            'element' => 'jcefilebrowser',
+            'folder' => 'quickicon'
+        ));
+
+        if ($plugin) {
+            $extension->publish(null, 0);
         }
     }
 
@@ -359,6 +368,11 @@ class pkg_jceInstallerScript
             $site . '/editor/tiny_mce/plugins/xhtmlxtras/classes'
         );
 
+        // remove inlinepopups
+        $folder['2.7.13'] = array(
+            $site . '/editor/tiny_mce/plugins/inlinepopups'
+        );
+
         foreach ($folders as $version => $list) {
             // version check
             if (version_compare($version, $current_version, 'gt')) {
@@ -369,9 +383,32 @@ class pkg_jceInstallerScript
                 if (!@is_dir($folder)) {
                     continue;
                 }
-                try {
-                    JFolder::delete($folder);
-                } catch(Exception $e){}
+
+                $files = JFolder::files($folder, '.', false, true, array(), array());
+
+                foreach($files as $file) {
+                    if (!@unlink($file)) {
+                        try {
+                            JFile::delete($file);
+                        } catch(Exception $e){}
+                    }
+                }
+
+                $folders = JFolder::folders($folder, '.', false, true, array(), array());
+
+                foreach($folders as $dir) {
+                    if (!@rmdir($dir)) {
+                        try {
+                            JFolder::delete($dir);
+                        } catch(Exception $e){}
+                    }
+                }
+
+                if (!@rmdir($folder)) {
+                    try {
+                        JFolder::delete($folder);
+                    } catch(Exception $e){}
+                }
             }
         }
 

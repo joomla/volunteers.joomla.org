@@ -183,6 +183,20 @@ if ($hasCookieControl)
 	if ($gtmId)
 	{
 		$this->addScriptDeclaration("var propertyGtmId = '" . $gtmId . "';");
+
+		// Get Cookie Script Ids
+		$cookiescriptId = JoomlaTemplateHelper::getScriptIds($gtmId);
+
+		if ($cookiescriptId->status)
+		{
+			$this->addScriptDeclaration("var propertyUaId = '" . $cookiescriptId->uaId . "';");
+			$this->addScriptDeclaration("var propertyAwId = '" . $cookiescriptId->awId . "';");
+			$this->addScriptDeclaration("var propertyTwitter = " . $cookiescriptId->twitter . ";"); //remove single quotes for boolean true
+			$this->addScriptDeclaration("var propertyFacebookId = '" . $cookiescriptId->fbId . "';");
+			$this->addScriptDeclaration("var propertyAddThis = " . $cookiescriptId->addthis . ";"); //remove single quotes for boolean true
+			$this->addScriptDeclaration("var propertyAddThisId = '" . $cookiescriptId->addthisId . "';");
+			$this->addScriptDeclaration("var propertyPingdomId = '" . $cookiescriptId->pingdomId . "';");
+		}
 	}
 }
 else

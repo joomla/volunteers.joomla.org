@@ -168,7 +168,7 @@ var config = {
             cookies: ['OAID', 'IDE', 'ck1', 'drtn*', 'rlas3', 'rtn1-z', 'fr', 'everest_g_v2', 'everest_session_v2', 'gglck', 'NID', 'na_id', 'na_tc', 'id', 'mdata', 'dpm'],
             onAccept: function () {
                 if ((typeof propertyAwId !== 'undefined')) {
-                    document.write('<script async src="https://www.googletagmanager.com/gtag/js?id=AW-976618339"></script>');
+                    document.write('<script async src="https://www.googletagmanager.com/gtag/js?id=' + propertyAwId + '"></script>');
                     window.dataLayer = window.dataLayer || [];
 
                     function gtag() {

@@ -372,6 +372,51 @@ class JoomlaTemplateHelper
 	}
 
 	/**
+	 * Retrieve all script related IDs and relative information where an ID is not applied (i.e. 'true' for Twitter) for the current site
+	 *
+	 * Note that this helper method is only 'good' for live sites, for development environments since no ID is returned, either script related IDs do
+	 *
+	 * @param   string  $gtmId  The property's GTM Identifier
+	 *
+	 * @return  object  $ids    The property's script IDs with a boolean status. In case of GTM ID's non-existence, the object's status and values are set to false
+	 */
+	public static function getScriptIds($gtmId)
+	{
+		$ids = new stdClass();
+
+		switch ($gtmId)
+		{
+			case 'GTM-P2Z55T':
+			{
+				$ids->status    = true;
+				$ids->uaId      = 'ID-1234567890';
+				$ids->awId      = 'ID-1234567890';
+				$ids->twitter   = 'true';
+				$ids->fbId      = 'ID-1234567890';
+				$ids->addthis   = 'true';
+				$ids->addthisId = 'ID-1234567890';
+				$ids->pingdomId = 'ID-1234567890';
+
+				break;
+			}
+
+			default:
+				$ids->status    = false;
+				$ids->uaId      = false;
+				$ids->awId      = false;
+				$ids->twitter   = false;
+				$ids->fbId      = false;
+				$ids->addthis   = false;
+				$ids->addthisId = false;
+				$ids->pingdomId = false;
+
+				break;
+		}
+
+		return $ids;
+	}
+
+	/**
 	 * Get the route for the login page
 	 *
 	 * @return  string

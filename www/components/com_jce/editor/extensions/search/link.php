@@ -33,7 +33,7 @@ class WFLinkSearchExtension extends WFSearchExtension
 
         // use tested defaults
         if (empty($plugins)) {
-            $plugins = array('categories', 'contacts', 'content', 'newsfeeds', 'weblinks');
+            $plugins = array('categories', 'contacts', 'content', 'newsfeeds', 'weblinks', 'tags');
         }
 
         foreach ($plugins as $plugin) {
@@ -173,7 +173,7 @@ class WFLinkSearchExtension extends WFSearchExtension
         // get router mode
         $sef 	= (int) $wf->getParam('search.link.sef_url', 0);
         
-        $limit 	= (int) $wf->getParam('search.link.limit', 10);
+        $limit 	= (int) $wf->getParam('search.link.limit', 50);
 
         // set router off so a raw url is returned by the Search plugin
         if ($router) {
@@ -190,6 +190,16 @@ class WFLinkSearchExtension extends WFSearchExtension
         if (substr($searchword, 0, 1) == '"' && substr($searchword, -1) == '"') {
             $searchword = substr($searchword, 1, -1);
             $searchphrase = 'exact';
+        }
+
+        // get passed through ordering
+        $ordering = $app->input->post->getWord('ordering', $ordering);
+
+        // get passed through area
+        $area = $app->input->post->getCmd('areas', (array) $area);
+
+        if (empty($area)) {
+            $area = null;
         }
 
         // trigger search on loaded plugins

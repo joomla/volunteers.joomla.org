@@ -64,12 +64,29 @@ class plgEditorJCE extends JPlugin
 
         $editor->render($settings);
 
+        // get media version
+        $version = $document->getMediaVersion();
+
         foreach ($editor->getScripts() as $script) {
-            $document->addScript($script, array('version' => 'auto'));
+            // add version directly for backwards compatablity
+            if (strpos($script, '?') === false) {
+                $script .= '?' . $version;
+            } else {
+                $script .= '&' . $version;
+            }
+
+            $document->addScript($script);
         }
 
         foreach ($editor->getStyleSheets() as $style) {
-            $document->addStylesheet($style, array('version' => 'auto'));
+            // add version directly for backwards compatablity
+            if (strpos($style, '?') === false) {
+                $style .= '?' . $version;
+            } else {
+                $style .= '&' . $version;
+            }
+            
+            $document->addStylesheet($style);
         }
 
         $document->addScriptDeclaration(implode("\n", $editor->getScriptDeclaration()));
@@ -165,6 +182,16 @@ class plgEditorJCE extends JPlugin
             } else {
                 $buttons = $this->_subject->getButtons($name, $buttons, $asset, $author);
             }
+
+            // fix some legacy buttons
+            array_walk($buttons, function($button) {
+                $cls = $button->get('class', '');
+
+                if (empty($cls) || strpos($cls, 'btn') === false) {
+                    $cls .= ' btn';
+                    $button->set('class', trim($cls));
+                }
+            });
 
             return JLayoutHelper::render('joomla.editors.buttons', $buttons);
         }

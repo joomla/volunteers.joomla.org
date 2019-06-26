@@ -57,7 +57,7 @@ class JoomlalinksContent extends JObject
         switch ($view) {
             // get top-level categories
             default:
-                $articles   = array();
+                $articles = array();
 
                 if (!isset($args->id)) {
                     $args->id = 1;
@@ -66,7 +66,7 @@ class JoomlalinksContent extends JObject
                 $categories = WFLinkBrowser::getCategory('com_content', $args->id);
 
                 // get any articles in this category (in Joomla! 1.6+ a category can contain sub-categories and articles)
-                $articles = self::_getArticles($args->id);
+                $articles = self::getArticles($args->id);
 
                 foreach ($categories as $category) {
                     $url = '';
@@ -78,12 +78,12 @@ class JoomlalinksContent extends JObject
                     $id = ContentHelperRoute::getCategoryRoute($category->id, $args->id, $language);
 
                     if (strpos($id, 'index.php?Itemid=') !== false) {
-                        $url = self::_getMenuLink($id);
+                        $url = self::getMenuLink($id);
                         $id = 'index.php?option=com_content&view=category&id=' . $category->id;
                     }
 
                     $items[] = array(
-                        'url' => $this->route($url),
+                        'url' => self::route($url),
                         'id' => $id,
                         'name' => $category->title . ' / ' . $category->alias,
                         'class' => 'folder content',
@@ -99,7 +99,7 @@ class JoomlalinksContent extends JObject
 
                         $id = ContentHelperRoute::getArticleRoute($article->slug, $article->catslug, $language);
 
-                        $id = $this->route($id);
+                        $id = self::route($id);
 
                         $items[] = array(
                             'id' => $id,
@@ -123,7 +123,7 @@ class JoomlalinksContent extends JObject
             // get articles and / or sub-categories
             case 'category':
                 // get any articles in this category (in Joomla! 1.6+ a category can contain sub-categories and articles)
-                $articles = self::_getArticles($args->id);
+                $articles = self::getArticles($args->id);
 
                 // get sub-categories
                 $categories = WFLinkBrowser::getCategory('com_content', $args->id);
@@ -155,11 +155,11 @@ class JoomlalinksContent extends JObject
                         }
 
                         if (strpos($url, 'index.php?Itemid=') !== false) {
-                            $url = self::_getMenuLink($url);
+                            $url = self::getMenuLink($url);
                         }
 
                         $items[] = array(
-                            'url' => $this->route($url),
+                            'url' => self::route($url),
                             'id' => $id,
                             'name' => $category->title . ' / ' . $category->alias,
                             'class' => 'folder content',
@@ -176,7 +176,7 @@ class JoomlalinksContent extends JObject
 
                     $id = ContentHelperRoute::getArticleRoute($article->slug, $article->catslug, $language);
 
-                    $id = $this->route($id);
+                    $id = self::route($id);
 
                     $items[] = array(
                         'id' => $id,
@@ -201,12 +201,12 @@ class JoomlalinksContent extends JObject
         return $items;
     }
 
-    private function _getMenuLink($url)
+    private static function getMenuLink($url)
     {
         $wf = WFEditorPlugin::getInstance();
-        
+
         // resolve the url from the menu link
-        if ($wf->getParam('joomlalinks.article_resolve_alias', 1)) {
+        if ($wf->getParam('links.joomlalinks.article_resolve_alias', 1)) {
             // get itemid
             preg_match('#Itemid=([\d]+)#', $url, $matches);
             // get link from menu
@@ -223,7 +223,7 @@ class JoomlalinksContent extends JObject
         return $url;
     }
 
-    private function _getArticles($id)
+    private function getArticles($id)
     {
         $db = JFactory::getDBO();
         $user = JFactory::getUser();
@@ -234,7 +234,7 @@ class JoomlalinksContent extends JObject
 
         $case = '';
 
-        if ((int) $this->get('article_alias', 1)) {
+        if ($wf->getParam('links.joomlalinks.article_alias', 1)) {
             //sqlsrv changes
             $case_when1 = ' CASE WHEN ';
             $case_when1 .= $query->charLength('a.alias', '!=', '0');
@@ -261,17 +261,17 @@ class JoomlalinksContent extends JObject
         $query->from('#__content AS a');
         $query->innerJoin('#__categories AS b ON b.id = ' . (int) $id);
 
-        $query->where('a.state = 1');
+        $query->where('a.catid = ' . (int) $id);
 
-        if ($wf->getParam('joomlalinks.article_unpublished', 0) == 1) {
-            $query->orWhere('a.state = 0');
+        if ($wf->getParam('links.joomlalinks.article_unpublished', 0) == 1) {
+            $query->where('(a.state = 0 OR a.state = 1)');
+        } else {
+            $query->where('a.state = 1');
         }
 
-        $query->andWhere('a.catid = ' . (int) $id);
-
         if (!$user->authorise('core.admin')) {
-            $query->andWhere('a.access IN (' . $groups . ')');
-            $query->andWhere('b.access IN (' . $groups . ')');
+            $query->where('a.access IN (' . $groups . ')');
+            $query->where('b.access IN (' . $groups . ')');
         }
 
         $query->order('a.title');
@@ -279,10 +279,6 @@ class JoomlalinksContent extends JObject
         $db->setQuery($query, 0);
 
         return $db->loadObjectList();
-    }
-
-    private function getItemId($url)
-    {
     }
 
     private static function getAnchors($content)
@@ -302,9 +298,11 @@ class JoomlalinksContent extends JObject
         return $anchors;
     }
 
-    private function route($url)
+    private static function route($url)
     {
-        if ((int) $this->get('sef_url', 0)) {
+        $wf = WFEditorPlugin::getInstance();
+
+        if ($wf->getParam('links.joomlalinks.sef_url', 0)) {
             $url = WFLinkBrowser::route($url);
         }
 

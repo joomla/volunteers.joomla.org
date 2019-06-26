@@ -148,18 +148,10 @@
         "row": 4,
         "core": 1
     },
-    "inlinepopups": {
-        "title": "WF_INLINEPOPUPS_TITLE",
-        "description": "WF_INLINEPOPUPS_DESC",
-        "icon": "",
-        "editable": 0,
-        "row": 4,
-        "core": 1
-    },
     "layer": {
         "title": "WF_LAYER_TITLE",
         "description": "WF_LAYER_DESC",
-        "icon": "insertlayer,moveforward,movebackward,absolute",
+        "icon": "insertlayer,layerforward,layerbackward,layerabsolute",
         "editable": 0,
         "row": 4,
         "core": 1
@@ -243,8 +235,7 @@
         "icon": "style",
         "editable": 0,
         "row": 4,
-        "core": 1,
-        "class": "list-box"
+        "core": 1
     },
     "styleselect": {
         "title": "WF_STYLESELECT_TITLE",
@@ -334,7 +325,6 @@
         "core": 1,
         "icon": "emotions",
         "row": 4,
-        "editable": 1,
-        "class": "split-button"
+        "editable": 1
     }
 }

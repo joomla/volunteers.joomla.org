@@ -182,7 +182,9 @@ class WFEditorPlugin extends JObject
         $document = WFDocument::getInstance();
 
         // ini language
-        $document->addScript(array('index.php?option=com_jce&' . $document->getQueryString(array('task' => 'plugin.loadlanguages', 'lang' => WFLanguage::getCode()))), 'joomla');
+        $document->addScript(array('index.php?option=com_jce&' . $document->getQueryString(
+            array('task' => 'plugin.loadlanguages', 'lang' => WFLanguage::getCode())
+        )), 'joomla');
 
         // pack assets if required
         $document->pack(true, $this->getParam('editor.compress_gzip', 0));
@@ -278,7 +280,7 @@ class WFEditorPlugin extends JObject
             foreach($fields as $field) {
                 $key = $field->getAttribute('name');
 
-                if ($key === "buttons") {
+                if (!$key || $key === "buttons") {
                     continue;
                 }
 
@@ -417,11 +419,10 @@ class WFEditorPlugin extends JObject
      * @param mixed  $fallback   Fallback value
      * @param mixed  $default    Default value
      * @param string $type       Variable type eg: string, boolean, integer, array
-     * @param bool   $allowempty
      *
      * @return mixed
      */
-    public function getParam($key, $fallback = '', $default = '', $type = 'string', $allowempty = true)
+    public function getParam($key, $fallback = '', $default = '', $type = 'string')
     {
         // get plugin name
         $name = $this->getName();
@@ -434,20 +435,25 @@ class WFEditorPlugin extends JObject
 
         // root key set
         if ($keys[0] === 'editor' || $keys[0] === $name || $keys[0] === $caller) {
-            return $wf->getParam($key, $fallback, $default, $type, $allowempty);
-            // no root key set, treat as shared param
+            return $wf->getParam($key, $fallback, $default, $type);
+        // no root key set, treat as shared param
         } else {
             // get fallback param from editor key
-            $fallback = $wf->getParam('editor.' . $key, $fallback, $default, $type, $allowempty);
+            $fallback = $wf->getParam('editor.' . $key, $fallback, $default, $type);
 
             if ($caller) {
                 // get fallback from plugin (with editor parameter as fallback)
-                $fallback = $wf->getParam($name . '.' . $key, $fallback, $default, $type, $allowempty);
+                $fallback = $wf->getParam($name . '.' . $key, $fallback, $default, $type);
                 $name = $caller;
+            }
+            
+            // reset the $default to prevent clearing
+            if ($fallback === $default) {
+                $default = '';
             }
 
             // return parameter
-            return $wf->getParam($name . '.' . $key, $fallback, $default, $type, $allowempty);
+            return $wf->getParam($name . '.' . $key, $fallback, $default, $type);
         }
     }
 

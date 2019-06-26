@@ -132,8 +132,8 @@ class WFApplication extends JObject
             }
         }
 
-        // get the Joomla! area (admin or site)
-        $area = $app->isClient('administrator') ? 2 : 1;
+        // get the Joomla! area, default to "site"
+        $area = $app->getClientId() === 0 ? 1 : 2;
 
         if (!class_exists('Wf_Mobile_Detect')) {
             // load mobile detect class
@@ -373,8 +373,8 @@ class WFApplication extends JObject
                 $data2 = array();
             }
 
-            // merge params
-            $data = WFUtility::array_merge_recursive_distinct($data1, $data2);
+            // merge params, but ignore empty values
+            $data = WFUtility::array_merge_recursive_distinct($data1, $data2, true);
 
             // create new registry with params
             $params = new JRegistry($data);
@@ -387,8 +387,8 @@ class WFApplication extends JObject
 
     private function isEmptyValue($value)
     {
-        if (is_string($value)) {
-            return $value === '';
+        if (is_null($value)) {
+            return true;
         }
 
         if (is_array($value)) {
@@ -405,7 +405,7 @@ class WFApplication extends JObject
      * @param $fallback Fallback value
      * @param $default Default value
      */
-    public function getParam($key, $fallback = '', $default = '', $type = 'string', $allowempty = true)
+    public function getParam($key, $fallback = '', $default = '', $type = 'string')
     {
         // get params for base key
         $params = $this->getParams();
@@ -413,30 +413,49 @@ class WFApplication extends JObject
         // get a parameter
         $value = $params->get($key);
 
-        if (is_null($value)) {
-            $value = $fallback;
-        } else {
-            if (!$allowempty && $this->isEmptyValue($value)) {
+        // key not present in params or was empty string or empty array (JRegistry returns null), use fallback value
+        if (self::isEmptyValue($value)) {            
+            // set default as empty string
+            $value = '';
+            
+            // key does not exist (parameter was not set) - use fallback
+            if ($params->exists($key) === false) {
+                $value = $fallback;
+
+                // if fallback is empty, revert to system default if it is non-empty
+                if ($fallback === '' && $default !== '') {
+                    $value = $default;
+
+                    // reset $default to prevent clearing
+                    $default = '';
+                }
+            // parameter is set, but is empty, but fallback is not (inherited values)
+            } else if ($fallback !== '') {
                 $value = $fallback;
             }
         }
 
-        if (is_string($value) && $type == 'string') {
+        // clean string value of whitespace
+        if (is_string($value)) {
             $value = trim(preg_replace('#[\n\r\t]+#', '', $value));
         }
 
+        // cast default to float if numeric
         if (is_numeric($default)) {
             $default = (float) $default;
         }
 
+        // cast value to float if numeric
         if (is_numeric($value)) {
             $value = (float) $value;
         }
 
+        // if value is equal to system default, clear $value and return
         if ($value === $default) {
             return '';
         }
 
+        // cast value to boolean
         if ($type == 'boolean') {
             $value = (bool) $value;
         }

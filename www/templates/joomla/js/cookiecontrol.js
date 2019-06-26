@@ -66,7 +66,9 @@ var config = {
                     })(window, document, 'script', 'dataLayer', propertyGtmId);
                 }
                 if ((typeof propertyUaId !== 'undefined')) {
-                    document.write('<script async src="https://www.googletagmanager.com/gtag/js?id=' + propertyUaId + '"></script>');
+                    var UaId = document.createElement("script");
+                    UaId.src = "//www.googletagmanager.com/gtag/js?id=" + propertyUaId;
+                    document.body.appendChild(UaId);
 
                     window.dataLayer = window.dataLayer || [];
 
@@ -168,7 +170,10 @@ var config = {
             cookies: ['OAID', 'IDE', 'ck1', 'drtn*', 'rlas3', 'rtn1-z', 'fr', 'everest_g_v2', 'everest_session_v2', 'gglck', 'NID', 'na_id', 'na_tc', 'id', 'mdata', 'dpm'],
             onAccept: function () {
                 if ((typeof propertyAwId !== 'undefined')) {
-                    document.write('<script async src="https://www.googletagmanager.com/gtag/js?id=' + propertyAwId + '"></script>');
+                    var AwId = document.createElement("script");
+                    AwId.src = "//www.googletagmanager.com/gtag/js?id=" + propertyAwId;
+                    document.body.appendChild(AwId);
+
                     window.dataLayer = window.dataLayer || [];
 
                     function gtag() {
@@ -179,7 +184,9 @@ var config = {
                     gtag('config', propertyAwId);
                 }
                 if ((typeof propertyTwitter !== 'undefined')) {
-                    document.write('<script src="//platform.twitter.com/widgets.js" type="text/javascript" async="async"></script>');
+                    var Twitter = document.createElement("script");
+                    Twitter.src = "//platform.twitter.com/widgets.js";
+                    document.body.appendChild(Twitter);
                 }
                 if ((typeof propertyFacebookId !== 'undefined')) {
                     !function (f, b, e, v, n, t, s) {
@@ -203,13 +210,21 @@ var config = {
                     fbq('init', propertyFacebookId);
                     fbq('track', 'PageView');
 
-                    document.write('<img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=1490208684611957&ev=PageView&noscript=1" />');
+                    var FacebookId = document.createElement("img");
+                    FacebookId.src = "https://www.facebook.com/tr?id=1490208684611957&ev=PageView&noscript=1";
+                    FacebookId.style = "display:none";
+                    document.body.appendChild(facFacebookIdebookPixel);
                 }
                 if ((typeof propertyAddThis !== 'undefined')) {
-                    document.write('<script async="" type="text/javascript" src="//cdn.carbonads.com/carbon.js?zoneid=1673&serve=C6AILKT&placement=joomlaorg" id="_carbonads_js"></script>');
+                    var AddThis = document.createElement("script");
+                    AddThis.src = "//cdn.carbonads.com/carbon.js?zoneid=1673&serve=C6AILKT&placement=joomlaorg";
+                    AddThis.id = "_carbonads_js";
+                    document.body.appendChild(AddThis);
                 }
                 if ((typeof propertyAddThisId !== 'undefined')) {
-                    document.write('<script src="//s7.addthis.com/js/300/addthis_widget.js#pubid=' + propertyAddThisId + '" type="text/javascript" async="async"></script>');
+                    var AddThisId = document.createElement("script");
+                    AddThisId.src = "//s7.addthis.com/js/300/addthis_widget.js#pubid=" + propertyAddThisId;
+                    document.body.appendChild(AddThisId);
                 }
             },
             onRevoke: function () {

@@ -48,7 +48,7 @@ var config = {
             name: 'performance',
             label: 'Performance Cookies',
             description: 'Performance cookies help us to improve our website by collecting and reporting information, on its usage.',
-            cookies: ['_dc_gtm_UA*', '_ga', '_gid', 'GPS', 'YSC', 'wistia-http2-push-disabled', 'di2', 'loc', 'ouid', 'uid', 'uvc', 'vc', 'TapAd_DID ', 'TapAd_TS ', '1P_JAR', 'phpbb3_cnuw4_k', 'd', 'mc', 'KADUSERCOOKIE', 'KTPCACOOKIE', '__utma', '__utmb', '__utmc', '__utmz', 'AMCVS_', 'AMCVS_', 'AMCV_', 'PP', 'PPP', '_gat_partnerTracker', '_gat_spreadshirtTracker', 'demdex', 'uvts'],
+            cookies: ['_dc_gtm_UA*', '_ga', '_gid', 'phpbb3_cnuw4_k', '__utma', '__utmb', '__utmc', '__utmz'],
             onAccept: function () {
                 if ((typeof propertyGtmId !== 'undefined')) {
                     (function (w, d, s, l, i) {
@@ -85,35 +85,11 @@ var config = {
                 CookieControl.delete('_dc_gtm_UA*');
                 CookieControl.delete('_ga');
                 CookieControl.delete('_gid');
-                CookieControl.delete('GPS');
-                CookieControl.delete('YSC');
-                CookieControl.delete('wistia-http2-push-disabled');
-                CookieControl.delete('di2');
-                CookieControl.delete('loc');
-                CookieControl.delete('ouid');
-                CookieControl.delete('uid');
-                CookieControl.delete('uvc');
-                CookieControl.delete('vc');
-                CookieControl.delete('TapAd_DID');
-                CookieControl.delete('TapAd_TS');
-                CookieControl.delete('1P_JAR');
                 CookieControl.delete('phpbb3_cnuw4_k');
-                CookieControl.delete('d');
-                CookieControl.delete('mc');
-                CookieControl.delete('KADUSERCOOKIE');
-                CookieControl.delete('KTPCACOOKIE');
                 CookieControl.delete('__utma');
                 CookieControl.delete('__utmb');
                 CookieControl.delete('__utmc');
                 CookieControl.delete('__utmz');
-                CookieControl.delete('AMCVS_');
-                CookieControl.delete('AMCV_');
-                CookieControl.delete('AMCVS_');
-                CookieControl.delete('PP');
-                CookieControl.delete('PPP');
-                CookieControl.delete('_gat_partnerTracker');
-                CookieControl.delete('demdex');
-                CookieControl.delete('uvts');
             },
             recommendedState: true
         },
@@ -121,7 +97,7 @@ var config = {
             name: 'functionality',
             label: 'Functionality Cookies',
             description: 'Functionality cookies are responsible for the partial functionality of this website during your navigation. By deactivating them, you might have limited access on our or third party website\'s features.',
-            cookies: ['PREF', 'VISITOR_INFO1_LIVE', 'rl_modals', '__distillery', 'AWSALB', '__atuvc', '__atuvs', 'MoodleSession', 'ct_checkjs', 'ct_fkp_timestamp', 'ct_pointer_data', 'ct_ps_timestamp', 'ct_timezone', '__utmt', '_sdsat_BasketAmountItems', 'affiliate', 'any_affiliate', 'direct_affiliate', 's_cc', 's_cc', 's_sq', '_rf', '_uservoice_tz', '_uvsid', '__cfduid'],
+            cookies: ['PREF', 'VISITOR_INFO1_LIVE', 'rl_modals', '__distillery', 'AWSALB', '__atuvc', '__atuvs', 'MoodleSession', 'ct_checkjs', 'ct_fkp_timestamp', 'ct_pointer_data', 'ct_ps_timestamp', 'ct_timezone', '__utmt', '_sdsat_BasketAmountItems', 'affiliate', 'any_affiliate', 'direct_affiliate', 's_cc', 's_cc', 's_sq', '__cfduid'],
             onAccept: function () {
                 if ((typeof propertyPingdomId !== 'undefined')) {
                     var _prum = [['id', propertyPingdomId],
@@ -156,9 +132,6 @@ var config = {
                 CookieControl.delete('direct_affiliate');
                 CookieControl.delete('s_cc');
                 CookieControl.delete('s_sq');
-                CookieControl.delete('_rf');
-                CookieControl.delete('_uservoice_tz');
-                CookieControl.delete('_uvsid');
                 CookieControl.delete('__cfduid');
             },
             recommendedState: true
@@ -167,7 +140,7 @@ var config = {
             name: 'advertising',
             label: 'Advertising',
             description: 'Advertising cookies help you see some ads based on your preferences. Joomla! serves or hosts ads as they are one of its major financial support.',
-            cookies: ['OAID', 'IDE', 'ck1', 'drtn*', 'rlas3', 'rtn1-z', 'fr', 'everest_g_v2', 'everest_session_v2', 'gglck', 'NID', 'na_id', 'na_tc', 'id', 'mdata', 'dpm'],
+            cookies: ['OAID', 'IDE', 'ck1', 'drtn*', 'rlas3', 'rtn1-z', 'fr', 'everest_g_v2', 'everest_session_v2', 'gglck', 'NID', 'na_id', 'na_tc', 'id', 'mdata', 'dpm', 'GPS', 'YSC', 'wistia-http2-push-disabled', 'di2', 'loc', 'ouid', 'uid', 'uvc', 'vc', 'TapAd_DID ', 'TapAd_TS ', '1P_JAR', 'd', 'mc', 'KADUSERCOOKIE', 'KTPCACOOKIE', 'AMCVS_', 'AMCV_', 'PP', 'PPP', '_gat_partnerTracker', '_gat_spreadshirtTracker', 'demdex'],
             onAccept: function () {
                 if ((typeof propertyAwId !== 'undefined')) {
                     var AwId = document.createElement("script");
@@ -244,6 +217,29 @@ var config = {
                 CookieControl.delete('id');
                 CookieControl.delete('mdata');
                 CookieControl.delete('dpm');
+                CookieControl.delete('GPS');
+                CookieControl.delete('YSC');
+                CookieControl.delete('wistia-http2-push-disabled');
+                CookieControl.delete('di2');
+                CookieControl.delete('loc');
+                CookieControl.delete('ouid');
+                CookieControl.delete('uid');
+                CookieControl.delete('uvc');
+                CookieControl.delete('vc');
+                CookieControl.delete('TapAd_DID');
+                CookieControl.delete('TapAd_TS');
+                CookieControl.delete('1P_JAR');
+                CookieControl.delete('d');
+                CookieControl.delete('mc');
+                CookieControl.delete('KADUSERCOOKIE');
+                CookieControl.delete('KTPCACOOKIE');
+                CookieControl.delete('AMCVS_');
+                CookieControl.delete('AMCV_');
+                CookieControl.delete('PP');
+                CookieControl.delete('PPP');
+                CookieControl.delete('_gat_partnerTracker');
+                CookieControl.delete('_gat_spreadshirtTracker');
+                CookieControl.delete('demdex');
             },
             recommendedState: true
         },

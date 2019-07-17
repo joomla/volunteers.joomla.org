@@ -91,7 +91,8 @@ var config = {
                 CookieControl.delete('__utmc');
                 CookieControl.delete('__utmz');
             },
-            recommendedState: true
+            recommendedState: true,
+            lawfulBasis: 'legitimate interest'
         },
         {
             name: 'functionality',

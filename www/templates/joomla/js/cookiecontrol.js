@@ -257,7 +257,9 @@ window.addEventListener("load", function () {
     CookieControl.load(config);
 
     var removex = document.getElementById('ccc-notify-dismiss'),
-        cookieState = JSON.parse(CookieControl.getCookie('CookieControl')).initialState;
+        cookieControlCookie = JSON.parse(CookieControl.getCookie('CookieControl')),
+        cookieState = cookieControlCookie.initialState,
+        cookieInteraction = cookieControlCookie.interactedWith;
 
     // Remove the click function if element exists
     if (removex) {
@@ -266,6 +268,8 @@ window.addEventListener("load", function () {
 
     // If type is closed the cookie notice is not accepted. If it is notify, then it is accepted.
     if (cookieState && cookieState.type === 'closed') {
-        CookieControl.open();
+        if (!cookieInteraction) {
+            CookieControl.open();
+        }
     }
 });

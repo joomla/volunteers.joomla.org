@@ -252,15 +252,20 @@ var config = {
     ],
     statement: {}
 };
+
 window.addEventListener("load", function () {
     CookieControl.load(config);
-    var removex = document.getElementById('ccc-notify-dismiss');
+
+    var removex = document.getElementById('ccc-notify-dismiss'),
+        cookieState = JSON.parse(CookieControl.getCookie('CookieControl')).initialState;
+
+    // Remove the click function if element exists
     if (removex) {
-        dismissIcon.remove(); // remove the click function if element exists
+        dismissIcon.remove();
     }
 
-    //if type is closed the cookie notice is not accepted. if it is notify, then it is accepted.
-    if (JSON.parse(CookieControl.getCookie('CookieControl')).initialState.type == 'closed') {
+    // If type is closed the cookie notice is not accepted. If it is notify, then it is accepted.
+    if (cookieState && cookieState.type === 'closed') {
         CookieControl.open();
     }
 });

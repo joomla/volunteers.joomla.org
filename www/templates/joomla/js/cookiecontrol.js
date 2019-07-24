@@ -8,8 +8,7 @@
 //var propertyAddThisId = ra-xxxxxxxxxxxxxx
 //var propertyPingdomId = apiKey;
 
-//Works the same for Google Analytics, Advertising or Marketing scripts etc.
-
+// Works the same for Google Analytics, Advertising or Marketing scripts etc.
 var config = {
     apiKey: 'f3c65236ed9682b20dd601125410aa54139c8dfa',
     product: 'PRO_MULTISITE',
@@ -47,7 +46,7 @@ var config = {
         {
             name: 'performance',
             label: 'Performance Cookies',
-            description: 'Performance cookies help us to improve our website by collecting and reporting information, on its usage.',
+            description: 'Performance cookies help us to improve our website by collecting and reporting information anonymously, on its usage. We use Google Analytics cookies to collect information about how visitors use our website. We anonymize IP addresses in Google Analytics, and the anonymized data is transmitted to and stored by Google on its servers.',
             cookies: ['_dc_gtm_UA*', '_ga', '_gid', 'phpbb3_cnuw4_k', '__utma', '__utmb', '__utmc', '__utmz'],
             onAccept: function () {
                 if ((typeof propertyGtmId !== 'undefined')) {

@@ -186,7 +186,7 @@ var config = {
                     var FacebookId = document.createElement("img");
                     FacebookId.src = "https://www.facebook.com/tr?id=1490208684611957&ev=PageView&noscript=1";
                     FacebookId.style = "display:none";
-                    document.body.appendChild(facFacebookIdebookPixel);
+                    document.body.appendChild(FacebookId);
                 }
                 if ((typeof propertyAddThis !== 'undefined')) {
                     var AddThis = document.createElement("script");

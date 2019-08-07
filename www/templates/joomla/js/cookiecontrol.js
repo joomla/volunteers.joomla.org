@@ -47,7 +47,7 @@ var config = {
             name: 'performance',
             label: 'Performance Cookies',
             description: 'Performance cookies help us to improve our website by collecting and reporting information anonymously, on its usage. We use Google Analytics cookies to collect information about how visitors use our website. We anonymize IP addresses in Google Analytics, and the anonymized data is transmitted to and stored by Google on its servers.',
-            cookies: ['_dc_gtm_UA*', '_ga', '_gid', 'phpbb3_cnuw4_k', '__utma', '__utmb', '__utmc', '__utmz'],
+            cookies: ['_dc_gtm_UA*', '_ga', '_gid', '__utma', '__utmb', '__utmc', '__utmz'],
             onAccept: function () {
                 if ((typeof propertyGtmId !== 'undefined')) {
                     (function (w, d, s, l, i) {
@@ -97,7 +97,7 @@ var config = {
             name: 'functionality',
             label: 'Functionality Cookies',
             description: 'Functionality cookies are responsible for the partial functionality of this website during your navigation. By deactivating them, you might have limited access on our or third party website\'s features.',
-            cookies: ['PREF', 'VISITOR_INFO1_LIVE', 'rl_modals', '__distillery', 'AWSALB', '__atuvc', '__atuvs', 'MoodleSession', 'ct_checkjs', 'ct_fkp_timestamp', 'ct_pointer_data', 'ct_ps_timestamp', 'ct_timezone', '__utmt', '_sdsat_BasketAmountItems', 'affiliate', 'any_affiliate', 'direct_affiliate', 's_cc', 's_cc', 's_sq', '__cfduid'],
+            cookies: ['PREF', 'VISITOR_INFO1_LIVE', 'rl_modals', '__distillery', 'AWSALB', '__atuvc', '__atuvs', 'ct_checkjs', 'ct_fkp_timestamp', 'ct_pointer_data', 'ct_ps_timestamp', 'ct_timezone', '__utmt', '_sdsat_BasketAmountItems', 'affiliate', 'any_affiliate', 'direct_affiliate', 's_cc', 's_cc', 's_sq', '__cfduid'],
             onAccept: function () {
                 if ((typeof propertyPingdomId !== 'undefined')) {
                     var _prum = [['id', propertyPingdomId],

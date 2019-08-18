@@ -42,6 +42,7 @@ class WFFileBrowser extends JObject
         'total_size' => 0,
         'remove_exif' => 0,
     );
+
     /* @var int */
     public $folder_tree = 1;
 
@@ -343,6 +344,8 @@ class WFFileBrowser extends JObject
     {
         $filters = $this->get('filter');
 
+        $return = true;
+
         if (!empty($filters)) {
             $path = ltrim($path, '/');
 
@@ -350,26 +353,33 @@ class WFFileBrowser extends JObject
                 $filter = trim($filter);
                 
                 // show this folder
-                if ($filter{0} === "+") {
+                if ($filter[0] === "+") {
                     $path_parts     = explode('/', $path);
                     $filter_parts   = explode('/', substr($filter, 1));
 
                     // filter match
-                    if (!(empty(array_intersect_assoc($filter_parts, $path_parts)))) {
+                    if (false === empty(array_intersect_assoc($filter_parts, $path_parts))) {
                         return true;
                     }
-                    
-                } else if ($filter{0} === "-") {
-                    return $path !== substr($filter, 1);
+
+                    $return = false;
+
+                // hide this folder    
                 } else {
-                    return $filter !== $path;
+                    $return = true;
+                    
+                    if ($filter[0] === "-") {
+                        $filter = substr($filter, 1);
+                    }
+
+                    if ($filter === $path) {
+                        return false;
+                    }
                 }
             }
-
-            return false;
         }
 
-        return true;
+        return $return;
     }
 
     public function getBaseDir()
@@ -448,7 +458,7 @@ class WFFileBrowser extends JObject
         $name = '';
 
         if ($filter) {
-            if ($filter{0} == '.') {
+            if ($filter[0] == '.') {
                 $ext = WFUtility::makeSafe($filter);
 
                 for ($i = 0; $i < count($filetypes); ++$i) {
@@ -464,7 +474,7 @@ class WFFileBrowser extends JObject
         // get file list by filter
         $files = $this->getFiles($dir, $name . '\.(?i)(' . implode('|', $filetypes) . ')$', $sort);
 
-        if (empty($filter) || $filter{0} != '.') {
+        if (empty($filter) || $filter[0] != '.') {
             // get folder list
             $folders = $this->getFolders($dir, '^(?i).*' . WFUtility::makeSafe($filter) . '.*', $sort);
         }
@@ -608,8 +618,8 @@ class WFFileBrowser extends JObject
                 . '       <i class="uk-icon uk-icon-home"></i>'
                 . '     </span>'
                 . '     <span class="uk-tree-text">' . JText::_('WF_LABEL_HOME', 'Home') . '</span>'
-                    . '   </a>'
-                    . ' </div>';
+                . '   </a>'
+                . ' </div>';
 
                 $dir = '/';
             }

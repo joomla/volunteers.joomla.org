@@ -39,7 +39,7 @@ JFactory::getDocument()->addScript('media/com_volunteers/js/oms.js', 'text/javas
 </div>
 <div class="row-fluid">
 	<div class="video-container">
-		<iframe src="https://www.youtube-nocookie.com/embed/J0onJYXf0rc?controls=0&rel=0"
+		<iframe src="https://www.youtube-nocookie.com/embed/0D5gW0lwPm0?controls=0&rel=0"
 		        allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
 		        allowfullscreen
 		></iframe>

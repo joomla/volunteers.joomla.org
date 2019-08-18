@@ -572,9 +572,33 @@ abstract class WFUtility
      *
      * @link    http://www.php.net/manual/en/function.is-array.php#98305
      */
-    private static function is_associative_array($array)
+    public static function is_associative_array($array)
     {
         return is_array($array) && (count($array) == 0 || 0 !== count(array_diff_key($array, array_keys(array_keys($array)))));
+    }
+
+    public static function isJson($value)
+    {
+        // value must be a string
+        if (!$value || !is_string($value)) {
+            return false;
+        }
+
+        // trim
+        $value = trim($value);
+
+        if (!$value) {
+            return false;
+        }
+
+        // quick syntax check
+        if ($value[0] !== '{' && $value[0] !== '[') {
+            return false;
+        }
+        
+        // full check using json_decode
+        json_decode($value);
+        return json_last_error() == JSON_ERROR_NONE;
     }
 
     /**

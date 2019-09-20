@@ -5,6 +5,9 @@
  * @copyright   Copyright (C) 2005 - 2017 Open Source Matters, Inc. All rights reserved.
  * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
+ 
+//volunteers.joomla.org/www/templates/joomla/helpers/template.php
+
 
 defined('_JEXEC') or die;
 
@@ -74,6 +77,8 @@ class JoomlaTemplateHelper
 				break;
 			}
 
+			case 'domains.joomla.org': // @TODO add GTM if exists, else return null
+
 			case 'downloads.joomla.org':
 			{
 				$id = 'GTM-KR9CX8';
@@ -103,6 +108,13 @@ class JoomlaTemplateHelper
 				break;
 			}
 
+			case 'foundation.joomla.org':
+			{
+				$id = false;
+
+				break;
+			}
+
 			case 'framework.joomla.org':
 			{
 				$id = 'GTM-NX46ZP';
@@ -110,9 +122,23 @@ class JoomlaTemplateHelper
 				break;
 			}
 
+			case 'help.joomla.org':
+			{
+				$id = 'GTM-NVGP9X';
+
+				break;
+			}
+
 			case 'issues.joomla.org':
 			{
 				$id = 'GTM-M7HXQ7';
+
+				break;
+			}
+
+			case 'launch.joomla.org':
+			{
+				$id = 'GTM-T253JLF';
 
 				break;
 			}
@@ -152,6 +178,13 @@ class JoomlaTemplateHelper
 				break;
 			}
 
+			case 'update.joomla.org':
+			{
+				$id = false;
+
+				break;
+			}
+
 			case 'vel.joomla.org':
 			{
 				$id = 'GTM-NKZPKQ';
@@ -160,6 +193,19 @@ class JoomlaTemplateHelper
 			}
 
 			case 'volunteers.joomla.org':
+			{
+				$id = 'GTM-P2Z55T';
+
+				break;
+			}
+
+			case 'shop.joomla.org':
+			{
+				$id = 'GTM-WQNG7Z';
+
+				break;
+			}
+
 			case 'test.volunteers.joomla.org': // @TODO remove after testing
 			case 'volunteers.joomla.test': // @TODO remove after testing
 			{
@@ -386,16 +432,310 @@ class JoomlaTemplateHelper
 
 		switch ($gtmId)
 		{
-			case 'GTM-P2Z55T':
+			case 'GTM-NDWJB8': // @origin api.joomla.org
 			{
 				$ids->status    = true;
-				$ids->uaId      = 'ID-1234567890';
-				$ids->awId      = 'ID-1234567890';
+				$ids->uaId      = 'undefined';
+				$ids->awId      = 'undefined';
+				$ids->twitter   = false;
+				$ids->fbId      = 'undefined';
+				$ids->addthis   = false;
+				$ids->addthisId = 'undefined';
+				$ids->pingdomId = '59300ad15992c776ad970068';
+
+				break;
+			}
+
+			case 'GTM-PFP9MJ': // @origin certification.joomla.org
+			{
+				$ids->status    = true;
+				$ids->uaId      = 'undefined';
+				$ids->awId      = 'undefined';
+				$ids->twitter   = false;
+				$ids->fbId      = 'undefined';
+				$ids->addthis   = false;
+				$ids->addthisId = 'undefined';
+				$ids->pingdomId = '59300ad15992c776ad970068';
+
+				break;
+			}
+
+			case 'GTM-WQNG7Z': // @origin community.joomla.org
+			{
+				$ids->status    = true;
+				$ids->uaId      = 'undefined';
+				$ids->awId      = 'undefined';
+				$ids->twitter   = true;
+				$ids->fbId      = 'undefined';
+				$ids->addthis   = false;
+				$ids->addthisId = 'undefined';
+				$ids->pingdomId = '59300ad15992c776ad970068';
+
+				break;
+			}
+
+			case 'GTM-PZWNZR': // @origin conference.joomla.org
+			{
+				$ids->status    = true;
+				$ids->uaId      = 'undefined';
+				$ids->awId      = 'undefined';
+				$ids->twitter   = false;
+				$ids->fbId      = 'undefined';
+				$ids->addthis   = false;
+				$ids->addthisId = 'undefined';
+				$ids->pingdomId = 'undefined';
+
+				break;
+			}
+
+			case 'GTM-WJ36D4': // @origin developer.joomla.org
+			{
+				$ids->status    = true;
+				$ids->uaId      = 'undefined';
+				$ids->awId      = 'undefined';
+				$ids->twitter   = false;
+				$ids->fbId      = 'undefined';
+				$ids->addthis   = false;
+				$ids->addthisId = 'undefined';
+				$ids->pingdomId = '59300ad15992c776ad970068';
+
+				break;
+			}
+
+			case 'GTM-K6SPGS': // @origin docs.joomla.org
+			{
+				$ids->status    = true;
+				$ids->uaId      = 'undefined';
+				$ids->awId      = 'undefined';
+				$ids->twitter   = false;
+				$ids->fbId      = 'undefined';
+				$ids->addthis   = true;
+				$ids->addthisId = 'ra-5378f70766e02197';
+				$ids->pingdomId = 'undefined';
+
+				break;
+			}
+
+			case 'GTM-KR9CX8': // @origin downloads.joomla.org
+			{
+				$ids->status    = true;
+				$ids->uaId      = 'undefined';
+				$ids->awId      = 'undefined';
+				$ids->twitter   = false;
+				$ids->fbId      = 'undefined';
+				$ids->addthis   = false;
+				$ids->addthisId = 'undefined';
+				$ids->pingdomId = '59300ad15992c776ad970068';
+
+				break;
+			}
+
+			case 'GTM-TRG37W': // @origin exam.joomla.org
+			{
+				$ids->status    = true;
+				$ids->uaId      = 'undefined';
+				$ids->awId      = 'undefined';
+				$ids->twitter   = false;
+				$ids->fbId      = 'undefined';
+				$ids->addthis   = false;
+				$ids->addthisId = 'undefined';
+				$ids->pingdomId = '59300ad15992c776ad970068';
+
+				break;
+			}
+
+			case 'GTM-MH6RGF': // @origin extensions.joomla.org
+			{
+				$ids->status    = true;
+				$ids->uaId      = 'undefined';
+				$ids->awId      = 'undefined';
+				$ids->twitter   = false;
+				$ids->fbId      = 'undefined';
+				$ids->addthis   = false;
+				$ids->addthisId = 'undefined';
+				$ids->pingdomId = '59300ad15992c776ad970068';
+
+				break;
+			}
+
+			case 'GTM-TWSN2R': // @origin forum.joomla.org
+			{
+				$ids->status    = true;
+				$ids->uaId      = 'undefined';
+				$ids->awId      = 'undefined';
+				$ids->twitter   = false;
+				$ids->fbId      = 'undefined';
+				$ids->addthis   = false;
+				$ids->addthisId = 'undefined';
+				$ids->pingdomId = '59300ad15992c776ad970068';
+
+				break;
+			}
+
+			case 'GTM-NX46ZP': // @origin framework.joomla.org
+			{
+				$ids->status    = true;
+				$ids->uaId      = 'undefined';
+				$ids->awId      = 'undefined';
+				$ids->twitter   = false;
+				$ids->fbId      = 'undefined';
+				$ids->addthis   = false;
+				$ids->addthisId = 'undefined';
+				$ids->pingdomId = '59300ad15992c776ad970068';
+
+				break;
+			}
+
+			case 'GTM-NVGP9X': // @origin help.joomla.org
+			{
+				$ids->status    = true;
+				$ids->uaId      = 'undefined';
+				$ids->awId      = 'undefined';
+				$ids->twitter   = false;
+				$ids->fbId      = 'undefined';
+				$ids->addthis   = false;
+				$ids->addthisId = 'undefined';
+				$ids->pingdomId = '59300ad15992c776ad970068';
+
+				break;
+			}
+
+			case 'GTM-M7HXQ7': // @origin issues.joomla.org
+			{
+				$ids->status    = true;
+				$ids->uaId      = 'undefined';
+				$ids->awId      = 'undefined';
+				$ids->twitter   = false;
+				$ids->fbId      = 'undefined';
+				$ids->addthis   = false;
+				$ids->addthisId = 'undefined';
+				$ids->pingdomId = '59300ad15992c776ad970068';
+
+				break;
+			}
+
+			case 'GTM-T253JLF': // @origin launch.joomla.org
+			{
+				$ids->status    = true;
+				$ids->uaId      = 'UA-28160972-3';
+				$ids->awId      = 'AW-976618339';
+				$ids->twitter   = false;
+				$ids->fbId      = 'undefined';
+				$ids->addthis   = false;
+				$ids->addthisId = 'undefined';
+				$ids->pingdomId = 'undefined';
+
+				break;
+			}
+
+			case 'GTM-WG7372': // @origin magazine.joomla.org
+			{
+				$ids->status    = true;
+				$ids->uaId      = 'undefined';
+				$ids->awId      = 'undefined';
+				$ids->twitter   = false;
+				$ids->fbId      = 'undefined';
+				$ids->addthis   = false;
+				$ids->addthisId = 'undefined';
+				$ids->pingdomId = '59300ad15992c776ad970068';
+
+				break;
+			}
+
+			case 'GTM-5GST4C': // @origin www.opensourcematters.org
+			{
+				$ids->status    = true;
+				$ids->uaId      = '';
+				$ids->awId      = '';
 				$ids->twitter   = 'true';
-				$ids->fbId      = 'ID-1234567890';
+				$ids->fbId      = '';
 				$ids->addthis   = 'true';
-				$ids->addthisId = 'ID-1234567890';
-				$ids->pingdomId = 'ID-1234567890';
+				$ids->addthisId = '';
+				$ids->pingdomId = '';
+
+				break;
+			}
+
+			case 'GTM-K8CR7K': // @origin resources.joomla.org
+			{
+				$ids->status    = true;
+				$ids->uaId      = 'undefined';
+				$ids->awId      = 'undefined';
+				$ids->twitter   = false;
+				$ids->fbId      = 'undefined';
+				$ids->addthis   = false;
+				$ids->addthisId = 'undefined';
+				$ids->pingdomId = '59300ad15992c776ad970068';
+
+				break;
+			}
+
+			case 'GTM-NKT9FP': // @origin showcase.joomla.org
+			{
+				$ids->status    = true;
+				$ids->uaId      = 'undefined';
+				$ids->awId      = 'undefined';
+				$ids->twitter   = false;
+				$ids->fbId      = 'undefined';
+				$ids->addthis   = false;
+				$ids->addthisId = 'undefined';
+				$ids->pingdomId = '59300ad15992c776ad970068';
+
+				break;
+			}
+
+			case 'GTM-KZ7SM9': // @origin tm.joomla.org
+			{
+				$ids->status    = true;
+				$ids->uaId      = 'undefined';
+				$ids->awId      = 'undefined';
+				$ids->twitter   = false;
+				$ids->fbId      = 'undefined';
+				$ids->addthis   = false;
+				$ids->addthisId = 'undefined';
+				$ids->pingdomId = '59300ad15992c776ad970068';
+
+				break;
+			}
+
+			case 'GTM-NKZPKQ': // @origin vel.joomla.org
+			{
+				$ids->status    = true;
+				$ids->uaId      = 'undefined';
+				$ids->awId      = 'undefined';
+				$ids->twitter   = false;
+				$ids->fbId      = 'facebook-jssdk'; // @TODO should be checked for validity
+				$ids->addthis   = false;
+				$ids->addthisId = 'undefined';
+				$ids->pingdomId = '59300ad15992c776ad970068';
+
+				break;
+			}
+
+			case 'GTM-WQNG7Z': // @origin shop.joomla.org | @TODO should consider to add a standalone cookie script
+			{
+				$ids->status    = true;
+				$ids->uaId      = 'undefined';
+				$ids->awId      = 'undefined';
+				$ids->twitter   = false;
+				$ids->fbId      = 'undefined';
+				$ids->addthis   = false;
+				$ids->addthisId = 'undefined';
+				$ids->pingdomId = '59300ad15992c776ad970068';
+
+				break;
+			}
+
+			case 'GTM-P2Z55T': // @origin volunteers.joomla.org
+			{
+				$ids->status    = true;
+				$ids->uaId      = 'undefined';
+				$ids->awId      = 'undefined';
+				$ids->twitter   = false;
+				$ids->fbId      = 'undefined';
+				$ids->addthis   = false;
+				$ids->addthisId = 'undefined';
+				$ids->pingdomId = '59300ad15992c776ad970068';
 
 				break;
 			}
@@ -414,6 +754,280 @@ class JoomlaTemplateHelper
 		}
 
 		return $ids;
+	}
+
+	/**
+	 * Retrieve the Cookie Categories Flag for each property
+	 *
+	 * Note that this helper method is only 'good' for live sites, for development environments no ID is returned
+	 *
+	 * @param   string  $siteUrl  The site URL without the scheme
+	 *
+	 * @return  object|boolean  The property's cookie category flags as a boolean true or false
+	 */
+	public static function getCcCategories($siteUrl)
+	{
+		$ccCategories = new stdClass();
+		$ccCategories->status = true;
+
+		switch ($siteUrl)
+		{
+			case 'api.joomla.org':
+			{
+				$ccCategories->Performance = true;
+				$ccCategories->Functional = false;
+				$ccCategories->Advertising = false;
+
+				break;
+			}
+
+			case 'certification.joomla.org':
+			{
+				$ccCategories->Performance = true;
+				$ccCategories->Functional = false;
+				$ccCategories->Advertising = false;
+
+				break;
+			}
+
+			case 'community.joomla.org':
+			{
+				$ccCategories->Performance = true;
+				$ccCategories->Functional = true;
+				$ccCategories->Advertising = true;
+
+				break;
+			}
+
+			case 'conference.joomla.org':
+			{
+				$ccCategories->Performance = true;
+				$ccCategories->Functional = true;
+				$ccCategories->Advertising = true;
+
+				break;
+			}
+
+			case 'developer.joomla.org':
+			{
+				$ccCategories->Performance = true;
+				$ccCategories->Functional = false;
+				$ccCategories->Advertising = false;
+
+				break;
+			}
+
+			case 'docs.joomla.org':
+			{
+				$ccCategories->Performance = true;
+				$ccCategories->Functional = true;
+				$ccCategories->Advertising = true;
+
+				break;
+			}
+
+			case 'domains.joomla.org': // @TODO GTM must be added first in func getGtmId($siteUrl)
+
+			case 'downloads.joomla.org':
+			{
+				$ccCategories->Performance = true;
+				$ccCategories->Functional = false;
+				$ccCategories->Advertising = false;
+
+				break;
+			}
+
+
+			case 'exam.joomla.org':
+			{
+				$ccCategories->Performance = true;
+				$ccCategories->Functional = false;
+				$ccCategories->Advertising = false;
+
+				break;
+			}
+
+			case 'extensions.joomla.org':
+			{
+				$ccCategories->Performance = true;
+				$ccCategories->Functional = false;
+				$ccCategories->Advertising = true;
+
+				break;
+			}
+
+			case 'forum.joomla.org':
+			{
+				$ccCategories->Performance = true;
+				$ccCategories->Functional = true;
+				$ccCategories->Advertising = true;
+
+				break;
+			}
+
+			case 'foundation.joomla.org':
+			{
+				$ccCategories->Performance = false;
+				$ccCategories->Functional = false;
+				$ccCategories->Advertising = false;
+
+				break;
+			}
+
+			case 'framework.joomla.org':
+			{
+				$ccCategories->Performance = true;
+				$ccCategories->Functional = false;
+				$ccCategories->Advertising = false;
+
+				break;
+			}
+
+			case 'help.joomla.org':
+			{
+				$ccCategories->Performance = true;
+				$ccCategories->Functional = false;
+				$ccCategories->Advertising = false;
+
+				break;
+			}
+
+			case 'issues.joomla.org':
+			{
+				$ccCategories->Performance = true;
+				$ccCategories->Functional = false;
+				$ccCategories->Advertising = false;
+
+				break;
+			}
+
+			case 'launch.joomla.org':
+			{
+				$ccCategories->Performance = true;
+				$ccCategories->Functional = false;
+				$ccCategories->Advertising = true;
+
+				break;
+			}
+
+			case 'magazine.joomla.org':
+			{
+				$ccCategories->Performance = true;
+				$ccCategories->Functional = false;
+				$ccCategories->Advertising = true;
+
+				break;
+			}
+
+			case 'opensourcematters.org':
+			{
+				$ccCategories->Performance = true;
+				$ccCategories->Functional = false;
+				$ccCategories->Advertising = true;
+
+				break;
+			}
+
+			case 'resources.joomla.org':
+			{
+				$ccCategories->Performance = true;
+				$ccCategories->Functional = false;
+				$ccCategories->Advertising = true;
+
+				break;
+			}
+
+			case 'showcase.joomla.org':
+			{
+				$ccCategories->Performance = true;
+				$ccCategories->Functional = false;
+				$ccCategories->Advertising = true;
+
+				break;
+			}
+
+			case 'tm.joomla.org':
+			{
+				$ccCategories->Performance = true;
+				$ccCategories->Functional = false;
+				$ccCategories->Advertising = false;
+
+				break;
+			}
+
+			case 'update.joomla.org':
+			{
+				$ccCategories->Performance = false;
+				$ccCategories->Functional = false;
+				$ccCategories->Advertising = false;
+
+				break;
+			}
+
+			case 'vel.joomla.org':
+			{
+				$ccCategories->Performance = true;
+				$ccCategories->Functional = false;
+				$ccCategories->Advertising = false;
+
+				break;
+			}
+
+			case 'volunteers.joomla.org':
+			{
+				$ccCategories->Performance = true;
+				$ccCategories->Functional = false;
+				$ccCategories->Advertising = false;
+
+				break;
+			}
+
+			case 'shop.joomla.org':
+			{
+				$ccCategories->Performance = true;
+				$ccCategories->Functional = true;
+				$ccCategories->Advertising = true;
+
+				break;
+			}
+
+			case 'test.volunteers.joomla.org': // @TODO remove after testing
+			{
+				$ccCategories->Performance = true;
+				$ccCategories->Functional = false;
+				$ccCategories->Advertising = false;
+
+				break;
+			}
+
+			case 'volunteers.joomla.test': // @TODO N/A
+			{
+				$ccCategories->Performance = true;
+				$ccCategories->Functional = true;
+				$ccCategories->Advertising = true;
+
+				break;
+			}
+
+			case 'www.joomla.org':
+			{
+				$ccCategories->Performance = true;
+				$ccCategories->Functional = true;
+				$ccCategories->Advertising = true;
+
+				break;
+			}
+
+			default:
+				
+				$ccCategories->Performance = false;
+				$ccCategories->Functional = false;
+				$ccCategories->Advertising = false;
+
+				break;
+		}
+
+		return $ccCategories;
 	}
 
 	/**

@@ -197,6 +197,17 @@ if ($hasCookieControl)
 			$this->addScriptDeclaration("var propertyAddThisId = '" . $cookiescriptId->addthisId . "';");
 			$this->addScriptDeclaration("var propertyPingdomId = '" . $cookiescriptId->pingdomId . "';");
 		}
+
+		// Get Property's Active Cookie Categories
+		$cookiescriptCat = JoomlaTemplateHelper::getCcCategories(Uri::getInstance()->toString(['host']));
+
+		if($cookiescriptCat->status)
+		{
+			$this->addScriptDeclaration("var ccPerformance = " . $cookiescriptCat->Performance . ";");
+			$this->addScriptDeclaration("var ccFunctional = " . $cookiescriptCat->Functional . ";");
+			$this->addScriptDeclaration("var ccAdvertising = " . $cookiescriptCat->Advertising . ";");
+		}
+
 	}
 }
 else

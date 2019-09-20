@@ -1,6 +1,3 @@
-//volunteers.joomla.org/www/templates/joomla/js/cookiecontrol.js
-
-
 //GTM id - originally belongs to index
 //var propertyGtmId = 'GTM-{ID}'; exploded from GTM-ID
 //var propertyUaId = 'UA-XXXXXX'
@@ -51,7 +48,7 @@ var config = {
             "then": {
                 name: 'performance',
                 label: 'Performance Cookies',
-                description: 'Performance cookies help us to improve our website by collecting and reporting information anonymously, on its usage. We use Google Analytics cookies to collect information about how visitors use our website. We anonymize IP addresses in Google Analytics, and the anonymized data is transmitted to and stored by Google on its servers.',
+                description: 'Performance cookies help us to improve our website by collecting and reporting information anonymously. We use Analytics services from Google LLC to help analyze how users use the site. IP anonymization is activated on this website.',
                 cookies: ['_dc_gtm_UA*', '_ga', '_gid', '__utma', '__utmb', '__utmc', '__utmz'],
                 onAccept: function () {
                     if ((typeof propertyGtmId !== 'undefined')) {

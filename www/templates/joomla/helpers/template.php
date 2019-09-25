@@ -5,9 +5,6 @@
  * @copyright   Copyright (C) 2005 - 2017 Open Source Matters, Inc. All rights reserved.
  * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
- 
-//volunteers.joomla.org/www/templates/joomla/helpers/template.php
-
 
 defined('_JEXEC') or die;
 
@@ -428,7 +425,7 @@ class JoomlaTemplateHelper
 	 */
 	public static function getScriptIds($gtmId)
 	{
-		$ids = new stdClass();
+		$ids = new stdClass;
 
 		switch ($gtmId)
 		{
@@ -767,7 +764,7 @@ class JoomlaTemplateHelper
 	 */
 	public static function getCcCategories($siteUrl)
 	{
-		$ccCategories = new stdClass();
+		$ccCategories         = new stdClass();
 		$ccCategories->status = true;
 
 		switch ($siteUrl)
@@ -775,7 +772,7 @@ class JoomlaTemplateHelper
 			case 'api.joomla.org':
 			{
 				$ccCategories->Performance = true;
-				$ccCategories->Functional = false;
+				$ccCategories->Functional  = false;
 				$ccCategories->Advertising = false;
 
 				break;
@@ -784,7 +781,7 @@ class JoomlaTemplateHelper
 			case 'certification.joomla.org':
 			{
 				$ccCategories->Performance = true;
-				$ccCategories->Functional = false;
+				$ccCategories->Functional  = false;
 				$ccCategories->Advertising = false;
 
 				break;
@@ -793,7 +790,7 @@ class JoomlaTemplateHelper
 			case 'community.joomla.org':
 			{
 				$ccCategories->Performance = true;
-				$ccCategories->Functional = true;
+				$ccCategories->Functional  = true;
 				$ccCategories->Advertising = true;
 
 				break;
@@ -802,7 +799,7 @@ class JoomlaTemplateHelper
 			case 'conference.joomla.org':
 			{
 				$ccCategories->Performance = true;
-				$ccCategories->Functional = true;
+				$ccCategories->Functional  = true;
 				$ccCategories->Advertising = true;
 
 				break;
@@ -811,7 +808,7 @@ class JoomlaTemplateHelper
 			case 'developer.joomla.org':
 			{
 				$ccCategories->Performance = true;
-				$ccCategories->Functional = false;
+				$ccCategories->Functional  = false;
 				$ccCategories->Advertising = false;
 
 				break;
@@ -820,7 +817,7 @@ class JoomlaTemplateHelper
 			case 'docs.joomla.org':
 			{
 				$ccCategories->Performance = true;
-				$ccCategories->Functional = true;
+				$ccCategories->Functional  = true;
 				$ccCategories->Advertising = true;
 
 				break;
@@ -831,7 +828,7 @@ class JoomlaTemplateHelper
 			case 'downloads.joomla.org':
 			{
 				$ccCategories->Performance = true;
-				$ccCategories->Functional = false;
+				$ccCategories->Functional  = false;
 				$ccCategories->Advertising = false;
 
 				break;
@@ -841,7 +838,7 @@ class JoomlaTemplateHelper
 			case 'exam.joomla.org':
 			{
 				$ccCategories->Performance = true;
-				$ccCategories->Functional = false;
+				$ccCategories->Functional  = false;
 				$ccCategories->Advertising = false;
 
 				break;
@@ -850,7 +847,7 @@ class JoomlaTemplateHelper
 			case 'extensions.joomla.org':
 			{
 				$ccCategories->Performance = true;
-				$ccCategories->Functional = false;
+				$ccCategories->Functional  = false;
 				$ccCategories->Advertising = true;
 
 				break;
@@ -859,7 +856,7 @@ class JoomlaTemplateHelper
 			case 'forum.joomla.org':
 			{
 				$ccCategories->Performance = true;
-				$ccCategories->Functional = true;
+				$ccCategories->Functional  = true;
 				$ccCategories->Advertising = true;
 
 				break;
@@ -868,7 +865,7 @@ class JoomlaTemplateHelper
 			case 'foundation.joomla.org':
 			{
 				$ccCategories->Performance = false;
-				$ccCategories->Functional = false;
+				$ccCategories->Functional  = false;
 				$ccCategories->Advertising = false;
 
 				break;
@@ -877,7 +874,7 @@ class JoomlaTemplateHelper
 			case 'framework.joomla.org':
 			{
 				$ccCategories->Performance = true;
-				$ccCategories->Functional = false;
+				$ccCategories->Functional  = false;
 				$ccCategories->Advertising = false;
 
 				break;
@@ -886,7 +883,7 @@ class JoomlaTemplateHelper
 			case 'help.joomla.org':
 			{
 				$ccCategories->Performance = true;
-				$ccCategories->Functional = false;
+				$ccCategories->Functional  = false;
 				$ccCategories->Advertising = false;
 
 				break;
@@ -895,7 +892,7 @@ class JoomlaTemplateHelper
 			case 'issues.joomla.org':
 			{
 				$ccCategories->Performance = true;
-				$ccCategories->Functional = false;
+				$ccCategories->Functional  = false;
 				$ccCategories->Advertising = false;
 
 				break;
@@ -904,7 +901,7 @@ class JoomlaTemplateHelper
 			case 'launch.joomla.org':
 			{
 				$ccCategories->Performance = true;
-				$ccCategories->Functional = false;
+				$ccCategories->Functional  = false;
 				$ccCategories->Advertising = true;
 
 				break;
@@ -913,7 +910,7 @@ class JoomlaTemplateHelper
 			case 'magazine.joomla.org':
 			{
 				$ccCategories->Performance = true;
-				$ccCategories->Functional = false;
+				$ccCategories->Functional  = false;
 				$ccCategories->Advertising = true;
 
 				break;
@@ -922,7 +919,7 @@ class JoomlaTemplateHelper
 			case 'opensourcematters.org':
 			{
 				$ccCategories->Performance = true;
-				$ccCategories->Functional = false;
+				$ccCategories->Functional  = false;
 				$ccCategories->Advertising = true;
 
 				break;
@@ -931,7 +928,7 @@ class JoomlaTemplateHelper
 			case 'resources.joomla.org':
 			{
 				$ccCategories->Performance = true;
-				$ccCategories->Functional = false;
+				$ccCategories->Functional  = false;
 				$ccCategories->Advertising = true;
 
 				break;
@@ -940,7 +937,7 @@ class JoomlaTemplateHelper
 			case 'showcase.joomla.org':
 			{
 				$ccCategories->Performance = true;
-				$ccCategories->Functional = false;
+				$ccCategories->Functional  = false;
 				$ccCategories->Advertising = true;
 
 				break;
@@ -949,7 +946,7 @@ class JoomlaTemplateHelper
 			case 'tm.joomla.org':
 			{
 				$ccCategories->Performance = true;
-				$ccCategories->Functional = false;
+				$ccCategories->Functional  = false;
 				$ccCategories->Advertising = false;
 
 				break;
@@ -958,7 +955,7 @@ class JoomlaTemplateHelper
 			case 'update.joomla.org':
 			{
 				$ccCategories->Performance = false;
-				$ccCategories->Functional = false;
+				$ccCategories->Functional  = false;
 				$ccCategories->Advertising = false;
 
 				break;
@@ -967,7 +964,7 @@ class JoomlaTemplateHelper
 			case 'vel.joomla.org':
 			{
 				$ccCategories->Performance = true;
-				$ccCategories->Functional = false;
+				$ccCategories->Functional  = false;
 				$ccCategories->Advertising = false;
 
 				break;
@@ -976,7 +973,7 @@ class JoomlaTemplateHelper
 			case 'volunteers.joomla.org':
 			{
 				$ccCategories->Performance = true;
-				$ccCategories->Functional = false;
+				$ccCategories->Functional  = false;
 				$ccCategories->Advertising = false;
 
 				break;
@@ -985,7 +982,7 @@ class JoomlaTemplateHelper
 			case 'shop.joomla.org':
 			{
 				$ccCategories->Performance = true;
-				$ccCategories->Functional = true;
+				$ccCategories->Functional  = true;
 				$ccCategories->Advertising = true;
 
 				break;
@@ -994,7 +991,7 @@ class JoomlaTemplateHelper
 			case 'test.volunteers.joomla.org': // @TODO remove after testing
 			{
 				$ccCategories->Performance = true;
-				$ccCategories->Functional = false;
+				$ccCategories->Functional  = false;
 				$ccCategories->Advertising = false;
 
 				break;
@@ -1003,7 +1000,7 @@ class JoomlaTemplateHelper
 			case 'volunteers.joomla.test': // @TODO N/A
 			{
 				$ccCategories->Performance = true;
-				$ccCategories->Functional = true;
+				$ccCategories->Functional  = true;
 				$ccCategories->Advertising = true;
 
 				break;
@@ -1012,16 +1009,16 @@ class JoomlaTemplateHelper
 			case 'www.joomla.org':
 			{
 				$ccCategories->Performance = true;
-				$ccCategories->Functional = true;
+				$ccCategories->Functional  = true;
 				$ccCategories->Advertising = true;
 
 				break;
 			}
 
 			default:
-				
+
 				$ccCategories->Performance = false;
-				$ccCategories->Functional = false;
+				$ccCategories->Functional  = false;
 				$ccCategories->Advertising = false;
 
 				break;
@@ -1129,8 +1126,7 @@ class JoomlaTemplateHelper
 		try
 		{
 			return $cache->get(
-				function ($url)
-				{
+				function ($url) {
 					// Set a very short timeout to try and not bring the site down
 					$response = HttpFactory::getHttp()->get($url, [], 2);
 

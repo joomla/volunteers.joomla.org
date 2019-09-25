@@ -10,7 +10,7 @@
  */
 defined('JPATH_PLATFORM') or die;
 
-require_once(JPATH_ADMINISTRATOR . '/components/com_jce/includes/base.php');
+require_once JPATH_ADMINISTRATOR . '/components/com_jce/includes/base.php';
 
 /**
  * JCE class.
@@ -128,7 +128,7 @@ class WFApplication extends JObject
 
             if ($context) {
                 $component = $this->getComponent($context);
-                $option = isset($component->element) ? $component->element : $component->option;
+                $option = $component->element;
             }
         }
 
@@ -226,11 +226,6 @@ class WFApplication extends JObject
                 }
 
                 if (!empty($item->components)) {
-                    // no context, and file browser cannot be assigned
-                    if ($options['option'] === 'com_jce') {
-                        continue;
-                    }
-                    
                     // check component
                     if (in_array($options['option'], explode(',', $item->components)) === false) {
                         continue;
@@ -421,10 +416,10 @@ class WFApplication extends JObject
         $value = $params->get($key);
 
         // key not present in params or was empty string or empty array (JRegistry returns null), use fallback value
-        if (self::isEmptyValue($value)) {            
+        if (self::isEmptyValue($value)) {
             // set default as empty string
             $value = '';
-            
+
             // key does not exist (parameter was not set) - use fallback
             if ($params->exists($key) === false) {
                 $value = $fallback;
@@ -436,7 +431,7 @@ class WFApplication extends JObject
                     // reset $default to prevent clearing
                     $default = '';
                 }
-            // parameter is set, but is empty, but fallback is not (inherited values)
+                // parameter is set, but is empty, but fallback is not (inherited values)
             } else if ($fallback !== '') {
                 $value = $fallback;
             }

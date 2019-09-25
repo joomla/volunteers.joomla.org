@@ -169,8 +169,9 @@ if (!$this->getMetaData('referrer'))
 	$this->setMetaData('referrer', 'unsafe-url');
 }
 
-// Get the GTM property ID
-$gtmId = JoomlaTemplateHelper::getGtmId(Uri::getInstance()->toString(['host']));
+// Get the site config
+/** @var JoomlaTemplateHelper $siteConfig */
+$siteConfig = JoomlaTemplateHelper::getSiteConfig(Uri::getInstance()->toString(['host']));
 
 // If Cookie Control is enabled, we expose the GTM ID as a JavaScript var versus registering GTM directly
 $hasCookieControl = $this->params->get('cookieControlActive', 0);
@@ -180,32 +181,28 @@ if ($hasCookieControl)
 	HTMLHelper::_('script', 'cookiecontrol.js', ['version' => 'auto', 'relative' => true, 'detectDebug' => (bool) JDEBUG], []);
 
 	// Purposefully declare a global variable versus using the Joomla.options JavaScript API for compatibility with non-Joomla (CMS) installations
-	if ($gtmId)
+	if ($siteConfig->gtmId)
 	{
-		$this->addScriptDeclaration("var propertyGtmId = '" . $gtmId . "';");
+		$this->addScriptDeclaration("var propertyGtmId = '" . $siteConfig->gtmId . "';");
 
 		// Get Cookie Script Ids
-		$cookiescriptId = JoomlaTemplateHelper::getScriptIds($gtmId);
-
-		if ($cookiescriptId->status)
+		if ($siteConfig->scripts)
 		{
-			$this->addScriptDeclaration("var propertyUaId = '" . $cookiescriptId->uaId . "';");
-			$this->addScriptDeclaration("var propertyAwId = '" . $cookiescriptId->awId . "';");
-			$this->addScriptDeclaration("var propertyTwitter = " . $cookiescriptId->twitter . ";"); //remove single quotes for boolean true
-			$this->addScriptDeclaration("var propertyFacebookId = '" . $cookiescriptId->fbId . "';");
-			$this->addScriptDeclaration("var propertyAddThis = " . $cookiescriptId->addthis . ";"); //remove single quotes for boolean true
-			$this->addScriptDeclaration("var propertyAddThisId = '" . $cookiescriptId->addthisId . "';");
-			$this->addScriptDeclaration("var propertyPingdomId = '" . $cookiescriptId->pingdomId . "';");
+			$this->addScriptDeclaration("var propertyUaId = '" . $siteConfig->scripts->uaId . "';");
+			$this->addScriptDeclaration("var propertyAwId = '" . $siteConfig->scripts->awId . "';");
+			$this->addScriptDeclaration("var propertyTwitter = " . $siteConfig->scripts->twitter . ";"); //remove single quotes for boolean true
+			$this->addScriptDeclaration("var propertyFacebookId = '" . $siteConfig->scripts->fbId . "';");
+			$this->addScriptDeclaration("var propertyAddThis = " . $siteConfig->scripts->addthis . ";"); //remove single quotes for boolean true
+			$this->addScriptDeclaration("var propertyAddThisId = '" . $siteConfig->scripts->addthisId . "';");
+			$this->addScriptDeclaration("var propertyPingdomId = '" . $siteConfig->scripts->pingdomId . "';");
 		}
 
 		// Get Property's Active Cookie Categories
-		$cookiescriptCat = JoomlaTemplateHelper::getCcCategories(Uri::getInstance()->toString(['host']));
-
-		if($cookiescriptCat->status)
+		if($siteConfig->cookies)
 		{
-			$this->addScriptDeclaration("var ccPerformance = " . $cookiescriptCat->Performance . ";");
-			$this->addScriptDeclaration("var ccFunctional = " . $cookiescriptCat->Functional . ";");
-			$this->addScriptDeclaration("var ccAdvertising = " . $cookiescriptCat->Advertising . ";");
+			$this->addScriptDeclaration("var ccPerformance = " . $siteConfig->cookies->performance . ";");
+			$this->addScriptDeclaration("var ccFunctional = " . $siteConfig->cookies->functional . ";");
+			$this->addScriptDeclaration("var ccAdvertising = " . $siteConfig->cookies->advertising . ";");
 		}
 
 	}
@@ -235,10 +232,10 @@ JS
 <body class="<?php echo "site $option view-$view layout-$layout task-$task itemid-$itemid" . ($this->params->get('fluidContainer') ? ' fluid' : '') . ($this->direction == 'rtl' ? ' rtl' : ''); ?>">
 	<?php
 	// Add Google Tag Manager code if one is set
-	if ($gtmId && !$hasCookieControl) : ?>
+	if ($siteConfig->gtmId && !$hasCookieControl) : ?>
 	<!-- Google Tag Manager -->
-	<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=<?php echo $gtmId; ?>" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-	<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','<?php echo $gtmId; ?>');</script>
+	<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=<?php echo $siteConfig->gtmId; ?>" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+	<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','<?php echo $siteConfig->gtmId; ?>');</script>
 	<!-- End Google Tag Manager -->
 	<?php endif; ?>
 	<?php

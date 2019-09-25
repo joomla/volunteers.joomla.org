@@ -20,1011 +20,636 @@ use Joomla\CMS\Uri\Uri;
 class JoomlaTemplateHelper
 {
 	/**
-	 * Retrieve the Google Tag Manager property ID for the current site
+	 * Retrieve the Site Configuration for Google Tag Manager, issue reporting links, script IDs and cookie categories
 	 *
-	 * Note that this helper method is only 'good' for live sites, for development environments no ID is returned
+	 * Note that this helper method is only 'good' for live sites, for development environments no data is returned
 	 *
 	 * @param   string  $siteUrl  The site URL without the scheme
 	 *
-	 * @return  string|boolean  The property ID or boolean false if one is not assigned
+	 * @return  stdClass The site configuration data
 	 */
-	public static function getGtmId($siteUrl)
+	public static function getSiteConfig($siteUrl)
 	{
+		$siteConfig = new stdClass;
+
 		switch ($siteUrl)
 		{
 			case 'api.joomla.org':
 			{
-				$id = 'GTM-NDWJB8';
+				$issueTag   = 'japi';
+				$siteConfig = (object) [
+					'gtmId'   => 'GTM-NDWJB8',
+					'scripts' => (object) [
+						'uaId'      => 'undefined',
+						'awId'      => 'undefined',
+						'twitter'   => false,
+						'fbId'      => 'undefined',
+						'addthis'   => false,
+						'addthisId' => 'undefined',
+						'pingdomId' => '59300ad15992c776ad970068'
+					],
+					'cookies' => (object) [
+						'performance' => true,
+						'functional'  => false,
+						'advertising' => false
+					],
+				];
 
 				break;
 			}
 
 			case 'certification.joomla.org':
 			{
-				$id = 'GTM-PFP9MJ';
+				$issueTag   = 'jcertif';
+				$siteConfig = (object) [
+					'gtmId'   => 'GTM-PFP9MJ',
+					'scripts' => (object) [
+						'uaId'      => 'undefined',
+						'awId'      => 'undefined',
+						'twitter'   => false,
+						'fbId'      => 'undefined',
+						'addthis'   => false,
+						'addthisId' => 'undefined',
+						'pingdomId' => '59300ad15992c776ad970068'
+					],
+					'cookies' => (object) [
+						'performance' => true,
+						'functional'  => false,
+						'advertising' => false
+					]
+				];
 
 				break;
 			}
 
 			case 'community.joomla.org':
 			{
-				$id = 'GTM-WQNG7Z';
+				$issueTag   = 'jcomm';
+				$siteConfig = (object) [
+					'gtmId'   => 'GTM-WQNG7Z',
+					'scripts' => (object) [
+						'uaId'      => 'undefined',
+						'awId'      => 'undefined',
+						'twitter'   => false,
+						'fbId'      => 'undefined',
+						'addthis'   => false,
+						'addthisId' => 'undefined',
+						'pingdomId' => '59300ad15992c776ad970068'
+					],
+					'cookies' => (object) [
+						'performance' => true,
+						'functional'  => true,
+						'advertising' => true
+					]
+				];
 
 				break;
 			}
 
 			case 'conference.joomla.org':
 			{
-				$id = 'GTM-PZWNZR';
+				$issueTag   = 'jconf';
+				$siteConfig = (object) [
+					'gtmId'   => 'GTM-PZWNZR',
+					'scripts' => (object) [
+						'uaId'      => 'undefined',
+						'awId'      => 'undefined',
+						'twitter'   => false,
+						'fbId'      => 'undefined',
+						'addthis'   => false,
+						'addthisId' => 'undefined',
+						'pingdomId' => 'undefined'
+					],
+					'cookies' => (object) [
+						'performance' => true,
+						'functional'  => true,
+						'advertising' => true
+					]
+				];
 
 				break;
 			}
 
 			case 'developer.joomla.org':
 			{
-				$id = 'GTM-WJ36D4';
+				$issueTag   = 'jdev';
+				$siteConfig = (object) [
+					'gtmId'   => 'GTM-WJ36D4',
+					'scripts' => (object) [
+						'uaId'      => 'undefined',
+						'awId'      => 'undefined',
+						'twitter'   => false,
+						'fbId'      => 'undefined',
+						'addthis'   => false,
+						'addthisId' => 'undefined',
+						'pingdomId' => '59300ad15992c776ad970068'
+					],
+					'cookies' => (object) [
+						'performance' => true,
+						'functional'  => false,
+						'advertising' => false
+					]
+				];
 
 				break;
 			}
 
 			case 'docs.joomla.org':
 			{
-				$id = 'GTM-K6SPGS';
+				$issueTag   = 'jdocs';
+				$siteConfig = (object) [
+					'gtmId'   => 'GTM-K6SPGS',
+					'scripts' => (object) [
+						'uaId'      => 'undefined',
+						'awId'      => 'undefined',
+						'twitter'   => false,
+						'fbId'      => 'undefined',
+						'addthis'   => false,
+						'addthisId' => 'ra-5378f70766e02197',
+						'pingdomId' => 'undefined'
+					],
+					'cookies' => (object) [
+						'performance' => true,
+						'functional'  => true,
+						'advertising' => true
+					]
+				];
 
 				break;
 			}
 
-			case 'domains.joomla.org': // @TODO add GTM if exists, else return null
+			case 'domains.joomla.org':
+			{
+				$issueTag   = 'jdomain';
+				$siteConfig = (object) [
+					'gtmId'   => null,
+					'scripts' => null,
+					'cookies' => null
+				];
+
+				break;
+			}
 
 			case 'downloads.joomla.org':
 			{
-				$id = 'GTM-KR9CX8';
+				$issueTag   = 'jdown';
+				$siteConfig = (object) [
+					'gtmId'   => 'GTM-KR9CX8',
+					'scripts' => (object) [
+						'uaId'      => 'undefined',
+						'awId'      => 'undefined',
+						'twitter'   => false,
+						'fbId'      => 'undefined',
+						'addthis'   => false,
+						'addthisId' => 'undefined',
+						'pingdomId' => '59300ad15992c776ad970068'
+					],
+					'cookies' => (object) [
+						'performance' => true,
+						'functional'  => false,
+						'advertising' => false
+					]
+				];
 
 				break;
 			}
 
-
 			case 'exam.joomla.org':
 			{
-				$id = 'GTM-TRG37W';
+				$issueTag   = 'jexam';
+				$siteConfig = (object) [
+					'gtmId'   => 'GTM-TRG37W',
+					'scripts' => (object) [
+						'uaId'      => 'undefined',
+						'awId'      => 'undefined',
+						'twitter'   => false,
+						'fbId'      => 'undefined',
+						'addthis'   => false,
+						'addthisId' => 'undefined',
+						'pingdomId' => '59300ad15992c776ad970068'
+					],
+					'cookies' => (object) [
+						'performance' => true,
+						'functional'  => false,
+						'advertising' => false
+					]
+				];
 
 				break;
 			}
 
 			case 'extensions.joomla.org':
 			{
-				$id = 'GTM-MH6RGF';
+				$siteConfig = (object) [
+					'gtmId'    => 'GTM-MH6RGF',
+					'scripts'  => (object) [
+						'uaId'      => 'undefined',
+						'awId'      => 'undefined',
+						'twitter'   => false,
+						'fbId'      => 'undefined',
+						'addthis'   => false,
+						'addthisId' => 'undefined',
+						'pingdomId' => '59300ad15992c776ad970068'
+					],
+					'cookies'  => (object) [
+						'performance' => true,
+						'functional'  => false,
+						'advertising' => true
+					],
+					'issueUrl' => 'https://github.com/joomla/jed-issues/issues/new?body=Please%20describe%20the%20problem%20or%20your%20issue'
+				];
 
 				break;
 			}
 
 			case 'forum.joomla.org':
 			{
-				$id = 'GTM-TWSN2R';
+				$issueTag   = 'jforum';
+				$siteConfig = (object) [
+					'gtmId'   => 'GTM-TWSN2R',
+					'scripts' => (object) [
+						'uaId'      => 'undefined',
+						'awId'      => 'undefined',
+						'twitter'   => false,
+						'fbId'      => 'undefined',
+						'addthis'   => false,
+						'addthisId' => 'undefined',
+						'pingdomId' => '59300ad15992c776ad970068'
+					],
+					'cookies' => (object) [
+						'performance' => true,
+						'functional'  => true,
+						'advertising' => true
+					]
+				];
 
 				break;
 			}
 
 			case 'foundation.joomla.org':
 			{
-				$id = false;
+				$issueTag   = 'jfoundation';
+				$siteConfig = (object) [
+					'gtmId'   => false,
+					'scripts' => (object) [
+						'uaId'      => 'undefined',
+						'awId'      => 'undefined',
+						'twitter'   => false,
+						'fbId'      => 'undefined',
+						'addthis'   => false,
+						'addthisId' => 'undefined',
+						'pingdomId' => '59300ad15992c776ad970068'
+					],
+					'cookies' => (object) [
+						'performance' => false,
+						'functional'  => false,
+						'advertising' => false
+					]
+				];
 
 				break;
 			}
 
 			case 'framework.joomla.org':
 			{
-				$id = 'GTM-NX46ZP';
+				$siteConfig = (object) [
+					'gtmId'    => 'GTM-NX46ZP',
+					'scripts'  => (object) [
+						'uaId'      => 'undefined',
+						'awId'      => 'undefined',
+						'twitter'   => false,
+						'fbId'      => 'undefined',
+						'addthis'   => false,
+						'addthisId' => 'undefined',
+						'pingdomId' => '59300ad15992c776ad970068'
+					],
+					'cookies'  => (object) [
+						'performance' => true,
+						'functional'  => false,
+						'advertising' => false,
+					],
+					'issueUrl' => 'https://github.com/joomla/framework.joomla.org/issues/new?title=[FW%20Site]&body=Please%20state%20the%20nature%20of%20your%20development%20emergency'
+				];
 
 				break;
 			}
 
 			case 'help.joomla.org':
 			{
-				$id = 'GTM-NVGP9X';
+				$siteConfig = (object) [
+					'gtmId'   => 'GTM-NVGP9X',
+					'scripts' => (object) [
+						'uaId'      => 'undefined',
+						'awId'      => 'undefined',
+						'twitter'   => false,
+						'fbId'      => 'undefined',
+						'addthis'   => false,
+						'addthisId' => 'undefined',
+						'pingdomId' => '59300ad15992c776ad970068'
+					],
+					'cookies' => (object) [
+						'performance' => true,
+						'functional'  => false,
+						'advertising' => false
+					]
+				];
 
 				break;
 			}
 
 			case 'issues.joomla.org':
 			{
-				$id = 'GTM-M7HXQ7';
+				$siteConfig = (object) [
+					'gtmId'    => 'GTM-M7HXQ7',
+					'scripts'  => (object) [
+						'uaId'      => 'undefined',
+						'awId'      => 'undefined',
+						'twitter'   => false,
+						'fbId'      => 'undefined',
+						'addthis'   => false,
+						'addthisId' => 'undefined',
+						'pingdomId' => '59300ad15992c776ad970068'
+					],
+					'cookies'  => (object) [
+						'performance' => true,
+						'functional'  => false,
+						'advertising' => false
+					],
+					'issueUrl' => 'https://issues.joomla.org/tracker/jtracker'
+				];
 
 				break;
 			}
 
 			case 'launch.joomla.org':
 			{
-				$id = 'GTM-T253JLF';
-
+				$siteConfig = (object) [
+					'gtmId'   => 'GTM-T253JLF',
+					'scripts' => (object) [
+						'uaId'      => 'UA-28160972-3',
+						'awId'      => 'AW-976618339',
+						'twitter'   => false,
+						'fbId'      => 'undefined',
+						'addthis'   => false,
+						'addthisId' => 'undefined',
+						'pingdomId' => 'undefined'
+					],
+					'cookies' => (object) [
+						'performance' => true,
+						'functional'  => false,
+						'advertising' => true
+					]
+				];
 				break;
 			}
 
 			case 'magazine.joomla.org':
 			{
-				$id = 'GTM-WG7372';
+				$issueTag   = 'jcm';
+				$siteConfig = (object) [
+					'gtmId'   => 'GTM-WG7372',
+					'scripts' => (object) [
+						'uaId'      => 'undefined',
+						'awId'      => 'undefined',
+						'twitter'   => false,
+						'fbId'      => 'undefined',
+						'addthis'   => false,
+						'addthisId' => 'undefined',
+						'pingdomId' => '59300ad15992c776ad970068'
+					],
+					'cookies' => (object) [
+						'performance' => true,
+						'functional'  => false,
+						'advertising' => true
+					]
+				];
 
 				break;
 			}
 
 			case 'opensourcematters.org':
 			{
-				$id = 'GTM-5GST4C';
+				$issueTag   = 'josm';
+				$siteConfig = (object) [
+					'gtmId'   => 'GTM-5GST4C',
+					'scripts' => (object) [
+						'uaId'      => '',
+						'awId'      => '',
+						'twitter'   => true,
+						'fbId'      => '',
+						'addthis'   => true,
+						'addthisId' => '',
+						'pingdomId' => ''
+					],
+					'cookies' => (object) [
+						'performance' => true,
+						'functional'  => false,
+						'advertising' => true
+					]
+				];
 
 				break;
 			}
 
 			case 'resources.joomla.org':
 			{
-				$id = 'GTM-K8CR7K';
+				$issueTag   = 'jrd';
+				$siteConfig = (object) [
+					'gtmId'   => 'GTM-K8CR7K',
+					'scripts' => (object) [
+						'uaId'      => 'undefined',
+						'awId'      => 'undefined',
+						'twitter'   => false,
+						'fbId'      => 'undefined',
+						'addthis'   => false,
+						'addthisId' => 'undefined',
+						'pingdomId' => '59300ad15992c776ad970068'
+					],
+					'cookies' => (object) [
+						'performance' => true,
+						'functional'  => false,
+						'advertising' => true
+					]
+				];
+
+				break;
+			}
+
+
+			case 'shop.joomla.org':
+			{
+				$siteConfig = (object) [
+					'gtmId'   => 'GTM-WQNG7Z',
+					'scripts' => (object) [
+						'uaId'      => 'undefined',
+						'awId'      => 'undefined',
+						'twitter'   => false,
+						'fbId'      => 'undefined',
+						'addthis'   => false,
+						'addthisId' => 'undefined',
+						'pingdomId' => '59300ad15992c776ad970068'
+					],
+					'cookies' => (object) [
+						'performance' => true,
+						'functional'  => true,
+						'advertising' => true
+					]
+				];
 
 				break;
 			}
 
 			case 'showcase.joomla.org':
 			{
-				$id = 'GTM-NKT9FP';
+				$issueTag   = 'jshow';
+				$siteConfig = (object) [
+					'gtmId'   => 'GTM-NKT9FP',
+					'scripts' => (object) [
+						'uaId'      => 'undefined',
+						'awId'      => 'undefined',
+						'twitter'   => false,
+						'fbId'      => 'undefined',
+						'addthis'   => false,
+						'addthisId' => 'undefined',
+						'pingdomId' => '59300ad15992c776ad970068'
+					],
+					'cookies' => (object) [
+						'performance' => true,
+						'functional'  => false,
+						'advertising' => true
+					]
+				];
 
 				break;
 			}
 
 			case 'tm.joomla.org':
 			{
-				$id = 'GTM-KZ7SM9';
+				$issueTag   = 'jtm';
+				$siteConfig = (object) [
+					'gtmId'   => 'GTM-KZ7SM9',
+					'scripts' => (object) [
+						'uaId'      => 'undefined',
+						'awId'      => 'undefined',
+						'twitter'   => false,
+						'fbId'      => 'undefined',
+						'addthis'   => false,
+						'addthisId' => 'undefined',
+						'pingdomId' => '59300ad15992c776ad970068'
+					],
+					'cookies' => (object) [
+						'performance' => true,
+						'functional'  => false,
+						'advertising' => false,
+					]
+				];
 
 				break;
 			}
 
 			case 'update.joomla.org':
 			{
-				$id = false;
+				$siteConfig = (object) [
+					'gtmId'   => false,
+					'scripts' => null,
+					'cookies' => null
+				];
 
 				break;
 			}
 
 			case 'vel.joomla.org':
 			{
-				$id = 'GTM-NKZPKQ';
+				$issueTag   = 'jvel';
+				$siteConfig = (object) [
+					'gtmId'   => 'GTM-NKZPKQ',
+					'scripts' => (object) [
+						'uaId'      => 'undefined',
+						'awId'      => 'undefined',
+						'twitter'   => false,
+						'fbId'      => 'facebook-jssdk', // @TODO should be checked for validity
+						'addthis'   => false,
+						'addthisId' => 'undefined',
+						'pingdomId' => '59300ad15992c776ad970068'
+					],
+					'cookies' => (object) [
+						'performance' => true,
+						'functional'  => false,
+						'advertising' => false
+					]
+				];
 
 				break;
 			}
 
 			case 'volunteers.joomla.org':
-			{
-				$id = 'GTM-P2Z55T';
-
-				break;
-			}
-
-			case 'shop.joomla.org':
-			{
-				$id = 'GTM-WQNG7Z';
-
-				break;
-			}
-
 			case 'test.volunteers.joomla.org': // @TODO remove after testing
-			case 'volunteers.joomla.test': // @TODO remove after testing
+			case 'volunteers.joomla.test':// @TODO remove after testing
 			{
-				$id = 'GTM-P2Z55T';
+				$siteConfig = (object) [
+					'gtmId'    => 'GTM-P2Z55T',
+					'scripts'  => (object) [
+						'uaId'      => 'undefined',
+						'awId'      => 'undefined',
+						'twitter'   => false,
+						'fbId'      => 'undefined',
+						'addthis'   => false,
+						'addthisId' => 'undefined',
+						'pingdomId' => '59300ad15992c776ad970068'
+					],
+					'cookies'  => (object) [
+						'performance' => true,
+						'functional'  => false,
+						'advertising' => false
+					],
+					'issueUrl' => 'https://github.com/joomla/volunteers.joomla.org/issues/new?body=Please%20describe%20the%20problem%20or%20your%20issue'
+				];
 
 				break;
 			}
 
 			case 'www.joomla.org':
 			{
-				$id = 'GTM-WWC8WL';
+				$issueTag   = 'joomla.org';
+				$siteConfig = (object) [
+					'gtmId'   => 'GTM-WWC8WL',
+					'scripts' => null,
+					'cookies' => (object) [
+						'performance' => true,
+						'functional'  => true,
+						'advertising' => true
+					],
+				];
 
 				break;
 			}
 
 			default:
-				$id = false;
-
-				break;
-		}
-
-		return $id;
-	}
-
-	/**
-	 * Retrieve the "report an issue" link for the current site
-	 *
-	 * Note that this helper method is only 'good' for the live site, for development environments it will use a default link
-	 *
-	 * @param   string  $siteUrl  The site URL without the scheme
-	 *
-	 * @return  string  The issue link
-	 */
-	public static function getIssueLink($siteUrl)
-	{
-		$hasCustom = false;
-
-		switch ($siteUrl)
-		{
-			case 'api.joomla.org':
-			{
-				$tag = 'japi';
-
-				break;
-			}
-
-			case 'certification.joomla.org':
-			{
-				$tag = 'jcertif';
-
-				break;
-			}
-
-			case 'community.joomla.org':
-			{
-				$tag = 'jcomm';
-
-				break;
-			}
-
-			case 'conference.joomla.org':
-			{
-				$tag = 'jconf';
-
-				break;
-			}
-
-			case 'developer.joomla.org':
-			{
-				$tag = 'jdev';
-
-				break;
-			}
-
-			case 'docs.joomla.org':
-			{
-				$tag = 'jdocs';
-
-				break;
-			}
-
-			case 'downloads.joomla.org':
-			{
-				$tag = 'jdown';
-
-				break;
-			}
-
-
-			case 'exam.joomla.org':
-			{
-				$tag = 'jexam';
-
-				break;
-			}
-
-			case 'extensions.joomla.org':
-			{
-				$hasCustom = true;
-				$tag       = 'jed';
-				$url       = 'https://github.com/joomla/jed-issues/issues/new?body=Please%20describe%20the%20problem%20or%20your%20issue';
-
-				break;
-			}
-
-			case 'forum.joomla.org':
-			{
-				$tag = 'jforum';
-
-				break;
-			}
-
-			case 'framework.joomla.org':
-			{
-				$hasCustom = true;
-				$tag       = 'jfw';
-				$url       = 'https://github.com/joomla/framework.joomla.org/issues/new?title=[FW%20Site]&body=Please%20state%20the%20nature%20of%20your%20development%20emergency';
-
-				break;
-			}
-
-			case 'issues.joomla.org':
-			{
-				$hasCustom = true;
-				$tag       = 'jissues';
-				$url       = 'https://issues.joomla.org/tracker/jtracker';
-
-				break;
-			}
-
-			case 'magazine.joomla.org':
-			{
-				$tag = 'jcm';
-
-				break;
-			}
-
-			case 'opensourcematters.org':
-			{
-				$tag = 'josm';
-
-				break;
-			}
-
-			case 'resources.joomla.org':
-			{
-				$tag = 'jrd';
-
-				break;
-			}
-
-			case 'showcase.joomla.org':
-			{
-				$tag = 'jshow';
-
-				break;
-			}
-
-			case 'tm.joomla.org':
-			{
-				$tag = 'jtm';
-
-				break;
-			}
-
-			case 'vel.joomla.org':
-			{
-				$tag = 'jvel';
-
-				break;
-			}
-
-			case 'volunteers.joomla.org':
-			{
-				$hasCustom = true;
-				$tag       = 'jvols';
-				$url       = 'https://github.com/joomla/volunteers.joomla.org/issues/new?body=Please%20describe%20the%20problem%20or%20your%20issue';
-
-				break;
-			}
-
-			case 'www.joomla.org':
-			{
-				$tag = 'joomla.org';
-
-				break;
-			}
-
-			default:
-				$tag = '';
+				$issueTag   = '';
+				$siteConfig = (object) [
+					'gtmId'   => false,
+					'scripts' => null,
+					'cookies' => null
+				];
 
 				break;
 		}
 
 		// Build the URL if we aren't using a custom source
-		if (!$hasCustom)
+		if (!isset($siteConfig->issueUrl))
 		{
-			$url = 'https://github.com/joomla/joomla-websites/issues/new?';
+			$siteConfig->issueUrl = 'https://github.com/joomla/joomla-websites/issues/new?';
 
 			// Do we have a tag?
-			if (!empty($tag))
+			if (!empty($issueTag))
 			{
-				$url .= "title=[$tag]%20&";
+				$siteConfig->issueUrl .= "title=[$issueTag]%20&";
 			}
 
-			$url .= 'body=Please%20describe%20the%20problem%20or%20your%20issue';
+			$siteConfig->issueUrl .= 'body=Please%20describe%20the%20problem%20or%20your%20issue';
 		}
 
-		return $url;
-	}
-
-	/**
-	 * Retrieve all script related IDs and relative information where an ID is not applied (i.e. 'true' for Twitter) for the current site
-	 *
-	 * Note that this helper method is only 'good' for live sites, for development environments since no ID is returned, either script related IDs do
-	 *
-	 * @param   string  $gtmId  The property's GTM Identifier
-	 *
-	 * @return  object  $ids    The property's script IDs with a boolean status. In case of GTM ID's non-existence, the object's status and values are set to false
-	 */
-	public static function getScriptIds($gtmId)
-	{
-		$ids = new stdClass;
-
-		switch ($gtmId)
-		{
-			case 'GTM-NDWJB8': // @origin api.joomla.org
-			{
-				$ids->status    = true;
-				$ids->uaId      = 'undefined';
-				$ids->awId      = 'undefined';
-				$ids->twitter   = false;
-				$ids->fbId      = 'undefined';
-				$ids->addthis   = false;
-				$ids->addthisId = 'undefined';
-				$ids->pingdomId = '59300ad15992c776ad970068';
-
-				break;
-			}
-
-			case 'GTM-PFP9MJ': // @origin certification.joomla.org
-			{
-				$ids->status    = true;
-				$ids->uaId      = 'undefined';
-				$ids->awId      = 'undefined';
-				$ids->twitter   = false;
-				$ids->fbId      = 'undefined';
-				$ids->addthis   = false;
-				$ids->addthisId = 'undefined';
-				$ids->pingdomId = '59300ad15992c776ad970068';
-
-				break;
-			}
-
-			case 'GTM-WQNG7Z': // @origin community.joomla.org
-			{
-				$ids->status    = true;
-				$ids->uaId      = 'undefined';
-				$ids->awId      = 'undefined';
-				$ids->twitter   = true;
-				$ids->fbId      = 'undefined';
-				$ids->addthis   = false;
-				$ids->addthisId = 'undefined';
-				$ids->pingdomId = '59300ad15992c776ad970068';
-
-				break;
-			}
-
-			case 'GTM-PZWNZR': // @origin conference.joomla.org
-			{
-				$ids->status    = true;
-				$ids->uaId      = 'undefined';
-				$ids->awId      = 'undefined';
-				$ids->twitter   = false;
-				$ids->fbId      = 'undefined';
-				$ids->addthis   = false;
-				$ids->addthisId = 'undefined';
-				$ids->pingdomId = 'undefined';
-
-				break;
-			}
-
-			case 'GTM-WJ36D4': // @origin developer.joomla.org
-			{
-				$ids->status    = true;
-				$ids->uaId      = 'undefined';
-				$ids->awId      = 'undefined';
-				$ids->twitter   = false;
-				$ids->fbId      = 'undefined';
-				$ids->addthis   = false;
-				$ids->addthisId = 'undefined';
-				$ids->pingdomId = '59300ad15992c776ad970068';
-
-				break;
-			}
-
-			case 'GTM-K6SPGS': // @origin docs.joomla.org
-			{
-				$ids->status    = true;
-				$ids->uaId      = 'undefined';
-				$ids->awId      = 'undefined';
-				$ids->twitter   = false;
-				$ids->fbId      = 'undefined';
-				$ids->addthis   = true;
-				$ids->addthisId = 'ra-5378f70766e02197';
-				$ids->pingdomId = 'undefined';
-
-				break;
-			}
-
-			case 'GTM-KR9CX8': // @origin downloads.joomla.org
-			{
-				$ids->status    = true;
-				$ids->uaId      = 'undefined';
-				$ids->awId      = 'undefined';
-				$ids->twitter   = false;
-				$ids->fbId      = 'undefined';
-				$ids->addthis   = false;
-				$ids->addthisId = 'undefined';
-				$ids->pingdomId = '59300ad15992c776ad970068';
-
-				break;
-			}
-
-			case 'GTM-TRG37W': // @origin exam.joomla.org
-			{
-				$ids->status    = true;
-				$ids->uaId      = 'undefined';
-				$ids->awId      = 'undefined';
-				$ids->twitter   = false;
-				$ids->fbId      = 'undefined';
-				$ids->addthis   = false;
-				$ids->addthisId = 'undefined';
-				$ids->pingdomId = '59300ad15992c776ad970068';
-
-				break;
-			}
-
-			case 'GTM-MH6RGF': // @origin extensions.joomla.org
-			{
-				$ids->status    = true;
-				$ids->uaId      = 'undefined';
-				$ids->awId      = 'undefined';
-				$ids->twitter   = false;
-				$ids->fbId      = 'undefined';
-				$ids->addthis   = false;
-				$ids->addthisId = 'undefined';
-				$ids->pingdomId = '59300ad15992c776ad970068';
-
-				break;
-			}
-
-			case 'GTM-TWSN2R': // @origin forum.joomla.org
-			{
-				$ids->status    = true;
-				$ids->uaId      = 'undefined';
-				$ids->awId      = 'undefined';
-				$ids->twitter   = false;
-				$ids->fbId      = 'undefined';
-				$ids->addthis   = false;
-				$ids->addthisId = 'undefined';
-				$ids->pingdomId = '59300ad15992c776ad970068';
-
-				break;
-			}
-
-			case 'GTM-NX46ZP': // @origin framework.joomla.org
-			{
-				$ids->status    = true;
-				$ids->uaId      = 'undefined';
-				$ids->awId      = 'undefined';
-				$ids->twitter   = false;
-				$ids->fbId      = 'undefined';
-				$ids->addthis   = false;
-				$ids->addthisId = 'undefined';
-				$ids->pingdomId = '59300ad15992c776ad970068';
-
-				break;
-			}
-
-			case 'GTM-NVGP9X': // @origin help.joomla.org
-			{
-				$ids->status    = true;
-				$ids->uaId      = 'undefined';
-				$ids->awId      = 'undefined';
-				$ids->twitter   = false;
-				$ids->fbId      = 'undefined';
-				$ids->addthis   = false;
-				$ids->addthisId = 'undefined';
-				$ids->pingdomId = '59300ad15992c776ad970068';
-
-				break;
-			}
-
-			case 'GTM-M7HXQ7': // @origin issues.joomla.org
-			{
-				$ids->status    = true;
-				$ids->uaId      = 'undefined';
-				$ids->awId      = 'undefined';
-				$ids->twitter   = false;
-				$ids->fbId      = 'undefined';
-				$ids->addthis   = false;
-				$ids->addthisId = 'undefined';
-				$ids->pingdomId = '59300ad15992c776ad970068';
-
-				break;
-			}
-
-			case 'GTM-T253JLF': // @origin launch.joomla.org
-			{
-				$ids->status    = true;
-				$ids->uaId      = 'UA-28160972-3';
-				$ids->awId      = 'AW-976618339';
-				$ids->twitter   = false;
-				$ids->fbId      = 'undefined';
-				$ids->addthis   = false;
-				$ids->addthisId = 'undefined';
-				$ids->pingdomId = 'undefined';
-
-				break;
-			}
-
-			case 'GTM-WG7372': // @origin magazine.joomla.org
-			{
-				$ids->status    = true;
-				$ids->uaId      = 'undefined';
-				$ids->awId      = 'undefined';
-				$ids->twitter   = false;
-				$ids->fbId      = 'undefined';
-				$ids->addthis   = false;
-				$ids->addthisId = 'undefined';
-				$ids->pingdomId = '59300ad15992c776ad970068';
-
-				break;
-			}
-
-			case 'GTM-5GST4C': // @origin www.opensourcematters.org
-			{
-				$ids->status    = true;
-				$ids->uaId      = '';
-				$ids->awId      = '';
-				$ids->twitter   = 'true';
-				$ids->fbId      = '';
-				$ids->addthis   = 'true';
-				$ids->addthisId = '';
-				$ids->pingdomId = '';
-
-				break;
-			}
-
-			case 'GTM-K8CR7K': // @origin resources.joomla.org
-			{
-				$ids->status    = true;
-				$ids->uaId      = 'undefined';
-				$ids->awId      = 'undefined';
-				$ids->twitter   = false;
-				$ids->fbId      = 'undefined';
-				$ids->addthis   = false;
-				$ids->addthisId = 'undefined';
-				$ids->pingdomId = '59300ad15992c776ad970068';
-
-				break;
-			}
-
-			case 'GTM-NKT9FP': // @origin showcase.joomla.org
-			{
-				$ids->status    = true;
-				$ids->uaId      = 'undefined';
-				$ids->awId      = 'undefined';
-				$ids->twitter   = false;
-				$ids->fbId      = 'undefined';
-				$ids->addthis   = false;
-				$ids->addthisId = 'undefined';
-				$ids->pingdomId = '59300ad15992c776ad970068';
-
-				break;
-			}
-
-			case 'GTM-KZ7SM9': // @origin tm.joomla.org
-			{
-				$ids->status    = true;
-				$ids->uaId      = 'undefined';
-				$ids->awId      = 'undefined';
-				$ids->twitter   = false;
-				$ids->fbId      = 'undefined';
-				$ids->addthis   = false;
-				$ids->addthisId = 'undefined';
-				$ids->pingdomId = '59300ad15992c776ad970068';
-
-				break;
-			}
-
-			case 'GTM-NKZPKQ': // @origin vel.joomla.org
-			{
-				$ids->status    = true;
-				$ids->uaId      = 'undefined';
-				$ids->awId      = 'undefined';
-				$ids->twitter   = false;
-				$ids->fbId      = 'facebook-jssdk'; // @TODO should be checked for validity
-				$ids->addthis   = false;
-				$ids->addthisId = 'undefined';
-				$ids->pingdomId = '59300ad15992c776ad970068';
-
-				break;
-			}
-
-			case 'GTM-WQNG7Z': // @origin shop.joomla.org | @TODO should consider to add a standalone cookie script
-			{
-				$ids->status    = true;
-				$ids->uaId      = 'undefined';
-				$ids->awId      = 'undefined';
-				$ids->twitter   = false;
-				$ids->fbId      = 'undefined';
-				$ids->addthis   = false;
-				$ids->addthisId = 'undefined';
-				$ids->pingdomId = '59300ad15992c776ad970068';
-
-				break;
-			}
-
-			case 'GTM-P2Z55T': // @origin volunteers.joomla.org
-			{
-				$ids->status    = true;
-				$ids->uaId      = 'undefined';
-				$ids->awId      = 'undefined';
-				$ids->twitter   = false;
-				$ids->fbId      = 'undefined';
-				$ids->addthis   = false;
-				$ids->addthisId = 'undefined';
-				$ids->pingdomId = '59300ad15992c776ad970068';
-
-				break;
-			}
-
-			default:
-				$ids->status    = false;
-				$ids->uaId      = false;
-				$ids->awId      = false;
-				$ids->twitter   = false;
-				$ids->fbId      = false;
-				$ids->addthis   = false;
-				$ids->addthisId = false;
-				$ids->pingdomId = false;
-
-				break;
-		}
-
-		return $ids;
-	}
-
-	/**
-	 * Retrieve the Cookie Categories Flag for each property
-	 *
-	 * Note that this helper method is only 'good' for live sites, for development environments no ID is returned
-	 *
-	 * @param   string  $siteUrl  The site URL without the scheme
-	 *
-	 * @return  object|boolean  The property's cookie category flags as a boolean true or false
-	 */
-	public static function getCcCategories($siteUrl)
-	{
-		$ccCategories         = new stdClass();
-		$ccCategories->status = true;
-
-		switch ($siteUrl)
-		{
-			case 'api.joomla.org':
-			{
-				$ccCategories->Performance = true;
-				$ccCategories->Functional  = false;
-				$ccCategories->Advertising = false;
-
-				break;
-			}
-
-			case 'certification.joomla.org':
-			{
-				$ccCategories->Performance = true;
-				$ccCategories->Functional  = false;
-				$ccCategories->Advertising = false;
-
-				break;
-			}
-
-			case 'community.joomla.org':
-			{
-				$ccCategories->Performance = true;
-				$ccCategories->Functional  = true;
-				$ccCategories->Advertising = true;
-
-				break;
-			}
-
-			case 'conference.joomla.org':
-			{
-				$ccCategories->Performance = true;
-				$ccCategories->Functional  = true;
-				$ccCategories->Advertising = true;
-
-				break;
-			}
-
-			case 'developer.joomla.org':
-			{
-				$ccCategories->Performance = true;
-				$ccCategories->Functional  = false;
-				$ccCategories->Advertising = false;
-
-				break;
-			}
-
-			case 'docs.joomla.org':
-			{
-				$ccCategories->Performance = true;
-				$ccCategories->Functional  = true;
-				$ccCategories->Advertising = true;
-
-				break;
-			}
-
-			case 'domains.joomla.org': // @TODO GTM must be added first in func getGtmId($siteUrl)
-
-			case 'downloads.joomla.org':
-			{
-				$ccCategories->Performance = true;
-				$ccCategories->Functional  = false;
-				$ccCategories->Advertising = false;
-
-				break;
-			}
-
-
-			case 'exam.joomla.org':
-			{
-				$ccCategories->Performance = true;
-				$ccCategories->Functional  = false;
-				$ccCategories->Advertising = false;
-
-				break;
-			}
-
-			case 'extensions.joomla.org':
-			{
-				$ccCategories->Performance = true;
-				$ccCategories->Functional  = false;
-				$ccCategories->Advertising = true;
-
-				break;
-			}
-
-			case 'forum.joomla.org':
-			{
-				$ccCategories->Performance = true;
-				$ccCategories->Functional  = true;
-				$ccCategories->Advertising = true;
-
-				break;
-			}
-
-			case 'foundation.joomla.org':
-			{
-				$ccCategories->Performance = false;
-				$ccCategories->Functional  = false;
-				$ccCategories->Advertising = false;
-
-				break;
-			}
-
-			case 'framework.joomla.org':
-			{
-				$ccCategories->Performance = true;
-				$ccCategories->Functional  = false;
-				$ccCategories->Advertising = false;
-
-				break;
-			}
-
-			case 'help.joomla.org':
-			{
-				$ccCategories->Performance = true;
-				$ccCategories->Functional  = false;
-				$ccCategories->Advertising = false;
-
-				break;
-			}
-
-			case 'issues.joomla.org':
-			{
-				$ccCategories->Performance = true;
-				$ccCategories->Functional  = false;
-				$ccCategories->Advertising = false;
-
-				break;
-			}
-
-			case 'launch.joomla.org':
-			{
-				$ccCategories->Performance = true;
-				$ccCategories->Functional  = false;
-				$ccCategories->Advertising = true;
-
-				break;
-			}
-
-			case 'magazine.joomla.org':
-			{
-				$ccCategories->Performance = true;
-				$ccCategories->Functional  = false;
-				$ccCategories->Advertising = true;
-
-				break;
-			}
-
-			case 'opensourcematters.org':
-			{
-				$ccCategories->Performance = true;
-				$ccCategories->Functional  = false;
-				$ccCategories->Advertising = true;
-
-				break;
-			}
-
-			case 'resources.joomla.org':
-			{
-				$ccCategories->Performance = true;
-				$ccCategories->Functional  = false;
-				$ccCategories->Advertising = true;
-
-				break;
-			}
-
-			case 'showcase.joomla.org':
-			{
-				$ccCategories->Performance = true;
-				$ccCategories->Functional  = false;
-				$ccCategories->Advertising = true;
-
-				break;
-			}
-
-			case 'tm.joomla.org':
-			{
-				$ccCategories->Performance = true;
-				$ccCategories->Functional  = false;
-				$ccCategories->Advertising = false;
-
-				break;
-			}
-
-			case 'update.joomla.org':
-			{
-				$ccCategories->Performance = false;
-				$ccCategories->Functional  = false;
-				$ccCategories->Advertising = false;
-
-				break;
-			}
-
-			case 'vel.joomla.org':
-			{
-				$ccCategories->Performance = true;
-				$ccCategories->Functional  = false;
-				$ccCategories->Advertising = false;
-
-				break;
-			}
-
-			case 'volunteers.joomla.org':
-			{
-				$ccCategories->Performance = true;
-				$ccCategories->Functional  = false;
-				$ccCategories->Advertising = false;
-
-				break;
-			}
-
-			case 'shop.joomla.org':
-			{
-				$ccCategories->Performance = true;
-				$ccCategories->Functional  = true;
-				$ccCategories->Advertising = true;
-
-				break;
-			}
-
-			case 'test.volunteers.joomla.org': // @TODO remove after testing
-			{
-				$ccCategories->Performance = true;
-				$ccCategories->Functional  = false;
-				$ccCategories->Advertising = false;
-
-				break;
-			}
-
-			case 'volunteers.joomla.test': // @TODO N/A
-			{
-				$ccCategories->Performance = true;
-				$ccCategories->Functional  = true;
-				$ccCategories->Advertising = true;
-
-				break;
-			}
-
-			case 'www.joomla.org':
-			{
-				$ccCategories->Performance = true;
-				$ccCategories->Functional  = true;
-				$ccCategories->Advertising = true;
-
-				break;
-			}
-
-			default:
-
-				$ccCategories->Performance = false;
-				$ccCategories->Functional  = false;
-				$ccCategories->Advertising = false;
-
-				break;
-		}
-
-		return $ccCategories;
+		return $siteConfig;
 	}
 
 	/**
@@ -1067,7 +692,7 @@ class JoomlaTemplateHelper
 		return strtr(
 			$result,
 			[
-				'%reportroute%' => static::getIssueLink(Uri::getInstance()->toString(['host'])),
+				'%reportroute%' => static::getSiteConfig(Uri::getInstance()->toString(['host']))->issueUrl,
 				'%loginroute%'  => Route::_(static::getLoginRoute()),
 				'%logintext%'   => Factory::getUser()->guest ? Text::_('TPL_JOOMLA_FOOTER_LINK_LOG_IN') : Text::_('TPL_JOOMLA_FOOTER_LINK_LOG_OUT'),
 				'%currentyear%' => date('Y'),

@@ -30,7 +30,7 @@ defined('JPATH_PLATFORM') or die;
       </nav>
 
       <main class="uk-grid uk-grid-collapse uk-width-1-1 uk-position-cover uk-flex">
-        <div class="uk-width-3-10 uk-width-large-1-4">
+        <div class="uk-width-3-10 uk-width-large-1-4 uk-hidden-small">
           <div class="uk-navbar">
             <div class="uk-navbar-content uk-width-1-1 uk-text-center">
               <?php echo JText::_('WF_LABEL_FOLDERS'); ?>
@@ -63,14 +63,14 @@ defined('JPATH_PLATFORM') or die;
               </button>
 
               <!-- Sort Date -->
-              <button class="uk-width-2-10 uk-button uk-padding-remove uk-text-left" id="sort-date" data-sort="modified" data-sort-type="date" aria-labelledby="sort-date-label" aria-hidden="true">
+              <button class="uk-width-2-10 uk-button uk-padding-remove uk-text-left uk-hidden-mini" id="sort-date" data-sort="modified" data-sort-type="date" aria-labelledby="sort-date-label" aria-hidden="true">
                 <i class="uk-icon-sort-numeric-asc"></i>
                 <i class="uk-icon-sort-numeric-desc"></i>
                 <label id="sort-data-label" for="sort-date">&nbsp;<?php echo JText::_('WF_LABEL_DATE'); ?></label>
               </button>
 
               <!-- Sort Size -->
-              <button class="uk-width-4-10 uk-button uk-text-left" id="sort-size" data-sort="size" data-sort-type="number" aria-labelledby="sort-size-label" aria-hidden="true">
+              <button class="uk-width-4-10 uk-button uk-text-left uk-hidden-mini" id="sort-size" data-sort="size" data-sort-type="number" aria-labelledby="sort-size-label" aria-hidden="true">
                 <i class="uk-icon-sort-numeric-asc"></i>
                 <i class="uk-icon-sort-numeric-desc"></i>
                 <label id="sort-size-label" for="sort-size">&nbsp;<?php echo JText::_('WF_LABEL_SIZE'); ?></label>
@@ -97,6 +97,7 @@ defined('JPATH_PLATFORM') or die;
           <div class="folder-up" title="Up">
             <button class="uk-button uk-button-link uk-width-1-1 uk-text-left uk-padding-remove" aria-label="Up"><i class="uk-width-1-10 uk-icon uk-icon-undo uk-icon-folder-up"></i>...</button>
           </div>
+
           <div id="browser-list"></div>
 
           <div id="browser-list-limit" class="uk-navbar">
@@ -136,7 +137,7 @@ defined('JPATH_PLATFORM') or die;
 
         </div>
 
-        <div class="uk-width-3-10 uk-position-relative">
+        <div class="uk-width-2-10 uk-position-relative uk-hidden-small">
           <div class="uk-navbar">
             <div class="uk-navbar-content uk-width-1-1 uk-text-center">
               <?php echo JText::_('WF_LABEL_DETAILS'); ?>
@@ -147,8 +148,6 @@ defined('JPATH_PLATFORM') or die;
               <div id="browser-details-text" class="uk-height-1-1"></div>
               <div id="browser-details-comment"></div>
             </div>
-
-            <div id="browser-buttons" class="uk-text-center"></div>
           </div>
           <div id="browser-details-nav" class="uk-navbar">
             <div class="uk-navbar-content uk-width-1-1 uk-padding-remove">
@@ -163,6 +162,10 @@ defined('JPATH_PLATFORM') or die;
               </ul>
             </div>
           </div>
+        </div>
+
+        <div id="browser-buttons" class="uk-text-center">
+          <div class="uk-navbar uk-width-1-1" role="presentation"><div class="uk-navbar-content"></div></div>
         </div>
     </div>
     </main>

@@ -30,8 +30,6 @@ class JoomlaTemplateHelper
 	 */
 	public static function getSiteConfig($siteUrl)
 	{
-		$siteConfig = new stdClass;
-
 		switch ($siteUrl)
 		{
 			case 'api.joomla.org':
@@ -42,16 +40,16 @@ class JoomlaTemplateHelper
 					'scripts' => (object) [
 						'uaId'      => 'undefined',
 						'awId'      => 'undefined',
-						'twitter'   => false,
+						'twitter'   => 'false',
 						'fbId'      => 'undefined',
-						'addthis'   => false,
+						'addthis'   => 'false',
 						'addthisId' => 'undefined',
 						'pingdomId' => '59300ad15992c776ad970068'
 					],
 					'cookies' => (object) [
-						'performance' => true,
-						'functional'  => false,
-						'advertising' => false
+						'performance' => 'true',
+						'functional'  => 'false',
+						'advertising' => 'false'
 					],
 				];
 
@@ -66,16 +64,16 @@ class JoomlaTemplateHelper
 					'scripts' => (object) [
 						'uaId'      => 'undefined',
 						'awId'      => 'undefined',
-						'twitter'   => false,
+						'twitter'   => 'false',
 						'fbId'      => 'undefined',
-						'addthis'   => false,
+						'addthis'   => 'false',
 						'addthisId' => 'undefined',
 						'pingdomId' => '59300ad15992c776ad970068'
 					],
 					'cookies' => (object) [
-						'performance' => true,
-						'functional'  => false,
-						'advertising' => false
+						'performance' => 'true',
+						'functional'  => 'false',
+						'advertising' => 'false'
 					]
 				];
 
@@ -90,16 +88,16 @@ class JoomlaTemplateHelper
 					'scripts' => (object) [
 						'uaId'      => 'undefined',
 						'awId'      => 'undefined',
-						'twitter'   => false,
+						'twitter'   => 'false',
 						'fbId'      => 'undefined',
-						'addthis'   => false,
+						'addthis'   => 'false',
 						'addthisId' => 'undefined',
 						'pingdomId' => '59300ad15992c776ad970068'
 					],
 					'cookies' => (object) [
-						'performance' => true,
-						'functional'  => true,
-						'advertising' => true
+						'performance' => 'true',
+						'functional'  => 'true',
+						'advertising' => 'true'
 					]
 				];
 
@@ -114,16 +112,16 @@ class JoomlaTemplateHelper
 					'scripts' => (object) [
 						'uaId'      => 'undefined',
 						'awId'      => 'undefined',
-						'twitter'   => false,
+						'twitter'   => 'false',
 						'fbId'      => 'undefined',
-						'addthis'   => false,
+						'addthis'   => 'false',
 						'addthisId' => 'undefined',
 						'pingdomId' => 'undefined'
 					],
 					'cookies' => (object) [
-						'performance' => true,
-						'functional'  => true,
-						'advertising' => true
+						'performance' => 'true',
+						'functional'  => 'true',
+						'advertising' => 'true'
 					]
 				];
 
@@ -138,16 +136,16 @@ class JoomlaTemplateHelper
 					'scripts' => (object) [
 						'uaId'      => 'undefined',
 						'awId'      => 'undefined',
-						'twitter'   => false,
+						'twitter'   => 'false',
 						'fbId'      => 'undefined',
-						'addthis'   => false,
+						'addthis'   => 'false',
 						'addthisId' => 'undefined',
 						'pingdomId' => '59300ad15992c776ad970068'
 					],
 					'cookies' => (object) [
-						'performance' => true,
-						'functional'  => false,
-						'advertising' => false
+						'performance' => 'true',
+						'functional'  => 'false',
+						'advertising' => 'false'
 					]
 				];
 
@@ -162,16 +160,16 @@ class JoomlaTemplateHelper
 					'scripts' => (object) [
 						'uaId'      => 'undefined',
 						'awId'      => 'undefined',
-						'twitter'   => false,
+						'twitter'   => 'false',
 						'fbId'      => 'undefined',
-						'addthis'   => false,
+						'addthis'   => 'false',
 						'addthisId' => 'ra-5378f70766e02197',
 						'pingdomId' => 'undefined'
 					],
 					'cookies' => (object) [
-						'performance' => true,
-						'functional'  => true,
-						'advertising' => true
+						'performance' => 'true',
+						'functional'  => 'true',
+						'advertising' => 'true'
 					]
 				];
 
@@ -198,16 +196,16 @@ class JoomlaTemplateHelper
 					'scripts' => (object) [
 						'uaId'      => 'undefined',
 						'awId'      => 'undefined',
-						'twitter'   => false,
+						'twitter'   => 'false',
 						'fbId'      => 'undefined',
-						'addthis'   => false,
+						'addthis'   => 'false',
 						'addthisId' => 'undefined',
 						'pingdomId' => '59300ad15992c776ad970068'
 					],
 					'cookies' => (object) [
-						'performance' => true,
-						'functional'  => false,
-						'advertising' => false
+						'performance' => 'true',
+						'functional'  => 'false',
+						'advertising' => 'false'
 					]
 				];
 
@@ -222,16 +220,16 @@ class JoomlaTemplateHelper
 					'scripts' => (object) [
 						'uaId'      => 'undefined',
 						'awId'      => 'undefined',
-						'twitter'   => false,
+						'twitter'   => 'false',
 						'fbId'      => 'undefined',
-						'addthis'   => false,
+						'addthis'   => 'false',
 						'addthisId' => 'undefined',
 						'pingdomId' => '59300ad15992c776ad970068'
 					],
 					'cookies' => (object) [
-						'performance' => true,
-						'functional'  => false,
-						'advertising' => false
+						'performance' => 'true',
+						'functional'  => 'false',
+						'advertising' => 'false'
 					]
 				];
 
@@ -245,16 +243,16 @@ class JoomlaTemplateHelper
 					'scripts'  => (object) [
 						'uaId'      => 'undefined',
 						'awId'      => 'undefined',
-						'twitter'   => false,
+						'twitter'   => 'false',
 						'fbId'      => 'undefined',
-						'addthis'   => false,
+						'addthis'   => 'false',
 						'addthisId' => 'undefined',
 						'pingdomId' => '59300ad15992c776ad970068'
 					],
 					'cookies'  => (object) [
-						'performance' => true,
-						'functional'  => false,
-						'advertising' => true
+						'performance' => 'true',
+						'functional'  => 'false',
+						'advertising' => 'true'
 					],
 					'issueUrl' => 'https://github.com/joomla/jed-issues/issues/new?body=Please%20describe%20the%20problem%20or%20your%20issue'
 				];
@@ -270,16 +268,16 @@ class JoomlaTemplateHelper
 					'scripts' => (object) [
 						'uaId'      => 'undefined',
 						'awId'      => 'undefined',
-						'twitter'   => false,
+						'twitter'   => 'false',
 						'fbId'      => 'undefined',
-						'addthis'   => false,
+						'addthis'   => 'false',
 						'addthisId' => 'undefined',
 						'pingdomId' => '59300ad15992c776ad970068'
 					],
 					'cookies' => (object) [
-						'performance' => true,
-						'functional'  => true,
-						'advertising' => true
+						'performance' => 'true',
+						'functional'  => 'true',
+						'advertising' => 'true'
 					]
 				];
 
@@ -290,20 +288,20 @@ class JoomlaTemplateHelper
 			{
 				$issueTag   = 'jfoundation';
 				$siteConfig = (object) [
-					'gtmId'   => false,
+					'gtmId'   => 'false',
 					'scripts' => (object) [
 						'uaId'      => 'undefined',
 						'awId'      => 'undefined',
-						'twitter'   => false,
+						'twitter'   => 'false',
 						'fbId'      => 'undefined',
-						'addthis'   => false,
+						'addthis'   => 'false',
 						'addthisId' => 'undefined',
 						'pingdomId' => '59300ad15992c776ad970068'
 					],
 					'cookies' => (object) [
-						'performance' => false,
-						'functional'  => false,
-						'advertising' => false
+						'performance' => 'false',
+						'functional'  => 'false',
+						'advertising' => 'false'
 					]
 				];
 
@@ -317,16 +315,16 @@ class JoomlaTemplateHelper
 					'scripts'  => (object) [
 						'uaId'      => 'undefined',
 						'awId'      => 'undefined',
-						'twitter'   => false,
+						'twitter'   => 'false',
 						'fbId'      => 'undefined',
-						'addthis'   => false,
+						'addthis'   => 'false',
 						'addthisId' => 'undefined',
 						'pingdomId' => '59300ad15992c776ad970068'
 					],
 					'cookies'  => (object) [
-						'performance' => true,
-						'functional'  => false,
-						'advertising' => false,
+						'performance' => 'true',
+						'functional'  => 'false',
+						'advertising' => 'false',
 					],
 					'issueUrl' => 'https://github.com/joomla/framework.joomla.org/issues/new?title=[FW%20Site]&body=Please%20state%20the%20nature%20of%20your%20development%20emergency'
 				];
@@ -341,16 +339,16 @@ class JoomlaTemplateHelper
 					'scripts' => (object) [
 						'uaId'      => 'undefined',
 						'awId'      => 'undefined',
-						'twitter'   => false,
+						'twitter'   => 'false',
 						'fbId'      => 'undefined',
-						'addthis'   => false,
+						'addthis'   => 'false',
 						'addthisId' => 'undefined',
 						'pingdomId' => '59300ad15992c776ad970068'
 					],
 					'cookies' => (object) [
-						'performance' => true,
-						'functional'  => false,
-						'advertising' => false
+						'performance' => 'true',
+						'functional'  => 'false',
+						'advertising' => 'false'
 					]
 				];
 
@@ -364,16 +362,16 @@ class JoomlaTemplateHelper
 					'scripts'  => (object) [
 						'uaId'      => 'undefined',
 						'awId'      => 'undefined',
-						'twitter'   => false,
+						'twitter'   => 'false',
 						'fbId'      => 'undefined',
-						'addthis'   => false,
+						'addthis'   => 'false',
 						'addthisId' => 'undefined',
 						'pingdomId' => '59300ad15992c776ad970068'
 					],
 					'cookies'  => (object) [
-						'performance' => true,
-						'functional'  => false,
-						'advertising' => false
+						'performance' => 'true',
+						'functional'  => 'false',
+						'advertising' => 'false'
 					],
 					'issueUrl' => 'https://issues.joomla.org/tracker/jtracker'
 				];
@@ -388,16 +386,16 @@ class JoomlaTemplateHelper
 					'scripts' => (object) [
 						'uaId'      => 'UA-28160972-3',
 						'awId'      => 'AW-976618339',
-						'twitter'   => false,
+						'twitter'   => 'false',
 						'fbId'      => 'undefined',
-						'addthis'   => false,
+						'addthis'   => 'false',
 						'addthisId' => 'undefined',
 						'pingdomId' => 'undefined'
 					],
 					'cookies' => (object) [
-						'performance' => true,
-						'functional'  => false,
-						'advertising' => true
+						'performance' => 'true',
+						'functional'  => 'false',
+						'advertising' => 'true'
 					]
 				];
 				break;
@@ -411,16 +409,16 @@ class JoomlaTemplateHelper
 					'scripts' => (object) [
 						'uaId'      => 'undefined',
 						'awId'      => 'undefined',
-						'twitter'   => false,
+						'twitter'   => 'false',
 						'fbId'      => 'undefined',
-						'addthis'   => false,
+						'addthis'   => 'false',
 						'addthisId' => 'undefined',
 						'pingdomId' => '59300ad15992c776ad970068'
 					],
 					'cookies' => (object) [
-						'performance' => true,
-						'functional'  => false,
-						'advertising' => true
+						'performance' => 'true',
+						'functional'  => 'false',
+						'advertising' => 'true'
 					]
 				];
 
@@ -435,16 +433,16 @@ class JoomlaTemplateHelper
 					'scripts' => (object) [
 						'uaId'      => '',
 						'awId'      => '',
-						'twitter'   => true,
+						'twitter'   => 'true',
 						'fbId'      => '',
-						'addthis'   => true,
+						'addthis'   => 'true',
 						'addthisId' => '',
 						'pingdomId' => ''
 					],
 					'cookies' => (object) [
-						'performance' => true,
-						'functional'  => false,
-						'advertising' => true
+						'performance' => 'true',
+						'functional'  => 'false',
+						'advertising' => 'true'
 					]
 				];
 
@@ -459,16 +457,16 @@ class JoomlaTemplateHelper
 					'scripts' => (object) [
 						'uaId'      => 'undefined',
 						'awId'      => 'undefined',
-						'twitter'   => false,
+						'twitter'   => 'false',
 						'fbId'      => 'undefined',
-						'addthis'   => false,
+						'addthis'   => 'false',
 						'addthisId' => 'undefined',
 						'pingdomId' => '59300ad15992c776ad970068'
 					],
 					'cookies' => (object) [
-						'performance' => true,
-						'functional'  => false,
-						'advertising' => true
+						'performance' => 'true',
+						'functional'  => 'false',
+						'advertising' => 'true'
 					]
 				];
 
@@ -483,16 +481,16 @@ class JoomlaTemplateHelper
 					'scripts' => (object) [
 						'uaId'      => 'undefined',
 						'awId'      => 'undefined',
-						'twitter'   => false,
+						'twitter'   => 'false',
 						'fbId'      => 'undefined',
-						'addthis'   => false,
+						'addthis'   => 'false',
 						'addthisId' => 'undefined',
 						'pingdomId' => '59300ad15992c776ad970068'
 					],
 					'cookies' => (object) [
-						'performance' => true,
-						'functional'  => true,
-						'advertising' => true
+						'performance' => 'true',
+						'functional'  => 'true',
+						'advertising' => 'true'
 					]
 				];
 
@@ -507,16 +505,16 @@ class JoomlaTemplateHelper
 					'scripts' => (object) [
 						'uaId'      => 'undefined',
 						'awId'      => 'undefined',
-						'twitter'   => false,
+						'twitter'   => 'false',
 						'fbId'      => 'undefined',
-						'addthis'   => false,
+						'addthis'   => 'false',
 						'addthisId' => 'undefined',
 						'pingdomId' => '59300ad15992c776ad970068'
 					],
 					'cookies' => (object) [
-						'performance' => true,
-						'functional'  => false,
-						'advertising' => true
+						'performance' => 'true',
+						'functional'  => 'false',
+						'advertising' => 'true'
 					]
 				];
 
@@ -531,16 +529,16 @@ class JoomlaTemplateHelper
 					'scripts' => (object) [
 						'uaId'      => 'undefined',
 						'awId'      => 'undefined',
-						'twitter'   => false,
+						'twitter'   => 'false',
 						'fbId'      => 'undefined',
-						'addthis'   => false,
+						'addthis'   => 'false',
 						'addthisId' => 'undefined',
 						'pingdomId' => '59300ad15992c776ad970068'
 					],
 					'cookies' => (object) [
-						'performance' => true,
-						'functional'  => false,
-						'advertising' => false,
+						'performance' => 'true',
+						'functional'  => 'false',
+						'advertising' => 'false',
 					]
 				];
 
@@ -550,7 +548,7 @@ class JoomlaTemplateHelper
 			case 'update.joomla.org':
 			{
 				$siteConfig = (object) [
-					'gtmId'   => false,
+					'gtmId'   => 'false',
 					'scripts' => null,
 					'cookies' => null
 				];
@@ -566,16 +564,16 @@ class JoomlaTemplateHelper
 					'scripts' => (object) [
 						'uaId'      => 'undefined',
 						'awId'      => 'undefined',
-						'twitter'   => false,
+						'twitter'   => 'false',
 						'fbId'      => 'facebook-jssdk', // @TODO should be checked for validity
-						'addthis'   => false,
+						'addthis'   => 'false',
 						'addthisId' => 'undefined',
 						'pingdomId' => '59300ad15992c776ad970068'
 					],
 					'cookies' => (object) [
-						'performance' => true,
-						'functional'  => false,
-						'advertising' => false
+						'performance' => 'true',
+						'functional'  => 'false',
+						'advertising' => 'false'
 					]
 				];
 
@@ -591,16 +589,16 @@ class JoomlaTemplateHelper
 					'scripts'  => (object) [
 						'uaId'      => 'undefined',
 						'awId'      => 'undefined',
-						'twitter'   => false,
+						'twitter'   => 'false',
 						'fbId'      => 'undefined',
-						'addthis'   => false,
+						'addthis'   => 'false',
 						'addthisId' => 'undefined',
 						'pingdomId' => '59300ad15992c776ad970068'
 					],
 					'cookies'  => (object) [
-						'performance' => true,
-						'functional'  => false,
-						'advertising' => false
+						'performance' => 'true',
+						'functional'  => 'false',
+						'advertising' => 'false'
 					],
 					'issueUrl' => 'https://github.com/joomla/volunteers.joomla.org/issues/new?body=Please%20describe%20the%20problem%20or%20your%20issue'
 				];
@@ -615,9 +613,9 @@ class JoomlaTemplateHelper
 					'gtmId'   => 'GTM-WWC8WL',
 					'scripts' => null,
 					'cookies' => (object) [
-						'performance' => true,
-						'functional'  => true,
-						'advertising' => true
+						'performance' => 'true',
+						'functional'  => 'true',
+						'advertising' => 'true'
 					],
 				];
 
@@ -627,7 +625,7 @@ class JoomlaTemplateHelper
 			default:
 				$issueTag   = '';
 				$siteConfig = (object) [
-					'gtmId'   => false,
+					'gtmId'   => 'false',
 					'scripts' => null,
 					'cookies' => null
 				];

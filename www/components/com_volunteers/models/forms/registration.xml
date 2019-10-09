@@ -63,7 +63,7 @@
         />
 
         <field
-                name="city"
+                name="city-location"
                 type="text"
                 label="COM_VOLUNTEERS_FIELD_CITY"
                 class="location-city location"

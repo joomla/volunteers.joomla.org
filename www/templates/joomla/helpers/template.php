@@ -355,6 +355,30 @@ class JoomlaTemplateHelper
 				break;
 			}
 
+			case 'identity.joomla.org':
+			{
+				$siteConfig = (object) [
+					'gtmId'    => 'GTM-XXXXX',
+					'scripts'  => (object) [
+						'uaId'      => 'undefined',
+						'awId'      => 'undefined',
+						'twitter'   => 'false',
+						'fbId'      => 'undefined',
+						'addthis'   => 'false',
+						'addthisId' => 'undefined',
+						'pingdomId' => '59300ad15992c776ad970068'
+					],
+					'cookies'  => (object) [
+						'performance' => 'true',
+						'functional'  => 'true',
+						'advertising' => 'false'
+					],
+					'issueUrl' => 'https://github.com/joomla/identity.joomla.org/issues/new?body=Please%20describe%20the%20problem%20or%20your%20issue'
+				];
+
+				break;
+			}
+
 			case 'issues.joomla.org':
 			{
 				$siteConfig = (object) [

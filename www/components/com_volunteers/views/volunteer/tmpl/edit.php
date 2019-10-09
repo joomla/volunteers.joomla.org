@@ -91,6 +91,14 @@ JFactory::getDocument()->addScriptDeclaration("
 
         <h3><?php echo JText::_('COM_VOLUNTEERS_PROFILE_LOCATION') ?></h3>
 
+	    <div class="control-group">
+		    <div class="controls">
+			    <div class="alert alert-info">
+				    <?php echo JText::_('COM_VOLUNTEERS_PROFILE_LOCATION_DESC') ?>
+			    </div>
+		    </div>
+	    </div>
+
 		<?php echo $this->form->renderField('country'); ?>
 		<?php echo $this->form->renderField('city-location'); ?>
 		<?php echo $this->form->renderField('location'); ?>

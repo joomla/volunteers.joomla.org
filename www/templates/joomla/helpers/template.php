@@ -358,7 +358,7 @@ class JoomlaTemplateHelper
 			case 'identity.joomla.org':
 			{
 				$siteConfig = (object) [
-					'gtmId'    => 'GTM-XXXXX',
+					'gtmId'    => 'GTM-5BL9XHS',
 					'scripts'  => (object) [
 						'uaId'      => 'undefined',
 						'awId'      => 'undefined',

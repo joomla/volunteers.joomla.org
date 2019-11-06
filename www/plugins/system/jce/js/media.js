@@ -1,2 +1,2 @@
-/* jce - 2.7.17 | 2019-08-22 | https://www.joomlacontenteditor.net | Copyright (C) 2006 - 2019 Ryan Demmer. All rights reserved | GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html */
+/* jce - 2.7.19 | 2019-10-25 | https://www.joomlacontenteditor.net | Copyright (C) 2006 - 2019 Ryan Demmer. All rights reserved | GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html */
 !function($){$(document).ready(function($){$(".wf-media-input").not(".wf-media-input-readonly").removeAttr("readonly"),$(document).on("subform-row-add",function(event,row){$(row).find(".wf-media-input").not(".wf-media-input-readonly").removeAttr("readonly")})})}(jQuery);

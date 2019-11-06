@@ -38,9 +38,10 @@ class WFLinkSearchExtension extends WFSearchExtension
 
         foreach ($plugins as $plugin) {
             if (JPluginHelper::isEnabled('search', $plugin)) {
-                JPluginHelper::importPlugin('search', $plugin);
-
-                $this->enabled[] = $plugin;
+                // check plugin imports correctly - plugin may have a db entry, but is missing files
+                if (JPluginHelper::importPlugin('search', $plugin)) {
+                    $this->enabled[] = $plugin;
+                }
             }
         }
     }
@@ -239,7 +240,7 @@ class WFLinkSearchExtension extends WFSearchExtension
             $row->text = SearchHelper::prepareSearchContent($row->text, $needle);
 
             // remove base url
-            if (strpos($row->href, JURI::base(true)) !== false) {
+            if (JURI::base(true) && strpos($row->href, JURI::base(true)) !== false) {
                 $row->href = substr_replace($row->href, '', 0, strlen(JURI::base(true)) + 1);
             }
 

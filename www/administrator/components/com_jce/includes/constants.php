@@ -11,7 +11,7 @@
 defined('_JEXEC') or die('RESTRICTED');
 
 // Some shortcuts to make life easier
-define('WF_VERSION', '2.7.17');
+define('WF_VERSION', '2.7.19');
 
 // JCE Administration Component
 define('WF_ADMINISTRATOR',     JPATH_ADMINISTRATOR.'/components/com_jce');

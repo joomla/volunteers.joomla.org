@@ -58,12 +58,12 @@ abstract class VolunteersHelper
 
 		if ($image && ($size == 'small'))
 		{
-			$image_path = 'https://test.volunteers.joomla.org/' . $image;
+			$image_path = 'https://identity.joomla.org/' . $image;
 		}
 
 		if ($image && ($size == 'large'))
 		{
-			$image_path = 'https://test.volunteers.joomla.org/' . $image;
+			$image_path = 'https://identity.joomla.org/' . $image;
 		}
 
 		if ($urlonly && empty($image))
@@ -72,7 +72,7 @@ abstract class VolunteersHelper
 		}
 		elseif ($urlonly && $image)
 		{
-			$html = 'https://test.volunteers.joomla.org/' . $image;
+			$html = 'https://identity.joomla.org/' . $image;
 		}
 		else
 		{

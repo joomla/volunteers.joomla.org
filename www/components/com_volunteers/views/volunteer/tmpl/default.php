@@ -44,9 +44,9 @@ defined('_JEXEC') or die;
             <h1><?php echo $this->item->name; ?></h1>
         </div>
 
-		<?php if ($this->item->city || $this->item->country): ?>
+		<?php if ($this->item->city_location || $this->item->country): ?>
             <p class="muted">
-                <span class="icon-location"></span> <?php echo VolunteersHelper::location($this->item->country, $this->item->city); ?>
+                <span class="icon-location"></span> <?php echo VolunteersHelper::location($this->item->country, $this->item->city_location); ?>
             </p>
 		<?php endif; ?>
 
@@ -67,7 +67,6 @@ defined('_JEXEC') or die;
                 </a>
 			<?php endif; ?>
         </div>
-        </p>
 
         <p>
         <div class="btn-group">

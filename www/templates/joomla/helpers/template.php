@@ -364,8 +364,8 @@ class JoomlaTemplateHelper
 						'awId'      => 'undefined',
 						'twitter'   => 'false',
 						'fbId'      => 'undefined',
-						'addthis'   => 'false',
-						'addthisId' => 'undefined',
+						'addthis'   => 'true',
+						'addthisId' => 'ra-5d944d91cdb6c3f1',
 						'pingdomId' => '59300ad15992c776ad970068'
 					],
 					'cookies'  => (object) [

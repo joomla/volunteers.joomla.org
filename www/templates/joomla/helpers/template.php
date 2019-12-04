@@ -366,7 +366,7 @@ class JoomlaTemplateHelper
 						'fbId'      => 'undefined',
 						'addthis'   => 'false',
 						'addthisId' => 'undefined',
-						'pingdomId' => 'undefined'
+						'pingdomId' => '59300ad15992c776ad970068'
 					],
 					'cookies'  => (object) [
 						'performance' => 'true',

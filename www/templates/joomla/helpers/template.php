@@ -362,16 +362,16 @@ class JoomlaTemplateHelper
 					'scripts'  => (object) [
 						'uaId'      => 'undefined',
 						'awId'      => 'undefined',
-						'twitter'   => 'false',
+						'twitter'   => 'undefined',
 						'fbId'      => 'undefined',
-						'addthis'   => 'false',
-						'addthisId' => 'undefined',
-						'pingdomId' => '59300ad15992c776ad970068'
+						'addthis'   => 'true',
+						'addthisId' => 'ra-5d944d91cdb6c3f1',
+						'pingdomId' => 'undefined'
 					],
 					'cookies'  => (object) [
 						'performance' => 'true',
 						'functional'  => 'true',
-						'advertising' => 'false'
+						'advertising' => 'true'
 					],
 					'issueUrl' => 'https://github.com/joomla/identity.joomla.org/issues/new?body=Please%20describe%20the%20problem%20or%20your%20issue'
 				];

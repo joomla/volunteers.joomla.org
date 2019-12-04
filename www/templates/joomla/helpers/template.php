@@ -40,9 +40,9 @@ class JoomlaTemplateHelper
 					'scripts' => (object) [
 						'uaId'      => 'undefined',
 						'awId'      => 'undefined',
-						'twitter'   => 'false',
+						'twitter'   => 'undefined',
 						'fbId'      => 'undefined',
-						'addthis'   => 'false',
+						'carbonads' => 'undefined',
 						'addthisId' => 'undefined',
 						'pingdomId' => '59300ad15992c776ad970068'
 					],
@@ -64,9 +64,9 @@ class JoomlaTemplateHelper
 					'scripts' => (object) [
 						'uaId'      => 'undefined',
 						'awId'      => 'undefined',
-						'twitter'   => 'false',
+						'twitter'   => 'undefined',
 						'fbId'      => 'undefined',
-						'addthis'   => 'false',
+						'carbonads' => 'undefined',
 						'addthisId' => 'undefined',
 						'pingdomId' => '59300ad15992c776ad970068'
 					],
@@ -88,9 +88,9 @@ class JoomlaTemplateHelper
 					'scripts' => (object) [
 						'uaId'      => 'undefined',
 						'awId'      => 'undefined',
-						'twitter'   => 'false',
+						'twitter'   => 'undefined',
 						'fbId'      => 'undefined',
-						'addthis'   => 'false',
+						'carbonads' => 'undefined',
 						'addthisId' => 'undefined',
 						'pingdomId' => '59300ad15992c776ad970068'
 					],
@@ -136,9 +136,9 @@ class JoomlaTemplateHelper
 					'scripts' => (object) [
 						'uaId'      => 'undefined',
 						'awId'      => 'undefined',
-						'twitter'   => 'false',
+						'twitter'   => 'undefined',
 						'fbId'      => 'undefined',
-						'addthis'   => 'false',
+						'carbonads' => 'undefined',
 						'addthisId' => 'undefined',
 						'pingdomId' => '59300ad15992c776ad970068'
 					],
@@ -160,9 +160,9 @@ class JoomlaTemplateHelper
 					'scripts' => (object) [
 						'uaId'      => 'undefined',
 						'awId'      => 'undefined',
-						'twitter'   => 'false',
+						'twitter'   => 'undefined',
 						'fbId'      => 'undefined',
-						'addthis'   => 'false',
+						'carbonads' => 'true',
 						'addthisId' => 'ra-5378f70766e02197',
 						'pingdomId' => 'undefined'
 					],
@@ -196,9 +196,9 @@ class JoomlaTemplateHelper
 					'scripts' => (object) [
 						'uaId'      => 'undefined',
 						'awId'      => 'undefined',
-						'twitter'   => 'false',
+						'twitter'   => 'undefined',
 						'fbId'      => 'undefined',
-						'addthis'   => 'false',
+						'carbonads' => 'undefined',
 						'addthisId' => 'undefined',
 						'pingdomId' => '59300ad15992c776ad970068'
 					],
@@ -220,9 +220,9 @@ class JoomlaTemplateHelper
 					'scripts' => (object) [
 						'uaId'      => 'undefined',
 						'awId'      => 'undefined',
-						'twitter'   => 'false',
+						'twitter'   => 'undefined',
 						'fbId'      => 'undefined',
-						'addthis'   => 'false',
+						'carbonads' => 'undefined',
 						'addthisId' => 'undefined',
 						'pingdomId' => '59300ad15992c776ad970068'
 					],
@@ -243,9 +243,9 @@ class JoomlaTemplateHelper
 					'scripts'  => (object) [
 						'uaId'      => 'undefined',
 						'awId'      => 'undefined',
-						'twitter'   => 'false',
+						'twitter'   => 'undefined',
 						'fbId'      => 'undefined',
-						'addthis'   => 'false',
+						'carbonads' => 'undefined',
 						'addthisId' => 'undefined',
 						'pingdomId' => '59300ad15992c776ad970068'
 					],
@@ -268,9 +268,9 @@ class JoomlaTemplateHelper
 					'scripts' => (object) [
 						'uaId'      => 'undefined',
 						'awId'      => 'undefined',
-						'twitter'   => 'false',
+						'twitter'   => 'undefined',
 						'fbId'      => 'undefined',
-						'addthis'   => 'false',
+						'carbonads' => 'undefined',
 						'addthisId' => 'undefined',
 						'pingdomId' => '59300ad15992c776ad970068'
 					],
@@ -292,9 +292,9 @@ class JoomlaTemplateHelper
 					'scripts' => (object) [
 						'uaId'      => 'undefined',
 						'awId'      => 'undefined',
-						'twitter'   => 'false',
+						'twitter'   => 'undefined',
 						'fbId'      => 'undefined',
-						'addthis'   => 'false',
+						'carbonads' => 'undefined',
 						'addthisId' => 'undefined',
 						'pingdomId' => '59300ad15992c776ad970068'
 					],
@@ -315,9 +315,9 @@ class JoomlaTemplateHelper
 					'scripts'  => (object) [
 						'uaId'      => 'undefined',
 						'awId'      => 'undefined',
-						'twitter'   => 'false',
+						'twitter'   => 'undefined',
 						'fbId'      => 'undefined',
-						'addthis'   => 'false',
+						'carbonads' => 'undefined',
 						'addthisId' => 'undefined',
 						'pingdomId' => '59300ad15992c776ad970068'
 					],
@@ -339,9 +339,9 @@ class JoomlaTemplateHelper
 					'scripts' => (object) [
 						'uaId'      => 'undefined',
 						'awId'      => 'undefined',
-						'twitter'   => 'false',
+						'twitter'   => 'undefined',
 						'fbId'      => 'undefined',
-						'addthis'   => 'false',
+						'carbonads' => 'undefined',
 						'addthisId' => 'undefined',
 						'pingdomId' => '59300ad15992c776ad970068'
 					],
@@ -364,7 +364,7 @@ class JoomlaTemplateHelper
 						'awId'      => 'undefined',
 						'twitter'   => 'undefined',
 						'fbId'      => 'undefined',
-						'addthis'   => 'true',
+						'carbonads' => 'undefined',
 						'addthisId' => 'ra-5d944d91cdb6c3f1',
 						'pingdomId' => 'undefined'
 					],
@@ -386,9 +386,9 @@ class JoomlaTemplateHelper
 					'scripts'  => (object) [
 						'uaId'      => 'undefined',
 						'awId'      => 'undefined',
-						'twitter'   => 'false',
+						'twitter'   => 'undefined',
 						'fbId'      => 'undefined',
-						'addthis'   => 'false',
+						'carbonads' => 'undefined',
 						'addthisId' => 'undefined',
 						'pingdomId' => '59300ad15992c776ad970068'
 					],
@@ -410,9 +410,9 @@ class JoomlaTemplateHelper
 					'scripts' => (object) [
 						'uaId'      => 'UA-28160972-3',
 						'awId'      => 'AW-976618339',
-						'twitter'   => 'false',
+						'twitter'   => 'undefined',
 						'fbId'      => 'undefined',
-						'addthis'   => 'false',
+						'carbonads' => 'undefined',
 						'addthisId' => 'undefined',
 						'pingdomId' => 'undefined'
 					],
@@ -433,9 +433,9 @@ class JoomlaTemplateHelper
 					'scripts' => (object) [
 						'uaId'      => 'undefined',
 						'awId'      => 'undefined',
-						'twitter'   => 'false',
+						'twitter'   => 'undefined',
 						'fbId'      => 'undefined',
-						'addthis'   => 'false',
+						'carbonads' => 'undefined',
 						'addthisId' => 'undefined',
 						'pingdomId' => '59300ad15992c776ad970068'
 					],
@@ -459,7 +459,7 @@ class JoomlaTemplateHelper
 						'awId'      => '',
 						'twitter'   => 'true',
 						'fbId'      => '',
-						'addthis'   => 'true',
+						'carbonads' => '',
 						'addthisId' => '',
 						'pingdomId' => ''
 					],
@@ -481,9 +481,9 @@ class JoomlaTemplateHelper
 					'scripts' => (object) [
 						'uaId'      => 'undefined',
 						'awId'      => 'undefined',
-						'twitter'   => 'false',
+						'twitter'   => 'undefined',
 						'fbId'      => 'undefined',
-						'addthis'   => 'false',
+						'carbonads' => 'undefined',
 						'addthisId' => 'undefined',
 						'pingdomId' => '59300ad15992c776ad970068'
 					],
@@ -505,9 +505,9 @@ class JoomlaTemplateHelper
 					'scripts' => (object) [
 						'uaId'      => 'undefined',
 						'awId'      => 'undefined',
-						'twitter'   => 'false',
+						'twitter'   => 'undefined',
 						'fbId'      => 'undefined',
-						'addthis'   => 'false',
+						'carbonads' => 'undefined',
 						'addthisId' => 'undefined',
 						'pingdomId' => '59300ad15992c776ad970068'
 					],
@@ -529,9 +529,9 @@ class JoomlaTemplateHelper
 					'scripts' => (object) [
 						'uaId'      => 'undefined',
 						'awId'      => 'undefined',
-						'twitter'   => 'false',
+						'twitter'   => 'undefined',
 						'fbId'      => 'undefined',
-						'addthis'   => 'false',
+						'carbonads' => 'undefined',
 						'addthisId' => 'undefined',
 						'pingdomId' => '59300ad15992c776ad970068'
 					],
@@ -553,9 +553,9 @@ class JoomlaTemplateHelper
 					'scripts' => (object) [
 						'uaId'      => 'undefined',
 						'awId'      => 'undefined',
-						'twitter'   => 'false',
+						'twitter'   => 'undefined',
 						'fbId'      => 'undefined',
-						'addthis'   => 'false',
+						'carbonads' => 'undefined',
 						'addthisId' => 'undefined',
 						'pingdomId' => '59300ad15992c776ad970068'
 					],
@@ -588,9 +588,9 @@ class JoomlaTemplateHelper
 					'scripts' => (object) [
 						'uaId'      => 'undefined',
 						'awId'      => 'undefined',
-						'twitter'   => 'false',
-						'fbId'      => 'facebook-jssdk', // @TODO should be checked for validity
-						'addthis'   => 'false',
+						'twitter'   => 'undefined',
+						'fbId'      => 'facebook-jssdk', // @TODO: should be checked for validity
+						'carbonads' => 'undefined',
 						'addthisId' => 'undefined',
 						'pingdomId' => '59300ad15992c776ad970068'
 					],
@@ -613,9 +613,9 @@ class JoomlaTemplateHelper
 					'scripts'  => (object) [
 						'uaId'      => 'undefined',
 						'awId'      => 'undefined',
-						'twitter'   => 'false',
+						'twitter'   => 'undefined',
 						'fbId'      => 'undefined',
-						'addthis'   => 'false',
+						'carbonads' => 'undefined',
 						'addthisId' => 'undefined',
 						'pingdomId' => '59300ad15992c776ad970068'
 					],

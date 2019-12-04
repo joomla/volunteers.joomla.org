@@ -4,7 +4,7 @@
 //var propertyAwId = 'AW-XXXXXX' 
 //var propertyTwitter = script tags
 //var propertyFacebookId = xxxxxxxxxxxxxxxx
-//var propertyAddThis = script tags
+//var propertyCarbonAds = script tags
 //var propertyAddThisId = ra-xxxxxxxxxxxxxx
 //var propertyPingdomId = apiKey;
 
@@ -78,7 +78,7 @@ window.addEventListener("load", function () {
 			name: 'functionality',
 			label: 'Functionality Cookies',
 			description: 'Functionality cookies are responsible for the partial functionality of this website during your navigation. By deactivating them, you might have limited access on our or third party website\'s features.',
-			cookies: ['PREF', 'VISITOR_INFO1_LIVE', 'rl_modals', '__distillery', 'AWSALB', '__atuvc', '__atuvs', 'ct_checkjs', 'ct_fkp_timestamp', 'ct_pointer_data', 'ct_ps_timestamp', 'ct_timezone', '__utmt', '_sdsat_BasketAmountItems', 'affiliate', 'any_affiliate', 'direct_affiliate', 's_cc', 's_cc', 's_sq', '__cfduid'],
+			cookies: ccFunctionalIndex,
 			onAccept: function () {
 				if ((typeof propertyPingdomId !== 'undefined') && (propertyPingdomId !== 'undefined')) {
 					pushPingdomScript(propertyPingdomId);
@@ -96,7 +96,7 @@ window.addEventListener("load", function () {
 			name: 'advertising',
 			label: 'Advertising',
 			description: 'Advertising cookies help you see some ads based on your preferences. Joomla! serves or hosts ads as they are one of its major financial support.',
-			cookies: ['OAID', 'IDE', 'ck1', 'drtn*', 'rlas3', 'rtn1-z', 'fr', 'everest_g_v2', 'everest_session_v2', 'gglck', 'NID', 'na_id', 'na_tc', 'id', 'mdata', 'dpm', 'GPS', 'YSC', 'wistia-http2-push-disabled', 'di2', 'loc', 'ouid', 'uid', 'uvc', 'vc', 'TapAd_DID ', 'TapAd_TS ', '1P_JAR', 'd', 'mc', 'KADUSERCOOKIE', 'KTPCACOOKIE', 'AMCVS_', 'AMCV_', 'PP', 'PPP', '_gat_partnerTracker', '_gat_spreadshirtTracker', 'demdex'],
+			cookies: ccAdvertisingIndex,
 			onAccept: function () {
 				if ((typeof propertyAwId !== 'undefined') && (propertyAwId !== 'undefined')) {
                         		pushAwScript(propertyAwId);
@@ -107,8 +107,8 @@ window.addEventListener("load", function () {
                     		if ((typeof propertyFacebookId !== 'undefined') && (propertyFacebookId !== 'undefined')) {
                         		pushFbScript(propertyFacebookId);
                     		}
-                    		if ((typeof propertyAddThis !== 'undefined') && (propertyAddThis !== 'undefined')) {
-                        		pushAtScript();
+                    		if ((typeof propertyCarbonAds !== 'undefined') && (propertyCarbonAds !== 'undefined')) {
+                        		pushCaScript();
                     		}
                     		if ((typeof propertyAddThisId !== 'undefined') && (propertyAddThisId !== 'undefined')) {
                         		pushAtIdScript(propertyAddThisId);
@@ -225,15 +225,15 @@ function pushFbScript(id)
 	document.body.appendChild(FbImg);
 }
 
-// Push AddThis script into <body></body> (src value must be checked)
-function pushAtScript()
+// Push CarbonAds script into <body></body> (src value must be checked)
+function pushCaScript()
 {
-	var AtScript = document.createElement("script");
+	var CaScript = document.createElement("script");
 	
-	AtScript.src = "//cdn.carbonads.com/carbon.js?zoneid=1673&serve=C6AILKT&placement=joomlaorg";
-	AtScript.id = "_carbonads_js";
+	CaScript.src = "//cdn.carbonads.com/carbon.js?zoneid=1673&serve=C6AILKT&placement=joomlaorg";
+	CaScript.id = "_carbonads_js";
 	
-	document.body.appendChild(AtScript);					
+	document.body.appendChild(CaScript);					
 }
 
 // Push AddThisId script into <body></body> (src value must be checked)

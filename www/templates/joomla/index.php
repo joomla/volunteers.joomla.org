@@ -192,7 +192,7 @@ if ($hasCookieControl)
 			$this->addScriptDeclaration("var propertyAwId = '" . $siteConfig->scripts->awId . "';");
 			$this->addScriptDeclaration("var propertyTwitter = " . $siteConfig->scripts->twitter . ";"); //remove single quotes for boolean true
 			$this->addScriptDeclaration("var propertyFacebookId = '" . $siteConfig->scripts->fbId . "';");
-			$this->addScriptDeclaration("var propertyAddThis = " . $siteConfig->scripts->addthis . ";"); //remove single quotes for boolean true
+			$this->addScriptDeclaration("var propertyCarbonAds = " . $siteConfig->scripts->carbonads . ";"); //remove single quotes for boolean true
 			$this->addScriptDeclaration("var propertyAddThisId = '" . $siteConfig->scripts->addthisId . "';");
 			$this->addScriptDeclaration("var propertyPingdomId = '" . $siteConfig->scripts->pingdomId . "';");
 		}

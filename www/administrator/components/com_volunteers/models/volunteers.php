@@ -146,7 +146,7 @@ class VolunteersModelVolunteers extends JModelList
 			else
 			{
 				$search = $db->quote('%' . str_replace(' ', '%', $db->escape(trim($search), true) . '%'));
-				$query->where('(user.name LIKE ' . $search . ' OR a.alias LIKE ' . $search . ')');
+				$query->where('(user.name LIKE ' . $search . ' OR a.alias LIKE ' . $search . ' OR a.intro LIKE ' . $search . ' OR a.joomlastory LIKE ' . $search . ')');
 			}
 		}
 

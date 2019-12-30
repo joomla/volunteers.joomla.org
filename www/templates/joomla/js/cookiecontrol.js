@@ -3,7 +3,8 @@
 //var propertyUaId = 'UA-XXXXXX'
 //var propertyAwId = 'AW-XXXXXX' 
 //var propertyTwitter = script tags
-//var propertyFacebookId = xxxxxxxxxxxxxxxx
+//var propertyFacebookSdk = 'facebook-jssdk'
+//var propertyFacebookPixel = xxxxxxxxxxxxxxxx
 //var propertyCarbonAds = script tags
 //var propertyAddThisId = ra-xxxxxxxxxxxxxx
 //var propertyPingdomId = apiKey;
@@ -104,8 +105,11 @@ window.addEventListener("load", function () {
                     		if ((typeof propertyTwitter !== 'undefined') && (propertyTwitter !== 'undefined')) {
                         		pushTwScript();
                     		}
-                    		if ((typeof propertyFacebookId !== 'undefined') && (propertyFacebookId !== 'undefined')) {
-                        		pushFbScript(propertyFacebookId);
+                    		if ((typeof propertyFacebookSdk !== 'undefined') && (propertyFacebookSdk !== 'undefined')) {
+                        		pushFbSdkScript(propertyFacebookSdk);
+                    		}
+				if ((typeof propertyFacebookPixel !== 'undefined') && (propertyFacebookPixel !== 'undefined')) {
+                        		pushFbPxlScript(propertyFacebookPixel);
                     		}
                     		if ((typeof propertyCarbonAds !== 'undefined') && (propertyCarbonAds !== 'undefined')) {
                         		pushCaScript();
@@ -190,14 +194,14 @@ function pushPingdomScript(id)
 function pushAwScript(id)
 {
 	var AwScript = document.createElement("script");
-    var AwGtag = document.createElement("script");
+    	var AwGtag = document.createElement("script");
 	var AwGtagContent = document.createTextNode("window.dataLayer = window.dataLayer || [];function gtag() { dataLayer.push(arguments); }gtag('js', new Date());gtag('config', '" + id + "');");
 	
 	AwGtag.appendChild(AwGtagContent);
 	AwScript.src = "//www.googletagmanager.com/gtag/js?id=" + id;
 	
 	document.head.appendChild(AwScript);
-    document.head.appendChild(AwGtag);
+    	document.head.appendChild(AwGtag);
 }
 
 // Push Twitter widget into <body></body>
@@ -210,8 +214,19 @@ function pushTwScript()
 	document.body.appendChild(TwScript);					
 }
 
-// Push Facebook script and pixel into <body></body> (src value must be checked)
-function pushFbScript(id)
+// Push Facebook Sdk script into <body></body> (src value must be checked)
+function pushFbSdkScript(id)
+{
+	var FbScript = document.createElement("script");
+	var FbScriptContent = document.createTextNode("(function(d, s, id) { var js, fjs = d.getElementsByTagName(s)[0]; if (d.getElementById(id)) return; js = d.createElement(s); js.id = id; js.src = 'https://connect.facebook.net/en_GB/sdk.js#xfbml=1&version=v2.10&appId='; fjs.parentNode.insertBefore(js, fjs); }(document, 'script', '" + id + "'));");
+	
+	FbScript.appendChild(FbScriptContent);
+	
+	document.body.appendChild(FbScript);
+}
+
+// Push Facebook Pixel script into <body></body> (src value must be checked)
+function pushFbPxlScript(id)
 {
 	var FbImg = document.createElement("img");
 	var FbScript = document.createElement("script");

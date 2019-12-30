@@ -149,7 +149,7 @@ class WFEditor
     private function getCompressionOptions()
     {
         $wf = WFApplication::getInstance();
-        
+
         // check for joomla debug mode
         $debug = JFactory::getConfig()->get('debug');
 
@@ -168,6 +168,66 @@ class WFEditor
         }
 
         return $options;
+    }
+
+    private function assignEditorSkin(&$settings)
+    {
+        if ($settings['skin'] && strpos($settings['skin'], '.') !== false) {
+            list($settings['skin'], $settings['skin_variant']) = explode('.', $settings['skin']);
+        }
+
+        // classic has been removed
+        if ($settings['skin'] === 'classic') {
+            $settings['skin'] = 'default';
+        }
+
+        if ($settings['skin'] === 'mobile') {
+            $settings['skin'] = 'default';
+            $settings['skin_variant'] = 'touch';
+        }
+    }
+
+    /**
+     * Porcess and assign custom configuration variables
+     *
+     * @param [Array] $settings
+     * @return void
+     */
+    private function getCustomConfig(&$settings)
+    {
+        // get an editor instance
+        $wf = WFApplication::getInstance();
+        
+        // Other - user specified
+        $userParams = $wf->getParam('editor.custom_config', '');
+
+        if ($userParams) {
+            // legacy format, eg: key:value;key:value
+            if (!WFUtility::isJson($userParams)) {
+                $userParams = explode(';', $userParams);
+            } else {
+                $userParams = json_decode($userParams, true);
+            }
+
+            foreach ($userParams as $userParam) {
+                $name = '';
+                $value = '';
+
+                // legacy string
+                if (is_string($userParam)) {                    
+                    list($name, $value) = explode(':', $userParam);
+                }
+
+                // json associative array
+                if (is_array($userParam) && array_key_exists('name', $userParam)) {
+                    extract($userParam);
+                }
+
+                if ($name && $value !== '') {
+                    $settings[$name] = trim($value, " \t\n\r\0\x0B'\"");
+                }
+            }
+        }
     }
 
     public function getSettings()
@@ -218,7 +278,7 @@ class WFEditor
                 'statusbar_location' => array('bottom', 'bottom', 'string'),
                 'path' => array(1, 1, 'boolean'),
                 'resizing' => array(1, 0, 'boolean'),
-                'resize_horizontal' => array(1, 1, 'boolean')
+                'resize_horizontal' => array(1, 1, 'boolean'),
             );
 
             // set rows key to pass to plugin config
@@ -231,20 +291,10 @@ class WFEditor
             $settings['width'] = $wf->getParam('editor.width');
             $settings['height'] = $wf->getParam('editor.height');
 
-            // assign skin
-            $settings['skin'] = $wf->getParam('editor.toolbar_theme', 'default', 'default');
+            // assign skin - new default is "modern"
+            $settings['skin'] = $wf->getParam('editor.toolbar_theme', 'default');
 
-            if ($settings['skin'] && strpos($settings['skin'], '.') !== false) {
-                $parts = explode('.', $settings['skin']);
-
-                $settings['skin'] = $parts[0];
-                $settings['skin_variant'] = $parts[1];
-            }
-
-            // classic has been removed
-            if ($settings['skin'] === 'classic') {
-                $settings['skin'] = 'default';
-            }
+            $this->assignEditorSkin($settings);
 
             // get body class if any
             $body_class = $wf->getParam('editor.body_class', '');
@@ -281,7 +331,9 @@ class WFEditor
                 $settings['invalid_elements'] = array_values($settings['invalid_elements']);
             }
 
-        } // end profile
+        } else {
+            $settings['readonly'] = true;
+        }
 
         // get compression options stylesheet
         $settings['compress'] = $this->getCompressionOptions();
@@ -306,16 +358,7 @@ class WFEditor
             $this->addScript(JURI::base(true) . '/index.php?option=com_jce&task=editor.loadlanguages&lang=' . $settings['language'] . '&context=' . $this->context . '&' . $token . '=1');
         }
 
-        //Other - user specified
-        $userParams = $wf->getParam('editor.custom_config', '');
-
-        if ($userParams) {
-            $userParams = explode(';', $userParams);
-            foreach ($userParams as $userParam) {
-                $keys = explode(':', $userParam);
-                $settings[trim($keys[0])] = count($keys) > 1 ? trim($keys[1]) : '';
-            }
-        }
+        $this->getCustomConfig($settings);
 
         // process settings
         array_walk($settings, function (&$value, $key) {
@@ -323,7 +366,8 @@ class WFEditor
             if ($key === "rows") {
                 $value = '';
             }
-            
+
+            // implode standard arrays
             if (is_array($value) && $value === array_values($value)) {
                 $value = implode(',', $value);
             }
@@ -447,6 +491,27 @@ class WFEditor
     }
 
     /**
+     * Check if an icon already exists in a toolbar row
+     *
+     * @param [Array] $rows
+     * @param [Mixed] $icon
+     * @return Boolean
+     */
+    private function rowHasIcon($rows, $icon)
+    {
+        $found = false;
+
+        foreach ($rows as $key => $row) {
+            if (in_array($icon, $row)) {
+                $found = true;
+                break;
+            }
+        }
+
+        return $found;
+    }
+
+    /**
      * Return a list of icons for each JCE editor row.
      *
      * @param string  The number of rows
@@ -456,7 +521,7 @@ class WFEditor
     private function getToolbar()
     {
         $wf = WFApplication::getInstance();
-        $rows = array('theme_buttons1' => '', 'theme_buttons2' => '', 'theme_buttons3' => '');
+        $rows = array('theme_buttons1' => array(), 'theme_buttons2' => array(), 'theme_buttons3' => array());
 
         // we need a profile object and some defined rows
         if (!is_object($this->profile) || empty($this->profile->rows)) {
@@ -465,6 +530,7 @@ class WFEditor
 
         // get plugins
         $plugins = JcePluginsHelper::getPlugins();
+
         // get core commands
         $commands = JcePluginsHelper::getCommands();
 
@@ -483,18 +549,24 @@ class WFEditor
         );
 
         $x = 0;
+
         for ($i = 1; $i <= count($lists); ++$i) {
             $buttons = array();
             $items = explode(',', $lists[$x]);
 
-            foreach ($items as $item) {
-                // set the plugin/command name
-                $name = $item;
-
-                // map legacy values etc.
+            // map legacy values etc.
+            array_walk($items, function (&$item) use ($map) {
                 if (array_key_exists($item, $map)) {
                     $item = $map[$item];
                 }
+            });
+
+            // remove duplicates
+            $items = array_unique($items);
+
+            foreach ($items as $item) {
+                // set the plugin/command name
+                $name = $item;
 
                 // check if button should be in toolbar
                 if ($item !== '|') {
@@ -523,7 +595,9 @@ class WFEditor
                                     $a[] = $s;
                                 }
                             }
+                            
                             $item = implode(',', $a);
+
                             // remove leading or trailing |
                             $item = trim($item, '|');
                         }
@@ -531,15 +605,19 @@ class WFEditor
                 }
 
                 if (!empty($item)) {
-                    // remove double |
+                    // remove double spacer
                     $item = preg_replace('#(\|,)+#', '|,', $item);
+
+                    if ($this->rowHasIcon($rows, $item)) {
+                        continue;
+                    }
 
                     $buttons[] = $item;
                 }
             }
 
             if (!empty($buttons)) {
-                $rows['theme_buttons' . $i] = implode(',', $buttons);
+                $rows['theme_buttons' . $i] = $buttons;
             }
 
             ++$x;
@@ -604,6 +682,39 @@ class WFEditor
     }
 
     /**
+     * Determine whether the editor has a profile assigned
+     *
+     * @return boolean
+     */
+    public function hasProfile()
+    {
+        return is_object($this->profile);
+    }
+
+    /**
+     * Determine whether a plugin is loaded
+     *
+     * @param [string] $name
+     * @return boolean
+     */
+    public function hasPlugin($name)
+    {
+        $plugins = $this->getPlugins();
+
+        if (in_array($name, $plugins['core'])) {
+            return true;
+        }
+
+        if (!empty($plugins['external'])) {
+            if (array_key_exists($name, $plugins['external'])) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Return a list of published JCE plugins.
      *
      * @return string list
@@ -628,7 +739,7 @@ class WFEditor
                 });
 
                 // core plugins
-                $core = array('core', 'autolink', 'cleanup', 'code', 'format', 'importcss', 'colorpicker', 'upload', 'figure', 'ui');
+                $core = array('core', 'autolink', 'cleanup', 'code', 'format', 'importcss', 'colorpicker', 'upload', 'figure', 'ui', 'noneditable');
 
                 // load branding plugin
                 if (!WF_EDITOR_PRO) {
@@ -888,15 +999,20 @@ class WFEditor
             case 0:
                 // use getParam so result is cleaned
                 $global_custom = $wf->getParam('editor.content_css_custom', '');
-                // Replace $template variable with site template name
-                $global_custom = str_replace('$template', $template, $global_custom);
 
-                foreach (explode(',', $global_custom) as $tmp) {
+                if (is_string($global_custom)) {
+                    $global_custom = explode(',', $global_custom);
+                }
+
+                foreach ($global_custom as $tmp) {
                     $tmp = trim($tmp);
 
                     if (empty($tmp)) {
                         continue;
                     }
+
+                    // Replace $template variable with site template name
+                    $tmp = str_replace('$template', $template, $tmp);
 
                     // external url
                     if (strpos($tmp, '://') !== false) {
@@ -962,12 +1078,23 @@ class WFEditor
             case 0:
             case 1:
                 $profile_custom = $wf->getParam('editor.profile_content_css_custom', '');
-                // Replace $template variable with site template name (defaults to 'system')
-                $profile_custom = str_replace('$template', $template, $profile_custom);
+
+                if (is_string($profile_custom)) {
+                    $profile_custom = explode(',', $profile_custom);
+                }
 
                 $custom = array();
 
-                foreach (explode(',', $profile_custom) as $tmp) {
+                foreach ($profile_custom as $tmp) {
+                    $tmp = trim($tmp);
+
+                    if (empty($tmp)) {
+                        continue;
+                    }
+
+                    // Replace $template variable with site template name (defaults to 'system')
+                    $tmp = str_replace('$template', $template, $tmp);
+
                     $list = array();
 
                     // external url
@@ -1019,6 +1146,7 @@ class WFEditor
                 continue;
             }
 
+            // full path
             if (strpos($file, '://') !== false) {
                 $stylesheets[] = $file;
                 continue;
@@ -1027,7 +1155,15 @@ class WFEditor
             // remove leading slash
             $file = ltrim($file, '/');
 
-            if (JFile::exists(JPATH_SITE . '/' . $file)) {
+            $fullpath = JPATH_SITE . '/' . $file;
+
+            if (JFile::exists($fullpath)) {
+                // less
+                if (pathinfo($file, PATHINFO_EXTENSION) === 'less') {
+                    $stylesheets[] = $fullpath;
+                    continue;
+                }
+
                 $etag = '';
 
                 // add etag

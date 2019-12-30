@@ -27,7 +27,7 @@ class plgSystemEmail extends JPlugin
             if(count($jform) && preg_match('/@/',$jform['username'])) {
                 $db = JFactory::getDbo();
                 $query = $db->getQuery(true);
-                $query->select('username')->from('#__users')->where('email = '.$db->quote($jform['username']));
+                $query->select('username')->from('#__users')->where('UPPER(email) = UPPER('.$db->quote($jform['username']).')');
                 $db->setQuery($query);
                 $username = $db->loadObjectList();
                 if(count($username)) {

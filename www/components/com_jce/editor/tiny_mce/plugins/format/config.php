@@ -40,13 +40,29 @@ class WFFormatPluginConfig
             }
         }
 
-        //$settings['removeformat_selector'] = $wf->getParam('editor.removeformat_selector', 'span,b,strong,em,i,font,u,strike', 'span,b,strong,em,i,font,u,strike');
+        $convert_urls = $wf->getParam('editor.convert_urls', 'relative');
 
-        // Relative urls
-        $settings['relative_urls'] = $wf->getParam('editor.relative_urls', 1, 1, 'boolean');
-        
-        // set remove_script_host if relative_urls is disabled
-        if ($settings['relative_urls'] === false) {
+        // Relative urls - legacy
+        $relative_urls = $wf->getParam('editor.relative_urls');
+
+        // cast numeric string or float to integer
+        if (is_numeric($relative_urls)) {
+            $relative_urls = intval($relative_urls);
+        }
+
+        if ($relative_urls === 1 || $convert_urls === 'relative') {
+            $settings['relative_urls'] = true;
+        }
+
+        // absolute urls
+        if ($relative_urls === 0 || $convert_urls === 'absolute') {
+            $settings['relative_urls'] = false;
+            $settings['remove_script_host'] = false;
+        }
+
+        // mixed urls - the new default
+        if (empty($convert_urls)) {
+            $settings['mixed_urls'] = true;
             $settings['remove_script_host'] = false;
         }
     }

@@ -190,9 +190,10 @@ if ($hasCookieControl)
 		{
 			$this->addScriptDeclaration("var propertyUaId = '" . $siteConfig->scripts->uaId . "';");
 			$this->addScriptDeclaration("var propertyAwId = '" . $siteConfig->scripts->awId . "';");
-			$this->addScriptDeclaration("var propertyTwitter = " . $siteConfig->scripts->twitter . ";"); //remove single quotes for boolean true
-			$this->addScriptDeclaration("var propertyFacebookId = '" . $siteConfig->scripts->fbId . "';");
-			$this->addScriptDeclaration("var propertyCarbonAds = " . $siteConfig->scripts->carbonads . ";"); //remove single quotes for boolean true
+			$this->addScriptDeclaration("var propertyTwitter = '" . $siteConfig->scripts->twitter . "';");
+			$this->addScriptDeclaration("var propertyFacebookSdk = '" . $siteConfig->scripts->fbSdk . "';");
+			$this->addScriptDeclaration("var propertyFacebookPixel = '" . $siteConfig->scripts->fbPixel . "';");
+			$this->addScriptDeclaration("var propertyCarbonAds = '" . $siteConfig->scripts->carbonads . "';");
 			$this->addScriptDeclaration("var propertyAddThisId = '" . $siteConfig->scripts->addthisId . "';");
 			$this->addScriptDeclaration("var propertyPingdomId = '" . $siteConfig->scripts->pingdomId . "';");
 		}

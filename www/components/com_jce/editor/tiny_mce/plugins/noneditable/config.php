@@ -8,17 +8,12 @@
  * is derivative of works licensed under the GNU General Public License or
  * other free or open source software licenses
  */
-class WFInlinepopupsPluginConfig
+class WFNoneditablePluginConfig
 {
-    public static function getStyles()
+    public static function getConfig(&$settings)
     {
         $wf = WFApplication::getInstance();
-        // only required if we're packing css
-        if ($wf->getParam('editor.compress_css', 1)) {
-            // add ui theme css file
-            return array(
-                __DIR__.'/css/dialog.css',
-            );
-        }
+        $settings['noneditable_editable_class']     = $wf->getParam('noneditable.editable_class', '');
+        $settings['noneditable_noneditable_class']  = $wf->getParam('noneditable.noneditable_class', '');
     }
 }

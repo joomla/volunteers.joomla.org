@@ -57,6 +57,37 @@ class JceModelProfile extends JModelAdmin
         return JTable::getInstance($type, $prefix, $config);
     }
 
+    /* Override to prevent plugins from processing form data */
+	protected function preprocessData($context, &$data, $group = 'system')
+	{
+        if (!isset($data->config)) {
+            return;
+        }
+
+        $config = $data->config;
+        
+        if (is_string($config)) {
+            $config = json_decode($config, true);
+        }
+
+        if (empty($config)) {
+            return;
+        }
+
+        // editor parameters
+        if (isset($config['editor'])) {
+            if (!empty($config['editor']['toolbar_theme']) && $config['editor']['toolbar_theme'] === 'mobile') {
+                $config['editor']['toolbar_theme'] = 'default.touch';
+            }
+    
+            if (isset($config['editor']['relative_urls'])) {
+                $config['editor']['convert_urls'] = $config['editor']['relative_urls'] == 0 ? 'absolute' : 'relative';
+            }
+        }
+
+        $data->config = $config;
+	}
+
     /**
      * Method to allow derived classes to preprocess the form.
      *
@@ -107,6 +138,7 @@ class JceModelProfile extends JModelAdmin
             }
         }
 
+        // allow plugins to process form, eg: MediaField etc.
         parent::preprocessForm($form, $data);
     }
 
@@ -194,7 +226,9 @@ class JceModelProfile extends JModelAdmin
         }
 
         $data->users    = $users;
-        $data->config   = $data->params; 
+        $data->config   = $data->params;
+        
+        $this->preprocessData('com_jce.profiles', $data);
 
         return $data;
     }
@@ -220,26 +254,27 @@ class JceModelProfile extends JModelAdmin
                 $items = explode(',', $group);
                 $buttons = array();
 
-                for ($x = 0; $x < count($items); ++$x) {
-                    $name = $items[$x];
+                // remove duplicates
+                $items = array_unique($items);
 
-                    if ($name === 'spacer') {
+                foreach ($items as $x => $item) {
+                    if ($item === 'spacer') {
                         unset($items[$x]);
                         continue;
                     }
 
                     // not in the list...
-                    if (empty($name) || array_key_exists($name, $plugins) === false) {
+                    if (empty($item) || array_key_exists($item, $plugins) === false) {
                         continue;
                     }
 
                     // must be assigned...
-                    if (!$plugins[$name]->active) {
+                    if (!$plugins[$item]->active) {
                         continue;
                     }
 
                     // assign icon
-                    $buttons[] = $plugins[$name];
+                    $buttons[] = $plugins[$item];
                 }
 
                 $groups[] = $buttons;
@@ -345,6 +380,9 @@ class JceModelProfile extends JModelAdmin
             // array or profile plugin items
             $rows = explode(',', $data->plugins);
 
+            // remove duplicates
+            $rows = array_unique($rows);
+
             // only need plugins with xml files
             foreach (JcePluginsHelper::getPlugins() as $name => $plugin) {
                 $plugin->icon = empty($plugin->icon) ? array() : explode(',', $plugin->icon);
@@ -378,6 +416,7 @@ class JceModelProfile extends JModelAdmin
 
                 if (is_file($plugin->manifest)) {
                     $plugin->form = $this->loadForm('com_jce.profile.' . $plugin->name, $plugin->manifest, array('control' => 'jform[config]', 'load_data' => true), true, '//extension');
+                    $plugin->formclass = 'options-grid-form options-grid-form-full';
 
                     $fieldsets = $plugin->form->getFieldsets();
 
@@ -433,6 +472,7 @@ class JceModelProfile extends JModelAdmin
 
                                 // load form
                                 $extension->form = $this->loadForm('com_jce.profile.' . implode('.', $path), $p->manifest, array('control' => 'jform[config][' . $plugin->name . '][' . $type . ']', 'load_data' => true), true, '//extension');
+                                $extension->formclass = 'options-grid-form options-grid-form-full';
 
                                 // get fieldsets if any
                                 $fieldsets = $extension->form->getFieldsets();
@@ -676,11 +716,12 @@ class JceModelProfile extends JModelAdmin
                 // add config data
                 if (array_key_exists($item, $data['params'])) {
                     $value = $data['params'][$item];
+                    // clean and add to json array for merging
                     $json[$item] = filter_var_array($value, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW);
                 }
             }
 
-            // combine and encode as json string
+            // merge and encode as json string
             $data['params'] = json_encode(WFUtility::array_merge_recursive_distinct($params, $json));
         }
 

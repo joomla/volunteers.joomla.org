@@ -25,6 +25,8 @@ class JceViewProfile extends JViewLegacy
         $this->item = $this->get('Item');
         $this->form = $this->get('Form');
 
+        $this->formclass = 'form-horizontal options-grid-form options-grid-form-full';
+
         $this->plugins = $this->get('Plugins');
         $this->rows = $this->get('Rows');
         $this->available = $this->get('AvailableButtons');
@@ -45,21 +47,22 @@ class JceViewProfile extends JViewLegacy
             return false;
         }
 
-        JHtml::_('behavior.modal', 'a.modal_users');
         JHtml::_('jquery.ui', array('core', 'sortable'));
 
         $this->addToolbar();
-        //$this->sidebar = JHtmlSidebar::render();
         parent::display($tpl);
 
-        $document = JFactory::getDocument();
-        $document->addStyleSheet('components/com_jce/media/css/profile.min.css?' . WF_VERSION);
+        // version hash
+        $hash = md5(WF_VERSION);
 
-        $document->addScript('components/com_jce/media/js/core.min.js?' . WF_VERSION);
-        $document->addScript('components/com_jce/media/js/profile.min.js?' . WF_VERSION);
+        $document = JFactory::getDocument();
+        $document->addStyleSheet('components/com_jce/media/css/profile.min.css?' . $hash);
+
+        $document->addScript('components/com_jce/media/js/core.min.js?' . $hash);
+        $document->addScript('components/com_jce/media/js/profile.min.js?' . $hash);
 
         // default theme
-        $document->addStyleSheet(JURI::root(true) . '/components/com_jce/editor/tiny_mce/themes/advanced/skins/default/ui.admin.css?' . WF_VERSION);
+        $document->addStyleSheet(JURI::root(true) . '/components/com_jce/editor/tiny_mce/themes/advanced/skins/default/ui.admin.css?' . $hash);
     }
 
     /**

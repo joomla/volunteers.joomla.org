@@ -1,0 +1,1 @@
+.mcePathRow{overflow:hidden;width:100%}.mcePathHidden .mceText{display:none}.mcePathHidden:after,.mcePathLabel,.mcePathPath{display:inline-block}.mcePathPath .mceText{cursor:pointer;font-size:12px;line-height:14px;max-width:3em;text-overflow:ellipsis;overflow:hidden}.mcePathHidden:after{content:"..."}.mcePathLabel{position:relative;min-width:32px;margin:0 5px 0 0;font-size:14px}

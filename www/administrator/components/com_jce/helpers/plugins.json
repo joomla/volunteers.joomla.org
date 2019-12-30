@@ -35,7 +35,7 @@
         "title": "WF_CHARMAP_TITLE",
         "description": "WF_CHARMAP_DESC",
         "icon": "charmap",
-        "editable": 0,
+        "editable": 1,
         "row": 2,
         "core": 1
     },
@@ -148,6 +148,15 @@
         "row": 4,
         "core": 1
     },
+    "joomla": {
+        "title": "WF_JOOMLABUTTONS_TITLE",
+        "description": "WF_JOOMLABUTTONS_DESC",
+        "icon": "joomla",
+        "editable": 0,
+        "row": 4,
+        "core": 1,
+        "class": "split-button"
+    },
     "layer": {
         "title": "WF_LAYER_TITLE",
         "description": "WF_LAYER_DESC",
@@ -162,7 +171,8 @@
         "icon": "link",
         "editable": 1,
         "row": 4,
-        "core": 1
+        "core": 1,
+        "class": "split-button"
     },
     "lists": {
         "title": "WF_LISTS_TITLE",
@@ -187,6 +197,14 @@
         "icon": "nonbreaking",
         "editable": 0,
         "row": 4,
+        "core": 1
+    },
+    "noneditable": {
+        "title": "WF_NONEDITABLE_TITLE",
+        "description": "WF_NONEDITABLE_DESC",
+        "icon": "",
+        "editable": 1,
+        "row": 0,
         "core": 1
     },
     "preview": {
@@ -325,6 +343,7 @@
         "core": 1,
         "icon": "emotions",
         "row": 4,
-        "editable": 1
+        "editable": 1,
+        "class": "split-button"
     }
 }

@@ -282,8 +282,6 @@ class WFPacker extends JObject
 
     protected function compileLess($string, $path)
     {
-        require_once __DIR__ . '/vendor/lessphp/lessc.inc.php';
-
         $less = new lessc();
         // add file directory
         $less->addImportDir($path);

@@ -19,6 +19,29 @@ class PlgSystemJce extends JPlugin
         return $this->onContentPrepareForm($form, $data);
     }
 
+    public function onAfterDispatch()
+    {
+        $app = JFactory::getApplication();
+
+        // only in "site"
+        if ($app->getClientId() !== 0) {
+            return;
+        }
+
+        // only if enabled
+        if ((int) $this->params->get('column_styles', 1) === 0) {
+            return;
+        }
+
+        $document = JFactory::getDocument();
+        $document->addStyleSheet(JURI::root(true) . '/plugins/system/jce/css/content.css?' . $document->getMediaVersion());
+    }
+
+    public function onWfContentPreview($context, &$article, &$params, $page)
+    {
+        $article->text = '<style type="text/css">@import url("' . JURI::root(true) . '/plugins/system/jce/css/content.css");</style>' . $article->text;
+    }
+
     /**
      * adds additional fields to the user editing form.
      *

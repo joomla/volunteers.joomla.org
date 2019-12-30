@@ -32,7 +32,7 @@ class plgAuthenticationEmail extends JPlugin {
         $username = JFactory::getApplication()->input->post->get('username',false,'RAW');
         $query->select('id, username, password');
         $query->from('#__users');
-        $query->where('email LIKE ' . $db->Quote($username));
+        $query->where('UPPER(email) = UPPER(' . $db->Quote($username) .')' );
         
         $db->setQuery($query);
         $result = $db->loadObject();

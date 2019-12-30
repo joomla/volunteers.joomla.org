@@ -61,10 +61,10 @@ window.addEventListener("load", function () {
 			onAccept: function () {
 				if ((typeof propertyGtmId !== 'undefined') && (propertyGtmId !== 'undefined')) {
 					pushGtmScript(propertyGtmId);
-			    	}
-			    	if ((typeof propertyUaId !== 'undefined') && (propertyUaId !== 'undefined')) {
+				}
+				if ((typeof propertyUaId !== 'undefined') && (propertyUaId !== 'undefined')) {
 					pushUaScript(propertyUaId);
-			    	}
+				}
 			},
 			onRevoke: function () {
 				ccPerformanceIndex.forEach(element => CookieControl.delete(element));
@@ -100,23 +100,23 @@ window.addEventListener("load", function () {
 			cookies: ccAdvertisingIndex,
 			onAccept: function () {
 				if ((typeof propertyAwId !== 'undefined') && (propertyAwId !== 'undefined')) {
-                        		pushAwScript(propertyAwId);
-                    		}
-                    		if ((typeof propertyTwitter !== 'undefined') && (propertyTwitter !== 'undefined')) {
-                        		pushTwScript();
-                    		}
-                    		if ((typeof propertyFacebookSdk !== 'undefined') && (propertyFacebookSdk !== 'undefined')) {
-                        		pushFbSdkScript(propertyFacebookSdk);
-                    		}
+					pushAwScript(propertyAwId);
+				}
+				if ((typeof propertyTwitter !== 'undefined') && (propertyTwitter !== 'undefined')) {
+					pushTwScript();
+				}
+				if ((typeof propertyFacebookSdk !== 'undefined') && (propertyFacebookSdk !== 'undefined')) {
+					pushFbSdkScript(propertyFacebookSdk);
+				}
 				if ((typeof propertyFacebookPixel !== 'undefined') && (propertyFacebookPixel !== 'undefined')) {
-                        		pushFbPxlScript(propertyFacebookPixel);
-                    		}
-                    		if ((typeof propertyCarbonAds !== 'undefined') && (propertyCarbonAds !== 'undefined')) {
-                        		pushCaScript();
-                    		}
-                    		if ((typeof propertyAddThisId !== 'undefined') && (propertyAddThisId !== 'undefined')) {
-                        		pushAtIdScript(propertyAddThisId);
-                    		}
+					pushFbPxlScript(propertyFacebookPixel);
+				}
+				if ((typeof propertyCarbonAds !== 'undefined') && (propertyCarbonAds !== 'undefined')) {
+					pushCaScript();
+				}
+				if ((typeof propertyAddThisId !== 'undefined') && (propertyAddThisId !== 'undefined')) {
+					pushAtIdScript(propertyAddThisId);
+				}
 			},
 			onRevoke: function () {
 				ccAdvertisingIndex.forEach(element => CookieControl.delete(element));
@@ -155,79 +155,72 @@ window.addEventListener("load", function () {
 // @TODO: Move these functions into a seperate file (To be discussed)
 
 // Push GAnalytics Script into <head></head>
-function pushUaScript(id)
-{
-    var UaScript = document.createElement("script");
-    var UaGtag = document.createElement("script");
-    var UaGtagContent = document.createTextNode("window.dataLayer = window.dataLayer || [];function gtag() {dataLayer.push(arguments);}gtag('js', new Date());	gtag('config', '" + id + "', {'anonymize_ip': true});");
-    
-    UaGtag.appendChild(UaGtagContent);
-    UaScript.src = "//www.googletagmanager.com/gtag/js?id=" + id;
+function pushUaScript(id) {
+	var UaScript = document.createElement("script");
+	var UaGtag = document.createElement("script");
+	var UaGtagContent = document.createTextNode("window.dataLayer = window.dataLayer || [];function gtag() {dataLayer.push(arguments);}gtag('js', new Date());	gtag('config', '" + id + "', {'anonymize_ip': true});");
 
-    document.head.appendChild(UaScript);
-    document.head.appendChild(UaGtag);
+	UaGtag.appendChild(UaGtagContent);
+	UaScript.src = "//www.googletagmanager.com/gtag/js?id=" + id;
+
+	document.head.appendChild(UaScript);
+	document.head.appendChild(UaGtag);
 }
 
 // Push Google Tag Manager Script into <head></head>
-function pushGtmScript(id)
-{
-    var GtmScript = document.createElement("script");
-    var GtmContent = document.createTextNode("(function (w, d, s, l, i) { w[l] = w[l] || [];w[l].push({'gtm.start':new Date().getTime(), event: 'gtm.js'});var f = d.getElementsByTagName(s)[0],j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : '';j.async = true;j.src ='//www.googletagmanager.com/gtm.js?id=' + i + dl;f.parentNode.insertBefore(j, f);})(window, document, 'script', 'dataLayer', '" + id + "');");
-    
-    GtmScript.appendChild(GtmContent);
-    
-    document.head.appendChild(GtmScript);
+function pushGtmScript(id) {
+	var GtmScript = document.createElement("script");
+	var GtmContent = document.createTextNode("(function (w, d, s, l, i) { w[l] = w[l] || [];w[l].push({'gtm.start':new Date().getTime(), event: 'gtm.js'});var f = d.getElementsByTagName(s)[0],j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : '';j.async = true;j.src ='//www.googletagmanager.com/gtm.js?id=' + i + dl;f.parentNode.insertBefore(j, f);})(window, document, 'script', 'dataLayer', '" + id + "');");
+
+	GtmScript.appendChild(GtmContent);
+
+	document.head.appendChild(GtmScript);
 }
 
 // Push Pingdom Script into <head></head>
-function pushPingdomScript(id)
-{
-    var PingdomScript = document.createElement("script");
-    var PingdomContent = document.createTextNode("var _prum = [['id', '" + id + "'],	['mark', 'firstbyte', (new Date()).getTime()]];(function () {var s = document.getElementsByTagName('script')[0]	, p = document.createElement('script');	p.async = 'async';	p.src = 'https://rum-static.pingdom.net/prum.min.js';	s.parentNode.insertBefore(p, s);})();");
-    
-    PingdomScript.appendChild(PingdomContent);
-    
-    document.head.appendChild(PingdomScript);
+function pushPingdomScript(id) {
+	var PingdomScript = document.createElement("script");
+	var PingdomContent = document.createTextNode("var _prum = [['id', '" + id + "'],	['mark', 'firstbyte', (new Date()).getTime()]];(function () {var s = document.getElementsByTagName('script')[0]	, p = document.createElement('script');	p.async = 'async';	p.src = 'https://rum-static.pingdom.net/prum.min.js';	s.parentNode.insertBefore(p, s);})();");
+
+	PingdomScript.appendChild(PingdomContent);
+
+	document.head.appendChild(PingdomScript);
 }
 
 // Push Google Adwords Script into <head></head>
-function pushAwScript(id)
-{
+function pushAwScript(id) {
 	var AwScript = document.createElement("script");
-    	var AwGtag = document.createElement("script");
+	var AwGtag = document.createElement("script");
 	var AwGtagContent = document.createTextNode("window.dataLayer = window.dataLayer || [];function gtag() { dataLayer.push(arguments); }gtag('js', new Date());gtag('config', '" + id + "');");
-	
+
 	AwGtag.appendChild(AwGtagContent);
 	AwScript.src = "//www.googletagmanager.com/gtag/js?id=" + id;
-	
+
 	document.head.appendChild(AwScript);
-    	document.head.appendChild(AwGtag);
+	document.head.appendChild(AwGtag);
 }
 
 // Push Twitter widget into <body></body>
-function pushTwScript()
-{
+function pushTwScript() {
 	var TwScript = document.createElement("script");
-	
+
 	TwScript.src = "//platform.twitter.com/widgets.js";
-	
-	document.body.appendChild(TwScript);					
+
+	document.body.appendChild(TwScript);
 }
 
 // Push Facebook Sdk script into <body></body> (src value must be checked)
-function pushFbSdkScript(id)
-{
+function pushFbSdkScript(id) {
 	var FbScript = document.createElement("script");
 	var FbScriptContent = document.createTextNode("(function(d, s, id) { var js, fjs = d.getElementsByTagName(s)[0]; if (d.getElementById(id)) return; js = d.createElement(s); js.id = id; js.src = 'https://connect.facebook.net/en_GB/sdk.js#xfbml=1&version=v2.10&appId='; fjs.parentNode.insertBefore(js, fjs); }(document, 'script', '" + id + "'));");
 	
 	FbScript.appendChild(FbScriptContent);
-	
+
 	document.body.appendChild(FbScript);
 }
 
 // Push Facebook Pixel script into <body></body> (src value must be checked)
-function pushFbPxlScript(id)
-{
+function pushFbPxlScript(id) {
 	var FbImg = document.createElement("img");
 	var FbScript = document.createElement("script");
 	var FbContent = document.createTextNode("!function (f, b, e, v, n, t, s) {if (f.fbq) return;n = f.fbq = function () {n.callMethod ?n.callMethod.apply(n, arguments) : n.queue.push(arguments)};if (!f._fbq) f._fbq = n;n.push = n;n.loaded = !0;n.version = '2.0';n.queue = [];t = b.createElement(e);t.async = !0;t.src = v;s = b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t, s)}(window, document, 'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init', '" + id + "');fbq('track', 'PageView');");
@@ -241,22 +234,20 @@ function pushFbPxlScript(id)
 }
 
 // Push CarbonAds script into <body></body> (src value must be checked)
-function pushCaScript()
-{
+function pushCaScript() {
 	var CaScript = document.createElement("script");
-	
+
 	CaScript.src = "//cdn.carbonads.com/carbon.js?zoneid=1673&serve=C6AILKT&placement=joomlaorg";
 	CaScript.id = "_carbonads_js";
-	
-	document.body.appendChild(CaScript);					
+
+	document.body.appendChild(CaScript);
 }
 
 // Push AddThisId script into <body></body> (src value must be checked)
-function pushAtIdScript(id)
-{
+function pushAtIdScript(id) {
 	var AtIdScript = document.createElement("script");
-	
+
 	AtIdScript.src = "//s7.addthis.com/js/300/addthis_widget.js#pubid=" + id;
-	
-	document.body.appendChild(AtIdScript);		
+
+	document.body.appendChild(AtIdScript);
 }

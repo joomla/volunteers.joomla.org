@@ -69,17 +69,51 @@ class JceModelConfig extends JModelForm
             $data = $this->getData();
         }
 
+        $this->preprocessData('com_jce.config', $data);
+
         return $data;
     }
 
     /* Override to prevent plugins from processing form data */
-    protected function preprocessForm(\JForm $form, $data, $group = 'content')
+    protected function preprocessData($context, &$data, $group = 'system')
     {
-    }
+        if (!isset($data->params)) {
+            return;
+        }
 
-    /* Override to prevent plugins from processing form data */
-    protected function preprocessData($context, &$data, $group = 'content')
-    {
+        $config = $data->params;
+
+        if (is_string($config)) {
+            $config = json_decode($config, true);
+        }
+
+        if (empty($config)) {
+            return;
+        }
+
+        if (!empty($config['custom_config'])) {
+            // settings syntax, eg: key:value
+            if (is_string($config['custom_config']) && strpos($config['custom_config'], ':') !== false) {
+
+                if (!WFUtility::isJson($config['custom_config'])) {
+                    $values = explode(';', $config['custom_config']);
+
+                    // reset as array
+                    $config['custom_config'] = array();
+
+                    foreach ($values as $value) {
+                        list($key, $val) = explode(':', $value);
+
+                        $config['custom_config'][] = array(
+                            'name' => $key,
+                            'value' => trim($val, " \t\n\r\0\x0B'\""),
+                        );
+                    }
+                }
+            }
+        }
+
+        $data->params = $config;
     }
 
     /**

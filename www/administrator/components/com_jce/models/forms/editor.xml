@@ -4,13 +4,14 @@
         <fieldset name="features" addfieldpath="/administrator/components/com_categories/models/fields">
             <field name="width" type="text" size="5" default="" placeholder="auto" label="WF_PARAM_EDITOR_WIDTH" description="WF_PARAM_EDITOR_WIDTH_DESC" />
             <field name="height" type="text" size="5" default="" placeholder="auto" label="WF_PARAM_EDITOR_HEIGHT" description="WF_PARAM_EDITOR_HEIGHT_DESC" />
-            <field name="toolbar_theme" type="list" default="default" label="WF_PARAM_EDITOR_TOOLBAR_THEME" description="WF_PARAM_EDITOR_TOOLBAR_THEME_DESC">
-                <option value="default">WF_LABEL_DEFAULT</option>
+            <field name="toolbar_theme" type="list" default="modern" label="WF_PARAM_EDITOR_TOOLBAR_THEME" description="WF_PARAM_EDITOR_TOOLBAR_THEME_DESC">
+                <option value="modern">WF_PARAM_EDITOR_SKIN_RETINA</option>
+                <option value="modern.touch">WF_PARAM_EDITOR_SKIN_RETINA_TOUCH</option>
+                <option value="default">WF_PARAM_EDITOR_SKIN_CLASSIC</option>
+                <option value="default.touch">WF_PARAM_EDITOR_SKIN_CLASSIC_TOUCH</option>
                 <option value="o2k7">WF_PARAM_EDITOR_SKIN_OFFICE_BLUE</option>
                 <option value="o2k7.silver">WF_PARAM_EDITOR_SKIN_OFFICE_SILVER</option>
                 <option value="o2k7.black">WF_PARAM_EDITOR_SKIN_OFFICE_BLACK</option>
-                <option value="mobile">WF_PARAM_EDITOR_SKIN_MOBILE</option>
-                <!--option value="modern">WF_PARAM_EDITOR_SKIN_MODERN</option-->
             </field>
             <field name="toolbar_align" type="list" default="left" label="WF_PARAM_EDITOR_TOOLBAR_ALIGN" description="WF_PARAM_EDITOR_TOOLBAR_ALIGN_DESC">
                 <option value="left">WF_OPTION_LEFT</option>
@@ -54,9 +55,10 @@
             </field>
         </fieldset>
         <fieldset name="editor.setup">
-            <field name="relative_urls" type="radio" default="1" label="WF_PARAM_RELATIVE" description="WF_PARAM_RELATIVE_DESC" class="btn-group btn-group-yesno">
-                <option value="1">JYES</option>
-                <option value="0">JNO</option>
+            <field name="convert_urls" type="list" default="relative" label="WF_PARAM_EDITOR_CONVERT_URLS" description="WF_PARAM_EDITOR_CONVERT_URLS_DESC">
+                <option value="">WF_OPTION_NONE</option>
+                <option value="relative">WF_OPTION_RELATIVE</option>
+                <option value="absolute">WF_OPTION_ABSOLUTE</option>
             </field>
             <field name="verify_html" type="list" default="" label="WF_PARAM_CLEANUP" description="WF_PARAM_EDITOR_PROFILE_CLEANUP_DESC" class="btn-group btn-group-yesno">
                 <option value="">WF_OPTION_INHERIT</option>
@@ -83,7 +85,11 @@
                 <option value="1">WF_PARAM_CSS_OVERWRITE</option>
                 <option value="2">WF_PARAM_CSS_INHERIT</option>
             </field>
-            <field name="profile_content_css_custom" placeholder="eg: templates/$template/css/content.css" type="textarea" rows="2" cols="55" default="" label="WF_PARAM_CSS_CUSTOM" description="WF_PARAM_CSS_CUSTOM_DESC" showon="profile_content_css:0[OR]profile_content_css:1" />
+
+            <field name="profile_content_css_custom" type="repeatable" default="" label="WF_PARAM_CSS_CUSTOM" description="WF_PARAM_CSS_CUSTOM_DESC" showon="profile_content_css:0[OR]profile_content_css:1">
+                <field type="text" size="50" hiddenLabel="true" hint="eg: templates/$template/css/content.css" />
+            </field>
+
             <field name="custom_colors" type="textarea" rows="3" cols="50" default="" label="WF_PARAM_CUSTOM_COLORS" description="WF_PARAM_CUSTOM_COLORS_DESC" placeholder="eg: #CC0000,#FF0000" />
         </fieldset>
         <fieldset name="editor.filesystem">
@@ -91,7 +97,7 @@
             <field name="dir" type="text" default="" size="50" placeholder="images" label="WF_PARAM_DIRECTORY" description="WF_PARAM_DIRECTORY_DESC"/>
 
             <field name="dir_filter" type="repeatable" default="" label="WF_PARAM_DIRECTORY_FILTER" description="WF_PARAM_DIRECTORY_FILTER_DESC">
-                <field type="text" size="50" />
+                <field type="text" size="50" hiddenLabel="true" />
             </field>
 
             <field name="filesystem" type="filesystem" default="joomla" label="WF_PARAM_FILESYSTEM" description="WF_PARAM_FILESYSTEM_DESC" />

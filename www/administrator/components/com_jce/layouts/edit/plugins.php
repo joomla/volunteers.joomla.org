@@ -29,40 +29,40 @@ $plugins = $displayData->get('Plugins');
                 $icons .= '<div class="mce-widget mce-btn mceButton ' . $plugin->class . '" title="' . $plugin->title . '"><span class="mce-ico mce-i-' . $icon . ' mceIcon mce_' . $icon . '"></span></div>';
             }
 
-            $title .= '<div class="mceEditor defaultSkin"><div class="mce-container mce-toolbar mceToolBarItem">' . $icons . '</div></div>';
+            $title .= '<div class="mceEditor mceDefaultSkin"><div class="mce-container mce-toolbar mceToolBarItem">' . $icons . '</div></div>';
         }
 
         echo JHtml::_('bootstrap.addTab', 'plugins', 'tabs-plugins-' . $plugin->name, $title); ?>
-
-            <div class="row-fluid">
-
-                    <h2><?php echo $plugin->title; ?></h2>
-                    <hr />
-
-                    <?php if ($plugin->form) :
-
-                        echo $plugin->form->renderFieldset('config'); ?>
-
+            <fieldset class="<?php echo !empty($displayData->formclass) ? $displayData->formclass : ''; ?>">
+                <legend><?php echo $plugin->title; ?></legend>
+                <div class="row-fluid">
                         <hr />
-                        
-                        <?php foreach ($plugin->extensions as $type => $extensions) : ?>
-                            <h3><?php echo JText::_('WF_EXTENSION_' . strtoupper($type), true); ?></h3>
 
-                            <?php foreach ($extensions as $extension) : ?>
+                        <?php if ($plugin->form) :
 
-                                <div class="row-fluid">
-                                    <h4><?php echo JText::_('PLG_JCE_' . strtoupper($type) . '_' . strtoupper($extension->name), true); ?></h4>                                
-                                    <?php echo $extension->form->renderFieldset($type . '.' . $extension->name); ?>
-                                </div>
-
-                            <?php endforeach; ?>
+                            echo $plugin->form->renderFieldset('config'); ?>
 
                             <hr />
+                            
+                            <?php foreach ($plugin->extensions as $type => $extensions) : ?>
+                                <h3><?php echo JText::_('WF_EXTENSION_' . strtoupper($type), true); ?></h3>
 
-                        <?php endforeach;
+                                <?php foreach ($extensions as $extension) : ?>
 
-                        endif; ?>
-            </div>
+                                    <div class="row-fluid">
+                                        <h4><?php echo JText::_('PLG_JCE_' . strtoupper($type) . '_' . strtoupper($extension->name), true); ?></h4>                                
+                                        <?php echo $extension->form->renderFieldset($type . '.' . $extension->name); ?>
+                                    </div>
+
+                                <?php endforeach; ?>
+
+                                <hr />
+
+                            <?php endforeach;
+
+                            endif; ?>
+                </div>
+            </fieldset>
             <?php echo JHtml::_('bootstrap.endTab');
         }
         echo JHtml::_('bootstrap.endTabSet'); ?>

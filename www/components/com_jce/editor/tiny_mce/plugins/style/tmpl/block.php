@@ -10,41 +10,41 @@
  */
 defined('JPATH_PLATFORM') or die;
 ?>
-      <div class="uk-grid uk-grid-small">
+      <div class="uk-form-row uk-grid uk-grid-small">
         <label for="block_wordspacing" class="uk-form-label uk-width-2-10"><?php echo JText::_('WF_STYLES_BLOCK_WORDSPACING'); ?></label>
-            <div class="uk-form-controls uk-width-5-10 uk-datalist">
-              <select id="block_wordspacing"></select>
+            <div class="uk-form-controls uk-width-5-10">
+              <select id="block_wordspacing" class="uk-datalist"></select>
             </div>
             <div class="uk-form-controls uk-width-3-10">
               <select id="block_wordspacing_measurement" ></select>
             </div>
       </div>
 
-      <div class="uk-grid uk-grid-small">
+      <div class="uk-form-row uk-grid uk-grid-small">
         <label for="block_letterspacing" class="uk-form-label uk-width-2-10"><?php echo JText::_('WF_STYLES_BLOCK_LETTERSPACING'); ?></label>
-            <div class="uk-form-controls uk-width-5-10 uk-datalist">
-              <select id="block_letterspacing"></select>
+            <div class="uk-form-controls uk-width-5-10">
+              <select id="block_letterspacing" class="uk-datalist"></select>
             </div>
             <div class="uk-form-controls uk-width-3-10">
               <select id="block_letterspacing_measurement"></select>
             </div>
       </div>
 
-      <div class="uk-grid uk-grid-small">
+      <div class="uk-form-row uk-grid uk-grid-small">
         <label for="block_vertical_alignment" class="uk-form-label uk-width-2-10"><?php echo JText::_('WF_STYLES_BLOCK_VERTICAL_ALIGNMENT'); ?></label>
-        <div class="uk-form-controls uk-width-5-10 uk-datalist">
-          <select id="block_vertical_alignment"></select>
+        <div class="uk-form-controls uk-width-5-10">
+          <select id="block_vertical_alignment" class="uk-datalist"></select>
         </div>
       </div>
 
-      <div class="uk-grid uk-grid-small">
+      <div class="uk-form-row uk-grid uk-grid-small">
         <label for="block_text_align" class="uk-form-label uk-width-2-10"><?php echo JText::_('WF_STYLES_BLOCK_TEXT_ALIGN'); ?></label>
-        <div class="uk-form-controls uk-width-5-10 uk-datalist">
-          <select id="block_text_align"></select>
+        <div class="uk-form-controls uk-width-5-10">
+          <select id="block_text_align" class="uk-datalist"></select>
         </div>
       </div>
 
-      <div class="uk-grid uk-grid-small">
+      <div class="uk-form-row uk-grid uk-grid-small">
         <label for="block_text_indent" class="uk-form-label uk-width-2-10"><?php echo JText::_('WF_STYLES_BLOCK_TEXT_INDENT'); ?></label>
             <div class="uk-form-controls uk-width-2-10">
               <input type="number" id="block_text_indent" />
@@ -54,16 +54,16 @@ defined('JPATH_PLATFORM') or die;
             </div>
       </div>
 
-      <div class="uk-grid uk-grid-small">
+      <div class="uk-form-row uk-grid uk-grid-small">
         <label for="block_whitespace" class="uk-form-label uk-width-2-10"><?php echo JText::_('WF_STYLES_BLOCK_WHITESPACE'); ?></label>
-        <div class="uk-form-controls uk-width-5-10 uk-datalist">
-          <select id="block_whitespace"></select>
+        <div class="uk-form-controls uk-width-5-10">
+          <select id="block_whitespace" class="uk-datalist"></select>
         </div>
       </div>
 
-      <div class="uk-grid uk-grid-small">
+      <div class="uk-form-row uk-grid uk-grid-small">
         <label for="block_display" class="uk-form-label uk-width-2-10"><?php echo JText::_('WF_STYLES_BLOCK_DISPLAY'); ?></label>
-        <div class="uk-form-controls uk-width-5-10 uk-datalist">
-          <select id="block_display"></select>
+        <div class="uk-form-controls uk-width-5-10">
+          <select id="block_display" class="uk-datalist"></select>
         </div>
       </div>

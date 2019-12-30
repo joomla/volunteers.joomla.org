@@ -28,13 +28,13 @@ JHtml::_('formbehavior.chosen', 'select');
 
 		<h3><?php echo JText::_('COM_VOLUNTEERS_PROFILE_ACCOUNT') ?></h3>
 
-        <div class="control-group">
-            <div class="controls">
-                <div class="alert alert-info">
+		<div class="control-group">
+			<div class="controls">
+				<div class="alert alert-info">
 					<?php echo JText::_('COM_VOLUNTEERS_FIELD_NAME_DESC') ?>
-                </div>
-            </div>
-        </div>
+				</div>
+			</div>
+		</div>
 		<?php echo $this->form->renderField('name'); ?>
 		<?php echo $this->form->renderField('email'); ?>
 		<?php echo $this->form->renderField('password1'); ?>
@@ -84,19 +84,19 @@ JHtml::_('formbehavior.chosen', 'select');
 		<?php echo $this->form->renderField('city-location'); ?>
 		<?php echo $this->form->renderField('location'); ?>
 
-		<div class="address">
+		<div class="address-info">
 			<?php echo $this->form->renderField('address'); ?>
 		</div>
 
 		<hr>
 
-        <h3><?php echo JText::_('COM_VOLUNTEERS_PROFILE_JOOMLA') ?></h3>
+		<h3><?php echo JText::_('COM_VOLUNTEERS_PROFILE_JOOMLA') ?></h3>
 
 		<?php echo $this->form->renderField('joomlaforum'); ?>
 		<?php echo $this->form->renderField('joomladocs'); ?>
 		<?php echo $this->form->renderField('certification'); ?>
 
-        <hr>
+		<hr>
 
 		<h3><?php echo JText::_('COM_VOLUNTEERS_PROFILE_SOCIAL') ?></h3>
 
@@ -145,7 +145,7 @@ JHtml::_('formbehavior.chosen', 'select');
 
 		<?php echo $this->form->renderField('peakon'); ?>
 
-        <div class="row-fluid">
+		<div class="row-fluid">
 			<div class="btn-toolbar pull-right">
 
 				<div id="toolbar-apply" class="btn-group">
@@ -173,3 +173,8 @@ JHtml::_('formbehavior.chosen', 'select');
 		});
 	});
 </script>
+<style>
+	.address-info {
+		opacity: 0;
+	}
+</style>

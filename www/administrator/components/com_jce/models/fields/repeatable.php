@@ -35,12 +35,9 @@ class JFormFieldRepeatable extends JFormField
      */
     protected function getInput()
     {
-        // Initialize variables.
-        $subForm = new JForm($this->name, array('control' => 'jform'));
-        $xml = $this->element->children()->asXml();
-        $subForm->load($xml);
-
+        $subForm = new JForm($this->name, array('control' => $this->formControl));
         $children = $this->element->children();
+        $subForm->load($children);
         $subForm->setFields($children);
 
         // And finaly build a main container
@@ -53,15 +50,25 @@ class JFormFieldRepeatable extends JFormField
             $values = explode(',', $values);
         }
 
-        foreach ($values as $index => $value) {
+        $fields = $subForm->getFieldset();
 
+        foreach ($values as $value) {
+            $class  = '';
+
+            // highlight grouped fields
+            if (count($fields) > 1) {
+                $class = ' well well-small p-2 bg-light';
+            }
+            
             $str[] = '<div class="form-field-repeatable-item">';
+            $str[] = '  <div class="form-field-repeatable-item-group' . $class . '">';
 
             $n = 0;
-            
-            foreach ($subForm->getFieldset() as $field) {
+
+            foreach ($fields as $field) {
                 $field->element['multiple'] = true;
 
+                // substitute for repeatable element
                 $field->element['name'] = (string) $this->element['name'];
 
                 if (is_array($value)) {
@@ -74,18 +81,23 @@ class JFormFieldRepeatable extends JFormField
                 $field->setup($field->element, $field->value, $this->group);
 
                 // reset id
-                $field->id = '';
+                $field->id .= '_' . $n;
 
                 if (strpos($field->name, '[]') === false) {
                     $field->name .= '[]';
                 }
 
-                $str[] = $field->getInput();
-                $str[] = '<button class="btn btn-link form-field-repeatable-add" aria-label="' . JText::_('JGLOBAL_FIELD_ADD') . '"><i class="icon icon-plus pull-right float-right"></i></button>';
-                $str[] = '<button class="btn btn-link form-field-repeatable-remove" aria-label="' . JText::_('JGLOBAL_FIELD_REMOVE') . '"><i class="icon icon-trash pull-right float-right"></i></button>';
-
+                $str[] = $field->renderField();
+                
                 $n++;
             }
+
+            $str[] = '  </div>';
+
+            $str[] = '  <div class="form-field-repeatable-item-control">';
+            $str[] = '      <button class="btn btn-link form-field-repeatable-add" aria-label="' . JText::_('JGLOBAL_FIELD_ADD') . '"><i class="icon icon-plus pull-right float-right"></i></button>';
+            $str[] = '      <button class="btn btn-link form-field-repeatable-remove" aria-label="' . JText::_('JGLOBAL_FIELD_REMOVE') . '"><i class="icon icon-trash pull-right float-right"></i></button>';
+            $str[] = '  </div>';
 
             $str[] = '</div>';
         }

@@ -18,31 +18,31 @@ defined('JPATH_PLATFORM') or die;
         <input type="checkbox" id="border_style_same" checked="checked" onclick="StyleDialog.toggleSame(this,'border_style');" />
         <label for="border_style_same"><?php echo JText::_('WF_STYLES_SAME'); ?></label>
       </div>
-    <div class="uk-grid uk-grid-small">
+    <div class="uk-form-row uk-grid uk-grid-small">
       <label for="border_style_top" class="uk-form-label uk-width-3-10"><?php echo JText::_('WF_STYLES_TOP'); ?></label>
-      <div class="uk-form-controls uk-width-7-10 uk-datalist">
-        <select id="border_style_top"></select>
+      <div class="uk-form-controls uk-width-7-10">
+        <select id="border_style_top" class="uk-datalist"></select>
       </div>
     </div>
 
-    <div class="uk-grid uk-grid-small">
+    <div class="uk-form-row uk-grid uk-grid-small">
       <label for="border_style_right" class="uk-form-label uk-width-3-10"><?php echo JText::_('WF_STYLES_RIGHT'); ?></label>
-      <div class="uk-form-controls uk-width-7-10 uk-datalist">
-        <select id="border_style_right"></select>
+      <div class="uk-form-controls uk-width-7-10">
+        <select id="border_style_right" class="uk-datalist"></select>
       </div>
     </div>
 
-    <div class="uk-grid uk-grid-small">
+    <div class="uk-form-row uk-grid uk-grid-small">
       <label for="border_style_bottom" class="uk-form-label uk-width-3-10"><?php echo JText::_('WF_STYLES_BOTTOM'); ?></label>
-      <div class="uk-form-controls uk-width-7-10 uk-datalist">
-        <select id="border_style_bottom"></select>
+      <div class="uk-form-controls uk-width-7-10">
+        <select id="border_style_bottom" class="uk-datalist"></select>
       </div>
     </div>
 
-    <div class="uk-grid uk-grid-small">
+    <div class="uk-form-row uk-grid uk-grid-small">
       <label for="border_style_left" class="uk-form-label uk-width-3-10"><?php echo JText::_('WF_STYLES_LEFT'); ?></label>
-      <div class="uk-form-controls uk-width-7-10 uk-datalist">
-        <select id="border_style_left"></select>
+      <div class="uk-form-controls uk-width-7-10">
+        <select id="border_style_left" class="uk-datalist"></select>
       </div>
     </div>
   </fieldset>
@@ -55,36 +55,36 @@ defined('JPATH_PLATFORM') or die;
         <label for="border_width_same"><?php echo JText::_('WF_STYLES_SAME'); ?></label>
       </div>
 
-      <div class="uk-grid uk-grid-small">
-        <div class="uk-form-controls uk-width-5-10 uk-datalist">
-          <select id="border_width_top"></select>
+      <div class="uk-form-row uk-grid uk-grid-small">
+        <div class="uk-form-controls uk-width-5-10">
+          <select id="border_width_top" class="uk-datalist"></select>
         </div>
         <div class="uk-form-controls uk-width-5-10">
           <select id="border_width_top_measurement" ></select>
         </div>
       </div>
 
-      <div class="uk-grid uk-grid-small">
-        <div class="uk-form-controls uk-width-5-10 uk-datalist">
-          <select id="border_width_right"></select>
+      <div class="uk-form-row uk-grid uk-grid-small">
+        <div class="uk-form-controls uk-width-5-10">
+          <select id="border_width_right" class="uk-datalist"></select>
         </div>
         <div class="uk-form-controls uk-width-5-10">
           <select id="border_width_right_measurement" ></select>
         </div>
       </div>
 
-      <div class="uk-grid uk-grid-small">
-        <div class="uk-form-controls uk-width-5-10 uk-datalist">
-          <select id="border_width_bottom"></select>
+      <div class="uk-form-row uk-grid uk-grid-small">
+        <div class="uk-form-controls uk-width-5-10">
+          <select id="border_width_bottom" class="uk-datalist"></select>
         </div>
         <div class="uk-form-controls uk-width-5-10">
           <select id="border_width_bottom_measurement" ></select>
         </div>
       </div>
 
-      <div class="uk-grid uk-grid-small">
-        <div class="uk-form-controls uk-width-5-10 uk-datalist">
-          <select id="border_width_left"></select>
+      <div class="uk-form-row uk-grid uk-grid-small">
+        <div class="uk-form-controls uk-width-5-10">
+          <select id="border_width_left" class="uk-datalist"></select>
         </div>
         <div class="uk-form-controls uk-width-5-10">
           <select id="border_width_left_measurement" ></select>
@@ -100,25 +100,25 @@ defined('JPATH_PLATFORM') or die;
         <label for="border_color_same"><?php echo JText::_('WF_STYLES_SAME'); ?></label>
       </div>
 
-      <div class="uk-form-row">
+      <div class="uk-form-row uk-grid uk-grid-small">
         <div class="uk-form-controls uk-width-2-3">
           <input id="border_color_top" class="color" type="text" value="" />
         </div>
       </div>
 
-      <div class="uk-form-row">
+      <div class="uk-form-row uk-grid uk-grid-small">
         <div class="uk-form-controls uk-width-2-3">
           <input id="border_color_right" class="color" type="text" value="" />
         </div>
       </div>
 
-      <div class="uk-form-row">
+      <div class="uk-form-row uk-grid uk-grid-small">
         <div class="uk-form-controls uk-width-2-3">
           <input id="border_color_bottom" class="color" type="text" value="" />
         </div>
       </div>
 
-      <div class="uk-form-row">
+      <div class="uk-form-row uk-grid uk-grid-small">
         <div class="uk-form-controls uk-width-2-3">
           <input id="border_color_left" class="color" type="text" value="" />
         </div>

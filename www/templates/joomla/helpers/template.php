@@ -157,6 +157,9 @@ class JoomlaTemplateHelper
 				break;
 			}
 
+			/*
+			 * Docs property is not using the generic template file
+			 *
 			case 'docs.joomla.org':
 			{
 				$issueTag   = 'jdocs';
@@ -181,7 +184,11 @@ class JoomlaTemplateHelper
 
 				break;
 			}
+			*/
 
+			/*
+			 * Domains property is not using the generic template file
+			 *	
 			case 'domains.joomla.org':
 			{
 				$issueTag   = 'jdomain';
@@ -193,6 +200,7 @@ class JoomlaTemplateHelper
 
 				break;
 			}
+			*/
 
 			case 'downloads.joomla.org':
 			{
@@ -418,6 +426,9 @@ class JoomlaTemplateHelper
 				break;
 			}
 
+			/*
+			 * Launch property is not using the generic template file
+			 *	
 			case 'launch.joomla.org':
 			{
 				$siteConfig = (object) [
@@ -440,6 +451,7 @@ class JoomlaTemplateHelper
 				];
 				break;
 			}
+			*/
 
 			case 'magazine.joomla.org':
 			{
@@ -517,6 +529,9 @@ class JoomlaTemplateHelper
 			}
 
 
+			/*
+			 * Shop property is not using the generic template file
+			 *	
 			case 'shop.joomla.org':
 			{
 				$siteConfig = (object) [
@@ -540,6 +555,7 @@ class JoomlaTemplateHelper
 
 				break;
 			}
+			*/
 
 			case 'showcase.joomla.org':
 			{

@@ -37,31 +37,6 @@ JFactory::getDocument()->addScript('media/com_volunteers/js/oms.js', 'text/javas
 		</p>
 	</div>
 </div>
-<div class="row-fluid">
-	<div class="video-container">
-		<iframe src="https://www.youtube-nocookie.com/embed/Fe5kEH05u_4?controls=0&rel=0"
-		        allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
-		        allowfullscreen
-		></iframe>
-	</div>
-	<style>
-		.video-container {
-			position: relative;
-			padding-bottom: 56.25%;
-			height: 0;
-			overflow: hidden;
-		}
-
-		.video-container iframe {
-			position: absolute;
-			top: 0;
-			left: 0;
-			width: 100%;
-			height: 100%;
-			border: 0;
-		}
-	</style>
-</div>
 <br>
 <div class="row-fluid">
 	<h2><?php echo JText::_('COM_VOLUNTEERS_LATEST_REPORTS') ?></h2>

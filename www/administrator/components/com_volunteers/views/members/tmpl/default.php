@@ -5,6 +5,8 @@
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
+use Joomla\CMS\Language\Text;
+
 // No direct access.
 defined('_JEXEC') or die;
 
@@ -43,35 +45,27 @@ if ($saveOrder)
 					<?php echo JText::_('JGLOBAL_NO_MATCHING_RESULTS'); ?>
 				</div>
 			<?php else : ?>
+				<h3><?php echo count($this->items); ?> members (matching filters)</h3>
 				<table class="table table-striped" id="itemsList">
 					<thead>
 					<tr>
-						<th width="1%" class="nowrap center hidden-phone">
-							<?php echo JHtml::_('searchtools.sort', '', 'a.ordering', $listDirn, $listOrder, null, 'asc', 'JGRID_HEADING_ORDERING', 'icon-menu-2'); ?>
-						</th>
-						<th width="1%" class="hidden-phone center">
-							<?php echo JHtml::_('grid.checkall'); ?>
-						</th>
-						<th width="1%" style="min-width:55px" class="nowrap center">
-							<?php echo JHtml::_('searchtools.sort', 'JSTATUS', 'a.state', $listDirn, $listOrder); ?>
-						</th>
-						<th width="8%"></th>
+						<th width="6%"></th>
 						<th width="15%" class="team">
-							<?php echo JHtml::_('searchtools.sort', 'COM_VOLUNTEERS_FIELD_TEAM_DEPARTMENT', 'a.team', $listDirn, $listOrder); ?>
+							<?php echo JHtml::_('searchtools.sort', 'COM_VOLUNTEERS_FIELD_DEPARTMENT', 'a.department', $listDirn, $listOrder); ?>
 						</th>
-						<th width="15%" class="name">
-							<?php echo JHtml::_('searchtools.sort', 'COM_VOLUNTEERS_FIELD_VOLUNTEER', 'a.volunteer', $listDirn, $listOrder); ?>
+						<th width="15%" class="team">
+							<?php echo JHtml::_('searchtools.sort', 'COM_VOLUNTEERS_FIELD_TEAM', 'a.team', $listDirn, $listOrder); ?>
 						</th>
 						<th>
 							<?php echo JHtml::_('searchtools.sort', 'COM_VOLUNTEERS_FIELD_POSITION', 'a.position', $listDirn, $listOrder); ?>
 						</th>
-						<th>
-							<?php echo JHtml::_('searchtools.sort', 'COM_VOLUNTEERS_FIELD_ROLE', 'a.role', $listDirn, $listOrder); ?>
+						<th width="15%" class="name">
+							<?php echo JHtml::_('searchtools.sort', 'COM_VOLUNTEERS_FIELD_VOLUNTEER', 'a.volunteer', $listDirn, $listOrder); ?>
 						</th>
-						<th>
+						<th width="8%">
 							<?php echo JHtml::_('searchtools.sort', 'COM_VOLUNTEERS_FIELD_DATE_STARTED', 'a.date_started', $listDirn, $listOrder); ?>
 						</th>
-						<th>
+						<th width="8%">
 							<?php echo JHtml::_('searchtools.sort', 'COM_VOLUNTEERS_FIELD_DATE_ENDED', 'a.date_ended', $listDirn, $listOrder); ?>
 						</th>
 						<th width="1%" class="nowrap center hidden-phone">
@@ -94,57 +88,39 @@ if ($saveOrder)
 						$canCheckin = $user->authorise('core.manage', 'com_checkin') || $item->checked_out == $user->get('id') || $item->checked_out == 0;
 						$canChange = $user->authorise('core.edit.state', 'com_volunteers') && $canCheckin;
 						?>
-						<tr class="row<?php echo $i % 2; ?><?php if($item->date_ended == '0000-00-00'):?> success<?php else:?> error<?php endif;?>"  sortable-volunteer-id="<?php echo $item->id ?>">
-							<td class="order nowrap center hidden-phone">
-								<?php
-								$iconClass = '';
-								if (!$canChange)
-								{
-									$iconClass = ' inactive';
-								}
-								elseif (!$saveOrder)
-								{
-									$iconClass = ' inactive tip-top hasTooltip" title="' . JHtml::tooltipText('JORDERINGDISABLED');
-								}
-								?>
-								<span class="sortable-handler<?php echo $iconClass ?>">
-								<span class="icon-menu"></span>
-							</span>
-								<?php if ($canChange && $saveOrder) : ?>
-									<input type="text" style="display:none" name="order[]" size="5" value="<?php echo $item->ordering; ?>" class="width-20 text-area-order "/>
-								<?php endif; ?>
-							</td>
-							<td class="center hidden-phone">
-								<?php echo JHtml::_('grid.id', $i, $item->id); ?>
-							</td>
-							<td class="center">
-								<?php echo JHtml::_('jgrid.published', $item->state, $i, 'members.', $canChange, 'cb'); ?>
-							</td>
+						<tr class="row<?php echo $i % 2; ?><?php if ($item->date_ended == '0000-00-00'): ?> success<?php else: ?> error<?php endif; ?>" sortable-volunteer-id="<?php echo $item->id ?>">
 							<td>
 								<a class="btn btn-small" href="<?php echo JRoute::_('index.php?option=com_volunteers&task=member.edit&id=' . (int) $item->id); ?>">
 									<span class="icon-edit"></span>Edit
 								</a>
 							</td>
 							<td class="nowrap">
-								<?php if ($canEdit && $item->department) : ?>
-									<a href="<?php echo JRoute::_('index.php?option=com_volunteers&task=department.edit&id=' . (int) $item->department); ?>">
-										<?php echo $this->escape($item->department_title); ?>
-									</a>
-								<?php elseif ($item->department) : ?>
-									<?php echo $this->escape($item->department_title); ?>
-								<?php endif; ?>
-								<?php if ($canEdit && $item->team) : ?>
-									<a href="<?php echo JRoute::_('index.php?option=com_volunteers&task=team.edit&id=' . (int) $item->team); ?>">
-										<?php echo $this->escape($item->team_title); ?>
-									</a>
-								<?php elseif ($item->team) : ?>
-									<?php echo $this->escape($item->team_title); ?>
+								<?php echo $item->department_title; ?>
+								<?php echo $item->teamdepartment_title; ?>
+							</td>
+							<td class="nowrap">
+								<?php if ($item->team_title): ?>
+									<?php echo $item->team_title; ?>
+									<br><small>
+										<?php if ($item->team_status == 0): ?>
+											<?php echo Text::_('COM_VOLUNTEERS_FIELD_STATUS_INFORMATION'); ?>
+										<?php elseif ($item->team_status == 1): ?>
+											<?php echo Text::_('COM_VOLUNTEERS_FIELD_STATUS_OFFICIAL'); ?>
+										<?php elseif ($item->team_status == 2): ?>
+											<?php echo Text::_('COM_VOLUNTEERS_FIELD_STATUS_UNOFFICIAL'); ?>
+										<?php endif; ?>
+									</small>
+								<?php else: ?>
+									-
 								<?php endif; ?>
 							</td>
 							<td class="nowrap">
-								<?php if ($item->checked_out) : ?>
-									<?php echo JHtml::_('jgrid.checkedout', $i, $item->editor, $item->checked_out_time, 'members.', $canCheckin); ?>
+								<?php echo $item->position_title; ?>
+								<?php if ($item->role_title): ?>
+									<br><small><?php echo $item->role_title; ?></small>
 								<?php endif; ?>
+							</td>
+							<td class="nowrap">
 								<?php if ($canEdit) : ?>
 									<a href="<?php echo JRoute::_('index.php?option=com_volunteers&task=volunteer.edit&id=' . (int) $item->volunteer); ?>">
 										<?php echo $this->escape($item->volunteer_name); ?>
@@ -152,12 +128,7 @@ if ($saveOrder)
 								<?php else : ?>
 									<?php echo $this->escape($item->volunteer_name); ?>
 								<?php endif; ?>
-							</td>
-							<td class="nowrap">
-								<?php echo $item->position_title; ?>
-							</td>
-							<td>
-								<?php echo $this->escape($item->role_title); ?>
+								<br><small><?php echo $item->user_email; ?></small>
 							</td>
 							<td>
 								<?php echo $item->date_started; ?>

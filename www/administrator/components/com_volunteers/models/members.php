@@ -59,11 +59,14 @@ class VolunteersModelMembers extends JModelList
 		$this->setState('filter.search', $this->getUserStateFromRequest($this->context . '.filter.search', 'filter_search'));
 		$this->setState('filter.state', $this->getUserStateFromRequest($this->context . '.filter.state', 'filter_state'));
 		$this->setState('filter.department', $this->getUserStateFromRequest($this->context . '.filter.department', 'filter_department'));
+		$this->setState('filter.departmentTeam', $this->getUserStateFromRequest($this->context . '.filter.departmentTeam', 'filter_departmentTeam'));
 		$this->setState('filter.team', $this->getUserStateFromRequest($this->context . '.filter.team', 'filter_team'));
 		$this->setState('filter.volunteer', $this->getUserStateFromRequest($this->context . '.filter.volunteer', 'filter_volunteer'));
 		$this->setState('filter.position', $this->getUserStateFromRequest($this->context . '.filter.position', 'filter_position'));
 		$this->setState('filter.active', $this->getUserStateFromRequest($this->context . '.filter.active', 'filter_active'));
 		$this->setState('filter.type', $this->getUserStateFromRequest($this->context . '.filter.type', 'filter_type'));
+		$this->setState('filter.teamStatus', $this->getUserStateFromRequest($this->context . '.filter.teamStatus', 'filter_teamStatus'));
+		$this->setState('filter.osmStatus', $this->getUserStateFromRequest($this->context . '.filter.osmStatus', 'filter_osmStatus'));
 
 		// Load the parameters.
 		$params = JComponentHelper::getParams('com_volunteers');
@@ -80,7 +83,7 @@ class VolunteersModelMembers extends JModelList
 	 * different modules that might need different sets of data or different
 	 * ordering requirements.
 	 *
-	 * @param   string $id A prefix for the store id.
+	 * @param   string  $id  A prefix for the store id.
 	 *
 	 * @return  string  A store id.
 	 */
@@ -90,9 +93,12 @@ class VolunteersModelMembers extends JModelList
 		$id .= ':' . $this->getState('filter.search');
 		$id .= ':' . $this->getState('filter.state');
 		$id .= ':' . $this->getState('filter.department');
+		$id .= ':' . $this->getState('filter.departmentTeam');
 		$id .= ':' . $this->getState('filter.volunteer');
 		$id .= ':' . $this->getState('filter.active');
 		$id .= ':' . $this->getState('filter.type');
+		$id .= ':' . $this->getState('filter.teamStatus');
+		$id .= ':' . $this->getState('filter.osmStatus');
 
 		return parent::getStoreId($id);
 	}
@@ -117,13 +123,17 @@ class VolunteersModelMembers extends JModelList
 		$query->select('volunteer.image AS volunteer_image, volunteer.address AS volunteer_address, volunteer.city AS volunteer_city, volunteer.zip AS volunteer_zip, volunteer.country AS volunteer_country')
 			->join('LEFT', '#__volunteers_volunteers AS ' . $db->quoteName('volunteer') . ' ON volunteer.id = a.volunteer');
 
-		// Join over the teams.
+		// Join over the departments.
 		$query->select('department.title AS department_title, department.parent_id AS department_parent_id')
 			->join('LEFT', '#__volunteers_departments AS ' . $db->quoteName('department') . ' ON department.id = a.department');
 
 		// Join over the teams.
-		$query->select('team.title AS team_title')
+		$query->select('team.title AS team_title, team.status AS team_status')
 			->join('LEFT', '#__volunteers_teams AS ' . $db->quoteName('team') . ' ON team.id = a.team');
+
+		// Join over the teams.
+		$query->select('teamdepartment.title AS teamdepartment_title')
+			->join('LEFT', '#__volunteers_departments AS ' . $db->quoteName('teamdepartment') . ' ON teamdepartment.id = team.department');
 
 		// Join over the positions.
 		$query->select('position.title AS position_title')
@@ -175,6 +185,14 @@ class VolunteersModelMembers extends JModelList
 			$query->where('a.department = ' . (int) $department);
 		}
 
+		// Filter by department teams
+		$departmentTeam = $this->getState('filter.departmentTeam');
+
+		if (is_numeric($departmentTeam) && ($departmentTeam > 0))
+		{
+			$query->where('team.department = ' . (int) $departmentTeam);
+		}
+
 		// Filter by team
 		$team = $this->getState('filter.team');
 
@@ -209,6 +227,44 @@ class VolunteersModelMembers extends JModelList
 			$query->where('a.position = ' . (int) $position);
 		}
 
+		// Filter by team status
+		$teamStatus = $this->getState('filter.teamStatus');
+
+		if (is_numeric($teamStatus))
+		{
+			$query->where('team.status = ' . (int) $teamStatus);
+		}
+
+		// Filter by OSM status
+		$osmStatus = $this->getState('filter.osmStatus');
+
+		if ($osmStatus)
+		{
+			switch ($osmStatus)
+			{
+				case 'contributor':
+					$positions = '8';
+					break;
+				case 'member':
+					$positions = '1,2,7';
+					break;
+				case 'teamleaders':
+					$positions = '2';
+					break;
+				case 'directors':
+					$positions = '11';
+					break;
+				case 'officers':
+					$positions = '13';
+					break;
+			}
+
+			$query
+				->where('a.position IN (' . $positions . ')')
+				->where('team.parent_id = 0')
+				->where('team.department != 58');
+		}
+
 		// Filter by active
 		$active = $this->getState('filter.active');
 
@@ -230,12 +286,12 @@ class VolunteersModelMembers extends JModelList
 		// Filter by type
 		$type = $this->getState('filter.type');
 
-		if ($type == 'department')
+		if ($type === 'department')
 		{
 			$query->where('a.department <> 0');
 		}
 
-		if ($type == 'team')
+		if ($type === 'team')
 		{
 			$query->where('a.team <> 0');
 		}

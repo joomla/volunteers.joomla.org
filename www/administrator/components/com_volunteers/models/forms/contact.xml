@@ -10,8 +10,7 @@
         />
         <field
                 name="message"
-                type="textarea"
-                rows="6"
+                type="editor"
                 label="COM_VOLUNTEERS_FIELD_TEXT"
                 required="true"
         />

@@ -87,4 +87,36 @@ class VolunteersControllerMembers extends JControllerAdmin
 		// Push to the browser so it starts a download
 		Factory::$application->close();
 	}
+
+	/**
+	 * Export members to csv
+	 *
+	 * @return void
+	 * @since 1.0.0
+	 */
+	public function mail()
+	{
+		// Check for request forgeries.
+		$this->checkToken();
+
+		/** @var VolunteersModelMembers $model */
+		$model = JModelLegacy::getInstance('Members', 'VolunteersModel', array('ignore_request' => false));
+		$items = $model->getItems();
+
+		$members = [];
+
+		foreach ($items as $item)
+		{
+			$members[] = [
+				'name'     => $item->volunteer_name,
+				'email'    => $item->user_email,
+				'position' => $item->position_title,
+				'team'     => $item->team_title
+			];
+		}
+
+		Factory::getSession()->set('volunteers.recipients', $members);
+
+		$this->setRedirect(JRoute::_('index.php?option=com_volunteers&view=contact', false));
+	}
 }

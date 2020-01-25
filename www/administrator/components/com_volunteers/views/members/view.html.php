@@ -73,7 +73,7 @@ class VolunteersViewMembers extends JViewLegacy
 		if ($user->authorise('core.admin', 'com_volunteers'))
 		{
 			JToolbarHelper::custom('members.export', 'download', 'download', 'Export current selection (CSV)', false);
-			JToolbarHelper::custom('members.email', 'mail', 'mail', 'E-mail current selection', false);
+			JToolbarHelper::custom('members.mail', 'mail', 'mail', 'E-mail current selection', false);
 		}
 
 		if ($user->authorise('core.admin', 'com_volunteers') || $user->authorise('core.options', 'com_volunteers'))

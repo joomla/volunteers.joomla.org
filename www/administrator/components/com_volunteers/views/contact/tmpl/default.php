@@ -22,8 +22,21 @@ JFactory::getDocument()->addScriptDeclaration("
 ?>
 
 <form action="<?php echo JRoute::_('index.php?option=com_volunteers&view=contact'); ?>"
-	  method="post" name="adminForm" id="adminForm" class="form-validate">
-
+      method="post" name="adminForm" id="adminForm" class="form-validate">
+	<?php if ($this->recipients): ?>
+	<h3><?php echo count($this->recipients); ?> recipients</h3>
+	<table class="table table-striped">
+		<?php foreach ($this->recipients as $recipient): ?>
+			<tr>
+				<td width="200px"><strong><?php echo $recipient['name']; ?></strong></td>
+				<td width="300px"> <?php echo $recipient['email']; ?></td>
+				<td width="200px"> <?php echo $recipient['position']; ?></td>
+				<td> <?php echo $recipient['team']; ?></td>
+			</tr>
+		<?php endforeach; ?>
+		<?php endif; ?>
+	</table>
+	<h3>Email</h3>
 	<?php echo $this->form->renderFieldset('message'); ?>
 
 	<input type="hidden" name="task" value=""/>

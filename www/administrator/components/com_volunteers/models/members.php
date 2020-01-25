@@ -53,7 +53,7 @@ class VolunteersModelMembers extends JModelList
 	 *
 	 * @note    Calling getState in this method will result in recursion.
 	 */
-	protected function populateState($ordering = 'team.title', $direction = 'asc')
+	protected function populateState($ordering = 'a.id', $direction = 'desc')
 	{
 		// Load the filter state.
 		$this->setState('filter.search', $this->getUserStateFromRequest($this->context . '.filter.search', 'filter_search'));
@@ -297,8 +297,8 @@ class VolunteersModelMembers extends JModelList
 		}
 
 		// Add the list ordering clause.
-		$orderCol  = $this->state->get('list.ordering', 'team.title');
-		$orderDirn = $this->state->get('list.direction', 'asc');
+		$orderCol  = $this->state->get('list.ordering', 'a.id');
+		$orderDirn = $this->state->get('list.direction', 'desc');
 
 		$query->order($db->escape($orderCol . ' ' . $orderDirn));
 

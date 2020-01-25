@@ -54,7 +54,6 @@ class VolunteersViewMembers extends JViewLegacy
 	{
 		require_once JPATH_COMPONENT . '/helpers/volunteers.php';
 
-		$state = $this->get('State');
 		$canDo = JHelperContent::getActions('com_volunteers');
 		$user  = JFactory::getUser();
 
@@ -71,21 +70,10 @@ class VolunteersViewMembers extends JViewLegacy
 			JToolbarHelper::editList('member.edit');
 		}
 
-		if ($canDo->get('core.edit.state'))
+		if ($user->authorise('core.admin', 'com_volunteers'))
 		{
-			JToolbarHelper::publish('members.publish', 'JTOOLBAR_PUBLISH', true);
-			JToolbarHelper::unpublish('members.unpublish', 'JTOOLBAR_UNPUBLISH', true);
-			JToolbarHelper::archiveList('members.archive');
-			JToolbarHelper::checkin('members.checkin');
-		}
-
-		if ($state->get('filter.state') == -2 && $canDo->get('core.delete'))
-		{
-			JToolbarHelper::deleteList('', 'members.delete', 'JTOOLBAR_EMPTY_TRASH');
-		}
-		elseif ($canDo->get('core.edit.state'))
-		{
-			JToolbarHelper::trash('members.trash');
+			JToolbarHelper::custom('members.export', 'download', 'download', 'Export current selection (CSV)', false);
+			JToolbarHelper::custom('members.mail', 'mail', 'mail', 'E-mail current selection', false);
 		}
 
 		if ($user->authorise('core.admin', 'com_volunteers') || $user->authorise('core.options', 'com_volunteers'))

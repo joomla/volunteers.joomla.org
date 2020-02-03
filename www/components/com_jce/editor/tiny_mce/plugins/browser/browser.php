@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright     Copyright (c) 2009-2019 Ryan Demmer. All rights reserved
+ * @copyright     Copyright (c) 2009-2020 Ryan Demmer. All rights reserved
  * @license       GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  * JCE is free software. This version may have been modified pursuant
  * to the GNU General Public License, and as distributed it includes or
@@ -45,6 +45,9 @@ class WFBrowserPlugin extends WFMediaManager
 
         // get file browser reference
         $browser = $this->getFileBrowser();
+        
+        // add upload event
+        $browser->addEvent('onUpload', array($this, 'onUpload'));
 
         // map to comma seperated list
         $filetypes = $browser->getFileTypes('list', $filetypes);
@@ -125,5 +128,24 @@ class WFBrowserPlugin extends WFMediaManager
         if ($layout === 'plugin') {
             $document->addScript(array('browser'), 'plugins');
         }
+    }
+
+    public function onUpload($file, $relative = '')
+    {
+        parent::onUpload($file, $relative);
+        
+        $app = JFactory::getApplication();
+
+        // inline upload
+        if ($app->input->getInt('inline', 0) === 1) {
+            $result = array(
+                'file' => $relative,
+                'name' => basename($file),
+            );
+
+            return $result;
+        }
+
+        return array();
     }
 }

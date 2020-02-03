@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright     Copyright (c) 2009-2019 Ryan Demmer. All rights reserved
+ * @copyright     Copyright (c) 2009-2020 Ryan Demmer. All rights reserved
  * @license       GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  * JCE is free software. This version may have been modified pursuant
  * to the GNU General Public License, and as distributed it includes or
@@ -172,7 +172,7 @@ final class WFTabs extends JObject
                     $class .= ' uk-hidden';
                 }
 
-                $output .= "\t" . '<li role="presentation" aria-selected="false" class="' . $class . '"><button type="button" class="uk-button uk-button-link uk-button-tab" tabindex="-1">' . JText::_('WF_TAB_' . strtoupper($name)) . '</button></li>' . "\n";
+                $output .= "\t" . '<li role="presentation" aria-selected="false" class="' . $class . '"><button type="button" class="uk-button uk-button-link uk-button-tab" tabindex="-1" value="' . $name . '">' . JText::_('WF_TAB_' . strtoupper($name)) . '</button></li>' . "\n";
                 ++$x;
             }
 

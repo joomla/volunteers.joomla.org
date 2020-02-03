@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright     Copyright (c) 2009-2019 Ryan Demmer. All rights reserved
+ * @copyright     Copyright (c) 2009-2020 Ryan Demmer. All rights reserved
  * @license       GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  * JCE is free software. This version may have been modified pursuant
  * to the GNU General Public License, and as distributed it includes or
@@ -195,7 +195,7 @@ class WFFileBrowser extends JObject
 
     private function getViewable()
     {
-        return 'jpeg,jpg,gif,png,webp,avi,wmv,wm,asf,asx,wmx,wvx,mov,qt,mpg,mp3,mp4,m4v,mpeg,ogg,ogv,webm,swf,flv,f4v,xml,dcr,rm,ra,ram,divx,html,htm,txt,rtf,pdf,doc,docx,xls,xlsx,ppt,pptx';
+        return 'jpeg,jpg,gif,png,webp,apng,svg,avi,wmv,wm,asf,asx,wmx,wvx,mov,qt,mpg,mp3,mp4,m4v,mpeg,ogg,ogv,webm,swf,flv,f4v,xml,dcr,rm,ra,ram,divx,html,htm,txt,rtf,pdf,doc,docx,xls,xlsx,ppt,pptx';
     }
 
     /**
@@ -235,7 +235,7 @@ class WFFileBrowser extends JObject
                 // create flattened array, eg: ["jpg", "jpeg", "gif", "png"]
                 if ($format === 'array' || $format === 'list') {
                     $data = array_merge($data, array_map('strtolower', $items));
-                    // create associative array, eg:  or ["images" => ["jpg", "jpeg", "gif", "png"]]
+                // create associative array, eg:  or ["images" => ["jpg", "jpeg", "gif", "png"]]
                 } else {
                     $data[$type] = $items;
                 }
@@ -251,7 +251,10 @@ class WFFileBrowser extends JObject
         if ($format === 'json') {
             return json_encode($data);
         }
+
         // return array
+        $data = array_values($data);
+        
         return $data;
     }
 
@@ -419,6 +422,7 @@ class WFFileBrowser extends JObject
         $list = $filesystem->getFiles($relative, $filter, $sort, $limit, $start);
 
         $list = array_filter($list, function ($item) {
+            // must have an id set
             if (empty($item['id'])) {
                 return true;
             }
@@ -1281,7 +1285,7 @@ class WFFileBrowser extends JObject
         // upload finished
         if ($result instanceof WFFileSystemResult) {
             if ($result->state === true) {
-                $name = basename($result->path);
+                $name = WFUtility::mb_basename($result->path);
 
                 if (empty($result->url)) {
                     $result->url = WFUtility::makePath($filesystem->getRootDir(), WFUtility::makePath($dir, $name));
@@ -1352,7 +1356,7 @@ class WFFileBrowser extends JObject
                     if ($result->message) {
                         $this->setResult($result->message, 'error');
                     } else {
-                        $this->setResult(JText::sprintf('WF_MANAGER_DELETE_' . strtoupper($result->type) . '_ERROR', basename($item)), 'error');
+                        $this->setResult(JText::sprintf('WF_MANAGER_DELETE_' . strtoupper($result->type) . '_ERROR', WFUtility::mb_basename($item)), 'error');
                     }
                 } else {
                     $this->fireEvent('on' . ucfirst($result->type) . 'Delete', array($item));
@@ -1429,13 +1433,13 @@ class WFFileBrowser extends JObject
 
         if ($result instanceof WFFileSystemResult) {
             if (!$result->state) {
-                $this->setResult(JText::sprintf('WF_MANAGER_RENAME_' . strtoupper($result->type) . '_ERROR', basename($source)), 'error');
+                $this->setResult(JText::sprintf('WF_MANAGER_RENAME_' . strtoupper($result->type) . '_ERROR', WFUtility::mb_basename($source)), 'error');
                 if ($result->message) {
                     $this->setResult($result->message, 'error');
                 }
             } else {
                 $data = array(
-                    'name' => basename($result->path),
+                    'name' => WFUtility::mb_basename($result->path),
                 );
 
                 $event = $this->fireEvent('on' . ucfirst($result->type) . 'Rename', array($destination));
@@ -1510,7 +1514,7 @@ class WFFileBrowser extends JObject
                 $path = $item;
             }
 
-            if ($filesystem->is_file(WFUtility::makePath($destination, basename($item))) && $overwrite === false) {
+            if ($filesystem->is_file(WFUtility::makePath($destination, WFUtility::mb_basename($item))) && $overwrite === false) {
                 $this->setResult($item, 'confirm');
 
                 return $this->getResult();
@@ -1528,7 +1532,7 @@ class WFFileBrowser extends JObject
                     if ($result->message) {
                         $this->setResult($result->message, 'error');
                     } else {
-                        $this->setResult(JText::sprintf('WF_MANAGER_COPY_' . strtoupper($result->type) . '_ERROR', basename($item)), 'error');
+                        $this->setResult(JText::sprintf('WF_MANAGER_COPY_' . strtoupper($result->type) . '_ERROR', WFUtility::mb_basename($item)), 'error');
                     }
                 } else {
                     $data = array(
@@ -1603,7 +1607,7 @@ class WFFileBrowser extends JObject
                 }
             }
 
-            if ($filesystem->is_file(WFUtility::makePath($destination, basename($item))) && $overwrite === false) {
+            if ($filesystem->is_file(WFUtility::makePath($destination, WFUtility::mb_basename($item))) && $overwrite === false) {
                 $this->setResult($item, 'confirm');
 
                 return $this->getResult();
@@ -1616,7 +1620,7 @@ class WFFileBrowser extends JObject
                     if ($result->message) {
                         $this->setResult($result->message, 'error');
                     } else {
-                        $this->setResult(JText::sprintf('WF_MANAGER_MOVE_' . strtoupper($result->type) . '_ERROR', basename($item)), 'error');
+                        $this->setResult(JText::sprintf('WF_MANAGER_MOVE_' . strtoupper($result->type) . '_ERROR', WFUtility::mb_basename($item)), 'error');
                     }
                 } else {
                     $data = array(
@@ -1680,7 +1684,7 @@ class WFFileBrowser extends JObject
                 if ($result->message) {
                     $this->setResult($result->message, 'error');
                 } else {
-                    $this->setResult(JText::sprintf('WF_MANAGER_NEW_FOLDER_ERROR', basename($new)), 'error');
+                    $this->setResult(JText::sprintf('WF_MANAGER_NEW_FOLDER_ERROR', WFUtility::mb_basename($new)), 'error');
                 }
             } else {
                 $this->fireEvent('onFolderNew', array($new));

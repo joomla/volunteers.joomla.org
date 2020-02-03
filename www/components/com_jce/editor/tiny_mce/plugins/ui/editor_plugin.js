@@ -1,2 +1,2 @@
-/* jce - 2.8.2 | 2019-12-18 | https://www.joomlacontenteditor.net | Copyright (C) 2006 - 2019 Ryan Demmer. All rights reserved | GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html */
+/* jce - 2.8.5 | 2020-01-29 | https://www.joomlacontenteditor.net | Copyright (C) 2006 - 2020 Ryan Demmer. All rights reserved | GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html */
 !function(){tinymce.create("tinymce.plugins.UiPlugin",{init:function(ed,url){}}),tinymce.PluginManager.add("ui",tinymce.plugins.UiPlugin)}();

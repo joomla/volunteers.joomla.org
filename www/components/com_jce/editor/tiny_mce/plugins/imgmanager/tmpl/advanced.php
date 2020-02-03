@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright    Copyright (c) 2009-2019 Ryan Demmer. All rights reserved
+ * @copyright    Copyright (c) 2009-2020 Ryan Demmer. All rights reserved
  * @license    GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  * JCE is free software. This version may have been modified pursuant
  * to the GNU General Public License, and as distributed it includes or
@@ -19,7 +19,8 @@ defined('JPATH_PLATFORM') or die;
     <label for="classlist" class="hastip uk-form-label uk-width-1-1 uk-width-small-3-10"
            title="<?php echo JText::_('WF_LABEL_CLASSES_DESC'); ?>"><?php echo JText::_('WF_LABEL_CLASSES'); ?></label>
     <div class="uk-form-controls uk-width-1-1 uk-width-small-7-10">
-        <select id="classes" class="uk-datalist" multiple="multiple"></select>
+        <input type="text" id="classes" class="uk-datalist" multiple="multiple" list="classes_datalist" />
+        <datalist id="classes_datalist"></datalist>
     </div>
 </div>
 <div class="uk-form-row uk-grid uk-grid-small">

@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <extension version="3.8" type="plugin" group="quickicon" method="upgrade">
 	<name>plg_quickicon_jce</name>
-	<version>2.8.2</version>
-    <creationDate>18-12-2019</creationDate>
+	<version>2.8.5</version>
+    <creationDate>29-01-2020</creationDate>
     <author>Ryan Demmer</author>
     <authorEmail>info@joomlacontenteditor.net</authorEmail>
     <authorUrl>http://www.joomlacontenteditor.net</authorUrl>
-    <copyright>Copyright (C) 2006 - 2019 Ryan Demmer. All rights reserved</copyright>
+    <copyright>Copyright (C) 2006 - 2020 Ryan Demmer. All rights reserved</copyright>
     <license>GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html</license>
 	<description>PLG_QUICKICON_JCE_XML_DESCRIPTION</description>
 	<files folder="plugins/quickicon/jce">

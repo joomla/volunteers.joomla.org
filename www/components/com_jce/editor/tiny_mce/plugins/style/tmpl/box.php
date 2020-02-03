@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright 	Copyright (c) 2009-2019 Ryan Demmer. All rights reserved
+ * @copyright 	Copyright (c) 2009-2020 Ryan Demmer. All rights reserved
  * @license   	GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  * JCE is free software. This version may have been modified pursuant
  * to the GNU General Public License, and as distributed it includes or
@@ -23,7 +23,7 @@ defined('JPATH_PLATFORM') or die;
 
       <label for="box_float" class="uk-form-label uk-width-2-10"><?php echo JText::_('WF_STYLES_BOX_FLOAT'); ?></label>
       <div class="uk-form-controls uk-width-2-10">
-        <select id="box_float" class="uk-datalist"></select>
+        <input type="text" id="box_float" class="uk-datalist" list="box_float_datalist" /><datalist id="box_float_datalist"></datalist>
       </div>
     </div>
 
@@ -39,7 +39,7 @@ defined('JPATH_PLATFORM') or die;
 
       <label for="box_clear" class="uk-form-label uk-width-2-10"><?php echo JText::_('WF_STYLES_BOX_CLEAR'); ?></label>
       <div class="uk-form-controls uk-width-2-10">
-        <select id="box_clear" class="uk-datalist"></select>
+        <input type="text" id="box_clear" class="uk-datalist" list="box_clear_datalist" /><datalist id="box_clear_datalist"></datalist>
       </div>
     </div>
 

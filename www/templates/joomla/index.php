@@ -242,6 +242,13 @@ JS
 	<?php
 	// Add CookieControl if activated
 	if ($hasCookieControl): ?>
+		<?php 
+		/**
+ 		* After live testing, update civic version to implement accessibility features
+ 		*
+		* src="//cc.cdn.civiccomputing.com/8/cookieControl-8.3.min.js"
+ 		*/
+		?>
 		<script src="//cc.cdn.civiccomputing.com/8/cookieControl-8.x.min.js" type="text/javascript"></script>
 	<?php endif; ?>
 	<!-- Top Nav -->

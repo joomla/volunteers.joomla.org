@@ -381,7 +381,7 @@ class JoomlaTemplateHelper
 				$siteConfig = (object) [
 					'gtmId'    => 'GTM-5BL9XHS',
 					'scripts'  => (object) [
-						'uaId'      => 'undefined',
+						'uaId'      => 'UA-157297508-1',
 						'awId'      => 'undefined',
 						'twitter'   => 'undefined',
 						'fbSdk'     => 'undefined',

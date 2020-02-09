@@ -5,6 +5,8 @@
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
+use Joomla\CMS\Factory;
+
 // No direct access.
 defined('_JEXEC') or die;
 
@@ -14,6 +16,8 @@ defined('_JEXEC') or die;
 class VolunteersViewContact extends JViewLegacy
 {
 	protected $form;
+
+	protected $recipients;
 
 	/**
 	 * Display the view
@@ -25,7 +29,8 @@ class VolunteersViewContact extends JViewLegacy
 	public function display($tpl = null)
 	{
 		/** @var JForm form */
-		$this->form  = $this->get('Form');
+		$this->form       = $this->get('Form');
+		$this->recipients = Factory::getSession()->get('volunteers.recipients');
 
 		// Check for errors.
 		if (count($errors = $this->get('Errors')))

@@ -157,51 +157,6 @@ class JoomlaTemplateHelper
 				break;
 			}
 
-			/*
-			 * Docs property is not using the generic template file
-			 *
-			case 'docs.joomla.org':
-			{
-				$issueTag   = 'jdocs';
-				$siteConfig = (object) [
-					'gtmId'   => 'GTM-K6SPGS',
-					'scripts' => (object) [
-						'uaId'      => 'undefined',
-						'awId'      => 'undefined',
-						'twitter'   => 'undefined',
-						'fbSdk'     => 'undefined',
-						'fbPixel'   => 'undefined',
-						'carbonads' => 'true',
-						'addthisId' => 'ra-5378f70766e02197',
-						'pingdomId' => 'undefined'
-					],
-					'cookies' => (object) [
-						'performance' => 'true',
-						'functional'  => 'true',
-						'advertising' => 'true'
-					]
-				];
-
-				break;
-			}
-			*/
-
-			/*
-			 * Domains property is not using the generic template file
-			 *	
-			case 'domains.joomla.org':
-			{
-				$issueTag   = 'jdomain';
-				$siteConfig = (object) [
-					'gtmId'   => null,
-					'scripts' => null,
-					'cookies' => null
-				];
-
-				break;
-			}
-			*/
-
 			case 'downloads.joomla.org':
 			{
 				$issueTag   = 'jdown';
@@ -381,19 +336,19 @@ class JoomlaTemplateHelper
 				$siteConfig = (object) [
 					'gtmId'    => 'GTM-5BL9XHS',
 					'scripts'  => (object) [
-						'uaId'      => 'UA-157297508-1',
+						'uaId'      => 'undefined',
 						'awId'      => 'undefined',
 						'twitter'   => 'undefined',
 						'fbSdk'     => 'undefined',
 						'fbPixel'   => 'undefined',
 						'carbonads' => 'undefined',
-						'addthisId' => 'ra-5d944d91cdb6c3f1',
+						'addthisId' => 'undefined',
 						'pingdomId' => 'undefined'
 					],
 					'cookies'  => (object) [
-						'performance' => 'true',
-						'functional'  => 'true',
-						'advertising' => 'true'
+						'performance' => 'false',
+						'functional'  => 'false',
+						'advertising' => 'false'
 					],
 					'issueUrl' => 'https://github.com/joomla/identity.joomla.org/issues/new?body=Please%20describe%20the%20problem%20or%20your%20issue'
 				];
@@ -425,33 +380,6 @@ class JoomlaTemplateHelper
 
 				break;
 			}
-
-			/*
-			 * Launch property is not using the generic template file
-			 *	
-			case 'launch.joomla.org':
-			{
-				$siteConfig = (object) [
-					'gtmId'   => 'GTM-T253JLF',
-					'scripts' => (object) [
-						'uaId'      => 'UA-28160972-3',
-						'awId'      => 'AW-976618339',
-						'twitter'   => 'undefined',
-						'fbSdk'     => 'undefined',
-						'fbPixel'   => 'undefined',
-						'carbonads' => 'undefined',
-						'addthisId' => 'undefined',
-						'pingdomId' => 'undefined'
-					],
-					'cookies' => (object) [
-						'performance' => 'true',
-						'functional'  => 'false',
-						'advertising' => 'true'
-					]
-				];
-				break;
-			}
-			*/
 
 			case 'magazine.joomla.org':
 			{
@@ -527,35 +455,6 @@ class JoomlaTemplateHelper
 
 				break;
 			}
-
-
-			/*
-			 * Shop property is not using the generic template file
-			 *	
-			case 'shop.joomla.org':
-			{
-				$siteConfig = (object) [
-					'gtmId'   => 'GTM-WQNG7Z',
-					'scripts' => (object) [
-						'uaId'      => 'undefined',
-						'awId'      => 'undefined',
-						'twitter'   => 'undefined',
-						'fbSdk'     => 'undefined',
-						'fbPixel'   => 'undefined',
-						'carbonads' => 'undefined',
-						'addthisId' => 'undefined',
-						'pingdomId' => '59300ad15992c776ad970068'
-					],
-					'cookies' => (object) [
-						'performance' => 'true',
-						'functional'  => 'true',
-						'advertising' => 'true'
-					]
-				];
-
-				break;
-			}
-			*/
 
 			case 'showcase.joomla.org':
 			{
@@ -644,8 +543,6 @@ class JoomlaTemplateHelper
 			}
 
 			case 'volunteers.joomla.org':
-			case 'test.volunteers.joomla.org': // @TODO remove after testing
-			case 'volunteers.joomla.test':// @TODO remove after testing
 			{
 				$siteConfig = (object) [
 					'gtmId'    => 'GTM-P2Z55T',

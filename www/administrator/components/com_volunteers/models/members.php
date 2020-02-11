@@ -190,7 +190,15 @@ class VolunteersModelMembers extends JModelList
 
 		if (is_numeric($departmentTeam) && ($departmentTeam > 0))
 		{
-			$query->where('team.department = ' . (int) $departmentTeam);
+			// Special handling for board of directors
+			if ($departmentTeam == 58)
+			{
+				$query->where('a.position IN (11,13)');
+			}
+			else
+			{
+				$query->where('team.department = ' . (int) $departmentTeam);
+			}
 		}
 
 		// Filter by team

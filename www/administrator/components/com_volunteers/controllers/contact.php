@@ -27,6 +27,7 @@ class VolunteersControllerContact extends JControllerForm
 		$mailer  = Factory::getMailer();
 		$app     = Factory::getApplication();
 		$session = Factory::getSession();
+		$user    = Factory::getUser();
 		$canDo   = JHelperContent::getActions('com_volunteers');
 
 		// Super users access only
@@ -47,13 +48,28 @@ class VolunteersControllerContact extends JControllerForm
 
 		foreach ($recipients as $recipient)
 		{
-			$emails[] = $recipient['email'];
+			if ($recipient['email'] !== $user->email)
+			{
+				$emails[] = $recipient['email'];
+			}
 		}
 
 		$emails = array_unique($emails);
 
 		// Send mail
-		$success = $mailer->sendMail($from, $fromName, $emails, $subject, $body, true);
+		$success = $mailer->sendMail(
+			$app->get('mailfrom'),
+			$app->get('fromname'),
+			$user->email,
+			$subject,
+			$body,
+			true,
+			null,
+			$emails,
+			null,
+			$user->email,
+			$user->name
+		);
 
 		if (!$success)
 		{

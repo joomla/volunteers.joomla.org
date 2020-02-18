@@ -5,6 +5,8 @@
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
+use Joomla\CMS\Factory;
+
 // No direct access.
 defined('_JEXEC') or die;
 
@@ -78,7 +80,7 @@ class VolunteersModelVolunteers extends JModelList
 	 * different modules that might need different sets of data or different
 	 * ordering requirements.
 	 *
-	 * @param   string $id A prefix for the store id.
+	 * @param   string  $id  A prefix for the store id.
 	 *
 	 * @return  string  A store id.
 	 */
@@ -103,6 +105,8 @@ class VolunteersModelVolunteers extends JModelList
 	 */
 	protected function getListQuery()
 	{
+		$frontend = Factory::getApplication()->isClient('site');
+
 		// Create a new query object.
 		$db    = $this->getDbo();
 		$query = $db->getQuery(true);
@@ -146,12 +150,19 @@ class VolunteersModelVolunteers extends JModelList
 			else
 			{
 				$search = $db->quote('%' . str_replace(' ', '%', $db->escape(trim($search), true) . '%'));
-				$query->where('(user.name LIKE ' . $search . ' OR a.alias LIKE ' . $search . ' OR a.intro LIKE ' . $search . ' OR a.joomlastory LIKE ' . $search . ')');
+				if ($frontend)
+				{
+					$query->where('(user.name LIKE ' . $search . ' OR a.alias LIKE ' . $search . ')');
+				}
+				else
+				{
+					$query->where('(user.name LIKE ' . $search . ' OR a.alias LIKE ' . $search . ' OR a.intro LIKE ' . $search . ' OR a.joomlastory LIKE ' . $search . ')');
+				}
 			}
 		}
 
 		// Filter by active state
-		$active = $this->getState('filter.active', (JFactory::getApplication()->isSite()) ? 1 : null);
+		$active = $this->getState('filter.active', ($frontend) ? 1 : null);
 
 		if (is_numeric($active))
 		{

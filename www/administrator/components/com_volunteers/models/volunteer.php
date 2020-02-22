@@ -424,7 +424,7 @@ class VolunteersModelVolunteer extends JModelAdmin
 	}
 
 	/**
-	 * Method to check a link for a 200 response code
+	 * Method to check a link for a 200 or 301 response code
 	 *
 	 * @param $url
 	 *
@@ -448,7 +448,7 @@ class VolunteersModelVolunteer extends JModelAdmin
 		}
 
 		// Check for response code
-		if ($response->code !== 200)
+		if ($response->code !== 200 && $response->code !== 301)
 		{
 			throw new \RuntimeException();
 		}

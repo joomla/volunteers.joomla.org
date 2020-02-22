@@ -130,7 +130,7 @@ class VolunteersViewReport extends JViewLegacy
 			'displayEmail'     => true,
 			'displayFacebook'  => true,
 			'displayTwitter'   => true,
-			'displayGoogle'    => true,
+			'displayGoogle'    => false,
 			'displayLinkedin'  => true,
 			'displayPinterest' => true,
 			'shorten'          => true,

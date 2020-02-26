@@ -8,6 +8,7 @@
 //var propertyCarbonAds = script tags
 //var propertyAddThisId = ra-xxxxxxxxxxxxxx
 //var propertyPingdomId = apiKey;
+//var propertyGoogleSynd = true;
 
 var ccPerformanceIndex = ['_dc_gtm_UA*', '_ga', '_gid', '__utma', '__utmb', '__utmc', '__utmz'];
 var ccFunctionalIndex = ['PREF', 'VISITOR_INFO1_LIVE', 'rl_modals', '__distillery', 'AWSALB', '__atuvc', '__atuvs', 'ct_checkjs', 'ct_fkp_timestamp', 'ct_pointer_data', 'ct_ps_timestamp', 'ct_timezone', '__utmt', '_sdsat_BasketAmountItems', 'affiliate', 'any_affiliate', 'direct_affiliate', 's_cc', 's_cc', 's_sq', '__cfduid'];
@@ -22,6 +23,9 @@ var config = {
 	position: "LEFT",
 	theme: "LIGHT",
 	layout: "slideout",
+	accessibility: {
+		highlightFocus: true
+	},
 	branding: {
 		fontColor: "#fff",
 		fontSizeTitle: "1.1em",
@@ -123,6 +127,13 @@ window.addEventListener("load", function () {
 			},
 			recommendedState: true
 		});
+	}
+	
+	if(ccIAB) {
+		config.iabCMP = true;
+	} 
+	else {
+		config.iabCMP = false;	
 	}
 
 	config.optionalCookies.push({

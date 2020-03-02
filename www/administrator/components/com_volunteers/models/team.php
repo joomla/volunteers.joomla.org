@@ -376,7 +376,7 @@ class VolunteersModelTeam extends JModelAdmin
 			}
 			else
 			{
-				$members->honorroll[$item->date_ended] = $item;
+				$members->honorroll[$item->date_ended . $item->volunteer_name] = $item;
 			}
 		}
 

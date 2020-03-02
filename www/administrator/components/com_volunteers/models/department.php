@@ -32,9 +32,9 @@ class VolunteersModelDepartment extends JModelAdmin
 	/**
 	 * Method to get a table object, load it if necessary.
 	 *
-	 * @param   string $type   The table name. Optional.
-	 * @param   string $prefix The class prefix. Optional.
-	 * @param   array  $config Configuration array for model. Optional.
+	 * @param   string  $type    The table name. Optional.
+	 * @param   string  $prefix  The class prefix. Optional.
+	 * @param   array   $config  Configuration array for model. Optional.
 	 *
 	 * @return  JTable  A JTable object
 	 */
@@ -46,8 +46,8 @@ class VolunteersModelDepartment extends JModelAdmin
 	/**
 	 * Abstract method for getting the form from the model.
 	 *
-	 * @param   array   $data     Data for the form.
-	 * @param   boolean $loadData True if the form is to load its own data (default case), false if not.
+	 * @param   array    $data      Data for the form.
+	 * @param   boolean  $loadData  True if the form is to load its own data (default case), false if not.
 	 *
 	 * @return  mixed  A JForm object on success, false on failure
 	 */
@@ -99,7 +99,7 @@ class VolunteersModelDepartment extends JModelAdmin
 	/**
 	 * Prepare and sanitise the table data prior to saving.
 	 *
-	 * @param   JTable $table A reference to a JTable object.
+	 * @param   JTable  $table  A reference to a JTable object.
 	 *
 	 * @return  void
 	 */
@@ -149,7 +149,7 @@ class VolunteersModelDepartment extends JModelAdmin
 	/**
 	 * Method to save the form data.
 	 *
-	 * @param   array $data The form data.
+	 * @param   array  $data  The form data.
 	 *
 	 * @return  boolean  True on success.
 	 */
@@ -172,9 +172,9 @@ class VolunteersModelDepartment extends JModelAdmin
 	/**
 	 * Method to change the title & alias.
 	 *
-	 * @param   integer $category_id The id of the parent.
-	 * @param   string  $alias       The alias.
-	 * @param   string  $name        The title.
+	 * @param   integer  $category_id  The id of the parent.
+	 * @param   string   $alias        The alias.
+	 * @param   string   $name         The title.
 	 *
 	 * @return  array  Contains the modified title and alias.
 	 */
@@ -199,7 +199,7 @@ class VolunteersModelDepartment extends JModelAdmin
 	/**
 	 * Method to get Department Members.
 	 *
-	 * @param   integer $pk The id of the team.
+	 * @param   integer  $pk  The id of the team.
 	 *
 	 * @return  mixed  Data object on success, false on failure.
 	 */
@@ -222,6 +222,7 @@ class VolunteersModelDepartment extends JModelAdmin
 			switch ($item->position)
 			{
 				case 9:
+				case 11:
 					$leaders[$item->volunteer_name . $item->date_ended] = $item;
 					break;
 
@@ -256,9 +257,12 @@ class VolunteersModelDepartment extends JModelAdmin
 			}
 			else
 			{
-				$members->honorroll[] = $item;
+				$members->honorroll[$item->date_ended . $item->volunteer_name] = $item;
 			}
 		}
+
+		// Sort honor roll
+		krsort($members->honorroll);
 
 		return $members;
 	}
@@ -266,7 +270,7 @@ class VolunteersModelDepartment extends JModelAdmin
 	/**
 	 * Method to get Department Reports.
 	 *
-	 * @param   integer $pk The id of the team.
+	 * @param   integer  $pk  The id of the team.
 	 *
 	 * @return  mixed  Data object on success, false on failure.
 	 */
@@ -285,7 +289,7 @@ class VolunteersModelDepartment extends JModelAdmin
 	/**
 	 * Method to get Department Teams.
 	 *
-	 * @param   integer $pk The id of the team.
+	 * @param   integer  $pk  The id of the team.
 	 *
 	 * @return  mixed  Data object on success, false on failure.
 	 */
@@ -326,7 +330,7 @@ class VolunteersModelDepartment extends JModelAdmin
 	/**
 	 * Method to get Department Teams.
 	 *
-	 * @param   integer $pk The ids of the team.
+	 * @param   integer  $pk  The ids of the team.
 	 *
 	 * @return  mixed  Data object on success, false on failure.
 	 */

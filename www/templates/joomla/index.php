@@ -196,6 +196,7 @@ if ($hasCookieControl)
 			$this->addScriptDeclaration("var propertyCarbonAds = '" . $siteConfig->scripts->carbonads . "';");
 			$this->addScriptDeclaration("var propertyAddThisId = '" . $siteConfig->scripts->addthisId . "';");
 			$this->addScriptDeclaration("var propertyPingdomId = '" . $siteConfig->scripts->pingdomId . "';");
+			$this->addScriptDeclaration("var propertyGoogleSynd = '" . $siteConfig->scripts->gsynd . "';");
 		}
 
 		// Get Property's Active Cookie Categories
@@ -204,6 +205,7 @@ if ($hasCookieControl)
 			$this->addScriptDeclaration("var ccPerformance = " . $siteConfig->cookies->performance . ";");
 			$this->addScriptDeclaration("var ccFunctional = " . $siteConfig->cookies->functional . ";");
 			$this->addScriptDeclaration("var ccAdvertising = " . $siteConfig->cookies->advertising . ";");
+			$this->addScriptDeclaration("var ccIAB = " . $siteConfig->cookies->iab . ";");
 		}
 
 	}

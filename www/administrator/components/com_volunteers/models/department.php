@@ -281,9 +281,49 @@ class VolunteersModelDepartment extends JModelAdmin
 		// Get reports
 		$model = JModelLegacy::getInstance('Reports', 'VolunteersModel', array('ignore_request' => true));
 		$model->setState('filter.department', $pk);
-		$model->setState('list.limit', 10);
+		$model->setState('list.limit', 25);
 
 		return $model->getItems();
+	}
+
+	/**
+	 * Method to get Department Reports.
+	 *
+	 * @param   integer  $pk  The id of the team.
+	 *
+	 * @return  mixed  Data object on success, false on failure.
+	 */
+	public function getDepartmentReportsTeams($pk = null)
+	{
+		$pk = (!empty($pk)) ? $pk : (int) $this->getState($this->getName() . '.id');
+
+		// Get reports
+		$model = JModelLegacy::getInstance('Reports', 'VolunteersModel', array('ignore_request' => true));
+		$model->setState('filter.departmentTeams', $pk);
+		$model->setState('list.limit', 25);
+
+		return $model->getItems();
+	}
+
+	/**
+	 * Method to get total number of team reports.
+	 *
+	 * @param   integer  $pk  The id of the team.
+	 *
+	 * @return  integer
+	 */
+	public function getDepartmentReportsTotal($pk = null)
+	{
+		$pk = (!empty($pk)) ? $pk : (int) $this->getState($this->getName() . '.id');
+
+		$db    = $this->getDbo();
+		$query = $db->getQuery(true)
+			->select('count(id)')
+			->from($db->quoteName('#__volunteers_reports'))
+			->where($db->quoteName('department') . ' = ' . $db->quote($pk))
+			->where($db->quoteName('state') . ' = 1');
+
+		return $db->setQuery($query)->loadResult();
 	}
 
 	/**

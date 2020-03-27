@@ -157,15 +157,15 @@ class VolunteersModelReports extends JModelList
 
 		if (is_numeric($department) && ($department > 0))
 		{
-			// Exception for the board department
-			if ($department == 58)
-			{
-				$query->where('a.department = ' . (int) $department);
-			}
-			else
-			{
-				$query->where('(a.department = ' . (int) $department . ' OR team.department = ' . (int) $department . ')');
-			}
+			$query->where('a.department = ' . (int) $department);
+		}
+
+		// Filter by department teams
+		$departmentTeams = $this->getState('filter.departmentTeams');
+
+		if (is_numeric($departmentTeams) && ($departmentTeams > 0))
+		{
+			$query->where('team.department = ' . (int) $departmentTeams);
 		}
 
 		// Filter by team

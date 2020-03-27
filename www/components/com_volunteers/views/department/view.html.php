@@ -26,20 +26,21 @@ class VolunteersViewDepartment extends JViewLegacy
 	/**
 	 * Execute and display a template script.
 	 *
-	 * @param   string $tpl The name of the template file to parse; automatically searches through the template paths.
+	 * @param   string  $tpl  The name of the template file to parse; automatically searches through the template paths.
 	 *
 	 * @return  mixed  A string if successful, otherwise a Error object.
 	 */
 	public function display($tpl = null)
 	{
-		$this->item          = $this->get('Item');
-		$this->state         = $this->get('State');
-		$this->form          = $this->get('Form');
-		$this->user          = JFactory::getUser();
-		$this->item->reports = $this->get('DepartmentReports');
-		$this->item->teams   = $this->get('DepartmentTeams');
-		$this->item->members = $this->get('DepartmentMembers');
-		$this->acl           = VolunteersHelper::acl('department', $this->item->id);
+		$this->item               = $this->get('Item');
+		$this->state              = $this->get('State');
+		$this->form               = $this->get('Form');
+		$this->user               = JFactory::getUser();
+		$this->item->reports      = $this->get('DepartmentReports');
+		$this->item->reportsTeams = $this->get('DepartmentReportsTeams');
+		$this->item->teams        = $this->get('DepartmentTeams');
+		$this->item->members      = $this->get('DepartmentMembers');
+		$this->acl                = VolunteersHelper::acl('department', $this->item->id);
 
 		// Set department id in session
 		JFactory::getSession()->set('department', $this->item->id);

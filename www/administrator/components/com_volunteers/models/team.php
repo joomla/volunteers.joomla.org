@@ -437,9 +437,30 @@ class VolunteersModelTeam extends JModelAdmin
 		// Get reports
 		$model = JModelLegacy::getInstance('Reports', 'VolunteersModel', array('ignore_request' => true));
 		$model->setState('filter.team', $pk);
-		$model->setState('list.limit', 10);
+		$model->setState('list.limit', 25);
 
 		return $model->getItems();
+	}
+
+	/**
+	 * Method to get total number of team reports.
+	 *
+	 * @param   integer  $pk  The id of the team.
+	 *
+	 * @return  integer
+	 */
+	public function getTeamReportsTotal($pk = null)
+	{
+		$pk = (!empty($pk)) ? $pk : (int) $this->getState($this->getName() . '.id');
+
+		$db    = $this->getDbo();
+		$query = $db->getQuery(true)
+			->select('count(id)')
+			->from($db->quoteName('#__volunteers_reports'))
+			->where($db->quoteName('team') . ' = ' . $db->quote($pk))
+			->where($db->quoteName('state') . ' = 1');
+
+		return $db->setQuery($query)->loadResult();
 	}
 
 	/**

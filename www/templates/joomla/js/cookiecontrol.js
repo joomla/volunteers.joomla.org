@@ -128,12 +128,11 @@ window.addEventListener("load", function () {
 			recommendedState: true
 		});
 	}
-	
-	if(ccIAB) {
+
+	if (ccIAB) {
 		config.iabCMP = true;
-	} 
-	else {
-		config.iabCMP = false;	
+	} else {
+		config.iabCMP = false;
 	}
 
 	config.optionalCookies.push({

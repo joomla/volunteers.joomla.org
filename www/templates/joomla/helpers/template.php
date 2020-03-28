@@ -78,7 +78,7 @@ class JoomlaTemplateHelper
 					'cookies' => (object) [
 						'performance' => 'true',
 						'functional'  => 'false',
-						'advertising' => 'false'
+						'advertising' => 'false',
 						'iab'         => 'true'
 					]
 				];
@@ -105,7 +105,7 @@ class JoomlaTemplateHelper
 					'cookies' => (object) [
 						'performance' => 'true',
 						'functional'  => 'true',
-						'advertising' => 'true'
+						'advertising' => 'true',
 						'iab'         => 'true'
 					]
 				];
@@ -132,7 +132,7 @@ class JoomlaTemplateHelper
 					'cookies' => (object) [
 						'performance' => 'true',
 						'functional'  => 'true',
-						'advertising' => 'true'
+						'advertising' => 'true',
 						'iab'         => 'true'
 					]
 				];
@@ -536,7 +536,7 @@ class JoomlaTemplateHelper
 					'cookies' => (object) [
 						'performance' => 'true',
 						'functional'  => 'false',
-						'advertising' => 'false',,
+						'advertising' => 'false',
 						'iab'         => 'true'
 					]
 				];

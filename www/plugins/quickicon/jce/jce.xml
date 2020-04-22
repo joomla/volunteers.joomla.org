@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <extension version="3.8" type="plugin" group="quickicon" method="upgrade">
 	<name>plg_quickicon_jce</name>
-	<version>2.8.9</version>
-    <creationDate>29-02-2020</creationDate>
+	<version>2.8.10</version>
+    <creationDate>02-04-2020</creationDate>
     <author>Ryan Demmer</author>
     <authorEmail>info@joomlacontenteditor.net</authorEmail>
     <authorUrl>http://www.joomlacontenteditor.net</authorUrl>

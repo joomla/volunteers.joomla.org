@@ -35,18 +35,21 @@ class WFEditor
      * @var array
      */
     private $scripts = array();
+
     /**
      * Array of linked style sheets.
      *
      * @var array
      */
     private $stylesheets = array();
+
     /**
      * Array of included style declarations.
      *
      * @var array
      */
     private $styles = array();
+
     /**
      * Array of scripts placed in the header.
      *
@@ -54,13 +57,22 @@ class WFEditor
      */
     private $javascript = array();
 
+    /**
+     * Array of core plugins
+     * 
+     * @var array
+     */
+    private static $plugins = array('core', 'help', 'autolink', 'cleanup', 'code', 'format', 'importcss', 'colorpicker', 'upload', 'figure', 'ui', 'noneditable', 'branding');
+
     private function addScript($url)
     {
+        $url = $this->addAssetVersion($url);
         $this->scripts[] = $url;
     }
 
     private function addStyleSheet($url)
     {
+        $url = $this->addAssetVersion($url);
         $this->stylesheets[] = $url;
     }
 
@@ -125,6 +137,19 @@ class WFEditor
         return self::$instance;
     }
 
+    private function addAssetVersion($url)
+    {
+        $version = md5(self::getVersion());
+
+        if (strpos($url, '?') === false) {
+            $url .= '?' . $version;
+        } else {
+            $url .= '&' . $version;
+        }
+
+        return $url;
+    }
+
     /**
      * Legacy function to build the editor
      *
@@ -172,10 +197,16 @@ class WFEditor
 
     private function assignEditorSkin(&$settings)
     {
+        // get an editor instance
+        $wf = WFApplication::getInstance();
+
+        // assign skin - new default is "modern"
+        $settings['skin'] = $wf->getParam('editor.toolbar_theme', 'default');
+
         if (empty($settings['skin'])) {
             $settings['skin'] = 'modern';
         }
-        
+
         if ($settings['skin'] && strpos($settings['skin'], '.') !== false) {
             list($settings['skin'], $settings['skin_variant']) = explode('.', $settings['skin']);
         }
@@ -201,7 +232,7 @@ class WFEditor
     {
         // get an editor instance
         $wf = WFApplication::getInstance();
-        
+
         // Other - user specified
         $userParams = $wf->getParam('editor.custom_config', '');
 
@@ -218,7 +249,7 @@ class WFEditor
                 $value = '';
 
                 // legacy string
-                if (is_string($userParam)) {                    
+                if (is_string($userParam)) {
                     list($name, $value) = explode(':', $userParam);
                 }
 
@@ -295,9 +326,7 @@ class WFEditor
             $settings['width'] = $wf->getParam('editor.width');
             $settings['height'] = $wf->getParam('editor.height');
 
-            // assign skin - new default is "modern"
-            $settings['skin'] = $wf->getParam('editor.toolbar_theme', 'default');
-
+            // process and assign the editor skin
             $this->assignEditorSkin($settings);
 
             // get body class if any
@@ -379,7 +408,7 @@ class WFEditor
 
             // Editor
             $this->addScript($this->getURL(true) . '/libraries/js/editor.min.js');
-            
+
             // language
             $this->addScript(JURI::base(true) . '/index.php?option=com_jce&task=editor.loadlanguages&lang=' . $settings['language'] . '&context=' . $this->context . '&' . $token . '=1');
         }
@@ -621,7 +650,7 @@ class WFEditor
                                     $a[] = $s;
                                 }
                             }
-                            
+
                             $item = implode(',', $a);
 
                             // remove leading or trailing |
@@ -764,14 +793,6 @@ class WFEditor
                     return in_array($item, array_keys($list));
                 });
 
-                // core plugins
-                $core = array('core', 'help', 'autolink', 'cleanup', 'code', 'format', 'importcss', 'colorpicker', 'upload', 'figure', 'ui', 'noneditable');
-
-                // load branding plugin
-                if (!WF_EDITOR_PRO) {
-                    $core[] = 'branding';
-                }
-
                 // add advlists plugin if lists are loaded
                 if (in_array('lists', $items)) {
                     $items[] = 'advlist';
@@ -789,7 +810,7 @@ class WFEditor
                 self::addDependencies($items);
 
                 // add core plugins
-                $items = array_merge($core, $items);
+                $items = array_merge(self::$plugins, $items);
 
                 // remove duplicates and empty values
                 $items = array_unique(array_filter($items));
@@ -824,6 +845,10 @@ class WFEditor
 
                 // remove missing plugins
                 $items = array_filter($items, function ($item) {
+                    if (WF_EDITOR_PRO && $item === 'branding') {
+                        return false;
+                    }
+                    
                     return is_file(WF_EDITOR_PLUGINS . '/' . $item . '/editor_plugin.js');
                 });
 
@@ -1012,9 +1037,9 @@ class WFEditor
         $gantry5 = glob($path . '/custom/css-compiled/' . $name . '_*.css');
         $gantry4 = glob($path . '/css-compiled/master-*.css');
 
-        if (!empty($gantry5)) {  
+        if (!empty($gantry5)) {
             // update url
-            $url =  'templates/' . $template->name . '/custom/css-compiled';
+            $url = 'templates/' . $template->name . '/custom/css-compiled';
 
             $path = dirname($gantry5[0]);
             $file = basename($gantry5[0]);
@@ -1044,16 +1069,16 @@ class WFEditor
 
             // create name of possible custom.css file
             $custom = str_replace($name, 'custom', $file);
-            
+
             // load custom css file if it exists
-            if (is_file($path . '/' . $custom))  {
+            if (is_file($path . '/' . $custom)) {
                 $files[] = $url . '/' . $custom;
             }
         }
 
-        if (!empty($gantry4)) { 
+        if (!empty($gantry4)) {
             // update url
-            $url =  'templates/' . $template->name . '/css-compiled';
+            $url = 'templates/' . $template->name . '/css-compiled';
             // load gantry bootstrap files
             $files[] = $url . '/bootstrap.css';
             // load css files
@@ -1125,7 +1150,7 @@ class WFEditor
         $files[] = 'templates/' . $template->name . '/css/template.css';
 
         $params = new JRegistry($template->params);
-        $preset  = $params->get('preset', '');
+        $preset = $params->get('preset', '');
 
         $data = json_decode($preset);
 
@@ -1159,7 +1184,7 @@ class WFEditor
         $files[] = 'templates/' . $template->name . '/css/template.css';
 
         $params = new JRegistry($template->params);
-        $preset  = $params->get('preset', '');
+        $preset = $params->get('preset', '');
 
         $data = json_decode($preset);
 
@@ -1195,7 +1220,7 @@ class WFEditor
         $files[] = 'templates/' . $template->name . '/wright/css/bootstrap.min.css';
 
         $params = new JRegistry($template->params);
-        $style  = $params->get('style', 'default');
+        $style = $params->get('style', 'default');
 
         // check style-custom.css file
         $file = $path . '/css/style-' . $style . '.css';
@@ -1225,7 +1250,7 @@ class WFEditor
             $files[] = 'templates/' . $template->name . '/css/' . basename($css);
             return true;
         }
- 
+
         $css = JFolder::files($path, '(base|core|template|template_css)\.(css|less)$', false, true);
 
         if (!empty($css)) {
@@ -1340,7 +1365,7 @@ class WFEditor
             case 1:
                 $files = array();
 
-                foreach(array('Core', 'Gantry', 'YOOTheme', 'Helix', 'Wright', 'Sun') as $name) {
+                foreach (array('Core', 'Gantry', 'YOOTheme', 'Helix', 'Wright', 'Sun') as $name) {
                     $method = 'get' . $name . 'TemplateFiles';
                     self::$method($files, $template);
                 }
@@ -1537,6 +1562,9 @@ class WFEditor
         // toolbar theme
         $toolbar = explode('.', $wf->getParam('editor.toolbar_theme', 'default'));
 
+        // base skin value
+        $skin = $toolbar[0];
+
         switch ($type) {
             case 'language':
                 $files = array();
@@ -1556,10 +1584,12 @@ class WFEditor
                     $files[] = WF_EDITOR . '/tiny_mce/themes/' . $theme . '/editor_template' . $suffix . '.js';
                 }
 
-                $core = array('autolink', 'cleanup', 'core', 'code', 'colorpicker', 'upload', 'format');
-
                 // Add core plugins
                 foreach ($plugins['core'] as $plugin) {
+                    if (in_array($plugin, self::$plugins)) {
+                        continue;
+                    }
+                    
                     $files[] = WF_EDITOR_PLUGINS . '/' . $plugin . '/editor_plugin' . $suffix . '.js';
                 }
 
@@ -1585,7 +1615,7 @@ class WFEditor
                 if ($layout == 'content') {
                     $files = array();
 
-                    $files[] = WF_EDITOR_THEMES . '/' . $themes[0] . '/skins/' . $toolbar[0] . '/content.css';
+                    $files[] = WF_EDITOR_THEMES . '/' . $themes[0] . '/skins/' . $skin . '/content.css';
 
                     // get template stylesheets
                     $styles = self::getTemplateStyleSheetsList(true);
@@ -1627,7 +1657,11 @@ class WFEditor
 
                     $files[] = WF_EDITOR_LIBRARIES . '/css/editor.min.css';
 
-                    list($skin, $variant) = $toolbar;
+                    $variant = '';
+
+                    if (count($toolbar) > 1) {
+                        $variant = $toolbar[1];
+                    }
 
                     // load 'default'
                     $files[] = WF_EDITOR_THEMES . '/' . $themes[0] . '/skins/default/ui.css';
@@ -1644,8 +1678,10 @@ class WFEditor
                 break;
         }
 
+        $cache_validation = (bool) $this->getParam('editor.compress_cache_validation', true);
+
         $packer->setFiles($files);
-        $packer->pack();
+        $packer->pack(true, $cache_validation);
     }
 
     public function loadlanguages()

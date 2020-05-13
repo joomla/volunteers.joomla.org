@@ -167,6 +167,18 @@ class JoomlaTemplateHelper
 				break;
 			}
 
+			case 'domains.joomla.org':
+			{
+				$issueTag   = 'jdomain';
+				$siteConfig = (object) [
+					'gtmId'   => 'false',
+					'scripts' => null,
+					'cookies' => null
+				];
+
+				break;
+			}
+
 			case 'downloads.joomla.org':
 			{
 				$issueTag   = 'jdown';
@@ -666,7 +678,7 @@ class JoomlaTemplateHelper
 		JLoader::register('UsersHelperRoute', JPATH_SITE . '/components/com_users/helpers/route.php');
 
 		// Look for a menu item for this route
-		$itemid = UsersHelperRoute::getLoginRoute();
+		$itemid = (Factory::getUser()->guest) ? UsersHelperRoute::getLoginRoute() : self::getLogoutRoute();
 		$itemid = $itemid !== null ? '&Itemid=' . $itemid : '';
 
 		// Return the base route plus menu item ID if available
@@ -754,7 +766,8 @@ class JoomlaTemplateHelper
 		try
 		{
 			return $cache->get(
-				function ($url) {
+				function ($url)
+				{
 					// Set a very short timeout to try and not bring the site down
 					$response = HttpFactory::getHttp()->get($url, [], 2);
 
@@ -773,5 +786,27 @@ class JoomlaTemplateHelper
 		{
 			return 'Could not load template section.';
 		}
+	}
+
+	/**
+	 * Method to get a route configuration for the logout view.
+	 *
+	 * @return  mixed    Integer menu id on success, null on failure.
+	 */
+	public static function getLogoutRoute()
+	{
+		// Get the items.
+		$items = UsersHelperRoute::getItems();
+
+		// Search for a suitable menu id.
+		foreach ($items as $item)
+		{
+			if (isset($item->query['view']) && $item->query['view'] === 'login' && (!empty($item->query['layout']) && $item->query['layout'] === 'logout'))
+			{
+				return $item->id;
+			}
+		}
+
+		return null;
 	}
 }

@@ -2,7 +2,7 @@
 /**
  * Joomla.org site template
  *
- * @copyright   Copyright (C) 2005 - 2018 Open Source Matters, Inc. All rights reserved.
+ * @copyright   Copyright (C) 2005 - 2020 Open Source Matters, Inc. All rights reserved.
  * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
 
@@ -52,9 +52,6 @@ if ($this->params->get('bs3Grid', '0'))
 
 // Optional site specific CSS override
 HTMLHelper::_('stylesheet', 'custom.css', ['version' => 'auto', 'relative' => true, 'detectDebug' => false], []);
-
-// @TODO add Cookie CSS to main CSS after initial testing to prevent additional request
-HTMLHelper::_('stylesheet', 'cookiecontrol.css', ['version' => 'auto', 'relative' => true, 'detectDebug' => false], []);
 
 // Load optional RTL Bootstrap CSS
 if ($this->direction === 'rtl')
@@ -200,14 +197,13 @@ if ($hasCookieControl)
 		}
 
 		// Get Property's Active Cookie Categories
-		if($siteConfig->cookies)
+		if ($siteConfig->cookies)
 		{
 			$this->addScriptDeclaration("var ccPerformance = " . $siteConfig->cookies->performance . ";");
 			$this->addScriptDeclaration("var ccFunctional = " . $siteConfig->cookies->functional . ";");
 			$this->addScriptDeclaration("var ccAdvertising = " . $siteConfig->cookies->advertising . ";");
 			$this->addScriptDeclaration("var ccIAB = " . $siteConfig->cookies->iab . ";");
 		}
-
 	}
 }
 else

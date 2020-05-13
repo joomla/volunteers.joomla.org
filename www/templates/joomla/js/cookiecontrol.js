@@ -1,15 +1,3 @@
-//GTM id - originally belongs to index
-//var propertyGtmId = 'GTM-{ID}'; exploded from GTM-ID
-//var propertyUaId = 'UA-XXXXXX'
-//var propertyAwId = 'AW-XXXXXX' 
-//var propertyTwitter = script tags
-//var propertyFacebookSdk = 'facebook-jssdk'
-//var propertyFacebookPixel = xxxxxxxxxxxxxxxx
-//var propertyCarbonAds = script tags
-//var propertyAddThisId = ra-xxxxxxxxxxxxxx
-//var propertyPingdomId = apiKey;
-//var propertyGoogleSynd = true;
-
 var ccPerformanceIndex = ['_dc_gtm_UA*', '_ga', '_gid', '__utma', '__utmb', '__utmc', '__utmz'];
 var ccFunctionalIndex = ['PREF', 'VISITOR_INFO1_LIVE', 'rl_modals', '__distillery', 'AWSALB', '__atuvc', '__atuvs', 'ct_checkjs', 'ct_fkp_timestamp', 'ct_pointer_data', 'ct_ps_timestamp', 'ct_timezone', '__utmt', '_sdsat_BasketAmountItems', 'affiliate', 'any_affiliate', 'direct_affiliate', 's_cc', 's_cc', 's_sq', '__cfduid'];
 var ccAdvertisingIndex = ['OAID', 'IDE', 'ck1', 'drtn*', 'rlas3', 'rtn1-z', 'fr', 'everest_g_v2', 'everest_session_v2', 'gglck', 'NID', 'na_id', 'na_tc', 'id', 'mdata', 'dpm', 'GPS', 'YSC', 'wistia-http2-push-disabled', 'di2', 'loc', 'ouid', 'uid', 'uvc', 'vc', 'TapAd_DID ', 'TapAd_TS ', '1P_JAR', 'd', 'mc', 'KADUSERCOOKIE', 'KTPCACOOKIE', 'AMCVS_', 'AMCV_', 'PP', 'PPP', '_gat_partnerTracker', '_gat_spreadshirtTracker', 'demdex'];
@@ -223,7 +211,7 @@ function pushTwScript() {
 function pushFbSdkScript(id) {
 	var FbScript = document.createElement("script");
 	var FbScriptContent = document.createTextNode("(function(d, s, id) { var js, fjs = d.getElementsByTagName(s)[0]; if (d.getElementById(id)) return; js = d.createElement(s); js.id = id; js.src = 'https://connect.facebook.net/en_GB/sdk.js#xfbml=1&version=v2.10&appId='; fjs.parentNode.insertBefore(js, fjs); }(document, 'script', '" + id + "'));");
-	
+
 	FbScript.appendChild(FbScriptContent);
 
 	document.body.appendChild(FbScript);

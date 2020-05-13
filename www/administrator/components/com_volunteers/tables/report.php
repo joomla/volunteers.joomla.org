@@ -16,7 +16,7 @@ class VolunteersTableReport extends JTable
 	/**
 	 * Constructor
 	 *
-	 * @param   JDatabaseDriver &$db A database connector object
+	 * @param   JDatabaseDriver &$db  A database connector object
 	 */
 	public function __construct(&$db)
 	{
@@ -49,7 +49,7 @@ class VolunteersTableReport extends JTable
 		{
 			// New item. An item created and created_by field can be set by the user,
 			// so we don't touch either of these if they are set.
-			if (!(int) $this->created)
+			if (!$this->created)
 			{
 				$this->created = $date->toSql();
 			}
@@ -58,6 +58,12 @@ class VolunteersTableReport extends JTable
 			{
 				$this->created_by = $user->id;
 			}
+		}
+
+		// Don't allow future dates
+		if ($this->created > $date)
+		{
+			$this->created = $date->toSql();
 		}
 
 		return parent::store($updateNulls);

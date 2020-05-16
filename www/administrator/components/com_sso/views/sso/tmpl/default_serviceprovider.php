@@ -3,7 +3,7 @@
  * @package     SSO.Component
  *
  * @author      RolandD Cyber Produksi <contact@rolandd.com>
- * @copyright   Copyright (C) 2017 - 2018 RolandD Cyber Produksi. All rights reserved.
+ * @copyright   Copyright (C) 2017 - 2020 RolandD Cyber Produksi. All rights reserved.
  * @license     GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  * @link        https://rolandd.com
  */
@@ -11,7 +11,8 @@
 defined('_JEXEC') or die;
 
 ?>
-<p> Go to Profiles - Create new profile</p>
+<h2>Adding an Identity Provider to this Service Provider</h2>
+<p> Go to Identity Provider Profiles - Create new profile</p>
 <p><strong>Profile - Joomla Tab</strong>
 <ul>
 	<li>Select the usergroup to assign new users to</li>
@@ -48,9 +49,14 @@ defined('_JEXEC') or die;
 	<li>Go to Plugins</li>
 	<li>Filter on SSO</li>
 	<li>Enable the Authentication - RO SSO plugin</li>
-	<li>Enable the RO SSO - Joomla plugin</li>
 </ul>
 </p>
+<p><strong>Read the metadata from the Identity Provider</strong></p>
+
+<ol>
+    <li>Go to folder libraries\simplesamlphp\modules\metarefresh\bin'</li>
+    <li>Import the metadata using the command 'php metarefresh.php [URL to metadata file]'</li>
+</ol>
 <p><strong>SSO System Plugin</strong><br />
 To automatically redirect users to the Identity Provider, you can enable the SSO System Plugin
 <ul>

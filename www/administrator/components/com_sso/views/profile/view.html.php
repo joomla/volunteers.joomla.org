@@ -3,7 +3,7 @@
  * @package    SSO.Component
  *
  * @author     RolandD Cyber Produksi <contact@rolandd.com>
- * @copyright  Copyright (C) 2017 - 2018 RolandD Cyber Produksi. All rights reserved.
+ * @copyright  Copyright (C) 2017 - 2020 RolandD Cyber Produksi. All rights reserved.
  * @license    GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  * @link       https://rolandd.com
  */
@@ -14,6 +14,7 @@ use Joomla\CMS\Helper\ContentHelper;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\View\HtmlView;
 use Joomla\CMS\Object\CMSObject;
+use Joomla\CMS\Toolbar\ToolbarHelper;
 
 defined('_JEXEC') or die;
 
@@ -72,9 +73,9 @@ class SsoViewProfile extends HtmlView
 	 *
 	 * @return  mixed  A string if successful, otherwise a JError object.
 	 *
-	 * @since   1.0.0
-	 *
 	 * @throws  Exception
+	 *
+	 * @since   1.0.0
 	 */
 	public function display($tpl = null)
 	{
@@ -105,39 +106,39 @@ class SsoViewProfile extends HtmlView
 	 *
 	 * @return  void
 	 *
-	 * @since   1.0.0
-	 *
 	 * @throws  Exception
+	 *
+	 * @since   1.0.0
 	 */
 	private function addToolbar()
 	{
 		Factory::getApplication()->input->set('hidemainmenu', true);
 
-		JToolbarHelper::title(Text::_('COM_SSO_PROFILE'), 'user');
+		ToolbarHelper::title(Text::_('COM_SSO_PROFILE'), 'broadcast');
 
 		if ($this->canDo->get('core.edit') || $this->canDo->get('core.create'))
 		{
-			JToolbarHelper::apply('profile.apply');
-			JToolbarHelper::save('profile.save');
+			ToolbarHelper::apply('profile.apply');
+			ToolbarHelper::save('profile.save');
 		}
 
 		if ($this->canDo->get('core.create') && $this->canDo->get('core.manage'))
 		{
-			JToolbarHelper::save2new('profile.save2new');
+			ToolbarHelper::save2new('profile.save2new');
 		}
 
 		if ($this->canDo->get('core.create'))
 		{
-			JToolbarHelper::save2copy('profile.save2copy');
+			ToolbarHelper::save2copy('profile.save2copy');
 		}
 
 		if (0 === $this->item->id)
 		{
-			JToolbarHelper::cancel('profile.cancel');
+			ToolbarHelper::cancel('profile.cancel');
 		}
 		else
 		{
-			JToolbarHelper::cancel('profile.cancel', 'JTOOLBAR_CLOSE');
+			ToolbarHelper::cancel('profile.cancel', 'JTOOLBAR_CLOSE');
 		}
 	}
 }

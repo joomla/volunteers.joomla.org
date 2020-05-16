@@ -3,7 +3,7 @@
  * @package     SSO.Component
  *
  * @author     RolandD Cyber Produksi <contact@rolandd.com>
- * @copyright  Copyright (C) 2017 - 2018 RolandD Cyber Produksi. All rights reserved.
+ * @copyright  Copyright (C) 2017 - 2020 RolandD Cyber Produksi. All rights reserved.
  * @license    GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  * @link       https://rolandd.com
  */
@@ -13,6 +13,8 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\View\HtmlView;
 use Joomla\CMS\Object\CMSObject;
 use Joomla\CMS\Pagination\Pagination;
+use Joomla\CMS\Toolbar\ToolbarHelper;
+use Joomla\Registry\Registry;
 
 defined('_JEXEC') or die;
 
@@ -81,25 +83,35 @@ class SsoViewProfiles extends HtmlView
 	public $activeFilters = array();
 
 	/**
+	 * The SimpleSAMLphp configuration
+	 *
+	 * @var    Registry
+	 * @since  1.0.0
+	 */
+	protected $config;
+
+	/**
 	 * Execute and display a template script.
 	 *
 	 * @param   string  $tpl  The name of the template file to parse; automatically searches through the template paths.
 	 *
 	 * @return  mixed  A string if successful, otherwise a JError object.
 	 *
-	 * @see     fetch()
-	 * @since   1.0.0
-	 *
 	 * @throws  Exception
+	 *
+	 * @since   1.0.0
 	 */
 	public function display($tpl = null)
 	{
-		$this->items         = $this->get('Items');
-		$this->pagination    = $this->get('Pagination');
-		$this->state         = $this->get('State');
+		/** @var SsoModelProfiles $model */
+		$model = $this->getModel();
+		$this->items         = $model->getItems();
+		$this->pagination    = $model->getPagination();
+		$this->state         = $model->getState();
 		$this->canDo         = ContentHelper::getActions('com_sso');
-		$this->filterForm    = $this->get('FilterForm');
-		$this->activeFilters = $this->get('ActiveFilters');
+		$this->filterForm    = $model->getFilterForm();
+		$this->activeFilters = $model->getActiveFilters();
+		$this->config        = new SsoConfig;
 
 		// Render the sidebar
 		$helper = new SsoHelper;
@@ -119,32 +131,35 @@ class SsoViewProfiles extends HtmlView
 	 * @return  void
 	 *
 	 * @since   1.0.0
-	 *
-	 * @throws  Exception
 	 */
 	private function addToolbar()
 	{
-		JToolbarHelper::title(Text::_('COM_SSO_PROFILES'), 'page');
+		ToolbarHelper::title(Text::_('COM_SSO_PROFILES'), 'broadcast');
 
 		if ($this->canDo->get('core.create'))
 		{
-			JToolbarHelper::addNew('profile.add');
+			ToolbarHelper::addNew('profile.add');
 		}
 
 		if ($this->canDo->get('core.edit') || $this->canDo->get('core.edit.own'))
 		{
-			JToolbarHelper::editList('profile.edit');
+			ToolbarHelper::editList('profile.edit');
 		}
 
 		if ($this->canDo->get('core.edit.state'))
 		{
-			JToolbarHelper::publish('profiles.publish', 'JTOOLBAR_PUBLISH', true);
-			JToolbarHelper::unpublish('profiles.unpublish', 'JTOOLBAR_UNPUBLISH', true);
+			ToolbarHelper::publish('profiles.publish', 'JTOOLBAR_PUBLISH', true);
+			ToolbarHelper::unpublish('profiles.unpublish', 'JTOOLBAR_UNPUBLISH', true);
 		}
 
 		if ($this->canDo->get('core.delete'))
 		{
-			JToolbarHelper::deleteList('JGLOBAL_CONFIRM_DELETE', 'profiles.delete', 'JTOOLBAR_DELETE');
+			ToolbarHelper::deleteList('JGLOBAL_CONFIRM_DELETE', 'profiles.delete', 'JTOOLBAR_DELETE');
+		}
+
+		if ($this->canDo->get('core.create'))
+		{
+			ToolbarHelper::custom('profiles.refresh', 'refresh', 'refresh', Text::_('COM_SSO_REFRESH_CLIENTS'));
 		}
 	}
 }

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <extension type="component" version="3.5" method="upgrade">
 	<name>COM_SSO</name>
-	<creationDate>10 November 2018</creationDate>
+	<creationDate>16 May 2020</creationDate>
 	<author>RolandD Cyber Produksi</author>
 	<authorEmail>contact@rolandd.com</authorEmail>
 	<authorUrl>https://rolandd.com</authorUrl>
-	<copyright>Copyright (C) 2017 - 2018 RolandD Cyber Produksi. All rights reserved.</copyright>
+	<copyright>Copyright (C) 2017 - 2020 RolandD Cyber Produksi. All rights reserved.</copyright>
 	<license>GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html</license>
-	<version>1.0.0</version>
+	<version>1.2.1</version>
 	<description>COM_SSO_XML_DESCRIPTION</description>
 
 	<!-- Scripts to run on installation -->
@@ -35,8 +35,9 @@
 
 	<!-- Front-end files -->
 	<files folder="components/com_sso">
-		<filename>sso.php</filename>
 		<filename>controller.php</filename>
+		<filename>router.php</filename>
+		<filename>sso.php</filename>
 		<folder>controllers</folder>
 		<folder>language</folder>
 		<folder>models</folder>
@@ -52,19 +53,20 @@
 			<menu link="option=com_sso&amp;view=config">COM_SSO_CONFIGURATION</menu>
 			<menu link="option=com_sso&amp;view=certificate">COM_SSO_CERTIFICATE</menu>
 			<menu link="option=com_sso&amp;view=profiles">COM_SSO_PROFILES</menu>
+			<menu link="option=com_sso&amp;view=clients">COM_SSO_CLIENTS</menu>
 		</submenu>
 
 		<!-- Core files -->
 		<files folder="administrator/components/com_sso">
-			<filename>sso.php</filename>
 			<filename>access.xml</filename>
+			<filename>changelog.txt</filename>
 			<filename>config.xml</filename>
 			<filename>controller.php</filename>
 			<filename>LICENSE.txt</filename>
+			<filename>sso.php</filename>
 			<folder>controllers</folder>
 			<folder>helpers</folder>
 			<folder>language</folder>
-			<folder>layouts</folder>
 			<folder>models</folder>
 			<folder>sql</folder>
 			<folder>tables</folder>
@@ -72,9 +74,7 @@
 		</files>
 	</administration>
 
-	<!-- Update servers
 	<updateservers>
-		<server type="extension" priority="1" name="sso">https://rolandd.com/updates/sso.xml</server>
+		<server type="extension" priority="1" name="RO Single Sign On">https://rolandd.com/updates/rosso</server>
 	</updateservers>
-	 -->
 </extension>

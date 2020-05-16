@@ -3,7 +3,7 @@
  * @package     SSO.Component
  *
  * @author     RolandD Cyber Produksi <contact@rolandd.com>
- * @copyright  Copyright (C) 2017 - 2018 RolandD Cyber Produksi. All rights reserved.
+ * @copyright  Copyright (C) 2017 - 2020 RolandD Cyber Produksi. All rights reserved.
  * @license    GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  * @link       https://rolandd.com
  */
@@ -21,7 +21,7 @@ defined('_JEXEC') or die;
 		<br />
 		In case this does not work on your system, please follow the directions below under System Preparation
 	</li>
-    <li>Go to SSO Configuration
+    <li>Go to Configuration
 	    <ol>
 		    <li>Set "Administrator Password"</li>
 		    <li>Set "Secret Salt"</li>

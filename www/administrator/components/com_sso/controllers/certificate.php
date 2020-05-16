@@ -3,10 +3,12 @@
  * @package    SSO.Component
  *
  * @author     RolandD Cyber Produksi <contact@rolandd.com>
- * @copyright  Copyright (C) 2017 - 2018 RolandD Cyber Produksi. All rights reserved.
+ * @copyright  Copyright (C) 2017 - 2020 RolandD Cyber Produksi. All rights reserved.
  * @license    GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  * @link       https://rolandd.com
  */
+
+defined('_JEXEC') or die;
 
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
@@ -14,7 +16,6 @@ use Joomla\CMS\MVC\Controller\FormController;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\Session\Session;
 
-defined('_JEXEC') or die;
 /**
  * Certificate controller.
  *
@@ -35,7 +36,7 @@ class SsoControllerCertificate extends FormController
 	 *
 	 * @since   1.0.0
 	 */
-	public function save($key = null, $urlVar = null)
+	public function save($key = null, $urlVar = null): bool
 	{
 		// Check for request forgeries.
 		Session::checkToken() or jexit(Text::_('JINVALID_TOKEN'));

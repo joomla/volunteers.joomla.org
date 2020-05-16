@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<metadata>
+	<layout title="COM_SSO_LOGOUT">
+		<message>
+			<![CDATA[COM_SSO_LOGOUT_DESC]]>
+		</message>
+	</layout>
+	<fields name="request">
+		<fieldset name="request">
+			<field
+				name="task"
+				type="hidden"
+				default="login.logout"
+			/>
+
+			<field addfieldpath="administrator/components/com_sso/models/fields"
+				   name="profile"
+				   type="sso.profile"
+				   label="COM_SSO_LOGOUT_PROFILE"
+				   description="COM_SSO_LOGOUT_PROFILE_DESC"
+				   default=""
+				   required="true">
+				<option value="">COM_SSO_SELECT_PROFILE</option>
+			</field>
+		</fieldset>
+	</fields>
+</metadata>

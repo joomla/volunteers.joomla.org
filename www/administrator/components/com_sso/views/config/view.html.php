@@ -3,7 +3,7 @@
  * @package     SSO.Component
  *
  * @author     RolandD Cyber Produksi <contact@rolandd.com>
- * @copyright  Copyright (C) 2017 - 2018 RolandD Cyber Produksi. All rights reserved.
+ * @copyright  Copyright (C) 2017 - 2020 RolandD Cyber Produksi. All rights reserved.
  * @license    GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  * @link       https://rolandd.com
  */
@@ -11,6 +11,7 @@
 use Joomla\CMS\Form\Form;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\View\HtmlView;
+use Joomla\CMS\Toolbar\ToolbarHelper;
 
 defined('_JEXEC') or die;
 
@@ -58,7 +59,9 @@ class SsoViewConfig extends HtmlView
 	 */
 	public function display($tpl = null)
 	{
-		$this->form  = $this->get('Form');
+		/** @var SsoModelConfig $model */
+		$model      = $this->getModel();
+		$this->form = $model->getForm();
 
 		// Show the toolbar
 		$this->toolbar();
@@ -81,7 +84,7 @@ class SsoViewConfig extends HtmlView
 	 */
 	private function toolbar()
 	{
-		JToolBarHelper::title(Text::_('COM_SSO_CONFIG'), 'equalizer');
-		JToolbarHelper::apply('config.save');
+		ToolBarHelper::title(Text::_('COM_SSO_CONFIG'), 'equalizer');
+		ToolbarHelper::apply('config.save');
 	}
 }

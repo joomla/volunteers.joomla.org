@@ -2,17 +2,18 @@
 /**
  * @package     SSO.Component
  *
- * @author     RolandD Cyber Produksi <contact@rolandd.com>
- * @copyright  Copyright (C) 2017 - 2018 RolandD Cyber Produksi. All rights reserved.
- * @license    GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
- * @link       https://rolandd.com
+ * @author      RolandD Cyber Produksi <contact@rolandd.com>
+ * @copyright   Copyright (C) 2017 - 2020 RolandD Cyber Produksi. All rights reserved.
+ * @license     GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
+ * @link        https://rolandd.com
  */
+
+defined('_JEXEC') or die;
 
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
+use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\Registry\Registry;
-
-defined('_JEXEC') or die;
 
 /**
  * SSO helper.
@@ -31,12 +32,23 @@ class SsoHelper
 	 *
 	 * @since   1.0.0
 	 */
-	public function addSubmenu($vName)
+	public function addSubmenu(string $vName): void
 	{
-		JHtmlSidebar::addEntry(Text::_('COM_SSO_DASHBOARAD'), 'index.php?option=com_sso&view=sso', $vName == 'sso');
-		JHtmlSidebar::addEntry(Text::_('COM_SSO_CONFIG'), 'index.php?option=com_sso&view=config', $vName == 'config');
-		JHtmlSidebar::addEntry(Text::_('COM_SSO_CERTIFICATE'), 'index.php?option=com_sso&view=certificate', $vName == 'certificate');
-		JHtmlSidebar::addEntry(Text::_('COM_SSO_PROFILES'), 'index.php?option=com_sso&view=profiles', $vName == 'profiles');
+		JHtmlSidebar::addEntry(Text::_('COM_SSO_DASHBOARAD'), 'index.php?option=com_sso&view=sso',
+			$vName === 'sso'
+		);
+		JHtmlSidebar::addEntry(Text::_('COM_SSO_CONFIG'), 'index.php?option=com_sso&view=config',
+			$vName === 'config'
+		);
+		JHtmlSidebar::addEntry(Text::_('COM_SSO_CERTIFICATE'), 'index.php?option=com_sso&view=certificate',
+			$vName === 'certificate'
+		);
+		JHtmlSidebar::addEntry(Text::_('COM_SSO_PROFILES'), 'index.php?option=com_sso&view=profiles',
+			$vName === 'profiles'
+		);
+		JHtmlSidebar::addEntry(Text::_('COM_SSO_CLIENTS'), 'index.php?option=com_sso&view=clients',
+			$vName === 'clients'
+		);
 	}
 
 	/**
@@ -48,7 +60,7 @@ class SsoHelper
 	 *
 	 * @since   1.0.0
 	 */
-	public function getParams($alias = 'joomla')
+	public function getParams(string $alias = 'joomla'): Registry
 	{
 		$db = Factory::getDbo();
 
@@ -71,7 +83,7 @@ class SsoHelper
 	 *
 	 * @since   1.0.0
 	 */
-	public function processAttributes($authorizationSource, $attributes)
+	public function processAttributes(string $authorizationSource, array $attributes): array
 	{
 		$userFields = array();
 
@@ -89,7 +101,7 @@ class SsoHelper
 			throw new InvalidArgumentException(Text::_('COM_SSO_MISSING_FIELDMAP'));
 		}
 
-		$map = json_decode($fieldMap);
+		$map = json_decode($fieldMap, false);
 
 		// Convert the nested maps to a usable array
 		$mapFields = array();
@@ -112,6 +124,11 @@ class SsoHelper
 		{
 			throw new InvalidArgumentException(Text::_('COM_SSO_NO_ATTRIBUTES_FOUND'));
 		}
+
+		// Trigger plugins to do customizing of the attributes
+		PluginHelper::importPlugin('sso');
+		$dispatcher = JEventDispatcher::getInstance();
+		$dispatcher->trigger('onAfterProcessAttributes', array(&$userFields));
 
 		return $userFields;
 	}

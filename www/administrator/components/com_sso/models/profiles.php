@@ -2,16 +2,15 @@
 /**
  * @package     SSO.Component
  *
- * @author     RolandD Cyber Produksi <contact@rolandd.com>
- * @copyright  Copyright (C) 2017 - 2018 RolandD Cyber Produksi. All rights reserved.
- * @license    GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
- * @link       https://rolandd.com
+ * @author      RolandD Cyber Produksi <contact@rolandd.com>
+ * @copyright   Copyright (C) 2017 - 2020 RolandD Cyber Produksi. All rights reserved.
+ * @license     GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
+ * @link        https://rolandd.com
  */
 
-use Joomla\CMS\Factory;
-use Joomla\CMS\MVC\Model\ListModel;
-
 defined('_JEXEC') or die;
+
+use Joomla\CMS\MVC\Model\ListModel;
 
 /**
  * SSO Profiles model.
@@ -22,33 +21,29 @@ defined('_JEXEC') or die;
 class SsoModelProfiles extends ListModel
 {
 	/**
-	 * Database connector
-	 *
-	 * @var    JDatabaseDriverMysqli
-	 * @since  1.0.0
-	 */
-	private $db;
-
-	/**
 	 * Constructor.
 	 *
 	 * @param   array  $config  An optional associative array of configuration settings.
 	 *
 	 * @since   1.0.0
+	 *
+	 * @throws  Exception
 	 */
 	public function __construct($config = array())
 	{
 		if (empty($config['filter_fields']))
 		{
 			$config['filter_fields'] = array(
-				'ordering', 'profiles.ordering',
-				'id', 'profiles.id',
-				'name', 'profiles.name',
-				'published', 'profiles.published',
+				'ordering',
+				'profiles.ordering',
+				'id',
+				'profiles.id',
+				'name',
+				'profiles.name',
+				'published',
+				'profiles.published',
 			);
 		}
-
-		$this->db = Factory::getDbo();
 
 		parent::__construct($config);
 	}
@@ -65,7 +60,7 @@ class SsoModelProfiles extends ListModel
 	 *
 	 * @since   1.0.0
 	 */
-	protected function populateState($ordering = null, $direction = null)
+	protected function populateState($ordering = null, $direction = null): void
 	{
 		// List state information.
 		parent::populateState('profiles.ordering', 'asc');
@@ -78,12 +73,13 @@ class SsoModelProfiles extends ListModel
 	 *
 	 * @since   1.0.0
 	 *
-	 * @throws  \RuntimeException
+	 * @throws  RuntimeException
 	 */
 	protected function getListQuery()
 	{
 		// Create a new query object.
-		$query = $this->db->getQuery(true);
+		$db    = $this->getDbo();
+		$query = $db->getQuery(true);
 
 		// Select the required fields from the table.
 		$query->select(
@@ -93,7 +89,7 @@ class SsoModelProfiles extends ListModel
 			)
 		);
 
-		$query->from($this->db->quoteName('#__sso_profiles', 'profiles'));
+		$query->from($db->quoteName('#__sso_profiles', 'profiles'));
 
 		// If the model is set to check item state, add to the query.
 		$published = $this->getState('filter.published');
@@ -105,11 +101,11 @@ class SsoModelProfiles extends ListModel
 
 		// Add the list ordering clause.
 		$query->order(
-			$this->db->quoteName(
-				$this->db->escape(
+			$db->quoteName(
+				$db->escape(
 					$this->getState('list.ordering', 'profiles.ordering')
 				)
-			) . ' ' . $this->db->escape($this->getState('list.direction', 'ASC'))
+			) . ' ' . $db->escape($this->getState('list.direction', 'ASC'))
 		);
 
 		return $query;

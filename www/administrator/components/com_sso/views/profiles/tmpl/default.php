@@ -3,7 +3,7 @@
  * @package     SSO.Component
  *
  * @author     RolandD Cyber Produksi <contact@rolandd.com>
- * @copyright  Copyright (C) 2017 - 2018 RolandD Cyber Produksi. All rights reserved.
+ * @copyright  Copyright (C) 2017 - 2020 RolandD Cyber Produksi. All rights reserved.
  * @license    GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  * @link       https://rolandd.com
  */
@@ -12,6 +12,7 @@ use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Layout\LayoutHelper;
 use Joomla\CMS\Router\Route;
+use Joomla\CMS\Uri\Uri;
 
 defined('_JEXEC') or die;
 
@@ -50,11 +51,17 @@ if ($saveOrder)
 						<?php echo HTMLHelper::_('grid.checkall'); ?>
 					</th>
 					<th width="1%" class="nowrap center">
-						<?php echo JHtml::_('searchtools.sort', 'JSTATUS', 'profiles.published', $listDirn, $listOrder); ?>
+						<?php echo HTMLHelper::_('searchtools.sort', 'JSTATUS', 'profiles.published', $listDirn, $listOrder); ?>
 					</th>
 					<th class="left">
 						<?php echo HTMLHelper::_('searchtools.sort', 'COM_SSO_PROFILES_NAME', 'profiles.name', $listDirn, $listOrder); ?>
 					</th>
+                    <th class="left">
+						<?php echo Text::_('COM_SSO_PROFILES_ALIAS'); ?>
+                    </th>
+                    <th class="left">
+						<?php echo Text::_('COM_SSO_PROFILES_METADATA_URL'); ?>
+                    </th>
 				</tr>
 				</thead>
 				<tfoot>
@@ -113,6 +120,13 @@ if ($saveOrder)
 								<?php endif; ?>
 							</div>
 						</td>
+                        <td>
+							<?php echo $item->alias; ?>
+                        </td>
+                        <td>
+                            <?php $url = Uri::root() . $this->config->get('baseurlpath') . 'module.php/saml/sp/metadata.php/' . $item->alias; ?>
+                            <?php echo HTMLHelper::_('link', $url, $url, 'target="_blank"'); ?>
+                        </td>
 					</tr>
 				<?php endforeach; ?>
 				</tbody>

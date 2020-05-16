@@ -3,12 +3,14 @@
  * @package     SSO.Component
  *
  * @author     RolandD Cyber Produksi <contact@rolandd.com>
- * @copyright  Copyright (C) 2017 - 2018 RolandD Cyber Produksi. All rights reserved.
+ * @copyright  Copyright (C) 2017 - 2020 RolandD Cyber Produksi. All rights reserved.
  * @license    GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  * @link       https://rolandd.com
  */
 
 use Joomla\CMS\Factory;
+use Joomla\CMS\Language\Multilanguage;
+use Joomla\CMS\Menu\AbstractMenu;
 use Joomla\CMS\MVC\Controller\BaseController;
 use Joomla\CMS\Router\Route;
 
@@ -42,14 +44,31 @@ class SsoControllerLogin extends BaseController
 			$model->processLogin();
 
 			// Check if we need to redirect the user anywhere
+			$return = $this->input->getBase64('return');
+			$link   = base64_decode($return);
 			$helper     = new SsoHelper;
 			$parameters = $helper->getParams($model->setState('authorizationSource', 'default-sp'));
-			$menu       = Factory::getApplication()->getMenu();
-			$menu       = $menu->getItem($parameters->get('joomla.redirect'));
+			$redirect   = $parameters->get('joomla.redirect');
 
-			if ($menu)
+			if ($redirect !== 'active')
 			{
-				$this->setRedirect(Route::_($menu->link));
+				/** @var AbstractMenu $menu */
+				$menu = Factory::getApplication()->getMenu();
+				$menu = $menu->getItem($redirect);
+				$link = $menu->link;
+
+				if (Multilanguage::isEnabled())
+				{
+					$language = Factory::getUser()->getParam('language');
+					$link     .= '&lang=' . $language;
+				}
+
+				$link = Route::_($link);
+			}
+
+			if ($link)
+			{
+				$this->setRedirect($link);
 			}
 		}
 		catch (Exception $exception)

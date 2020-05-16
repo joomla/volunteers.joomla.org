@@ -3,18 +3,19 @@
  * @package     SSO.Component
  *
  * @author     RolandD Cyber Produksi <contact@rolandd.com>
- * @copyright  Copyright (C) 2017 - 2018 RolandD Cyber Produksi. All rights reserved.
+ * @copyright  Copyright (C) 2017 - 2020 RolandD Cyber Produksi. All rights reserved.
  * @license    GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  * @link       https://rolandd.com
  */
+
+defined('_JEXEC') or die;
 
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\Controller\FormController;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\Session\Session;
-
-defined('_JEXEC') or die;
+use Joomla\CMS\Uri\Uri;
 
 /**
  * Config Controller.
@@ -36,7 +37,7 @@ class SsoControllerConfig extends FormController
 	 *
 	 * @throws  Exception
 	 */
-	public function save($key = null, $urlVar = null)
+	public function save($key = null, $urlVar = null): bool
 	{
 		// Check for request forgeries.
 		Session::checkToken() or exit(Text::_('JINVALID_TOKEN'));
@@ -146,7 +147,7 @@ class SsoControllerConfig extends FormController
 		// Check if there is a return value
 		$return = $this->input->get('return', null, 'base64');
 
-		if (!is_null($return) && JUri::isInternal(base64_decode($return)))
+		if (!is_null($return) && Uri::isInternal(base64_decode($return)))
 		{
 			$url = base64_decode($return);
 		}

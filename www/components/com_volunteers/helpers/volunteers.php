@@ -5,7 +5,8 @@
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
-// No direct access.
+use Joomla\CMS\Uri\Uri;
+
 defined('_JEXEC') or die;
 
 JLoader::register('JHtmlVolunteers', JPATH_ADMINISTRATOR . '/components/com_volunteers/helpers/html/volunteers.php');
@@ -38,45 +39,22 @@ abstract class VolunteersHelper
 
 	public static function image($image, $size, $urlonly = false, $alt = '')
 	{
-		// No image, size small
-		if (empty($image) && ($size == 'small'))
+		if (empty($image))
 		{
-			$image_path = 'images/joomla_50x50.png';
+			$image = Uri::base(). 'images/joomla.png';
 		}
 
-		// No image, size large
-		if (empty($image) && ($size == 'large'))
+		if ($urlonly)
 		{
-			$image_path = 'images/joomla.png';
+			$html = $image;
 		}
-
-		if ($image)
+		elseif ($size === 'small')
 		{
-			$image_filename  = pathinfo($image, PATHINFO_FILENAME);
-			$image_extension = pathinfo($image, PATHINFO_EXTENSION);
-		}
-
-		if ($image && ($size == 'small'))
-		{
-			$image_path = 'https://identity.joomla.org/' . $image;
-		}
-
-		if ($image && ($size == 'large'))
-		{
-			$image_path = 'https://identity.joomla.org/' . $image;
-		}
-
-		if ($urlonly && empty($image))
-		{
-			$html = JUri::base() . $image_path;
-		}
-		elseif ($urlonly && $image)
-		{
-			$html = 'https://identity.joomla.org/' . $image;
+			$html = '<img class="img-rounded" alt="' . $alt . '" src="' . $image . '" width="50px"/>';
 		}
 		else
 		{
-			$html = '<img class="img-rounded" alt="' . $alt . '" src="' . $image_path . '"/>';
+			$html = '<img class="img-rounded" alt="' . $alt . '" src="' . $image . '"/>';
 		}
 
 		return $html;

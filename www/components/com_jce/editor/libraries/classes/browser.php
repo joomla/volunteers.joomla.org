@@ -175,9 +175,11 @@ class WFFileBrowser extends JObject
 
     public function getFileSystem()
     {
-        static $filesystem;
+        static $filesystem = array();
 
-        if (!is_object($filesystem)) {
+        $fs = $this->get('filesystem', 'joomla');
+
+        if (!isset($filesystem[$fs])) {
             $wf = WFEditorPlugin::getInstance();
 
             $config = array(
@@ -187,10 +189,10 @@ class WFFileBrowser extends JObject
                 'filetypes' => $this->listFileTypes(),
             );
 
-            $filesystem = WFFileSystem::getInstance($this->get('filesystem'), $config);
+            $filesystem[$fs] = WFFileSystem::getInstance($fs, $config);
         }
 
-        return $filesystem;
+        return $filesystem[$fs];
     }
 
     private function getViewable()
@@ -1290,6 +1292,9 @@ class WFFileBrowser extends JObject
                 if (empty($result->url)) {
                     $result->url = WFUtility::makePath($filesystem->getRootDir(), WFUtility::makePath($dir, $name));
                 }
+                
+                // trim slashes
+                $result->url = trim($result->url, '/');
 
                 // run events
                 $data = $this->fireEvent('onUpload', array($result->path, $result->url));

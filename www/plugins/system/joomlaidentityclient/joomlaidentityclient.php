@@ -68,7 +68,7 @@ class PlgSystemJoomlaidentityclient extends CMSPlugin
 		{
 			return;
 		}
-		
+
 		JLog::addLogger(['text_file' => 'idp-calls.php'], JLog::ALL, ['idp']);
 		JLog::add('Call received', JLog::INFO, 'idp');
 
@@ -85,7 +85,7 @@ class PlgSystemJoomlaidentityclient extends CMSPlugin
 			}
 
 			// Get the payload
-			$data = $this->app->input->get('data', '', 'string');
+			$data = $this->app->input->get('data', '', 'raw');
 			$hash = base64_decode($this->app->input->get('hash', '', 'base64'));
 
 			// Validate the hash
@@ -94,7 +94,7 @@ class PlgSystemJoomlaidentityclient extends CMSPlugin
 				JLog::add(Text::_('PLG_SYSTEM_JOOMLAIDENTITYCLIENT_INVALID_HASH'), JLog::INFO, 'idp');
 				throw new InvalidArgumentException(Text::_('PLG_SYSTEM_JOOMLAIDENTITYCLIENT_INVALID_HASH'));
 			}
-			
+
 			JLog::add('Data: '. $data, JLog::INFO, 'idp');
 
 			// Get the data

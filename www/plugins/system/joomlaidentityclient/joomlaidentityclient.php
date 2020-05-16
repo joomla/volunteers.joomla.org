@@ -68,6 +68,9 @@ class PlgSystemJoomlaidentityclient extends CMSPlugin
 		{
 			return;
 		}
+		
+		JLog::addLogger(['text_file' => 'idp-calls.php'], JLog::ALL, ['idp']);
+		JLog::add('Call received', JLog::INFO, 'idp');
 
 		try
 		{
@@ -77,6 +80,7 @@ class PlgSystemJoomlaidentityclient extends CMSPlugin
 			// Check API key length
 			if (strlen($apiKey) <> 36)
 			{
+			JLog::add(Text::_('PLG_SYSTEM_JOOMLAIDENTITYCLIENT_INVALID_APIKEY'), JLog::INFO, 'idp');
 				throw new InvalidArgumentException(Text::_('PLG_SYSTEM_JOOMLAIDENTITYCLIENT_INVALID_APIKEY'));
 			}
 
@@ -87,8 +91,11 @@ class PlgSystemJoomlaidentityclient extends CMSPlugin
 			// Validate the hash
 			if ($hash !== hash_hmac('sha512', $data, $apiKey))
 			{
+				JLog::add(Text::_('PLG_SYSTEM_JOOMLAIDENTITYCLIENT_INVALID_HASH'), JLog::INFO, 'idp');
 				throw new InvalidArgumentException(Text::_('PLG_SYSTEM_JOOMLAIDENTITYCLIENT_INVALID_HASH'));
 			}
+			
+			JLog::add('Data: '. $data, JLog::INFO, 'idp');
 
 			// Get the data
 			$data     = json_decode($data);
@@ -98,11 +105,13 @@ class PlgSystemJoomlaidentityclient extends CMSPlugin
 
 			if (!$guid || strlen($guid) <> 36)
 			{
+				JLog::add(Text::_('PLG_SYSTEM_JOOMLAIDENTITYCLIENT_INVALID_GUID'), JLog::INFO, 'idp');
 				throw new InvalidArgumentException(Text::_('PLG_SYSTEM_JOOMLAIDENTITYCLIENT_INVALID_GUID'));
 			}
 
 			if ($userData)
 			{
+				JLog::add(Text::_('processIdentity'), JLog::INFO, 'idp');
 				$this->processIdentity($guid, $task, $userData);
 			}
 		}

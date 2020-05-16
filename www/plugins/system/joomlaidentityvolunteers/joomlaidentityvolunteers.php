@@ -88,7 +88,7 @@ class PlgSystemJoomlaIdentityVolunteers extends CMSPlugin
 	 * @since   1.0.0
 	 */
 	public function onProcessIdentity($userId, $guid, $task, $data)
-	{
+	{		
 		try
 		{
 			$this->validateData($data);
@@ -147,7 +147,7 @@ class PlgSystemJoomlaIdentityVolunteers extends CMSPlugin
 			'country'             => $data->country,
 			'intro'               => $data->intro,
 			'joomlastory'         => $data->joomlastory,
-			'image'               => $data->image,
+			'image'               => ($data->image) ? 'https://identity.joomla.org/' . $data->image : '',
 			'facebook'            => $data->facebook,
 			'twitter'             => $data->twitter,
 			'linkedin'            => $data->linkedin,
@@ -162,6 +162,8 @@ class PlgSystemJoomlaIdentityVolunteers extends CMSPlugin
 			'joomladocs'          => $data->joomladocs,
 			'crowdin'             => $data->crowdin
 		);
+		
+		JLog::add(json_encode($volunteer), JLog::INFO, 'idpjvp');
 
 		try
 		{

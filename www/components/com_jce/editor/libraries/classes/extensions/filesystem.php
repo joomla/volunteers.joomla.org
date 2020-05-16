@@ -42,9 +42,9 @@ class WFFileSystem extends WFExtension
      */
     public static function getInstance($type = 'joomla', $config = array())
     {
-        static $instance;
+        static $instance = array();
 
-        if (!is_object($instance)) {
+        if (!isset($instance[$type])) {
             $fs = parent::loadExtensions('filesystem', $type);
 
             // load the default...
@@ -60,13 +60,13 @@ class WFFileSystem extends WFExtension
             $classname = 'WF' . ucfirst($fs->name) . 'FileSystem';
 
             if (class_exists($classname)) {
-                $instance = new $classname($config);
+                $instance[$type] = new $classname($config);
             } else {
-                $instance = new self($config);
+                $instance[$type] = new self($config);
             }
         }
 
-        return $instance;
+        return $instance[$type];
     }
 
     public function updateOptions(&$options)
@@ -178,10 +178,12 @@ class WFFileSystem extends WFExtension
             if (!empty($root)) {
                 // Convert slashes / Strip double slashes
                 $root = preg_replace('/[\\\\]+/', '/', $root);
+
                 // Remove first leading slash
                 $root = ltrim($root, '/');
-                // Force default directory if base param starts with a variable or a . eg $id
-                if (preg_match('/[\.\$]/', $root[0])) {
+                
+                // Force default directory if base param is now empty or starts with a variable or a . eg $id
+                if (empty($root) || preg_match('/[\.\$]/', $root[0])) {
                     $root = 'images';
                 }
 

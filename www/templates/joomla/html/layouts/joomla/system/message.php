@@ -3,7 +3,7 @@
  * @package     Joomla.Site
  * @subpackage  Template.protostar
  *
- * @copyright   Copyright (C) 2005 - 2018 Open Source Matters, Inc. All rights reserved.
+ * @copyright   Copyright (C) 2005 - 2020 Open Source Matters, Inc. All rights reserved.
  * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
 
@@ -13,7 +13,7 @@ use Joomla\CMS\Language\Text;
 
 $msgList = $displayData['msgList'];
 
-$alert = array('error' => 'alert-error', 'warning' => '', 'notice' => 'alert-info', 'message' => 'alert-success');
+$alert = array('error' => 'alert-error', 'warning' => '', 'notice' => 'alert-info', 'message' => 'alert-success', 'info' => 'alert-info',);
 ?>
 <div id="system-message-container">
 	<?php if (is_array($msgList) && !empty($msgList)) : ?>

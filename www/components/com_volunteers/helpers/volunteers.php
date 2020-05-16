@@ -58,17 +58,21 @@ abstract class VolunteersHelper
 
 		if ($image && ($size == 'small'))
 		{
-			$image_path = 'images/volunteers/thumbs/' . $image_filename . '_50x50.' . $image_extension;
+			$image_path = 'https://identity.joomla.org/' . $image;
 		}
 
 		if ($image && ($size == 'large'))
 		{
-			$image_path = 'images/volunteers/' . $image_filename . '.' . $image_extension;
+			$image_path = 'https://identity.joomla.org/' . $image;
 		}
 
-		if ($urlonly)
+		if ($urlonly && empty($image))
 		{
 			$html = JUri::base() . $image_path;
+		}
+		elseif ($urlonly && $image)
+		{
+			$html = 'https://identity.joomla.org/' . $image;
 		}
 		else
 		{

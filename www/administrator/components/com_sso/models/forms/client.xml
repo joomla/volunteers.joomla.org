@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form>
+    <fieldset name="settings">
+        <field name="id" type="hidden" class="readonly" readonly="true"/>
+
+        <field name="name"
+               type="text"
+               label="COM_SSO_CLIENT_NAME_LABEL"
+               description="COM_SSO_CLIENT_NAME_DESC"
+               class="input-xlarge"
+               required="true"
+               default=""/>
+
+        <field name="source"
+               type="text"
+               label="COM_SSO_CLIENT_SOURCE_LABEL"
+               description="COM_SSO_CLIENT_SOURCE_DESC"
+               class="input-xxlarge"
+               required="true"
+               validate="url"
+               default=""/>
+
+        <field name="outputDir"
+               type="text"
+               label="COM_SSO_CLIENT_OUTPUTDIR_LABEL"
+               description="COM_SSO_CLIENT_OUTPUTDIR_DESC"
+               class="input-xxlarge"
+               required="true"
+               filter="cmd"
+               default=""/>
+
+        <field name="outputFormat"
+               type="list"
+               label="COM_SSO_CLIENT_OUTPUTFORMAT_LABEL"
+               description="COM_SSO_CLIENT_OUTPUTFORMAT_DESC"
+               class="advancedSelect"
+               required="true"
+               default="flatfile">
+            <option value="flatfile">COM_SSO_CLIENT_FLATFILE</option>
+            <option value="serialize">COM_SSO_CLIENT_SERIALIZE</option>
+        </field>
+
+        <field name="expireAfter"
+               type="number"
+               label="COM_SSO_CLIENT_EXPIREAFTER_LABEL"
+               description="COM_SSO_CLIENT_EXPIREAFTER_DESC"
+               class="input-mini"
+               required="false"
+               default="7"/>
+
+        <field name="validateFingerprint"
+               type="text"
+               label="COM_SSO_CLIENT_VALIDATEFINGERPRINT_LABEL"
+               description="COM_SSO_CLIENT_VALIDATEFINGERPRINT_DESC"
+               class="input-xxlarge"
+               required="false"
+               default=""/>
+
+        <field name="certificates"
+               type="filelist"
+               label="COM_SSO_CLIENT_CERTIFICATES_LABEL"
+               description="COM_SSO_CLIENT_CERTIFICATES_DESC"
+               directory="libraries/simplesamlphp/cert"
+               hideDefault="true"
+               hideNone="true"
+               filter="crt"
+               class="advancedSelect"
+               required="false"
+               default=""
+               multiple="true"/>
+
+        <field
+                name="published"
+                type="list"
+                label="JSTATUS"
+                class="advancedSelect"
+                size="1"
+                default="1"
+        >
+            <option value="1">JPUBLISHED</option>
+            <option value="0">JUNPUBLISHED</option>
+        </field>
+    </fieldset>
+</form>

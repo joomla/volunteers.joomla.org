@@ -1,0 +1,94 @@
+/* CIVIC Cookie Control */
+#ccc-notify-dismiss {
+  display: none !important;
+}
+
+#ccc {
+  h3 {
+    font-family: 'Open Sans', sans-serif;
+  }
+
+  p {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  }
+
+  #ccc-notify {
+    p {
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+  }
+
+  .ccc-notify-buttons {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  }
+
+  button#ccc-recommended-settings {
+    background: #62c462;
+
+    &:hover {
+      background: #51a351;
+    }
+  }
+
+  #ccc-content {
+    hr {
+      opacity: 0.75;
+    }
+  }
+}
+
+#ccc[light] {
+  button#ccc-icon {
+    fill: #152845;
+  }
+
+  button.ccc-notify-button {
+    border: 1px solid #62c462;
+    color: #fff;
+    font-size: 0.95em;
+    border-radius: 0;
+
+    &:hover {
+      border-color: #51a351;
+    }
+
+    &:focus {
+      border-color: #ccc;
+    }
+
+    &:active {
+      border-color: #ccc;
+    }
+  }
+
+  #ccc-notify-accept.ccc-button-solid {
+    background: #62c462;
+
+    &:hover {
+      background: #51a351;
+    }
+  }
+}
+
+#ccc-optional-categories {
+  .optional-cookie {
+    &:last-child {
+      .checkbox-toggle {
+        display: none;
+      }
+
+      p {
+        text-align: center;
+
+        a {
+          font-size: 15px;
+          font-weight: 700;
+
+          &:hover {
+            text-decoration: none;
+          }
+        }
+      }
+    }
+  }
+}

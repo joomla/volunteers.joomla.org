@@ -2,7 +2,7 @@
 /**
  * Joomla.org site template
  *
- * @copyright   Copyright (C) 2005 - 2018 Open Source Matters, Inc. All rights reserved.
+ * @copyright   Copyright (C) 2005 - 2020 Open Source Matters, Inc. All rights reserved.
  * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
 
@@ -37,7 +37,7 @@ HTMLHelper::_('bootstrap.framework');
 // Add Stylesheets - if the site is in debug mode or has explicitly chosen to not use the CDN, load the local media
 if (JDEBUG || !$this->params->get('useCdn', '1'))
 {
-	HTMLHelper::_('stylesheet', 'template.min.css', ['relative' => true, 'detectDebug' => (bool) JDEBUG, 'version' => '3.0.0']);
+	HTMLHelper::_('stylesheet', 'template.min.css', ['relative' => true, 'detectDebug' => (bool) JDEBUG, 'version' => '3.0.1-dev']);
 }
 else
 {
@@ -166,32 +166,75 @@ if (!$this->getMetaData('referrer'))
 	$this->setMetaData('referrer', 'unsafe-url');
 }
 
-// Get the GTM property ID
-$gtmId = JoomlaTemplateHelper::getGtmId(Uri::getInstance()->toString(['host']));
+// Get the site config
+$siteConfig = JoomlaTemplateHelper::getSiteConfig(Uri::getInstance()->toString(['host']));
+
+// If Cookie Control is enabled, we expose the GTM ID as a JavaScript var versus registering GTM directly
+$hasCookieControl = $this->params->get('cookieControlActive', 0);
+
+if ($hasCookieControl)
+{
+	HTMLHelper::_('script', 'https://cc.cdn.civiccomputing.com/8/cookieControl-8.x.min.js');
+	HTMLHelper::_('script', 'cookiecontrol.js', ['version' => 'auto', 'relative' => true, 'detectDebug' => (bool) JDEBUG], []);
+
+	// Purposefully declare a global variable versus using the Joomla.options JavaScript API for compatibility with non-Joomla (CMS) installations
+	if ($siteConfig->gtmId)
+	{
+		$this->addScriptDeclaration("var propertyGtmId = '" . $siteConfig->gtmId . "';");
+
+		// Get Cookie Script Ids
+		if ($siteConfig->scripts)
+		{
+			$this->addScriptDeclaration("var propertyUaId = '" . $siteConfig->scripts->uaId . "';");
+			$this->addScriptDeclaration("var propertyAwId = '" . $siteConfig->scripts->awId . "';");
+			$this->addScriptDeclaration("var propertyTwitter = '" . $siteConfig->scripts->twitter . "';");
+			$this->addScriptDeclaration("var propertyFacebookSdk = '" . $siteConfig->scripts->fbSdk . "';");
+			$this->addScriptDeclaration("var propertyFacebookPixel = '" . $siteConfig->scripts->fbPixel . "';");
+			$this->addScriptDeclaration("var propertyCarbonAds = '" . $siteConfig->scripts->carbonads . "';");
+			$this->addScriptDeclaration("var propertyAddThisId = '" . $siteConfig->scripts->addthisId . "';");
+			$this->addScriptDeclaration("var propertyPingdomId = '" . $siteConfig->scripts->pingdomId . "';");
+			$this->addScriptDeclaration("var propertyGoogleSynd = '" . $siteConfig->scripts->gsynd . "';");
+		}
+
+		// Get Property's Active Cookie Categories
+		if ($siteConfig->cookies)
+		{
+			$this->addScriptDeclaration("var ccPerformance = " . $siteConfig->cookies->performance . ";");
+			$this->addScriptDeclaration("var ccFunctional = " . $siteConfig->cookies->functional . ";");
+			$this->addScriptDeclaration("var ccAdvertising = " . $siteConfig->cookies->advertising . ";");
+			$this->addScriptDeclaration("var ccIAB = " . $siteConfig->cookies->iab . ";");
+		}
+	}
+}
+else
+{
+	// Register Pingdom analytics
+	$this->addScriptDeclaration(<<<JS
+var _prum = [['id', '59300ad15992c776ad970068'],
+			['mark', 'firstbyte', (new Date()).getTime()]];
+(function() {
+	var s = document.getElementsByTagName('script')[0]
+	, p = document.createElement('script');
+	p.async = 'async';
+	p.src = 'https://rum-static.pingdom.net/prum.min.js';
+	s.parentNode.insertBefore(p, s);
+})();
+JS
+	);
+}
 ?>
 <!DOCTYPE html>
 <html lang="<?php echo $this->language; ?>" dir="<?php echo $this->direction; ?>">
 <head>
 	<jdoc:include type="head" />
-	<script>
-		var _prum = [['id', '59300ad15992c776ad970068'],
-					['mark', 'firstbyte', (new Date()).getTime()]];
-		(function() {
-			var s = document.getElementsByTagName('script')[0]
-			, p = document.createElement('script');
-			p.async = 'async';
-			p.src = 'https://rum-static.pingdom.net/prum.min.js';
-			s.parentNode.insertBefore(p, s);
-		})();
-	</script>
 </head>
 <body class="<?php echo "site $option view-$view layout-$layout task-$task itemid-$itemid" . ($this->params->get('fluidContainer') ? ' fluid' : '') . ($this->direction == 'rtl' ? ' rtl' : ''); ?>">
 	<?php
 	// Add Google Tag Manager code if one is set
-	if ($gtmId) : ?>
+	if ($siteConfig->gtmId && !$hasCookieControl) : ?>
 	<!-- Google Tag Manager -->
-	<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=<?php echo $gtmId; ?>" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-	<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','<?php echo $gtmId; ?>');</script>
+	<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=<?php echo $siteConfig->gtmId; ?>" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+	<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','<?php echo $siteConfig->gtmId; ?>');</script>
 	<!-- End Google Tag Manager -->
 	<?php endif; ?>
 	<!-- Top Nav -->
@@ -220,12 +263,12 @@ $gtmId = JoomlaTemplateHelper::getGtmId(Uri::getInstance()->toString(['host']));
 					</h1>
 				</div>
 				<div class="span5">
-					<div class="btn-toolbar pull-right">
-						<div class="btn-group">
-							<a href="https://downloads.joomla.org/" class="btn btn-large btn-warning"><?php echo Text::_('TPL_JOOMLA_DOWNLOAD_BUTTON'); ?></a>
+					<div class="btn-toolbar row-fluid">
+						<div class="span6">
+							<a href="https://downloads.joomla.org/" class="btn btn-block btn-large btn-warning"><?php echo Text::_('TPL_JOOMLA_DOWNLOAD_BUTTON'); ?></a>
 						</div>
-						<div class="btn-group">
-							<a href="https://launch.joomla.org" class="btn btn-large btn-primary"><?php echo Text::_('TPL_JOOMLA_DEMO_BUTTON'); ?></a>
+						<div class="span6">
+							<a href="https://launch.joomla.org" class="btn btn-block btn-large btn-primary"><?php echo Text::_('TPL_JOOMLA_DEMO_BUTTON'); ?> <span aria-hidden="true" class="icon-rocket"></span></a>
 						</div>
 					</div>
 				</div>

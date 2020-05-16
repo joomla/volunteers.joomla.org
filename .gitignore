@@ -35,3 +35,8 @@ Desktop.ini
 
 # Images
 /www/images
+
+# SSO System files
+/www/libraries/simplesamlphp/cert/*
+/www/libraries/simplesamlphp/config/*
+/www/libraries/simplesamlphp/metadata-generated/*

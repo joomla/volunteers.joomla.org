@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension version="3.8" type="plugin" group="authentication" method="upgrade">
+    <name>PLG_AUTHENTICATION_SSO</name>
+    <creationDate>10 November 2018</creationDate>
+    <author>RolandD Cyber Produksi</author>
+    <authorEmail>contact@rolandd.com</authorEmail>
+    <authorUrl>https://rolandd.com</authorUrl>
+    <copyright>Copyright (C) 2017 - 2018 RolandD Cyber Produksi. All rights reserved.</copyright>
+    <license>GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html</license>
+    <version>1.0.0</version>
+    <description>PLG_AUTHENTICATION_SSO_XML_DESCRIPTION</description>
+
+    <files>
+        <filename plugin="sso">sso.php</filename>
+        <folder>language</folder>
+    </files>
+
+    <config>
+        <fields name="params">
+            <fieldset name="basic">
+                <field
+                        addfieldpath="administrator/components/com_sso/models/fields"
+                        name="profile"
+                        type="sso.profile"
+                        label="PLG_AUTHENTICATION_SSO_PROFILE_LABEL"
+                        description="PLG_AUTHENTICATION_SSO_PROFILE_DESC"/>
+            </fieldset>
+        </fields>
+    </config>
+</extension>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form>
+	<fieldset name="settings">
+		<field name="id" type="hidden" class="readonly" readonly="true"  />
+
+		<field name="name"
+			   type="text"
+			   label="COM_SSO_PROFILE_NAME_LABEL"
+			   description="COM_SSO_PROFILE_NAME_DESC"
+			   class="input-xlarge"
+			   required="true"
+			   default=""/>
+
+		<field name="alias"
+			   type="text"
+			   label="COM_SSO_ALIAS_NAME_LABEL"
+			   description="COM_SSO_ALIAS_NAME_DESC"
+			   class="readonly"
+			   readonly="true"
+			   required="false"
+			   default=""/>
+
+		<field
+				name="published"
+				type="list"
+				label="JSTATUS"
+				class="advancedSelect"
+				size="1"
+				default="1"
+		>
+			<option value="1">JPUBLISHED</option>
+			<option value="0">JUNPUBLISHED</option>
+		</field>
+	</fieldset>
+</form>

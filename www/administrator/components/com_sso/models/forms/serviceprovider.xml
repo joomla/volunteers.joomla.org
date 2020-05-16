@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form>
+    <fieldset name="joomla" label="COM_SSO_CONFIG_JOOMLA">
+        <fields name="joomla">
+            <field name="userGroup"
+                   type="usergrouplist"
+                   label="COM_SSO_CONFIG_USERGROUP_LABEL"
+                   description="COM_SSO_CONFIG_USERGROUP_DESC"
+                   multiple="true"
+                   required="true"
+                   class="advancedSelect"/>
+
+            <field name="userGroupMapping"
+                   type="subform"
+                   label="COM_SSO_CONFIG_USERGROUP_MAPPING_LABEL"
+                   description="COM_SSO_CONFIG_USERGROUP_MAPPING_DESC"
+                   multiple="true"
+                   required="true"
+                   emptylabel="true"
+                   buttons="add,remove"
+                   layout="joomla.form.field.subform.repeatable-table">
+                <form>
+                    <fieldset>
+                        <field
+                                name="groupName"
+                                type="usergrouplist"
+                                label="COM_SSO_CONFIG_GROUPNAME_LABEL"
+                                description="COM_SSO_CONFIG_GROUPNAME_DESC"
+                                class="advancedSelect"
+                                multiple="true"/>
+
+                        <field
+                                name="mapName"
+                                type="text"
+                                label="COM_SSO_CONFIG_MAP_NAME_LABEL"
+                                description="COM_SSO_CONFIG_MAP_NAME_DESC"/>
+
+                        <field
+                                name="mapValue"
+                                type="text"
+                                label="COM_SSO_CONFIG_MAP_VALUE_LABEL"
+                                description="COM_SSO_CONFIG_MAP_VALUE_DESC"/>
+                    </fieldset>
+                </form>
+            </field>
+
+            <field name="redirect"
+                   type="menuitem"
+                   label="COM_SSO_CONFIG_REDIRECT_LABEL"
+                   description="COM_SSO_CONFIG_REDIRECT_DESC"
+                   required="true"
+                   class="input-xxlarge advancedSelect"
+                   default="active">
+                <option value="active">COM_SSO_CONFIG_REDIRECT_ACTIVE_PAGE</option>
+            </field>
+        </fields>
+    </fieldset>
+
+    <fieldset name="authorization" label="COM_SSO_CONFIG_AUTHORIZATION">
+        <fields name="authorization">
+            <field name="idp"
+                   type="text"
+                   label="COM_SSO_CONFIG_IDP_LABEL"
+                   description="COM_SSO_CONFIG_IDP_DESC"
+                   required="true"
+                   class="input-xxlarge"/>
+
+            <field name="privatekey"
+                   type="text"
+                   label="COM_SSO_CONFIG_PRIVATEKEY_LABEL"
+                   description="COM_SSO_CONFIG_PRIVATEKEY_DESC"
+                   required="true"
+                   class="input-medium"/>
+
+            <field name="certificate"
+                   type="text"
+                   label="COM_SSO_CONFIG_CERTIFICATE_LABEL"
+                   description="COM_SSO_CONFIG_CERTIFICATE_DESC"
+                   required="true"
+                   class="input-medium"/>
+        </fields>
+    </fieldset>
+
+    <fieldset name="fields" label="COM_SSO_CONFIG_FIELDS">
+        <fields name="fields">
+            <field name="fieldMap"
+                   type="subform"
+                   formsource="/administrator/components/com_sso/models/forms/fieldmap.xml"
+                   label="COM_SSO_CONFIG_FIELDMAP_LABEL"
+                   description="COM_SSO_CONFIG_FIELDMAP_DESC"
+                   multiple="true"
+                   groupByFieldset="true"
+                   value="1"
+                   emptylabel="true"
+                   buttons="add,remove"
+                   layout="joomla.form.field.subform.repeatable-table">
+            </field>
+        </fields>
+    </fieldset>
+</form>

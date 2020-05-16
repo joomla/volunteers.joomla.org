@@ -1104,11 +1104,30 @@ class WFEditor
         }
 
         if (is_dir($path . '/warp')) {
-            $file = $path . '/css/theme.css';
+            $file = 'css/theme.css';
+
+            $config = $path . '/config.json';
+
+            if (is_file($config)) {
+                $data = file_get_contents($config);
+                $json = json_decode($data);
+
+                $style = '';
+
+                if ($json) {
+                    if (!empty($json->layouts->default->style)) {
+                        $style = $json->layouts->default->style;
+                    }
+                }
+
+                if ($style && $style !== 'default') {
+                    $file = 'styles/' . $style . '/css/theme.css';
+                }
+            }
 
             // add base theme.css file
-            if (is_file($file)) {
-                $files[] = 'templates/' . $template->name . '/css/theme.css';
+            if (is_file($path . '/' . $file)) {
+                $files[] = 'templates/' . $template->name . '/' . $file;
             }
 
             // add custom css file
@@ -1371,7 +1390,7 @@ class WFEditor
                 }
 
                 // clean up $files array
-                $files = array_unique($files);
+                $files = array_unique(array_filter($files));
 
                 break;
             // Nothing, use editor default
@@ -1442,7 +1461,7 @@ class WFEditor
         }
 
         // remove duplicates
-        $files = array_unique($files);
+        $files = array_unique(array_filter($files));
 
         // get the root directory
         $root = $absolute ? JPATH_SITE : JURI::root(true);
@@ -1485,7 +1504,7 @@ class WFEditor
         }
 
         // remove duplicates
-        $stylesheets = array_unique($stylesheets);
+        $stylesheets = array_unique(array_filter($stylesheets));
 
         return $stylesheets;
     }

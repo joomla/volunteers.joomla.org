@@ -35,7 +35,7 @@ defined('_JEXEC') or die;
     <div class="span9">
         <div class="filter-bar">
 			<?php if (($this->user->id == $this->item->user_id) && $this->item->user_id): ?>
-                <a class="btn pull-right" href="https://identity.joomla.org/profile">
+                <a class="btn pull-right" href="https://identity.joomla.org/profile?layout=edit">
                     <span class="icon-edit"></span> <?php echo JText::_('COM_VOLUNTEERS_TITLE_VOLUNTEERS_EDIT_MY') ?>
                 </a>
 			<?php endif; ?>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<extension version="3.8" type="package" method="upgrade">
+	<name>RO SSO - Package</name>
+	<packagename>sso</packagename>
+	<creationDate>@date@</creationDate>
+	<author>RolandD Cyber Produksi</author>
+	<authorEmail>contact@rolandd.com</authorEmail>
+	<authorUrl>https://rolandd.com/</authorUrl>
+	<copyright>Copyright (C) 2017 - 2018 RolandD Cyber Produksi. All rights reserved.</copyright>
+	<license>GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html</license>
+	<version>1.0.0</version>
+	<description>RO SSO Package</description>
+
+	<scriptfile>script.php</scriptfile>
+
+	<files folder="packages">
+		<file type="component" id="com_sso">com_ro_sso_1.0.0.zip</file>
+		<file type="plugin" group="authtentication" id="sso">plg_authentication_ro_sso_1.0.0.zip</file>
+		<file type="plugin" group="sso" id="joomla">plg_ro_sso_joomla_1.0.0.zip</file>
+		<file type="plugin" group="system" id="sso">plg_system_ro_sso_1.0.0.zip</file>
+		<file type="module" id="sso">mod_ro_sso_1.0.0.zip</file>
+	</files>
+</extension>

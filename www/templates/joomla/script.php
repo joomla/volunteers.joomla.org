@@ -2,7 +2,7 @@
 /**
  * Joomla.org site template
  *
- * @copyright   Copyright (C) 2005 - 2018 Open Source Matters, Inc. All rights reserved.
+ * @copyright   Copyright (C) 2005 - 2020 Open Source Matters, Inc. All rights reserved.
  * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
 
@@ -27,6 +27,9 @@ class JoomlaInstallerScript extends InstallerScript
 	{
 		$this->minimumJoomla = '3.8';
 		$this->minimumPhp    = '5.4';
+
+		// Workaround for https://github.com/joomla/joomla-cms/issues/23219 by allowing downgrades!?
+		$this->allowDowngrades = true;
 
 		$this->deleteFiles = [
 			'/language/en-GB/en-GB.tpl_joomla.ini',

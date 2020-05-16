@@ -2,11 +2,11 @@
 <!DOCTYPE install PUBLIC "-//Joomla! 2.5//DTD template 1.0//EN" "https://www.joomla.org/xml/dtd/2.5/template-install.dtd">
 <extension version="3.8" type="template" client="site" method="upgrade">
 	<name>joomla</name>
-	<version>3.0.0</version>
+	<version>3.0.1-dev</version>
 	<creationDate>30-Aug-2016</creationDate>
 	<author>Kyle Ledbetter</author>
 	<authorEmail>kyle@kyleledbetter.com</authorEmail>
-	<copyright>Copyright (C) 2005 - 2018 Open Source Matters, Inc. All rights reserved.</copyright>
+	<copyright>Copyright (C) 2005 - 2020 Open Source Matters, Inc. All rights reserved.</copyright>
 	<description>TPL_JOOMLA_XML_DESCRIPTION</description>
 	<scriptfile>script.php</scriptfile>
 	<files>
@@ -53,12 +53,25 @@
 		<fields name="params">
 			<fieldset name="advanced">
 				<field
-					name="useCDN"
+					name="useCdn"
 					type="radio"
 					label="TPL_JOOMLA_USE_CDN_LABEL"
 					description="TPL_JOOMLA_USE_CDN_DESC"
 					class="btn-group btn-group-yesno"
 					default="1"
+					filter="int"
+					>
+					<option value="0">JNO</option>
+					<option value="1">JYES</option>
+				</field>
+
+				<field
+					name="cookieControlActive"
+					type="radio"
+					label="TPL_JOOMLA_COOKIE_CONTROL_ACTIVE_LABEL"
+					description="TPL_JOOMLA_COOKIE_CONTROL_ACTIVE_DESC"
+					class="btn-group btn-group-yesno"
+					default="0"
 					filter="int"
 					>
 					<option value="0">JNO</option>

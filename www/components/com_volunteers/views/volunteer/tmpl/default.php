@@ -35,7 +35,7 @@ defined('_JEXEC') or die;
     <div class="span9">
         <div class="filter-bar">
 			<?php if (($this->user->id == $this->item->user_id) && $this->item->user_id): ?>
-                <a class="btn pull-right" href="<?php echo JRoute::_('index.php?option=com_volunteers&task=volunteer.edit&id=' . $this->item->id) ?>">
+                <a class="btn pull-right" href="https://identity.joomla.org/profile">
                     <span class="icon-edit"></span> <?php echo JText::_('COM_VOLUNTEERS_TITLE_VOLUNTEERS_EDIT_MY') ?>
                 </a>
 			<?php endif; ?>
@@ -44,9 +44,9 @@ defined('_JEXEC') or die;
             <h1><?php echo $this->item->name; ?></h1>
         </div>
 
-		<?php if ($this->item->city || $this->item->country): ?>
+		<?php if ($this->item->{'city-location'} || $this->item->country): ?>
             <p class="muted">
-                <span class="icon-location"></span> <?php echo VolunteersHelper::location($this->item->country, $this->item->city); ?>
+                <span class="icon-location"></span> <?php echo VolunteersHelper::location($this->item->country, $this->item->{'city-location'}); ?>
             </p>
 		<?php endif; ?>
 
@@ -67,7 +67,6 @@ defined('_JEXEC') or die;
                 </a>
 			<?php endif; ?>
         </div>
-        </p>
 
         <p>
         <div class="btn-group">

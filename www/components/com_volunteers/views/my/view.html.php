@@ -16,7 +16,7 @@ class VolunteersViewMy extends JViewLegacy
 	/**
 	 * Execute and display a template script.
 	 *
-	 * @param   string $tpl The name of the template file to parse; automatically searches through the template paths.
+	 * @param   string  $tpl  The name of the template file to parse; automatically searches through the template paths.
 	 *
 	 * @return  mixed  A string if successful, otherwise a Error object.
 	 */
@@ -27,6 +27,10 @@ class VolunteersViewMy extends JViewLegacy
 		$userId      = (int) $user->get('id');
 		$volunteerId = (int) $model->getVolunteerId($userId);
 
-		JFactory::getApplication()->redirect(JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $volunteerId, false));
+		if ($volunteerId)
+		{
+			JFactory::getApplication()->redirect(JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $volunteerId, false));
+		}
+		parent::display($tpl);
 	}
 }

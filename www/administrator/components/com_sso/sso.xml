@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<extension type="component" version="3.5" method="upgrade">
+	<name>COM_SSO</name>
+	<creationDate>16 May 2020</creationDate>
+	<author>RolandD Cyber Produksi</author>
+	<authorEmail>contact@rolandd.com</authorEmail>
+	<authorUrl>https://rolandd.com</authorUrl>
+	<copyright>Copyright (C) 2017 - 2020 RolandD Cyber Produksi. All rights reserved.</copyright>
+	<license>GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html</license>
+	<version>1.2.1</version>
+	<description>COM_SSO_XML_DESCRIPTION</description>
+
+	<!-- Scripts to run on installation -->
+	<scriptfile>script.php</scriptfile>
+
+	<!-- Runs on install -->
+	<install>
+		<sql>
+			<file driver="mysql" charset="utf8">sql/install/mysql/mysql.sql</file>
+		</sql>
+	</install>
+
+	<!-- Runs on update -->
+	<update>
+		<schemas>
+			<schemapath type="mysql">sql/updates/mysql</schemapath>
+		</schemas>
+	</update>
+
+	<!-- Media files -->
+	<media folder="media/com_sso" destination="com_sso">
+		<folder>css</folder>
+		<folder>js</folder>
+	</media>
+
+	<!-- Front-end files -->
+	<files folder="components/com_sso">
+		<filename>controller.php</filename>
+		<filename>router.php</filename>
+		<filename>sso.php</filename>
+		<folder>controllers</folder>
+		<folder>language</folder>
+		<folder>models</folder>
+		<folder>views</folder>
+	</files>
+
+	<!-- Back-end files -->
+	<administration>
+		<!-- Menu entries -->
+		<menu view="sso">COM_SSO</menu>
+		<submenu>
+			<menu link="option=com_sso">COM_SSO_DASHBOARD</menu>
+			<menu link="option=com_sso&amp;view=config">COM_SSO_CONFIGURATION</menu>
+			<menu link="option=com_sso&amp;view=certificate">COM_SSO_CERTIFICATE</menu>
+			<menu link="option=com_sso&amp;view=profiles">COM_SSO_PROFILES</menu>
+			<menu link="option=com_sso&amp;view=clients">COM_SSO_CLIENTS</menu>
+		</submenu>
+
+		<!-- Core files -->
+		<files folder="administrator/components/com_sso">
+			<filename>access.xml</filename>
+			<filename>changelog.txt</filename>
+			<filename>config.xml</filename>
+			<filename>controller.php</filename>
+			<filename>LICENSE.txt</filename>
+			<filename>sso.php</filename>
+			<folder>controllers</folder>
+			<folder>helpers</folder>
+			<folder>language</folder>
+			<folder>models</folder>
+			<folder>sql</folder>
+			<folder>tables</folder>
+			<folder>views</folder>
+		</files>
+	</administration>
+
+	<updateservers>
+		<server type="extension" priority="1" name="RO Single Sign On">https://rolandd.com/updates/rosso</server>
+	</updateservers>
+</extension>

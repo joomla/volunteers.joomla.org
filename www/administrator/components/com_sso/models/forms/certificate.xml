@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form>
+    <fieldset name="certificate">
+        <fields name="certificate">
+            <field name="countryName"
+                   type="text"
+                   label="COM_SSO_CERTIFICATE_COUNTRYNAME_LABEL"
+                   description="COM_SSO_CERTIFICATE_COUNTRYNAME_DESC"
+                   required="true"
+                   class="input-mini"/>
+
+            <field name="stateOrProvinceName"
+                   type="text"
+                   label="COM_SSO_CERTIFICATE_STATEORPROVINCENAME_LABEL"
+                   description="COM_SSO_CERTIFICATE_STATEORPROVINCENAME_DESC"
+                   required="true"
+                   class="input-xxlarge"/>
+
+            <field name="localityName"
+                   type="text"
+                   label="COM_SSO_CERTIFICATE_LOCALITYNAME_LABEL"
+                   description="COM_SSO_CERTIFICATE_LOCALITYNAME_DESC"
+                   required="true"
+                   class="input-xxlarge"/>
+
+            <field name="organizationName"
+                   type="text"
+                   label="COM_SSO_CERTIFICATE_ORGANIZATIONNAME_LABEL"
+                   description="COM_SSO_CERTIFICATE_ORGANIZATIONNAME_DESC"
+                   required="true"
+                   class="input-xxlarge"/>
+
+            <field name="organizationalUnitName"
+                   type="text"
+                   label="COM_SSO_CERTIFICATE_ORGANIZATIONALUNITNAME_LABEL"
+                   description="COM_SSO_CERTIFICATE_ORGANIZATIONALUNITNAME_DESC"
+                   required="true"
+                   class="input-xxlarge"/>
+
+            <field name="commonName"
+                   type="text"
+                   label="COM_SSO_CERTIFICATE_COMMONNAME_LABEL"
+                   description="COM_SSO_CERTIFICATE_COMMONNAME_DESC"
+                   required="true"
+                   class="input-xxlarge"/>
+
+            <field name="emailAddress"
+                   type="text"
+                   label="COM_SSO_CERTIFICATE_EMAILADDRESS_LABEL"
+                   description="COM_SSO_CERTIFICATE_EMAILADDRESS_DESC"
+                   required="true"
+                   class="input-xxlarge"/>
+
+            <field name="password"
+                   type="password"
+                   label="COM_SSO_CERTIFICATE_PASSWORD_LABEL"
+                   description="COM_SSO_CERTIFICATE_PASSWORD_DESC"
+                   required="true"
+                   class="input-xxlarge"/>
+
+            <field name="privateKey"
+                   type="text"
+                   label="COM_SSO_CERTIFICATE_PRIVATEKEY_LABEL"
+                   description="COM_SSO_CERTIFICATE_PRIVATEKEY_DESC"
+                   required="true"
+                   default="sso.pem"
+                   class="input-xxlarge"/>
+
+            <field name="certificateKey"
+                   type="text"
+                   label="COM_SSO_CERTIFICATE_CERTIFICATEKEY_LABEL"
+                   description="COM_SSO_CERTIFICATE_CERTIFICATEKEY_DESC"
+                   required="true"
+                   default="sso.crt"
+                   class="input-xxlarge"/>
+        </fields>
+    </fieldset>
+</form>

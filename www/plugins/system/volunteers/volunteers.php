@@ -77,46 +77,6 @@ class PlgSystemVolunteers extends JPlugin
 	 *
 	 * @return  boolean  True on success
 	 */
-	public function onUserAfterLogin()
-	{
-		// Run on frontend only
-		if ($this->app->isAdmin())
-		{
-			return true;
-		}
-
-		JModelLegacy::addIncludePath(JPATH_ADMINISTRATOR . '/components/com_volunteers/models', 'VolunteersModel');
-		$model       = JModelLegacy::getInstance('Volunteer', 'VolunteersModel', array('ignore_request' => true));
-		$userId      = JFactory::getUser()->get('id');
-		$volunteerId = (int) $model->getVolunteerId($userId);
-		$teams       = $model->getVolunteerTeams($volunteerId);
-
-		// If active team member, check fields
-		if ($teams->activemember)
-		{
-			// Get volunteer data
-			$volunteer = $model->getItem($volunteerId);
-
-			if (empty($volunteer->address) || empty($volunteer->city) || empty($volunteer->zip))
-			{
-				// Set session variable
-				JFactory::getSession()->set('updateprofile', 1);
-
-				// Redirect to profile
-				$this->loadLanguage('com_volunteers', JPATH_ADMINISTRATOR);
-				$this->app->enqueueMessage(JText::_('COM_VOLUNTEERS_PROFILE_ACTIVEMEMBERFIELDS'), 'warning');
-				$this->app->redirect('index.php?option=com_volunteers&task=volunteer.edit&id=' . $volunteerId);
-			}
-		}
-
-		return true;
-	}
-
-	/**
-	 * Check if volunteer filled in all required fields
-	 *
-	 * @return  boolean  True on success
-	 */
 	public function onAfterRender()
 	{
 		// Run on frontend only

@@ -1,56 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
 <extension version="3.8" type="plugin" group="system" method="upgrade">
-	<name>PLG_SYSTEM_SSO</name>
-	<creationDate>10 November 2018</creationDate>
-	<author>RolandD Cyber Produksi</author>
-	<authorEmail>contact@rolandd.com</authorEmail>
-	<authorUrl>https://rolandd.com</authorUrl>
-	<copyright>Copyright (C) 2017 - 2018 RolandD Cyber Produksi. All rights reserved.</copyright>
-	<license>GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html</license>
-	<version>1.0.0</version>
-	<description>PLG_SYSTEM_SSO_XML_DESCRIPTION</description>
+    <name>PLG_SYSTEM_SSO</name>
+    <creationDate>16 May 2020</creationDate>
+    <author>RolandD Cyber Produksi</author>
+    <authorEmail>contact@rolandd.com</authorEmail>
+    <authorUrl>https://rolandd.com</authorUrl>
+    <copyright>Copyright (C) 2017 - 2020 RolandD Cyber Produksi. All rights reserved.</copyright>
+    <license>GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html</license>
+    <version>1.2.1</version>
+    <description>PLG_SYSTEM_SSO_XML_DESCRIPTION</description>
 
-	<files>
-		<filename plugin="sso">sso.php</filename>
-		<folder>language</folder>
-	</files>
+    <files>
+        <filename plugin="sso">sso.php</filename>
+        <folder>language</folder>
+    </files>
 
-	<config>
-		<fields name="params">
-			<fieldset name="basic">
-				<field
-					name="preventLogin"
-					type="radio"
-					label="PLG_SYSTEM_SSO_FIELD_PREVENT_LOGIN_LABEL"
-					description="PLG_SYSTEM_SSO_FIELD_PREVENT_LOGIN_DESC"
-					class="btn-group btn-group-yesno"
-					default="0"
-					filter="integer"
-				>
-					<option value="1">JYES</option>
-					<option value="0">JNO</option>
-				</field>
+    <config>
+        <fields name="params">
+            <fieldset name="basic">
+                <field
+                        name="preventLogin"
+                        type="radio"
+                        label="PLG_SYSTEM_SSO_FIELD_PREVENT_LOGIN_LABEL"
+                        description="PLG_SYSTEM_SSO_FIELD_PREVENT_LOGIN_DESC"
+                        class="btn-group btn-group-yesno"
+                        default="0"
+                        filter="integer"
+                >
+                    <option value="1">JYES</option>
+                    <option value="0">JNO</option>
+                </field>
 
-				<field
-					name="menuRedirect"
-					type="menuitem"
-					label="PLG_SYSTEM_SSO_FIELD_MENU_REDIRECT_LABEL"
-					description="PLG_SYSTEM_SSO_FIELD_MENU_REDIRECT_DESC"
-					showon="preventLogin:1"/>
+                <field
+                        name="menuRedirect"
+                        type="menuitem"
+                        label="PLG_SYSTEM_SSO_FIELD_MENU_REDIRECT_LABEL"
+                        description="PLG_SYSTEM_SSO_FIELD_MENU_REDIRECT_DESC"
+                        showon="preventLogin:1"/>
 
-				<field
-					name="autoLogin"
-					type="radio"
-					label="PLG_SYSTEM_SSO_FIELD_AUTO_LOGIN_LABEL"
-					description="PLG_SYSTEM_SSO_FIELD_AUTO_LOGIN_DESC"
-					class="btn-group btn-group-yesno"
-					default="0"
-					filter="integer"
-				>
-					<option value="1">JYES</option>
-					<option value="0">JNO</option>
-				</field>
-			</fieldset>
-		</fields>
-	</config>
+                <field
+                        name="autoLogin"
+                        type="radio"
+                        label="PLG_SYSTEM_SSO_FIELD_AUTO_LOGIN_LABEL"
+                        description="PLG_SYSTEM_SSO_FIELD_AUTO_LOGIN_DESC"
+                        class="btn-group btn-group-yesno"
+                        default="0"
+                        filter="integer"
+                >
+                    <option value="1">JYES</option>
+                    <option value="0">JNO</option>
+                </field>
+
+                <field
+                        addfieldpath="administrator/components/com_sso/models/fields"
+                        name="profile"
+                        type="sso.profile"
+                        label="PLG_SYSTEM_SSO_PROFILE_LABEL"
+                        description="PLG_SYSTEM_SSO_PROFILE_DESC"
+                        showon="autoLogin:1"/>
+            </fieldset>
+        </fields>
+    </config>
 </extension>

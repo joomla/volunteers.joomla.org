@@ -1,23 +1,28 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <extension version="3.8" type="package" method="upgrade">
-	<name>RO SSO - Package</name>
+	<name>RO Single Sign On - Package</name>
 	<packagename>sso</packagename>
-	<creationDate>@date@</creationDate>
+	<creationDate>16 May 2020</creationDate>
 	<author>RolandD Cyber Produksi</author>
 	<authorEmail>contact@rolandd.com</authorEmail>
 	<authorUrl>https://rolandd.com/</authorUrl>
-	<copyright>Copyright (C) 2017 - 2018 RolandD Cyber Produksi. All rights reserved.</copyright>
+	<copyright>Copyright (C) 2017 - 2020 RolandD Cyber Produksi. All rights reserved.</copyright>
 	<license>GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html</license>
-	<version>1.0.0</version>
-	<description>RO SSO Package</description>
+	<version>1.2.1</version>
+	<description>RO Single Sign On Package</description>
 
 	<scriptfile>script.php</scriptfile>
 
 	<files folder="packages">
-		<file type="component" id="com_sso">com_ro_sso_1.0.0.zip</file>
-		<file type="plugin" group="authtentication" id="sso">plg_authentication_ro_sso_1.0.0.zip</file>
-		<file type="plugin" group="sso" id="joomla">plg_ro_sso_joomla_1.0.0.zip</file>
-		<file type="plugin" group="system" id="sso">plg_system_ro_sso_1.0.0.zip</file>
-		<file type="module" id="sso">mod_ro_sso_1.0.0.zip</file>
+		<file type="component" id="com_sso">com_ro_sso_1.2.1.zip</file>
+		<file type="plugin" group="authentication" id="sso">plg_authentication_ro_sso_1.2.1.zip</file>
+		<file type="plugin" group="system" id="sso">plg_system_ro_sso_1.2.1.zip</file>
+		<file type="module" id="mod_sso" client="site">mod_ro_sso_1.2.1.zip</file>
 	</files>
+
+	<blockChildUninstall>true</blockChildUninstall>
+
+	<updateservers>
+		<server type="extension" priority="1" name="RO Single Sign On">https://rolandd.com/updates/rosso</server>
+	</updateservers>
 </extension>

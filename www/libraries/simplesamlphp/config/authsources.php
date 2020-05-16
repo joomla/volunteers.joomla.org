@@ -1,19 +1,13 @@
-<?php $config = array (
+<?php
+$config = array (
   'admin' => 
   array (
     0 => 'core:AdminPassword',
   ),
-  'default-sp' => 
-  array (
-    0 => 'saml:SP',
-    'entityID' => NULL,
-    'idp' => NULL,
-    'discoURL' => NULL,
-  ),
   'identity-provider' => 
   array (
     0 => 'saml:SP',
-    'idp' => 'https://identity.joomla.org/saml/saml2/idp/metadata.php',
+    'idp' => 'https://identity.joomla.org/www/sso/saml2/idp/metadata.php',
     'discoURL' => NULL,
     'NameIDPolicy' => 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified',
     'privatekey' => 'volunteers.pem',

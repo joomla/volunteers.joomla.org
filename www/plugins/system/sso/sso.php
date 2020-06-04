@@ -54,14 +54,20 @@ class PlgSystemSso extends CMSPlugin
 			// Automatically log users in
 			if ($this->params->get('autoLogin', false))
 			{
-				$this->app->redirect(Uri::root() . 'index.php?option=com_sso&task=login.login');
+				// Get the referer URL
+				$uri    = Uri::getInstance();
+				$return = base64_encode($uri->toString());
+				$this->app->redirect(
+					Uri::root() .
+					'index.php?option=com_sso&task=login.login&profile=' . $this->params->get('profile', 'default-sp') . '&return=' . $return
+				);
 			}
 
 			// Prevent users from accessing the Joomla com_users login
 			if ($this->params->get('preventLogin', false))
 			{
 				$redirect = false;
-				$uri = Uri::getInstance();
+				$uri      = Uri::getInstance();
 
 				if (($input->getCmd('option') === 'com_users' && $uri->getVar('view', '') === '')
 					|| ($input->getCmd('option') === 'com_users' || $uri->getPath() === '/component/users/') && $uri->getVar('view') === 'login')
@@ -76,7 +82,7 @@ class PlgSystemSso extends CMSPlugin
 					if ($itemId)
 					{
 						$menuLink = $this->getMenuLink($itemId);
-						$menuUri = Uri::getInstance($menuLink);
+						$menuUri  = Uri::getInstance($menuLink);
 
 						if ($menuUri->getVar('option') === 'com_users' && $menuUri->getVar('view') === 'login')
 						{
@@ -91,7 +97,7 @@ class PlgSystemSso extends CMSPlugin
 					$menuLink = $this->getMenuLink($this->params->get('menuRedirect', 0));
 					$url      = '/';
 
-					if (!is_null($menuLink))
+					if ($menuLink !== null)
 					{
 						$url = Route::_($menuLink);
 					}
@@ -111,9 +117,9 @@ class PlgSystemSso extends CMSPlugin
 	 *
 	 * @since   1.0.0
 	 */
-	private function getMenuLink(int $id)
+	private function getMenuLink(int $id): string
 	{
-		$db = $this->db;
+		$db    = $this->db;
 		$query = $db->getQuery(true)
 			->select($db->quoteName('link'))
 			->from($db->quoteName('#__menu'))

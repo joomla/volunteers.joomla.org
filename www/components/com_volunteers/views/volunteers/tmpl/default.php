@@ -48,7 +48,7 @@ $active = $this->state->get('filter.active', 1);
 		<div class="row-fluid">
 			<?php $i = 0; ?>
 			<?php if (!empty($this->items)) foreach ($this->items as $item): ?>
-			<div class="span3">
+			<div class="span2">
 				<div class="well well-small">
 					<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $item->id) ?>">
 						<?php echo VolunteersHelper::image($item->image, 'large', false, $item->name); ?>
@@ -61,7 +61,7 @@ $active = $this->state->get('filter.active', 1);
 				</div>
 			</div>
 			<?php $i++; ?>
-			<?php if ($i == 4): ?>
+			<?php if ($i == 6): ?>
 		</div>
 		<div class="row-fluid">
 			<?php $i = 0; ?>

@@ -708,7 +708,7 @@ class JoomlaTemplateHelper
 			$result,
 			[
 				'%reportroute%' => static::getSiteConfig(Uri::getInstance()->toString(['host']))->issueUrl,
-				'%loginroute%'  => Route::_(static::getLoginRoute()),
+				'%loginroute%'  => (Factory::getUser()->guest) ? 'login' : 'logout',
 				'%logintext%'   => Factory::getUser()->guest ? Text::_('TPL_JOOMLA_FOOTER_LINK_LOG_IN') : Text::_('TPL_JOOMLA_FOOTER_LINK_LOG_OUT'),
 				'%currentyear%' => date('Y'),
 			]

@@ -1,0 +1,29 @@
+RO Single Sign On
+Author: RolandD Cyber Produksi (contact@rolandd.com)
+Website: https://rolandd.com/
+Version: 1.2.1
+Date: 16 May 2020
+
+Legenda:
++ Added
+- Removed
+* Fixed
+/ Changed
+
+Changelog
+Version 1.2.1 [ 2020-05-16 ]
++ Updated to SimpleSAMLphp 1.18.7
+
+Version 1.2.0 [ 2020-04-09 ]
++ Updated to SimpleSAMLphp 1.18.5
++ Implemented group mapping for new users
++ Added option to select provider for forced login in SSO plugin
++ Added option to redirect to the active page
+/ Updated MySQL statements for SimpleSAMLphp tables
+
+Version 1.1.0 [ 2019-08-18 ]
++ Updated to SimpleSAMLphp 1.17.5
+* Fixed manifest files
+
+Version 1.0.0 [ 2019-08-18 ]
+Initial release

@@ -7,20 +7,22 @@ use SAML2\Compat\Ssp\Container;
 class ContainerSingleton
 {
     /**
-     * @var \SAML2\Compat\Ssp\Container
+     * @var \SAML2\Compat\AbstractContainer
      */
     protected static $container;
 
+
     /**
-     * @return \SAML2\Compat\Ssp\Container
+     * @return \SAML2\Compat\AbstractContainer
      */
     public static function getInstance()
     {
-        if (!self::$container) {
+        if (!isset(self::$container)) {
             self::setContainer(self::initSspContainer());
         }
         return self::$container;
     }
+
 
     /**
      * Set a container to use.
@@ -33,6 +35,7 @@ class ContainerSingleton
         self::$container = $container;
         return $container;
     }
+
 
     /**
      * @return \SAML2\Compat\Ssp\Container

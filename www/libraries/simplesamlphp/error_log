@@ -1,0 +1,7 @@
+[16-May-2020 03:52:17 America/Chicago] PHP Fatal error:  Uncaught SimpleSAML\Error\ConfigurationError: The configuration (config/module_cron.php) is invalid: Missing configuration file in /home/volj/public_html/www/libraries/simplesamlphp/lib/SimpleSAML/Configuration.php:165
+Stack trace:
+#0 /home/volj/public_html/www/libraries/simplesamlphp/lib/SimpleSAML/Configuration.php(262): SimpleSAML\Configuration::loadFromFile('/home/volj/publ...', true)
+#1 /home/volj/public_html/www/libraries/simplesamlphp/modules/cron/lib/Cron.php(28): SimpleSAML\Configuration::getConfig('module_cron.php')
+#2 /home/volj/public_html/www/libraries/simplesamlphp/modules/cron/bin/cron.php(36): SimpleSAML\Module\cron\Cron->__construct()
+#3 {main}
+  thrown in /home/volj/public_html/www/libraries/simplesamlphp/lib/SimpleSAML/Configuration.php on line 165

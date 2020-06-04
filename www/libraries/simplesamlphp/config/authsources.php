@@ -1,5 +1,4 @@
-<?php
-$config = array (
+<?php $config = array (
   'admin' => 
   array (
     0 => 'core:AdminPassword',

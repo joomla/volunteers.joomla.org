@@ -126,7 +126,7 @@ if ($saveOrder)
 							</td>
 							<td class="volunteer-image">
 								<?php if ($item->image): ?>
-									<img class="img-rounded" src="<?php echo JURI::root() . 'images/volunteers/' . $item->image; ?>">
+									<img class="img-rounded" src="<?php echo $item->image; ?>">
 								<?php else: ?>
 									<img class="img-rounded" src="<?php echo JURI::root() . 'images/joomla.png'; ?>">
 								<?php endif; ?>

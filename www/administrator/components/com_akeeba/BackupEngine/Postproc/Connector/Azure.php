@@ -44,6 +44,7 @@
 
 namespace Akeeba\Engine\Postproc\Connector;
 
+defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Postproc\Connector\Azure\AzureStorage;
 use Akeeba\Engine\Postproc\Connector\Azure\Blob\Container;
@@ -66,12 +67,12 @@ class Azure extends AzureStorage
 	/**
 	 * ACL - Private access
 	 */
-	const ACL_PRIVATE = false;
+	public const ACL_PRIVATE = false;
 
 	/**
 	 * ACL - Public access
 	 */
-	const ACL_PUBLIC = true;
+	public const ACL_PUBLIC = true;
 
 	/**
 	 * Create resource name

@@ -9,7 +9,7 @@
 
 namespace Akeeba\Engine\Driver\Query;
 
-
+defined('AKEEBAENGINE') || die();
 
 /**
  * Query Element Class.

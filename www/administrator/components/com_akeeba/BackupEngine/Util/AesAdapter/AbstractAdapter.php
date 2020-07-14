@@ -9,7 +9,7 @@
 
 namespace Akeeba\Engine\Util\AesAdapter;
 
-
+defined('AKEEBAENGINE') || die();
 
 /**
  * Abstract AES encryption class

@@ -41,7 +41,7 @@
 
 namespace Akeeba\Engine\Postproc\Connector\Azure\Retrypolicy;
 
-
+defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Postproc\Connector\Azure\Exception\Retrypolicy as RetrypolicyException;
 use Akeeba\Engine\Postproc\Connector\Azure\Retrypolicy;
@@ -116,4 +116,3 @@ class Ntimes extends Retrypolicy
 		}
 	}
 }
-

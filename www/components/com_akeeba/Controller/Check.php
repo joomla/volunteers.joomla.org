@@ -8,7 +8,7 @@
 namespace Akeeba\Backup\Site\Controller;
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 use Akeeba\Backup\Site\Controller\Mixin\FrontEndPermissions;
 use Akeeba\Backup\Site\Model\Statistics;

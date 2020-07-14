@@ -8,10 +8,10 @@
 namespace Akeeba\Backup\Admin\Model;
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 use FOF30\Model\Model;
-use JText;
+use Joomla\CMS\Language\Text;
 use RuntimeException;
 
 class FTPBrowser extends Model
@@ -70,7 +70,7 @@ class FTPBrowser extends Model
 	 *
 	 * @var  array
 	 */
-	public $parts = array();
+	public $parts = [];
 
 	/**
 	 * Path to the parent directory
@@ -86,7 +86,7 @@ class FTPBrowser extends Model
 	 */
 	public function getListing()
 	{
-		$dir   = $this->directory;
+		$dir = $this->directory;
 
 		// Parse directory to parts
 		$parsed_dir  = trim($dir, '/');
@@ -120,7 +120,7 @@ class FTPBrowser extends Model
 
 		if ($con === false)
 		{
-			throw new RuntimeException(JText::_('COM_AKEEBA_FTPBROWSER_ERROR_HOSTNAME'));
+			throw new RuntimeException(Text::_('COM_AKEEBA_FTPBROWSER_ERROR_HOSTNAME'));
 		}
 
 		// Login
@@ -128,7 +128,7 @@ class FTPBrowser extends Model
 
 		if ($result === false)
 		{
-			throw new RuntimeException(JText::_('COM_AKEEBA_FTPBROWSER_ERROR_USERPASS'));
+			throw new RuntimeException(Text::_('COM_AKEEBA_FTPBROWSER_ERROR_USERPASS'));
 		}
 
 		// Set the passive mode -- don't care if it fails, though!
@@ -141,7 +141,7 @@ class FTPBrowser extends Model
 
 			if ($result === false)
 			{
-				throw new RuntimeException(JText::_('COM_AKEEBA_FTPBROWSER_ERROR_NOACCESS'));
+				throw new RuntimeException(Text::_('COM_AKEEBA_FTPBROWSER_ERROR_NOACCESS'));
 			}
 		}
 		else
@@ -160,13 +160,43 @@ class FTPBrowser extends Model
 
 		if ($list === false)
 		{
-			throw new RuntimeException(JText::_('COM_AKEEBA_FTPBROWSER_ERROR_UNSUPPORTED'));
+			throw new RuntimeException(Text::_('COM_AKEEBA_FTPBROWSER_ERROR_UNSUPPORTED'));
 		}
 
 		// Parse the raw listing into an array
 		$folders = $this->parse_rawlist($list);
 
 		return $folders;
+	}
+
+	/**
+	 * Perform the actual folder browsing. Returns an array that's usable by the UI.
+	 *
+	 * @return  array
+	 */
+	public function doBrowse()
+	{
+		$error = '';
+		$list  = [];
+
+		try
+		{
+			$list = $this->getListing();
+		}
+		catch (RuntimeException $e)
+		{
+			$error = $e->getMessage();
+		}
+
+		$response_array = [
+			'error'       => $error,
+			'list'        => $list,
+			'breadcrumbs' => $this->parts,
+			'directory'   => $this->directory,
+			'parent'      => $this->parent_directory,
+		];
+
+		return $response_array;
 	}
 
 	/**
@@ -199,35 +229,5 @@ class FTPBrowser extends Model
 		asort($folders);
 
 		return $folders;
-	}
-
-	/**
-	 * Perform the actual folder browsing. Returns an array that's usable by the UI.
-	 *
-	 * @return  array
-	 */
-	public function doBrowse()
-	{
-		$error = '';
-		$list = [];
-
-		try
-		{
-			$list = $this->getListing();
-		}
-		catch (RuntimeException $e)
-		{
-			$error = $e->getMessage();
-		}
-
-		$response_array = array(
-			'error'       => $error,
-			'list'        => $list,
-			'breadcrumbs' => $this->parts,
-			'directory'   => $this->directory,
-			'parent'      => $this->parent_directory
-		);
-
-		return $response_array;
 	}
 }

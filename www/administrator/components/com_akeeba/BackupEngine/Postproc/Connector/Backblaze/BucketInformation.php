@@ -9,7 +9,7 @@
 
 namespace Akeeba\Engine\Postproc\Connector\Backblaze;
 
-
+defined('AKEEBAENGINE') || die();
 
 use DomainException;
 

@@ -6,7 +6,7 @@
  */
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 /** @var  $this  \Akeeba\Backup\Admin\View\Backup\Html */
 
@@ -22,7 +22,7 @@ defined('_JEXEC') or die();
 {{-- Obsolete PHP version warning --}}
 @include('admin:com_akeeba/CommonTemplates/phpversion_warning', [
     'softwareName'  => 'Akeeba Backup',
-    'minPHPVersion' => '5.6.0',
+    'minPHPVersion' => '7.1.0',
 ])
 
 {{-- Backup Setup --}}
@@ -52,7 +52,7 @@ defined('_JEXEC') or die();
 			@lang('COM_AKEEBA_BACKUP_ERROR_UNWRITABLEOUTPUT_' . ($this->autoStart ? 'AUTOBACKUP' : 'NORMALBACKUP'))
 		</h3>
 		<p>
-			@sprintf('COM_AKEEBA_BACKUP_ERROR_UNWRITABLEOUTPUT_COMMON', 'index.php?option=com_akeeba&view=Configuration', 'https://www.akeebabackup.com/warnings/q001.html')
+			@sprintf('COM_AKEEBA_BACKUP_ERROR_UNWRITABLEOUTPUT_COMMON', 'index.php?option=com_akeeba&view=Configuration', 'https://www.akeeba.com/warnings/q001.html')
 		</p>
 	</div>
 	@endif
@@ -294,13 +294,13 @@ defined('_JEXEC') or die();
 					@lang('COM_AKEEBA_BACKUP_TEXT_RTFMTOSOLVEPRO')
 					@endif
 
-					@sprintf('COM_AKEEBA_BACKUP_TEXT_RTFMTOSOLVE', 'https://www.akeebabackup.com/documentation/troubleshooter/abbackup.html?utm_source=akeeba_backup&utm_campaign=backuperrorlink')
+					@sprintf('COM_AKEEBA_BACKUP_TEXT_RTFMTOSOLVE', 'https://www.akeeba.com/documentation/akeeba-backup-documentation/troubleshoot-backup.html?utm_source=akeeba_backup&utm_campaign=backuperrorlink')
 				</p>
 				<p>
 					@if(AKEEBA_PRO)
-					@sprintf('COM_AKEEBA_BACKUP_TEXT_SOLVEISSUE_PRO', 'https://www.akeebabackup.com/support.html?utm_source=akeeba_backup&utm_campaign=backuperrorpro')
+					@sprintf('COM_AKEEBA_BACKUP_TEXT_SOLVEISSUE_PRO', 'https://www.akeeba.com/support.html?utm_source=akeeba_backup&utm_campaign=backuperrorpro')
 					@else
-					@sprintf('COM_AKEEBA_BACKUP_TEXT_SOLVEISSUE_CORE', 'https://www.akeebabackup.com/subscribe.html?utm_source=akeeba_backup&utm_campaign=backuperrorcore','https://www.akeebabackup.com/support.html?utm_source=akeeba_backup&utm_campaign=backuperrorcore')
+					@sprintf('COM_AKEEBA_BACKUP_TEXT_SOLVEISSUE_CORE', 'https://www.akeeba.com/subscribe.html?utm_source=akeeba_backup&utm_campaign=backuperrorcore','https://www.akeeba.com/support.html?utm_source=akeeba_backup&utm_campaign=backuperrorcore')
 					@endif
 
 					@sprintf('COM_AKEEBA_BACKUP_TEXT_SOLVEISSUE_LOG', 'index.php?option=com_akeeba&view=Log&latest=1')
@@ -314,7 +314,7 @@ defined('_JEXEC') or die();
 			</a>
 			@endif
 
-			<a class="akeeba-btn--primary" href="https://www.akeebabackup.com/documentation/troubleshooter/abbackup.html?utm_source=akeeba_backup&utm_campaign=backuperrorbutton">
+			<a class="akeeba-btn--primary" href="https://www.akeeba.com/documentation/akeeba-backup-documentation/troubleshoot-backup.html?utm_source=akeeba_backup&utm_campaign=backuperrorbutton">
 				<span class="akion-ios-book"></span>
 				@lang('COM_AKEEBA_BACKUP_TROUBLESHOOTINGDOCS')
 			</a>

@@ -7,6 +7,8 @@
 
 namespace FOF30\Factory;
 
+defined('_JEXEC') || die;
+
 use FOF30\Controller\Controller;
 use FOF30\Dispatcher\Dispatcher;
 use FOF30\Factory\Exception\ControllerNotFound;
@@ -20,8 +22,6 @@ use FOF30\Model\Model;
 use FOF30\Toolbar\Toolbar;
 use FOF30\TransparentAuthentication\TransparentAuthentication;
 use FOF30\View\View;
-
-defined('_JEXEC') or die;
 
 /**
  * Magic MVC object factory. This factory will "magically" create MVC objects even if the respective classes do not
@@ -41,7 +41,7 @@ class MagicSwitchFactory extends SwitchFactory implements FactoryInterface
 	 *
 	 * @return  Controller
 	 */
-	public function controller($viewName, array $config = array())
+	public function controller($viewName, array $config = [])
 	{
 		try
 		{
@@ -50,8 +50,8 @@ class MagicSwitchFactory extends SwitchFactory implements FactoryInterface
 		catch (ControllerNotFound $e)
 		{
 			$magic = new Magic\ControllerFactory($this->container);
-            // Let's pass the section override (if any)
-            $magic->setSection($this->getSection());
+			// Let's pass the section override (if any)
+			$magic->setSection($this->getSection());
 
 			return $magic->make($viewName, $config);
 		}
@@ -65,7 +65,7 @@ class MagicSwitchFactory extends SwitchFactory implements FactoryInterface
 	 *
 	 * @return  Model
 	 */
-	public function model($viewName, array $config = array())
+	public function model($viewName, array $config = [])
 	{
 		try
 		{
@@ -74,8 +74,8 @@ class MagicSwitchFactory extends SwitchFactory implements FactoryInterface
 		catch (ModelNotFound $e)
 		{
 			$magic = new Magic\ModelFactory($this->container);
-            // Let's pass the section override (if any)
-            $magic->setSection($this->getSection());
+			// Let's pass the section override (if any)
+			$magic->setSection($this->getSection());
 
 			return $magic->make($viewName, $config);
 		}
@@ -90,7 +90,7 @@ class MagicSwitchFactory extends SwitchFactory implements FactoryInterface
 	 *
 	 * @return  View
 	 */
-	public function view($viewName, $viewType = 'html', array $config = array())
+	public function view($viewName, $viewType = 'html', array $config = [])
 	{
 		try
 		{
@@ -99,8 +99,8 @@ class MagicSwitchFactory extends SwitchFactory implements FactoryInterface
 		catch (ViewNotFound $e)
 		{
 			$magic = new Magic\ViewFactory($this->container);
-            // Let's pass the section override (if any)
-            $magic->setSection($this->getSection());
+			// Let's pass the section override (if any)
+			$magic->setSection($this->getSection());
 
 			return $magic->make($viewName, $viewType, $config);
 		}
@@ -113,15 +113,19 @@ class MagicSwitchFactory extends SwitchFactory implements FactoryInterface
 	 *
 	 * @return  Toolbar
 	 */
-	public function toolbar(array $config = array())
+	public function toolbar(array $config = [])
 	{
 		$appConfig = $this->container->appConfig;
 
-		$defaultConfig = array(
-			'useConfigurationFile'  => true,
-			'renderFrontendButtons' => in_array($appConfig->get("views.*.config.renderFrontendButtons"), array(true, 'true', 'yes', 'on', 1)),
-			'renderFrontendSubmenu' => in_array($appConfig->get("views.*.config.renderFrontendSubmenu"), array(true, 'true', 'yes', 'on', 1)),
-		);
+		$defaultConfig = [
+			'useConfigurationFile' => true,
+			'renderFrontendButtons' => in_array($appConfig->get("views.*.config.renderFrontendButtons"), [
+				true, 'true', 'yes', 'on', 1,
+			]),
+			'renderFrontendSubmenu' => in_array($appConfig->get("views.*.config.renderFrontendSubmenu"), [
+				true, 'true', 'yes', 'on', 1,
+			]),
+		];
 
 		$config = array_merge($defaultConfig, $config);
 
@@ -135,7 +139,7 @@ class MagicSwitchFactory extends SwitchFactory implements FactoryInterface
 	 *
 	 * @return  Dispatcher
 	 */
-	public function dispatcher(array $config = array())
+	public function dispatcher(array $config = [])
 	{
 		$dispatcherClass = $this->container->getNamespacePrefix($this->getSection()) . 'Dispatcher\\Dispatcher';
 
@@ -158,8 +162,8 @@ class MagicSwitchFactory extends SwitchFactory implements FactoryInterface
 		{
 			// Not found. Return the magically created Dispatcher
 			$magic = new DispatcherFactory($this->container);
-            // Let's pass the section override (if any)
-            $magic->setSection($this->getSection());
+			// Let's pass the section override (if any)
+			$magic->setSection($this->getSection());
 
 			return $magic->make($config);
 		}
@@ -172,7 +176,7 @@ class MagicSwitchFactory extends SwitchFactory implements FactoryInterface
 	 *
 	 * @return  TransparentAuthentication
 	 */
-	public function transparentAuthentication(array $config = array())
+	public function transparentAuthentication(array $config = [])
 	{
 		$toolbarClass = $this->container->getNamespacePrefix($this->getSection()) . 'TransparentAuthentication\\TransparentAuthentication';
 
@@ -195,8 +199,8 @@ class MagicSwitchFactory extends SwitchFactory implements FactoryInterface
 		{
 			// Not found. Return the magically created TransparentAuthentication
 			$magic = new TransparentAuthenticationFactory($this->container);
-            // Let's pass the section override (if any)
-            $magic->setSection($this->getSection());
+			// Let's pass the section override (if any)
+			$magic->setSection($this->getSection());
 
 			return $magic->make($config);
 		}

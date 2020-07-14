@@ -8,7 +8,7 @@
 namespace Akeeba\Backup\Admin\Model;
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 use Akeeba\Backup\Admin\Helper\SecretWord;
 use Akeeba\Backup\Admin\Model\Mixin\Chmod;
@@ -19,11 +19,10 @@ use Akeeba\Engine\Util\RandomValue;
 use FOF30\Database\Installer;
 use FOF30\Download\Download;
 use FOF30\Model\Model;
-use JFile;
-use JFolder;
 use JLoader;
+use Joomla\CMS\Filesystem\File;
+use Joomla\CMS\Filesystem\Folder;
 use Joomla\CMS\Uri\Uri;
-use JUri;
 use RuntimeException;
 use stdClass;
 
@@ -186,12 +185,10 @@ class ControlPanel extends Model
 			return true;
 		}
 
-		JLoader::import('joomla.filesystem.folder');
-
 		$result = true;
 
 		// Loop through subdirectories
-		$folders = JFolder::folders($parent, '.', 3, true);
+		$folders = Folder::folders($parent, '.', 3, true);
 
 		foreach ($folders as $folder)
 		{
@@ -204,7 +201,7 @@ class ControlPanel extends Model
 		}
 
 		// Loop through files
-		$files = JFolder::files($parent, '.', 3, true);
+		$files = Folder::files($parent, '.', 3, true);
 
 		foreach ($files as $file)
 		{
@@ -227,10 +224,9 @@ class ControlPanel extends Model
 	public function checkSettingsEncryption()
 	{
 		// Do we have a key file?
-		JLoader::import('joomla.filesystem.file');
 		$filename = JPATH_COMPONENT_ADMINISTRATOR . '/BackupEngine/serverkey.php';
 
-		if (JFile::exists($filename))
+		if (File::exists($filename))
 		{
 			// We have a key file. Do we need to disable it?
 			if ($this->container->params->get('useencryption', -1) == 0)
@@ -269,7 +265,7 @@ class ControlPanel extends Model
 		}
 
 		$this->container->params->set('confwiz_upgrade', 1);
-		$this->container->params->set('siteurl', str_replace('/administrator', '', JUri::base()));
+		$this->container->params->set('siteurl', str_replace('/administrator', '', Uri::base()));
 		$this->container->params->set('jlibrariesdir', Factory::getFilesystemTools()->TranslateWinPath(JPATH_LIBRARIES));
 		$this->container->params->set('jversion', '1.6');
 		$this->container->params->save();
@@ -894,8 +890,7 @@ class ControlPanel extends Model
 		// Finally, remove the key file
 		if (!@unlink($filename))
 		{
-			JLoader::import('joomla.filesystem.file');
-			JFile::delete($filename);
+			File::delete($filename);
 		}
 	}
 
@@ -948,8 +943,7 @@ class ControlPanel extends Model
 		$filecontents = "<?php defined('AKEEBAENGINE') or die(); define('AKEEBA_SERVERKEY', '$key'); ?>";
 		$filename     = $this->container->backEndPath . '/BackupEngine/serverkey.php';
 
-		JLoader::import('joomla.filesystem.file');
-		$result = JFile::write($filename, $filecontents);
+		$result = File::write($filename, $filecontents);
 
 		if (!$result)
 		{

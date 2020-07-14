@@ -8,10 +8,10 @@
 namespace Akeeba\Backup\Site\Model\Json\Task;
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 use Akeeba\Backup\Site\Model\Updates;
-use Akeeba\Engine\Platform;
+use Joomla\CMS\Filter\InputFilter;
 
 /**
  * Get the update information
@@ -21,20 +21,20 @@ class UpdateGetInformation extends AbstractTask
 	/**
 	 * Execute the JSON API task
 	 *
-	 * @param   array $parameters The parameters to this task
+	 * @param   array  $parameters  The parameters to this task
 	 *
 	 * @return  mixed
 	 *
 	 * @throws  \RuntimeException  In case of an error
 	 */
-	public function execute(array $parameters = array())
+	public function execute(array $parameters = [])
 	{
-		$filter = \JFilterInput::getInstance();
+		$filter = InputFilter::getInstance();
 
 		// Get the passed configuration values
-		$defConfig = array(
-			'force' => 0
-		);
+		$defConfig = [
+			'force' => 0,
+		];
 
 		$defConfig = array_merge($defConfig, $parameters);
 
@@ -45,6 +45,6 @@ class UpdateGetInformation extends AbstractTask
 
 		$updateInformation = $model->getUpdates($force);
 
-		return (object)$updateInformation;
+		return (object) $updateInformation;
 	}
 }

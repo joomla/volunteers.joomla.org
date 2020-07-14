@@ -8,14 +8,14 @@
 namespace Akeeba\Backup\Admin\Controller;
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 use Akeeba\Backup\Admin\Controller\Mixin\CustomACL;
 use Akeeba\Backup\Admin\Controller\Mixin\PredefinedTaskList;
 use Akeeba\Backup\Admin\Model\Restore as RestoreModel;
 use FOF30\Container\Container;
 use FOF30\Controller\Controller;
-use JText;
+use Joomla\CMS\Language\Text;
 
 /**
  * Controller for the restoration page
@@ -99,7 +99,7 @@ class Restore extends Controller
 
 		if ($status === false)
 		{
-			$this->setRedirect('index.php?option=com_akeeba&view=Manage', JText::_('COM_AKEEBA_RESTORE_ERROR_CANT_WRITE'), 'error');
+			$this->setRedirect('index.php?option=com_akeeba&view=Manage', \Joomla\CMS\Language\Text::_('COM_AKEEBA_RESTORE_ERROR_CANT_WRITE'), 'error');
 			$this->redirect();
 
 			return;

@@ -5,19 +5,19 @@
   ~ @license   GNU General Public License version 3, or later
   -->
 
-<extension version="3.8.0" type="package" method="upgrade">
+<extension version="3.9.0" type="package" method="upgrade">
     <dlid prefix="dlid=" suffix=""/>
     <name>Akeeba Backup package</name>
     <author>Nicholas K. Dionysopoulos</author>
-    <creationDate>2020-05-21</creationDate>
+    <creationDate>2020-07-14</creationDate>
     <packagename>akeeba</packagename>
-    <version>7.1.4</version>
-    <url>https://www.akeebabackup.com</url>
+    <version>7.2.2</version>
+    <url>https://www.akeeba.com</url>
     <packager>Akeeba Ltd</packager>
-    <packagerurl>https://www.akeebabackup.com</packagerurl>
+    <packagerurl>https://www.akeeba.com</packagerurl>
     <copyright>Copyright (c)2006-2019 Akeeba Ltd / Nicholas K. Dionysopoulos</copyright>
     <license>GNU GPL v3 or later</license>
-    <description>Akeeba Backup installation package v.7.1.4</description>
+    <description>Akeeba Backup installation package v.7.2.2</description>
 
     <!-- List of extensions to install -->
     <files>
@@ -49,6 +49,6 @@
 
     <!-- Update servers -->
     <updateservers>
-        <server type="extension" priority="1" name="Akeeba Backup Professional">https://cdn.akeebabackup.com/updates/pkgakeebapro.xml</server>
+        <server type="extension" priority="1" name="Akeeba Backup Professional">https://cdn.akeeba.com/updates/pkgakeebapro.xml</server>
     </updateservers>
 </extension>

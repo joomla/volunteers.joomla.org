@@ -8,10 +8,11 @@
 namespace Akeeba\Backup\Site\Model\Json\Task;
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 use Akeeba\Backup\Site\Model\FileFilters;
 use Akeeba\Engine\Platform;
+use Joomla\CMS\Filter\InputFilter;
 
 /**
  * Get the filesystem entities along with their filtering status (typically for rendering a GUI)
@@ -21,29 +22,29 @@ class GetFSEntities extends AbstractTask
 	/**
 	 * Execute the JSON API task
 	 *
-	 * @param   array $parameters The parameters to this task
+	 * @param   array  $parameters  The parameters to this task
 	 *
 	 * @return  mixed
 	 *
 	 * @throws  \RuntimeException  In case of an error
 	 */
-	public function execute(array $parameters = array())
+	public function execute(array $parameters = [])
 	{
-		$filter = \JFilterInput::getInstance();
+		$filter = InputFilter::getInstance();
 
 		// Get the passed configuration values
-		$defConfig = array(
+		$defConfig = [
 			'profile'      => 0,
 			'root'         => '[SITEROOT]',
 			'subdirectory' => '',
-		);
+		];
 
 		$defConfig = array_merge($defConfig, $parameters);
 
 		$profile      = $filter->clean($defConfig['profile'], 'int');
 		$root         = $filter->clean($defConfig['root'], 'string');
 		$subdirectory = $filter->clean($defConfig['subdirectory'], 'path');
-		$crumbs       = array();
+		$crumbs       = [];
 
 		// We need a valid profile ID
 		if ($profile <= 0)

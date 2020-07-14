@@ -8,12 +8,12 @@
 namespace Akeeba\Backup\Admin\Model;
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 use Akeeba\Engine\Factory;
 use Akeeba\Engine\Platform;
 use FOF30\Model\Model;
-use JText;
+use Joomla\CMS\Language\Text;
 
 /**
  * Model for the discover and import page
@@ -27,14 +27,14 @@ class Discover extends Model
 	 */
 	public function getFiles()
 	{
-		$ret = array();
+		$ret = [];
 
 		$directory = $this->getState('directory', '');
 		$directory = Factory::getFilesystemTools()->translateStockDirs($directory);
 
 		// Get all archive files
 		$allFiles = Factory::getFileLister()->getFiles($directory, true);
-		$files    = array();
+		$files    = [];
 
 		if (!empty($allFiles))
 		{
@@ -42,7 +42,7 @@ class Discover extends Model
 			{
 				$ext = strtoupper(substr($file, -3));
 
-				if (in_array($ext, array('JPA', 'JPS', 'ZIP')))
+				if (in_array($ext, ['JPA', 'JPS', 'ZIP']))
 				{
 					$files[] = $file;
 				}
@@ -56,13 +56,13 @@ class Discover extends Model
 		}
 
 		// Make sure these files do not already exist in another backup record
-		$db  = $this->container->db;
+		$db = $this->container->db;
 
 		$sql = $db->getQuery(true)
-				  ->select($db->qn('absolute_path'))
-				  ->from($db->qn('#__ak_stats'))
-				  ->where($db->qn('absolute_path') . ' LIKE ' . $db->q($directory . '%'))
-				  ->where($db->qn('filesexist') . ' = ' . $db->q('1'));
+			->select($db->qn('absolute_path'))
+			->from($db->qn('#__ak_stats'))
+			->where($db->qn('absolute_path') . ' LIKE ' . $db->q($directory . '%'))
+			->where($db->qn('filesexist') . ' = ' . $db->q('1'));
 
 		try
 		{
@@ -128,8 +128,8 @@ class Discover extends Model
 		}
 
 		// Create a new backup record
-		$record = array(
-			'description'     => JText::_('COM_AKEEBA_DISCOVER_LABEL_IMPORTEDDESCRIPTION'),
+		$record = [
+			'description'     => Text::_('COM_AKEEBA_DISCOVER_LABEL_IMPORTEDDESCRIPTION'),
 			'comment'         => '',
 			'backupstart'     => date('Y-m-d H:i:s', $fileModificationTime),
 			'backupend'       => date('Y-m-d H:i:s', $fileModificationTime + 1),
@@ -143,11 +143,11 @@ class Discover extends Model
 			'tag'             => 'backend',
 			'filesexist'      => 1,
 			'remote_filename' => '',
-			'total_size'      => $total_size
-		);
+			'total_size'      => $total_size,
+		];
 
-		$id    = null;
-		$id    = Platform::getInstance()->set_or_update_statistics($id, $record);
+		$id = null;
+		$id = Platform::getInstance()->set_or_update_statistics($id, $record);
 
 		return $id;
 	}

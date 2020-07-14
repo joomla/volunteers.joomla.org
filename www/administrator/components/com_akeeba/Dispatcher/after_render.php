@@ -6,7 +6,9 @@
  */
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+use Joomla\CMS\Factory;
+
+defined('_JEXEC') || die();
 
 if (function_exists('akeebaBackupOnAfterRenderToFixBrokenCloudFlareRocketLoader'))
 {
@@ -31,7 +33,8 @@ if (function_exists('akeebaBackupOnAfterRenderToFixBrokenCloudFlareRocketLoader'
  * please refer to their documentation link:
  * https://support.cloudflare.com/hc/en-us/articles/200168056-What-does-Rocket-Loader-do-
  *
- * Unfortunately, the way it's implemented is that it effectively makes ALL JavaScript files load as though they had the
+ * Unfortunately, the way it's implemented is that it effectively makes ALL JavaScript files load as though they had
+ * the
  * "async" attribute. In other words, they will load in a random order. This is a major problem for a general purpose
  * CMS like Joomla because extensions' JavaScript scripts depend not only on other script files from the same extension
  * but also on the core script files provided by Joomla itself. By loading these files in a random order it's possible
@@ -42,7 +45,8 @@ if (function_exists('akeebaBackupOnAfterRenderToFixBrokenCloudFlareRocketLoader'
  * http://webmasters.stackexchange.com/a/60277
  * As this person succinctly puts it: "I'm actually quite shocked that it works (although perhaps it doesn't always)".
  *
- * In any case, their documentation (https://support.cloudflare.com/hc/en-us/articles/200169436--How-can-I-have-Rocket-Loader-ignore-my-script-s-in-Automatic-Mode-)
+ * In any case, their documentation
+ * (https://support.cloudflare.com/hc/en-us/articles/200169436--How-can-I-have-Rocket-Loader-ignore-my-script-s-in-Automatic-Mode-)
  * suggests adding the non-standard `data-cfasync="false"` attribute BEFORE the script's src attribute.
  *
  * Here's the thing. Joomla! does NOT let you do that thorugh its API used to register script files to be loaded in the
@@ -84,7 +88,7 @@ function akeebaBackupOnAfterRenderToFixBrokenCloudFlareRocketLoader()
 	// The generated HTML
 	try
 	{
-		$app = JFactory::getApplication();
+		$app = Factory::getApplication();
 	}
 	catch (Exception $e)
 	{
@@ -94,7 +98,7 @@ function akeebaBackupOnAfterRenderToFixBrokenCloudFlareRocketLoader()
 	$buffer = $app->getBody();
 
 	// Replace '<script...src' with '<script...data-cfasync="false" src'
-	$regEx = '/<script([^>]*)src\s?=\s?(\'|")/im';
+	$regEx  = '/<script([^>]*)src\s?=\s?(\'|")/im';
 	$buffer = preg_replace($regEx, '<script$1 data-cfasync="false" src=$2', $buffer);
 
 	// Reconstruct the page's HTML and set it back to the buffer

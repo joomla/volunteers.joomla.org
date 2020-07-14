@@ -8,7 +8,7 @@
 namespace Akeeba\Backup\Admin\Model;
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 use Akeeba\Backup\Admin\Model\Mixin\ExclusionFilter;
 use Akeeba\Engine\Factory;
@@ -461,7 +461,7 @@ class FileFilters extends Model
 
 		foreach ($uom as $unit => $byteSize)
 		{
-			if (doubleval($bytes) >= $byteSize)
+			if (floatval($bytes) >= $byteSize)
 			{
 				return sprintf($format, $bytes / $byteSize) . ' ' . $unit;
 			}

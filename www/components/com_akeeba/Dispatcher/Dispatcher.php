@@ -8,7 +8,7 @@
 namespace Akeeba\Backup\Site\Dispatcher;
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 use Akeeba\Backup\Admin\Dispatcher\Dispatcher as AdminDispatcher;
 use Akeeba\Backup\Admin\Helper\SecretWord;
@@ -16,7 +16,8 @@ use Akeeba\Engine\Factory;
 use Akeeba\Engine\Platform;
 use FOF30\Container\Container;
 use FOF30\Dispatcher\Exception\AccessForbidden;
-use \Joomla\CMS\Factory as JFactory;
+use Joomla\CMS\Factory as JFactory;
+use Joomla\CMS\Language\Text;
 
 class Dispatcher extends AdminDispatcher
 {
@@ -63,7 +64,7 @@ class Dispatcher extends AdminDispatcher
 		// Core version: there is no front-end, throw a 403
 		if (!defined('AKEEBA_PRO') || !AKEEBA_PRO)
 		{
-			throw new AccessForbidden(\JText::_('COM_AKEEBA_ERR_NO_FRONTEND_IN_CORE'));
+			throw new AccessForbidden(Text::_('COM_AKEEBA_ERR_NO_FRONTEND_IN_CORE'));
 		}
 
 		$this->container->platform->importPlugin('akeebabackup');

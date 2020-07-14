@@ -9,7 +9,7 @@
 
 namespace Akeeba\Engine\Driver\Query;
 
-
+defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Driver\Base as DriverBase;
 use Akeeba\Engine\Driver\Query\Element as QueryElement;
@@ -161,7 +161,7 @@ abstract class Base
 		switch ($method)
 		{
 			case 'q':
-				return $this->quote($args[0], isset($args[1]) ? $args[1] : true);
+				return $this->quote($args[0], $args[1] ?? true);
 				break;
 
 			case 'qn':
@@ -169,7 +169,7 @@ abstract class Base
 				break;
 
 			case 'e':
-				return $this->escape($args[0], isset($args[1]) ? $args[1] : false);
+				return $this->escape($args[0], $args[1] ?? false);
 				break;
 		}
 	}
@@ -332,7 +332,7 @@ abstract class Base
 	 */
 	public function __get($name)
 	{
-		return isset($this->$name) ? $this->$name : null;
+		return $this->$name ?? null;
 	}
 
 	/**
@@ -984,7 +984,7 @@ abstract class Base
 			throw new QueryException('Invalid database object');
 		}
 
-		$result = $this->db->getNullDate($quoted);
+		$result = $this->db->getNullDate();
 
 		if ($quoted)
 		{

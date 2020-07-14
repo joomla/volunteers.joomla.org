@@ -9,7 +9,7 @@
 
 namespace Akeeba\Engine;
 
-
+defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Platform\Base;
 use Akeeba\Engine\Platform\PlatformInterface;

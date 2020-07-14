@@ -7,9 +7,11 @@
 
 namespace FOF30\View;
 
-use FOF30\Container\Container;
+defined('_JEXEC') || die;
 
-defined('_JEXEC') or die;
+use FOF30\Container\Container;
+use Joomla\CMS\Language\Text;
+use RuntimeException;
 
 /**
  * Locates the appropriate template file for a view
@@ -23,7 +25,7 @@ class ViewTemplateFinder
 	protected $container;
 
 	/** @var  array  The layout template extensions to look for */
-	protected $extensions = array('.blade.php', '.php');
+	protected $extensions = ['.blade.php', '.php'];
 
 	/** @var  string  Default layout's name (default: "default") */
 	protected $defaultLayout = 'default';
@@ -57,9 +59,9 @@ class ViewTemplateFinder
 	 * @param   View   $view    The view we are attached to
 	 * @param   array  $config  The configuration for this view template finder
 	 */
-	function __construct(View $view, array $config = array())
+	function __construct(View $view, array $config = [])
 	{
-		$this->view = $view;
+		$this->view      = $view;
 		$this->container = $view->getContainer();
 
 		if (isset($config['extensions']))
@@ -68,7 +70,9 @@ class ViewTemplateFinder
 			{
 				$config['extensions'] = trim($config['extensions']);
 				$config['extensions'] = explode(',', $config['extensions']);
-				$config['extensions'] = array_map(function ($x) { return trim($x); }, $config['extensions']);
+				$config['extensions'] = array_map(function ($x) {
+					return trim($x);
+				}, $config['extensions']);
 			}
 
 			$this->setExtensions($config['extensions']);
@@ -86,21 +90,21 @@ class ViewTemplateFinder
 
 		if (isset($config['strictView']))
 		{
-			$config['strictView'] = in_array($config['strictView'], array(true, 'true', 'yes', 'on', 1));
+			$config['strictView'] = in_array($config['strictView'], [true, 'true', 'yes', 'on', 1]);
 
 			$this->setStrictView($config['strictView']);
 		}
 
 		if (isset($config['strictTpl']))
 		{
-			$config['strictTpl'] = in_array($config['strictTpl'], array(true, 'true', 'yes', 'on', 1));
+			$config['strictTpl'] = in_array($config['strictTpl'], [true, 'true', 'yes', 'on', 1]);
 
 			$this->setStrictTpl($config['strictTpl']);
 		}
 
 		if (isset($config['strictLayout']))
 		{
-			$config['strictLayout'] = in_array($config['strictLayout'], array(true, 'true', 'yes', 'on', 1));
+			$config['strictLayout'] = in_array($config['strictLayout'], [true, 'true', 'yes', 'on', 1]);
 
 			$this->setStrictLayout($config['strictLayout']);
 		}
@@ -118,9 +122,9 @@ class ViewTemplateFinder
 	 * view             string  The name of the view
 	 * layout           string  The name of the layout
 	 * tpl              string  The name of the subtemplate
-	 * strictView       bool    Should I only look in the specified view, or should I look in the pluralised/singularised view as well?
-	 * strictLayout     bool    Should I only look for this layout, or also for the default layout?
-	 * strictTpl        bool    Should I only look for this subtemplate or also for no subtemplate?
+	 * strictView       bool    Should I only look in the specified view, or should I look in the
+	 * pluralised/singularised view as well? strictLayout     bool    Should I only look for this layout, or also for
+	 * the default layout? strictTpl        bool    Should I only look for this subtemplate or also for no subtemplate?
 	 * sidePrefix       string  The application side prefix (site, admin, auto, any)
 	 *
 	 * @param   array  $parameters  See above
@@ -130,29 +134,29 @@ class ViewTemplateFinder
 	public function getViewTemplateUris(array $parameters)
 	{
 		// Merge the default parameters with the parameters given
-		$parameters = array_merge(array(
-			'component'     => $this->container->componentName,
-			'view'          => $this->view->getName(),
-			'layout'        => $this->defaultLayout,
-			'tpl'           => $this->defaultTpl,
-			'strictView'    => $this->strictView,
-			'strictLayout'  => $this->strictLayout,
-			'strictTpl'     => $this->strictTpl,
-			'sidePrefix'    => $this->sidePrefix,
-		), $parameters);
+		$parameters = array_merge([
+			'component'    => $this->container->componentName,
+			'view'         => $this->view->getName(),
+			'layout'       => $this->defaultLayout,
+			'tpl'          => $this->defaultTpl,
+			'strictView'   => $this->strictView,
+			'strictLayout' => $this->strictLayout,
+			'strictTpl'    => $this->strictTpl,
+			'sidePrefix'   => $this->sidePrefix,
+		], $parameters);
 
-		$uris = array();
+		$uris = [];
 
-		$component       = $parameters['component'];
-		$view            = $parameters['view'];
-		$layout          = $parameters['layout'];
-		$tpl             = $parameters['tpl'];
-		$strictView      = $parameters['strictView'];
-		$strictLayout    = $parameters['strictLayout'];
-		$strictTpl       = $parameters['strictTpl'];
-		$sidePrefix      = $parameters['sidePrefix'];
+		$component    = $parameters['component'];
+		$view         = $parameters['view'];
+		$layout       = $parameters['layout'];
+		$tpl          = $parameters['tpl'];
+		$strictView   = $parameters['strictView'];
+		$strictLayout = $parameters['strictLayout'];
+		$strictTpl    = $parameters['strictTpl'];
+		$sidePrefix   = $parameters['sidePrefix'];
 
-		$basePath = $sidePrefix.  ':' . $component . '/' . $view . '/';
+		$basePath = $sidePrefix . ':' . $component . '/' . $view . '/';
 
 		$uris[] = $basePath . $layout . ($tpl ? "_$tpl" : '');
 
@@ -173,11 +177,11 @@ class ViewTemplateFinder
 
 		if (!$strictView)
 		{
-			$parameters['view'] = $this->container->inflector->isSingular($view) ? $this->container->inflector->pluralize($view) : $this->container->inflector->singularize($view);
+			$parameters['view']       = $this->container->inflector->isSingular($view) ? $this->container->inflector->pluralize($view) : $this->container->inflector->singularize($view);
 			$parameters['strictView'] = true;
 
 			$extraUris = $this->getViewTemplateUris($parameters);
-			$uris = array_merge($uris, $extraUris);
+			$uris      = array_merge($uris, $extraUris);
 			unset ($extraUris);
 		}
 
@@ -194,23 +198,23 @@ class ViewTemplateFinder
 	 */
 	public function parseTemplateUri($uri = '')
 	{
-		$parts = array(
-			'admin'		 => 0,
-			'component'	 => $this->container->componentName,
-			'view'		 => $this->view->getName(),
-			'template'	 => 'default'
-		);
+		$parts = [
+			'admin'     => 0,
+			'component' => $this->container->componentName,
+			'view'      => $this->view->getName(),
+			'template'  => 'default',
+		];
 
 		if (substr($uri, 0, 5) == 'auto:')
 		{
 			$replacement = $this->container->platform->isBackend() ? 'admin:' : 'site:';
-			$uri = $replacement . substr($uri, 5);
+			$uri         = $replacement . substr($uri, 5);
 		}
 
 		if (substr($uri, 0, 6) == 'admin:')
 		{
 			$parts['admin'] = 1;
-			$uri = substr($uri, 6);
+			$uri            = substr($uri, 6);
 		}
 		elseif (substr($uri, 0, 5) == 'site:')
 		{
@@ -219,7 +223,7 @@ class ViewTemplateFinder
 		elseif (substr($uri, 0, 4) == 'any:')
 		{
 			$parts['admin'] = -1;
-			$uri = substr($uri, 4);
+			$uri            = substr($uri, 4);
 		}
 
 		if (empty($uri))
@@ -227,7 +231,7 @@ class ViewTemplateFinder
 			return $parts;
 		}
 
-		$uriParts = explode('/', $uri, 3);
+		$uriParts  = explode('/', $uri, 3);
 		$partCount = count($uriParts);
 
 		if ($partCount >= 1)
@@ -259,9 +263,9 @@ class ViewTemplateFinder
 	 *
 	 * @return  string
 	 *
-	 * @throws \RuntimeException
+	 * @throws RuntimeException
 	 */
-	public function resolveUriToPath($uri, $layoutTemplate = '', array $extraPaths = array(), $noOverride = false)
+	public function resolveUriToPath($uri, $layoutTemplate = '', array $extraPaths = [], $noOverride = false)
 	{
 		// Parse the URI into its parts
 		$parts = $this->parseTemplateUri($uri);
@@ -272,7 +276,7 @@ class ViewTemplateFinder
 		$templatePath   = $this->container->platform->getTemplateOverridePath($parts['component']);
 
 		// Get the lookup paths
-		$paths = array();
+		$paths = [];
 
 		// If we are on the correct side of the application or we have an "any:" URI look for a template override
 		if (!$noOverride && (($parts['admin'] == -1) || ($parts['admin'] == $isAdmin)))
@@ -311,13 +315,46 @@ class ViewTemplateFinder
 
 		// Get the Joomla! version template suffixes
 		$jVersionSuffixes = array_merge($this->container->platform->getTemplateSuffixes(), ['']);
+
+		// Get the renderer name suffixes
+		$rendererNameSuffixes = [
+			'.' . $this->container->renderer->getInformation()->name,
+			'',
+		];
+
 		$filesystem = $this->container->filesystem;
 
 		foreach ($this->extensions as $extension)
 		{
 			foreach ($jVersionSuffixes as $JVersionSuffix)
 			{
-				$filenameToFind = $parts['template'] . $JVersionSuffix . $extension;
+				foreach ($rendererNameSuffixes as $rendererNameSuffix)
+				{
+					$filenameToFind = $parts['template'] . $JVersionSuffix . $rendererNameSuffix . $extension;
+
+					$fileName = $filesystem->pathFind($paths, $filenameToFind);
+
+					if ($fileName)
+					{
+						return $fileName;
+					}
+				}
+			}
+		}
+
+		/**
+		 * If no view template was found for the component fall back to FOF's core Blade templates -- located in
+		 * <libdir>/ViewTemplates/<viewName>/<templateName> -- and their template overrides.
+		 */
+		$paths   = [];
+		$paths[] = $this->container->platform->getTemplateOverridePath('lib_fof30') . '/' . $parts['view'];
+		$paths[] = realpath(__DIR__ . '/..') . '/ViewTemplates/' . $parts['view'];
+
+		foreach ($jVersionSuffixes as $JVersionSuffix)
+		{
+			foreach ($rendererNameSuffixes as $rendererNameSuffix)
+			{
+				$filenameToFind = $parts['template'] . $JVersionSuffix . $rendererNameSuffix . '.blade.php';
 
 				$fileName = $filesystem->pathFind($paths, $filenameToFind);
 
@@ -328,27 +365,7 @@ class ViewTemplateFinder
 			}
 		}
 
-		/**
-		 * If no view template was found for the component fall back to FOF's core Blade templates -- located in
-		 * <libdir>/ViewTemplates/<viewName>/<templateName> -- and their template overrides.
-		 */
-		$paths = [];
-		$paths[] = $this->container->platform->getTemplateOverridePath('lib_fof30') . '/' . $parts['view'];
-		$paths[] = realpath(__DIR__ . '/..') . '/ViewTemplates/' . $parts['view'];
-
-		foreach ($jVersionSuffixes as $JVersionSuffix)
-		{
-			$filenameToFind = $parts['template'] . $JVersionSuffix . '.blade.php';
-
-			$fileName = $filesystem->pathFind($paths, $filenameToFind);
-
-			if (!empty($fileName))
-			{
-				return $fileName;
-			}
-		}
-
-		throw new \RuntimeException(\JText::sprintf('JLIB_APPLICATION_ERROR_LAYOUTFILE_NOT_FOUND', $uri), 500);
+		throw new RuntimeException(Text::sprintf('JLIB_APPLICATION_ERROR_LAYOUTFILE_NOT_FOUND', $uri), 500);
 	}
 
 	/**
@@ -461,7 +478,7 @@ class ViewTemplateFinder
 	/**
 	 * Sets the default subtemplate name
 	 *
-	 * @param  string  $defaultTpl
+	 * @param   string  $defaultTpl
 	 */
 	public function setDefaultTpl($defaultTpl)
 	{
@@ -574,7 +591,7 @@ class ViewTemplateFinder
 		$sidePrefix = strtolower($sidePrefix);
 		$sidePrefix = trim($sidePrefix);
 
-		if (!in_array($sidePrefix, array('site', 'admin', 'auto', 'any')))
+		if (!in_array($sidePrefix, ['site', 'admin', 'auto', 'any']))
 		{
 			$sidePrefix = 'auto';
 		}

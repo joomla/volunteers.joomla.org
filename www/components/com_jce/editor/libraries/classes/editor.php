@@ -1333,6 +1333,11 @@ class WFEditor
         $global = intval($wf->getParam('editor.content_css', 1));
         $profile = intval($wf->getParam('editor.profile_content_css', 2));
 
+        // no template found???
+        if (empty($template)) {
+            return $stylesheets;
+        }
+
         switch ($global) {
             // Custom template css files
             case 0:
@@ -1349,6 +1354,9 @@ class WFEditor
                     if (empty($tmp)) {
                         continue;
                     }
+
+                    // clean slashes
+                    $tmp = preg_replace('#[/\\\\]+#', '/', $tmp);
 
                     // Replace $template variable with site template name
                     $tmp = str_replace('$template', $template->name, $tmp);
@@ -1416,6 +1424,9 @@ class WFEditor
                     if (empty($tmp)) {
                         continue;
                     }
+
+                    // clean slashes
+                    $tmp = preg_replace('#[/\\\\]+#', '/', $tmp);
 
                     // Replace $template variable with site template name (defaults to 'system')
                     $tmp = str_replace('$template', $template->name, $tmp);

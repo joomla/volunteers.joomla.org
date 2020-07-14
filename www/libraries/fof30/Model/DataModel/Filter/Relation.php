@@ -7,19 +7,21 @@
 
 namespace FOF30\Model\DataModel\Filter;
 
-defined('_JEXEC') or die;
+use JDatabaseQuery;
+
+defined('_JEXEC') || die;
 
 class Relation extends Number
 {
-	/** @var \JDatabaseQuery The COUNT subquery to filter by */
+	/** @var JDatabaseQuery The COUNT sub-query to filter by */
 	protected $subQuery = null;
 
 	public function __construct($db, $relationName, $subQuery)
 	{
-		$field = (object)array(
-			'name'	=> $relationName,
-			'type'	=> 'relation',
-		);
+		$field = (object) [
+			'name' => $relationName,
+			'type' => 'relation',
+		];
 
 		parent::__construct($db, $field);
 
@@ -33,6 +35,6 @@ class Relation extends Number
 
 	public function getFieldName()
 	{
-		return '(' . (string)$this->subQuery . ')';
+		return '(' . (string) $this->subQuery . ')';
 	}
 }

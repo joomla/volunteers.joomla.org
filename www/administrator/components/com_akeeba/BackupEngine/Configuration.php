@@ -9,7 +9,7 @@
 
 namespace Akeeba\Engine;
 
-
+defined('AKEEBAENGINE') || die();
 
 use DirectoryIterator;
 use stdClass;

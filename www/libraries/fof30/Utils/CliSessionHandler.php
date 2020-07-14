@@ -7,6 +7,8 @@
 
 namespace FOF30\Utils;
 
+defined('_JEXEC') || die;
+
 use FOF30\Encrypt\Randval;
 use JSessionHandlerInterface;
 use RuntimeException;

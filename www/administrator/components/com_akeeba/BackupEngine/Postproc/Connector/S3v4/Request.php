@@ -9,10 +9,9 @@
 
 namespace Akeeba\Engine\Postproc\Connector\S3v4;
 
+defined('AKEEBAENGINE') || die();
+
 use Akeeba\Engine\Postproc\Connector\S3v4\Response\Error;
-
-
-
 
 class Request
 {
@@ -589,7 +588,7 @@ class Request
 			return $strlen;
 		}
 
-		list($header, $value) = explode(': ', trim($data), 2);
+		[$header, $value] = explode(': ', trim($data), 2);
 
 		switch (strtolower($header))
 		{
@@ -726,7 +725,6 @@ class Request
 		 *
 		 * v4 signing does NOT support non-Amazon endpoints.
 		 */
-
 		// Most endpoints: s3-REGION.amazonaws.com
 		$endpoint = 's3-' . $region . '.amazonaws.com';
 

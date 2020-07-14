@@ -41,7 +41,7 @@
 
 namespace Akeeba\Engine\Postproc\Connector\Azure\Credentials;
 
-
+defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Postproc\Connector\Azure\AzureStorage;
 use Akeeba\Engine\Postproc\Connector\Azure\Credentials;

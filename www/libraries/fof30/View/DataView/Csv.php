@@ -7,11 +7,13 @@
 
 namespace FOF30\View\DataView;
 
+defined('_JEXEC') || die;
+
+use Exception;
 use FOF30\Container\Container;
 use FOF30\Model\DataModel;
 use FOF30\View\Exception\AccessForbidden;
-
-defined('_JEXEC') or die;
+use Joomla\CMS\Document\Document;
 
 class Csv extends Html implements DataViewInterface
 {
@@ -34,7 +36,7 @@ class Csv extends Html implements DataViewInterface
 	 *
 	 * @var  array
 	 */
-	protected $csvFields = array();
+	protected $csvFields = [];
 
 
 	/**
@@ -44,7 +46,7 @@ class Csv extends Html implements DataViewInterface
 	 * @param   Container  $container  The container we belong to
 	 * @param   array      $config     The configuration overrides for the view
 	 */
-	public function __construct(Container $container, array $config = array())
+	public function __construct(Container $container, array $config = [])
 	{
 		parent::__construct($container, $config);
 
@@ -68,8 +70,8 @@ class Csv extends Html implements DataViewInterface
 
 		if (empty($this->csvFilename))
 		{
-			$view = $this->input->getCmd('view', 'cpanel');
-			$view = $this->container->inflector->pluralize($view);
+			$view              = $this->input->getCmd('view', 'cpanel');
+			$view              = $this->container->inflector->pluralize($view);
 			$this->csvFilename = strtolower($view) . '.csv';
 		}
 
@@ -83,28 +85,28 @@ class Csv extends Html implements DataViewInterface
 	 * Overrides the default method to execute and display a template script.
 	 * Instead of loadTemplate is uses loadAnyTemplate.
 	 *
-	 * @param   string $tpl The name of the template file to parse
+	 * @param   string  $tpl  The name of the template file to parse
 	 *
 	 * @return  boolean  True on success
 	 *
-	 * @throws  \Exception  When the layout file is not found
+	 * @throws  Exception  When the layout file is not found
 	 */
 	public function display($tpl = null)
 	{
 		$eventName = 'onBefore' . ucfirst($this->doTask);
-		$this->triggerEvent($eventName, array($tpl));
+		$this->triggerEvent($eventName, [$tpl]);
 
 		// Load the model
 		/** @var DataModel $model */
 		$model = $this->getModel();
 
-		$items = $model->get();
+		$items       = $model->get();
 		$this->items = $items;
 
 		$platform = $this->container->platform;
 		$document = $platform->getDocument();
 
-		if ($document instanceof \JDocument)
+		if ($document instanceof Document)
 		{
 			$document->setMimeEncoding('text/csv');
 		}
@@ -117,7 +119,7 @@ class Csv extends Html implements DataViewInterface
 		 * scanners. The only way to beat them is... wait for it... write our software using the same obscure constructs
 		 * actual malware is using to evade these broken malware scanners. The irony is not lost on me.
 		 */
-		$xo = substr("revenge", 0, 3);
+		$xo   = substr("revenge", 0, 3);
 		$xoxo = substr("calibrate", 1, 2);
 		$platform->setHeader('Cache-Control', 'must-' . $xo . $xoxo . 'idate, post-check=0, pre-check=0');
 
@@ -136,12 +138,12 @@ class Csv extends Html implements DataViewInterface
 		{
 			$result = $this->loadTemplate($tpl, true);
 
-			if ($result instanceof \Exception)
+			if ($result instanceof Exception)
 			{
 				$hasFailed = true;
 			}
 		}
-		catch (\Exception $e)
+		catch (Exception $e)
 		{
 			$hasFailed = true;
 		}
@@ -158,15 +160,15 @@ class Csv extends Html implements DataViewInterface
 				throw new AccessForbidden;
 			}
 
-			$item    = $items->last();
-			$keys    = $item->getData();
-			$keys    = array_keys($keys);
+			$item = $items->last();
+			$keys = $item->getData();
+			$keys = array_keys($keys);
 
 			reset($items);
 
 			if (!empty($this->csvFields))
 			{
-				$temp = array();
+				$temp = [];
 
 				foreach ($this->csvFields as $f)
 				{
@@ -176,13 +178,13 @@ class Csv extends Html implements DataViewInterface
 					if (!$model->hasField($f) && strpos($f, '.'))
 					{
 						$methods = explode('.', $f);
-						$object = $item;
+						$object  = $item;
 						// Let's see if the relation exists
 						foreach ($methods as $method)
 						{
 							if (isset($object->$method) || property_exists($object, $method))
 							{
-								$exist = true;
+								$exist  = true;
 								$object = $object->$method;
 							}
 							else
@@ -197,7 +199,7 @@ class Csv extends Html implements DataViewInterface
 					{
 						$temp[] = $f;
 					}
-					elseif($exist)
+					elseif ($exist)
 					{
 						$temp[] = $f;
 					}
@@ -208,7 +210,7 @@ class Csv extends Html implements DataViewInterface
 
 			if ($this->csvHeader)
 			{
-				$csv = array();
+				$csv = [];
 
 				foreach ($keys as $k)
 				{
@@ -225,7 +227,7 @@ class Csv extends Html implements DataViewInterface
 
 			foreach ($items as $item)
 			{
-				$csv  = array();
+				$csv = [];
 
 				foreach ($keys as $k)
 				{
@@ -233,7 +235,7 @@ class Csv extends Html implements DataViewInterface
 					if (!$model->hasField($k) && strpos($k, '.'))
 					{
 						$methods = explode('.', $k);
-						$v = $item;
+						$v       = $item;
 
 						foreach ($methods as $method)
 						{
@@ -267,7 +269,7 @@ class Csv extends Html implements DataViewInterface
 		}
 
 		$eventName = 'onAfter' . ucfirst($this->doTask);
-		$this->triggerEvent($eventName, array($tpl));
+		$this->triggerEvent($eventName, [$tpl]);
 
 		return true;
 	}

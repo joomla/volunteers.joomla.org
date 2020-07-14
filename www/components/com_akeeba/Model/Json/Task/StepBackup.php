@@ -8,10 +8,10 @@
 namespace Akeeba\Backup\Site\Model\Json\Task;
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 use Akeeba\Engine\Factory;
-use Akeeba\Engine\Platform;
+use Joomla\CMS\Filter\InputFilter;
 
 /**
  * Step through a backup job
@@ -21,22 +21,22 @@ class StepBackup extends AbstractTask
 	/**
 	 * Execute the JSON API task
 	 *
-	 * @param   array $parameters The parameters to this task
+	 * @param   array  $parameters  The parameters to this task
 	 *
 	 * @return  mixed
 	 *
 	 * @throws  \RuntimeException  In case of an error
 	 */
-	public function execute(array $parameters = array())
+	public function execute(array $parameters = [])
 	{
-		$filter = \JFilterInput::getInstance();
+		$filter = InputFilter::getInstance();
 
 		// Get the passed configuration values
-		$defConfig = array(
+		$defConfig = [
 			'profile'  => null,
 			'tag'      => AKEEBA_BACKUP_ORIGIN,
 			'backupid' => null,
-		);
+		];
 
 		$defConfig = array_merge($defConfig, $parameters);
 
@@ -57,7 +57,7 @@ class StepBackup extends AbstractTask
 		// Try to set the profile from the setup parameters
 		if (!empty($profile))
 		{
-			$profile  = max(1, $profile); // Make sure $profile is a positive integer >= 1
+			$profile = max(1, $profile); // Make sure $profile is a positive integer >= 1
 			$this->container->platform->setSessionVar('profile', $profile);
 			define('AKEEBA_PROFILE', $profile);
 		}

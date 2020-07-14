@@ -7,9 +7,9 @@
 
 namespace FOF30\Configuration\Domain;
 
-use SimpleXMLElement;
+defined('_JEXEC') || die;
 
-defined('_JEXEC') or die;
+use SimpleXMLElement;
 
 /**
  * The Interface of a FOF configuration domain class. The methods are used to parse and
@@ -23,7 +23,7 @@ interface DomainInterface
 	/**
 	 * Parse the XML data, adding them to the $ret array
 	 *
-	 * @param   SimpleXMLElement  $xml   The XML data of the component's configuration area
+	 * @param   SimpleXMLElement   $xml  The XML data of the component's configuration area
 	 * @param   array             &$ret  The parsed data, in the form of a hash array
 	 *
 	 * @return  void
@@ -34,8 +34,8 @@ interface DomainInterface
 	 * Return a configuration variable
 	 *
 	 * @param   string  &$configuration  Configuration variables (hashed array)
-	 * @param   string  $var             The variable we want to fetch
-	 * @param   mixed   $default         Default value
+	 * @param   string   $var            The variable we want to fetch
+	 * @param   mixed    $default        Default value
 	 *
 	 * @return  mixed  The variable's value
 	 */

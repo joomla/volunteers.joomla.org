@@ -9,7 +9,7 @@
 
 namespace Akeeba\Engine\Postproc;
 
-
+defined('AKEEBAENGINE') || die();
 
 class None extends Base
 {

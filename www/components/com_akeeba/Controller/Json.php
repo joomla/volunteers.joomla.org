@@ -8,7 +8,7 @@
 namespace Akeeba\Backup\Site\Controller;
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 use FOF30\Container\Container;
 use FOF30\Controller\Controller;

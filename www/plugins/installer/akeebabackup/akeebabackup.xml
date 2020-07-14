@@ -5,15 +5,15 @@
   ~ @license   GNU General Public License version 3, or later
   -->
 
-<extension version="3.8.0" type="plugin" group="installer" method="upgrade">
+<extension version="3.9.0" type="plugin" group="installer" method="upgrade">
 	<name>PLG_INSTALLER_AKEEBABACKUP</name>
 	<author>Nicholas K. Dionysopoulos</author>
-	<authorEmail>nicholas@akeebabackup.com</authorEmail>
-	<authorUrl>http://www.akeebabackup.com</authorUrl>
+	<authorEmail>nicholas@akeeba.com</authorEmail>
+	<authorUrl>https://www.akeeba.com</authorUrl>
 	<copyright>Copyright (c)2006-2019 Nicholas K. Dionysopoulos</copyright>
 	<license>GNU General Public License version 3, or later</license>
-	<creationDate>2020-05-21</creationDate>
-	<version>7.1.4</version>
+	<creationDate>2020-07-14</creationDate>
+	<version>7.2.2</version>
 	<description>PLG_INSTALLER_AKEEBABACKUP_XML_DESCRIPTION</description>
 	<files>
 		<filename plugin="akeebabackup">akeebabackup.php</filename>

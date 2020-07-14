@@ -9,9 +9,7 @@
 
 namespace Akeeba\Engine\Filter;
 
-
-
-use Akeeba\Engine\Factory;
+defined('AKEEBAENGINE') || die();
 
 /**
  * Directory exclusion filter based on regular expressions

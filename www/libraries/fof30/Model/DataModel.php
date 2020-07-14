@@ -7,12 +7,14 @@
 
 namespace FOF30\Model;
 
+defined('_JEXEC') || die;
+
+use Exception;
 use FOF30\Container\Container;
 use FOF30\Controller\Exception\LockedRecord;
 use FOF30\Date\Date;
 use FOF30\Event\Dispatcher;
 use FOF30\Event\Observer;
-use FOF30\Form\Form;
 use FOF30\Model\DataModel\Collection as DataCollection;
 use FOF30\Model\DataModel\Exception\BaseException;
 use FOF30\Model\DataModel\Exception\CannotLockNotLoadedRecord;
@@ -26,8 +28,21 @@ use FOF30\Model\DataModel\Exception\SpecialColumnMissing;
 use FOF30\Model\DataModel\Relation\Exception\RelationNotFound;
 use FOF30\Model\DataModel\RelationManager;
 use FOF30\Utils\ArrayHelper;
-
-defined('_JEXEC') or die;
+use InvalidArgumentException;
+use JDatabaseDriver;
+use JDatabaseQuery;
+use JLoader;
+use Joomla\CMS\Access\Rules;
+use Joomla\CMS\Application\ApplicationHelper;
+use Joomla\CMS\Component\ComponentHelper;
+use Joomla\CMS\Language\Text;
+use Joomla\CMS\Table\Asset;
+use Joomla\CMS\Table\ContentType;
+use Joomla\CMS\Table\Table;
+use Joomla\CMS\Table\TableInterface;
+use Joomla\CMS\UCM\UCMContent;
+use RuntimeException;
+use UnexpectedValueException;
 
 /**
  * Data-aware model, implementing a convenient ORM
@@ -46,30 +61,30 @@ defined('_JEXEC') or die;
  * @method $this enabled() enabled(int $enabled)
  * @method DataModel getNew() getNew(string $relationName)
  *
- * @property  int     $enabled      Publish status of this record
- * @property  int     $ordering     Sort ordering of this record
- * @property  int     $created_by   ID of the user who created this record
- * @property  string  $created_on   Date/time stamp of record creation
- * @property  int     $modified_by  ID of the user who modified this record
- * @property  string  $modified_on  Date/time stamp of record modification
- * @property  int     $locked_by    ID of the user who locked this record
- * @property  string  $locked_on    Date/time stamp of record locking
+ * @property  int    $enabled      Publish status of this record
+ * @property  int    $ordering     Sort ordering of this record
+ * @property  int    $created_by   ID of the user who created this record
+ * @property  string $created_on   Date/time stamp of record creation
+ * @property  int    $modified_by  ID of the user who modified this record
+ * @property  string $modified_on  Date/time stamp of record modification
+ * @property  int    $locked_by    ID of the user who locked this record
+ * @property  string $locked_on    Date/time stamp of record locking
  *
  * Type hinting -- end
  */
-class DataModel extends Model implements \JTableInterface
+class DataModel extends Model implements TableInterface
 {
 	/** @var   array  A list of tables in the database */
-	protected static $tableCache = array();
+	protected static $tableCache = [];
 
 	/** @var   array  A list of table fields, keyed per table */
-	protected static $tableFieldCache = array();
+	protected static $tableFieldCache = [];
 
 	/** @var   array  A list of permutations of the prefix with upper/lowercase letters */
-	protected static $prefixCasePermutations = array();
+	protected static $prefixCasePermutations = [];
 
 	/** @var   array  Table field name aliases, defined as aliasFieldName => actualFieldName */
-	protected $aliasFields = array();
+	protected $aliasFields = [];
 
 	/** @var   boolean  Should I run automatic checks on the table data? */
 	protected $autoChecks = true;
@@ -80,26 +95,26 @@ class DataModel extends Model implements \JTableInterface
 	/** @var   Dispatcher  An event dispatcher for model behaviours */
 	protected $behavioursDispatcher = null;
 
-	/** @var   \JDatabaseDriver  The database driver for this model */
+	/** @var   JDatabaseDriver  The database driver for this model */
 	protected $dbo = null;
 
 	/** @var   array  Which fields should be exempt from automatic checks when autoChecks is enabled */
-	protected $fieldsSkipChecks = array();
+	protected $fieldsSkipChecks = [];
 
 	/** @var   array  Which fields should be auto-filled from the model state (by extent, the request)? */
-	protected $fillable = array();
+	protected $fillable = [];
 
 	/** @var   array  Which fields should never be auto-filled from the model state (by extent, the request)? */
-	protected $guarded = array();
+	protected $guarded = [];
 
 	/** @var   string  The identity field's name */
 	protected $idFieldName = '';
 
 	/** @var   array  A hash array with the table fields we know about and their information. Each key is the field name, the value is the field information */
-	protected $knownFields = array();
+	protected $knownFields = [];
 
 	/** @var   array  The data of the current record */
-	protected $recordData = array();
+	protected $recordData = [];
 
 	/** @var   boolean  What will delete() do? True: trash (enabled set to -2); false: hard delete (remove from database) */
 	protected $softDelete = false;
@@ -108,19 +123,19 @@ class DataModel extends Model implements \JTableInterface
 	protected $tableName = '';
 
 	/** @var   array  A collection of custom, additional where clauses to apply during buildQuery */
-	protected $whereClauses = array();
+	protected $whereClauses = [];
 
 	/** @var   RelationManager  The relation manager of this model */
 	protected $relationManager = null;
 
 	/** @var   array  A list of all eager loaded relations and their attached callbacks */
-	protected $eagerRelations = array();
+	protected $eagerRelations = [];
 
 	/** @var   array  A list of the relation filter definitions for this model */
-	protected $relationFilters = array();
+	protected $relationFilters = [];
 
 	/** @var   array  A list of the relations which will be auto-touched by save() and touch() methods */
-	protected $touches = array();
+	protected $touches = [];
 
 	/** @var bool Should rows be tracked as ACL assets? */
 	protected $_trackAssets = false;
@@ -128,41 +143,14 @@ class DataModel extends Model implements \JTableInterface
 	/** @var bool Does the resource support joomla tags? */
 	protected $_has_tags = false;
 
-	/** @var  \JAccessRules  The rules associated with this record. */
+	/** @var  Rules  The rules associated with this record. */
 	protected $_rules;
 
 	/** @var  string  The UCM content type (typically: com_something.viewname, e.g. com_foobar.items) */
 	protected $contentType = null;
 
-	/**
-	 * The name of the XML form to load
-	 *
-	 * @var  string|null
-	 *
-	 * @deprecated 3.1  Support for XML forms will be removed in FOF 4
-	 */
-	protected $formName = null;
-
-	/**
-	 * Array of form objects
-	 *
-	 * @var  Form[]
-	 *
-	 * @deprecated 3.1  Support for XML forms will be removed in FOF 4
-	 */
-	protected $_forms = array();
-
-	/**
-	 * The data to load into a form
-	 *
-	 * @var  array
-	 *
-	 * @deprecated 3.1  Support for XML forms will be removed in FOF 4
-	 */
-	protected $_formData = array();
-
- 	/** @var  array  Shared parameters for behaviors */
-	protected $_behaviorParams = array();
+	/** @var  array  Shared parameters for behaviors */
+	protected $_behaviorParams = [];
 
 	/**
 	 * The asset key for items in this table. It's usually something in the
@@ -178,31 +166,30 @@ class DataModel extends Model implements \JTableInterface
 	 *
 	 * You can use the $config array to pass some configuration values to the object:
 	 *
-	 * tableName             String   The name of the database table to use. Default: #__appName_viewNamePlural (Ruby on Rails convention)
-	 * idFieldName           String   The table key field name. Default: appName_viewNameSingular_id (Ruby on Rails convention)
-	 * knownFields           Array    The known fields in the table. Default: read from the table itself
-	 * autoChecks            Boolean  Should I turn on automatic data validation checks?
-	 * fieldsSkipChecks      Array    List of fields which should not participate in automatic data validation checks.
-	 * aliasFields           Array    Associative array of "magic" field aliases.
-	 * behavioursDispatcher  EventDispatcher  The model behaviours event dispatcher.
-	 * behaviourObservers    Array    The model behaviour observers to attach to the behavioursDispatcher.
-	 * behaviours            Array    A list of behaviour names to instantiate and attach to the behavioursDispatcher.
-	 * fillable_fields       Array    Which fields should be auto-filled from the model state (by extent, the request)?
-	 * guarded_fields        Array    Which fields should never be auto-filled from the model state (by extent, the request)?
-	 * relations             Array    (hashed)  The relations to autoload on model creation.
-	 * contentType           String   The UCM content type, e.g. "com_foobar.items"
+	 * tableName             String   The name of the database table to use. Default: #__appName_viewNamePlural (Ruby
+	 * on Rails convention) idFieldName           String   The table key field name. Default:
+	 * appName_viewNameSingular_id (Ruby on Rails convention) knownFields           Array    The known fields in the
+	 * table. Default: read from the table itself autoChecks            Boolean  Should I turn on automatic data
+	 * validation checks? fieldsSkipChecks      Array    List of fields which should not participate in automatic data
+	 * validation checks. aliasFields           Array    Associative array of "magic" field aliases.
+	 * behavioursDispatcher  EventDispatcher  The model behaviours event dispatcher. behaviourObservers    Array    The
+	 * model behaviour observers to attach to the behavioursDispatcher. behaviours            Array    A list of
+	 * behaviour names to instantiate and attach to the behavioursDispatcher. fillable_fields       Array    Which
+	 * fields should be auto-filled from the model state (by extent, the request)? guarded_fields        Array    Which
+	 * fields should never be auto-filled from the model state (by extent, the request)? relations             Array    (hashed)  The relations to autoload on model creation. contentType           String   The UCM content type, e.g. "com_foobar.items"
 	 *
-	 * Setting either fillable_fields or guarded_fields turns on automatic filling of fields in the constructor. If both
+	 * Setting either fillable_fields or guarded_fields turns on automatic filling of fields in the constructor. If
+	 * both
 	 * are set only guarded_fields is taken into account. Fields are not filled automatically outside the constructor.
-	 *
-	 * @see Model::__construct()
 	 *
 	 * @param   Container  $container  The configuration variables to this model
 	 * @param   array      $config     Configuration values for this model
 	 *
-	 * @throws \FOF30\Model\DataModel\Exception\NoTableColumns
+	 * @throws NoTableColumns
+	 * @see Model::__construct()
+	 *
 	 */
-	public function __construct(Container $container, array $config = array())
+	public function __construct(Container $container, array $config = [])
 	{
 		// First call the parent constructor.
 		parent::__construct($container, $config);
@@ -218,7 +205,7 @@ class DataModel extends Model implements \JTableInterface
 		elseif (empty($this->tableName))
 		{
 			// The table name is by default: #__appName_viewNamePlural (Ruby on Rails convention)
-			$viewPlural = $container->inflector->pluralize($this->getName());
+			$viewPlural      = $container->inflector->pluralize($this->getName());
 			$this->tableName = '#__' . strtolower($this->container->bareComponentName) . '_' . strtolower($viewPlural);
 		}
 
@@ -230,7 +217,7 @@ class DataModel extends Model implements \JTableInterface
 		elseif (empty($this->idFieldName))
 		{
 			// The default ID field is: appName_viewNameSingular_id (Ruby on Rails convention)
-			$viewSingular = $container->inflector->singularize($this->getName());
+			$viewSingular      = $container->inflector->singularize($this->getName());
 			$this->idFieldName = strtolower($this->container->bareComponentName) . '_' . strtolower($viewSingular) . '_id';
 		}
 
@@ -261,7 +248,7 @@ class DataModel extends Model implements \JTableInterface
 			if (!is_bool($config['autoChecks']))
 			{
 				$config['autoChecks'] = strtolower($config['autoChecks']);
-				$config['autoChecks'] = in_array($config['autoChecks'], array('yes', 'true', 'on', 1));
+				$config['autoChecks'] = in_array($config['autoChecks'], ['yes', 'true', 'on', 1]);
 			}
 
 			$this->autoChecks = $config['autoChecks'];
@@ -273,7 +260,9 @@ class DataModel extends Model implements \JTableInterface
 			if (!is_array($config['fieldsSkipChecks']))
 			{
 				$config['fieldsSkipChecks'] = explode(',', $config['fieldsSkipChecks']);
-				$config['fieldsSkipChecks'] = array_map(function ($x) { return trim($x); }, $config['fieldsSkipChecks']);
+				$config['fieldsSkipChecks'] = array_map(function ($x) {
+					return trim($x);
+				}, $config['fieldsSkipChecks']);
 			}
 
 			$this->fieldsSkipChecks = $config['fieldsSkipChecks'];
@@ -315,7 +304,7 @@ class DataModel extends Model implements \JTableInterface
 		}
 
 		// Add extra behaviours
-		foreach (array('Created', 'Modified') as $behaviour)
+		foreach (['Created', 'Modified'] as $behaviour)
 		{
 			$this->addBehaviour($behaviour);
 		}
@@ -326,10 +315,12 @@ class DataModel extends Model implements \JTableInterface
 			if (!is_array($config['fillable_fields']))
 			{
 				$config['fillable_fields'] = explode(',', $config['fillable_fields']);
-				$config['fillable_fields'] = array_map(function ($x) { return trim($x); }, $config['fillable_fields']);
+				$config['fillable_fields'] = array_map(function ($x) {
+					return trim($x);
+				}, $config['fillable_fields']);
 			}
 
-			$this->fillable = array();
+			$this->fillable = [];
 			$this->autoFill = true;
 
 			foreach ($config['fillable_fields'] as $field)
@@ -351,10 +342,12 @@ class DataModel extends Model implements \JTableInterface
 			if (!is_array($config['guarded_fields']))
 			{
 				$config['guarded_fields'] = explode(',', $config['guarded_fields']);
-				$config['guarded_fields'] = array_map(function ($x) { return trim($x); }, $config['guarded_fields']);
+				$config['guarded_fields'] = array_map(function ($x) {
+					return trim($x);
+				}, $config['guarded_fields']);
 			}
 
-			$this->guarded = array();
+			$this->guarded  = [];
 			$this->autoFill = true;
 
 			foreach ($config['guarded_fields'] as $field)
@@ -371,21 +364,20 @@ class DataModel extends Model implements \JTableInterface
 		}
 
 		// If we are tracking assets, make sure an access field exists and initially set the default.
-		$asset_id_field	= $this->getFieldAlias('asset_id');
-		$access_field	= $this->getFieldAlias('access');
+		$asset_id_field = $this->getFieldAlias('asset_id');
+		$access_field   = $this->getFieldAlias('access');
 
 		if (array_key_exists($asset_id_field, $this->knownFields))
 		{
-			\JLoader::import('joomla.access.rules');
 			$this->_trackAssets = true;
 		}
 
 		/**
-		if ($this->_trackAssets && array_key_exists($access_field, $this->knownFields) && !($this->getState($access_field, null)))
-		{
-			$this->$access_field = (int) $this->container->platform->getConfig()->get('access');
-		}
-		**/
+		 * if ($this->_trackAssets && array_key_exists($access_field, $this->knownFields) && !($this->getState($access_field, null)))
+		 * {
+		 * $this->$access_field = (int) $this->container->platform->getConfig()->get('access');
+		 * }
+		 **/
 
 		$assetKey = $this->container->componentName . '.' . strtolower($container->inflector->singularize($this->getName()));
 		$this->setAssetKey($assetKey);
@@ -440,7 +432,7 @@ class DataModel extends Model implements \JTableInterface
 					continue;
 				}
 
-				$defaultRelConfig = array(
+				$defaultRelConfig = [
 					'type'              => 'hasOne',
 					'foreignModelClass' => null,
 					'localKey'          => null,
@@ -448,7 +440,7 @@ class DataModel extends Model implements \JTableInterface
 					'pivotTable'        => null,
 					'pivotLocalKey'     => null,
 					'pivotForeignKey'   => null,
-				);
+				];
 
 				$relConfig = array_merge($defaultRelConfig, $relConfig);
 
@@ -462,7 +454,7 @@ class DataModel extends Model implements \JTableInterface
 		foreach ($this->knownFields as $fieldName => $information)
 		{
 			// Initialize only the null or not yet set records
-			if(!isset($this->recordData[$fieldName]))
+			if (!isset($this->recordData[$fieldName]))
 			{
 				$this->recordData[$fieldName] = $information->Default;
 			}
@@ -476,8 +468,8 @@ class DataModel extends Model implements \JTableInterface
 	 * Magic caller. It works like the magic setter and returns ourselves for chaining. If no arguments are passed we'll
 	 * only look for a scope filter.
 	 *
-	 * @param   string $name
-	 * @param   mixed  $arguments
+	 * @param   string  $name
+	 * @param   array   $arguments
 	 *
 	 * @return  static
 	 */
@@ -504,7 +496,7 @@ class DataModel extends Model implements \JTableInterface
 		// Magically map relations to methods, e.g. $this->foobar will return the "foobar" relations' contents
 		if ($this->relationManager->isMagicMethod($name))
 		{
-			return call_user_func_array(array($this->relationManager, $name), $arguments);
+			return call_user_func_array([$this->relationManager, $name], $arguments);
 		}
 
 		// Otherwise call the parent
@@ -512,10 +504,10 @@ class DataModel extends Model implements \JTableInterface
 	}
 
 	/**
-	 * Magic checker on a property. It follows the same logic of the __get magic method, however, if nothing is found, it
-	 * won't return the state of a variable (we are checking if a property is set)
+	 * Magic checker on a property. It follows the same logic of the __get magic method, however, if nothing is found,
+	 * it won't return the state of a variable (we are checking if a property is set)
 	 *
-	 * @param   string  $name   The name of the field to check
+	 * @param   string  $name  The name of the field to check
 	 *
 	 * @return  bool    Is the field set?
 	 */
@@ -527,7 +519,7 @@ class DataModel extends Model implements \JTableInterface
 		if (substr($name, 0, 3) == 'flt')
 		{
 			$isState = true;
-			$name = strtolower(substr($name, 3, 1)) . substr($name, 4);
+			$name    = strtolower(substr($name, 3, 1)) . substr($name, 4);
 		}
 
 		// If $name is a field name, get its value
@@ -559,7 +551,7 @@ class DataModel extends Model implements \JTableInterface
 	 * Tip: You can define custom field getter methods as getFieldNameAttribute, where FieldName is your field's name,
 	 *      in CamelCase (even if the field name itself is in snake_case).
 	 *
-	 * @param   string $name The name of the field / state variable to retrieve
+	 * @param   string  $name  The name of the field / state variable to retrieve
 	 *
 	 * @return  static|mixed
 	 */
@@ -576,7 +568,7 @@ class DataModel extends Model implements \JTableInterface
 		if (substr($name, 0, 3) == 'flt')
 		{
 			$isState = true;
-			$name = strtolower(substr($name, 3, 1)) . substr($name, 4);
+			$name    = strtolower(substr($name, 3, 1)) . substr($name, 4);
 		}
 
 		// If $name is a field name, get its value
@@ -612,8 +604,8 @@ class DataModel extends Model implements \JTableInterface
 	 * Tip: You can define custom field setter methods as setFieldNameAttribute, where FieldName is your field's name,
 	 *      in CamelCase (even if the field name itself is in snake_case).
 	 *
-	 * @param   string $name  The name of the field / scope / state variable to set
-	 * @param   mixed  $value The value to set
+	 * @param   string  $name   The name of the field / scope / state variable to set
+	 * @param   mixed   $value  The value to set
 	 *
 	 * @return  void
 	 */
@@ -625,12 +617,12 @@ class DataModel extends Model implements \JTableInterface
 		if (substr($name, 0, 3) == 'flt')
 		{
 			$isState = true;
-			$name = strtolower(substr($name, 3, 1)) . substr($name, 4);
+			$name    = strtolower(substr($name, 3, 1)) . substr($name, 4);
 		}
 		elseif (substr($name, 0, 5) == 'scope')
 		{
 			$isScope = true;
-			$name = strtolower(substr($name, 5, 1)) . substr($name, 5);
+			$name    = strtolower(substr($name, 5, 1)) . substr($name, 5);
 		}
 
 		// If $name is a field name, set its value
@@ -694,16 +686,16 @@ class DataModel extends Model implements \JTableInterface
 			return $this;
 		}
 
-		$info = (object)array(
+		$info = (object) [
 			'Default' => $default,
-			'Type' => $type,
-			'Null' => 'YES',
-		);
+			'Type'    => $type,
+			'Null'    => 'YES',
+		];
 
 		$this->knownFields[$fieldName] = $info;
 
 		// Initialize only the null or not yet set records
-		if(!isset($this->recordData[$fieldName]))
+		if (!isset($this->recordData[$fieldName]))
 		{
 			$this->recordData[$fieldName] = $default;
 		}
@@ -724,7 +716,7 @@ class DataModel extends Model implements \JTableInterface
 	/**
 	 * Get the columns from a database table.
 	 *
-	 * @param   string $tableName Table name. If null current table is used
+	 * @param   string  $tableName  Table name. If null current table is used
 	 *
 	 * @return  mixed  An array of the field names, or false if an error occurs.
 	 */
@@ -765,12 +757,12 @@ class DataModel extends Model implements \JTableInterface
 			if (!in_array($checkName, static::$tableCache) && preg_match('/[A-Z]/', $prefix) && (substr($name, 0, 3) == '#__'))
 			{
 				$prefixPermutations = $this->getPrefixCasePermutations();
-				$partialCheckName = substr($name, 3);
+				$partialCheckName   = substr($name, 3);
 
 				foreach ($prefixPermutations as $permutatedPrefix)
 				{
 					$checkName = $permutatedPrefix . $partialCheckName;
-					
+
 					if (in_array($checkName, static::$tableCache))
 					{
 						break;
@@ -804,7 +796,7 @@ class DataModel extends Model implements \JTableInterface
 					{
 						if (stristr($field->Default, '\'::timestamp without time zone'))
 						{
-							list ($date,) = explode('::', $field->Default, 2);
+							[$date, ] = explode('::', $field->Default, 2);
 							$field->Default = trim($date, "'");
 						}
 					}
@@ -818,7 +810,7 @@ class DataModel extends Model implements \JTableInterface
 	/**
 	 * Get the database connection associated with this data Model
 	 *
-	 * @return  \JDatabaseDriver
+	 * @return  JDatabaseDriver
 	 */
 	public function getDbo()
 	{
@@ -838,7 +830,7 @@ class DataModel extends Model implements \JTableInterface
 	 */
 	public function getData()
 	{
-		$ret = array();
+		$ret = [];
 
 		foreach ($this->knownFields as $field => $info)
 		{
@@ -872,8 +864,8 @@ class DataModel extends Model implements \JTableInterface
 	 * Alias of getIdFieldName. Used for JTableInterface compatibility.
 	 *
 	 * @return  string  The name of the primary key for the table.
-     *
-     * @codeCoverageIgnore
+	 *
+	 * @codeCoverageIgnore
 	 */
 	public function getKeyName()
 	{
@@ -894,8 +886,8 @@ class DataModel extends Model implements \JTableInterface
 	 * Returns the value of a field. If a field is not set it uses the $default value. Automatically uses magic
 	 * getter variables if required.
 	 *
-	 * @param   string $name    The name of the field to retrieve
-	 * @param   mixed  $default Default value, if the field is not set and doesn't have a getter method
+	 * @param   string  $name     The name of the field to retrieve
+	 * @param   mixed   $default  Default value, if the field is not set and doesn't have a getter method
 	 *
 	 * @return  mixed  The value of the field
 	 */
@@ -922,8 +914,8 @@ class DataModel extends Model implements \JTableInterface
 	/**
 	 * Sets the value of a field.
 	 *
-	 * @param   string $name  The name of the field to set
-	 * @param   mixed  $value The value to set it to
+	 * @param   string  $name   The name of the field to set
+	 * @param   mixed   $value  The value to set it to
 	 *
 	 * @return  void
 	 */
@@ -989,7 +981,7 @@ class DataModel extends Model implements \JTableInterface
 	/**
 	 * Does this model know about a field called $fieldName? Automatically uses aliases when necessary.
 	 *
-	 * @param   string $fieldName Field name to check
+	 * @param   string  $fieldName  Field name to check
 	 *
 	 * @return  boolean  True if the field exists
 	 */
@@ -1003,7 +995,7 @@ class DataModel extends Model implements \JTableInterface
 	/**
 	 * Get the real name of a field name based on its alias. If the field is not aliased $alias is returned
 	 *
-	 * @param   string $alias The field to get an alias for
+	 * @param   string  $alias  The field to get an alias for
 	 *
 	 * @return  string  The real name of the field
 	 */
@@ -1027,11 +1019,11 @@ class DataModel extends Model implements \JTableInterface
 	 *
 	 * @return  array  Array of [relationName => fieldName] arrays
 	 *
-	 * @throws  \FOF30\Model\DataModel\Relation\Exception\RelationNotFound
+	 * @throws  RelationNotFound
 	 */
 	public function getRelationFields()
 	{
-		$fields = array();
+		$fields = [];
 
 		$relationNames = $this->relationManager->getRelationNames();
 
@@ -1085,11 +1077,11 @@ class DataModel extends Model implements \JTableInterface
 		$parts = explode('_', $fieldName);
 		if ((substr($fieldName, -3) != '_id') || (count($parts) < 3))
 		{
-			throw new \RuntimeException("Cannot determine the foreign model for local field '$fieldName'; it does not follow the expected component_model_id convention.");
+			throw new RuntimeException("Cannot determine the foreign model for local field '$fieldName'; it does not follow the expected component_model_id convention.");
 		}
 
 		$fieldName = substr($fieldName, 0, -3);
-		list($component, $modelName) = explode('_', $fieldName, 2);
+		[$component, $modelName] = explode('_', $fieldName, 2);
 		$modelName = $this->container->inflector->camelize($modelName);
 
 		return "$component.$modelName";
@@ -1108,7 +1100,9 @@ class DataModel extends Model implements \JTableInterface
 	 * @param   null|array  $data            [Optional] Data to bind
 	 * @param   string      $orderingFilter  A WHERE clause used to apply table item reordering
 	 * @param   array       $ignore          A list of fields to ignore when binding $data
-	 * @para    boolean     $resetRelations  Should I automatically reset relations if relation-important fields are changed?
+	 *
+	 * @para    boolean     $resetRelations  Should I automatically reset relations if relation-important fields are
+	 *          changed?
 	 *
 	 * @return   static  Self, for chaining
 	 */
@@ -1118,11 +1112,11 @@ class DataModel extends Model implements \JTableInterface
 		$oldPKValue = $this->getId();
 
 		// Call the onBeforeSave event
-		$this->triggerEvent('onBeforeSave', array(&$data));
+		$this->triggerEvent('onBeforeSave', [&$data]);
 
 		// Get the relation to local field map and initialise the relationsAffected array
 		$relationImportantFields = $this->getRelationFields();
-		$dataBeforeBind = array();
+		$dataBeforeBind          = [];
 
 		// If we have relations we keep a copy of the data before bind.
 		if (count($relationImportantFields))
@@ -1155,11 +1149,11 @@ class DataModel extends Model implements \JTableInterface
 		// Insert or update the record. Note that the object we use for insertion / update is the a copy holding
 		// the transformed data.
 		$dataObject = $this->recordDataToDatabaseData();
-		$dataObject = (object)$dataObject;
+		$dataObject = (object) $dataObject;
 
 		if ($isNewRecord)
 		{
-			$this->triggerEvent('onBeforeCreate', array(&$dataObject));
+			$this->triggerEvent('onBeforeCreate', [&$dataObject]);
 
 			// Insert the new record
 			$db->insertObject($this->tableName, $dataObject, $this->idFieldName);
@@ -1177,7 +1171,7 @@ class DataModel extends Model implements \JTableInterface
 		}
 		else
 		{
-			$this->triggerEvent('onBeforeUpdate', array(&$dataObject));
+			$this->triggerEvent('onBeforeUpdate', [&$dataObject]);
 
 			$db->updateObject($this->tableName, $dataObject, $this->idFieldName, true);
 
@@ -1202,7 +1196,7 @@ class DataModel extends Model implements \JTableInterface
 				{
 					if ($records instanceof DataModel)
 					{
-						$records = array($records);
+						$records = [$records];
 					}
 
 					/** @var DataModel $record */
@@ -1218,11 +1212,11 @@ class DataModel extends Model implements \JTableInterface
 		if (count($relationImportantFields) && $resetRelations)
 		{
 			// Since array_diff_assoc doesn't work recursively we have to do it the EXCRUCIATINGLY SLOW WAY. Sad panda :(
-			$keysRecord = (is_array($this->recordData) && !empty($this->recordData)) ? array_keys($this->recordData) : array();
-			$keysBefore = (is_array($dataBeforeBind) && !empty($dataBeforeBind)) ? array_keys($dataBeforeBind) : array();
-			$keysAll = array_merge($keysRecord, $keysBefore);
-			$keysAll = array_unique($keysAll);
-			$modifiedFields = array();
+			$keysRecord     = (is_array($this->recordData) && !empty($this->recordData)) ? array_keys($this->recordData) : [];
+			$keysBefore     = (is_array($dataBeforeBind) && !empty($dataBeforeBind)) ? array_keys($dataBeforeBind) : [];
+			$keysAll        = array_merge($keysRecord, $keysBefore);
+			$keysAll        = array_unique($keysAll);
+			$modifiedFields = [];
 
 			foreach ($keysAll as $key)
 			{
@@ -1240,7 +1234,7 @@ class DataModel extends Model implements \JTableInterface
 
 			if (count($modifiedFields))
 			{
-				$relationsAffected = array();
+				$relationsAffected = [];
 
 				unset($modifiedData);
 
@@ -1277,7 +1271,7 @@ class DataModel extends Model implements \JTableInterface
 		{
 			$this->save();
 		}
-		catch (\Exception $e)
+		catch (Exception $e)
 		{
 			return false;
 		}
@@ -1290,10 +1284,11 @@ class DataModel extends Model implements \JTableInterface
 	 * data, unless you provide a $data array. On top of that, it also saves all specified relations. If $relations is
 	 * null it will save all relations known to this model.
 	 *
-	 * @param   null|array $data           [Optional] Data to bind
-	 * @param   string     $orderingFilter A WHERE clause used to apply table item reordering
-	 * @param   array      $ignore         A list of fields to ignore when binding $data
-	 * @param   array      $relations      Which relations to save with the model's record. Leave null for all relations
+	 * @param   null|array  $data            [Optional] Data to bind
+	 * @param   string      $orderingFilter  A WHERE clause used to apply table item reordering
+	 * @param   array       $ignore          A list of fields to ignore when binding $data
+	 * @param   array       $relations       Which relations to save with the model's record. Leave null for all
+	 *                                       relations
 	 *
 	 * @return static Self, for chaining
 	 */
@@ -1311,7 +1306,7 @@ class DataModel extends Model implements \JTableInterface
 		// Otherwise empty $this->touches completely as we'll be pushing all relations
 		else
 		{
-			$this->touches = array();
+			$this->touches = [];
 		}
 
 		// Save this record
@@ -1350,22 +1345,22 @@ class DataModel extends Model implements \JTableInterface
 	 * be bound to the record data. If you are using aliased fields you may also want to override the
 	 * databaseDataToRecordData method. Generally, it is a BAD idea using JOINs instead of relations.
 	 *
-	 * @param   mixed $data   An associative array or object to bind to the DataModel instance.
-	 * @param   mixed $ignore An optional array or space separated list of properties to ignore while binding.
+	 * @param   mixed  $data    An associative array or object to bind to the DataModel instance.
+	 * @param   mixed  $ignore  An optional array or space separated list of properties to ignore while binding.
 	 *
 	 * @return  static  Self, for chaining
 	 *
-	 * @throws  \InvalidArgumentException
-	 * @throws    \Exception
+	 * @throws  InvalidArgumentException
+	 * @throws    Exception
 	 */
-	public function bind($data, $ignore = array())
+	public function bind($data, $ignore = [])
 	{
-		$this->triggerEvent('onBeforeBind', array(&$data));
+		$this->triggerEvent('onBeforeBind', [&$data]);
 
 		// If the source value is not an array or object return false.
 		if (!is_object($data) && !is_array($data))
 		{
-			throw new \InvalidArgumentException(\JText::sprintf('LIB_FOF_MODEL_ERR_BIND', get_class($this), gettype($data)));
+			throw new InvalidArgumentException(Text::sprintf('LIB_FOF_MODEL_ERR_BIND', get_class($this), gettype($data)));
 		}
 
 		// If the ignore value is a string, explode it over spaces.
@@ -1394,7 +1389,7 @@ class DataModel extends Model implements \JTableInterface
 		// Perform data transformation
 		$this->databaseDataToRecordData();
 
-		$this->triggerEvent('onAfterBind', array($data));
+		$this->triggerEvent('onAfterBind', [$data]);
 
 		return $this;
 	}
@@ -1404,7 +1399,7 @@ class DataModel extends Model implements \JTableInterface
 	 *
 	 * @return  static  Self, for chaining
 	 *
-	 * @throws \RuntimeException  When the data bound to this record is invalid
+	 * @throws RuntimeException  When the data bound to this record is invalid
 	 */
 	public function check()
 	{
@@ -1417,12 +1412,12 @@ class DataModel extends Model implements \JTableInterface
 		$this->triggerEvent('onBeforeCheck');
 
 		// Create a slug if there is a title and an empty slug
-        $slugField  = $this->getFieldAlias('slug');
-        $titleField = $this->getFieldAlias('title');
+		$slugField  = $this->getFieldAlias('slug');
+		$titleField = $this->getFieldAlias('title');
 
 		if ($this->hasField('title') && $this->hasField('slug') && !$this->$slugField)
 		{
-			$this->$slugField = \JApplicationHelper::stringURLSafe($this->$titleField);
+			$this->$slugField = ApplicationHelper::stringURLSafe($this->$titleField);
 		}
 
 		// Special handling of the ordering field
@@ -1453,50 +1448,7 @@ class DataModel extends Model implements \JTableInterface
 				$text = $this->container->componentName . '_' . $this->container->inflector->singularize($this->getName()) . '_ERR_'
 					. $fieldName . '_EMPTY';
 
-				throw new \RuntimeException(\JText::_(strtoupper($text)), 500);
-			}
-		}
-
-		// Server-side form validation
-		$allData = $this->getData();
-		$form = $this->getForm($allData, false);
-
-		if (is_object($form) && $form instanceof Form)
-		{
-			$serverside_validate = strtolower($form->getAttribute('serverside_validate'));
-
-			if (in_array($serverside_validate, array('true', 'yes', '1', 'on')))
-			{
-				$fieldset = $form->getFieldset();
-
-				foreach ($fieldset as $nfield => $fldset)
-				{
-					if (!array_key_exists($nfield, $allData))
-					{
-						$field = $form->getField($fldset->fieldname, $fldset->group);
-						$type  = strtolower($field->type);
-
-						switch ($type)
-						{
-							case 'checkbox':
-								$allData[$nfield] = 0;
-								break;
-
-							default:
-								$allData[$nfield] = '';
-								break;
-						}
-					}
-				}
-
-				try
-				{
-					$this->validateForm($form, $allData);
-				}
-				catch (\Exception $e)
-				{
-					throw new \RuntimeException($e->getMessage(), $e->getCode());
-				}
+				throw new RuntimeException(Text::_(strtoupper($text)), 500);
 			}
 		}
 
@@ -1506,11 +1458,11 @@ class DataModel extends Model implements \JTableInterface
 	/**
 	 * Change the ordering of the records of the table
 	 *
-	 * @param   string $where The WHERE clause of the SQL used to fetch the order
+	 * @param   string  $where  The WHERE clause of the SQL used to fetch the order
 	 *
 	 * @return  static  Self, for chaining
 	 *
-	 * @throws  \UnexpectedValueException
+	 * @throws  UnexpectedValueException
 	 */
 	public function reorder($where = '')
 	{
@@ -1520,7 +1472,7 @@ class DataModel extends Model implements \JTableInterface
 			throw new SpecialColumnMissing(sprintf('%s does not support ordering.', $this->tableName));
 		}
 
-		$this->triggerEvent('onBeforeReorder', array(&$where));
+		$this->triggerEvent('onBeforeReorder', [&$where]);
 
 		$order_field = $this->getFieldAlias('ordering');
 		$k           = $this->getIdFieldName();
@@ -1528,10 +1480,10 @@ class DataModel extends Model implements \JTableInterface
 
 		// Get the primary keys and ordering values for the selection.
 		$query = $db->getQuery(true)
-					->select($db->qn($k) . ', ' . $db->qn($order_field))
-					->from($db->qn($this->getTableName()))
-					->where($db->qn($order_field) . ' >= ' . $db->q(0))
-					->order($db->qn($order_field) . 'ASC, ' . $db->qn($k) . 'ASC');
+			->select($db->qn($k) . ', ' . $db->qn($order_field))
+			->from($db->qn($this->getTableName()))
+			->where($db->qn($order_field) . ' >= ' . $db->q(0))
+			->order($db->qn($order_field) . 'ASC, ' . $db->qn($k) . 'ASC');
 
 		// Setup the extra where and ordering clause data.
 		if ($where)
@@ -1552,9 +1504,9 @@ class DataModel extends Model implements \JTableInterface
 				{
 					// Update the row ordering field.
 					$query = $db->getQuery(true)
-								->update($db->qn($this->getTableName()))
-								->set($db->qn($order_field) . ' = ' . $db->q($i + 1))
-								->where($db->qn($k) . ' = ' . $db->q($row->$k));
+						->update($db->qn($this->getTableName()))
+						->set($db->qn($order_field) . ' = ' . $db->q($i + 1))
+						->where($db->qn($k) . ' = ' . $db->q($row->$k));
 					$db->setQuery($query)->execute();
 				}
 			}
@@ -1569,14 +1521,14 @@ class DataModel extends Model implements \JTableInterface
 	 * Method to move a row in the ordering sequence of a group of rows defined by an SQL WHERE clause.
 	 * Negative numbers move the row up in the sequence and positive numbers move it down.
 	 *
-	 * @param   integer $delta   The direction and magnitude to move the row in the ordering sequence.
-	 * @param   string  $where   WHERE clause to use for limiting the selection of rows to compact the
+	 * @param   integer  $delta  The direction and magnitude to move the row in the ordering sequence.
+	 * @param   string   $where  WHERE clause to use for limiting the selection of rows to compact the
 	 *                           ordering values.
 	 *
 	 * @return  static  Self, for chaining
 	 *
-	 * @throws  \UnexpectedValueException  If the table does not support reordering
-	 * @throws  \RuntimeException  If the record is not loaded
+	 * @throws  UnexpectedValueException  If the table does not support reordering
+	 * @throws  RuntimeException  If the record is not loaded
 	 */
 	public function move($delta, $where = '')
 	{
@@ -1585,7 +1537,7 @@ class DataModel extends Model implements \JTableInterface
 			throw new SpecialColumnMissing(sprintf('%s does not support ordering.', $this->tableName));
 		}
 
-		$this->triggerEvent('onBeforeMove', array(&$delta, &$where));
+		$this->triggerEvent('onBeforeMove', [&$delta, &$where]);
 
 		$ordering_field = $this->getFieldAlias('ordering');
 
@@ -1597,9 +1549,9 @@ class DataModel extends Model implements \JTableInterface
 			return $this;
 		}
 
-		$k = $this->idFieldName;
-		$row = null;
-		$db = $this->getDbo();
+		$k     = $this->idFieldName;
+		$row   = null;
+		$db    = $this->getDbo();
 		$query = $db->getQuery(true);
 
 		// If the table is not loaded, return false
@@ -1609,21 +1561,21 @@ class DataModel extends Model implements \JTableInterface
 		}
 
 		// Select the primary key and ordering values from the table.
-		$query->select(array(
-				$db->qn($this->idFieldName), $db->qn($ordering_field)
-			)
+		$query->select([
+				$db->qn($this->idFieldName), $db->qn($ordering_field),
+			]
 		)->from($db->qn($this->tableName));
 
 		// If the movement delta is negative move the row up.
 		if ($delta < 0)
 		{
-			$query->where($db->qn($ordering_field) . ' < ' . $db->q((int)$this->$ordering_field));
+			$query->where($db->qn($ordering_field) . ' < ' . $db->q((int) $this->$ordering_field));
 			$query->order($db->qn($ordering_field) . ' DESC');
 		}
 		// If the movement delta is positive move the row down.
 		elseif ($delta > 0)
 		{
-			$query->where($db->qn($ordering_field) . ' > ' . $db->q((int)$this->$ordering_field));
+			$query->where($db->qn($ordering_field) . ' > ' . $db->q((int) $this->$ordering_field));
 			$query->order($db->qn($ordering_field) . ' ASC');
 		}
 
@@ -1642,14 +1594,14 @@ class DataModel extends Model implements \JTableInterface
 			// Update the ordering field for this instance to the row's ordering value.
 			$query = $db->getQuery(true)
 				->update($db->qn($this->tableName))
-				->set($db->qn($ordering_field) . ' = ' . $db->q((int)$row->$ordering_field))
+				->set($db->qn($ordering_field) . ' = ' . $db->q((int) $row->$ordering_field))
 				->where($db->qn($k) . ' = ' . $db->q($this->$k));
 			$db->setQuery($query)->execute();
 
 			// Update the ordering field for the row to this instance's ordering value.
 			$query = $db->getQuery(true)
 				->update($db->qn($this->tableName))
-				->set($db->qn($ordering_field) . ' = ' . $db->q((int)$this->$ordering_field))
+				->set($db->qn($ordering_field) . ' = ' . $db->q((int) $this->$ordering_field))
 				->where($db->qn($k) . ' = ' . $db->q($row->$k));
 			$db->setQuery($query)->execute();
 
@@ -1665,8 +1617,8 @@ class DataModel extends Model implements \JTableInterface
 	/**
 	 * Process a large collection of records a few at a time.
 	 *
-	 * @param   integer   $chunkSize How many records to process at once
-	 * @param   callable  $callback  A callable to process each record
+	 * @param   integer   $chunkSize  How many records to process at once
+	 * @param   callable  $callback   A callable to process each record
 	 *
 	 * @return  static  Self, for chaining
 	 */
@@ -1699,12 +1651,12 @@ class DataModel extends Model implements \JTableInterface
 	public function count()
 	{
 		// Get a "count all" query
-		$db = $this->getDbo();
+		$db    = $this->getDbo();
 		$query = $this->buildQuery(true);
 		$query->clear('select')->clear('order')->select('COUNT(*)');
 
 		// Run the "before build query" hook and behaviours
-		$this->triggerEvent('onBuildCountQuery', array(&$query));
+		$this->triggerEvent('onBuildCountQuery', [&$query]);
 
 		$total = $db->setQuery($query)->loadResult();
 
@@ -1714,20 +1666,20 @@ class DataModel extends Model implements \JTableInterface
 	/**
 	 * Build the query to fetch data from the database
 	 *
-	 * @param   boolean $overrideLimits Should I override limits
+	 * @param   boolean  $overrideLimits  Should I override limits
 	 *
-	 * @return  \JDatabaseQuery  The database query to use
+	 * @return  JDatabaseQuery  The database query to use
 	 */
 	public function buildQuery($overrideLimits = false)
 	{
 		// Get a "select all" query
-		$db = $this->getDbo();
+		$db    = $this->getDbo();
 		$query = $db->getQuery(true)
 			->select('*')
 			->from($this->getTableName());
 
 		// Run the "before build query" hook and behaviours
-		$this->triggerEvent('onBeforeBuildQuery', array(&$query, $overrideLimits));
+		$this->triggerEvent('onBeforeBuildQuery', [&$query, $overrideLimits]);
 
 		// Apply custom WHERE clauses
 		if (count($this->whereClauses))
@@ -1750,7 +1702,7 @@ class DataModel extends Model implements \JTableInterface
 
 		$dir = strtoupper($this->getState('filter_order_Dir', null, 'cmd'));
 
-		if (!in_array($dir, array('ASC', 'DESC')))
+		if (!in_array($dir, ['ASC', 'DESC']))
 		{
 			$dir = 'ASC';
 			$this->setState('filter_order_Dir', $dir);
@@ -1759,7 +1711,7 @@ class DataModel extends Model implements \JTableInterface
 		$query->order($order . ' ' . $dir);
 
 		// Run the "before after query" hook and behaviours
-		$this->triggerEvent('onAfterBuildQuery', array(&$query, $overrideLimits));
+		$this->triggerEvent('onAfterBuildQuery', [&$query, $overrideLimits]);
 
 		return $query;
 	}
@@ -1767,9 +1719,9 @@ class DataModel extends Model implements \JTableInterface
 	/**
 	 * Returns a DataCollection iterator based on your currently set Model state
 	 *
-	 * @param   boolean $overrideLimits Should I ignore limits set in the Model?
-	 * @param   integer $limitstart     How many items to skip from the start, only when $overrideLimits = true
-	 * @param   integer $limit          How many items to return, only when $overrideLimits = true
+	 * @param   boolean  $overrideLimits  Should I ignore limits set in the Model?
+	 * @param   integer  $limitstart      How many items to skip from the start, only when $overrideLimits = true
+	 * @param   integer  $limit           How many items to return, only when $overrideLimits = true
 	 *
 	 * @return  DataCollection  The data collection
 	 */
@@ -1778,7 +1730,7 @@ class DataModel extends Model implements \JTableInterface
 		if (!$overrideLimits)
 		{
 			$limitstart = $this->getState('limitstart', 0);
-			$limit = $this->getState('limit', 0);
+			$limit      = $this->getState('limit', 0);
 		}
 
 		$dataCollection = DataCollection::make($this->getItemsArray($limitstart, $limit, $overrideLimits));
@@ -1800,7 +1752,7 @@ class DataModel extends Model implements \JTableInterface
 	public function &getItemsArray($limitstart = 0, $limit = 0, $overrideLimits = false)
 	{
 		$itemsTemp = $this->getRawDataArray($limitstart, $limit, $overrideLimits);
-		$items = array();
+		$items     = [];
 
 		while (!empty($itemsTemp))
 		{
@@ -1814,7 +1766,7 @@ class DataModel extends Model implements \JTableInterface
 			$item->relationManager->rebase($item);
 		}
 
-		$this->triggerEvent('onAfterGetItemsArray', array(&$items));
+		$this->triggerEvent('onAfterGetItemsArray', [&$items]);
 
 		return $items;
 	}
@@ -1831,7 +1783,7 @@ class DataModel extends Model implements \JTableInterface
 	public function &getRawDataArray($limitstart = 0, $limit = 0, $overrideLimits = false)
 	{
 		$limitstart = max($limitstart, 0);
-		$limit = max($limit, 0);
+		$limit      = max($limit, 0);
 
 		$query = $this->buildQuery($overrideLimits);
 
@@ -1845,8 +1797,10 @@ class DataModel extends Model implements \JTableInterface
 	/**
 	 * Eager loads the provided relations and assigns their data to a data collection
 	 *
-	 * @param    DataCollection  $dataCollection  The data collection on which the eager loaded relations will be applied
-	 * @param    array|null      $relations       The relations to eager load. Leave empty to use the already defined relations
+	 * @param   DataCollection  $dataCollection  The data collection on which the eager loaded relations will be
+	 *                                           applied
+	 * @param   array|null      $relations       The relations to eager load. Leave empty to use the already defined
+	 *                                           relations
 	 *
 	 * @return static for chaining
 	 */
@@ -1892,7 +1846,7 @@ class DataModel extends Model implements \JTableInterface
 	 */
 	public function archive()
 	{
-		if(!$this->getId())
+		if (!$this->getId())
 		{
 			throw new RecordNotLoaded("Can't archive a not loaded DataModel");
 		}
@@ -1902,7 +1856,7 @@ class DataModel extends Model implements \JTableInterface
 			return $this;
 		}
 
-		$this->triggerEvent('onBeforeArchive', array());
+		$this->triggerEvent('onBeforeArchive', []);
 
 		$enabled = $this->getFieldAlias('enabled');
 
@@ -1919,7 +1873,7 @@ class DataModel extends Model implements \JTableInterface
 	 * is loaded before trying to trash it. Unlike a hard delete, trashing is a "soft delete", only setting the enabled
 	 * field to -2.
 	 *
-	 * @param   mixed $id Primary key (id field) value
+	 * @param   mixed  $id  Primary key (id field) value
 	 *
 	 * @return  static  for chaining
 	 */
@@ -1932,7 +1886,7 @@ class DataModel extends Model implements \JTableInterface
 
 		$id = $this->getId();
 
-		if(!$id)
+		if (!$id)
 		{
 			throw new RecordNotLoaded("Can't trash a not loaded DataModel");
 		}
@@ -1942,13 +1896,13 @@ class DataModel extends Model implements \JTableInterface
 			throw new SpecialColumnMissing("DataModel::trash method needs an 'enabled' field");
 		}
 
-		$this->triggerEvent('onBeforeTrash', array(&$id));
+		$this->triggerEvent('onBeforeTrash', [&$id]);
 
-		$enabled = $this->getFieldAlias('enabled');
+		$enabled        = $this->getFieldAlias('enabled');
 		$this->$enabled = -2;
 		$this->save();
 
-		$this->triggerEvent('onAfterTrash', array(&$id));
+		$this->triggerEvent('onAfterTrash', [&$id]);
 
 		return $this;
 	}
@@ -1957,13 +1911,13 @@ class DataModel extends Model implements \JTableInterface
 	 * Change the publish state of a record. By default it will set it to 1 (published) unless you specify a different
 	 * value.
 	 *
-	 * @param int $state The publish state. Default: 1 (published).
+	 * @param   int  $state  The publish state. Default: 1 (published).
 	 *
 	 * @return   static  For chaining
 	 */
 	public function publish($state = 1)
 	{
-		if(!$this->getId())
+		if (!$this->getId())
 		{
 			throw new RecordNotLoaded("Can't change the state of a not loaded DataModel");
 		}
@@ -1973,7 +1927,7 @@ class DataModel extends Model implements \JTableInterface
 			return $this;
 		}
 
-		$this->triggerEvent('onBeforePublish', array());
+		$this->triggerEvent('onBeforePublish', []);
 
 		$enabled = $this->getFieldAlias('enabled');
 
@@ -1992,7 +1946,7 @@ class DataModel extends Model implements \JTableInterface
 	 */
 	public function unpublish()
 	{
-		if(!$this->getId())
+		if (!$this->getId())
 		{
 			throw new RecordNotLoaded("Can't unpublish a not loaded DataModel");
 		}
@@ -2002,7 +1956,7 @@ class DataModel extends Model implements \JTableInterface
 			return $this;
 		}
 
-		$this->triggerEvent('onBeforeUnpublish', array());
+		$this->triggerEvent('onBeforeUnpublish', []);
 
 		$enabled = $this->getFieldAlias('enabled');
 
@@ -2019,7 +1973,7 @@ class DataModel extends Model implements \JTableInterface
 	 * record is loaded before trying to untrash it. Please note that enabled is set to 0 (unpublished) when you untrash
 	 * an item.
 	 *
-	 * @param   mixed $id Primary key (id field) value
+	 * @param   mixed  $id  Primary key (id field) value
 	 *
 	 * @return  static  for chaining
 	 */
@@ -2037,19 +1991,19 @@ class DataModel extends Model implements \JTableInterface
 
 		$id = $this->getId();
 
-		if(!$id)
+		if (!$id)
 		{
 			throw new RecordNotLoaded("Can't change the state of a not loaded DataModel");
 		}
 
-		$this->triggerEvent('onBeforeRestore', array(&$id));
+		$this->triggerEvent('onBeforeRestore', [&$id]);
 
 		$enabled = $this->getFieldAlias('enabled');
 
 		$this->$enabled = 0;
 		$this->save();
 
-		$this->triggerEvent('onAfterRestore', array(&$id));
+		$this->triggerEvent('onAfterRestore', [&$id]);
 
 		return $this;
 	}
@@ -2058,7 +2012,8 @@ class DataModel extends Model implements \JTableInterface
 	 * Creates a copy of the current record. After the copy is performed, the data model contains the data of the new
 	 * record.
 	 *
-	 * @param   array|DataModel  An associative array or object to bind to the DataModel instance. Allows you to override values on the copied object.
+	 * @param   array|DataModel  An associative array or object to bind to the DataModel instance. Allows you to
+	 *                              override values on the copied object.
 	 *
 	 * @return   static
 	 */
@@ -2100,7 +2055,7 @@ class DataModel extends Model implements \JTableInterface
 
 		$result = $this->save($data);
 
-		$this->triggerEvent('onAfterCopy', array(&$result));
+		$this->triggerEvent('onAfterCopy', [&$result]);
 
 		return $result;
 	}
@@ -2149,26 +2104,24 @@ class DataModel extends Model implements \JTableInterface
 		}
 
 		// Get the component privileges
-		$platform = $this->container->platform;
+		$platform  = $this->container->platform;
 		$component = $this->container->componentName;
 
-		$privileges = array
-		(
-			'editown'	 => $platform->authorise('core.edit.own'  , $component),
-			'editstate'	 => $platform->authorise('core.edit.state', $component),
-			'admin'	     => $platform->authorise('core.admin'    , $component),
-			'manage'	 => $platform->authorise('core.manage'    , $component),
-		);
+		$privileges = [
+			'editown'   => $platform->authorise('core.edit.own', $component),
+			'editstate' => $platform->authorise('core.edit.state', $component),
+			'admin'     => $platform->authorise('core.admin', $component),
+			'manage'    => $platform->authorise('core.manage', $component),
+		];
 
 		// If we are trackign assets get the item's privileges
 		if ($this->isAssetsTracked())
 		{
-			$assetKey = $this->getAssetKey();
-			$assetPrivileges = array
-			(
-				'editown'	 => $platform->authorise('core.edit.own'  , $assetKey),
-				'editstate'	 => $platform->authorise('core.edit.state', $assetKey),
-			);
+			$assetKey        = $this->getAssetKey();
+			$assetPrivileges = [
+				'editown'   => $platform->authorise('core.edit.own', $assetKey),
+				'editstate' => $platform->authorise('core.edit.state', $assetKey),
+			];
 
 			foreach ($assetPrivileges as $k => $v)
 			{
@@ -2202,15 +2155,15 @@ class DataModel extends Model implements \JTableInterface
 	/**
 	 * Reset the record data
 	 *
-	 * @param   boolean $useDefaults    Should I use the default values? Default: yes
-	 * @param   boolean $resetRelations Should I reset the relations too? Default: no
+	 * @param   boolean  $useDefaults     Should I use the default values? Default: yes
+	 * @param   boolean  $resetRelations  Should I reset the relations too? Default: no
 	 *
 	 * @return  static  Self, for chaining
 	 */
 	public function reset($useDefaults = true, $resetRelations = false)
 	{
-		$this->recordData = array();
-		$this->whereClauses = array();
+		$this->recordData   = [];
+		$this->whereClauses = [];
 
 		foreach ($this->knownFields as $fieldName => $information)
 		{
@@ -2227,12 +2180,12 @@ class DataModel extends Model implements \JTableInterface
 		if ($resetRelations)
 		{
 			$this->relationManager->resetRelationData();
-			$this->eagerRelations = array();
+			$this->eagerRelations = [];
 		}
 
-		$this->relationFilters = array();
+		$this->relationFilters = [];
 
-		$this->triggerEvent('onAfterReset', array($useDefaults, $resetRelations));
+		$this->triggerEvent('onAfterReset', [$useDefaults, $resetRelations]);
 
 		return $this;
 	}
@@ -2242,7 +2195,7 @@ class DataModel extends Model implements \JTableInterface
 	 * enabled to -2 whereas a hard delete removes the data from the database. If you want to force a specific behaviour
 	 * directly call trash() for a soft delete or forceDelete() for a hard delete.
 	 *
-	 * @param   mixed $id Primary key (id field) value
+	 * @param   mixed  $id  Primary key (id field) value
 	 *
 	 * @return  static  for chaining
 	 */
@@ -2262,7 +2215,7 @@ class DataModel extends Model implements \JTableInterface
 	 * Delete a record, either the currently loaded one or the one specified in $id. If an $id is specified that record
 	 * is loaded before trying to delete it. In the end the data model is reset.
 	 *
-	 * @param   mixed $id Primary key (id field) value
+	 * @param   mixed  $id  Primary key (id field) value
 	 *
 	 * @return  static  for chaining
 	 */
@@ -2275,12 +2228,12 @@ class DataModel extends Model implements \JTableInterface
 
 		$id = $this->getId();
 
-		if(!$id)
+		if (!$id)
 		{
 			throw new RecordNotLoaded("Can't delete a not loaded DataModel object");
 		}
 
-		$this->triggerEvent('onBeforeDelete', array(&$id));
+		$this->triggerEvent('onBeforeDelete', [&$id]);
 
 		$db = $this->getDbo();
 
@@ -2290,7 +2243,7 @@ class DataModel extends Model implements \JTableInterface
 			->where($db->qn($this->idFieldName) . ' = ' . $db->q($id));
 		$db->setQuery($query)->execute();
 
-		$this->triggerEvent('onAfterDelete', array(&$id));
+		$this->triggerEvent('onAfterDelete', [&$id]);
 
 		$this->reset();
 
@@ -2307,7 +2260,7 @@ class DataModel extends Model implements \JTableInterface
 	 *
 	 * @return  void
 	 *
-	 * @throws  \RuntimeException  If you should not delete the record (the message tells you why)
+	 * @throws  RuntimeException  If you should not delete the record (the message tells you why)
 	 */
 	public function canDelete($oid = null, $joins = null)
 	{
@@ -2318,41 +2271,41 @@ class DataModel extends Model implements \JTableInterface
 			$this->$pkField = intval($oid);
 		}
 
-        if(!$this->$pkField)
-        {
-            throw new \InvalidArgumentException('Master table should be loaded or an ID should be passed');
-        }
+		if (!$this->$pkField)
+		{
+			throw new InvalidArgumentException('Master table should be loaded or an ID should be passed');
+		}
 
 		if (is_array($joins))
 		{
 			$db      = $this->getDbo();
 			$query   = $db->getQuery(true)
-			              ->select($db->qn('master') . '.' . $db->qn($pkField))
-			              ->from($db->qn($this->tableName) . ' AS ' . $db->qn('master'));
+				->select($db->qn('master') . '.' . $db->qn($pkField))
+				->from($db->qn($this->tableName) . ' AS ' . $db->qn('master'));
 			$tableNo = 0;
 
 			foreach ($joins as $table)
 			{
-                // Sanity check on passed array
-                $check  = array('idfield', 'idalias', 'name', 'joinfield', 'label');
-                $result = array_intersect($check, array_keys($table));
+				// Sanity check on passed array
+				$check  = ['idfield', 'idalias', 'name', 'joinfield', 'label'];
+				$result = array_intersect($check, array_keys($table));
 
-                if(count($result) != count($check))
-                {
-                    throw new \InvalidArgumentException('Join array missing some keys, please check the documentation');
-                }
+				if (count($result) != count($check))
+				{
+					throw new InvalidArgumentException('Join array missing some keys, please check the documentation');
+				}
 
 				$tableNo++;
 				$query->select(
-					array(
+					[
 						'COUNT(DISTINCT ' . $db->qn('t' . $tableNo) .
-						'.' . $db->qn($table['idfield']) . ') AS ' . $db->qn($table['idalias'])
-					)
+						'.' . $db->qn($table['idfield']) . ') AS ' . $db->qn($table['idalias']),
+					]
 				);
 				$query->join('LEFT', $db->qn($table['name']) .
-				                     ' AS ' . $db->qn('t' . $tableNo) .
-				                     ' ON ' . $db->qn('t' . $tableNo) . '.' . $db->qn($table['joinfield']) .
-				                     ' = ' . $db->qn('master') . '.' . $db->qn($pkField)
+					' AS ' . $db->qn('t' . $tableNo) .
+					' ON ' . $db->qn('t' . $tableNo) . '.' . $db->qn($table['joinfield']) .
+					' = ' . $db->qn('master') . '.' . $db->qn($pkField)
 				);
 			}
 
@@ -2362,7 +2315,7 @@ class DataModel extends Model implements \JTableInterface
 
 			$obj = $this->getDbo()->loadObject();
 
-			$msg = array();
+			$msg = [];
 			$i   = 0;
 
 			foreach ($joins as $table)
@@ -2371,7 +2324,7 @@ class DataModel extends Model implements \JTableInterface
 
 				if ($obj->$pkField > 0)
 				{
-					$msg[] = \JText::_($table['label']);
+					$msg[] = Text::_($table['label']);
 				}
 
 				$i++;
@@ -2381,7 +2334,7 @@ class DataModel extends Model implements \JTableInterface
 			{
 				$option  = $this->container->componentName;
 				$comName = $this->container->bareComponentName;
-				$tbl = $this->getTableName();
+				$tbl     = $this->getTableName();
 				$tview   = str_replace('#__' . $comName . '_', '', $tbl);
 				$prefix  = $option . '_' . $tview . '_NODELETE_';
 
@@ -2389,12 +2342,12 @@ class DataModel extends Model implements \JTableInterface
 
 				foreach ($msg as $key)
 				{
-					$message .= '<li>'.\JText::_(strtoupper($prefix . $key)).'</li>';
+					$message .= '<li>' . Text::_(strtoupper($prefix . $key)) . '</li>';
 				}
 
 				$message .= '</ul>';
 
-				throw new \RuntimeException($message);
+				throw new RuntimeException($message);
 			}
 		}
 	}
@@ -2402,20 +2355,20 @@ class DataModel extends Model implements \JTableInterface
 	/**
 	 * Find and load a single record based on the provided key values. If the record is not found an exception is thrown
 	 *
-	 * @param   array|mixed $keys   An optional primary key value to load the row by, or an array of fields to match.
+	 * @param   array|mixed  $keys  An optional primary key value to load the row by, or an array of fields to match.
 	 *                              If not set the "id" state variable or, if empty, the identity column's value is used
 	 *
 	 * @return  static  Self, for chaining
 	 *
-	 * @throws  \RuntimeException  When the row is not found
+	 * @throws  RuntimeException  When the row is not found
 	 */
 	public function findOrFail($keys = null)
 	{
 		$this->find($keys);
 
-        // We have to assign the value, since empty() is not triggering the __get magic method
-        // http://stackoverflow.com/questions/2045791/php-empty-on-get-accessor
-        $value = $this->getId();
+		// We have to assign the value, since empty() is not triggering the __get magic method
+		// http://stackoverflow.com/questions/2045791/php-empty-on-get-accessor
+		$value = $this->getId();
 
 		if (empty($value))
 		{
@@ -2428,16 +2381,16 @@ class DataModel extends Model implements \JTableInterface
 	/**
 	 * Method to load a row from the database by primary key. Used for JTableInterface compatibility.
 	 *
-	 * @param   mixed    $keys   An optional primary key value to load the row by, or an array of fields to match.  If not
-	 *                           set the instance property value is used.
+	 * @param   mixed    $keys   An optional primary key value to load the row by, or an array of fields to match.  If
+	 *                           not set the instance property value is used.
 	 * @param   boolean  $reset  True to reset the default values before loading the new row.
 	 *
 	 * @return  boolean  True if successful. False if row not found.
 	 *
+	 * @throws  RuntimeException
+	 * @throws  UnexpectedValueException
 	 * @link    http://docs.joomla.org/JTable/load
 	 * @since   3.2
-	 * @throws  \RuntimeException
-	 * @throws  \UnexpectedValueException
 	 */
 	public function load($keys = null, $reset = true)
 	{
@@ -2450,7 +2403,7 @@ class DataModel extends Model implements \JTableInterface
 		{
 			$this->findOrFail($keys);
 		}
-		catch (\Exception $e)
+		catch (Exception $e)
 		{
 			return false;
 		}
@@ -2461,7 +2414,7 @@ class DataModel extends Model implements \JTableInterface
 	/**
 	 * Find and load a single record based on the provided key values
 	 *
-	 * @param   array|mixed $keys   An optional primary key value to load the row by, or an array of fields to match.
+	 * @param   array|mixed  $keys  An optional primary key value to load the row by, or an array of fields to match.
 	 *                              If not set the "id" state variable or, if empty, the identity column's value is used
 	 *
 	 * @return  static  Self, for chaining
@@ -2469,7 +2422,7 @@ class DataModel extends Model implements \JTableInterface
 	public function find($keys = null)
 	{
 		// Execute the onBeforeLoad event
-		$this->triggerEvent('onBeforeLoad', array(&$keys));
+		$this->triggerEvent('onBeforeLoad', [&$keys]);
 
 		// If we are not given any keys, try to get the ID from the state or the table data
 		if (empty($keys))
@@ -2483,34 +2436,34 @@ class DataModel extends Model implements \JTableInterface
 
 			if (empty($id))
 			{
-				$this->triggerEvent('onAfterLoad', array(false, &$keys));
+				$this->triggerEvent('onAfterLoad', [false, &$keys]);
 
 				$this->reset();
 
 				return $this;
 			}
 
-			$keys = array($this->idFieldName => $id);
+			$keys = [$this->idFieldName => $id];
 		}
 		elseif (!is_array($keys))
 		{
 			if (empty($keys))
 			{
-				$this->triggerEvent('onAfterLoad', array(false, &$keys));
+				$this->triggerEvent('onAfterLoad', [false, &$keys]);
 
 				$this->reset();
 
 				return $this;
 			}
 
-			$keys = array($this->idFieldName => $keys);
+			$keys = [$this->idFieldName => $keys];
 		}
 
 		// Reset the table
 		$this->reset();
 
 		// Get the query
-		$db = $this->getDbo();
+		$db    = $this->getDbo();
 		$query = $db->getQuery(true)
 			->select('*')
 			->from($db->qn($this->tableName));
@@ -2536,14 +2489,14 @@ class DataModel extends Model implements \JTableInterface
 		{
 			$row = $db->loadAssoc();
 		}
-		catch (\Exception $e)
+		catch (Exception $e)
 		{
 			$row = null;
 		}
 
 		if (empty($row))
 		{
-			$this->triggerEvent('onAfterLoad', array(false, &$keys));
+			$this->triggerEvent('onAfterLoad', [false, &$keys]);
 
 			return $this;
 		}
@@ -2554,7 +2507,7 @@ class DataModel extends Model implements \JTableInterface
 		$this->relationManager->rebase($this);
 
 		// Execute the onAfterLoad event
-		$this->triggerEvent('onAfterLoad', array(true, &$keys));
+		$this->triggerEvent('onAfterLoad', [true, &$keys]);
 
 		return $this;
 	}
@@ -2562,7 +2515,7 @@ class DataModel extends Model implements \JTableInterface
 	/**
 	 * Create a new record with the provided data
 	 *
-	 * @param   array $data The data to use in the new record
+	 * @param   array  $data  The data to use in the new record
 	 *
 	 * @return  static  Self, for chaining
 	 */
@@ -2574,7 +2527,7 @@ class DataModel extends Model implements \JTableInterface
 	/**
 	 * Return the first item found or create a new one based on the provided $data
 	 *
-	 * @param   array $data Data for the newly created item
+	 * @param   array  $data  Data for the newly created item
 	 *
 	 * @return  static
 	 */
@@ -2596,7 +2549,7 @@ class DataModel extends Model implements \JTableInterface
 	 *
 	 * @return  static
 	 *
-	 * @throws  \RuntimeException
+	 * @throws  RuntimeException
 	 */
 	public function firstOrFail()
 	{
@@ -2638,17 +2591,17 @@ class DataModel extends Model implements \JTableInterface
 	 * modelName            is the model's name, first character uppercase, e.g. Baz
 	 * behaviourName        is the $behaviour parameter, first character uppercase, e.g. Something
 	 *
-	 * @param   string $behaviour The behaviour's name
+	 * @param   string  $behaviour  The behaviour's name
 	 *
 	 * @return  static  Self, for chaining
 	 */
 	public function addBehaviour($behaviour)
 	{
-		$prefixes = array(
+		$prefixes = [
 			$this->container->getNamespacePrefix() . 'Model\\Behaviour\\' . ucfirst($this->getName()),
 			$this->container->getNamespacePrefix() . 'Model\\Behaviour',
 			'\\FOF30\\Model\\DataModel\\Behaviour',
-		);
+		];
 
 		foreach ($prefixes as $prefix)
 		{
@@ -2677,17 +2630,17 @@ class DataModel extends Model implements \JTableInterface
 	 * modelName            is the model's name, first character uppercase, e.g. Baz
 	 * behaviourName        is the $behaviour parameter, first character uppercase, e.g. Something
 	 *
-	 * @param   string $behaviour The behaviour's name
+	 * @param   string  $behaviour  The behaviour's name
 	 *
 	 * @return  static  Self, for chaining
 	 */
 	public function removeBehaviour($behaviour)
 	{
-		$prefixes = array(
+		$prefixes = [
 			$this->container->getNamespacePrefix() . 'Model\\Behaviour\\' . ucfirst($this->getName()),
 			$this->container->getNamespacePrefix() . 'Model\\Behaviour',
 			'\\FOF30\\Model\\DataModel\\Behaviour',
-		);
+		];
 
 		foreach ($prefixes as $prefix)
 		{
@@ -2722,8 +2675,8 @@ class DataModel extends Model implements \JTableInterface
 	 * Set the field and direction of ordering for the query returned by buildQuery.
 	 * Alias of $this->setState('filter_order', $fieldName) and $this->setState('filter_order_Dir', $direction)
 	 *
-	 * @param   string $fieldName The field name to order by
-	 * @param   string $direction The direction to order by (ASC for ascending or DESC for descending)
+	 * @param   string  $fieldName  The field name to order by
+	 * @param   string  $direction  The direction to order by (ASC for ascending or DESC for descending)
 	 *
 	 * @return  static  For chaining
 	 */
@@ -2731,7 +2684,7 @@ class DataModel extends Model implements \JTableInterface
 	{
 		$direction = strtoupper($direction);
 
-		if (!in_array($direction, array('ASC', 'DESC')))
+		if (!in_array($direction, ['ASC', 'DESC']))
 		{
 			$direction = 'ASC';
 		}
@@ -2746,14 +2699,14 @@ class DataModel extends Model implements \JTableInterface
 	 * Set the limitStart for the query, i.e. how many records to skip.
 	 * Alias of $this->setState('limitstart', $limitStart);
 	 *
-	 * @param   integer $limitStart Records to skip from the start
+	 * @param   integer  $limitStart  Records to skip from the start
 	 *
 	 * @return  static  For chaining
 	 */
 	public function skip($limitStart = null)
 	{
 		// Only positive integers are allowed
-		if(!is_int($limitStart) || $limitStart < 0 || !$limitStart)
+		if (!is_int($limitStart) || $limitStart < 0 || !$limitStart)
 		{
 			$limitStart = 0;
 		}
@@ -2767,14 +2720,14 @@ class DataModel extends Model implements \JTableInterface
 	 * Set the limit for the query, i.e. how many records to return.
 	 * Alias of $this->setState('limit', $limit);
 	 *
-	 * @param   integer $limit Maximum number of records to return
+	 * @param   integer  $limit  Maximum number of records to return
 	 *
 	 * @return  static  For chaining
 	 */
 	public function take($limit = null)
 	{
 		// Only positive integers are allowed
-		if(!is_int($limit) || $limit < 0 || !$limit)
+		if (!is_int($limit) || $limit < 0 || !$limit)
 		{
 			$limit = 0;
 		}
@@ -2797,7 +2750,7 @@ class DataModel extends Model implements \JTableInterface
 	/**
 	 * Returns the record's data as a JSON string
 	 *
-	 * @param   boolean $prettyPrint Should I format the JSON for pretty printing
+	 * @param   boolean  $prettyPrint  Should I format the JSON for pretty printing
 	 *
 	 * @return  string
 	 */
@@ -2818,13 +2771,13 @@ class DataModel extends Model implements \JTableInterface
 	/**
 	 * Touch a record, updating its modified_on and/or modified_by columns
 	 *
-	 * @param   integer $userId Optional user ID of the user touching the record
+	 * @param   integer  $userId  Optional user ID of the user touching the record
 	 *
 	 * @return  static  Self, for chaining
 	 */
 	public function touch($userId = null)
 	{
-		if(!$this->getId())
+		if (!$this->getId())
 		{
 			throw new RecordNotLoaded("Can't touch a not loaded DataModel");
 		}
@@ -2834,7 +2787,7 @@ class DataModel extends Model implements \JTableInterface
 			return $this;
 		}
 
-		$db = $this->getDbo();
+		$db   = $this->getDbo();
 		$date = new Date();
 
 		// Update the created_on / modified_on
@@ -2864,13 +2817,13 @@ class DataModel extends Model implements \JTableInterface
 	/**
 	 * Lock a record by setting its locked_on and/or locked_by columns
 	 *
-	 * @param   integer $userId
+	 * @param   integer  $userId
 	 *
 	 * @return  static  Self, for chaining
 	 */
 	public function lock($userId = null)
 	{
-		if(!$this->getId())
+		if (!$this->getId())
 		{
 			throw new CannotLockNotLoadedRecord;
 		}
@@ -2880,7 +2833,7 @@ class DataModel extends Model implements \JTableInterface
 			return $this;
 		}
 
-		$this->triggerEvent('onBeforeLock', array());
+		$this->triggerEvent('onBeforeLock', []);
 
 		$db = $this->getDbo();
 
@@ -2916,7 +2869,7 @@ class DataModel extends Model implements \JTableInterface
 	 */
 	public function unlock()
 	{
-		if(!$this->getId())
+		if (!$this->getId())
 		{
 			throw new RecordNotLoaded("Can't unlock a not loaded DataModel");
 		}
@@ -2926,7 +2879,7 @@ class DataModel extends Model implements \JTableInterface
 			return $this;
 		}
 
-		$this->triggerEvent('onBeforeUnlock', array());
+		$this->triggerEvent('onBeforeUnlock', []);
 
 		$db = $this->getDbo();
 
@@ -2989,7 +2942,7 @@ class DataModel extends Model implements \JTableInterface
 			}
 		}
 
-		$allowedUsers = array(0);
+		$allowedUsers = [0];
 
 		if (!empty($userId))
 		{
@@ -3007,9 +2960,10 @@ class DataModel extends Model implements \JTableInterface
 	/**
 	 * Automatically uses the Filters behaviour to filter records in the model based on your criteria.
 	 *
-	 * @param   string $fieldName The field name to filter on
-	 * @param   string $method    The filtering method, e.g. <>, =, != and so on
-	 * @param   mixed  $values    The value you're filtering on. Some filters (e.g. interval or between) require an array of values
+	 * @param   string  $fieldName  The field name to filter on
+	 * @param   string  $method     The filtering method, e.g. <>, =, != and so on
+	 * @param   mixed   $values     The value you're filtering on. Some filters (e.g. interval or between) require an
+	 *                              array of values
 	 *
 	 * @return  static  For chaining
 	 */
@@ -3025,53 +2979,53 @@ class DataModel extends Model implements \JTableInterface
 		// be used inside the Filters behaviour
 		// -- Let's not do this. The Filters behaviour works just fine with the regular field name!
 		/**
-		if ($fieldName == $this->getIdFieldName())
-		{
-			$fieldName = 'id';
-		}
-		**/
+		 * if ($fieldName == $this->getIdFieldName())
+		 * {
+		 * $fieldName = 'id';
+		 * }
+		 **/
 
-		$options = array(
+		$options = [
 			'method' => $method,
-			'value'  => $values
-		);
+			'value'  => $values,
+		];
 
 		// Handle method aliases
 		switch ($method)
 		{
 			case '<>':
-				$options['method'] = 'search';
+				$options['method']   = 'search';
 				$options['operator'] = '!=';
 				break;
 
 			case 'lt':
-				$options['method'] = 'search';
+				$options['method']   = 'search';
 				$options['operator'] = '<';
 				break;
 
 			case 'le':
-				$options['method'] = 'search';
+				$options['method']   = 'search';
 				$options['operator'] = '<=';
 				break;
 
 			case 'gt':
-				$options['method'] = 'search';
+				$options['method']   = 'search';
 				$options['operator'] = '>';
 				break;
 
 			case 'ge':
-				$options['method'] = 'search';
+				$options['method']   = 'search';
 				$options['operator'] = '>=';
 				break;
 
 			case 'eq':
-				$options['method'] = 'search';
+				$options['method']   = 'search';
 				$options['operator'] = '=';
 				break;
 
 			case 'neq':
 			case 'ne':
-				$options['method'] = 'search';
+				$options['method']   = 'search';
 				$options['operator'] = '!=';
 				break;
 
@@ -3085,7 +3039,7 @@ class DataModel extends Model implements \JTableInterface
 			case '!>=':
 			case '!=':
 			case '=':
-				$options['method'] = 'search';
+				$options['method']   = 'search';
 				$options['operator'] = $method;
 				break;
 
@@ -3127,7 +3081,7 @@ class DataModel extends Model implements \JTableInterface
 
 			default:
 
-				throw new InvalidSearchMethod('Method '.$method.' is unsupported');
+				throw new InvalidSearchMethod('Method ' . $method . ' is unsupported');
 
 				break;
 		}
@@ -3143,12 +3097,12 @@ class DataModel extends Model implements \JTableInterface
 					if (isset($values['from']) && isset($values['to']))
 					{
 						$options['from'] = $values['from'];
-						$options['to'] = $values['to'];
+						$options['to']   = $values['to'];
 					}
 					else
 					{
 						$options['from'] = array_shift($values);
-						$options['to'] = array_shift($values);
+						$options['to']   = array_shift($values);
 					}
 
 					unset($options['value']);
@@ -3174,12 +3128,12 @@ class DataModel extends Model implements \JTableInterface
 					// Get the value and interval from the $values array
 					if (isset($values['value']) && isset($values['interval']))
 					{
-						$options['value'] = $values['value'];
+						$options['value']    = $values['value'];
 						$options['interval'] = $values['interval'];
 					}
 					else
 					{
-						$options['value'] = array_shift($values);
+						$options['value']    = array_shift($values);
 						$options['interval'] = array_shift($values);
 					}
 				}
@@ -3191,8 +3145,8 @@ class DataModel extends Model implements \JTableInterface
 						$values = array_shift($values);
 					}
 
-					$options['value'] = $values;
-					$options['method'] = 'search';
+					$options['value']    = $values;
+					$options['method']   = 'search';
 					$options['operator'] = '=';
 				}
 				break;
@@ -3210,12 +3164,12 @@ class DataModel extends Model implements \JTableInterface
 					if (isset($values['operator']) && isset($values['value']))
 					{
 						$options['operator'] = $values['operator'];
-						$options['value'] = $values['value'];
+						$options['value']    = $values['value'];
 					}
 					else
 					{
 						$options['operator'] = array_shift($values);
-						$options['value'] = array_shift($values);
+						$options['value']    = array_shift($values);
 					}
 				}
 				break;
@@ -3236,7 +3190,7 @@ class DataModel extends Model implements \JTableInterface
 	 * business logic with raw SQL makes your application harder to maintain and refactor as dependencies to your
 	 * database schema creep in areas of your code that should have nothing to do with it.
 	 *
-	 * @param   string $rawWhereClause The raw WHERE clause to add
+	 * @param   string  $rawWhereClause  The raw WHERE clause to add
 	 *
 	 * @return  static  For chaining
 	 */
@@ -3263,7 +3217,7 @@ class DataModel extends Model implements \JTableInterface
 	 * Please note that eager loaded relations produce their queries without going through the respective model. Instead
 	 * they generate a SQL query directly, then map the loaded results into a DataCollection.
 	 *
-	 * @param array $relations The relations to eager load. See above for more information.
+	 * @param   array  $relations  The relations to eager load. See above for more information.
 	 *
 	 * @return static For chaining
 	 */
@@ -3271,7 +3225,7 @@ class DataModel extends Model implements \JTableInterface
 	{
 		if (empty($relations))
 		{
-			$this->eagerRelations = array();
+			$this->eagerRelations = [];
 
 			return $this;
 		}
@@ -3282,12 +3236,12 @@ class DataModel extends Model implements \JTableInterface
 		{
 			if (is_callable($v))
 			{
-				$relName = $k;
+				$relName  = $k;
 				$callback = $v;
 			}
 			else
 			{
-				$relName = $v;
+				$relName  = $v;
 				$callback = null;
 			}
 
@@ -3305,10 +3259,11 @@ class DataModel extends Model implements \JTableInterface
 	 * $posts->has('comments', '>=', 10)->get();
 	 * will return all posts with at least 10 comments.
 	 *
-	 * @param string $relation The relation to query
-	 * @param string $operator The comparison operator. Same operators as the where() method.
-	 * @param mixed  $value    The value(s) to compare against.
-	 * @param bool   $replace  When true (default) any existing relation filters for the same relation will be replaced
+	 * @param   string  $relation  The relation to query
+	 * @param   string  $operator  The comparison operator. Same operators as the where() method.
+	 * @param   mixed   $value     The value(s) to compare against.
+	 * @param   bool    $replace   When true (default) any existing relation filters for the same relation will be
+	 *                             replaced
 	 *
 	 * @return static
 	 */
@@ -3320,49 +3275,49 @@ class DataModel extends Model implements \JTableInterface
 			$this->addBehaviour('relationFilters');
 		}
 
-		$filter = array(
+		$filter = [
 			'relation' => $relation,
 			'method'   => $operator,
 			'operator' => $operator,
-			'value'    => $value
-		);
+			'value'    => $value,
+		];
 
 		// Handle method aliases
 		switch ($operator)
 		{
 			case '<>':
-				$filter['method'] = 'search';
+				$filter['method']   = 'search';
 				$filter['operator'] = '!=';
 				break;
 
 			case 'lt':
-				$filter['method'] = 'search';
+				$filter['method']   = 'search';
 				$filter['operator'] = '<';
 				break;
 
 			case 'le':
-				$filter['method'] = 'search';
+				$filter['method']   = 'search';
 				$filter['operator'] = '<=';
 				break;
 
 			case 'gt':
-				$filter['method'] = 'search';
+				$filter['method']   = 'search';
 				$filter['operator'] = '>';
 				break;
 
 			case 'ge':
-				$filter['method'] = 'search';
+				$filter['method']   = 'search';
 				$filter['operator'] = '>=';
 				break;
 
 			case 'eq':
-				$filter['method'] = 'search';
+				$filter['method']   = 'search';
 				$filter['operator'] = '=';
 				break;
 
 			case 'neq':
 			case 'ne':
-				$filter['method'] = 'search';
+				$filter['method']   = 'search';
 				$filter['operator'] = '!=';
 				break;
 
@@ -3376,7 +3331,7 @@ class DataModel extends Model implements \JTableInterface
 			case '!>=':
 			case '!=':
 			case '=':
-				$filter['method'] = 'search';
+				$filter['method']   = 'search';
 				$filter['operator'] = $operator;
 				break;
 
@@ -3417,12 +3372,12 @@ class DataModel extends Model implements \JTableInterface
 				break;
 
 			case 'callback':
-				$filter['method'] = 'callback';
+				$filter['method']   = 'callback';
 				$filter['operator'] = 'callback';
 				break;
 
 			default:
-				throw new InvalidSearchMethod('Operator '.$operator.' is unsupported');
+				throw new InvalidSearchMethod('Operator ' . $operator . ' is unsupported');
 				break;
 		}
 
@@ -3437,12 +3392,12 @@ class DataModel extends Model implements \JTableInterface
 					if (isset($value['from']) && isset($value['to']))
 					{
 						$filter['from'] = $value['from'];
-						$filter['to'] = $value['to'];
+						$filter['to']   = $value['to'];
 					}
 					else
 					{
 						$filter['from'] = array_shift($value);
-						$filter['to'] = array_shift($value);
+						$filter['to']   = array_shift($value);
 					}
 
 					unset($filter['value']);
@@ -3456,8 +3411,8 @@ class DataModel extends Model implements \JTableInterface
 					}
 
 					$filter['operator'] = ($filter['method'] == 'between') ? '=' : '!=';
-					$filter['value'] = $value;
-					$filter['method'] = 'search';
+					$filter['value']    = $value;
+					$filter['method']   = 'search';
 				}
 
 				break;
@@ -3468,12 +3423,12 @@ class DataModel extends Model implements \JTableInterface
 					// Get the value and interval from the $value array
 					if (isset($value['value']) && isset($value['interval']))
 					{
-						$filter['value'] = $value['value'];
+						$filter['value']    = $value['value'];
 						$filter['interval'] = $value['interval'];
 					}
 					else
 					{
-						$filter['value'] = array_shift($value);
+						$filter['value']    = array_shift($value);
 						$filter['interval'] = array_shift($value);
 					}
 				}
@@ -3485,8 +3440,8 @@ class DataModel extends Model implements \JTableInterface
 						$value = array_shift($value);
 					}
 
-					$filter['value'] = $value;
-					$filter['method'] = 'search';
+					$filter['value']    = $value;
+					$filter['method']   = 'search';
 					$filter['operator'] = '=';
 				}
 				break;
@@ -3504,12 +3459,12 @@ class DataModel extends Model implements \JTableInterface
 					if (isset($value['operator']) && isset($value['value']))
 					{
 						$filter['operator'] = $value['operator'];
-						$filter['value'] = $value['value'];
+						$filter['value']    = $value['value'];
 					}
 					else
 					{
 						$filter['operator'] = array_shift($value);
-						$filter['value'] = array_shift($value);
+						$filter['value']    = array_shift($value);
 					}
 				}
 				break;
@@ -3517,9 +3472,9 @@ class DataModel extends Model implements \JTableInterface
 			case 'callback':
 				if (!is_callable($filter['value']))
 				{
-					$filter['method'] = 'search';
+					$filter['method']   = 'search';
 					$filter['operator'] = '=';
-					$filter['value'] = 1;
+					$filter['value']    = 1;
 				}
 				break;
 		}
@@ -3549,9 +3504,10 @@ class DataModel extends Model implements \JTableInterface
 	 * You have to return a WHERE clause for the model's query, e.g.
 	 * (SELECT COUNT(*) FROM #__comments AS reltbl WHERE reltbl.user_id = user_id) BETWEEN 1 AND 20
 	 *
-	 * @param string   $relation The relation to query against
-	 * @param callable $callBack The callback to use for filtering
-	 * @param bool     $replace  When true (default) any existing relation filters for the same relation will be replaced
+	 * @param   string    $relation  The relation to query against
+	 * @param   callable  $callBack  The callback to use for filtering
+	 * @param   bool      $replace   When true (default) any existing relation filters for the same relation will be
+	 *                               replaced
 	 *
 	 * @return static
 	 */
@@ -3593,6 +3549,16 @@ class DataModel extends Model implements \JTableInterface
 	}
 
 	/**
+	 * Method to get the rules for the record.
+	 *
+	 * @return  Rules object
+	 */
+	public function getRules()
+	{
+		return $this->_rules;
+	}
+
+	/**
 	 * Method to set rules for the record.
 	 *
 	 * @param   mixed  $input  A JAccessRules object, JSON string, or array.
@@ -3601,24 +3567,14 @@ class DataModel extends Model implements \JTableInterface
 	 */
 	public function setRules($input)
 	{
-		if ($input instanceof \JAccessRules)
+		if ($input instanceof Rules)
 		{
 			$this->_rules = $input;
 		}
 		else
 		{
-			$this->_rules = new \JAccessRules($input);
+			$this->_rules = new Rules($input);
 		}
-	}
-
-	/**
-	 * Method to get the rules for the record.
-	 *
-	 * @return  \JAccessRules object
-	 */
-	public function getRules()
-	{
-		return $this->_rules;
 	}
 
 	/**
@@ -3641,11 +3597,6 @@ class DataModel extends Model implements \JTableInterface
 	public function setAssetsTracked($state)
 	{
 		$state = (bool) $state;
-
-		if ($state)
-		{
-			\JLoader::import('joomla.access.rules');
-		}
 
 		$this->_trackAssets = $state;
 	}
@@ -3671,34 +3622,13 @@ class DataModel extends Model implements \JTableInterface
 	}
 
 	/**
-	 * Loads the asset table related to this table.
-	 * This will help tests, too, since we can mock this function.
-	 *
-	 * @return bool|\JTableAsset     False on failure, otherwise JTableAsset
-	 */
-	protected function getAsset()
-	{
-		$name     = $this->getAssetName();
-
-		// Do NOT touch JTable here -- we are loading the core asset table which is a JTable, not a F0FTable
-		$asset    = \JTable::getInstance('Asset');
-
-		if (!$asset->loadByName($name))
-		{
-			return false;
-		}
-
-		return $asset;
-	}
-
-	/**
 	 * Method to compute the default name of the asset.
 	 * The default name is in the form table_name.id
 	 * where id is the value of the primary key of the table.
 	 *
+	 * @return  string
 	 * @throws  NoAssetKey
 	 *
-	 * @return  string
 	 */
 	public function getAssetName()
 	{
@@ -3726,6 +3656,19 @@ class DataModel extends Model implements \JTableInterface
 	}
 
 	/**
+	 * This method sets the asset key for the items of this table. Obviously, it
+	 * is only meant to be used when you have a table with an asset field.
+	 *
+	 * @param   string  $assetKey  The name of the asset key to use
+	 *
+	 * @return  void
+	 */
+	public function setAssetKey($assetKey)
+	{
+		$this->_assetKey = $assetKey;
+	}
+
+	/**
 	 * Method to return the title to use for the asset table.  In
 	 * tracking the assets a title is kept for each asset so that there is some
 	 * context available in a unified access manager.  Usually this would just
@@ -3733,8 +3676,8 @@ class DataModel extends Model implements \JTableInterface
 	 * primary name of the row. If this method is not overridden, the asset name is used.
 	 *
 	 * @return  string  The string to use as the title in the asset table.
-     *
-     * @codeCoverageIgnore
+	 *
+	 * @codeCoverageIgnore
 	 */
 	public function getAssetTitle()
 	{
@@ -3749,17 +3692,21 @@ class DataModel extends Model implements \JTableInterface
 	 * asset does not exist it will be created.
 	 *
 	 * @param   DataModel  $model  A model object for the asset parent.
-	 * @param   integer   $id     Id to look up
+	 * @param   integer    $id     Id to look up
 	 *
 	 * @return  integer
 	 */
 	public function getAssetParentId($model = null, $id = null)
 	{
-		if ($model) {}; // Prevent phpStorm's inspections from freaking out
-		if ($id) {}; // Prevent phpStorm's inspections from freaking out
+		if ($model)
+		{
+		} // Prevent phpStorm's inspections from freaking out
+		if ($id)
+		{
+		} // Prevent phpStorm's inspections from freaking out
 
 		// For simple cases, parent to the asset root.
-		$assets = \JTable::getInstance('Asset', 'JTable', array('dbo' => $this->getDbo()));
+		$assets = Table::getInstance('Asset', 'JTable', ['dbo' => $this->getDbo()]);
 		$rootId = $assets->getRootId();
 
 		if (!empty($rootId))
@@ -3771,30 +3718,17 @@ class DataModel extends Model implements \JTableInterface
 	}
 
 	/**
-	 * This method sets the asset key for the items of this table. Obviously, it
-	 * is only meant to be used when you have a table with an asset field.
-	 *
-	 * @param   string  $assetKey  The name of the asset key to use
-	 *
-	 * @return  void
-	 */
-	public function setAssetKey($assetKey)
-	{
-		$this->_assetKey = $assetKey;
-	}
-
-	/**
 	 * Method to load a row for editing from the version history table.
 	 *
-	 * @param   integer    $version_id  Key to the version history table.
-	 * @param   string     $alias       The type_alias in #__content_types
+	 * @param   integer  $version_id  Key to the version history table.
+	 * @param   string   $alias       The type_alias in #__content_types
 	 *
 	 * @return  boolean  True on success
 	 *
-	 * @since   2.3
-	 *
 	 * @throws  RecordNotLoaded
 	 * @throws  BaseException
+	 * @since   2.3
+	 *
 	 */
 	public function loadhistory($version_id, $alias)
 	{
@@ -3805,7 +3739,7 @@ class DataModel extends Model implements \JTableInterface
 		}
 
 		// Get an instance of the row to checkout.
-		$historyTable = \JTable::getInstance('Contenthistory');
+		$historyTable = Table::getInstance('Contenthistory');
 
 		if (!$historyTable->load($version_id))
 		{
@@ -3814,7 +3748,7 @@ class DataModel extends Model implements \JTableInterface
 
 		$rowArray = ArrayHelper::fromObject(json_decode($historyTable->version_data));
 
-		$typeId = \JTable::getInstance('Contenttype')->getTypeId($alias);
+		$typeId = Table::getInstance('Contenttype')->getTypeId($alias);
 
 		if ($historyTable->ucm_type_id != $typeId)
 		{
@@ -3826,7 +3760,7 @@ class DataModel extends Model implements \JTableInterface
 				$this->unlock();
 			}
 
-			throw new BaseException(\JText::_('JLIB_APPLICATION_ERROR_HISTORY_ID_MISMATCH'));
+			throw new BaseException(Text::_('JLIB_APPLICATION_ERROR_HISTORY_ID_MISMATCH'));
 		}
 
 		$this->setState('save_date', $historyTable->save_date);
@@ -3866,7 +3800,7 @@ class DataModel extends Model implements \JTableInterface
 	 *
 	 * @return   string  The content type alias
 	 *
-	 * @throws   \Exception  If you have not set the contentType configuration variable
+	 * @throws   Exception  If you have not set the contentType configuration variable
 	 */
 	public function getContentType()
 	{
@@ -3882,13 +3816,13 @@ class DataModel extends Model implements \JTableInterface
 	 * Check if a UCM content type exists for this resource, and
 	 * create it if it does not
 	 *
-	 * @param  string  $alias  The content type alias (optional)
+	 * @param   string  $alias  The content type alias (optional)
 	 *
-	 * @return  null
+	 * @return  void
 	 */
 	public function checkContentType($alias = null)
 	{
-		$contentType = new \JTableContenttype($this->getDbo());
+		$contentType = new ContentType($this->getDbo());
 
 		if (!$alias)
 		{
@@ -3899,45 +3833,45 @@ class DataModel extends Model implements \JTableInterface
 
 		// Fetch the extension name
 		$component = $aliasParts[0];
-		$component = \JComponentHelper::getComponent($component);
+		$component = ComponentHelper::getComponent($component);
 
 		// Fetch the name using the menu item
 		$query = $this->getDbo()->getQuery(true);
 		$query->select('title')->from('#__menu')->where('component_id = ' . (int) $component->id);
 		$this->getDbo()->setQuery($query);
-		$component_name = \JText::_($this->getDbo()->loadResult());
+		$component_name = Text::_($this->getDbo()->loadResult());
 
 		$name = $component_name . ' ' . ucfirst($aliasParts[1]);
 
 		// Create a new content type for our resource
-		if (!$contentType->load(array('type_alias' => $alias)))
+		if (!$contentType->load(['type_alias' => $alias]))
 		{
 			$contentType->type_title = $name;
 			$contentType->type_alias = $alias;
-			$contentType->table = json_encode(
-				array(
-					'special' => array(
+			$contentType->table      = json_encode(
+				[
+					'special' => [
 						'dbtable' => $this->getTableName(),
 						'key'     => $this->getKeyName(),
 						'type'    => $name,
 						'prefix'  => $this->container->getNamespacePrefix() . '\\Model\\',
 						'class'   => $this->getName(),
-						'config'  => 'array()'
-					),
-					'common' => array(
+						'config'  => 'array()',
+					],
+					'common'  => [
 						'dbtable' => '#__ucm_content',
-						'key' => 'ucm_id',
-						'type' => 'CoreContent',
-						'prefix' => 'JTable',
-						'config' => 'array()'
-					)
-				)
+						'key'     => 'ucm_id',
+						'type'    => 'CoreContent',
+						'prefix'  => 'JTable',
+						'config'  => 'array()',
+					],
+				]
 			);
 
 			$contentType->field_mappings = json_encode(
-				array(
-					'common' => array(
-						0 => array(
+				[
+					'common'  => [
+						0 => [
 							"core_content_item_id" => $this->getKeyName(),
 							"core_title"           => $this->getUcmCoreAlias('title'),
 							"core_state"           => $this->getUcmCoreAlias('enabled'),
@@ -3961,29 +3895,29 @@ class DataModel extends Model implements \JTableInterface
 							"core_metadesc"        => $this->getUcmCoreAlias('metadesc'),
 							"core_catid"           => $this->getUcmCoreAlias('cat_id'),
 							"core_xreference"      => $this->getUcmCoreAlias('xreference'),
-							"asset_id"             => $this->getUcmCoreAlias('asset_id')
-						)
-					),
-					'special' => array(
-						0 => array(
-						)
-					)
-				)
+							"asset_id"             => $this->getUcmCoreAlias('asset_id'),
+						],
+					],
+					'special' => [
+						0 => [
+						],
+					],
+				]
 			);
 
-			$ignoreFields = array(
+			$ignoreFields = [
 				$this->getUcmCoreAlias('modified_on', null),
 				$this->getUcmCoreAlias('modified_by', null),
 				$this->getUcmCoreAlias('locked_by', null),
 				$this->getUcmCoreAlias('locked_on', null),
 				$this->getUcmCoreAlias('hits', null),
-				$this->getUcmCoreAlias('version', null)
-			);
+				$this->getUcmCoreAlias('version', null),
+			];
 
 			$contentType->content_history_options = json_encode(
-				array(
-					"ignoreChanges" => array_filter($ignoreFields, 'strlen')
-				)
+				[
+					"ignoreChanges" => array_filter($ignoreFields, 'strlen'),
+				]
 			);
 
 			$contentType->router = '';
@@ -3993,266 +3927,10 @@ class DataModel extends Model implements \JTableInterface
 	}
 
 	/**
-	 * Utility methods that fetches the column name for the field.
-	 * If it does not exists, returns a "null" string
-	 *
-	 * @param  string  $alias  The alias for the column
-	 * @param  string  $null   What to return if no column exists
-	 *
-	 * @return string The column name
-	 */
-	protected function getUcmCoreAlias($alias, $null = "null")
-	{
-		if (!$this->hasField($alias))
-		{
-			return $null;
-		}
-
-		return $this->getFieldAlias($alias);
-	}
-
-	/**
-	 * Sets the abstract XML form file name
-	 *
-	 * @param   string  $formName  The abstract form file name to set, e.g. "form.default"
-	 *
-	 * @return  void
-	 *
-	 * @deprecated 3.1  Support for XML forms will be removed in FOF 4
-	 */
-	public function setFormName($formName)
-	{
-		$this->formName = $formName;
-	}
-
-	/**
-	 * Gets the abstract XML form file name
-	 *
-	 * @return  string  The abstract form file name, e.g. "form.default"
-	 *
-	 * @deprecated 3.1  Support for XML forms will be removed in FOF 4
-	 */
-	public function getFormName()
-	{
-		return $this->formName;
-	}
-
-	/**
-	 * A method for getting the form from the model.
-	 *
-	 * @param   array    $data      Data for the form.
-	 * @param   boolean  $loadData  True if the form is to load its own data (default case), false if not.
-	 * @param   boolean  $source    The name of the form. If not set we'll try the form_name state variable or fall back to default.
-	 *
-	 * @return  Form|bool  A Form object on success, false on failure
-	 *
-	 * @since   2.0
-	 *
-	 * @deprecated 3.1  Support for XML forms will be removed in FOF 4
-	 */
-	public function getForm($data = array(), $loadData = true, $source = null)
-	{
-		$this->_formData = $data;
-
-		if (empty($source))
-		{
-			$source = $this->formName;
-		}
-
-		if (empty($source))
-		{
-			$source = 'form.' . $this->name;
-		}
-
-		$name = $this->container->componentName . '.' . $this->name . '.' . $source;
-
-		$options = array(
-			'control'	 => false,
-			'load_data'	 => &$loadData,
-		);
-
-		$this->triggerEvent('onBeforeLoadForm', array(&$name, &$source, &$options));
-
-		$form = $this->loadForm($name, $source, $options);
-
-		if (is_object($form) && ($form instanceof Form))
-		{
-			$this->triggerEvent('onAfterLoadForm', array(&$form, &$name, &$source, &$options));
-
-			return $form;
-		}
-
-		return false;
-	}
-
-	/**
-	 * Method to get a form object.
-	 *
-	 * @param   string       $name     The name of the form.
-	 * @param   string       $source   The form filename (e.g. form.browse)
-	 * @param   array        $options  Optional array of options for the form creation.
-	 * @param   boolean      $clear    Optional argument to force load a new form.
-	 * @param   bool|string  $xpath    An optional xpath to search for the fields.
-	 *
-	 * @return  Form|bool  Form object on success, False on error.
-	 *
-	 * @throws  \Exception
-	 *
-	 * @see     Form
-	 * @since   2.0
-	 *
-	 * @deprecated 3.1  Support for XML forms will be removed in FOF 4
-	 */
-	protected function loadForm($name, $source, $options = array(), $clear = false, $xpath = false)
-	{
-		// Handle the optional arguments.
-		$options['control'] = isset($options['control']) ? $options['control'] : false;
-
-		// Create a signature hash.
-		$hash = md5($source . serialize($options));
-
-		if (!isset($this->_forms[$hash]) || $clear)
-		{
-			// Get the form.
-			$form = $this->container->factory->form($name, $source, $this->name, $options, false, $xpath);
-
-			if (!is_object($form))
-			{
-				$this->_forms[$hash] = false;
-
-				return false;
-			}
-
-			$data = array();
-
-			if (isset($options['load_data']) && $options['load_data'])
-			{
-				// Get the data for the form.
-				$data = $this->loadFormData();
-			}
-
-			// Allows data and form manipulation before preprocessing the form
-			$this->triggerEvent('onBeforePreprocessForm', array(&$form, &$data));
-
-			// Allow for additional modification of the form, and events to be triggered.
-			// We pass the data because plugins may require it.
-			$this->preprocessForm($form, $data);
-
-			// Allows data and form manipulation After preprocessing the form
-			$this->triggerEvent('onAfterPreprocessForm', array(&$form, &$data));
-
-			// Load the data into the form after the plugins have operated.
-			$form->bind($data);
-
-			// Store the form for later.
-			$this->_forms[$hash] = $form;
-		}
-
-		return $this->_forms[$hash];
-	}
-
-	/**
-	 * Method to get the data that should be injected in the form.
-	 *
-	 * @return  array    The default data is an empty array.
-	 *
-	 * @since   2.0
-	 *
-	 * @deprecated 3.1  Support for XML forms will be removed in FOF 4
-	 */
-	protected function loadFormData()
-	{
-		if (empty($this->_formData))
-		{
-			return array();
-		}
-		else
-		{
-			return $this->_formData;
-		}
-	}
-
-	/**
-	 * Method to allow derived classes to preprocess the form.
-	 *
-	 * @param   Form    &$form  A Form object.
-	 * @param   mixed   &$data  The data expected for the form.
-	 * @param   string  $group  The name of the plugin group to import (defaults to "content").
-	 *
-	 * @return  void
-	 *
-	 * @since   2.0
-	 *
-	 * @throws  \Exception if there is an error in the form event.
-	 *
-	 * @deprecated 3.1  Support for XML forms will be removed in FOF 4
-	 */
-	protected function preprocessForm(Form &$form, &$data, $group = 'content')
-	{
-		// Import the appropriate plugin group.
-		$this->container->platform->importPlugin($group);
-
-		// Trigger the form preparation event.
-		$this->container->platform->runPlugins('onContentPrepareForm', array(&$form, &$data));
-	}
-
-	/**
-	 * Method to validate the form data.
-	 *
-	 * @param   Form     $form   The form to validate against.
-	 * @param   array    $data   The data to validate.
-	 * @param   string   $group  The name of the field group to validate.
-	 *
-	 * @return  mixed   Array of filtered data if valid, false otherwise.
-	 *
-	 * @throws  BaseException|\Exception  On validation error
-	 *
-	 * @see     \JFormRule
-	 * @see     \JFilterInput
-	 *
-	 * @since   2.0
-	 *
-	 * @deprecated 3.1  Support for XML forms will be removed in FOF 4
-	 */
-	public function validateForm($form, $data, $group = null)
-	{
-		// Filter and validate the form data.
-		$data   = $form->filter($data);
-		$return = $form->validate($data, $group);
-
-		// Check for an error.
-		if ($return instanceof \Exception)
-		{
-			throw $return;
-		}
-
-		// Check the validation results.
-		if ($return === false)
-		{
-			// Get the validation messages from the form.
-			foreach ($form->getErrors() as $message)
-			{
-				if ($message instanceof \Exception)
-				{
-					throw $message;
-				}
-				else
-				{
-					throw new BaseException($message);
-				}
-			}
-
-			return false;
-		}
-
-		return $data;
-	}
-
-	/**
 	 * Set a behavior param
 	 *
-	 * @param   string  $name     The name of the param you want to set
-	 * @param   mixed   $value    The value to set
+	 * @param   string  $name   The name of the param you want to set
+	 * @param   mixed   $value  The value to set
 	 *
 	 * @return  static   Self, for chaining
 	 */
@@ -4273,7 +3951,7 @@ class DataModel extends Model implements \JTableInterface
 	 */
 	public function getBehaviorParam($name, $default = null)
 	{
-		return isset($this->_behaviorParams[$name]) ? $this->_behaviorParams[$name] : $default;
+		return $this->_behaviorParams[$name] ?? $default;
 	}
 
 	/**
@@ -4282,8 +3960,8 @@ class DataModel extends Model implements \JTableInterface
 	 * Note: passing a null $list to get the filter blacklist is deprecated as of FOF 3.1. Pleas use getBlacklistFilters
 	 *       instead.
 	 *
-	 * @param   mixed    $list    A filter or list of filters to backlist. If null return the list of backlisted filter
-	 * @param   boolean  $reset   Reset the blacklist if true
+	 * @param   mixed    $list   A filter or list of filters to backlist. If null return the list of backlisted filter
+	 * @param   boolean  $reset  Reset the blacklist if true
 	 *
 	 * @return  null|array  Return an array of value if $list is null
 	 */
@@ -4291,7 +3969,7 @@ class DataModel extends Model implements \JTableInterface
 	{
 		if (!isset($list))
 		{
-			return $this->getBehaviorParam('blacklistFilters', array());
+			return $this->getBehaviorParam('blacklistFilters', []);
 		}
 
 		if (is_string($list))
@@ -4301,7 +3979,7 @@ class DataModel extends Model implements \JTableInterface
 
 		if (!$reset)
 		{
-			$list = array_unique(array_merge($this->getBehaviorParam('blacklistFilters', array()), $list));
+			$list = array_unique(array_merge($this->getBehaviorParam('blacklistFilters', []), $list));
 		}
 
 		$this->setBehaviorParam('blacklistFilters', $list);
@@ -4316,7 +3994,7 @@ class DataModel extends Model implements \JTableInterface
 	 */
 	public function getBlacklistFilters()
 	{
-		return $this->getBehaviorParam('blacklistFilters', array());
+		return $this->getBehaviorParam('blacklistFilters', []);
 	}
 
 	/**
@@ -4327,19 +4005,19 @@ class DataModel extends Model implements \JTableInterface
 	public function updateUcmContent()
 	{
 		// Process the tags
-		$data  = $this->getData();
-		$alias = $this->getContentType();
-		$ucmContentTable = \JTable::getInstance('Corecontent');
+		$data            = $this->getData();
+		$alias           = $this->getContentType();
+		$ucmContentTable = Table::getInstance('Corecontent');
 
-		$ucm = new \JUcmContent($this, $alias);
+		$ucm     = new UCMContent($this, $alias);
 		$ucmData = $data ? $ucm->mapData($data) : $ucm->ucmData;
 
 		$primaryId = $ucm->getPrimaryKey($ucmData['common']['core_type_id'], $ucmData['common']['core_content_item_id']);
-		$result = $ucmContentTable->load($primaryId);
-		$result = $result && $ucmContentTable->bind($ucmData['common']);
-		$result = $result && $ucmContentTable->check();
-		$result = $result && $ucmContentTable->store();
-		$ucmId = $ucmContentTable->core_content_id;
+		$result    = $ucmContentTable->load($primaryId);
+		$result    = $result && $ucmContentTable->bind($ucmData['common']);
+		$result    = $result && $ucmContentTable->check();
+		$result    = $result && $ucmContentTable->store();
+		$ucmId     = $ucmContentTable->core_content_id;
 
 		return $result;
 	}
@@ -4355,7 +4033,7 @@ class DataModel extends Model implements \JTableInterface
 	{
 		if (!is_array($this->fieldsSkipChecks))
 		{
-			$this->fieldsSkipChecks = array();
+			$this->fieldsSkipChecks = [];
 		}
 
 		if (!$this->hasField($fieldName))
@@ -4382,7 +4060,7 @@ class DataModel extends Model implements \JTableInterface
 	{
 		if (!is_array($this->fieldsSkipChecks))
 		{
-			$this->fieldsSkipChecks = array();
+			$this->fieldsSkipChecks = [];
 
 			return;
 		}
@@ -4412,7 +4090,7 @@ class DataModel extends Model implements \JTableInterface
 	{
 		if (!is_array($this->fieldsSkipChecks))
 		{
-			$this->fieldsSkipChecks = array();
+			$this->fieldsSkipChecks = [];
 
 			return false;
 		}
@@ -4425,6 +4103,46 @@ class DataModel extends Model implements \JTableInterface
 		$fieldName = $this->getFieldAlias($fieldName);
 
 		return in_array($fieldName, $this->fieldsSkipChecks);
+	}
+
+	/**
+	 * Loads the asset table related to this table.
+	 * This will help tests, too, since we can mock this function.
+	 *
+	 * @return bool|Asset     False on failure, otherwise JTableAsset
+	 */
+	protected function getAsset()
+	{
+		$name = $this->getAssetName();
+
+		// Do NOT touch JTable here -- we are loading the core asset table which is a JTable, not a F0FTable
+		$asset = Table::getInstance('Asset');
+
+		if (!$asset->loadByName($name))
+		{
+			return false;
+		}
+
+		return $asset;
+	}
+
+	/**
+	 * Utility methods that fetches the column name for the field.
+	 * If it does not exists, returns a "null" string
+	 *
+	 * @param   string  $alias  The alias for the column
+	 * @param   string  $null   What to return if no column exists
+	 *
+	 * @return string The column name
+	 */
+	protected function getUcmCoreAlias($alias, $null = "null")
+	{
+		if (!$this->hasField($alias))
+		{
+			return $null;
+		}
+
+		return $this->getFieldAlias($alias);
 	}
 
 	/**
@@ -4446,13 +4164,13 @@ class DataModel extends Model implements \JTableInterface
 			}
 
 			$letters      = str_split($prefix, 1);
-			$permutations = array('');
+			$permutations = [''];
 
 			foreach ($letters as $nextLetter)
 			{
 				$lower = strtolower($nextLetter);
 				$upper = strtoupper($nextLetter);
-				$ret = array();
+				$ret   = [];
 
 				foreach ($permutations as $perm)
 				{
@@ -4467,12 +4185,11 @@ class DataModel extends Model implements \JTableInterface
 				}
 			}
 
-			$permutations = array_merge(array(
+			$permutations = array_merge([
 				strtolower($prefix),
 				strtoupper($prefix),
-			), $permutations);
-			$permutations = array_map(function ($x) use ($suffix)
-			{
+			], $permutations);
+			$permutations = array_map(function ($x) use ($suffix) {
 				return $x . $suffix;
 			}, $permutations);
 

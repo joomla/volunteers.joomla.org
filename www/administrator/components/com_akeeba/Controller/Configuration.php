@@ -8,15 +8,15 @@
 namespace Akeeba\Backup\Admin\Controller;
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 use Akeeba\Backup\Admin\Controller\Mixin\CustomACL;
 use Akeeba\Backup\Admin\Model\Profiles;
 use Akeeba\Engine\Platform;
 use FOF30\Controller\Controller;
-use JFactory;
-use JText;
-use JUri;
+use Joomla\CMS\Factory;
+use Joomla\CMS\Language\Text;
+use Joomla\CMS\Uri\Uri;
 
 /**
  * Configuration page controller
@@ -69,7 +69,7 @@ class Configuration extends Controller
 			]);
 		}
 
-		$this->setRedirect(JUri::base() . 'index.php?option=com_akeeba&view=Configuration', JText::_('COM_AKEEBA_CONFIG_SAVE_OK'));
+		$this->setRedirect(\Joomla\CMS\Uri\Uri::base() . 'index.php?option=com_akeeba&view=Configuration', \Joomla\CMS\Language\Text::_('COM_AKEEBA_CONFIG_SAVE_OK'));
 	}
 
 	/**
@@ -78,7 +78,7 @@ class Configuration extends Controller
 	public function save()
 	{
 		$this->apply();
-		$this->setRedirect(JUri::base() . 'index.php?option=com_akeeba', JText::_('COM_AKEEBA_CONFIG_SAVE_OK'));
+		$this->setRedirect(\Joomla\CMS\Uri\Uri::base() . 'index.php?option=com_akeeba', \Joomla\CMS\Language\Text::_('COM_AKEEBA_CONFIG_SAVE_OK'));
 	}
 
 	/**
@@ -104,14 +104,14 @@ class Configuration extends Controller
 		$profile->id = null;
 		$profile
 			->save([
-				'description' => JText::_('COM_AKEEBA_CONFIG_SAVENEW_DEFAULT_PROFILE_NAME')
+				'description' => \Joomla\CMS\Language\Text::_('COM_AKEEBA_CONFIG_SAVENEW_DEFAULT_PROFILE_NAME')
 			])
 		;
 
 		// Activate and edit the new profile
 		$returnUrl = base64_encode($this->redirect);
 		$token     = $this->container->platform->getToken(true);
-		$url       = JUri::base() . 'index.php?option=com_akeeba&task=SwitchProfile&profileid=' . $profile->getId() .
+		$url       = \Joomla\CMS\Uri\Uri::base() . 'index.php?option=com_akeeba&task=SwitchProfile&profileid=' . $profile->getId() .
 			'&returnurl=' . $returnUrl . '&' . $token . '=1';
 		$this->setRedirect($url);
 	}
@@ -123,7 +123,7 @@ class Configuration extends Controller
 	{
 		// CSRF prevention
 		$this->csrfProtection();
-		$this->setRedirect(JUri::base() . 'index.php?option=com_akeeba');
+		$this->setRedirect(\Joomla\CMS\Uri\Uri::base() . 'index.php?option=com_akeeba');
 	}
 
 	/**

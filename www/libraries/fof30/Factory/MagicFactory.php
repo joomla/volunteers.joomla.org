@@ -7,6 +7,8 @@
 
 namespace FOF30\Factory;
 
+defined('_JEXEC') || die;
+
 use FOF30\Controller\Controller;
 use FOF30\Factory\Exception\ControllerNotFound;
 use FOF30\Factory\Exception\DispatcherNotFound;
@@ -19,8 +21,6 @@ use FOF30\Model\Model;
 use FOF30\Toolbar\Toolbar;
 use FOF30\TransparentAuthentication\TransparentAuthentication;
 use FOF30\View\View;
-
-defined('_JEXEC') or die;
 
 /**
  * Magic MVC object factory. This factory will "magically" create MVC objects even if the respective classes do not
@@ -39,7 +39,7 @@ class MagicFactory extends BasicFactory implements FactoryInterface
 	 *
 	 * @return  Controller
 	 */
-	public function controller($viewName, array $config = array())
+	public function controller($viewName, array $config = [])
 	{
 		try
 		{
@@ -61,7 +61,7 @@ class MagicFactory extends BasicFactory implements FactoryInterface
 	 *
 	 * @return  Model
 	 */
-	public function model($viewName, array $config = array())
+	public function model($viewName, array $config = [])
 	{
 		try
 		{
@@ -84,7 +84,7 @@ class MagicFactory extends BasicFactory implements FactoryInterface
 	 *
 	 * @return  View
 	 */
-	public function view($viewName, $viewType = 'html', array $config = array())
+	public function view($viewName, $viewType = 'html', array $config = [])
 	{
 		try
 		{
@@ -105,22 +105,26 @@ class MagicFactory extends BasicFactory implements FactoryInterface
 	 *
 	 * @return  Toolbar
 	 */
-	public function toolbar(array $config = array())
+	public function toolbar(array $config = [])
 	{
 		$appConfig = $this->container->appConfig;
 
-		$defaultConfig = array(
-			'useConfigurationFile'  => true,
-			'renderFrontendButtons' => in_array($appConfig->get("views.*.config.renderFrontendButtons"), array(true, 'true', 'yes', 'on', 1)),
-			'renderFrontendSubmenu' => in_array($appConfig->get("views.*.config.renderFrontendSubmenu"), array(true, 'true', 'yes', 'on', 1)),
-		);
+		$defaultConfig = [
+			'useConfigurationFile' => true,
+			'renderFrontendButtons' => in_array($appConfig->get("views.*.config.renderFrontendButtons"), [
+				true, 'true', 'yes', 'on', 1,
+			]),
+			'renderFrontendSubmenu' => in_array($appConfig->get("views.*.config.renderFrontendSubmenu"), [
+				true, 'true', 'yes', 'on', 1,
+			]),
+		];
 
 		$config = array_merge($defaultConfig, $config);
 
 		return parent::toolbar($config);
 	}
 
-    public function dispatcher(array $config = array())
+	public function dispatcher(array $config = [])
 	{
 		$dispatcherClass = $this->container->getNamespacePrefix() . 'Dispatcher\\Dispatcher';
 
@@ -140,11 +144,11 @@ class MagicFactory extends BasicFactory implements FactoryInterface
 	/**
 	 * Creates a new TransparentAuthentication handler
 	 *
-	 * @param   array $config The configuration values for the TransparentAuthentication object
+	 * @param   array  $config  The configuration values for the TransparentAuthentication object
 	 *
 	 * @return  TransparentAuthentication
 	 */
-    public function transparentAuthentication(array $config = array())
+	public function transparentAuthentication(array $config = [])
 	{
 		$authClass = $this->container->getNamespacePrefix() . 'TransparentAuthentication\\TransparentAuthentication';
 

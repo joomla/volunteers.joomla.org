@@ -6,7 +6,7 @@
  */
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 /** @var  \Akeeba\Backup\Admin\View\Configuration\Html $this */
 ?>

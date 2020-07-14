@@ -9,7 +9,7 @@
 
 namespace Akeeba\Engine\Util\Transfer;
 
-
+defined('AKEEBAENGINE') || die();
 
 use DirectoryIterator;
 use Exception;

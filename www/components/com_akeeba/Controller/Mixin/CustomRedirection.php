@@ -10,7 +10,7 @@ namespace Akeeba\Backup\Site\Controller\Mixin;
 // Protect from unauthorized access
 use Akeeba\Engine\Platform;
 
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 /**
  * Provides the method to send custom HTTP redirection headers

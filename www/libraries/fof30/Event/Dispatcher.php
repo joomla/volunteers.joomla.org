@@ -7,9 +7,9 @@
 
 namespace FOF30\Event;
 
-use FOF30\Container\Container;
+defined('_JEXEC') || die;
 
-defined('_JEXEC') or die;
+use FOF30\Container\Container;
 
 class Dispatcher implements Observable
 {
@@ -17,10 +17,10 @@ class Dispatcher implements Observable
 	protected $container = null;
 
 	/** @var   array  The observers attached to the dispatcher */
-	protected $observers = array();
+	protected $observers = [];
 
 	/** @var   array  Maps events to observers */
-	protected $events = array();
+	protected $events = [];
 
 	/**
 	 * Public constructor
@@ -71,7 +71,7 @@ class Dispatcher implements Observable
 
 			if (!isset($this->events[$event]))
 			{
-				$this->events[$event] = array($className);
+				$this->events[$event] = [$className];
 			}
 			else
 			{
@@ -179,11 +179,11 @@ class Dispatcher implements Observable
 	 *
 	 * @return  array
 	 */
-	public function trigger($event, array $args = array())
+	public function trigger($event, array $args = [])
 	{
 		$event = strtolower($event);
 
-		$result = array();
+		$result = [];
 
 		// Make sure the event is known to us, otherwise return an empty array
 		if (!isset($this->events[$event]) || empty($this->events[$event]))
@@ -231,7 +231,7 @@ class Dispatcher implements Observable
 					$result[] = $observer->{$event}($args[0], $args[1], $args[2], $args[3], $args[4]);
 					break;
 				default:
-					$result[] = call_user_func_array(array($observer, $event), $args);
+					$result[] = call_user_func_array([$observer, $event], $args);
 					break;
 			}
 		}
@@ -249,7 +249,7 @@ class Dispatcher implements Observable
 	 *
 	 * @return  mixed  Null if the event can't be handled by any observer
 	 */
-	public function chainHandle($event, $args = array())
+	public function chainHandle($event, $args = [])
 	{
 		$event = strtolower($event);
 
@@ -301,7 +301,7 @@ class Dispatcher implements Observable
 					$result = $observer->{$event}($args[0], $args[1], $args[2], $args[3], $args[4]);
 					break;
 				default:
-					$result = call_user_func_array(array($observer, $event), $args);
+					$result = call_user_func_array([$observer, $event], $args);
 					break;
 			}
 
@@ -314,4 +314,4 @@ class Dispatcher implements Observable
 		// Return the observers' result in an array
 		return $result;
 	}
-} 
+}

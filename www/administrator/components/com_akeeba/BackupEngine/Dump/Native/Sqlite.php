@@ -9,7 +9,7 @@
 
 namespace Akeeba\Engine\Dump\Native;
 
-
+defined('AKEEBAENGINE') || die();
 
 use RuntimeException;
 

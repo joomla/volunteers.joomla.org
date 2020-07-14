@@ -9,7 +9,7 @@
 
 namespace Akeeba\Engine\Util;
 
-
+defined('AKEEBAENGINE') || die();
 
 /**
  * Crypto-safe random value generator. Based on the Randval class of the Aura for PHP's Session package.
@@ -58,7 +58,7 @@ class RandomValue
 	{
 		if (function_exists('extension_loaded') && function_exists('openssl_random_pseudo_bytes'))
 		{
-			defined('IS_WIN') or define('IS_WIN', DIRECTORY_SEPARATOR == '\\');
+			defined('IS_WIN') || define('IS_WIN', DIRECTORY_SEPARATOR == '\\');
 
 			if (extension_loaded('openssl') && (version_compare(PHP_VERSION, '5.3.4') >= 0 || IS_WIN))
 			{
@@ -167,7 +167,7 @@ class RandomValue
 			 * Collect any entropy available from the PHP system and filesystem.
 			 * If we have ssl data that isn't strong, we use it once.
 			 */
-			$entropy = rand() . uniqid(mt_rand(), true) . $sslStr;
+			$entropy = random_int(0, mt_getrandmax()) . uniqid(random_int(0, mt_getrandmax()), true) . $sslStr;
 			$entropy .= implode('', @fstat(fopen(__FILE__, 'r')));
 			$entropy .= memory_get_usage();
 			$sslStr  = '';
@@ -192,7 +192,7 @@ class RandomValue
 				for ($pass = 0; $pass < $samples; ++$pass)
 				{
 					$microStart = microtime(true) * 1000000;
-					$hash       = sha1(mt_rand(), true);
+					$hash       = sha1(random_int(0, mt_getrandmax()), true);
 
 					for ($count = 0; $count < 50; ++$count)
 					{
@@ -227,7 +227,7 @@ class RandomValue
 				for ($pass = 0; $pass < $iter; ++$pass)
 				{
 					$microStart = microtime(true);
-					$hash       = sha1(mt_rand(), true);
+					$hash       = sha1(random_int(0, mt_getrandmax()), true);
 
 					for ($count = 0; $count < $rounds; ++$count)
 					{

@@ -9,6 +9,8 @@
 
 namespace Akeeba\Engine\Postproc\Exception;
 
+defined('AKEEBAENGINE') || die();
+
 /**
  * Indicates that the post-processing engine does not support OAuth2 or similar redirection-based authentication with
  * the remote storage provider.

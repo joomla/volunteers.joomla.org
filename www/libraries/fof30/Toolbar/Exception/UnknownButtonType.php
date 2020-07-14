@@ -7,15 +7,17 @@
 
 namespace FOF30\Toolbar\Exception;
 
+defined('_JEXEC') || die;
+
 use Exception;
+use InvalidArgumentException;
+use Joomla\CMS\Language\Text;
 
-defined('_JEXEC') or die;
-
-class UnknownButtonType extends \InvalidArgumentException
+class UnknownButtonType extends InvalidArgumentException
 {
 	public function __construct($buttonType, $code = 500, Exception $previous = null)
 	{
-		$message = \JText::sprintf('LIB_FOF_TOOLBAR_ERR_UNKNOWNBUTTONTYPE', $buttonType);
+		$message = Text::sprintf('LIB_FOF_TOOLBAR_ERR_UNKNOWNBUTTONTYPE', $buttonType);
 
 		parent::__construct($message, $code, $previous);
 	}

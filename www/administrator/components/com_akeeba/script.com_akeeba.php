@@ -37,14 +37,14 @@ class Com_AkeebaInstallerScript extends \FOF30\Utils\InstallScript
 	 *
 	 * @var   string
 	 */
-	protected $minimumPHPVersion = '5.6.0';
+	protected $minimumPHPVersion = '7.1.0';
 
 	/**
 	 * The minimum Joomla! version required to install this extension
 	 *
 	 * @var   string
 	 */
-	protected $minimumJoomlaVersion = '3.8.0';
+	protected $minimumJoomlaVersion = '3.9.0';
 
 	/**
 	 * Obsolete files and folders to remove from the free version only. This is used when you move a feature from the
@@ -407,7 +407,10 @@ class Com_AkeebaInstallerScript extends \FOF30\Utils\InstallScript
 			"components/com_akeeba/Model/Json/Encapsulation/AesCtr256.php",
 
 			// Optimize JavaScript support
-			"administrator/componetns/com_akeeba/Helper/JsBundler.php",
+			"administrator/components/com_akeeba/Helper/JsBundler.php",
+
+			// Obsolete cacert.pem in the Engine
+			"administrator/components/com_akeeba/BackupEngine/cacert.pem",
 		],
 		'folders' => [
 			// Directories used up to version 4.1 (inclusive)
@@ -552,12 +555,6 @@ class Com_AkeebaInstallerScript extends \FOF30\Utils\InstallScript
 		{
 			$toPath = $componentPath . '/BackupEngine';
 
-			if (class_exists('JLoader') && method_exists('JLoader', 'import'))
-			{
-				JLoader::import('joomla.filesystem.folder');
-				JLoader::import('joomla.filesystem.file');
-			}
-
 			if (@is_dir($componentPath) && !@is_dir($toPath))
 			{
 				JFolder::create($toPath);
@@ -674,13 +671,6 @@ class Com_AkeebaInstallerScript extends \FOF30\Utils\InstallScript
 			define('AKEEBA_PRO', '0');
 		}
 
-		$videoTutorialURL = 'https://www.akeebabackup.com/videos/1212-akeeba-backup-core.html';
-
-		if (AKEEBA_PRO)
-		{
-			$videoTutorialURL = 'https://www.akeebabackup.com/videos/1213-akeeba-backup-for-joomla-pro.html';
-		}
-
 		?>
 		<img src="../media/com_akeeba/icons/logo-48.png" width="48" height="48" alt="Akeeba Backup" align="right"/>
 
@@ -688,8 +678,7 @@ class Com_AkeebaInstallerScript extends \FOF30\Utils\InstallScript
 
 		<fieldset>
 			<p>
-				We strongly recommend watching our
-				<a href="<?php echo $videoTutorialURL ?>">video
+				We strongly recommend watching our <a href="http://akee.ba/abfirstvideo">video
 				tutorials</a> before using this component.
 			</p>
 
@@ -701,8 +690,8 @@ class Com_AkeebaInstallerScript extends \FOF30\Utils\InstallScript
 
 			<p>
 				By installing this component you are implicitly accepting
-				<a href="https://www.akeebabackup.com/license.html">its license (GNU GPLv3)</a> and our
-				<a href="https://www.akeebabackup.com/privacy-policy.html">Terms of Service</a>,
+				<a href="https://www.akeeba.com/license.html">its license (GNU GPLv3)</a> and our
+				<a href="https://www.akeeba.com/privacy-policy.html">Terms of Service</a>,
 				including our Support Policy.
 			</p>
 		</fieldset>
@@ -766,7 +755,7 @@ class Com_AkeebaInstallerScript extends \FOF30\Utils\InstallScript
 		?>
 		<h2>Akeeba Backup Uninstallation Status</h2>
 		<p>We are sorry that you decided to uninstall Akeeba Backup. Please let us know why by using the <a
-			href="https://www.akeebabackup.com/contact-us.html" target="_blank">Contact Us form on our site</a>. We
+			href="https://www.akeeba.com/contact-us.html" target="_blank">Contact Us form on our site</a>. We
 			appreciate your feedback; it helps us develop better software!</p>
 		<?php
 	}
@@ -1024,7 +1013,7 @@ HTML;
 		$db = JFactory::getDbo();
 		$query = $db->getQuery(true)
 					->delete($db->qn('#__update_sites'))
-					->where($db->qn('location') . ' = ' . $db->q('http://cdn.akeebabackup.com/updates/fof.xml'));
+					->where($db->qn('location') . ' = ' . $db->q('http://cdn.akeeba.com/updates/fof.xml'));
 		try
 		{
 			$db->setQuery($query)->execute();

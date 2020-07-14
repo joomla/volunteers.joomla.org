@@ -9,7 +9,7 @@
 
 namespace Psr\Log;
 
-
+defined('AKEEBAENGINE') || die();
 
 /**
  * Basic Implementation of LoggerAwareInterface.

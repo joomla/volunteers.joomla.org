@@ -7,10 +7,11 @@
 
 namespace FOF30\Model\DataModel\Relation;
 
+defined('_JEXEC') || die;
+
 use FOF30\Model\DataModel;
 use FOF30\Model\DataModel\Relation;
-
-defined('_JEXEC') or die;
+use JDatabaseQuery;
 
 /**
  * HasMany (1-to-many) relation: this model is a parent which has zero or more children in the foreign table
@@ -22,13 +23,15 @@ class HasMany extends Relation
 	/**
 	 * Public constructor. Initialises the relation.
 	 *
-	 * @param   DataModel $parentModel       The data model we are attached to
-	 * @param   string    $foreignModelName  The name of the foreign key's model in the format "modelName@com_something"
-	 * @param   string    $localKey          The local table key for this relation, default: parentModel's ID field name
-	 * @param   string    $foreignKey        The foreign key for this relation, default: parentModel's ID field name
-	 * @param   string    $pivotTable        IGNORED
-	 * @param   string    $pivotLocalKey     IGNORED
-	 * @param   string    $pivotForeignKey   IGNORED
+	 * @param   DataModel  $parentModel       The data model we are attached to
+	 * @param   string     $foreignModelName  The name of the foreign key's model in the format
+	 *                                        "modelName@com_something"
+	 * @param   string     $localKey          The local table key for this relation, default: parentModel's ID field
+	 *                                        name
+	 * @param   string     $foreignKey        The foreign key for this relation, default: parentModel's ID field name
+	 * @param   string     $pivotTable        IGNORED
+	 * @param   string     $pivotLocalKey     IGNORED
+	 * @param   string     $pivotForeignKey   IGNORED
 	 */
 	public function __construct(DataModel $parentModel, $foreignModelName, $localKey = null, $foreignKey = null, $pivotTable = null, $pivotLocalKey = null, $pivotForeignKey = null)
 	{
@@ -46,76 +49,11 @@ class HasMany extends Relation
 	}
 
 	/**
-	 * Applies the relation filters to the foreign model when getData is called
-	 *
-	 * @param DataModel  $foreignModel   The foreign model you're operating on
-	 * @param DataModel\Collection $dataCollection If it's an eager loaded relation, the collection of loaded parent records
-	 *
-	 * @return boolean Return false to force an empty data collection
-	 */
-	protected function filterForeignModel(DataModel $foreignModel, DataModel\Collection $dataCollection = null)
-	{
-		// Decide how to proceed, based on eager or lazy loading
-		if (is_object($dataCollection))
-		{
-			// Eager loaded relation
-			if (!empty($dataCollection))
-			{
-				// Get a list of local keys from the collection
-				$values = array();
-
-				/** @var $item DataModel */
-				foreach ($dataCollection as $item)
-				{
-					$v = $item->getFieldValue($this->localKey, null);
-
-					if (!is_null($v))
-					{
-						$values[] = $v;
-					}
-				}
-
-				// Keep only unique values. This double step is required to re-index the array and avoid issues with
-				// Joomla Registry class. See issue #681
-				$values = array_values(array_unique($values));
-
-				// Apply the filter
-				if (!empty($values))
-				{
-					$foreignModel->where($this->foreignKey, 'in', $values);
-				}
-				else
-				{
-					return false;
-				}
-			}
-			else
-			{
-				return false;
-			}
-		}
-		else
-		{
-			// Lazy loaded relation; get the single local key
-			$localKey = $this->parentModel->getFieldValue($this->localKey, null);
-
-			if (is_null($localKey) || ($localKey === ''))
-			{
-				return false;
-			}
-
-			$foreignModel->where($this->foreignKey, '==', $localKey);
-		}
-
-		return true;
-	}
-
-	/**
-	 * Returns the count subquery for DataModel's has() and whereHas() methods.
+	 * Returns the count sub-query for DataModel's has() and whereHas() methods.
 	 *
 	 * @param   string  $tableAlias  The alias of the local table in the query. Leave blank to use the table's name.
 	 *
-	 * @return \JDatabaseQuery
+	 * @return JDatabaseQuery
 	 */
 	public function getCountSubquery($tableAlias = null)
 	{
@@ -167,4 +105,70 @@ class HasMany extends Relation
 
 		return $this->data->last();
 	}
-} 
+
+	/**
+	 * Applies the relation filters to the foreign model when getData is called
+	 *
+	 * @param   DataModel             $foreignModel    The foreign model you're operating on
+	 * @param   DataModel\Collection  $dataCollection  If it's an eager loaded relation, the collection of loaded
+	 *                                                 parent records
+	 *
+	 * @return boolean Return false to force an empty data collection
+	 */
+	protected function filterForeignModel(DataModel $foreignModel, DataModel\Collection $dataCollection = null)
+	{
+		// Decide how to proceed, based on eager or lazy loading
+		if (is_object($dataCollection))
+		{
+			// Eager loaded relation
+			if (!empty($dataCollection))
+			{
+				// Get a list of local keys from the collection
+				$values = [];
+
+				/** @var $item DataModel */
+				foreach ($dataCollection as $item)
+				{
+					$v = $item->getFieldValue($this->localKey, null);
+
+					if (!is_null($v))
+					{
+						$values[] = $v;
+					}
+				}
+
+				// Keep only unique values. This double step is required to re-index the array and avoid issues with
+				// Joomla Registry class. See issue #681
+				$values = array_values(array_unique($values));
+
+				// Apply the filter
+				if (!empty($values))
+				{
+					$foreignModel->where($this->foreignKey, 'in', $values);
+				}
+				else
+				{
+					return false;
+				}
+			}
+			else
+			{
+				return false;
+			}
+		}
+		else
+		{
+			// Lazy loaded relation; get the single local key
+			$localKey = $this->parentModel->getFieldValue($this->localKey, null);
+
+			if (is_null($localKey) || ($localKey === ''))
+			{
+				return false;
+			}
+
+			$foreignModel->where($this->foreignKey, '==', $localKey);
+		}
+
+		return true;
+	}
+}

@@ -7,26 +7,40 @@
 
 namespace FOF30\Platform\Joomla;
 
+defined('_JEXEC') || die;
+
+use ActionlogsModelActionlog;
 use Exception;
 use FOF30\Container\Container;
 use FOF30\Date\Date;
 use FOF30\Date\DateDecorator;
 use FOF30\Input\Input;
 use FOF30\Platform\Base\Platform as BasePlatform;
+use JDatabaseDriver;
+use JEventDispatcher;
+use Joomla\CMS\Application\ApplicationHelper;
 use Joomla\CMS\Application\CliApplication as JApplicationCli;
 use Joomla\CMS\Application\CMSApplication as JApplicationCms;
+use Joomla\CMS\Application\ConsoleApplication;
 use Joomla\CMS\Application\WebApplication as JApplicationWeb;
 use Joomla\CMS\Authentication\Authentication as JAuthentication;
 use Joomla\CMS\Authentication\AuthenticationResponse as JAuthenticationResponse;
 use Joomla\CMS\Cache\Cache as JCache;
+use Joomla\CMS\Document\Document;
 use Joomla\CMS\Document\HtmlDocument;
 use Joomla\CMS\Factory as JFactory;
+use Joomla\CMS\Language\Language;
+use Joomla\CMS\Log\Log;
+use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
+use Joomla\CMS\MVC\Model\BaseDatabaseModel;
+use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\CMS\Session\Session as JSession;
 use Joomla\CMS\Uri\Uri as JUri;
 use Joomla\CMS\User\User;
+use Joomla\CMS\User\UserHelper;
+use Joomla\CMS\Version;
+use Joomla\Component\Actionlogs\Administrator\Model\ActionlogModel;
 use Joomla\Registry\Registry;
-
-defined('_JEXEC') or die;
 
 /**
  * Part of the FOF Platform Abstraction Layer.
@@ -52,6 +66,13 @@ class Platform extends BasePlatform
 	protected static $isAdmin = null;
 
 	/**
+	 * Is this an API application?
+	 *
+	 * @var   bool
+	 */
+	protected static $isApi = null;
+
+	/**
 	 * A fake session storage for CLI apps. This is only used for legacy CLI applications which are not using the FOF
 	 * Base CLI script.
 	 *
@@ -62,7 +83,7 @@ class Platform extends BasePlatform
 	/**
 	 * The table and table field cache object, used to speed up database access
 	 *
-	 * @var  \JRegistry|Registry|null
+	 * @var  Registry|null
 	 */
 	private $_cache = null;
 
@@ -71,7 +92,7 @@ class Platform extends BasePlatform
 	 *
 	 * Overridden to cater for CLI applications not having access to a session object.
 	 *
-	 * @param   \FOF30\Container\Container  $c  The component container
+	 * @param   Container  $c  The component container
 	 */
 	public function __construct(Container $c)
 	{
@@ -79,7 +100,7 @@ class Platform extends BasePlatform
 
 		if ($this->isCli())
 		{
-			self::$fakeSession = new Registry();
+			static::$fakeSession = new Registry();
 		}
 	}
 
@@ -103,11 +124,11 @@ class Platform extends BasePlatform
 	 *
 	 * @return  void
 	 *
-	 * @throws  \Exception
+	 * @throws  Exception
 	 */
 	public function raiseError($code, $message)
 	{
-		$this->showErrorPage(new \Exception($message, $code));
+		$this->showErrorPage(new Exception($message, $code));
 	}
 
 	/**
@@ -180,7 +201,7 @@ class Platform extends BasePlatform
 	 */
 	public function getTemplateSuffixes()
 	{
-		$jversion     = new \JVersion;
+		$jversion     = new Version;
 		$versionParts = explode('.', $jversion->getShortVersion());
 		$majorVersion = array_shift($versionParts);
 		$suffixes     = [
@@ -204,7 +225,7 @@ class Platform extends BasePlatform
 	 */
 	public function getTemplateOverridePath($component, $absolute = true)
 	{
-		list($isCli, $isAdmin) = $this->isCliAdmin();
+		[$isCli, $isAdmin] = $this->isCliAdmin();
 
 		if (!$isCli)
 		{
@@ -298,9 +319,8 @@ class Platform extends BasePlatform
 	 * @param   integer  $id  The user ID to load. Skip or use null to retrieve
 	 *                        the object for the currently logged in user.
 	 *
-	 * @return  \JUser  The JUser object for the specified user
+	 * @return  User  The JUser object for the specified user
 	 * @see PlatformInterface::getUser()
-	 *
 	 */
 	public function getUser($id = null)
 	{
@@ -312,10 +332,10 @@ class Platform extends BasePlatform
 		{
 			if ($id)
 			{
-				return \JUser::getInstance($id);
+				return User::getInstance($id);
 			}
 
-			return new \JUser();
+			return new User();
 		}
 
 		return JFactory::getUser($id);
@@ -324,9 +344,8 @@ class Platform extends BasePlatform
 	/**
 	 * Returns the JDocument object which handles this component's response.
 	 *
-	 * @return  \JDocument
+	 * @return  Document
 	 * @see PlatformInterface::getDocument()
-	 *
 	 */
 	public function getDocument()
 	{
@@ -338,7 +357,7 @@ class Platform extends BasePlatform
 			{
 				$document = JFactory::getDocument();
 			}
-			catch (\Exception $exc)
+			catch (Exception $exc)
 			{
 				$document = null;
 			}
@@ -379,7 +398,7 @@ class Platform extends BasePlatform
 	/**
 	 * Return the \JLanguage instance of the CMS/application
 	 *
-	 * @return \JLanguage
+	 * @return Language
 	 */
 	public function getLanguage()
 	{
@@ -389,7 +408,7 @@ class Platform extends BasePlatform
 	/**
 	 * Returns the database driver object of the CMS/application
 	 *
-	 * @return \JDatabaseDriver
+	 * @return JDatabaseDriver
 	 */
 	public function getDbo()
 	{
@@ -412,7 +431,7 @@ class Platform extends BasePlatform
 	 */
 	public function getUserStateFromRequest($key, $request, $input, $default = null, $type = 'none', $setUserState = true)
 	{
-		list($isCLI, $isAdmin) = $this->isCliAdmin();
+		[$isCLI, $isAdmin] = $this->isCliAdmin();
 
 		unset($isAdmin); // Just to make phpStorm happy
 
@@ -481,8 +500,7 @@ class Platform extends BasePlatform
 
 		if ($runPlugins)
 		{
-			\JLoader::import('joomla.plugin.helper');
-			\JPluginHelper::importPlugin($type);
+			PluginHelper::importPlugin($type);
 		}
 	}
 
@@ -509,7 +527,7 @@ class Platform extends BasePlatform
 			// First, try with JEventDispatcher (Joomla 3.x)
 			if (class_exists('JEventDispatcher'))
 			{
-				return \JEventDispatcher::getInstance()->trigger($event, $data);
+				return JEventDispatcher::getInstance()->trigger($event, $data);
 			}
 
 			// If there's no JEventDispatcher try getting JApplication
@@ -564,7 +582,7 @@ class Platform extends BasePlatform
 	 */
 	public function isBackend()
 	{
-		list ($isCli, $isAdmin) = $this->isCliAdmin();
+		[$isCli, $isAdmin] = $this->isCliAdmin();
 
 		return $isAdmin && !$isCli;
 	}
@@ -578,9 +596,9 @@ class Platform extends BasePlatform
 	 */
 	public function isFrontend()
 	{
-		list ($isCli, $isAdmin) = $this->isCliAdmin();
+		[$isCli, $isAdmin] = $this->isCliAdmin();
 
-		return !$isAdmin && !$isCli;
+		return !$isAdmin && !$isCli && !$this->isApi();
 	}
 
 	/**
@@ -592,9 +610,44 @@ class Platform extends BasePlatform
 	 */
 	public function isCli()
 	{
-		list ($isCli, $isAdmin) = $this->isCliAdmin();
+		[$isCli, $isAdmin] = $this->isCliAdmin();
 
 		return !$isAdmin && $isCli;
+	}
+
+	public function isApi()
+	{
+		if (!is_null(static::$isApi))
+		{
+			return static::$isApi;
+		}
+
+		[$isCli, $isAdmin] = $this->isCliAdmin();
+
+		if (version_compare(JVERSION, '3.999.999', 'le') || $isCli || $isAdmin)
+		{
+			static::$isApi = false;
+
+			return static::$isApi;
+		}
+
+		try
+		{
+			$app         = JFactory::getApplication();
+			static::$isApi = $app->isClient('api');
+		}
+		catch (Exception $e)
+		{
+			static::$isApi = false;
+		}
+
+		if (static::$isApi)
+		{
+			static::$isCLI   = false;
+			static::$isAdmin = false;
+		}
+
+		return static::$isApi;
 	}
 
 	/**
@@ -677,7 +730,7 @@ class Platform extends BasePlatform
 	/**
 	 * Returns an object that holds the configuration of the current site.
 	 *
-	 * @return  \JRegistry|Registry
+	 * @return  Registry
 	 *
 	 * @codeCoverageIgnore
 	 */
@@ -689,14 +742,12 @@ class Platform extends BasePlatform
 	/**
 	 * logs in a user
 	 *
-	 * @param   array  $authInfo  authentification information
+	 * @param   array  $authInfo  Authentication information
 	 *
 	 * @return  boolean  True on success
 	 */
 	public function loginUser($authInfo)
 	{
-		\JLoader::import('joomla.user.authentication');
-
 		$options = ['remember' => false];
 
 		$response         = new JAuthenticationResponse();
@@ -758,16 +809,16 @@ class Platform extends BasePlatform
 
 			if ($result)
 			{
-				$match = \JUserHelper::verifyPassword($authInfo['password'], $result->password, $result->id);
+				$match = UserHelper::verifyPassword($authInfo['password'], $result->password, $result->id);
 
 				if ($match === true)
 				{
 					// Bring this in line with the rest of the system
-					$user               = \JUser::getInstance($result->id);
+					$user               = User::getInstance($result->id);
 					$response->email    = $user->email;
 					$response->fullname = $user->name;
 
-					list($isCli, $isAdmin) = $this->isCliAdmin();
+					[$isCli, $isAdmin] = $this->isCliAdmin();
 
 					if ($isAdmin)
 					{
@@ -791,8 +842,7 @@ class Platform extends BasePlatform
 
 			unset($results); // Just to make phpStorm happy
 
-			\JLoader::import('joomla.user.helper');
-			$userid = \JUserHelper::getUserId($response->username);
+			$userid = UserHelper::getUserId($response->username);
 			$user   = $this->getUser($userid);
 
 			$session = $this->container->session;
@@ -811,7 +861,6 @@ class Platform extends BasePlatform
 	 */
 	public function logoutUser()
 	{
-		\JLoader::import('joomla.user.authentication');
 		$app        = JFactory::getApplication();
 		$user       = $this->getUser();
 		$options    = ['remember' => false];
@@ -842,7 +891,7 @@ class Platform extends BasePlatform
 	 */
 	public function logAddLogger($file)
 	{
-		\JLog::addLogger(['text_file' => $file], \JLog::ALL, ['fof']);
+		Log::addLogger(['text_file' => $file], Log::ALL, ['fof']);
 	}
 
 	/**
@@ -857,7 +906,7 @@ class Platform extends BasePlatform
 	 */
 	public function logDeprecated($message)
 	{
-		\JLog::add($message, \JLog::WARNING, 'deprecated');
+		Log::add($message, Log::WARNING, 'deprecated');
 	}
 
 	/**
@@ -871,7 +920,7 @@ class Platform extends BasePlatform
 	 */
 	public function logDebug($message)
 	{
-		\JLog::add($message, \JLog::DEBUG, 'fof');
+		Log::add($message, Log::DEBUG, 'fof');
 	}
 
 	/**
@@ -913,9 +962,9 @@ class Platform extends BasePlatform
 		}
 
 		// Include required Joomla Model. Only applicable on Joomla 3.
-		if ($isJoomla3  && !$joomlaModelAdded)
+		if ($isJoomla3 && !$joomlaModelAdded)
 		{
-			\JModelLegacy::addIncludePath(JPATH_ROOT . '/administrator/components/com_actionlogs/models', 'ActionlogsModel');
+			BaseDatabaseModel::addIncludePath(JPATH_ROOT . '/administrator/components/com_actionlogs/models', 'ActionlogsModel');
 			$joomlaModelAdded = true;
 		}
 
@@ -945,12 +994,12 @@ class Platform extends BasePlatform
 
 		if (version_compare(JVERSION, '3.999.999', 'le'))
 		{
-			/** @var \ActionlogsModelActionlog $model * */
+			/** @var ActionlogsModelActionlog $model * */
 			try
 			{
-				$model = \JModelLegacy::getInstance('Actionlog', 'ActionlogsModel');
+				$model = BaseDatabaseModel::getInstance('Actionlog', 'ActionlogsModel');
 			}
-			catch (\Exception $e)
+			catch (Exception $e)
 			{
 				return;
 			}
@@ -959,9 +1008,9 @@ class Platform extends BasePlatform
 		{
 			try
 			{
-				/** @var \Joomla\CMS\MVC\Factory\MVCFactoryInterface $factory */
+				/** @var MVCFactoryInterface $factory */
 				$factory = JFactory::getApplication()->bootComponent('com_actionlogs')->getMVCFactory();
-				/** @var \Joomla\Component\Actionlogs\Administrator\Model\ActionlogModel $model */
+				/** @var ActionlogModel $model */
 				$model = $factory->createModel('Actionlog', 'Administrator');
 			}
 			catch (Exception $e)
@@ -992,9 +1041,7 @@ class Platform extends BasePlatform
 	 */
 	public function URIroot($pathonly = false, $path = null)
 	{
-		\JLoader::import('joomla.environment.uri');
-
-		return \JUri::root($pathonly, $path);
+		return JUri::root($pathonly, $path);
 	}
 
 	/**
@@ -1008,9 +1055,7 @@ class Platform extends BasePlatform
 	 */
 	public function URIbase($pathonly = false)
 	{
-		\JLoader::import('joomla.environment.uri');
-
-		return \JUri::base($pathonly);
+		return JUri::base($pathonly);
 	}
 
 	/**
@@ -1067,7 +1112,7 @@ class Platform extends BasePlatform
 	 *
 	 * @return  void
 	 *
-	 * @throws  \Exception
+	 * @throws  Exception
 	 */
 	public function redirect($url, $status = 303, $msg = '', $type = 'message')
 	{
@@ -1131,7 +1176,7 @@ class Platform extends BasePlatform
 	{
 		if ($this->isCli() && !class_exists('FOFApplicationCLI'))
 		{
-			self::$fakeSession->set("$namespace.$name", $value);
+			static::$fakeSession->set("$namespace.$name", $value);
 
 			return;
 		}
@@ -1152,7 +1197,7 @@ class Platform extends BasePlatform
 	{
 		if ($this->isCli() && !class_exists('FOFApplicationCLI'))
 		{
-			return self::$fakeSession->get("$namespace.$name", $default);
+			return static::$fakeSession->get("$namespace.$name", $default);
 		}
 
 		return $this->container->session->get($name, $default, $namespace);
@@ -1196,7 +1241,7 @@ class Platform extends BasePlatform
 			// Create a token
 			if (is_null($token) || $forceNew)
 			{
-				$token = \JUserHelper::genRandomPassword(32);
+				$token = UserHelper::genRandomPassword(32);
 				$this->setSessionVar('session.token', $token);
 			}
 
@@ -1207,7 +1252,7 @@ class Platform extends BasePlatform
 
 			$user = $this->getUser();
 
-			return \JApplicationHelper::getHash($user->id . $token);
+			return ApplicationHelper::getHash($user->id . $token);
 		}
 
 		// Web application, go through the regular Joomla! API.
@@ -1268,13 +1313,21 @@ class Platform extends BasePlatform
 
 					return [static::$isCLI, static::$isAdmin];
 				}
-				else
+
+				$app           = JFactory::getApplication();
+				static::$isCLI = $app instanceof Exception;
+
+				if (class_exists('Joomla\CMS\Application\CliApplication'))
 				{
-					$app           = JFactory::getApplication();
-					static::$isCLI = $app instanceof \Exception || $app instanceof JApplicationCli;
+					static::$isCLI = static::$isCLI || $app instanceof JApplicationCli;
+				}
+
+				if (class_exists('Joomla\CMS\Application\ConsoleApplication'))
+				{
+					static::$isCLI = static::$isCLI || ($app instanceof ConsoleApplication);
 				}
 			}
-			catch (\Exception $e)
+			catch (Exception $e)
 			{
 				static::$isCLI = true;
 			}
@@ -1312,7 +1365,7 @@ class Platform extends BasePlatform
 	 *
 	 * @param   boolean  $force  Should I forcibly reload the registry?
 	 *
-	 * @return  \JRegistry|Registry
+	 * @return  Registry
 	 */
 	private function &getCacheObject($force = false)
 	{
@@ -1323,19 +1376,17 @@ class Platform extends BasePlatform
 			$cache        = JFactory::getCache('fof', '');
 			$this->_cache = $cache->get('cache', 'fof');
 
-			\JLoader::import('joomla.registry.registry');
-
 			$isRegistry = is_object($this->_cache);
 
 			if ($isRegistry)
 			{
-				$isRegistry = class_exists('JRegistry') ? ($this->_cache instanceof \JRegistry) : ($this->_cache instanceof Registry);
+				$isRegistry = class_exists('JRegistry') ? ($this->_cache instanceof Registry) : ($this->_cache instanceof Registry);
 			}
 
 			if (!$isRegistry)
 			{
 				// Create a new Registry object
-				$this->_cache = class_exists('JRegistry') ? new \JRegistry() : new Registry();
+				$this->_cache = class_exists('JRegistry') ? new Registry() : new Registry();
 			}
 		}
 

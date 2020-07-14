@@ -7,10 +7,10 @@
 
 namespace FOF30\Factory\Magic;
 
+defined('_JEXEC') || die;
+
 use FOF30\Factory\Exception\ViewNotFound;
 use FOF30\View\DataView\DataViewInterface;
-
-defined('_JEXEC') or die;
 
 /**
  * Creates a DataModel/TreeModel object instance based on the information provided by the fof.xml configuration file
@@ -26,7 +26,7 @@ class ViewFactory extends BaseFactory
 	 *
 	 * @return  DataViewInterface  A new TreeModel or DataModel object
 	 */
-	public function make($name = null, $viewType = 'html', array $config = array())
+	public function make($name = null, $viewType = 'html', array $config = [])
 	{
 		if (empty($name))
 		{
@@ -34,15 +34,15 @@ class ViewFactory extends BaseFactory
 		}
 
 		$appConfig = $this->container->appConfig;
-		$name = ucfirst($name);
+		$name      = ucfirst($name);
 
-		$defaultConfig = array(
+		$defaultConfig = [
 			'name'          => $name,
 			'template_path' => $appConfig->get("views.$name.config.template_path"),
 			'layout'        => $appConfig->get("views.$name.config.layout"),
 			// You can pass something like .php => Class1, .foo.bar => Class 2
 			'viewEngineMap' => $appConfig->get("views.$name.config.viewEngineMap"),
-		);
+		];
 
 		$config = array_merge($defaultConfig, $config);
 

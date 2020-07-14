@@ -7,12 +7,12 @@
 
 namespace FOF30\Utils;
 
+defined('_JEXEC') || die;
+
 use Exception;
 use Joomla\CMS\Cache\Cache;
 use Joomla\CMS\Factory;
 use Joomla\CMS\MVC\Model\BaseDatabaseModel;
-
-defined('_JEXEC') or die;
 
 /**
  * A utility class to help you quickly clean the Joomla! cache

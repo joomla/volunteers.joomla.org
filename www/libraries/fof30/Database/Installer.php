@@ -7,25 +7,24 @@
 
 namespace FOF30\Database;
 
-use JDatabaseDriver;
-use SimpleXMLElement;
-use Exception;
+defined('_JEXEC') || die;
 
-defined('_JEXEC') or die;
+use Exception;
+use JDatabaseDriver;
+use JLoader;
+use Joomla\CMS\Filesystem\Folder;
+use SimpleXMLElement;
 
 class Installer
 {
+	/** @var array Internal cache for table list */
+	protected static $allTables = [];
 	/** @var  JDatabaseDriver  The database connector object */
 	private $db = null;
-
 	/** @var  string  The directory where the XML schema files are stored */
 	private $xmlDirectory = null;
-
 	/** @var  string  Force a specific **absolute** file path for the XML schema file */
 	private $forcedFile = null;
-
-    /** @var array Internal cache for table list  */
-    protected static $allTables = array();
 
 	/**
 	 * Public constructor
@@ -33,25 +32,13 @@ class Installer
 	 * @param   JDatabaseDriver  $db         The database driver we're going to use to install the tables
 	 * @param   string           $directory  The directory holding the XML schema update files
 	 *
-	 * @param   array  $config  The configuration array
+	 * @param   array            $config     The configuration array
 	 */
 	public function __construct(JDatabaseDriver $db, $directory)
 	{
 		$this->db = $db;
 
 		$this->xmlDirectory = $directory;
-	}
-
-	/**
-	 * Sets the directory where XML schema files are stored
-	 *
-	 * @param   string  $xmlDirectory
-	 *
-	 * @codeCoverageIgnore
-	 */
-	public function setXmlDirectory($xmlDirectory)
-	{
-		$this->xmlDirectory = $xmlDirectory;
 	}
 
 	/**
@@ -64,6 +51,18 @@ class Installer
 	public function getXmlDirectory()
 	{
 		return $this->xmlDirectory;
+	}
+
+	/**
+	 * Sets the directory where XML schema files are stored
+	 *
+	 * @param   string  $xmlDirectory
+	 *
+	 * @codeCoverageIgnore
+	 */
+	public function setXmlDirectory($xmlDirectory)
+	{
+		$this->xmlDirectory = $xmlDirectory;
 	}
 
 	/**
@@ -82,7 +81,7 @@ class Installer
 	 * Sets the absolute path to an XML schema file which will be read no matter what. Set to a blank string to let the
 	 * Installer class auto-detect your schema file based on your database type.
 	 *
-	 * @param  string  $forcedFile
+	 * @param   string  $forcedFile
 	 *
 	 * @codeCoverageIgnore
 	 */
@@ -91,15 +90,15 @@ class Installer
 		$this->forcedFile = $forcedFile;
 	}
 
-    /**
-     * Clears the internal table list cache
-     *
-     * @return  void
-     */
-    public function nukeCache()
-    {
-        static::$allTables = array();
-    }
+	/**
+	 * Clears the internal table list cache
+	 *
+	 * @return  void
+	 */
+	public function nukeCache()
+	{
+		static::$allTables = [];
+	}
 
 	/**
 	 * Creates or updates the database schema
@@ -143,15 +142,15 @@ class Installer
 			$value = trim($value);
 			$value = strtolower($value);
 
-			$autoCollationConversion = in_array($value, array('true', '1', 'on', 'yes'));
+			$autoCollationConversion = in_array($value, ['true', '1', 'on', 'yes']);
 		}
 
 		$hasUtf8mb4Support = method_exists($this->db, 'hasUTF8mb4Support') && $this->db->hasUTF8mb4Support();
-		$tablesToConvert = array();
+		$tablesToConvert   = [];
 
 		// If we have an uppercase db prefix we can expect CREATE TABLE fail because we cannot detect reliably
 		// the existence of database tables. See https://github.com/joomla/joomla-cms/issues/10928#issuecomment-228549658
-		$prefix = $this->db->getPrefix();
+		$prefix             = $this->db->getPrefix();
 		$canFailCreateTable = preg_match('/[A-Z]/', $prefix);
 
 		/** @var SimpleXMLElement $action */
@@ -169,7 +168,7 @@ class Installer
 			}
 
 			// Am I allowed to let this action fail?
-			$canFailAction = $attributes->canfail ? $attributes->canfail : 0;
+			$canFailAction = $attributes->canfail ?: 0;
 
 			// Evaluate conditions
 			$shouldExecute = true;
@@ -180,7 +179,7 @@ class Installer
 				if ($node->getName() == 'condition')
 				{
 					// Get the operator
-					$operator = $node->attributes()->operator ? (string)$node->attributes()->operator : 'and';
+					$operator = $node->attributes()->operator ? (string) $node->attributes()->operator : 'and';
 					$operator = empty($operator) ? 'and' : $operator;
 
 					$condition = $this->conditionMet($table, $node);
@@ -244,14 +243,14 @@ class Installer
 						continue;
 					}
 
-					$canFail = $node->attributes->canfail ? (string)$node->attributes->canfail : $canFailAction;
+					$canFail = $node->attributes->canfail ? (string) $node->attributes->canfail : $canFailAction;
 
 					if (is_string($canFail))
 					{
 						$canFail = strtoupper($canFail);
 					}
 
-					$canFail = (in_array($canFail, array(true, 1, 'YES', 'TRUE')));
+					$canFail = (in_array($canFail, [true, 1, 'YES', 'TRUE']));
 
 					// Do I need to automatically convert the collation of all CREATE / ALTER queries?
 					if ($autoCollationConversion)
@@ -321,7 +320,7 @@ class Installer
 		}
 
 		// Walk the sql > action tags to find all tables
-		$tables = array();
+		$tables = [];
 		/** @var SimpleXMLElement $actions */
 		$actions = $xml->sql->children();
 
@@ -329,7 +328,7 @@ class Installer
 		foreach ($actions as $action)
 		{
 			$attributes = $action->attributes();
-			$tables[] = (string)$attributes->table;
+			$tables[]   = (string) $attributes->table;
 		}
 
 		// Simplify the tables list
@@ -369,10 +368,8 @@ class Installer
 			}
 		}
 
-		class_exists('\\JFolder') || \JLoader::import('joomla.filesystem.folder');
-
 		// Get all XML files in the schema directory
-		$xmlFiles = \JFolder::files($this->xmlDirectory, '\.xml$');
+		$xmlFiles = Folder::files($this->xmlDirectory, '\.xml$');
 
 		if (empty($xmlFiles))
 		{
@@ -453,7 +450,7 @@ class Installer
 
 		foreach ($drivers->children() as $driverTypeTag)
 		{
-			$thisDriverType = (string)$driverTypeTag;
+			$thisDriverType = (string) $driverTypeTag;
 
 			if ($thisDriverType == $driverType)
 			{
@@ -464,7 +461,7 @@ class Installer
 		// Some custom database drivers use a non-standard $name variable. Let try a relaxed match.
 		foreach ($drivers->children() as $driverTypeTag)
 		{
-			$thisDriverType = (string)$driverTypeTag;
+			$thisDriverType = (string) $driverTypeTag;
 
 			if (
 				// e.g. $driverType = 'mysqlistupid', $thisDriverType = 'mysqli' => driver matched
@@ -492,7 +489,7 @@ class Installer
 	{
 		if (empty(static::$allTables))
 		{
-            static::$allTables = $this->db->getTableList();
+			static::$allTables = $this->db->getTableList();
 		}
 
 		// Does the table exist?
@@ -504,14 +501,14 @@ class Installer
 
 		// Get the condition's attributes
 		$attributes = $node->attributes();
-		$type = $attributes->type ? $attributes->type : null;
-		$value = $attributes->value ? (string) $attributes->value : null;
+		$type       = $attributes->type ?: null;
+		$value      = $attributes->value ? (string) $attributes->value : null;
 
 		switch ($type)
 		{
 			// Check if a table or column is missing
 			case 'missing':
-				$fieldName = (string)$value;
+				$fieldName = (string) $value;
 
 				if (empty($fieldName))
 				{
@@ -523,9 +520,9 @@ class Installer
 					{
 						$tableColumns = $this->db->getTableColumns($tableNormal, true);
 					}
-					catch (\Exception $e)
+					catch (Exception $e)
 					{
-						$tableColumns = array();
+						$tableColumns = [];
 					}
 
 					$condition = !array_key_exists($fieldName, $tableColumns);
@@ -539,20 +536,20 @@ class Installer
 				{
 					$tableColumns = $this->db->getTableColumns($tableNormal, true);
 				}
-				catch (\Exception $e)
+				catch (Exception $e)
 				{
-					$tableColumns = array();
+					$tableColumns = [];
 				}
 
 				$condition = false;
 
 				if (array_key_exists($value, $tableColumns))
 				{
-					$coltype = $attributes->coltype ? $attributes->coltype : null;
+					$coltype = $attributes->coltype ?: null;
 
 					if (!empty($coltype))
 					{
-						$coltype = strtolower($coltype);
+						$coltype     = strtolower($coltype);
 						$currentType = is_string($tableColumns[$value]) ? $tableColumns[$value] : strtolower($tableColumns[$value]->Type);
 
 						$condition = ($coltype == $currentType);
@@ -581,7 +578,7 @@ class Installer
 				// Check if the driver and the database connection have UTF8MB4 support
 				if (method_exists($this->db, 'hasUTF8mb4Support') && $this->db->hasUTF8mb4Support())
 				{
-					$fieldName = (string)$value;
+					$fieldName = (string) $value;
 
 					if (empty($fieldName))
 					{
@@ -602,12 +599,12 @@ class Installer
 
 			// Check if the result of a query matches our expectation
 			case 'equals':
-				$query = (string)$node;
+				$query = (string) $node;
 				$this->db->setQuery($query);
 
 				try
 				{
-					$result = $this->db->loadResult();
+					$result    = $this->db->loadResult();
 					$condition = ($result == $value);
 				}
 				catch (Exception $e)
@@ -639,7 +636,7 @@ class Installer
 	 */
 	private function getTableCollation($tableName)
 	{
-		static $cache = array();
+		static $cache = [];
 
 		$tableName = $this->db->replacePrefix($tableName);
 
@@ -660,7 +657,7 @@ class Installer
 	 */
 	private function realGetTableCollation($tableName)
 	{
-		$utf8Support = method_exists($this->db, 'hasUTFSupport') && $this->db->hasUTFSupport();
+		$utf8Support    = method_exists($this->db, 'hasUTFSupport') && $this->db->hasUTFSupport();
 		$utf8mb4Support = $utf8Support && method_exists($this->db, 'hasUTF8mb4Support') && $this->db->hasUTF8mb4Support();
 
 		$collation = $utf8mb4Support ? 'utf8mb4_unicode_ci' : ($utf8Support ? 'utf_general_ci' : 'latin1_swedish_ci');
@@ -671,7 +668,7 @@ class Installer
 		{
 			$row = $this->db->setQuery($query)->loadAssoc();
 		}
-		catch (\Exception $e)
+		catch (Exception $e)
 		{
 			return $collation;
 		}
@@ -704,14 +701,14 @@ class Installer
 	 */
 	private function getColumnCollation($tableName, $columnName)
 	{
-		static $cache = array();
+		static $cache = [];
 
-		$tableName = $this->db->replacePrefix($tableName);
+		$tableName  = $this->db->replacePrefix($tableName);
 		$columnName = $this->db->replacePrefix($columnName);
 
 		if (!isset($cache[$tableName]))
 		{
-			$cache[$tableName] = array();
+			$cache[$tableName] = [];
 		}
 
 		if (!isset($cache[$tableName][$columnName]))
@@ -740,7 +737,7 @@ class Installer
 		{
 			$row = $this->db->setQuery($query)->loadAssoc();
 		}
-		catch (\Exception $e)
+		catch (Exception $e)
 		{
 			return $collation;
 		}
@@ -779,23 +776,23 @@ class Installer
 		$beginningOfQuery = substr($query, 0, 12);
 		$beginningOfQuery = strtoupper($beginningOfQuery);
 
-		if (!in_array($beginningOfQuery, array('ALTER TABLE ', 'CREATE TABLE')))
+		if (!in_array($beginningOfQuery, ['ALTER TABLE ', 'CREATE TABLE']))
 		{
 			return $query;
 		}
 
 		// Replace utf8mb4 with utf8
-		$from = array(
+		$from = [
 			'utf8mb4_unicode_ci',
 			'utf8mb4_',
 			'utf8mb4',
-		);
+		];
 
-		$to = array(
+		$to = [
 			'utf8_general_ci', // Yeah, we convert utf8mb4_unicode_ci to utf8_general_ci per Joomla!'s conventions
 			'utf8_',
 			'utf8',
-		);
+		];
 
 		return str_replace($from, $to, $query);
 	}
@@ -813,40 +810,40 @@ class Installer
 		$beginningOfQuery = substr($query, 0, 12);
 		$beginningOfQuery = strtoupper($beginningOfQuery);
 
-		if (!in_array($beginningOfQuery, array('ALTER TABLE ', 'CREATE TABLE')))
+		if (!in_array($beginningOfQuery, ['ALTER TABLE ', 'CREATE TABLE']))
 		{
 			return $query;
 		}
 
 		// Replace utf8 with utf8mb4
-		$from = array(
+		$from = [
 			'utf8_general_ci',
 			'utf8_',
 			'utf8',
-		);
+		];
 
-		$to = array(
+		$to = [
 			'utf8mb4_unicode_ci', // Yeah, we convert utf8_general_ci to utf8mb4_unicode_ci per Joomla!'s conventions
 			'utf8mb4_',
 			'utf8mb4',
-		);
+		];
 
 		return str_replace($from, $to, $query);
 	}
 
 	/**
 	 * Analyzes a query. If it's a CREATE TABLE query the table is added to the $tables array.
-	 * 
+	 *
 	 * @param   string  $query   The query to analyze
-	 * @param   string  $tables  The array where the name of the detected table is added
-	 * 
+	 * @param   array   $tables  The array where the name of the detected table is added
+	 *
 	 * @return  void
 	 */
 	private function extractTablesToConvert($query, &$tables)
 	{
 		// Normalize the whitespace of the query
 		$query = trim($query);
-		$query = str_replace(array("\r\n", "\r", "\n"), ' ', $query);
+		$query = str_replace(["\r\n", "\r", "\n"], ' ', $query);
 
 		while (strstr($query, '  ') !== false)
 		{
@@ -871,7 +868,7 @@ class Installer
 		$query = str_replace('(', ' (', $query);
 
 		// Now we should have the name of the table, a space and the rest of the query. Extract the table name.
-		$parts = explode(' ', $query, 2);
+		$parts     = explode(' ', $query, 2);
 		$tableName = $parts[0];
 
 		/**
@@ -922,7 +919,7 @@ class Installer
 						$this->db->setQuery($query)->execute();
 					}
 				}
-				catch (\Exception $e)
+				catch (Exception $e)
 				{
 					// We ignore failed conversions. Remember, you MUST change your indices MANUALLY.
 				}
@@ -942,13 +939,13 @@ class Installer
 	private function hasIndex($tableName, $indexName)
 	{
 		static $isMySQL = null;
-		static $cache = array();
+		static $cache = [];
 
 		if (is_null($isMySQL))
 		{
 			$driverType = $this->db->name;
 			$driverType = strtolower($driverType);
-			$isMySQL = true;
+			$isMySQL    = true;
 
 			if (
 				!strpos($driverType, 'mysql') === 0
@@ -968,7 +965,7 @@ class Installer
 
 		if (!isset($cache[$tableName]))
 		{
-			$cache[$tableName] = array();
+			$cache[$tableName] = [];
 		}
 
 		if (!isset($cache[$tableName][$indexName]))
@@ -977,7 +974,7 @@ class Installer
 
 			try
 			{
-				$indices          = array();
+				$indices          = [];
 				$query            = 'SHOW INDEXES FROM ' . $this->db->qn($tableName);
 				$indexDefinitions = $this->db->setQuery($query)->loadAssocList();
 
@@ -993,7 +990,7 @@ class Installer
 
 				$cache[$tableName][$indexName] = in_array($indexName, $indices);
 			}
-			catch (\Exception $e)
+			catch (Exception $e)
 			{
 				// Ignore errors
 			}

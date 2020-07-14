@@ -9,13 +9,13 @@
 
 namespace Akeeba\Engine\Postproc;
 
-
+defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Factory;
 use Akeeba\Engine\Platform;
 use Akeeba\Engine\Postproc\Exception\BadConfiguration;
 use Awf\Text\Text;
-use JText;
+use Joomla\CMS\Language\Text as JText;
 use RuntimeException;
 
 class Email extends Base
@@ -44,11 +44,11 @@ class Email extends Base
 
 			if (class_exists('JText'))
 			{
-				$subject = JText::_('COM_AKEEBA_COMMON_EMAIL_DEAFULT_SUBJECT');
-			}
-			elseif (class_exists('\Awf\Text\Text'))
-			{
 				$subject = Text::_('COM_AKEEBA_COMMON_EMAIL_DEAFULT_SUBJECT');
+			}
+			elseif (class_exists('\Joomla\CMS\Language\Text'))
+			{
+				$subject = JText::_('COM_AKEEBA_COMMON_EMAIL_DEAFULT_SUBJECT');
 			}
 		}
 

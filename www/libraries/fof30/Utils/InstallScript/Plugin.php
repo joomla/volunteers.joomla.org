@@ -7,17 +7,14 @@
 
 namespace FOF30\Utils\InstallScript;
 
+defined('_JEXEC') || die;
+
 use Exception;
 use FOF30\Database\Installer;
-use JFactory;
 use JLoader;
-
-defined('_JEXEC') or die;
-
-JLoader::import('joomla.filesystem.folder');
-JLoader::import('joomla.filesystem.file');
-JLoader::import('joomla.installer.installer');
-JLoader::import('joomla.utilities.date');
+use Joomla\CMS\Factory;
+use Joomla\CMS\Installer\Adapter\ComponentAdapter;
+use Joomla\CMS\Log\Log;
 
 // In case FOF's autoloader is not present yet, e.g. new installation
 if (!class_exists('FOF30\\Utils\\InstallScript\\BaseInstaller', true))
@@ -67,10 +64,10 @@ class Plugin extends BaseInstaller
 		// Get the plugin name and folder from the class name (it's always plgFolderPluginInstallerScript) if necessary.
 		if (empty($this->pluginFolder) || empty($this->pluginName))
 		{
-			$class              = get_class($this);
-			$words              = preg_replace('/(\s)+/', '_', $class);
-			$words              = strtolower(preg_replace('/(?<=\\w)([A-Z])/', '_\\1', $words));
-			$classParts         = explode('_', $words);
+			$class      = get_class($this);
+			$words      = preg_replace('/(\s)+/', '_', $class);
+			$words      = strtolower(preg_replace('/(?<=\\w)([A-Z])/', '_\\1', $words));
+			$classParts = explode('_', $words);
 
 			if (empty($this->pluginFolder))
 			{
@@ -79,7 +76,7 @@ class Plugin extends BaseInstaller
 
 			if (empty($this->pluginName))
 			{
-				$this->pluginName   = $classParts[2];
+				$this->pluginName = $classParts[2];
 			}
 		}
 	}
@@ -88,8 +85,9 @@ class Plugin extends BaseInstaller
 	 * Joomla! pre-flight event. This runs before Joomla! installs or updates the component. This is our last chance to
 	 * tell Joomla! if it should abort the installation.
 	 *
-	 * @param   string                      $type   Installation type (install, update, discover_install)
-	 * @param   \JInstallerAdapterComponent $parent Parent object
+	 * @param   string            $type                                  Installation type (install, update,
+	 *                                                                   discover_install)
+	 * @param   ComponentAdapter  $parent                                Parent object
 	 *
 	 * @return  boolean  True to let the installation proceed, false to halt the installation
 	 */
@@ -118,12 +116,12 @@ class Plugin extends BaseInstaller
 	 * or updating your component. This is the last chance you've got to perform any additional installations, clean-up,
 	 * database updates and similar housekeeping functions.
 	 *
-	 * @param   string                      $type   install, update or discover_update
-	 * @param   \JInstallerAdapterComponent $parent Parent object
-	 *
-     * @throws Exception
+	 * @param   string            $type    install, update or discover_update
+	 * @param   ComponentAdapter  $parent  Parent object
 	 *
 	 * @return  void
+	 * @throws Exception
+	 *
 	 */
 	public function postflight($type, $parent)
 	{
@@ -135,13 +133,12 @@ class Plugin extends BaseInstaller
 		 */
 		// Add ourselves to the list of extensions depending on FOF30
 		// $this->addDependency('fof30', $this->getDependencyName());
-
 		// Install or update database
-		$schemaPath  = $parent->getParent()->getPath('source') . '/' . $this->schemaXmlPath;
+		$schemaPath = $parent->getParent()->getPath('source') . '/' . $this->schemaXmlPath;
 
 		if (@is_dir($schemaPath))
 		{
-			$dbInstaller = new Installer(JFactory::getDbo(), $schemaPath);
+			$dbInstaller = new Installer(Factory::getDbo(), $schemaPath);
 			$dbInstaller->updateSchema();
 		}
 
@@ -158,17 +155,17 @@ class Plugin extends BaseInstaller
 	/**
 	 * Runs on uninstallation
 	 *
-	 * @param   \JInstallerAdapterComponent $parent The parent object
+	 * @param   ComponentAdapter  $parent  The parent object
 	 */
 	public function uninstall($parent)
 	{
 		// Uninstall database
-		$schemaPath  = $parent->getParent()->getPath('source') . '/' . $this->schemaXmlPath;
+		$schemaPath = $parent->getParent()->getPath('source') . '/' . $this->schemaXmlPath;
 
 		// Uninstall database
 		if (@is_dir($schemaPath))
 		{
-			$dbInstaller = new Installer(JFactory::getDbo(), $schemaPath);
+			$dbInstaller = new Installer(Factory::getDbo(), $schemaPath);
 			$dbInstaller->removeSchema();
 		}
 
@@ -194,35 +191,35 @@ class Plugin extends BaseInstaller
 	 * ourselves WITHOUT going through the manifest, based entirely on the conventions we follow for Akeeba Ltd's
 	 * extensions.
 	 *
-	 * @param   \JInstallerAdapterComponent $parent
+	 * @param   ComponentAdapter  $parent
 	 */
 	protected function bugfixFilesNotCopiedOnUpdate($parent)
 	{
-		\JLog::add("Joomla! extension update workaround for $this->pluginFolder plugin $this->pluginName", \JLog::INFO, 'fof3_extension_installation');
+		Log::add("Joomla! extension update workaround for $this->pluginFolder plugin $this->pluginName", Log::INFO, 'fof3_extension_installation');
 
 		$temporarySource = $parent->getParent()->getPath('source');
 
-		$copyMap = array(
+		$copyMap = [
 			// Plugin files
 			$temporarySource               => JPATH_ROOT . '/plugins/' . $this->pluginFolder . '/' . $this->pluginName,
 			// Language (always stored in administrator for plugins)
 			$temporarySource . '/language' => JPATH_ADMINISTRATOR . '/language',
 			// Media files, e.g. /media/plg_system_foobar
 			$temporarySource . '/media'    => JPATH_ROOT . '/media/' . $this->getDependencyName(),
-		);
+		];
 
 		foreach ($copyMap as $source => $target)
 		{
-			\JLog::add(__CLASS__ . ":: Conditional copy $source to $target", \JLog::DEBUG, 'fof3_extension_installation');
+			Log::add(__CLASS__ . ":: Conditional copy $source to $target", Log::DEBUG, 'fof3_extension_installation');
 
-			$ignored = array();
+			$ignored = [];
 
 			if ($source == $temporarySource)
 			{
-				$ignored = array(
-					'index.html',  'index.htm', 'LICENSE.txt', 'license.txt', 'readme.htm', 'readme.html', 'README.md',
+				$ignored = [
+					'index.html', 'index.htm', 'LICENSE.txt', 'license.txt', 'readme.htm', 'readme.html', 'README.md',
 					'script.php', 'language', 'media',
-				);
+				];
 			}
 
 			$this->recursiveConditionalCopy($source, $target, $ignored);

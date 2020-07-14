@@ -5,9 +5,10 @@
  * @license   GNU General Public License version 3, or later
  */
 
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 use Akeeba\Engine\Factory;
+use Joomla\CMS\Language\Text;
 
 /** @var  \Akeeba\Backup\Admin\View\Log\Raw $this */
 
@@ -24,15 +25,12 @@ if (!@is_file($logFile) && @file_exists(substr($logFile, 0, -4)))
 	$logFile = substr($logFile, 0, -4);
 }
 
-// Load JFile class
-JLoader::import('joomla.filesystem.file');
-
 @ob_end_clean();
 
 if (!@file_exists($logFile))
 {
 	// Oops! The log doesn't exist!
-	echo '<p>' . JText::_('COM_AKEEBA_LOG_ERROR_LOGFILENOTEXISTS') . '</p>';
+	echo '<p>' . Text::_('COM_AKEEBA_LOG_ERROR_LOGFILENOTEXISTS') . '</p>';
 
 	return;
 }
@@ -43,7 +41,7 @@ else
 	if ($fp === FALSE)
 	{
 		// Oops! The log isn't readable?!
-		echo '<p>' . JText::_('COM_AKEEBA_LOG_ERROR_UNREADABLE') . '</p>';
+		echo '<p>' . Text::_('COM_AKEEBA_LOG_ERROR_UNREADABLE') . '</p>';
 
 		return;
 	}

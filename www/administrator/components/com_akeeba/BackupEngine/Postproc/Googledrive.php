@@ -9,7 +9,7 @@
 
 namespace Akeeba\Engine\Postproc;
 
-
+defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Factory;
 use Akeeba\Engine\Platform;
@@ -18,7 +18,7 @@ use Akeeba\Engine\Postproc\Exception\BadConfiguration;
 use Akeeba\Engine\Postproc\Exception\RangeDownloadNotSupported;
 use Awf\Text\Text;
 use Exception;
-use JText;
+use Joomla\CMS\Language\Text as JText;
 use RuntimeException;
 
 class Googledrive extends Base
@@ -92,7 +92,7 @@ HTML;
 		// Get the default item (the personal Drive)
 		$baseItem = 'Google Drive (personal)';
 
-		if (class_exists('JText'))
+		if (class_exists('\Joomla\CMS\Language\Text'))
 		{
 			$baseItem = JText::_('COM_AKEEBA_CONFIG_GOOGLEDRIVE_TEAMDRIVE_OPT_PERSONAL');
 		}
@@ -170,7 +170,7 @@ HTML;
 					__METHOD__, $this->remotePath
 				));
 
-				list($fileName, $folderId) = $connector->preprocessUploadPath($this->remotePath, $teamDriveID);
+				[$fileName, $folderId] = $connector->preprocessUploadPath($this->remotePath, $teamDriveID);
 
 				Factory::getLog()->debug(sprintf(
 					"%s - Google Drive folder ID = %s",
@@ -219,7 +219,7 @@ HTML;
 				__METHOD__, $remotePath
 			));
 
-			list($fileName, $folderId) = $connector->preprocessUploadPath($remotePath, $teamDriveID);
+			[$fileName, $folderId] = $connector->preprocessUploadPath($remotePath, $teamDriveID);
 
 			Factory::getLog()->debug(sprintf(
 				"%s - Creating new upload session",

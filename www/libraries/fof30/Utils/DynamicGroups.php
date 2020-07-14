@@ -7,9 +7,12 @@
 
 namespace FOF30\Utils;
 
-use FOF30\Container\Container;
+defined('_JEXEC') || die;
 
-defined('_JEXEC') or die;
+use FOF30\Container\Container;
+use ReflectionClass;
+use ReflectionException;
+use ReflectionObject;
 
 /**
  * Dynamic user to user group assignment.
@@ -75,9 +78,9 @@ class DynamicGroups
 
 		try
 		{
-			$reflectedAccess = new \ReflectionClass($className);
+			$reflectedAccess = new ReflectionClass($className);
 		}
-		catch (\ReflectionException $e)
+		catch (ReflectionException $e)
 		{
 			// This should never happen!
 			$container->platform->logDebug('Cannot locate the Joomla\\CMS\\Access\\Access or JAccess class. Is your Joomla installation broken or too old / too new?');
@@ -146,7 +149,7 @@ class DynamicGroups
 		$refProperty->setAccessible(true);
 		$identities = $refProperty->getValue();
 
-		$keys = array($user->id, 0);
+		$keys = [$user->id, 0];
 
 		foreach ($keys as $key)
 		{
@@ -173,24 +176,24 @@ class DynamicGroups
 		$container = Container::getInstance('com_FOOBAR');
 
 		$user          = $container->platform->getUser();
-		$reflectedUser = new \ReflectionObject($user);
+		$reflectedUser = new ReflectionObject($user);
 
 		// Clear the user group cache
-		$refProperty   = $reflectedUser->getProperty('_authGroups');
+		$refProperty = $reflectedUser->getProperty('_authGroups');
 		$refProperty->setAccessible(true);
-		$refProperty->setValue($user, array());
+		$refProperty->setValue($user, []);
 		$refProperty->setAccessible(false);
 
 		// Clear the view access level cache
-		$refProperty   = $reflectedUser->getProperty('_authLevels');
+		$refProperty = $reflectedUser->getProperty('_authLevels');
 		$refProperty->setAccessible(true);
-		$refProperty->setValue($user, array());
+		$refProperty->setValue($user, []);
 		$refProperty->setAccessible(false);
 
 		// Clear the authenticated actions cache. I haven't seen it used anywhere but it's there, so...
-		$refProperty   = $reflectedUser->getProperty('_authActions');
+		$refProperty = $reflectedUser->getProperty('_authActions');
 		$refProperty->setAccessible(true);
-		$refProperty->setValue($user, array());
+		$refProperty->setValue($user, []);
 		$refProperty->setAccessible(false);
 	}
 }

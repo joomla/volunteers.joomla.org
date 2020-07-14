@@ -7,15 +7,16 @@
 
 namespace FOF30\Model\DataModel\Exception;
 
+defined('_JEXEC') || die;
+
 use Exception;
+use RuntimeException;
 
-defined('_JEXEC') or die;
-
-abstract class TreeInvalidLftRgt extends \RuntimeException
+abstract class TreeInvalidLftRgt extends RuntimeException
 {
-	public function __construct( $message = '', $code = 500, Exception $previous = null )
+	public function __construct($message = '', $code = 500, Exception $previous = null)
 	{
-		parent::__construct( $message, $code, $previous );
+		parent::__construct($message, $code, $previous);
 	}
 
 }

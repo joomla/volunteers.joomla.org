@@ -7,11 +7,15 @@
 
 namespace FOF30\Input;
 
+defined('_JEXEC') || die;
+
+use Exception;
 use Joomla\CMS\Factory;
+use Joomla\CMS\Filter\InputFilter;
+use Joomla\CMS\Input\Input as JInput;
+use ReflectionObject;
 
-defined('_JEXEC') or die;
-
-class Input extends \JInput
+class Input extends JInput
 {
 	/**
 	 * Public constructor. Overridden to allow specifying the global input array
@@ -20,7 +24,7 @@ class Input extends \JInput
 	 * @param   array|string|object|null  $source   Source data; set null to use the default Joomla input source
 	 * @param   array                     $options  Filter options
 	 */
-	public function __construct($source = null, array $options = array())
+	public function __construct($source = null, array $options = [])
 	{
 		$hash = null;
 
@@ -39,10 +43,10 @@ class Input extends \JInput
 		{
 			$source = $source->getData();
 		}
-		elseif (is_object($source) && ($source instanceof \JInput))
+		elseif (is_object($source) && ($source instanceof JInput))
 		{
 			$serialised = $source->serialize();
-			list ($xOptions, $xData, $xInput) = unserialize($serialised);
+			[$xOptions, $xData, $xInput] = unserialize($serialised);
 			unset ($xOptions);
 			unset ($xInput);
 			unset ($source);
@@ -55,7 +59,7 @@ class Input extends \JInput
 			{
 				$source = (array) $source;
 			}
-			catch (\Exception $exc)
+			catch (Exception $exc)
 			{
 				$source = null;
 			}
@@ -132,7 +136,7 @@ class Input extends \JInput
 			$filter = substr($name, 3);
 
 			$default = null;
-			$mask = 0;
+			$mask    = 0;
 
 			if (isset($arguments[1]))
 			{
@@ -162,7 +166,7 @@ class Input extends \JInput
 	{
 		if (is_array($var))
 		{
-			$temp = array();
+			$temp = [];
 
 			foreach ($var as $k => $v)
 			{
@@ -188,11 +192,11 @@ class Input extends \JInput
 			// If the allow HTML flag is set, apply a safe HTML filter to the variable
 			if (version_compare(JVERSION, '3.999.999', 'le'))
 			{
-				$safeHtmlFilter = \JFilterInput::getInstance(null, null, 1, 1);
+				$safeHtmlFilter = InputFilter::getInstance(null, null, 1, 1);
 			}
 			else
 			{
-				$safeHtmlFilter = \JFilterInput::getInstance([], [], \JFilterInput::TAGS_BLACKLIST, \JFilterInput::ATTR_BLACKLIST);
+				$safeHtmlFilter = InputFilter::getInstance([], [], 1, 1);
 			}
 			$var = $safeHtmlFilter->clean($var, $type);
 		}
@@ -217,7 +221,7 @@ class Input extends \JInput
 		{
 			$input = Factory::getApplication()->input;
 		}
-		catch (\Exception $e)
+		catch (Exception $e)
 		{
 			$input = new \Joomla\Input\Input();
 		}
@@ -227,8 +231,8 @@ class Input extends \JInput
 			$input = $input->{$hash};
 		}
 
-		$refObject = new \ReflectionObject($input);
-		$refProp = $refObject->getProperty('data');
+		$refObject = new ReflectionObject($input);
+		$refProp   = $refObject->getProperty('data');
 		$refProp->setAccessible(true);
 
 		return $refProp->getValue($input);

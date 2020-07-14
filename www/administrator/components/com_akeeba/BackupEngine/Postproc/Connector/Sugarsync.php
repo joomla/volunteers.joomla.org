@@ -9,6 +9,7 @@
 
 namespace Akeeba\Engine\Postproc\Connector;
 
+defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Postproc\Connector\Sugarsync\Exception\Base as SugarsyncException;
 use DOMDocument;

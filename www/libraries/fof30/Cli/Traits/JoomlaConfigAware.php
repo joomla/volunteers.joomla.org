@@ -7,6 +7,8 @@
 
 namespace FOF30\Cli\Traits;
 
+defined('_JEXEC') || die;
+
 /**
  * Allows the CLI application to use the Joomla Global Configuration parameters as its own configuration.
  *

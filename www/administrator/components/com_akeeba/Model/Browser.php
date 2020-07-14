@@ -8,13 +8,13 @@
 namespace Akeeba\Backup\Admin\Model;
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
-use Akeeba\Engine\Platform;
 use Akeeba\Engine\Factory;
+use Akeeba\Engine\Platform;
 use FOF30\Model\Model;
-use JFolder;
 use JLoader;
+use Joomla\CMS\Filesystem\Folder;
 
 class Browser extends Model
 {
@@ -23,9 +23,6 @@ class Browser extends Model
 	 */
 	function makeListing()
 	{
-		JLoader::import('joomla.filesystem.folder');
-		JLoader::import('joomla.filesystem.path');
-
 		// Get the folder to browse
 		$folder        = $this->getState('folder', '');
 		$processfolder = $this->getState('processfolder', 0);
@@ -77,7 +74,7 @@ class Browser extends Model
 		if ($isFolderThere && !$isOpenbasedirRestricted)
 		{
 			$isWritable = is_writable($folder);
-			$subfolders = JFolder::folders($folder);
+			$subfolders = Folder::folders($folder);
 		}
 
 		// In case we can't identify the parent folder, use ourselves.

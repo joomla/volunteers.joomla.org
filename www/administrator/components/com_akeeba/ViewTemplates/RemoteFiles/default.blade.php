@@ -8,7 +8,7 @@
 // Protect from unauthorized access
 use Joomla\CMS\Language\Text as JText;
 
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 /** @var  \Akeeba\Backup\Admin\View\RemoteFiles\Html $this */
 

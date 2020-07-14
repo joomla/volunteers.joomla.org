@@ -8,10 +8,10 @@
 namespace Akeeba\Backup\Admin\Model;
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 use FOF30\Model\Model;
-use JText;
+use Joomla\CMS\Language\Text;
 use RuntimeException;
 
 class SFTPBrowser extends Model
@@ -70,7 +70,7 @@ class SFTPBrowser extends Model
 	 *
 	 * @var  array
 	 */
-	public $parts = array();
+	public $parts = [];
 
 	/**
 	 * Path to the parent directory
@@ -184,7 +184,7 @@ class SFTPBrowser extends Model
 
 		if (!is_resource($handle))
 		{
-			throw new RuntimeException(JText::_('COM_AKEEBA_SFTPBROWSER_ERROR_NOACCESS'));
+			throw new RuntimeException(Text::_('COM_AKEEBA_SFTPBROWSER_ERROR_NOACCESS'));
 		}
 
 		while (($entry = readdir($handle)) !== false)
@@ -220,7 +220,7 @@ class SFTPBrowser extends Model
 	public function doBrowse()
 	{
 		$error = '';
-		$list = [];
+		$list  = [];
 
 		try
 		{
@@ -231,13 +231,13 @@ class SFTPBrowser extends Model
 			$error = $e->getMessage();
 		}
 
-		$response_array = array(
+		$response_array = [
 			'error'       => $error,
 			'list'        => $list,
 			'breadcrumbs' => $this->parts,
 			'directory'   => $this->directory,
-			'parent'      => $this->parent_directory
-		);
+			'parent'      => $this->parent_directory,
+		];
 
 		return $response_array;
 	}

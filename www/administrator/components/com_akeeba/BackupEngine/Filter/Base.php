@@ -9,7 +9,7 @@
 
 namespace Akeeba\Engine\Filter;
 
-
+defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Factory;
 use Akeeba\Engine\Util\FileSystem;
@@ -56,13 +56,11 @@ abstract class Base
 	 *
 	 * @param   string  $root  The database for which to get the extra SQL statements
 	 *
-	 * @return string Extra SQL statements
+	 * @return  array  Extra SQL statements
 	 */
-	public function &getExtraSQL($root)
+	public function getExtraSQL(string $root): array
 	{
-		$dummy = "";
-
-		return $dummy;
+		return [];
 	}
 
 	/**

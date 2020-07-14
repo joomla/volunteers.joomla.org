@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <extension version="3.4" type="plugin" group="jce" method="upgrade">
     <name>WF_IMGMANAGER_TITLE</name>
-    <version>2.8.12</version>
-    <creationDate>12-05-2020</creationDate>
+    <version>2.8.14</version>
+    <creationDate>19-06-2020</creationDate>
     <author>Ryan Demmer</author>
     <authorEmail>info@joomlacontenteditor.net</authorEmail>
     <authorUrl>https://www.joomlacontenteditor.net/</authorUrl>
@@ -31,9 +31,21 @@
                 <option value="0">JNO</option>
             </field>
 
+            <field name="basic_dialog" type="yesno" default="0" label="WF_PARAM_BASIC_DIALOG" description="WF_PARAM_BASIC_DIALOG_DESC" class="btn-group btn-group-yesno">
+                <option value="1">JYES</option>
+                <option value="0">JNO</option>
+            </field>
+
+            <field type="container" showon="basic_dialog:1" class="inset">
+                <field name="basic_dialog_filebrowser" type="yesno" default="1" label="WF_URL_FILE_BROWSER" description="WF_URL_FILE_BROWSER_DESC" class="btn-group btn-group-yesno">
+                    <option value="1">JYES</option>
+                    <option value="0">JNO</option>
+                </field>
+            </field>
+
             <fieldset name="defaults">
                 <field type="heading" label="WF_PROFILES_PLUGINS_DEFAULTS" />
-                
+
                 <field name="alt" type="text" default="" size="50" label="WF_LABEL_ALT" description="WF_LABEL_ALT_DESC" />
                 <field name="margin_top" type="list" default="" class="editable" label="WF_PARAM_MARGIN_TOP" description="WF_PARAM_MARGIN_TOP_DESC">
                     <option value="">WF_OPTION_NOT_SET</option>
@@ -123,7 +135,7 @@
                     <option value="outset">WF_OPTION_BORDER_OUTSET</option>
                     <option value="ridge">WF_OPTION_BORDER_RIDGE</option>
                 </field>
-                <field name="border_color" type="text" class="color" size="10" default="#000000" label="WF_PARAM_BORDER_COLOR" description="WF_PARAM_BORDER_COLOR_DESC"/>
+                <field name="border_color" type="color" class="color" size="10" default="#000000" label="WF_PARAM_BORDER_COLOR" description="WF_PARAM_BORDER_COLOR_DESC"/>
                 <field name="align" type="list" default="" label="WF_PARAM_ALIGN_DEFAULT" description="WF_PARAM_ALIGN_DEFAULT_DESC">
                     <option value="">WF_OPTION_NOT_SET</option>
                     <option value="left">WF_OPTION_ALIGN_LEFT</option>
@@ -146,34 +158,43 @@
                 <field name="usemap" type="text" default="" size="50" label="WF_LABEL_USEMAP" description="WF_LABEL_USEMAP_DESC" />
                 <field name="longdesc" type="browser" default="" size="50" class="browser" label="WF_LABEL_LONGDESC" description="WF_LABEL_LONGDESC_DESC" />
 
+                <field name="loading" type="list" default="" label="WF_LABEL_LOADING" description="WF_LABEL_LOADING_DESC">
+                    <option value="">WF_OPTION_NOT_SET</option>
+                    <option value="lazy">WF_OPTION_LOADING_LAZY</option>
+                    <option value="eager">WF_OPTION_LOADING_EAGER</option>
+                </field>
+
             </fieldset>
 
             <field type="heading" label="WF_PROFILES_PLUGINS_ACCESS" />
 
-            <field name="tabs_rollover" type="yesno" default="1" label="WF_IMGMANAGER_PARAM_TAB_ROLLOVER" description="WF_IMGMANAGER_PARAM_TAB_ROLLOVER_DESC">
-                <option value="1">JYES</option>
-                <option value="0">JNO</option>
+            <field type="container" showon="basic_dialog:0">
+                <field name="tabs_rollover" type="yesno" default="1" label="WF_IMGMANAGER_PARAM_TAB_ROLLOVER" description="WF_IMGMANAGER_PARAM_TAB_ROLLOVER_DESC">
+                    <option value="1">JYES</option>
+                    <option value="0">JNO</option>
+                </field>
+                <field name="tabs_advanced" type="yesno" default="1" label="WF_IMGMANAGER_PARAM_TAB_ADVANCED" description="WF_IMGMANAGER_PARAM_TAB_ADVANCED_DESC">
+                    <option value="1">JYES</option>
+                    <option value="0">JNO</option>
+                </field>
+                <field name="attributes_dimensions" type="yesno" default="1" label="WF_IMGMANAGER_SHOW_DIMENSIONS" description="WF_IMGMANAGER_SHOW_DIMENSIONS_DESC">
+                    <option value="1">JYES</option>
+                    <option value="0">JNO</option>
+                </field>
+                <field name="attributes_align" type="yesno" default="1" label="WF_IMGMANAGER_SHOW_ALIGN" description="WF_IMGMANAGER_SHOW_ALIGN_DESC">
+                    <option value="1">JYES</option>
+                    <option value="0">JNO</option>
+                </field>
+                <field name="attributes_margin" type="yesno" default="1" label="WF_IMGMANAGER_SHOW_MARGIN" description="WF_IMGMANAGER_SHOW_MARGIN_DESC">
+                    <option value="1">JYES</option>
+                    <option value="0">JNO</option>
+                </field>
+                <field name="attributes_border" type="yesno" default="1" label="WF_IMGMANAGER_SHOW_BORDER" description="WF_IMGMANAGER_SHOW_BORDER_DESC">
+                    <option value="1">JYES</option>
+                    <option value="0">JNO</option>
+                </field>
             </field>
-            <field name="tabs_advanced" type="yesno" default="1" label="WF_IMGMANAGER_PARAM_TAB_ADVANCED" description="WF_IMGMANAGER_PARAM_TAB_ADVANCED_DESC">
-                <option value="1">JYES</option>
-                <option value="0">JNO</option>
-            </field>
-            <field name="attributes_dimensions" type="yesno" default="1" label="WF_IMGMANAGER_SHOW_DIMENSIONS" description="WF_IMGMANAGER_SHOW_DIMENSIONS_DESC">
-                <option value="1">JYES</option>
-                <option value="0">JNO</option>
-            </field>
-            <field name="attributes_align" type="yesno" default="1" label="WF_IMGMANAGER_SHOW_ALIGN" description="WF_IMGMANAGER_SHOW_ALIGN_DESC">
-                <option value="1">JYES</option>
-                <option value="0">JNO</option>
-            </field>
-            <field name="attributes_margin" type="yesno" default="1" label="WF_IMGMANAGER_SHOW_MARGIN" description="WF_IMGMANAGER_SHOW_MARGIN_DESC">
-                <option value="1">JYES</option>
-                <option value="0">JNO</option>
-            </field>
-            <field name="attributes_border" type="yesno" default="1" label="WF_IMGMANAGER_SHOW_BORDER" description="WF_IMGMANAGER_SHOW_BORDER_DESC">
-                <option value="1">JYES</option>
-                <option value="0">JNO</option>
-            </field>
+
             <field name="upload" type="yesno" default="1" label="WF_PARAM_UPLOAD" description="WF_PARAM_UPLOAD_DESC">
                 <option value="1">JYES</option>
                 <option value="0">JNO</option>

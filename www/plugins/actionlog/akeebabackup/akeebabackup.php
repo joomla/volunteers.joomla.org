@@ -7,18 +7,18 @@
 
 use Akeeba\Engine\Platform;
 use FOF30\Container\Container;
+use Joomla\CMS\Component\ComponentHelper;
+use Joomla\CMS\Plugin\CMSPlugin;
 
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 // PHP version check
-if (!version_compare(PHP_VERSION, '5.6.0', '>='))
+if (!version_compare(PHP_VERSION, '7.1.0', '>='))
 {
 	return;
 }
 
-JLoader::import('joomla.application.plugin');
-
-class plgActionlogAkeebabackup extends JPlugin
+class plgActionlogAkeebabackup extends CMSPlugin
 {
 	/** @var Container */
 	private $container;
@@ -26,12 +26,12 @@ class plgActionlogAkeebabackup extends JPlugin
 	/**
 	 * Constructor
 	 *
-	 * @param       object $subject The object to observe
-	 * @param       array  $config  An array that holds the plugin configuration
+	 * @param   object  $subject  The object to observe
+	 * @param   array   $config   An array that holds the plugin configuration
 	 *
 	 * @since       6.4.0
 	 */
-	public function __construct(& $subject, $config)
+	public function __construct(&$subject, $config)
 	{
 		// Make sure Akeeba Backup is installed
 		if (!file_exists(JPATH_ADMINISTRATOR . '/components/com_akeeba'))
@@ -40,9 +40,7 @@ class plgActionlogAkeebabackup extends JPlugin
 		}
 
 		// Make sure Akeeba Backup is enabled
-		JLoader::import('joomla.application.component.helper');
-
-		if ( !JComponentHelper::isEnabled('com_akeeba'))
+		if (!ComponentHelper::isEnabled('com_akeeba'))
 		{
 			return;
 		}
@@ -68,9 +66,9 @@ class plgActionlogAkeebabackup extends JPlugin
 	/**
 	 * Logs the creation of a new backup profile
 	 *
-	 * @param \Akeeba\Backup\Admin\Controller\Profiles	$controller
-	 * @param array										$data
-	 * @param int										$id
+	 * @param   \Akeeba\Backup\Admin\Controller\Profiles  $controller
+	 * @param   array                                     $data
+	 * @param   int                                       $id
 	 */
 	public function onComAkeebaControllerProfilesAfterApplySave($controller, $data, $id)
 	{
@@ -88,12 +86,12 @@ class plgActionlogAkeebabackup extends JPlugin
 	/**
 	 * Logs deletion of a backup profile
 	 *
-	 * @param \Akeeba\Backup\Admin\Controller\Profiles	$controller
+	 * @param   \Akeeba\Backup\Admin\Controller\Profiles  $controller
 	 */
 	public function onComAkeebaControllerProfilesAfterRemove($controller)
 	{
-		$ids = $controller->input->get('cid', array(), 'array', 2);
-		$profile_title = '# '.implode(', ', $ids);
+		$ids           = $controller->input->get('cid', [], 'array', 2);
+		$profile_title = '# ' . implode(', ', $ids);
 
 		$this->container->platform->logUserAction($profile_title, 'COM_AKEEBA_LOGS_PROFILE_DELETE', 'com_akeeba');
 	}
@@ -101,7 +99,7 @@ class plgActionlogAkeebabackup extends JPlugin
 	/**
 	 * Log configuration edit (apply)
 	 *
-	 * @param \Akeeba\Backup\Admin\Controller\Configuration	$controller
+	 * @param   \Akeeba\Backup\Admin\Controller\Configuration  $controller
 	 */
 	public function onComAkeebaControllerConfigurationAfterApply($controller)
 	{
@@ -111,7 +109,7 @@ class plgActionlogAkeebabackup extends JPlugin
 	/**
 	 * Log configuration edit (save and close)
 	 *
-	 * @param \Akeeba\Backup\Admin\Controller\Configuration	$controller
+	 * @param   \Akeeba\Backup\Admin\Controller\Configuration  $controller
 	 */
 	public function onComAkeebaControllerConfigurationAfterSave($controller)
 	{
@@ -121,7 +119,7 @@ class plgActionlogAkeebabackup extends JPlugin
 	/**
 	 * Log configuration edit (save and new)
 	 *
-	 * @param \Akeeba\Backup\Admin\Controller\Configuration	$controller
+	 * @param   \Akeeba\Backup\Admin\Controller\Configuration  $controller
 	 */
 	public function onComAkeebaControllerConfigurationAfterSavenew($controller)
 	{
@@ -131,7 +129,7 @@ class plgActionlogAkeebabackup extends JPlugin
 	/**
 	 * Log starting a new backup
 	 *
-	 * @param \Akeeba\Backup\Admin\Controller\Backup	$controller
+	 * @param   \Akeeba\Backup\Admin\Controller\Backup  $controller
 	 */
 	public function onComAkeebaControllerBackupBeforeAjax($controller)
 	{
@@ -150,7 +148,7 @@ class plgActionlogAkeebabackup extends JPlugin
 			return;
 		}
 
-		$profile_id = '#'.$profile_id;
+		$profile_id = '#' . $profile_id;
 
 		$this->container->platform->logUserAction($profile_id, 'COM_AKEEBA_LOGS_BACKUP_RUN', 'com_akeeba');
 	}
@@ -158,7 +156,7 @@ class plgActionlogAkeebabackup extends JPlugin
 	/**
 	 * Log downloading a backup using Joomla interface
 	 *
-	 * @param \Akeeba\Backup\Admin\Controller\Manage	$controller
+	 * @param   \Akeeba\Backup\Admin\Controller\Manage  $controller
 	 */
 	public function onComAkeebaControllerManageBeforeDownload($controller)
 	{
@@ -171,14 +169,14 @@ class plgActionlogAkeebabackup extends JPlugin
 			return;
 		}
 
-		$stat 		  = Platform::getInstance()->get_statistics($id);
+		$stat         = Platform::getInstance()->get_statistics($id);
 		$profile_name = Platform::getInstance()->get_profile_name($stat['profile_id']);
 
-		$title = 'Profile: "'.$profile_name.'" ID: '.$id;
+		$title = 'Profile: "' . $profile_name . '" ID: ' . $id;
 
 		if ($part > -1)
 		{
-			$title .= ' part: '.$part;
+			$title .= ' part: ' . $part;
 		}
 
 		$this->container->platform->logUserAction($title, 'COM_AKEEBA_LOGS_MANAGE_DOWNLOAD', 'com_akeeba');
@@ -187,7 +185,7 @@ class plgActionlogAkeebabackup extends JPlugin
 	/**
 	 * Logs deleting backup files
 	 *
-	 * @param \Akeeba\Backup\Admin\Controller\Manage	$controller
+	 * @param   \Akeeba\Backup\Admin\Controller\Manage  $controller
 	 */
 	public function onComAkeebaControllerManageBeforeDeletefiles($controller)
 	{
@@ -195,14 +193,14 @@ class plgActionlogAkeebabackup extends JPlugin
 
 		foreach ($ids as $id)
 		{
-			$this->container->platform->logUserAction('ID: '.$id,'COM_AKEEBA_LOGS_MANAGE_DELETEFILES', 'com_akeeba');
+			$this->container->platform->logUserAction('ID: ' . $id, 'COM_AKEEBA_LOGS_MANAGE_DELETEFILES', 'com_akeeba');
 		}
 	}
 
 	/**
 	 * Logs deleting backup stat entry
 	 *
-	 * @param \Akeeba\Backup\Admin\Controller\Manage	$controller
+	 * @param   \Akeeba\Backup\Admin\Controller\Manage  $controller
 	 */
 	public function onComAkeebaControllerManageBeforeRemove($controller)
 	{
@@ -210,14 +208,14 @@ class plgActionlogAkeebabackup extends JPlugin
 
 		foreach ($ids as $id)
 		{
-			$this->container->platform->logUserAction($id,'COM_AKEEBA_LOGS_MANAGE_DELETE', 'com_akeeba');
+			$this->container->platform->logUserAction($id, 'COM_AKEEBA_LOGS_MANAGE_DELETE', 'com_akeeba');
 		}
 	}
 
 	/**
 	 * Logs downloading remote archives to browser
 	 *
-	 * @param \Akeeba\Backup\Admin\Controller\RemoteFiles	$controller
+	 * @param   \Akeeba\Backup\Admin\Controller\RemoteFiles  $controller
 	 */
 	public function onComAkeebaControllerRemoteFilesBeforeDlfromremote($controller)
 	{
@@ -230,14 +228,14 @@ class plgActionlogAkeebabackup extends JPlugin
 			return;
 		}
 
-		$stat 		  = Platform::getInstance()->get_statistics($id);
+		$stat         = Platform::getInstance()->get_statistics($id);
 		$profile_name = Platform::getInstance()->get_profile_name($stat['profile_id']);
 
-		$title = 'Profile: "'.$profile_name.'" ID: '.$id;
+		$title = 'Profile: "' . $profile_name . '" ID: ' . $id;
 
 		if ($part > -1)
 		{
-			$title .= ' part: '.$part;
+			$title .= ' part: ' . $part;
 		}
 
 		$this->container->platform->logUserAction($title, 'COM_AKEEBA_LOGS_REMOTEFILE_DOWNLOAD', 'com_akeeba');
@@ -246,7 +244,7 @@ class plgActionlogAkeebabackup extends JPlugin
 	/**
 	 * Logs downloading remote archives back to the server
 	 *
-	 * @param \Akeeba\Backup\Admin\Controller\RemoteFiles	$controller
+	 * @param   \Akeeba\Backup\Admin\Controller\RemoteFiles  $controller
 	 */
 	public function onComAkeebaControllerRemoteFilesBeforeDltoserver($controller)
 	{
@@ -266,10 +264,10 @@ class plgActionlogAkeebabackup extends JPlugin
 			return;
 		}
 
-		$stat 		  = Platform::getInstance()->get_statistics($id);
+		$stat         = Platform::getInstance()->get_statistics($id);
 		$profile_name = Platform::getInstance()->get_profile_name($stat['profile_id']);
 
-		$title = 'Profile: "'.$profile_name.'" ID: '.$id;
+		$title = 'Profile: "' . $profile_name . '" ID: ' . $id;
 
 		$this->container->platform->logUserAction($title, 'COM_AKEEBA_LOGS_REMOTEFILE_FETCH', 'com_akeeba');
 	}
@@ -277,7 +275,7 @@ class plgActionlogAkeebabackup extends JPlugin
 	/**
 	 * Logs downloading remote archives to browser
 	 *
-	 * @param \Akeeba\Backup\Admin\Controller\RemoteFiles	$controller
+	 * @param   \Akeeba\Backup\Admin\Controller\RemoteFiles  $controller
 	 */
 	public function onComAkeebaControllerRemoteFilesBeforeDelete($controller)
 	{
@@ -290,14 +288,14 @@ class plgActionlogAkeebabackup extends JPlugin
 			return;
 		}
 
-		$stat 		  = Platform::getInstance()->get_statistics($id);
+		$stat         = Platform::getInstance()->get_statistics($id);
 		$profile_name = Platform::getInstance()->get_profile_name($stat['profile_id']);
 
-		$title = 'Profile: "'.$profile_name.'" ID: '.$id;
+		$title = 'Profile: "' . $profile_name . '" ID: ' . $id;
 
 		if ($part > -1)
 		{
-			$title .= ' part: '.$part;
+			$title .= ' part: ' . $part;
 		}
 
 		$this->container->platform->logUserAction($title, 'COM_AKEEBA_LOGS_REMOTEFILE_DELETE', 'com_akeeba');
@@ -306,11 +304,11 @@ class plgActionlogAkeebabackup extends JPlugin
 	/**
 	 * Logs downloading remote archives to browser
 	 *
-	 * @param \Akeeba\Backup\Admin\Controller\Upload	$controller
+	 * @param   \Akeeba\Backup\Admin\Controller\Upload  $controller
 	 */
 	public function onComAkeebaControllerUploadBeforeStart($controller)
 	{
-		$id   = $this->container->input->getInt('id');
+		$id = $this->container->input->getInt('id');
 
 		// This should never happens, but better be safe
 		if (!$id)
@@ -318,10 +316,10 @@ class plgActionlogAkeebabackup extends JPlugin
 			return;
 		}
 
-		$stat 		  = Platform::getInstance()->get_statistics($id);
+		$stat         = Platform::getInstance()->get_statistics($id);
 		$profile_name = Platform::getInstance()->get_profile_name($stat['profile_id']);
 
-		$title = 'Profile: "'.$profile_name.'" ID: '.$id;
+		$title = 'Profile: "' . $profile_name . '" ID: ' . $id;
 
 		$this->container->platform->logUserAction($title, 'COM_AKEEBA_LOGS_UPLOADS_ADD', 'com_akeeba');
 	}
@@ -329,7 +327,7 @@ class plgActionlogAkeebabackup extends JPlugin
 	/**
 	 * Log starting a site transfer wizard (connections valid, just before starting to actually transfer files)
 	 *
-	 * @param \Akeeba\Backup\Admin\Controller\Transfer	$controller
+	 * @param   \Akeeba\Backup\Admin\Controller\Transfer  $controller
 	 */
 	public function onComAkeebaControllerTransferBeforeUpload($controller)
 	{
@@ -353,7 +351,7 @@ class plgActionlogAkeebabackup extends JPlugin
 	/**
 	 * Logs downloading a backup log
 	 *
-	 * @param \Akeeba\Backup\Admin\Controller\Log	$controller
+	 * @param   \Akeeba\Backup\Admin\Controller\Log  $controller
 	 */
 	public function onComAkeebaControllerLogBeforeDownload($controller)
 	{
@@ -365,11 +363,11 @@ class plgActionlogAkeebabackup extends JPlugin
 	/**
 	 * Log importing a backup archive
 	 *
-	 * @param \Akeeba\Backup\Admin\Controller\Discover	$controller
+	 * @param   \Akeeba\Backup\Admin\Controller\Discover  $controller
 	 */
 	public function onComAkeebaControllerDiscoverBeforeImport($controller)
 	{
-		$files = $this->container->input->get('files', array(), 'array');
+		$files = $this->container->input->get('files', [], 'array');
 
 		foreach ($files as $file)
 		{
@@ -380,7 +378,7 @@ class plgActionlogAkeebabackup extends JPlugin
 	/**
 	 * Log importing a backup archive from S3
 	 *
-	 * @param \Akeeba\Backup\Admin\Controller\Discover	$controller
+	 * @param   \Akeeba\Backup\Admin\Controller\Discover  $controller
 	 */
 	public function onComAkeebaControllerS3ImportBeforeDltoserver($controller)
 	{
@@ -403,7 +401,7 @@ class plgActionlogAkeebabackup extends JPlugin
 	{
 		$profileName = $this->container->input->getString('profilename', null);
 
-		$this->container->platform->logUserAction('"'.$profileName.'"', 'COM_AKEEBA_LOGS_CONFIGURATION_EDIT', 'com_akeeba');
+		$this->container->platform->logUserAction('"' . $profileName . '"', 'COM_AKEEBA_LOGS_CONFIGURATION_EDIT', 'com_akeeba');
 	}
 
 	/**
@@ -414,10 +412,10 @@ class plgActionlogAkeebabackup extends JPlugin
 	private function getIDsFromRequest()
 	{
 		// Get the ID or list of IDs from the request or the configuration
-		$cid = $this->container->input->get('cid', array(), 'array');
+		$cid = $this->container->input->get('cid', [], 'array');
 		$id  = $this->container->input->getInt('id', 0);
 
-		$ids = array();
+		$ids = [];
 
 		if (is_array($cid) && !empty($cid))
 		{
@@ -425,7 +423,7 @@ class plgActionlogAkeebabackup extends JPlugin
 		}
 		elseif (!empty($id))
 		{
-			$ids = array($id);
+			$ids = [$id];
 		}
 
 		return $ids;

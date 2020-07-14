@@ -9,7 +9,7 @@
 
 namespace Akeeba\Engine\Postproc\Connector\S3v4;
 
-
+defined('AKEEBAENGINE') || die();
 
 /**
  * Base class for request signing objects.

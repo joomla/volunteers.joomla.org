@@ -9,7 +9,7 @@
 
 namespace Akeeba\Engine;
 
-
+defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Base\Part;
 use Akeeba\Engine\Core\Database;
@@ -39,8 +39,6 @@ if (function_exists('ini_set') && !defined('AKEEBADEBUG'))
 {
 	ini_set('display_errors', false);
 }
-
-define('AKEEBA_CACERT_PEM', __DIR__ . '/cacert.pem');
 
 // Make sure the class autoloader is loaded
 require_once __DIR__ . '/Autoloader.php';
@@ -120,9 +118,9 @@ abstract class Factory
 
 		$engineInfo = unserialize($serialized_data);
 
-		static::$root                = isset($engineInfo['root']) ? $engineInfo['root'] : '';
-		static::$objectList          = isset($engineInfo['objectList']) ? $engineInfo['objectList'] : [];
-		static::$engineClassnames    = isset($engineInfo['engineClassnames']) ? $engineInfo['engineClassnames'] : [];
+		static::$root                = $engineInfo['root'] ?? '';
+		static::$objectList          = $engineInfo['objectList'] ?? [];
+		static::$engineClassnames    = $engineInfo['engineClassnames'] ?? [];
 		static::$temporaryObjectList = [];
 	}
 

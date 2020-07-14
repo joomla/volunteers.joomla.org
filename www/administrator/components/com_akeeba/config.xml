@@ -27,7 +27,7 @@
 		<field name="dark_mode" type="radio" default="-1"
 			   label="COM_AKEEBA_CONFIG_BACKEND_DARKMODE_LABEL"
 			   description="COM_AKEEBA_CONFIG_BACKEND_DARKMODE_DESC"
-			   class="switcher btn-group">
+			   class="btn-group">
 			<option value="-1">COM_AKEEBA_CONFIG_BACKEND_DARKMODE_AUTO</option>
 			<option value="0">COM_AKEEBA_CONFIG_BACKEND_DARKMODE_NEVER</option>
 			<option value="1">COM_AKEEBA_CONFIG_BACKEND_DARKMODE_ALWAYS</option>
@@ -40,7 +40,7 @@
 		<field name="localtime" type="radio" default="1"
 			   label="COM_AKEEBA_CONFIG_BACKEND_LOCALTIME_LABEL"
 			   description="COM_AKEEBA_CONFIG_BACKEND_LOCALTIME_DESC"
-			   class="switcher btn-group">
+			   class="btn-group btn-group-yesno">
 			<option value="0">JNo</option>
 			<option value="1">JYes</option>
 		</field>
@@ -48,7 +48,7 @@
 		<field name="timezonetext" type="radio" default="T"
 			   label="COM_AKEEBA_CONFIG_BACKEND_TIMEZONETEXT_LABEL"
 			   description="COM_AKEEBA_CONFIG_BACKEND_TIMEZONETEXT_DESC"
-			   class="switcher btn-group">
+			   class="btn-group">
 			<option value="">COM_AKEEBA_CONFIG_BACKEND_TIMEZONETEXT_NONE</option>
 			<option value="T">COM_AKEEBA_CONFIG_BACKEND_TIMEZONETEXT_ABBREVIATION</option>
 			<option value="\G\M\TP">COM_AKEEBA_CONFIG_BACKEND_TIMEZONETEXT_GMTOFFSET</option>
@@ -57,7 +57,7 @@
 		<field name="showDeleteOnRestore" type="radio" default="0"
 			   label="COM_AKEEBA_CONFIG_BACKEND_SHOWDELETEONRESTORE_LABEL"
 			   description="COM_AKEEBA_CONFIG_BACKEND_SHOWDELETEONRESTORE_DESC"
-			   class="switcher btn-group">
+			   class="btn-group btn-group-yesno">
 			<option value="0">JNo</option>
 			<option value="1">JYes</option>
 		</field>
@@ -69,7 +69,7 @@
 		<field name="legacyapi_enabled" type="radio" default="0"
 			   label="COM_AKEEBA_CONFIG_LEGACYAPI_ENABLED_LABEL"
 			   description="COM_AKEEBA_CONFIG_LEGACYAPI_ENABLED_DESC"
-			   class="switcher btn-group">
+			   class="btn-group btn-group-yesno">
 			<option value="0">JNo</option>
 			<option value="1">JYes</option>
 		</field>
@@ -77,7 +77,7 @@
 		<field name="jsonapi_enabled" type="radio" default="0"
 			   label="COM_AKEEBA_CONFIG_JSONAPI_ENABLED_LABEL"
 			   description="COM_AKEEBA_CONFIG_JSONAPI_ENABLED_DESC"
-			   class="switcher btn-group">
+			   class="btn-group btn-group-yesno">
 			<option value="0">JNo</option>
 			<option value="1">JYes</option>
 		</field>
@@ -100,7 +100,7 @@
 		<field name="frontend_email_on_finish" type="radio" default="0"
 			   label="COM_AKEEBA_CONFIG_FRONTENDEMAIL_LABEL"
 			   description="COM_AKEEBA_CONFIG_FRONTENDEMAIL_DESC"
-			   class="switcher btn-group">
+			   class="btn-group btn-group-yesno">
 			<option value="0">JNo</option>
 			<option value="1">JYes</option>
 		</field>
@@ -108,7 +108,7 @@
 		<field name="frontend_email_when" type="radio" default="always"
 			   label="COM_AKEEBA_CONFIG_FRONTEND_EMAIL_WHEN_LABEL"
 			   description="COM_AKEEBA_CONFIG_FRONTEND_EMAIL_WHEN_DESC"
-			   class="switcher btn-group">
+			   class="btn-group">
 			<option value="always">COM_AKEEBA_CONFIG_FRONTEND_EMAIL_WHEN_ALWAYS</option>
 			<option value="failedupload">COM_AKEEBA_CONFIG_FRONTEND_EMAIL_WHEN_FAILEDUPLOAD</option>
 		</field>
@@ -163,8 +163,12 @@
 			   label="COM_AKEEBA_CONFIG_DOWNLOADID_LABEL"
 			   description="COM_AKEEBA_CONFIG_DOWNLOADID_DESC"/>
 
-		<field name="stats_enabled" type="list" default="1" label="COM_AKEEBA_CONFIG_USAGESTATS_LABEL"
-			   description="COM_AKEEBA_CONFIG_USAGESTATS_DESC">
+		<field name="stats_enabled"
+			   type="radio"
+			   default="1"
+			   label="COM_AKEEBA_CONFIG_USAGESTATS_LABEL"
+			   description="COM_AKEEBA_CONFIG_USAGESTATS_DESC"
+			   class="btn-group btn-group-yesno">
 			<option value="0">JNO</option>
 			<option value="1">JYES</option>
 		</field>
@@ -175,7 +179,7 @@
 		<field name="useencryption" type="radio" default="1"
 			   label="COM_AKEEBA_CONFIG_SECURITY_USEENCRYPTION_LABEL"
 			   description="COM_AKEEBA_CONFIG_SECURITY_USEENCRYPTION_DESCRIPTION"
-			   class="switcher btn-group">
+			   class="btn-group btn-group-yesno">
 			<option value="0">JNo</option>
 			<option value="1">JYes</option>
 		</field>
@@ -186,7 +190,7 @@
 		<field name="desktop_notifications" type="radio" default="0"
 			   label="COM_AKEEBA_CONFIG_DESKTOP_NOTIFICATIONS_LABEL"
 			   description="COM_AKEEBA_CONFIG_DESKTOP_NOTIFICATIONS_DESC"
-			   class="switcher btn-group">
+			   class="btn-group btn-group-yesno">
 		<option value="0">JNO</option>
 			<option value="1">JYES</option>
 		</field>

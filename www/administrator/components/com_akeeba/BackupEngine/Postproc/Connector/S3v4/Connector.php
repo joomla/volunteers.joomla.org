@@ -9,7 +9,7 @@
 
 namespace Akeeba\Engine\Postproc\Connector\S3v4;
 
-
+defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Postproc\Connector\S3v4\Exception\CannotDeleteFile;
 use Akeeba\Engine\Postproc\Connector\S3v4\Exception\CannotGetBucket;
@@ -122,7 +122,7 @@ class Connector
 							continue;
 						}
 
-						list($junk, $stupidAmazonDefinedContentLength) = explode(":", $line);
+						[$junk, $stupidAmazonDefinedContentLength] = explode(":", $line);
 
 						if (strpos($stupidAmazonDefinedContentLength, ',') !== false)
 						{
@@ -820,7 +820,7 @@ class Connector
 							continue;
 						}
 
-						list($junk, $stupidAmazonDefinedContentLength) = explode(":", $line);
+						[$junk, $stupidAmazonDefinedContentLength] = explode(":", $line);
 
 						if (strpos($stupidAmazonDefinedContentLength, ',') !== false)
 						{
@@ -911,7 +911,7 @@ class Connector
 
 		if ($response->error->isError())
 		{
-			if ($response->error->getCode() == 'RequestTimeout')
+			if ($response->error->getMessage() == 'RequestTimeout')
 			{
 				return;
 			}

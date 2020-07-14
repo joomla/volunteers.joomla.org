@@ -7,9 +7,9 @@
 
 namespace FOF30\Container\Exception;
 
-use Exception;
+defined('_JEXEC') || die;
 
-defined('_JEXEC') or die;
+use Exception;
 
 class NoComponent extends \Exception
 {

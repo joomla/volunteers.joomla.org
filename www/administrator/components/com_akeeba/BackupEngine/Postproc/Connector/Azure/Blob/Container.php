@@ -41,7 +41,7 @@
 
 namespace Akeeba\Engine\Postproc\Connector\Azure\Blob;
 
-
+defined('AKEEBAENGINE') || die();
 
 use Exception;
 

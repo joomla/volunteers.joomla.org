@@ -9,7 +9,7 @@
 
 namespace Akeeba\Engine\Postproc\Connector\Cloudfiles;
 
-
+defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Postproc\Connector\Cloudfiles\Exception\Http;
 use stdClass;
@@ -93,7 +93,7 @@ class Request
 	{
 		$query = '';
 
-		if (sizeof($this->parameters) > 0)
+		if (count($this->parameters) > 0)
 		{
 			$query = substr($this->url, -1) !== '?' ? '?' : '&';
 
@@ -315,7 +315,7 @@ class Request
 		}
 		else
 		{
-			list($header, $value) = explode(': ', trim($data), 2);
+			[$header, $value] = explode(': ', trim($data), 2);
 			$this->response->headers[$header] = is_numeric($value) ? (int) $value : $value;
 		}
 

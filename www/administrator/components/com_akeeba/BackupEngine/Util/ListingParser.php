@@ -9,7 +9,7 @@
 
 namespace Akeeba\Engine\Util;
 
-
+defined('AKEEBAENGINE') || die();
 
 /**
  * Parses directory listings of the standard UNIX or MS-DOS style, i.e. what is most commonly returned by FTP and SFTP
@@ -169,15 +169,15 @@ class ListingParser
 				$bitPart   = 0;
 				$permsPart = '';
 
-				list($thisPerms, $thisBit) = $this->textPermsDecode($userPerms);
+				[$thisPerms, $thisBit] = $this->textPermsDecode($userPerms);
 				$bitPart   += 4 * $thisBit; // SetUID
 				$permsPart .= $thisPerms;
 
-				list($thisPerms, $thisBit) = $this->textPermsDecode($groupPerms);
+				[$thisPerms, $thisBit] = $this->textPermsDecode($groupPerms);
 				$bitPart   += 2 * $thisBit; // SetGID
 				$permsPart .= $thisPerms;
 
-				list($thisPerms, $thisBit) = $this->textPermsDecode($otherPerms);
+				[$thisPerms, $thisBit] = $this->textPermsDecode($otherPerms);
 				$bitPart   += $thisBit; // Sticky (restricted deletion)
 				$permsPart .= $thisPerms;
 
@@ -205,7 +205,7 @@ class ListingParser
 			// Link target parsing
 			if (strpos($name, '->') !== false)
 			{
-				list($name, $target) = explode('->', $name);
+				[$name, $target] = explode('->', $name);
 
 				$entry['target'] = trim($target);
 			}

@@ -9,6 +9,8 @@
 
 namespace Akeeba\Engine\Platform\Exception;
 
+defined('AKEEBAENGINE') || die();
+
 use Akeeba\Engine\Platform;
 use Exception;
 use RuntimeException;

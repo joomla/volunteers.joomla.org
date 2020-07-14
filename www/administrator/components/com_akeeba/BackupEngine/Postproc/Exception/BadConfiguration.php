@@ -9,6 +9,8 @@
 
 namespace Akeeba\Engine\Postproc\Exception;
 
+defined('AKEEBAENGINE') || die();
+
 use RuntimeException;
 
 /**

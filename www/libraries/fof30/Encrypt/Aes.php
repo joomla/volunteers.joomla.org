@@ -7,12 +7,11 @@
 
 namespace FOF30\Encrypt;
 
+defined('_JEXEC') || die;
+
 use FOF30\Encrypt\AesAdapter\AdapterInterface;
-use FOF30\Encrypt\AesAdapter\Mcrypt;
 use FOF30\Encrypt\AesAdapter\OpenSSL;
 use FOF30\Utils\Phpfunc;
-
-defined('_JEXEC') or die;
 
 /**
  * A simple abstraction to AES encryption
@@ -25,7 +24,7 @@ defined('_JEXEC') or die;
  * $aes->setPassword('yourRealPassword');
  * // Encrypt something.
  * $cipherText = $aes->encryptString($sourcePlainText);
- * // Decypt something
+ * // Decrypt something
  * $plainText = $aes->decryptString($sourceCipherText);
  */
 class Aes
@@ -61,96 +60,11 @@ class Aes
 
 		if (!$this->adapter->isSupported($phpfunc))
 		{
-			$this->adapter = new Mcrypt();
+			throw new \RuntimeException('Your server does not have the PHP OpenSSL extension enabled. This is required for encryption handling.');
 		}
 
 		$this->adapter->setEncryptionMode($mode, $strength);
 		$this->setPassword($key, true);
-	}
-
-	/**
-	 * Sets the password for this instance.
-	 *
-	 * WARNING: Do not use the legacy mode, it's insecure
-	 *
-	 * @param   string $password   The password (either user-provided password or binary encryption key) to use
-	 * @param   bool   $legacyMode True to use the legacy key expansion. We recommend against using it.
-	 */
-	public function setPassword($password, $legacyMode = false)
-	{
-		$this->key = $password;
-
-		$passLength = strlen($password);
-
-		if (function_exists('mb_strlen'))
-		{
-			$passLength = mb_strlen($password, 'ASCII');
-		}
-
-		// Legacy mode was doing something stupid, requiring a key of 32 bytes. DO NOT USE LEGACY MODE!
-		if ($legacyMode && ($passLength != 32))
-		{
-			// Legacy mode: use the sha256 of the password
-			$this->key = hash('sha256', $password, true);
-			// We have to trim or zero pad the password (we end up throwing half of it away in Rijndael-128 / AES...)
-			$this->key = $this->adapter->resizeKey($this->key, $this->adapter->getBlockSize());
-		}
-	}
-
-	/**
-	 * Encrypts a string using AES
-	 *
-	 * @param   string $stringToEncrypt The plaintext to encrypt
-	 * @param   bool   $base64encoded   Should I Base64-encode the result?
-	 *
-	 * @return   string  The cryptotext. Please note that the first 16 bytes of
-	 *                   the raw string is the IV (initialisation vector) which
-	 *                   is necessary for decoding the string.
-	 */
-	public function encryptString($stringToEncrypt, $base64encoded = true)
-	{
-		$blockSize = $this->adapter->getBlockSize();
-		$randVal   = new Randval();
-		$iv        = $randVal->generate($blockSize);
-
-		$key        = $this->getExpandedKey($blockSize, $iv);
-		$cipherText = $this->adapter->encrypt($stringToEncrypt, $key, $iv);
-
-		// Optionally pass the result through Base64 encoding
-		if ($base64encoded)
-		{
-			$cipherText = base64_encode($cipherText);
-		}
-
-		// Return the result
-		return $cipherText;
-	}
-
-	/**
-	 * Decrypts a ciphertext into a plaintext string using AES
-	 *
-	 * @param   string $stringToDecrypt The ciphertext to decrypt. The first 16 bytes of the raw string must contain
-	 *                                  the IV (initialisation vector).
-	 * @param   bool   $base64encoded   Should I Base64-decode the data before decryption?
-	 *
-	 * @return   string  The plain text string
-	 */
-	public function decryptString($stringToDecrypt, $base64encoded = true)
-	{
-		if ($base64encoded)
-		{
-			$stringToDecrypt = base64_decode($stringToDecrypt);
-		}
-
-		// Extract IV
-		$iv_size = $this->adapter->getBlockSize();
-		$iv      = substr($stringToDecrypt, 0, $iv_size);
-		$key     = $this->getExpandedKey($iv_size, $iv);
-
-		// Decrypt the data
-		$plainText = $this->adapter->decrypt($stringToDecrypt, $key);
-
-		return $plainText;
 	}
 
 	/**
@@ -166,11 +80,6 @@ class Aes
 		}
 
 		$adapter = new OpenSSL();
-
-		if (!$adapter->isSupported($phpfunc))
-		{
-			$adapter = new Mcrypt();
-		}
 
 		if (!$adapter->isSupported($phpfunc))
 		{
@@ -200,6 +109,91 @@ class Aes
 		}
 
 		return true;
+	}
+
+	/**
+	 * Sets the password for this instance.
+	 *
+	 * WARNING: Do not use the legacy mode, it's insecure
+	 *
+	 * @param   string  $password    The password (either user-provided password or binary encryption key) to use
+	 * @param   bool    $legacyMode  True to use the legacy key expansion. We recommend against using it.
+	 */
+	public function setPassword($password, $legacyMode = false)
+	{
+		$this->key = $password;
+
+		$passLength = strlen($password);
+
+		if (function_exists('mb_strlen'))
+		{
+			$passLength = mb_strlen($password, 'ASCII');
+		}
+
+		// Legacy mode was doing something stupid, requiring a key of 32 bytes. DO NOT USE LEGACY MODE!
+		if ($legacyMode && ($passLength != 32))
+		{
+			// Legacy mode: use the sha256 of the password
+			$this->key = hash('sha256', $password, true);
+			// We have to trim or zero pad the password (we end up throwing half of it away in Rijndael-128 / AES...)
+			$this->key = $this->adapter->resizeKey($this->key, $this->adapter->getBlockSize());
+		}
+	}
+
+	/**
+	 * Encrypts a string using AES
+	 *
+	 * @param   string  $stringToEncrypt  The plaintext to encrypt
+	 * @param   bool    $base64encoded    Should I Base64-encode the result?
+	 *
+	 * @return   string  The cryptotext. Please note that the first 16 bytes of
+	 *                   the raw string is the IV (initialisation vector) which
+	 *                   is necessary for decoding the string.
+	 */
+	public function encryptString($stringToEncrypt, $base64encoded = true)
+	{
+		$blockSize = $this->adapter->getBlockSize();
+		$randVal   = new Randval();
+		$iv        = $randVal->generate($blockSize);
+
+		$key        = $this->getExpandedKey($blockSize, $iv);
+		$cipherText = $this->adapter->encrypt($stringToEncrypt, $key, $iv);
+
+		// Optionally pass the result through Base64 encoding
+		if ($base64encoded)
+		{
+			$cipherText = base64_encode($cipherText);
+		}
+
+		// Return the result
+		return $cipherText;
+	}
+
+	/**
+	 * Decrypts a ciphertext into a plaintext string using AES
+	 *
+	 * @param   string  $stringToDecrypt  The ciphertext to decrypt. The first 16 bytes of the raw string must contain
+	 *                                    the IV (initialisation vector).
+	 * @param   bool    $base64encoded    Should I Base64-decode the data before decryption?
+	 *
+	 * @return   string  The plain text string
+	 */
+	public function decryptString($stringToDecrypt, $base64encoded = true)
+	{
+		if ($base64encoded)
+		{
+			$stringToDecrypt = base64_decode($stringToDecrypt);
+		}
+
+		// Extract IV
+		$iv_size = $this->adapter->getBlockSize();
+		$iv      = substr($stringToDecrypt, 0, $iv_size);
+		$key     = $this->getExpandedKey($iv_size, $iv);
+
+		// Decrypt the data
+		$plainText = $this->adapter->decrypt($stringToDecrypt, $key);
+
+		return $plainText;
 	}
 
 	/**

@@ -9,6 +9,7 @@
 
 namespace Akeeba\Engine\Postproc\Connector;
 
+defined('AKEEBAENGINE') || die();
 
 use Exception;
 use RuntimeException;
@@ -19,17 +20,17 @@ class OneDrive
 	/**
 	 * The URL of the helper script which is used to get fresh API tokens
 	 */
-	const helperUrl = 'https://www.akeebabackup.com/oauth2/onedrive.php';
+	public const helperUrl = 'https://www.akeeba.com/oauth2/onedrive.php';
 
 	/**
 	 * Size limit for single part uploads
 	 */
-	const simpleUploadSizeLimit = 104857600;
+	public const simpleUploadSizeLimit = 104857600;
 
 	/**
 	 * Item property to set the name conflict behavior
 	 */
-	const nameConflictBehavior = '@name.conflictBehavior';
+	public const nameConflictBehavior = '@name.conflictBehavior';
 
 	/**
 	 * The access token for connecting to OneDrive
@@ -77,7 +78,7 @@ class OneDrive
 	 *
 	 * @param   string  $accessToken   The access token for accessing OneDrive
 	 * @param   string  $refreshToken  The refresh token for getting new access tokens for OneDrive
-	 * @param   string  $dlid          The AkeebaBackup.com Download ID, used whenever you try to refresh the token
+	 * @param   string  $dlid          The akeeba.com Download ID, used whenever you try to refresh the token
 	 */
 	public function __construct($accessToken, $refreshToken, $dlid)
 	{
@@ -288,7 +289,7 @@ class OneDrive
 		{
 			if (stripos($line, 'Location: ') === 0)
 			{
-				list($header, $location) = explode(': ', $line, 2);
+				[$header, $location] = explode(': ', $line, 2);
 
 				return $location . '?access_token=' . $this->accessToken;
 			}
@@ -808,7 +809,7 @@ class OneDrive
 		if (isset($response['error']) && is_array($response['error']))
 		{
 			$error            = $response['error']['code'];
-			$errorDescription = isset($response['error']['message']) ? $response['error']['message'] : 'No error description provided';
+			$errorDescription = $response['error']['message'] ?? 'No error description provided';
 
 			throw new RuntimeException("Error $error: $errorDescription", 500);
 		}
@@ -817,7 +818,7 @@ class OneDrive
 		if (isset($response['error']))
 		{
 			$error            = $response['error'];
-			$errorDescription = isset($response['error_description']) ? $response['error_description'] : 'No error description provided';
+			$errorDescription = $response['error_description'] ?? 'No error description provided';
 
 			throw new RuntimeException("Error $error: $errorDescription", 500);
 		}

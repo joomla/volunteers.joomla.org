@@ -5,13 +5,18 @@
  * @license   GNU General Public License version 2, or later
  */
 
+defined('_JEXEC') || die;
+
 use FOF30\Model\DataModel;
 use FOF30\Utils\ArrayHelper;
 use FOF30\Utils\FEFHelper\BrowseView;
 use FOF30\View\DataView\DataViewInterface;
+use FOF30\View\DataView\Html;
 use FOF30\View\DataView\Raw as DataViewRaw;
-
-defined('_JEXEC') or die;
+use Joomla\CMS\Factory;
+use Joomla\CMS\HTML\HTMLHelper;
+use Joomla\CMS\Language\Text;
+use Joomla\CMS\Pagination\Pagination;
 
 /**
  * Custom JHtml (HTMLHelper) class. Offers browse view controls compatible with Akeeba Frontend
@@ -24,17 +29,17 @@ abstract class FEFHelperBrowse
 	/**
 	 * Returns an action button on the browse view's table
 	 *
-	 * @param   integer      $i              The row index
-	 * @param   string       $task           The task to fire when the button is clicked
-	 * @param   string|array $prefix         An optional task prefix or an array of options
-	 * @param   string       $active_title   An optional active tooltip to display if $enable is true
-	 * @param   string       $inactive_title An optional inactive tooltip to display if $enable is true
-	 * @param   boolean      $tip            An optional setting for tooltip
-	 * @param   string       $active_class   An optional active HTML class
-	 * @param   string       $inactive_class An optional inactive HTML class
-	 * @param   boolean      $enabled        An optional setting for access control on the action.
-	 * @param   boolean      $translate      An optional setting for translation.
-	 * @param   string       $checkbox       An optional prefix for checkboxes.
+	 * @param   integer       $i               The row index
+	 * @param   string        $task            The task to fire when the button is clicked
+	 * @param   string|array  $prefix          An optional task prefix or an array of options
+	 * @param   string        $active_title    An optional active tooltip to display if $enable is true
+	 * @param   string        $inactive_title  An optional inactive tooltip to display if $enable is true
+	 * @param   boolean       $tip             An optional setting for tooltip
+	 * @param   string        $active_class    An optional active HTML class
+	 * @param   string        $inactive_class  An optional inactive HTML class
+	 * @param   boolean       $enabled         An optional setting for access control on the action.
+	 * @param   boolean       $translate       An optional setting for translation.
+	 * @param   string        $checkbox        An optional prefix for checkboxes.
 	 *
 	 * @return  string  The HTML markup
 	 *
@@ -60,9 +65,11 @@ abstract class FEFHelperBrowse
 		if ($tip)
 		{
 			$title = $enabled ? $active_title : $inactive_title;
-			$title = $translate ? JText::_($title) : $title;
-			$title = JHtml::_('tooltipText', $title, '', 0);
+			$title = $translate ? Text::_($title) : $title;
+			$title = HTMLHelper::_('tooltipText', $title, '', 0);
 		}
+
+		$html   = [];
 
 		if ($enabled)
 		{
@@ -70,7 +77,7 @@ abstract class FEFHelperBrowse
 
 			if (substr($active_class, 0, 2) == '--')
 			{
-				list($btnColor, $active_class) = explode(' ', $active_class, 2);
+				[$btnColor, $active_class] = explode(' ', $active_class, 2);
 				$btnColor = ltrim($btnColor, '-');
 			}
 
@@ -87,7 +94,7 @@ abstract class FEFHelperBrowse
 
 			if (substr($inactive_class, 0, 2) == '--')
 			{
-				list($btnColor, $inactive_class) = explode(' ', $inactive_class, 2);
+				[$btnColor, $inactive_class] = explode(' ', $inactive_class, 2);
 				$btnColor = ltrim($btnColor, '-');
 			}
 
@@ -110,17 +117,19 @@ abstract class FEFHelperBrowse
 	/**
 	 * Returns a state change button on the browse view's table
 	 *
-	 * @param   array        $states      array of value/state. Each state is an array of the form
-	 *                                    (task, text, active title, inactive title, tip (boolean), HTML active class, HTML inactive class)
-	 *                                    or ('task'=>task, 'text'=>text, 'active_title'=>active title,
-	 *                                    'inactive_title'=>inactive title, 'tip'=>boolean, 'active_class'=>html active class,
+	 * @param   array         $states     array of value/state. Each state is an array of the form
+	 *                                    (task, text, active title, inactive title, tip (boolean), HTML active class,
+	 *                                    HTML inactive class) or ('task'=>task, 'text'=>text, 'active_title'=>active
+	 *                                    title,
+	 *                                    'inactive_title'=>inactive title, 'tip'=>boolean, 'active_class'=>html active
+	 *                                    class,
 	 *                                    'inactive_class'=>html inactive class)
-	 * @param   integer      $value       The state value.
-	 * @param   integer      $i           The row index
-	 * @param   string|array $prefix      An optional task prefix or an array of options
-	 * @param   boolean      $enabled     An optional setting for access control on the action.
-	 * @param   boolean      $translate   An optional setting for translation.
-	 * @param   string       $checkbox    An optional prefix for checkboxes.
+	 * @param   integer       $value      The state value.
+	 * @param   integer       $i          The row index
+	 * @param   string|array  $prefix     An optional task prefix or an array of options
+	 * @param   boolean       $enabled    An optional setting for access control on the action.
+	 * @param   boolean       $translate  An optional setting for translation.
+	 * @param   string        $checkbox   An optional prefix for checkboxes.
 	 *
 	 * @return  string  The HTML markup
 	 *
@@ -155,13 +164,13 @@ abstract class FEFHelperBrowse
 	/**
 	 * Returns a published state on the browse view's table
 	 *
-	 * @param   integer      $value        The state value.
-	 * @param   integer      $i            The row index
-	 * @param   string|array $prefix       An optional task prefix or an array of options
-	 * @param   boolean      $enabled      An optional setting for access control on the action.
-	 * @param   string       $checkbox     An optional prefix for checkboxes.
-	 * @param   string       $publish_up   An optional start publishing date.
-	 * @param   string       $publish_down An optional finish publishing date.
+	 * @param   integer       $value         The state value.
+	 * @param   integer       $i             The row index
+	 * @param   string|array  $prefix        An optional task prefix or an array of options
+	 * @param   boolean       $enabled       An optional setting for access control on the action.
+	 * @param   string        $checkbox      An optional prefix for checkboxes.
+	 * @param   string        $publish_up    An optional start publishing date.
+	 * @param   string        $publish_down  An optional finish publishing date.
 	 *
 	 * @return  string  The HTML markup
 	 *
@@ -204,25 +213,25 @@ abstract class FEFHelperBrowse
 		// Special state for dates
 		if ($publish_up || $publish_down)
 		{
-			$nullDate = JFactory::getDbo()->getNullDate();
-			$nowDate  = JFactory::getDate()->toUnix();
+			$nullDate = Factory::getDbo()->getNullDate();
+			$nowDate  = Factory::getDate()->toUnix();
 
-			$tz = JFactory::getUser()->getTimezone();
+			$tz = Factory::getUser()->getTimezone();
 
-			$publish_up   = ($publish_up != $nullDate) ? JFactory::getDate($publish_up, 'UTC')->setTimeZone($tz) : false;
-			$publish_down = ($publish_down != $nullDate) ? JFactory::getDate($publish_down, 'UTC')->setTimeZone($tz) : false;
+			$publish_up   = ($publish_up != $nullDate) ? Factory::getDate($publish_up, 'UTC')->setTimeZone($tz) : false;
+			$publish_down = ($publish_down != $nullDate) ? Factory::getDate($publish_down, 'UTC')->setTimeZone($tz) : false;
 
 			// Create tip text, only we have publish up or down settings
 			$tips = [];
 
 			if ($publish_up)
 			{
-				$tips[] = JText::sprintf('JLIB_HTML_PUBLISHED_START', JHtml::_('date', $publish_up, JText::_('DATE_FORMAT_LC5'), 'UTC'));
+				$tips[] = Text::sprintf('JLIB_HTML_PUBLISHED_START', HTMLHelper::_('date', $publish_up, Text::_('DATE_FORMAT_LC5'), 'UTC'));
 			}
 
 			if ($publish_down)
 			{
-				$tips[] = JText::sprintf('JLIB_HTML_PUBLISHED_FINISHED', JHtml::_('date', $publish_down, JText::_('DATE_FORMAT_LC5'), 'UTC'));
+				$tips[] = Text::sprintf('JLIB_HTML_PUBLISHED_FINISHED', HTMLHelper::_('date', $publish_down, Text::_('DATE_FORMAT_LC5'), 'UTC'));
 			}
 
 			$tip = empty($tips) ? false : implode('<br />', $tips);
@@ -251,9 +260,9 @@ abstract class FEFHelperBrowse
 				// Add tips to titles
 				if ($tip)
 				{
-					$states[$key][1] = JText::_($states[$key][1]);
-					$states[$key][2] = JText::_($states[$key][2]) . '<br />' . $tip;
-					$states[$key][3] = JText::_($states[$key][3]) . '<br />' . $tip;
+					$states[$key][1] = Text::_($states[$key][1]);
+					$states[$key][2] = Text::_($states[$key][2]) . '<br />' . $tip;
+					$states[$key][3] = Text::_($states[$key][3]) . '<br />' . $tip;
 					$states[$key][4] = true;
 				}
 			}
@@ -269,11 +278,11 @@ abstract class FEFHelperBrowse
 	/**
 	 * Returns an isDefault state on the browse view's table
 	 *
-	 * @param   integer      $value    The state value.
-	 * @param   integer      $i        The row index
-	 * @param   string|array $prefix   An optional task prefix or an array of options
-	 * @param   boolean      $enabled  An optional setting for access control on the action.
-	 * @param   string       $checkbox An optional prefix for checkboxes.
+	 * @param   integer       $value     The state value.
+	 * @param   integer       $i         The row index
+	 * @param   string|array  $prefix    An optional task prefix or an array of options
+	 * @param   boolean       $enabled   An optional setting for access control on the action.
+	 * @param   string        $checkbox  An optional prefix for checkboxes.
 	 *
 	 * @return  string  The HTML markup
 	 *
@@ -304,12 +313,12 @@ abstract class FEFHelperBrowse
 	/**
 	 * Returns a checked-out icon
 	 *
-	 * @param   integer      $i          The row index.
-	 * @param   string       $editorName The name of the editor.
-	 * @param   string       $time       The time that the object was checked out.
-	 * @param   string|array $prefix     An optional task prefix or an array of options
-	 * @param   boolean      $enabled    True to enable the action.
-	 * @param   string       $checkbox   An optional prefix for checkboxes.
+	 * @param   integer       $i           The row index.
+	 * @param   string        $editorName  The name of the editor.
+	 * @param   string        $time        The time that the object was checked out.
+	 * @param   string|array  $prefix      An optional task prefix or an array of options
+	 * @param   boolean       $enabled     True to enable the action.
+	 * @param   string        $checkbox    An optional prefix for checkboxes.
 	 *
 	 * @return  string  The HTML markup
 	 *
@@ -317,7 +326,7 @@ abstract class FEFHelperBrowse
 	 */
 	public static function checkedout($i, $editorName, $time, $prefix = '', $enabled = false, $checkbox = 'cb')
 	{
-		JHtml::_('bootstrap.tooltip');
+		HTMLHelper::_('bootstrap.tooltip');
 
 		if (is_array($prefix))
 		{
@@ -327,9 +336,9 @@ abstract class FEFHelperBrowse
 			$prefix   = array_key_exists('prefix', $options) ? $options['prefix'] : '';
 		}
 
-		$text           = $editorName . '<br />' . JHtml::_('date', $time, JText::_('DATE_FORMAT_LC')) . '<br />' . JHtml::_('date', $time, 'H:i');
-		$active_title   = JHtml::_('tooltipText', JText::_('JLIB_HTML_CHECKIN'), $text, 0);
-		$inactive_title = JHtml::_('tooltipText', JText::_('JLIB_HTML_CHECKED_OUT'), $text, 0);
+		$text           = $editorName . '<br />' . HTMLHelper::_('date', $time, Text::_('DATE_FORMAT_LC')) . '<br />' . HTMLHelper::_('date', $time, 'H:i');
+		$active_title   = HTMLHelper::_('tooltipText', Text::_('JLIB_HTML_CHECKIN'), $text, 0);
+		$inactive_title = HTMLHelper::_('tooltipText', Text::_('JLIB_HTML_CHECKED_OUT'), $text, 0);
 
 		return static::action(
 			$i, 'checkin', $prefix, html_entity_decode($active_title, ENT_QUOTES, 'UTF-8'),
@@ -340,18 +349,18 @@ abstract class FEFHelperBrowse
 	/**
 	 * Returns the drag'n'drop reordering field for Browse views
 	 *
-	 * @param string            $orderingField The name of the field you're ordering by
-	 * @param string            $order         The order value of the current row
-	 * @param string            $class         CSS class for the ordering value INPUT field
-	 * @param string            $icon          CSS class for the d'n'd handle icon
-	 * @param string            $inactiveIcon  CSS class for the d'n'd disabled icon
-	 * @param DataViewInterface $view          The view you're rendering against. Leave null for auto-detection.
+	 * @param   string             $orderingField  The name of the field you're ordering by
+	 * @param   string             $order          The order value of the current row
+	 * @param   string             $class          CSS class for the ordering value INPUT field
+	 * @param   string             $icon           CSS class for the d'n'd handle icon
+	 * @param   string             $inactiveIcon   CSS class for the d'n'd disabled icon
+	 * @param   DataViewInterface  $view           The view you're rendering against. Leave null for auto-detection.
 	 *
 	 * @return string
 	 */
 	public static function order($orderingField, $order, $class = 'input-sm', $icon = 'akion-android-more-vertical', $inactiveIcon = 'akion-android-more-vertical', DataViewInterface $view = null)
 	{
-		/** @var \FOF30\View\DataView\Html $view */
+		/** @var Html $view */
 		if (is_null($view))
 		{
 			$view = BrowseView::getViewFromBacktrace();
@@ -374,7 +383,7 @@ abstract class FEFHelperBrowse
 
 			if (!is_array($hasAjaxOrderingSupport) || !$hasAjaxOrderingSupport['saveOrder'])
 			{
-				$disabledLabel    = JText::_('JORDERINGDISABLED');
+				$disabledLabel    = Text::_('JORDERINGDISABLED');
 				$disableClassName = 'inactive tip-top hasTooltip';
 			}
 
@@ -401,15 +410,15 @@ abstract class FEFHelperBrowse
 	/**
 	 * Returns the drag'n'drop reordering table header for Browse views
 	 *
-	 * @param string            $orderingField The name of the field you're ordering by
-	 * @param string            $icon          CSS class for the d'n'd handle icon
+	 * @param   string  $orderingField  The name of the field you're ordering by
+	 * @param   string  $icon           CSS class for the d'n'd handle icon
 	 *
 	 * @return string
 	 */
 	public static function orderfield($orderingField = 'ordering', $icon = 'akion-stats-bars')
 	{
-		$title = JText::_('JGLOBAL_CLICK_TO_SORT_THIS_COLUMN');
-		$orderingLabel = JText::_('JFIELD_ORDERING_LABEL');
+		$title         = Text::_('JGLOBAL_CLICK_TO_SORT_THIS_COLUMN');
+		$orderingLabel = Text::_('JFIELD_ORDERING_LABEL');
 
 		return <<< HTML
 <a href="#"
@@ -429,12 +438,12 @@ HTML;
 	/**
 	 * Creates an order-up action icon.
 	 *
-	 * @param   integer      $i        The row index.
-	 * @param   string       $task     An optional task to fire.
-	 * @param   string|array $prefix   An optional task prefix or an array of options
-	 * @param   string       $text     An optional text to display
-	 * @param   boolean      $enabled  An optional setting for access control on the action.
-	 * @param   string       $checkbox An optional prefix for checkboxes.
+	 * @param   integer       $i         The row index.
+	 * @param   string        $task      An optional task to fire.
+	 * @param   string|array  $prefix    An optional task prefix or an array of options
+	 * @param   string        $text      An optional text to display
+	 * @param   boolean       $enabled   An optional setting for access control on the action.
+	 * @param   string        $checkbox  An optional prefix for checkboxes.
 	 *
 	 * @return  string  The HTML markup
 	 *
@@ -457,12 +466,12 @@ HTML;
 	/**
 	 * Creates an order-down action icon.
 	 *
-	 * @param   integer      $i        The row index.
-	 * @param   string       $task     An optional task to fire.
-	 * @param   string|array $prefix   An optional task prefix or an array of options
-	 * @param   string       $text     An optional text to display
-	 * @param   boolean      $enabled  An optional setting for access control on the action.
-	 * @param   string       $checkbox An optional prefix for checkboxes.
+	 * @param   integer       $i         The row index.
+	 * @param   string        $task      An optional task to fire.
+	 * @param   string|array  $prefix    An optional task prefix or an array of options
+	 * @param   string        $text      An optional text to display
+	 * @param   boolean       $enabled   An optional setting for access control on the action.
+	 * @param   string        $checkbox  An optional prefix for checkboxes.
 	 *
 	 * @return  string  The HTML markup
 	 *
@@ -485,14 +494,14 @@ HTML;
 	/**
 	 * Table header for a field which changes the sort order when clicked
 	 *
-	 * @param   string $title         The link title
-	 * @param   string $order         The order field for the column
-	 * @param   string $direction     The current direction
-	 * @param   string $selected      The selected ordering
-	 * @param   string $task          An optional task override
-	 * @param   string $new_direction An optional direction for the new column
-	 * @param   string $tip           An optional text shown as tooltip title instead of $title
-	 * @param   string $form          An optional form selector
+	 * @param   string  $title          The link title
+	 * @param   string  $order          The order field for the column
+	 * @param   string  $direction      The current direction
+	 * @param   string  $selected       The selected ordering
+	 * @param   string  $task           An optional task override
+	 * @param   string  $new_direction  An optional direction for the new column
+	 * @param   string  $tip            An optional text shown as tooltip title instead of $title
+	 * @param   string  $form           An optional form selector
 	 *
 	 * @return  string
 	 *
@@ -500,8 +509,8 @@ HTML;
 	 */
 	public static function sort($title, $order, $direction = 'asc', $selected = '', $task = null, $new_direction = 'asc', $tip = '', $form = null)
 	{
-		JHtml::_('behavior.core');
-		JHtml::_('bootstrap.popover');
+		HTMLHelper::_('behavior.core');
+		HTMLHelper::_('bootstrap.popover');
 
 		$direction = strtolower($direction);
 		$icon      = ['akion-android-arrow-dropup', 'akion-android-arrow-dropdown'];
@@ -522,8 +531,8 @@ HTML;
 		}
 
 		$html = '<a href="#" onclick="Joomla.tableOrdering(\'' . $order . '\',\'' . $direction . '\',\'' . $task . '\'' . $form . ');return false;"'
-			. ' class="hasPopover" title="' . htmlspecialchars(JText::_($tip ?: $title)) . '"'
-			. ' data-content="' . htmlspecialchars(JText::_('JGLOBAL_CLICK_TO_SORT_THIS_COLUMN')) . '" data-placement="top">';
+			. ' class="hasPopover" title="' . htmlspecialchars(Text::_($tip ?: $title)) . '"'
+			. ' data-content="' . htmlspecialchars(Text::_('JGLOBAL_CLICK_TO_SORT_THIS_COLUMN')) . '" data-placement="top">';
 
 		if (isset($title['0']) && $title['0'] === '<')
 		{
@@ -531,7 +540,7 @@ HTML;
 		}
 		else
 		{
-			$html .= JText::_($title);
+			$html .= Text::_($title);
 		}
 
 		if ($order == $selected)
@@ -547,9 +556,9 @@ HTML;
 	/**
 	 * Method to check all checkboxes on the browse view's table
 	 *
-	 * @param   string $name   The name of the form element
-	 * @param   string $tip    The text shown as tooltip title instead of $tip
-	 * @param   string $action The action to perform on clicking the checkbox
+	 * @param   string  $name    The name of the form element
+	 * @param   string  $tip     The text shown as tooltip title instead of $tip
+	 * @param   string  $action  The action to perform on clicking the checkbox
 	 *
 	 * @return  string
 	 *
@@ -557,21 +566,21 @@ HTML;
 	 */
 	public static function checkall($name = 'checkall-toggle', $tip = 'JGLOBAL_CHECK_ALL', $action = 'Joomla.checkAll(this)')
 	{
-		JHtml::_('behavior.core');
-		JHtml::_('bootstrap.tooltip');
+		HTMLHelper::_('behavior.core');
+		HTMLHelper::_('bootstrap.tooltip');
 
-		return '<input type="checkbox" name="' . $name . '" value="" class="hasTooltip" title="' . JHtml::_('tooltipText', $tip)
+		return '<input type="checkbox" name="' . $name . '" value="" class="hasTooltip" title="' . HTMLHelper::_('tooltipText', $tip)
 			. '" onclick="' . $action . '" />';
 	}
 
 	/**
 	 * Method to create a checkbox for a grid row.
 	 *
-	 * @param   integer $rowNum     The row index
-	 * @param   integer $recId      The record id
-	 * @param   boolean $checkedOut True if item is checked out
-	 * @param   string  $name       The name of the form element
-	 * @param   string  $stub       The name of stub identifier
+	 * @param   integer  $rowNum      The row index
+	 * @param   integer  $recId       The record id
+	 * @param   boolean  $checkedOut  True if item is checked out
+	 * @param   string   $name        The name of the form element
+	 * @param   string   $stub        The name of stub identifier
 	 *
 	 * @return  mixed    String of html with a checkbox if item is not checked out, null if checked out.
 	 *
@@ -586,8 +595,8 @@ HTML;
 	/**
 	 * Include the necessary JavaScript for the browse view's table order feature
 	 *
-	 * @param   string $orderBy Filed by which we are currently sorting the table.
-	 * @param   bool   $return  Should I return the JS? Default: false (= add to the page's head)
+	 * @param   string  $orderBy  Filed by which we are currently sorting the table.
+	 * @param   bool    $return   Should I return the JS? Default: false (= add to the page's head)
 	 *
 	 * @return string
 	 */
@@ -621,7 +630,7 @@ JS;
 
 		try
 		{
-			JFactory::getApplication()->getDocument()->addScriptDeclaration($js);
+			Factory::getApplication()->getDocument()->addScriptDeclaration($js);
 		}
 		catch (Exception $e)
 		{
@@ -633,17 +642,23 @@ JS;
 	 * Returns the table ordering / pagination header for a browse view: number of records to display, order direction,
 	 * order by field.
 	 *
-	 * @param   DataViewRaw $view       The view you're rendering against. If not provided we will guess it using MAGIC.
-	 * @param   array       $sortFields Array of field name => description for the ordering fields in the dropdown. If not provided we will use all the fields available in the model.
-	 * @param   JPagination $pagination The Joomla pagination object. If not provided we fetch it from the view.
-	 * @param   string      $sortBy     Order by field name. If not provided we fetch it from the view.
-	 * @param   string      $order_Dir  Order direction. If not provided we fetch it from the view.
+	 * @param   DataViewRaw  $view                              The view you're rendering against. If not provided we
+	 *                                                          will guess it using MAGIC.
+	 * @param   array        $sortFields                        Array of field name => description for the ordering
+	 *                                                          fields in the dropdown. If not provided we will use all
+	 *                                                          the fields available in the model.
+	 * @param   Pagination   $pagination                        The Joomla pagination object. If not provided we fetch
+	 *                                                          it from the view.
+	 * @param   string       $sortBy                            Order by field name. If not provided we fetch it from
+	 *                                                          the view.
+	 * @param   string       $order_Dir                         Order direction. If not provided we fetch it from the
+	 *                                                          view.
 	 *
 	 * @return  string
 	 *
 	 * @since   3.3.0
 	 */
-	public static function orderheader(DataViewRaw $view = null, array $sortFields = [], JPagination $pagination = null, $sortBy = null, $order_Dir = null)
+	public static function orderheader(DataViewRaw $view = null, array $sortFields = [], Pagination $pagination = null, $sortBy = null, $order_Dir = null)
 	{
 		if (is_null($view))
 		{
@@ -654,7 +669,7 @@ JS;
 		{
 			/** @var DataModel $model */
 			$model      = $view->getModel();
-			$sortFields = isset($view->getLists()->sortFields) ? $view->getLists()->sortFields : [];
+			$sortFields = $view->getLists()->sortFields ?? [];
 			$sortFields = empty($sortFields) ? self::getSortFields($model) : $sortFields;
 		}
 
@@ -679,15 +694,15 @@ JS;
 		}
 
 		// Static hidden text labels
-		$limitLabel    = JText::_('JFIELD_PLG_SEARCH_SEARCHLIMIT_DESC');
-		$orderingDescr = JText::_('JFIELD_ORDERING_DESC');
-		$sortByLabel   = JText::_('JGLOBAL_SORT_BY');
+		$limitLabel    = Text::_('JFIELD_PLG_SEARCH_SEARCHLIMIT_DESC');
+		$orderingDescr = Text::_('JFIELD_ORDERING_DESC');
+		$sortByLabel   = Text::_('JGLOBAL_SORT_BY');
 
 		// Order direction dropdown
-		$directionSelect = JHtml::_('FEFHelper.select.genericlist', [
+		$directionSelect = HTMLHelper::_('FEFHelper.select.genericlist', [
 			''     => $orderingDescr,
-			'asc'  => JText::_('JGLOBAL_ORDER_ASCENDING'),
-			'desc' => JText::_('JGLOBAL_ORDER_DESCENDING'),
+			'asc'  => Text::_('JGLOBAL_ORDER_ASCENDING'),
+			'desc' => Text::_('JGLOBAL_ORDER_DESCENDING'),
 		], 'directionTable', [
 			'id'          => 'directionTable',
 			'list.select' => $order_Dir,
@@ -699,8 +714,8 @@ JS;
 
 		// Sort by field dropdown
 
-		$sortTable = JHtml::_('FEFHelper.select.genericlist', array_merge([
-			'' => JText::_('JGLOBAL_SORT_BY'),
+		$sortTable = HTMLHelper::_('FEFHelper.select.genericlist', array_merge([
+			'' => Text::_('JGLOBAL_SORT_BY'),
 		], $sortFields), 'sortTable', [
 			'id'          => 'sortTable',
 			'list.select' => $sortBy,
@@ -742,7 +757,7 @@ HTML;
 	 * Get the default sort fields from a model. It creates a hash array where the keys are the model's field names and
 	 * the values are the translation keys for their names, following FOF's naming conventions.
 	 *
-	 * @param   DataModel $model The model for which we get the sort fields
+	 * @param   DataModel  $model  The model for which we get the sort fields
 	 *
 	 * @return  array
 	 *
@@ -794,7 +809,7 @@ HTML;
 			foreach ($possibleKeys as $langKey)
 			{
 				$langKey    = strtoupper($langKey);
-				$fieldLabel = JText::_($langKey);
+				$fieldLabel = Text::_($langKey);
 
 				if ($fieldLabel !== $langKey)
 				{

@@ -9,7 +9,7 @@
 
 namespace Akeeba\Engine\Base\Exceptions;
 
-
+defined('AKEEBAENGINE') || die();
 
 use RuntimeException;
 

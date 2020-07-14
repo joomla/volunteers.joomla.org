@@ -41,7 +41,7 @@
 
 namespace Akeeba\Engine\Postproc\Connector\Azure\Exception;
 
-
+defined('AKEEBAENGINE') || die();
 
 use Exception;
 

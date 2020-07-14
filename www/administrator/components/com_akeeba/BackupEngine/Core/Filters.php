@@ -9,7 +9,7 @@
 
 namespace Akeeba\Engine\Core;
 
-
+defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Factory;
 use Akeeba\Engine\Filter\Base as FilterBase;
@@ -362,29 +362,23 @@ class Filters
 	 *
 	 * @param   string  $root
 	 *
-	 * @return string
+	 * @return  array
 	 */
-	public function &getExtraSQL($root)
+	public function getExtraSQL(string $root): array
 	{
-		$ret = "";
-		if (count($this->filters) >= 1)
+		if (count($this->filters) < 1)
 		{
-			/**
-			 * @var string     $filter_name
-			 * @var FilterBase $filter
-			 */
-			foreach ($this->filters as $filter_name => $filter)
-			{
-				$extra_sql = $filter->getExtraSQL($root);
-				if (!empty($extra_sql))
-				{
-					if (!empty($ret))
-					{
-						$ret .= "\n";
-					}
-					$ret .= $extra_sql;
-				}
-			}
+			return [];
+		}
+
+		$ret = [];
+
+		/**
+		 * @var FilterBase $filter
+		 */
+		foreach ($this->filters as $filter)
+		{
+			$ret = array_merge($ret, $filter->getExtraSQL($root));
 		}
 
 		return $ret;

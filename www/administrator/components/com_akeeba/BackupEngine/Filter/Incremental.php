@@ -9,6 +9,7 @@
 
 namespace Akeeba\Engine\Filter;
 
+defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Factory;
 use Akeeba\Engine\Platform;

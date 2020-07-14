@@ -8,7 +8,7 @@
 /** @var $this \Akeeba\Backup\Admin\View\ControlPanel\Html */
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 $cloudFlareTestFile = 'CLOUDFLARE::' . $this->getContainer()->template->parsePath('media://com_akeeba/js/ControlPanel.min.js');
 $cloudFlareTestFile .= '?' . $this->getContainer()->mediaVersion;
@@ -180,7 +180,7 @@ $cloudFlareTestFile .= '?' . $this->getContainer()->mediaVersion;
             @lang('COM_AKEEBA_CPANEL_MSG_MUSTENTERDLID')
         </h3>
         <p>
-            @sprintf('COM_AKEEBA_LBL_CPANEL_NEEDSDLID','https://www.akeebabackup.com/download/official/add-on-dlid.html')
+            @sprintf('COM_AKEEBA_LBL_CPANEL_NEEDSDLID','https://www.akeeba.com/download/official/add-on-dlid.html')
         </p>
         <form name="dlidform" action="index.php" method="post" class="akeeba-form--inline">
             <input type="hidden" name="option" value="com_akeeba" />
@@ -189,7 +189,7 @@ $cloudFlareTestFile .= '?' . $this->getContainer()->mediaVersion;
             <input type="hidden" name="@token(true)" value="1" />
             <div class="akeeba-form-group">
                 <label for="dlid">@lang('COM_AKEEBA_CPANEL_MSG_PASTEDLID')</label>
-                <input type="text" name="dlid" placeholder="<?php echo JText::_('COM_AKEEBA_CONFIG_DOWNLOADID_LABEL')?>"
+                <input type="text" name="dlid" placeholder="@lang('COM_AKEEBA_CONFIG_DOWNLOADID_LABEL')"
                        class="akeeba-input--wide">
 
                 <button type="submit" class="akeeba-btn--green">
@@ -204,14 +204,14 @@ $cloudFlareTestFile .= '?' . $this->getContainer()->mediaVersion;
 {{-- You have CORE; you need to upgrade, not just enter a Download ID --}}
 @if($this->coreWarningForDownloadID)
     <div class="akeeba-block--warning">
-        @sprintf('COM_AKEEBA_LBL_CPANEL_NEEDSUPGRADE','https://www.akeebabackup.com/videos/1212-akeeba-backup-core/1617-abtc03-upgrade-core-professional.html')
+        @sprintf('COM_AKEEBA_LBL_CPANEL_NEEDSUPGRADE','http://akee.ba/abcoretopro')
     </div>
 @endif
 
 {{-- Warn about CloudFlare Rocket Loader --}}
 <div class="akeeba-block--failure" style="display: none;" id="cloudFlareWarn">
-    <h3><?php echo JText::_('COM_AKEEBA_CPANEL_MSG_CLOUDFLARE_WARN')?></h3>
-    <p><?php echo JText::sprintf('COM_AKEEBA_CPANEL_MSG_CLOUDFLARE_WARN1', 'https://support.cloudflare.com/hc/en-us/articles/200169456-Why-is-JavaScript-or-jQuery-not-working-on-my-site-')?></p>
+    <h3>@lang('COM_AKEEBA_CPANEL_MSG_CLOUDFLARE_WARN')</h3>
+    <p>@sprintf('COM_AKEEBA_CPANEL_MSG_CLOUDFLARE_WARN1', 'https://support.cloudflare.com/hc/en-us/articles/200169456-Why-is-JavaScript-or-jQuery-not-working-on-my-site-')</p>
 </div>
 <?php
 /**

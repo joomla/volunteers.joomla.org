@@ -7,10 +7,9 @@
 
 namespace FOF30\Encrypt\AesAdapter;
 
-// Protect from unauthorized access
-use FOF30\Utils\Phpfunc;
+defined('_JEXEC') || die;
 
-defined('_JEXEC') or die();
+use FOF30\Utils\Phpfunc;
 
 /**
  * Interface for AES encryption adapters
@@ -20,17 +19,10 @@ interface AdapterInterface
 	/**
 	 * Sets the AES encryption mode.
 	 *
-	 * WARNING: The strength is deprecated as it has a different effect in MCrypt and OpenSSL. MCrypt was abandoned in
-	 * 2003 before the Rijndael-128 algorithm was officially the Advanced Encryption Standard (AES). MCrypt also offered
-	 * Rijndael-192 and Rijndael-256 algorithms with different block sizes. These are NOT used in AES. OpenSSL, however,
-	 * implements AES correctly. It always uses a 128-bit (16 byte) block. The 192 and 256 bit strengths refer to the
-	 * key size, not the block size. Therefore using different strengths in MCrypt and OpenSSL will result in different
-	 * and incompatible ciphertexts.
-	 *
-	 * TL;DR: Always use $strength = 128!
+	 * WARNING: The strength parameter is deprecated since FOF 3.1 and has no effect.
 	 *
 	 * @param   string  $mode      Choose between CBC (recommended) or ECB
-	 * @param   int     $strength  Bit strength of the key (128, 192 or 256 bits). DEPRECATED. READ NOTES ABOVE.
+	 * @param   int     $strength  DEPRECATED AND UNUSED.
 	 *
 	 * @return  mixed
 	 */
@@ -43,7 +35,8 @@ interface AdapterInterface
 	 * plaintext and trim the string to that length upon decryption.
 	 *
 	 * @param   string       $plainText  The plaintext to encrypt
-	 * @param   string       $key        The raw binary key (will be zero-padded or chopped if its size is different than the block size)
+	 * @param   string       $key        The raw binary key (will be zero-padded or chopped if its size is different
+	 *                                   than the block size)
 	 * @param   null|string  $iv         The initialization vector (for CBC mode algorithms)
 	 *
 	 * @return  string  The raw encrypted binary string.
@@ -62,7 +55,8 @@ interface AdapterInterface
 	 * just padding!).
 	 *
 	 * @param   string  $cipherText  The ciphertext to encrypt
-	 * @param   string  $key         The raw binary key (will be zero-padded or chopped if its size is different than the block size)
+	 * @param   string  $key         The raw binary key (will be zero-padded or chopped if its size is different than
+	 *                               the block size)
 	 *
 	 * @return  string  The raw unencrypted binary string.
 	 */

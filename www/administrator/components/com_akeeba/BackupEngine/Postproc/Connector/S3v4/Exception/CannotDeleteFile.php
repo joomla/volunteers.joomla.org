@@ -9,6 +9,8 @@
 
 namespace Akeeba\Engine\Postproc\Connector\S3v4\Exception;
 
+defined('AKEEBAENGINE') || die();
+
 use RuntimeException;
 
 class CannotDeleteFile extends RuntimeException

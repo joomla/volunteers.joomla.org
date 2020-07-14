@@ -29,7 +29,7 @@ IMPORTANT!
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 PHP version numbers are NOT decimals! Trailing zeros do matter. For example,
 PHP 5.3.28 is twenty four versions newer (greater than) than PHP 5.3.4.
-Please consult https://www.akeebabackup.com/how-do-version-numbers-work.html
+Please consult https://www.akeeba.com/how-do-version-numbers-work.html
 
 
 Further clarifications:

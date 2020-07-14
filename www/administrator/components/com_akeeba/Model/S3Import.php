@@ -8,15 +8,15 @@
 namespace Akeeba\Backup\Admin\Model;
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 use Akeeba\Engine\Factory;
 use Akeeba\Engine\Platform;
 use Akeeba\Engine\Postproc\Connector\S3v4\Configuration;
 use Akeeba\Engine\Postproc\Connector\S3v4\Connector as Amazons3;
 use FOF30\Model\Model;
-use JHtml;
-use JText;
+use Joomla\CMS\HTML\HTMLHelper;
+use Joomla\CMS\Language\Text;
 use RuntimeException;
 
 class S3Import extends Model
@@ -64,8 +64,8 @@ class S3Import extends Model
 	/**
 	 * Set the S3 connection credentials
 	 *
-	 * @param   string $accessKey Access key
-	 * @param   string $secretKey Private key
+	 * @param   string  $accessKey  Access key
+	 * @param   string  $secretKey  Private key
 	 *
 	 * @return  void
 	 */
@@ -73,61 +73,6 @@ class S3Import extends Model
 	{
 		$this->setState('s3access', $accessKey);
 		$this->setState('s3secret', $secretKey);
-	}
-
-	/**
-	 * Gets an S3 connector object
-	 *
-	 * @return  Amazons3
-	 */
-	private function &getS3Connector()
-	{
-		static $s3 = null;
-
-		if (!is_object($s3))
-		{
-			$config = $this->getS3Configuration();
-			$s3     = new Amazons3($config);
-		}
-
-		return $s3;
-	}
-
-	private function &getS3Configuration()
-	{
-		static $s3Config = null;
-
-		if (!is_object($s3Config))
-		{
-			$s3Access = $this->getState('s3access');
-			$s3Secret = $this->getState('s3secret');
-			$s3Config = new Configuration($s3Access, $s3Secret, 'v4', 'us-east-1');
-		}
-
-		return $s3Config;
-	}
-
-	/**
-	 * Do I have enough information to connect to S3?
-	 *
-	 * @param   boolean  $checkBucket  Should I also check that a bucket name is set?
-	 *
-	 * @return  boolean
-	 */
-	private function _hasAdequateInformation($checkBucket = true)
-	{
-		$s3access = $this->getState('s3access');
-		$s3secret = $this->getState('s3secret');
-		$s3bucket = $this->getState('s3bucket');
-
-		$check = !empty($s3access) && !empty($s3secret);
-
-		if ($checkBucket)
-		{
-			$check = $check && !empty($s3bucket);
-		}
-
-		return $check;
 	}
 
 	/**
@@ -141,7 +86,7 @@ class S3Import extends Model
 
 		if (!is_array($buckets))
 		{
-			$buckets = array();
+			$buckets = [];
 
 			if ($this->_hasAdequateInformation(false))
 			{
@@ -172,7 +117,7 @@ class S3Import extends Model
 
 		if (!is_array($folders) || !is_array($files))
 		{
-			$folders = array();
+			$folders = [];
 
 			if ($this->_hasAdequateInformation())
 			{
@@ -188,16 +133,16 @@ class S3Import extends Model
 
 					foreach ($raw as $name => $record)
 					{
-						if (substr($name, - 8) == '$folder$')
+						if (substr($name, -8) == '$folder$')
 						{
 							continue;
 						}
 
 						if (array_key_exists('name', $record))
 						{
-							$extension = substr($name, - 4);
+							$extension = substr($name, -4);
 
-							if (!in_array($extension, array('.zip', '.jpa')))
+							if (!in_array($extension, ['.zip', '.jpa']))
 							{
 								continue;
 							}
@@ -218,29 +163,29 @@ class S3Import extends Model
 			}
 		}
 
-		return array(
+		return [
 			'files'   => $files,
 			'folders' => $folders,
-		);
+		];
 	}
 
 	public function getBucketsDropdown()
 	{
-		$options   = array();
+		$options   = [];
 		$buckets   = $this->getBuckets();
-		$options[] = JHtml::_('select.option', '', JText::_('COM_AKEEBA_S3IMPORT_LABEL_SELECTBUCKET'));
+		$options[] = HTMLHelper::_('select.option', '', Text::_('COM_AKEEBA_S3IMPORT_LABEL_SELECTBUCKET'));
 
 		if (!empty($buckets))
 		{
 			foreach ($buckets as $b)
 			{
-				$options[] = JHtml::_('select.option', $b, $b);
+				$options[] = HTMLHelper::_('select.option', $b, $b);
 			}
 		}
 
 		$selected = $this->getState('s3bucket', '');
 
-		return JHtml::_('select.genericlist', $options, 's3bucket', array(), 'value', 'text', $selected);
+		return HTMLHelper::_('select.genericlist', $options, 's3bucket', [], 'value', 'text', $selected);
 	}
 
 	/**
@@ -251,7 +196,7 @@ class S3Import extends Model
 	public function getCrumbs()
 	{
 		$folder = $this->container->platform->getUserStateFromRequest('com_akeeba.folder', 'folder', $this->input, '', 'raw');
-		$crumbs = array();
+		$crumbs = [];
 
 		if (!empty($folder))
 		{
@@ -266,7 +211,7 @@ class S3Import extends Model
 	{
 		if (!$this->_hasAdequateInformation())
 		{
-			throw new RuntimeException(JText::_('COM_AKEEBA_S3IMPORT_ERR_NOTENOUGHINFO'));
+			throw new RuntimeException(Text::_('COM_AKEEBA_S3IMPORT_ERR_NOTENOUGHINFO'));
 		}
 
 		// Gather the necessary information to perform the download
@@ -328,7 +273,7 @@ class S3Import extends Model
 
 			// Figure out where on Earth to put that file
 			$local_file = Factory::getConfiguration()
-								 ->get('akeeba.basic.output_directory') . '/' . basename($remote_filename);
+					->get('akeeba.basic.output_directory') . '/' . basename($remote_filename);
 
 			// Do we have to initialize the process?
 			if ($part == -1)
@@ -391,7 +336,7 @@ class S3Import extends Model
 				)
 				{
 					// Failure to download the part's beginning = failure to download. Period.
-					throw new RuntimeException(JText::_('COM_AKEEBA_S3IMPORT_ERR_NOTFOUND'));
+					throw new RuntimeException(Text::_('COM_AKEEBA_S3IMPORT_ERR_NOTFOUND'));
 				}
 				elseif ($part >= $totalparts)
 				{
@@ -401,8 +346,8 @@ class S3Import extends Model
 
 					$filetime = time();
 					// Create a new backup record
-					$record = array(
-						'description'     => JText::_('COM_AKEEBA_DISCOVER_LABEL_IMPORTEDDESCRIPTION'),
+					$record = [
+						'description'     => Text::_('COM_AKEEBA_DISCOVER_LABEL_IMPORTEDDESCRIPTION'),
 						'comment'         => '',
 						'backupstart'     => date('Y-m-d H:i:s', $filetime),
 						'backupend'       => date('Y-m-d H:i:s', $filetime + 1),
@@ -416,10 +361,10 @@ class S3Import extends Model
 						'tag'             => 'backend',
 						'filesexist'      => 1,
 						'remote_filename' => '',
-						'total_size'      => $totalsize
-					);
+						'total_size'      => $totalsize,
+					];
 
-					$id    = null;
+					$id = null;
 					Platform::getInstance()->set_or_update_statistics($id, $record);
 
 					return null;
@@ -436,9 +381,9 @@ class S3Import extends Model
 			if ($result)
 			{
 				clearstatcache();
-				$filesize = (int)@filesize($temp_file);
+				$filesize = (int) @filesize($temp_file);
 				$total    = $this->container->platform->getSessionVar('s3import.donesize', 0, 'com_akeeba');
-				$total += $filesize;
+				$total    += $filesize;
 				$this->container->platform->setSessionVar('s3import.donesize', $total, 'com_akeeba');
 			}
 
@@ -453,7 +398,7 @@ class S3Import extends Model
 					// Can't open the file for writing
 					@unlink($temp_file);
 
-					throw new RuntimeException(JText::_('COM_AKEEBA_S3IMPORT_ERR_CANTWRITE'));
+					throw new RuntimeException(Text::_('COM_AKEEBA_S3IMPORT_ERR_CANTWRITE'));
 				}
 
 				$tf = fopen($temp_file, 'rb');
@@ -494,8 +439,8 @@ class S3Import extends Model
 		if ($part >= $totalparts)
 		{
 			// Just finished! Create a new backup record
-			$record = array(
-				'description'     => JText::_('COM_AKEEBA_DISCOVER_LABEL_IMPORTEDDESCRIPTION'),
+			$record = [
+				'description'     => Text::_('COM_AKEEBA_DISCOVER_LABEL_IMPORTEDDESCRIPTION'),
 				'comment'         => '',
 				'backupstart'     => date('Y-m-d H:i:s'),
 				'backupend'       => date('Y-m-d H:i:s', time() + 1),
@@ -509,10 +454,10 @@ class S3Import extends Model
 				'tag'             => 'backend',
 				'filesexist'      => 1,
 				'remote_filename' => '',
-				'total_size'      => $totalsize
-			);
+				'total_size'      => $totalsize,
+			];
 
-			$id    = null;
+			$id = null;
 			Platform::getInstance()->set_or_update_statistics($id, $record);
 
 			return null;
@@ -545,5 +490,60 @@ class S3Import extends Model
 		}
 
 		return $region;
+	}
+
+	/**
+	 * Gets an S3 connector object
+	 *
+	 * @return  Amazons3
+	 */
+	private function &getS3Connector()
+	{
+		static $s3 = null;
+
+		if (!is_object($s3))
+		{
+			$config = $this->getS3Configuration();
+			$s3     = new Amazons3($config);
+		}
+
+		return $s3;
+	}
+
+	private function &getS3Configuration()
+	{
+		static $s3Config = null;
+
+		if (!is_object($s3Config))
+		{
+			$s3Access = $this->getState('s3access');
+			$s3Secret = $this->getState('s3secret');
+			$s3Config = new Configuration($s3Access, $s3Secret, 'v4', 'us-east-1');
+		}
+
+		return $s3Config;
+	}
+
+	/**
+	 * Do I have enough information to connect to S3?
+	 *
+	 * @param   boolean  $checkBucket  Should I also check that a bucket name is set?
+	 *
+	 * @return  boolean
+	 */
+	private function _hasAdequateInformation($checkBucket = true)
+	{
+		$s3access = $this->getState('s3access');
+		$s3secret = $this->getState('s3secret');
+		$s3bucket = $this->getState('s3bucket');
+
+		$check = !empty($s3access) && !empty($s3secret);
+
+		if ($checkBucket)
+		{
+			$check = $check && !empty($s3bucket);
+		}
+
+		return $check;
 	}
 }

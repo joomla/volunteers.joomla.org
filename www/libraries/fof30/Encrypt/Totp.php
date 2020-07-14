@@ -7,7 +7,7 @@
 
 namespace FOF30\Encrypt;
 
-defined('_JEXEC') or die;
+defined('_JEXEC') || die;
 
 class Totp
 {
@@ -48,17 +48,17 @@ class Totp
 	 * of RFC6238. It's up to you to ensure that the same user/device does not
 	 * retry validation within the same Time Step.
 	 *
-	 * @param   int    $timeStep       The Time Step (in seconds). Use 30 to be compatible with Google Authenticator.
-	 * @param   int    $passCodeLength The generated passcode length. Default: 6 digits.
-	 * @param   int    $secretLength   The length of the secret key. Default: 10 bytes (80 bits).
-	 * @param   Base32 $base32         The base32 en/decrypter
+	 * @param   int     $timeStep        The Time Step (in seconds). Use 30 to be compatible with Google Authenticator.
+	 * @param   int     $passCodeLength  The generated passcode length. Default: 6 digits.
+	 * @param   int     $secretLength    The length of the secret key. Default: 10 bytes (80 bits).
+	 * @param   Base32  $base32          The base32 en/decrypter
 	 */
 	public function __construct($timeStep = 30, $passCodeLength = 6, $secretLength = 10, Base32 $base32 = null)
 	{
-		$this->timeStep = $timeStep;
+		$this->timeStep       = $timeStep;
 		$this->passCodeLength = $passCodeLength;
-		$this->secretLength = $secretLength;
-		$this->pinModulo = pow(10, $this->passCodeLength);
+		$this->secretLength   = $secretLength;
+		$this->pinModulo      = 10 ** $this->passCodeLength;
 
 		if (is_null($base32))
 		{
@@ -75,7 +75,7 @@ class Totp
 	 * defined. If $time is skipped or set to null the current timestamp will
 	 * be used.
 	 *
-	 * @param   int|null $time Timestamp
+	 * @param   int|null  $time  Timestamp
 	 *
 	 * @return  int  The time period since the UNIX Epoch
 	 */
@@ -95,9 +95,9 @@ class Totp
 	 * Check is the given passcode $code is a valid TOTP generated using secret
 	 * key $secret
 	 *
-	 * @param   string $secret The Base32-encoded secret key
-	 * @param   string $code   The passcode to check
-	 * @param   int    $time   The time to check it against. Leave null to check for the current server time.
+	 * @param   string  $secret  The Base32-encoded secret key
+	 * @param   string  $code    The passcode to check
+	 * @param   int     $time    The time to check it against. Leave null to check for the current server time.
 	 *
 	 * @return boolean True if the code is valid
 	 */
@@ -120,8 +120,8 @@ class Totp
 	 * Gets the TOTP passcode for a given secret key $secret and a given UNIX
 	 * timestamp $time
 	 *
-	 * @param   string $secret The Base32-encoded secret key
-	 * @param   int    $time   UNIX timestamp
+	 * @param   string  $secret  The Base32-encoded secret key
+	 * @param   int     $time    UNIX timestamp
 	 *
 	 * @return string
 	 */
@@ -133,45 +133,29 @@ class Totp
 		$time = pack("N", $period);
 		$time = str_pad($time, 8, chr(0), STR_PAD_LEFT);
 
-		$hash = hash_hmac('sha1', $time, $secret, true);
+		$hash   = hash_hmac('sha1', $time, $secret, true);
 		$offset = ord(substr($hash, -1));
 		$offset = $offset & 0xF;
 
 		$truncatedHash = $this->hashToInt($hash, $offset) & 0x7FFFFFFF;
-		$pinValue = str_pad($truncatedHash % $this->pinModulo, $this->passCodeLength, "0", STR_PAD_LEFT);
+		$pinValue      = str_pad($truncatedHash % $this->pinModulo, $this->passCodeLength, "0", STR_PAD_LEFT);
 
 		return $pinValue;
 	}
 
 	/**
-	 * Extracts a part of a hash as an integer
-	 *
-	 * @param   string $bytes The hash
-	 * @param   string $start The char to start from (0 = first char)
-	 *
-	 * @return  string
-	 */
-	protected function hashToInt($bytes, $start)
-	{
-		$input = substr($bytes, $start, strlen($bytes) - $start);
-		$val2 = unpack("N", substr($input, 0, 4));
-
-		return $val2[1];
-	}
-
-	/**
 	 * Returns a QR code URL for easy setup of TOTP apps like Google Authenticator
 	 *
-	 * @param   string $user     User
-	 * @param   string $hostname Hostname
-	 * @param   string $secret   Secret string
+	 * @param   string  $user      User
+	 * @param   string  $hostname  Hostname
+	 * @param   string  $secret    Secret string
 	 *
 	 * @return  string
 	 */
 	public function getUrl($user, $hostname, $secret)
 	{
-		$url = sprintf("otpauth://totp/%s@%s?secret=%s", $user, $hostname, $secret);
-		$encoder = "https://chart.googleapis.com/chart?chs=200x200&chld=Q|2&cht=qr&chl=";
+		$url        = sprintf("otpauth://totp/%s@%s?secret=%s", $user, $hostname, $secret);
+		$encoder    = "https://chart.googleapis.com/chart?chs=200x200&chld=Q|2&cht=qr&chl=";
 		$encoderURL = $encoder . urlencode($url);
 
 		return $encoderURL;
@@ -188,10 +172,26 @@ class Totp
 
 		for ($i = 1; $i <= $this->secretLength; $i++)
 		{
-			$c = rand(0, 255);
+			$c      = random_int(0, 255);
 			$secret .= pack("c", $c);
 		}
 
 		return $this->base32->encode($secret);
+	}
+
+	/**
+	 * Extracts a part of a hash as an integer
+	 *
+	 * @param   string  $bytes  The hash
+	 * @param   string  $start  The char to start from (0 = first char)
+	 *
+	 * @return  string
+	 */
+	protected function hashToInt($bytes, $start)
+	{
+		$input = substr($bytes, $start, strlen($bytes) - $start);
+		$val2  = unpack("N", substr($input, 0, 4));
+
+		return $val2[1];
 	}
 }

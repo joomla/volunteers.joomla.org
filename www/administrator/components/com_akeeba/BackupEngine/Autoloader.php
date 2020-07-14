@@ -9,6 +9,8 @@
 
 namespace Akeeba\Engine;
 
+defined('AKEEBAENGINE') || die();
+
 /**
  * The main class autoloader for AkeebaEngine
  */

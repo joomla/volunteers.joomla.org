@@ -9,6 +9,8 @@
 
 namespace Akeeba\Engine\Util\AesAdapter;
 
+defined('AKEEBAENGINE') || die();
+
 use Akeeba\Engine\Util\RandomValue;
 
 class OpenSSL extends AbstractAdapter implements AdapterInterface

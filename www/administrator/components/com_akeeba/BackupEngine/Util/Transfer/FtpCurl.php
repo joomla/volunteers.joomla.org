@@ -9,6 +9,8 @@
 
 namespace Akeeba\Engine\Util\Transfer;
 
+defined('AKEEBAENGINE') || die();
+
 use RuntimeException;
 
 /**

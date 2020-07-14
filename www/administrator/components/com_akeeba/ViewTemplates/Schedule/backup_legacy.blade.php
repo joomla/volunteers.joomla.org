@@ -8,7 +8,7 @@
 /** @var \Akeeba\Backup\Admin\View\Schedule\Html $this */
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 ?>
 <div class="akeeba-panel--information">
@@ -22,7 +22,7 @@ defined('_JEXEC') or die();
         </p>
         <p>
             <a class="akeeba-btn--info"
-               href="https://www.akeebabackup.com/documentation/akeeba-backup-documentation/automating-your-backup.html"
+               href="https://www.akeeba.com/documentation/akeeba-backup-documentation/automating-your-backup.html"
                target="_blank">
                 <span class="akion-ios-book"></span>
                 @lang('COM_AKEEBA_SCHEDULE_LBL_GENERICREADDOC')

@@ -8,10 +8,10 @@
 namespace Akeeba\Backup\Admin\Controller\Mixin;
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 use RuntimeException;
-use JText;
+use Joomla\CMS\Language\Text;
 
 trait CustomACL
 {
@@ -68,7 +68,7 @@ trait CustomACL
 
 		if (!$this->container->platform->authorise($privilege, 'com_akeeba'))
 		{
-			throw new RuntimeException(JText::_('JERROR_ALERTNOAUTHOR'), 403);
+			throw new RuntimeException(\Joomla\CMS\Language\Text::_('JERROR_ALERTNOAUTHOR'), 403);
 		}
 	}
 }

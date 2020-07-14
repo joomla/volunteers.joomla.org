@@ -8,14 +8,14 @@
 namespace Akeeba\Backup\Admin\Controller;
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 use Akeeba\Backup\Admin\Controller\Mixin\CustomACL;
 use Akeeba\Backup\Admin\Controller\Mixin\PredefinedTaskList;
 use Akeeba\Backup\Admin\Model\S3Import as S3ImportModel;
 use FOF30\Container\Container;
 use FOF30\Controller\Controller;
-use JText;
+use Joomla\CMS\Language\Text;
 
 class S3Import extends Controller
 {
@@ -113,7 +113,7 @@ class S3Import extends Controller
 		else
 		{
 			// All done. Redirect to intial page with a success message.
-			$this->setRedirect('index.php?option=com_akeeba&view=S3Import', JText::_('COM_AKEEBA_S3IMPORT_MSG_IMPORTCOMPLETE'));
+			$this->setRedirect('index.php?option=com_akeeba&view=S3Import', \Joomla\CMS\Language\Text::_('COM_AKEEBA_S3IMPORT_MSG_IMPORTCOMPLETE'));
 		}
 	}
 }

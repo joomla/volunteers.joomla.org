@@ -9,6 +9,8 @@
 
 namespace Akeeba\Engine\Platform;
 
+defined('AKEEBAENGINE') || die();
+
 use Exception;
 
 /**

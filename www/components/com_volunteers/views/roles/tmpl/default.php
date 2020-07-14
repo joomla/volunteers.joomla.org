@@ -39,7 +39,7 @@ defined('_JEXEC') or die;
                             </td>
                             <td>
                                 <a class="btn btn-small pull-right" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=team&id=' . $role->team . '#getinvolved') ?>">
-                                    <span class="icon-edit"></span> <?php echo JText::_('COM_VOLUNTEERS_ROLE_APPLY') ?>
+                                    <span class="icon-chevron-right"></span> <?php echo JText::_('COM_VOLUNTEERS_ROLE_APPLY') ?>
                                 </a>
                             </td>
                         </tr>

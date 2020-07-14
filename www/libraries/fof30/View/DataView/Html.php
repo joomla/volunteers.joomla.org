@@ -7,9 +7,13 @@
 
 namespace FOF30\View\DataView;
 
-use FOF30\Render\RenderInterface;
+defined('_JEXEC') || die;
 
-defined('_JEXEC') or die;
+use Exception;
+use FOF30\Render\RenderInterface;
+use Joomla\CMS\Application\SiteApplication;
+use Joomla\CMS\Factory;
+use Joomla\CMS\Language\Text;
 
 class Html extends Raw implements DataViewInterface
 {
@@ -19,59 +23,6 @@ class Html extends Raw implements DataViewInterface
 	/** @var string The translation key for the default page title */
 	public $defaultPageTitle = null;
 
-	/**
-	 * Runs before rendering the view template, echoing HTML to put before the
-	 * view template's generated HTML
-	 *
-	 * @return  void
-	 *
-	 * @throws \Exception
-	 */
-	protected function preRender()
-	{
-		$view = $this->getName();
-		$task = $this->task;
-
-		// Don't load the toolbar on CLI
-		$platform = $this->container->platform;
-
-		if (!$platform->isCli())
-		{
-			$toolbar = $this->container->toolbar;
-			$toolbar->perms = $this->permissions;
-			$toolbar->renderToolbar($view, $task);
-		}
-
-		if ($platform->isFrontend() && $this->setFrontendPageTitle)
-		{
-			$this->setPageTitle();
-		}
-
-		$renderer = $this->container->renderer;
-		$renderer->preRender($view, $task);
-	}
-
-	/**
-	 * Runs after rendering the view template, echoing HTML to put after the
-	 * view template's generated HTML
-	 *
-	 * @return  void
-	 *
-	 * @throws \Exception
-	 */
-	protected function postRender()
-	{
-		$view = $this->getName();
-		$task = $this->task;
-
-		$renderer = $this->container->renderer;
-
-		if ($renderer instanceof RenderInterface)
-		{
-			$renderer->postRender($view, $task);
-		}
-	}
-
 	public function setPageTitle()
 	{
 		if (!$this->container->platform->isFrontend())
@@ -79,16 +30,16 @@ class Html extends Raw implements DataViewInterface
 			return '';
 		}
 
-		/** @var \JApplicationSite $app */
-		$app = \JFactory::getApplication();
-		$document = \JFactory::getDocument();
-		$menus = $app->getMenu();
-		$menu = $menus->getActive();
-		$title = null;
+		/** @var SiteApplication $app */
+		$app      = Factory::getApplication();
+		$document = Factory::getDocument();
+		$menus    = $app->getMenu();
+		$menu     = $menus->getActive();
+		$title    = null;
 
 		// Get the option and view name
 		$option = $this->container->componentName;
-		$view = $this->getName();
+		$view   = $this->getName();
 
 		// Get the default page title translation key
 		$default = empty($this->defaultPageTitle) ? $option . '_TITLE_' . $view : $this->defaultPageTitle;
@@ -102,16 +53,16 @@ class Html extends Raw implements DataViewInterface
 		}
 		else
 		{
-			$params->def('page_heading', \JText::_($default));
+			$params->def('page_heading', Text::_($default));
 		}
 
 		// Set the document title
-		$title = $params->get('page_title', '');
+		$title    = $params->get('page_title', '');
 		$sitename = $app->get('sitename');
 
 		if ($title == $sitename)
 		{
-			$title = \JText::_($default);
+			$title = Text::_($default);
 		}
 
 		if (empty($title))
@@ -120,11 +71,11 @@ class Html extends Raw implements DataViewInterface
 		}
 		elseif ($app->get('sitename_pagetitles', 0) == 1)
 		{
-			$title = \JText::sprintf('JPAGETITLE', $app->get('sitename'), $title);
+			$title = Text::sprintf('JPAGETITLE', $app->get('sitename'), $title);
 		}
 		elseif ($app->get('sitename_pagetitles', 0) == 2)
 		{
-			$title = \JText::sprintf('JPAGETITLE', $title, $app->get('sitename'));
+			$title = Text::sprintf('JPAGETITLE', $title, $app->get('sitename'));
 		}
 
 		$document->setTitle($title);
@@ -149,12 +100,65 @@ class Html extends Raw implements DataViewInterface
 	}
 
 	/**
+	 * Runs before rendering the view template, echoing HTML to put before the
+	 * view template's generated HTML
+	 *
+	 * @return  void
+	 *
+	 * @throws Exception
+	 */
+	protected function preRender()
+	{
+		$view = $this->getName();
+		$task = $this->task;
+
+		// Don't load the toolbar on CLI
+		$platform = $this->container->platform;
+
+		if (!$platform->isCli())
+		{
+			$toolbar        = $this->container->toolbar;
+			$toolbar->perms = $this->permissions;
+			$toolbar->renderToolbar($view, $task);
+		}
+
+		if ($platform->isFrontend() && $this->setFrontendPageTitle)
+		{
+			$this->setPageTitle();
+		}
+
+		$renderer = $this->container->renderer;
+		$renderer->preRender($view, $task);
+	}
+
+	/**
+	 * Runs after rendering the view template, echoing HTML to put after the
+	 * view template's generated HTML
+	 *
+	 * @return  void
+	 *
+	 * @throws Exception
+	 */
+	protected function postRender()
+	{
+		$view = $this->getName();
+		$task = $this->task;
+
+		$renderer = $this->container->renderer;
+
+		if ($renderer instanceof RenderInterface)
+		{
+			$renderer->postRender($view, $task);
+		}
+	}
+
+	/**
 	 * Executes before rendering the page for the Add task.
 	 */
 	protected function onBeforeAdd()
 	{
 		// Hide main menu
-		\JFactory::getApplication()->input->set('hidemainmenu', true);
+		Factory::getApplication()->input->set('hidemainmenu', true);
 
 		parent::onBeforeAdd();
 	}
@@ -165,8 +169,8 @@ class Html extends Raw implements DataViewInterface
 	protected function onBeforeEdit()
 	{
 		// Hide main menu
-		\JFactory::getApplication()->input->set('hidemainmenu', true);
+		Factory::getApplication()->input->set('hidemainmenu', true);
 
 		parent::onBeforeEdit();
 	}
-} 
+}

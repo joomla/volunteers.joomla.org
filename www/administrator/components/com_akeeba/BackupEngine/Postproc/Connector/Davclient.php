@@ -25,7 +25,7 @@
 
 namespace Akeeba\Engine\Postproc\Connector;
 
-
+defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Factory;
 use Akeeba\Engine\Postproc\Connector\Davclient\Xml;
@@ -38,11 +38,11 @@ class Davclient
 	/**
 	 * Basic authentication
 	 */
-	const AUTH_BASIC = 1;
+	public const AUTH_BASIC = 1;
 	/**
 	 * Digest authentication
 	 */
-	const AUTH_DIGEST = 2;
+	public const AUTH_DIGEST = 2;
 	/**
 	 * The propertyMap is a key-value array.
 	 *
@@ -131,7 +131,7 @@ class Davclient
 		// We just need this class to unserialize a node collection. However in our case we really don't need it
 		// since we are just checking if exists or not, we don't have to iterate on it, so we can use a (very)
 		// simplified method just to avoid PHP warnings
-		$this->propertyMap['{DAV:}resourcetype'] = '\\Akeeba\\Engine\\Postproc\\Connector\\Davclient\\Xml';
+		$this->propertyMap['{DAV:}resourcetype'] = Xml::class;
 	}
 
 	/**
@@ -188,7 +188,7 @@ class Davclient
 
 		foreach ($properties as $property)
 		{
-			list($namespace, $elementName) = Xml::parseClarkNotation($property);
+			[$namespace, $elementName] = Xml::parseClarkNotation($property);
 
 			if ($namespace === 'DAV:')
 			{
@@ -216,14 +216,14 @@ class Davclient
 			reset($result);
 			$result = current($result);
 
-			return isset($result[200]) ? $result[200] : [];
+			return $result[200] ?? [];
 		}
 
 		$newResult = [];
 
 		foreach ($result as $href => $statusList)
 		{
-			$newResult[$href] = isset($statusList[200]) ? $statusList[200] : [];
+			$newResult[$href] = $statusList[200] ?? [];
 		}
 
 		return $newResult;
@@ -248,7 +248,7 @@ class Davclient
 
 		foreach ($properties as $propName => $propValue)
 		{
-			list($namespace, $elementName) = Xml::parseClarkNotation($propName);
+			[$namespace, $elementName] = Xml::parseClarkNotation($propName);
 
 			if ($propValue === null)
 			{
@@ -453,7 +453,7 @@ class Davclient
 			$curlSettings[CURLOPT_USERPWD]  = $this->userName . ':' . $this->password;
 		}
 
-		list($response, $curlInfo, $curlErrNo, $curlError) = $this->curlRequest($url, $curlSettings);
+		[$response, $curlInfo, $curlErrNo, $curlError] = $this->curlRequest($url, $curlSettings);
 
 		$this->parseHeaders();
 
@@ -563,7 +563,7 @@ class Davclient
 
 				$propStat->registerXPathNamespace('d', 'urn:DAV');
 				$status = $propStat->xpath('d:status');
-				list($httpVersion, $statusCode, $message) = explode(' ', (string) $status[0], 3);
+				[$httpVersion, $statusCode, $message] = explode(' ', (string) $status[0], 3);
 
 				// Only using the propertymap for results with status 200.
 				$propertyMap = $statusCode === '200' ? $this->propertyMap : [];

@@ -7,7 +7,12 @@
 
 namespace FOF30\Utils;
 
-defined('_JEXEC') or die;
+defined('_JEXEC') || die;
+
+use JLoader;
+use Joomla\CMS\Application\ApplicationHelper;
+use Joomla\CMS\Factory;
+use Joomla\CMS\Log\Log;
 
 abstract class StringHelper
 {
@@ -27,15 +32,10 @@ abstract class StringHelper
 	{
 		if (class_exists('\JLog'))
 		{
-			\JLog::add('FOF30\\Utils\\StringHelper::toSlug is deprecated. Use \\JApplicationHelper::stringURLSafe instead', \JLog::WARNING, 'deprecated');
+			Log::add('FOF30\\Utils\\StringHelper::toSlug is deprecated. Use \\JApplicationHelper::stringURLSafe instead', Log::WARNING, 'deprecated');
 		}
 
-		if (!class_exists('\JApplicationHelper'))
-		{
-			\JLoader::import('cms.application.helper');
-		}
-
-		return \JApplicationHelper::stringURLSafe($value);
+		return ApplicationHelper::stringURLSafe($value);
 	}
 
 	/**
@@ -54,10 +54,11 @@ abstract class StringHelper
 	{
 		if (class_exists('\JLog'))
 		{
-			\JLog::add('FOF30\\Utils\\StringHelper::toASCII is deprecated. Use JFactory::getLanguage()->transliterate instead', \JLog::WARNING, 'deprecated');
+			Log::add('FOF30\\Utils\\StringHelper::toASCII is deprecated. Use JFactory::getLanguage()->transliterate instead', Log::WARNING, 'deprecated');
 		}
 
-		$lang = \JFactory::getLanguage();
+		$lang = Factory::getLanguage();
+
 		return $lang->transliterate($value);
 	}
 
@@ -70,19 +71,19 @@ abstract class StringHelper
 	 */
 	public static function toBool($string)
 	{
-		$string = trim((string)$string);
+		$string = trim((string) $string);
 		$string = strtolower($string);
 
-		if (in_array($string, array(1, 'true', 'yes', 'on', 'enabled'), true))
+		if (in_array($string, [1, 'true', 'yes', 'on', 'enabled'], true))
 		{
 			return true;
 		}
 
-		if (in_array($string, array(0, 'false', 'no', 'off', 'disabled'), true))
+		if (in_array($string, [0, 'false', 'no', 'off', 'disabled'], true))
 		{
 			return false;
 		}
 
-		return (bool)$string;
+		return (bool) $string;
 	}
 }

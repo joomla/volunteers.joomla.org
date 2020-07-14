@@ -8,10 +8,11 @@
 namespace Akeeba\Backup\Site\Model\Json\Task;
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 use Akeeba\Backup\Site\Model\MultipleDatabases;
 use Akeeba\Engine\Platform;
+use Joomla\CMS\Filter\InputFilter;
 
 /**
  * Set up or edit an extra database definition
@@ -21,23 +22,23 @@ class SetIncludedDB extends AbstractTask
 	/**
 	 * Execute the JSON API task
 	 *
-	 * @param   array $parameters The parameters to this task
+	 * @param   array  $parameters  The parameters to this task
 	 *
 	 * @return  mixed
 	 *
 	 * @throws  \RuntimeException  In case of an error
 	 */
-	public function execute(array $parameters = array())
+	public function execute(array $parameters = [])
 	{
-		$filter = \JFilterInput::getInstance();
+		$filter = InputFilter::getInstance();
 
 		// Get the passed configuration values
-		$defConfig = array(
+		$defConfig = [
 			'profile'    => 0,
 			'name'       => '',
-			'connection' => array(),
+			'connection' => [],
 			'test'       => true,
-		);
+		];
 
 		$defConfig = array_merge($defConfig, $parameters);
 

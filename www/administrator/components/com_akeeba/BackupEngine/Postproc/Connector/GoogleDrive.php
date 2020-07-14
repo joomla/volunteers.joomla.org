@@ -9,7 +9,7 @@
 
 namespace Akeeba\Engine\Postproc\Connector;
 
-
+defined('AKEEBAENGINE') || die();
 
 use Exception;
 use RuntimeException;
@@ -24,15 +24,15 @@ class GoogleDrive
 	/**
 	 * The root URL for the Google Drive v3 API
 	 */
-	const rootUrl = 'https://www.googleapis.com/drive/v3/';
+	public const rootUrl = 'https://www.googleapis.com/drive/v3/';
 	/**
 	 * The root URL for the Google Drive v3 upload API
 	 */
-	const uploadUrl = 'https://www.googleapis.com/upload/drive/v3/';
+	public const uploadUrl = 'https://www.googleapis.com/upload/drive/v3/';
 	/**
 	 * The URL of the helper script which is used to get fresh API tokens
 	 */
-	const helperUrl = 'https://www.akeebabackup.com/oauth2/googledrive.php';
+	public const helperUrl = 'https://www.akeeba.com/oauth2/googledrive.php';
 	/**
 	 * The access token for connecting to Google Drive
 	 *
@@ -71,7 +71,7 @@ class GoogleDrive
 	 *
 	 * @param   string  $accessToken   The access token for accessing OneDrive
 	 * @param   string  $refreshToken  The refresh token for getting new access tokens for OneDrive
-	 * @param   string  $dlid          The AkeebaBackup.com Download ID, used whenever you try to refresh the token
+	 * @param   string  $dlid          The akeeba.com Download ID, used whenever you try to refresh the token
 	 */
 	public function __construct($accessToken, $refreshToken, $dlid)
 	{
@@ -127,7 +127,6 @@ class GoogleDrive
 
 		$refreshResponse = $this->fetch('GET', $refreshUrl);
 
-		$this->refreshToken = $refreshResponse['refresh_token'];
 		$this->accessToken  = $refreshResponse['access_token'];
 
 		return array_merge($response, $refreshResponse);
@@ -594,7 +593,7 @@ JSON;
 				continue;
 			}
 
-			list($header, $value) = explode(": ", $line);
+			[$header, $value] = explode(": ", $line);
 
 			if (strtolower($header) != 'location')
 			{
@@ -673,7 +672,7 @@ JSON;
 	 */
 	public function resumableUpload($path, $localFile, $partSize = 10485760, $mimeType = 'application/octet-stream', $teamDriveID = '')
 	{
-		list($fileName, $folderId) = $this->preprocessUploadPath($path, $teamDriveID);
+		[$fileName, $folderId] = $this->preprocessUploadPath($path, $teamDriveID);
 
 		$sessionUrl = $this->createUploadSession($folderId, $localFile, $fileName, $mimeType);
 		$from       = 0;
@@ -723,7 +722,7 @@ JSON;
 		}
 
 		// Smaller files, use simple upload
-		list($fileName, $folderId) = $this->preprocessUploadPath($path, $teamDriveID);
+		[$fileName, $folderId] = $this->preprocessUploadPath($path, $teamDriveID);
 
 		return $this->simpleUpload($folderId, $localFile, $fileName, $mimeType);
 	}
@@ -1008,7 +1007,7 @@ JSON;
 		if (isset($response['error']) && is_array($response['error']))
 		{
 			$error            = $response['error']['code'];
-			$errorDescription = isset($response['error']['message']) ? $response['error']['message'] : 'No error description provided';
+			$errorDescription = $response['error']['message'] ?? 'No error description provided';
 
 			throw new RuntimeException("Error $error: $errorDescription", 500);
 		}
@@ -1017,7 +1016,7 @@ JSON;
 		if (isset($response['error']))
 		{
 			$error            = $response['error'];
-			$errorDescription = isset($response['error_description']) ? $response['error_description'] : 'No error description provided';
+			$errorDescription = $response['error_description'] ?? 'No error description provided';
 
 			throw new RuntimeException("Error $error: $errorDescription", 500);
 		}

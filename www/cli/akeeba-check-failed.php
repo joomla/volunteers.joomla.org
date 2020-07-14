@@ -5,13 +5,15 @@
  * @license   GNU General Public License version 3, or later
  */
 
+use Akeeba\Backup\Site\Model\Statistics;
 use Akeeba\Engine\Platform;
+use FOF30\Container\Container;
 
 // Enable and include Akeeba Engine
 define('AKEEBAENGINE', 1);
 
 // Setup and import the base CLI script
-$minphp = '5.6.0';
+$minphp = '7.1.0';
 
 // Boilerplate -- START
 define('_JEXEC', 1);
@@ -43,6 +45,9 @@ require_once JPATH_LIBRARIES . '/fof30/Cli/Application.php';
 // Load the version file
 require_once JPATH_ADMINISTRATOR . '/components/com_akeeba/version.php';
 
+// Set up the cacert.pem location
+define('AKEEBA_CACERT_PEM', JPATH_LIBRARIES . '/src/Http/Transport/cacert.pem');
+
 /**
  * Akeeba Backup Check failed application
  */
@@ -51,8 +56,8 @@ class AkeebaBackupCheckfailed extends FOFApplicationCLI
 	public function doExecute()
 	{
 		// Load the language files
-		$paths	 = array(JPATH_ADMINISTRATOR, JPATH_ROOT);
-		$jlang	 = JFactory::getLanguage();
+		$paths = [JPATH_ADMINISTRATOR, JPATH_ROOT];
+		$jlang = JFactory::getLanguage();
 		$jlang->load('com_akeeba', $paths[0], 'en-GB', true);
 		$jlang->load('com_akeeba', $paths[1], 'en-GB', true);
 		$jlang->load('com_akeeba' . '.override', $paths[0], 'en-GB', true);
@@ -68,11 +73,11 @@ class AkeebaBackupCheckfailed extends FOFApplicationCLI
 			$debugmessage = "*** DEBUG MODE ENABLED ***\n";
 		}
 
-		$version		 = AKEEBA_VERSION;
-		$date			 = AKEEBA_DATE;
+		$version = AKEEBA_VERSION;
+		$date    = AKEEBA_DATE;
 
-		$phpversion		 = PHP_VERSION;
-		$phpenvironment	 = PHP_SAPI;
+		$phpversion     = PHP_VERSION;
+		$phpenvironment = PHP_SAPI;
 
 		if ($this->input->get('quiet', -1, 'int') == -1)
 		{
@@ -126,16 +131,16 @@ ENDBLOCK;
 		// Assign the correct platform
 		Platform::addPlatform('joomla3x', JPATH_COMPONENT_ADMINISTRATOR . '/BackupPlatform/Joomla3x');
 
-        define('AKEEBA_BACKUP_ORIGIN', 'cli');
+		define('AKEEBA_BACKUP_ORIGIN', 'cli');
 
-        // Work around some misconfigured servers which print out notices
+		// Work around some misconfigured servers which print out notices
 		if (function_exists('error_reporting'))
 		{
 			$oldLevel = error_reporting(0);
 		}
 
-		$container = \FOF30\Container\Container::getInstance('com_akeeba', [
-			'input' => $this->input
+		$container = Container::getInstance('com_akeeba', [
+			'input' => $this->input,
 		]);
 
 		if (function_exists('error_reporting'))
@@ -143,11 +148,11 @@ ENDBLOCK;
 			error_reporting($oldLevel);
 		}
 
-		/** @var \Akeeba\Backup\Site\Model\Statistics $model */
-		$model = $container->factory->model('Statistics')->tmpInstance();
-        $result = $model->notifyFailed();
+		/** @var Statistics $model */
+		$model  = $container->factory->model('Statistics')->tmpInstance();
+		$result = $model->notifyFailed();
 
-        echo implode("\n", $result['message']);
+		echo implode("\n", $result['message']);
 
 		exit();
 	}

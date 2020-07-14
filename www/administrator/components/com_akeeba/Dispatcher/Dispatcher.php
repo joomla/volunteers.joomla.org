@@ -8,7 +8,7 @@
 namespace Akeeba\Backup\Admin\Dispatcher;
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 use Akeeba\Backup\Admin\Helper\SecretWord;
 use Akeeba\Backup\Admin\Model\ControlPanel;
@@ -18,6 +18,7 @@ use FOF30\Container\Container;
 use FOF30\Dispatcher\Dispatcher as BaseDispatcher;
 use FOF30\Dispatcher\Mixin\ViewAliases;
 use Joomla\CMS\Factory as JFactory;
+use Joomla\CMS\Language\Text;
 
 class Dispatcher extends BaseDispatcher
 {
@@ -28,6 +29,7 @@ class Dispatcher extends BaseDispatcher
 	{
 		onBeforeDispatch as onBeforeDispatchViewAliases;
 	}
+
 	/** @var  \Akeeba\Backup\Admin\Container  The container we belong to */
 	protected $container = null;
 
@@ -90,7 +92,7 @@ class Dispatcher extends BaseDispatcher
 		// Does the user have adequate permissions to access our component?
 		if (!$this->container->platform->authorise('core.manage', 'com_akeeba'))
 		{
-			throw new \RuntimeException(\JText::_('JERROR_ALERTNOAUTHOR'), 404);
+			throw new \RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'), 404);
 		}
 
 		// FEF Renderer options. Used to load the common CSS file.
@@ -130,7 +132,7 @@ class Dispatcher extends BaseDispatcher
 				// The update is stuck. We will display a warning in the Control Panel
 			}
 
-			$msg = \JText::_('COM_AKEEBA_CONTROLPANEL_MSG_REBUILTTABLES');
+			$msg = Text::_('COM_AKEEBA_CONTROLPANEL_MSG_REBUILTTABLES');
 			$this->container->platform->redirect('index.php', 307, $msg, 'warning');
 		}
 
@@ -216,7 +218,6 @@ class Dispatcher extends BaseDispatcher
 		{
 			define('AKEEBAENGINE', 1);
 			define('AKEEBAROOT', $this->container->backEndPath . '/BackupEngine');
-			define('ALICEROOT', $this->container->backEndPath . '/AliceEngine');
 		}
 
 		// Make sure we have a profile set throughout the component's lifetime
@@ -230,12 +231,6 @@ class Dispatcher extends BaseDispatcher
 		// Load Akeeba Engine
 		$basePath = $this->container->backEndPath;
 		require_once $basePath . '/BackupEngine/Factory.php';
-
-		// Load ALICE (Pro version only)
-		if (@file_exists($basePath . '/AliceEngine/factory.php'))
-		{
-			require_once $basePath . '/AliceEngine/factory.php';
-		}
 	}
 
 	public function loadAkeebaEngineConfiguration()

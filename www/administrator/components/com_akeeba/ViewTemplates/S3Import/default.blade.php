@@ -6,7 +6,7 @@
  */
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 /** @var \Akeeba\Backup\Admin\View\S3Import\Html $this */
 ?>
@@ -64,9 +64,9 @@ defined('_JEXEC') or die();
                 </li>
 
                 @if(!empty($this->crumbs))
-					<?php $runningCrumb = ''; $i = 0; ?>
+                    <?php $runningCrumb = ''; $i = 0; ?>
                     @foreach($this->crumbs as $crumb)
-						<?php $runningCrumb .= $crumb . '/'; $i++; ?>
+                        <?php $runningCrumb .= $crumb . '/'; $i++; ?>
                         <li>
                             <a
                                     class="akeebaS3ImportChangeDirectory"

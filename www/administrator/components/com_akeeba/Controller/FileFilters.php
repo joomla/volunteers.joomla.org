@@ -10,7 +10,7 @@ namespace Akeeba\Backup\Admin\Controller;
 // Protect from unauthorized access
 use FOF30\Container\Container;
 
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 /**
  * File Filters controller

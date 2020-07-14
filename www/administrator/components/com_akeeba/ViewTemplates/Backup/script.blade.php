@@ -6,7 +6,7 @@
  */
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Uri\Uri;

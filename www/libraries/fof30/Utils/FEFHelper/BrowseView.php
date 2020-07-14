@@ -7,16 +7,18 @@
 
 namespace FOF30\Utils\FEFHelper;
 
-defined('_JEXEC') or die;
+defined('_JEXEC') || die;
 
+use Exception;
 use FOF30\Container\Container;
 use FOF30\Model\DataModel;
 use FOF30\Utils\ArrayHelper;
 use FOF30\Utils\SelectOptions;
 use FOF30\View\DataView\DataViewInterface;
 use FOF30\View\View;
-use JHtml;
-use JText;
+use Joomla\CMS\HTML\HTMLHelper;
+use Joomla\CMS\Language\Text;
+use RuntimeException;
 
 /**
  * An HTML helper for Browse views.
@@ -39,7 +41,7 @@ abstract class BrowseView
 	/**
 	 * Get the translation key for a field's label
 	 *
-	 * @param string $fieldName The field name
+	 * @param   string  $fieldName  The field name
 	 *
 	 * @return string
 	 *
@@ -65,7 +67,7 @@ abstract class BrowseView
 
 			foreach ($keys as $key)
 			{
-				if (JText::_($key) != $key)
+				if (Text::_($key) != $key)
 				{
 					return $key;
 				}
@@ -73,7 +75,7 @@ abstract class BrowseView
 
 			return $keys[0];
 		}
-		catch (\Exception $e)
+		catch (Exception $e)
 		{
 			return ucfirst($fieldName);
 		}
@@ -82,13 +84,13 @@ abstract class BrowseView
 	/**
 	 * Returns the label for a field (translated)
 	 *
-	 * @param string $fieldName The field name
+	 * @param   string  $fieldName  The field name
 	 *
 	 * @return string
 	 */
 	public static function fieldLabel($fieldName)
 	{
-		return JText::_(self::fieldLabelKey($fieldName));
+		return Text::_(self::fieldLabelKey($fieldName));
 	}
 
 	/**
@@ -109,17 +111,17 @@ abstract class BrowseView
 			$langKey = self::fieldLabelKey($field);
 		}
 
-		return JHtml::_('FEFHelper.browse.sort', $langKey, $field, $view->getLists()->order_Dir, $view->getLists()->order, $view->getTask());
+		return HTMLHelper::_('FEFHelper.browse.sort', $langKey, $field, $view->getLists()->order_Dir, $view->getLists()->order, $view->getTask());
 	}
 
 	/**
 	 * Create a browse view filter from values returned by a model
 	 *
-	 * @param string $localField      Field name
-	 * @param string $modelTitleField Foreign model field for drop-down display values
-	 * @param null   $modelName       Foreign model name
-	 * @param string $placeholder     Placeholder for no selection
-	 * @param array  $params          Generic select display parameters
+	 * @param   string  $localField       Field name
+	 * @param   string  $modelTitleField  Foreign model field for drop-down display values
+	 * @param   null    $modelName        Foreign model name
+	 * @param   string  $placeholder      Placeholder for no selection
+	 * @param   array   $params           Generic select display parameters
 	 *
 	 * @return string
 	 *
@@ -141,7 +143,7 @@ abstract class BrowseView
 		}
 
 		$params = array_merge([
-			'list.none'      => '&mdash; ' . JText::_($placeholder) . ' &mdash;',
+			'list.none'      => '&mdash; ' . Text::_($placeholder) . ' &mdash;',
 			'value_field'    => $modelTitleField,
 			'fof.autosubmit' => true,
 		], $params);
@@ -152,10 +154,10 @@ abstract class BrowseView
 	/**
 	 * Display a text filter (search box)
 	 *
-	 * @param   string $localField  The name of the model field. Used when getting the filter state.
-	 * @param   string $searchField The INPUT element's name. Default: "filter_$localField".
-	 * @param   string $placeholder The JText language key for the placeholder. Default: extrapolate from $localField.
-	 * @param   array  $attributes  HTML attributes for the INPUT element.
+	 * @param   string  $localField   The name of the model field. Used when getting the filter state.
+	 * @param   string  $searchField  The INPUT element's name. Default: "filter_$localField".
+	 * @param   string  $placeholder  The JText language key for the placeholder. Default: extrapolate from $localField.
+	 * @param   array   $attributes   HTML attributes for the INPUT element.
 	 *
 	 * @return  string
 	 *
@@ -168,12 +170,12 @@ abstract class BrowseView
 		$model                     = $view->getModel();
 		$searchField               = empty($searchField) ? $localField : $searchField;
 		$placeholder               = empty($placeholder) ? self::fieldLabelKey($localField) : $placeholder;
-		$attributes['type']        = isset($attributes['type']) ? $attributes['type'] : 'text';
+		$attributes['type']        = $attributes['type'] ?? 'text';
 		$attributes['name']        = $searchField;
 		$attributes['id']          = !isset($attributes['id']) ? "filter_$localField" : $attributes['id'];
 		$attributes['onchange']    = !isset($attributes['onchange']) ? 'document.adminForm.submit()' : null;
-		$attributes['placeholder'] = !isset($attributes['placeholder']) ? $view->escape(JText::_($placeholder)) : $attributes['placeholder'];
-		$attributes['title']       = isset($attributes['title']) ? $attributes['title'] : $attributes['placeholder'];
+		$attributes['placeholder'] = !isset($attributes['placeholder']) ? $view->escape(Text::_($placeholder)) : $attributes['placeholder'];
+		$attributes['title']       = $attributes['title'] ?? $attributes['placeholder'];
 		$attributes['value']       = $view->escape($model->getState($localField));
 
 		// Remove null attributes and collapse into a string
@@ -188,10 +190,10 @@ abstract class BrowseView
 	/**
 	 * Create a browse view filter with dropdown values
 	 *
-	 * @param string $localField  Field name
-	 * @param array  $options     The JHtml options list to use
-	 * @param string $placeholder Placeholder for no selection
-	 * @param array  $params      Generic select display parameters
+	 * @param   string  $localField   Field name
+	 * @param   array   $options      The JHtml options list to use
+	 * @param   string  $placeholder  Placeholder for no selection
+	 * @param   array   $params       Generic select display parameters
 	 *
 	 * @return string
 	 *
@@ -208,7 +210,7 @@ abstract class BrowseView
 		}
 
 		$params = array_merge([
-			'list.none'      => '&mdash; ' . JText::_($placeholder) . ' &mdash;',
+			'list.none'      => '&mdash; ' . Text::_($placeholder) . ' &mdash;',
 			'fof.autosubmit' => true,
 		], $params);
 
@@ -218,9 +220,9 @@ abstract class BrowseView
 	/**
 	 * View access dropdown filter
 	 *
-	 * @param string $localField  Field name
-	 * @param string $placeholder Placeholder for no selection
-	 * @param array  $params      Generic select display parameters
+	 * @param   string  $localField   Field name
+	 * @param   string  $placeholder  Placeholder for no selection
+	 * @param   array   $params       Generic select display parameters
 	 *
 	 * @return string
 	 *
@@ -234,9 +236,9 @@ abstract class BrowseView
 	/**
 	 * Published state dropdown filter
 	 *
-	 * @param string $localField  Field name
-	 * @param string $placeholder Placeholder for no selection
-	 * @param array  $params      Generic select display parameters
+	 * @param   string  $localField   Field name
+	 * @param   string  $placeholder  Placeholder for no selection
+	 * @param   array   $params       Generic select display parameters
 	 *
 	 * @return string
 	 *
@@ -250,18 +252,18 @@ abstract class BrowseView
 	/**
 	 * Create a select box from the values returned by a model
 	 *
-	 * @param string $name         Field name
-	 * @param string $modelName    The name of the model, e.g. "items" or "com_foobar.items"
-	 * @param string $currentValue The currently selected value
-	 * @param array  $params       Passed to optionsFromModel and genericSelect
-	 * @param array  $modelState   Optional state variables to pass to the model
-	 * @param array  $options      Any JHtml select options you want to add in front of the model's returned values
+	 * @param   string  $name          Field name
+	 * @param   string  $modelName     The name of the model, e.g. "items" or "com_foobar.items"
+	 * @param   string  $currentValue  The currently selected value
+	 * @param   array   $params        Passed to optionsFromModel and genericSelect
+	 * @param   array   $modelState    Optional state variables to pass to the model
+	 * @param   array   $options       Any JHtml select options you want to add in front of the model's returned values
+	 *
+	 * @return string
 	 *
 	 * @see   self::getOptionsFromModel
 	 * @see   self::getOptionsFromSource
 	 * @see   self::genericSelect
-	 *
-	 * @return string
 	 *
 	 * @since 3.3.0
 	 */
@@ -280,17 +282,17 @@ abstract class BrowseView
 	 * Get a (human readable) title from a (typically numeric, foreign key) key value using the data
 	 * returned by a DataModel.
 	 *
-	 * @param string $value      The key value
-	 * @param string $modelName  The name of the model, e.g. "items" or "com_foobar.items"
-	 * @param array  $params     Passed to getOptionsFromModel
-	 * @param array  $modelState Optional state variables to pass to the model
-	 * @param array  $options    Any JHtml select options you want to add in front of the model's returned values
+	 * @param   string  $value       The key value
+	 * @param   string  $modelName   The name of the model, e.g. "items" or "com_foobar.items"
+	 * @param   array   $params      Passed to getOptionsFromModel
+	 * @param   array   $modelState  Optional state variables to pass to the model
+	 * @param   array   $options     Any JHtml select options you want to add in front of the model's returned values
+	 *
+	 * @return string
 	 *
 	 * @see   self::getOptionsFromModel
 	 * @see   self::getOptionsFromSource
 	 * @see   self::genericSelect
-	 *
-	 * @return string
 	 *
 	 * @since 3.3.0
 	 */
@@ -314,11 +316,11 @@ abstract class BrowseView
 	/**
 	 * Gets the active option's label given an array of JHtml options
 	 *
-	 * @param   mixed   $selected       The currently selected value
-	 * @param   array   $data           The JHtml options to parse
-	 * @param   string  $optKey         Key name, default: value
-	 * @param   string  $optText        Value name, default: text
-	 * @param   bool    $selectFirst    Should I automatically select the first option? Default: true
+	 * @param   mixed   $selected     The currently selected value
+	 * @param   array   $data         The JHtml options to parse
+	 * @param   string  $optKey       Key name, default: value
+	 * @param   string  $optText      Value name, default: text
+	 * @param   bool    $selectFirst  Should I automatically select the first option? Default: true
 	 *
 	 * @return  mixed   The label of the currently selected option
 	 */
@@ -330,18 +332,18 @@ abstract class BrowseView
 		{
 			if (is_array($element))
 			{
-				$key = $optKey === null ? $elementKey : $element[$optKey];
+				$key  = $optKey === null ? $elementKey : $element[$optKey];
 				$text = $element[$optText];
 			}
 			elseif (is_object($element))
 			{
-				$key = $optKey === null ? $elementKey : $element->$optKey;
+				$key  = $optKey === null ? $elementKey : $element->$optKey;
 				$text = $element->$optText;
 			}
 			else
 			{
 				// This is a simple associative array
-				$key = $elementKey;
+				$key  = $elementKey;
 				$text = $element;
 			}
 
@@ -366,15 +368,18 @@ abstract class BrowseView
 	 * - format.depth The current indent depth.
 	 * - format.eol The end of line string, default is linefeed.
 	 * - format.indent The string to use for indentation, default is tab.
-	 * - groups If set, looks for keys with the value "<optgroup>" and synthesizes groups from them. Deprecated. Default: true.
+	 * - groups If set, looks for keys with the value "<optgroup>" and synthesizes groups from them. Deprecated.
+	 * Default: true.
 	 * - list.select Either the value of one selected option or an array of selected options. Default: $currentValue.
 	 * - list.translate If true, text and labels are translated via JText::_(). Default is false.
 	 * - list.attr HTML element attributes (key/value array or string)
 	 * - list.none Placeholder for no selection (creates an option with an empty string key)
 	 * - option.id The property in each option array to use as the selection id attribute. Defaults: null.
-	 * - option.key The property in each option array to use as the Default: "value". If set to null, the index of the option array is used.
+	 * - option.key The property in each option array to use as the Default: "value". If set to null, the index of the
+	 * option array is used.
 	 * - option.label The property in each option array to use as the selection label attribute. Default: null
-	 * - option.text The property in each option array to use as the displayed text. Default: "text". If set to null, the option array is assumed to be a list of displayable scalars.
+	 * - option.text The property in each option array to use as the displayed text. Default: "text". If set to null,
+	 * the option array is assumed to be a list of displayable scalars.
 	 * - option.attr The property in each option array to use for additional selection attributes. Defaults: null.
 	 * - option.disable: The property that will hold the disabled state. Defaults to "disable".
 	 * - fof.autosubmit Should I auto-submit the form on change? Default: true
@@ -388,10 +393,10 @@ abstract class BrowseView
 	 * - readonly Render as a readonly field with hidden inputs? Overrides 'disabled'. Default: false
 	 * - onchange Custom onchange handler. Overrides fof.autosubmit. Default: NULL (use fof.autosubmit).
 	 *
-	 * @param       $name
-	 * @param array $options
-	 * @param       $currentValue
-	 * @param array $params
+	 * @param          $name
+	 * @param   array  $options
+	 * @param          $currentValue
+	 * @param   array  $params
 	 *
 	 * @return string
 	 *
@@ -432,7 +437,7 @@ abstract class BrowseView
 		// If fof.autosubmit is enabled and onchange is not set we will add our own handler
 		if ($params['fof.autosubmit'] && is_null($params['onchange']))
 		{
-			$formName           = $params['fof.formname'] ? $params['fof.formname'] : 'adminForm';
+			$formName           = $params['fof.formname'] ?: 'adminForm';
 			$params['onchange'] = "document.{$formName}.submit()";
 		}
 
@@ -457,7 +462,7 @@ abstract class BrowseView
 
 		if (!empty($params['list.none']))
 		{
-			array_unshift($options, JHtml::_('FEFHelper.select.option', '', JText::_($params['list.none'])));
+			array_unshift($options, HTMLHelper::_('FEFHelper.select.option', '', Text::_($params['list.none'])));
 		}
 
 		$html = [];
@@ -465,7 +470,7 @@ abstract class BrowseView
 		// Create a read-only list (no name) with hidden input(s) to store the value(s).
 		if ($params['readonly'])
 		{
-			$html[] = JHtml::_('FEFHelper.select.genericlist', $options, $name, $params);
+			$html[] = HTMLHelper::_('FEFHelper.select.genericlist', $options, $name, $params);
 
 			// E.g. form field type tag sends $this->value as array
 			if ($params['multiple'] && is_array($currentValue))
@@ -488,7 +493,7 @@ abstract class BrowseView
 		else
 			// Create a regular list.
 		{
-			$html[] = JHtml::_('FEFHelper.select.genericlist', $options, $name, $params);
+			$html[] = HTMLHelper::_('FEFHelper.select.genericlist', $options, $name, $params);
 		}
 
 		return implode($html);
@@ -497,8 +502,8 @@ abstract class BrowseView
 	/**
 	 * Replace tags that reference fields with their values
 	 *
-	 * @param   string    $text Text to process
-	 * @param   DataModel $item The DataModel instance to get values from
+	 * @param   string     $text  Text to process
+	 * @param   DataModel  $item  The DataModel instance to get values from
 	 *
 	 * @return  string         Text with tags replace
 	 *
@@ -544,6 +549,67 @@ abstract class BrowseView
 	}
 
 	/**
+	 * Get the FOF View from the backtrace of the static call. MAGIC!
+	 *
+	 * @return  View
+	 *
+	 * @since 3.3.0
+	 */
+	public static function getViewFromBacktrace()
+	{
+		// In case we are on a braindead host
+		if (!function_exists('debug_backtrace'))
+		{
+			throw new RuntimeException("Your host has disabled the <code>debug_backtrace</code> PHP function. Please ask them to re-enable it. It's required for running this software.");
+		}
+
+		/**
+		 * For performance reasons I look into the last 4 call stack entries. If I don't find a container I
+		 * will expand my search by another 2 entries and so on until I either find a container or I stop
+		 * finding new call stack entries.
+		 */
+		$lastNumberOfEntries = 0;
+		$limit               = 4;
+		$skip                = 0;
+		$container           = null;
+
+		while (true)
+		{
+			$backtrace = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, $limit);
+
+			if (count($backtrace) == $lastNumberOfEntries)
+			{
+				throw new RuntimeException(__METHOD__ . ": Cannot retrieve FOF View from call stack. You are either calling me from a non-FEF extension or your PHP is broken.");
+			}
+
+			$lastNumberOfEntries = count($backtrace);
+
+			if ($skip)
+			{
+				$backtrace = array_slice($backtrace, $skip);
+			}
+
+			foreach ($backtrace as $bt)
+			{
+				if (!isset($bt['object']))
+				{
+					continue;
+				}
+
+				if ($bt['object'] instanceof View)
+				{
+					return $bt['object'];
+				}
+			}
+
+			$skip  = $limit;
+			$limit += 2;
+		}
+
+		throw new RuntimeException(__METHOD__ . ": Cannot retrieve FOF View from call stack. You are either calling me from a non-FEF extension or your PHP is broken.");
+	}
+
+	/**
 	 * Get JHtml options from an alternate source, e.g. a helper. This is useful for adding arbitrary options
 	 * which are either dynamic or you do not want to inline to your view, e.g. reusable options across
 	 * different views.
@@ -552,12 +618,13 @@ abstract class BrowseView
 	 * source_file          The file to load. You can use FOF's URIs such as 'admin:com_foobar/foo/bar'
 	 * source_class         The class to use
 	 * source_method        The static method to use on source_class
-	 * source_key           Use * if you're returning a key/value array. Otherwise the array key for the key (ID) value.
-	 * source_value         Use * if you're returning a key/value array. Otherwise the array key for the displayed value.
-	 * source_translate     Should I pass the value field through JText? Default: true
-	 * source_format        Set to "optionsobject" if you're returning an array of JHtml options. Ignored otherwise.
+	 * source_key           Use * if you're returning a key/value array. Otherwise the array key for the key (ID)
+	 * value.
+	 * source_value         Use * if you're returning a key/value array. Otherwise the array key for the displayed
+	 * value. source_translate     Should I pass the value field through JText? Default: true source_format        Set
+	 * to "optionsobject" if you're returning an array of JHtml options. Ignored otherwise.
 	 *
-	 * @param  array $attribs
+	 * @param   array  $attribs
 	 *
 	 * @return array
 	 *
@@ -623,10 +690,10 @@ abstract class BrowseView
 
 							if ($source_translate)
 							{
-								$value = JText::_($value);
+								$value = Text::_($value);
 							}
 
-							$options[] = JHtml::_('FEFHelper.select.option', $key, $value, 'value', 'text');
+							$options[] = HTMLHelper::_('FEFHelper.select.option', $key, $value, 'value', 'text');
 						}
 					}
 				}
@@ -651,10 +718,10 @@ abstract class BrowseView
 	 * with             Array of relation names for eager loading.
 	 * cache            Cache the results for faster reuse
 	 *
-	 * @param string $modelName  The name of the model, e.g. "items" or "com_foobar.items"
-	 * @param array  $params     Parameters which define which options to get from the model
-	 * @param array  $modelState Optional state variables to pass to the model
-	 * @param array  $options    Any JHtml select options you want to add in front of the model's returned values
+	 * @param   string  $modelName   The name of the model, e.g. "items" or "com_foobar.items"
+	 * @param   array   $params      Parameters which define which options to get from the model
+	 * @param   array   $modelState  Optional state variables to pass to the model
+	 * @param   array   $options     Any JHtml select options you want to add in front of the model's returned values
 	 *
 	 * @return mixed
 	 *
@@ -671,7 +738,7 @@ abstract class BrowseView
 
 		if (strpos($modelName, '.') !== false)
 		{
-			list ($componentName, $mName) = explode('.', $mName, 2);
+			[$componentName, $mName] = explode('.', $mName, 2);
 		}
 
 		if ($componentName != $container->componentName)
@@ -720,7 +787,7 @@ abstract class BrowseView
 		if (empty($params['none']) && !is_null($params['none']))
 		{
 			$langKey     = strtoupper($model->getContainer()->componentName . '_TITLE_' . $model->getName());
-			$placeholder = JText::_($langKey);
+			$placeholder = Text::_($langKey);
 
 			if ($langKey != $placeholder)
 			{
@@ -730,11 +797,11 @@ abstract class BrowseView
 
 		if (!empty($params['none']))
 		{
-			$options[] = JHtml::_('FEFHelper.select.option', null, JText::_($params['none']));
+			$options[] = HTMLHelper::_('FEFHelper.select.option', null, Text::_($params['none']));
 
 			if ($params['none_as_zero'])
 			{
-				$options[] = JHtml::_('FEFHelper.select.option', 0, JText::_($params['none']));
+				$options[] = HTMLHelper::_('FEFHelper.select.option', 0, Text::_($params['none']));
 			}
 		}
 
@@ -767,10 +834,10 @@ abstract class BrowseView
 
 				if ($params['translate'])
 				{
-					$value = JText::_($value);
+					$value = Text::_($value);
 				}
 
-				$options[] = JHtml::_('FEFHelper.select.option', $item->{$params['key_field']}, $value);
+				$options[] = HTMLHelper::_('FEFHelper.select.option', $item->{$params['key_field']}, $value);
 			}
 		}
 
@@ -794,7 +861,7 @@ abstract class BrowseView
 		// In case we are on a braindead host
 		if (!function_exists('debug_backtrace'))
 		{
-			throw new \RuntimeException("Your host has disabled the <code>debug_backtrace</code> PHP function. Please ask them to re-enable it. It's required for running this software.");
+			throw new RuntimeException("Your host has disabled the <code>debug_backtrace</code> PHP function. Please ask them to re-enable it. It's required for running this software.");
 		}
 
 		/**
@@ -813,7 +880,7 @@ abstract class BrowseView
 
 			if (count($backtrace) == $lastNumberOfEntries)
 			{
-				throw new \RuntimeException(__METHOD__ . ": Cannot retrieve FOF container from call stack. You are either calling me from a non-FEF extension or your PHP is broken.");
+				throw new RuntimeException(__METHOD__ . ": Cannot retrieve FOF container from call stack. You are either calling me from a non-FEF extension or your PHP is broken.");
 			}
 
 			$lastNumberOfEntries = count($backtrace);
@@ -842,68 +909,7 @@ abstract class BrowseView
 			$limit += 2;
 		}
 
-		throw new \RuntimeException(__METHOD__ . ": Cannot retrieve FOF container from call stack. You are either calling me from a non-FEF extension or your PHP is broken.");
-	}
-
-	/**
-	 * Get the FOF View from the backtrace of the static call. MAGIC!
-	 *
-	 * @return  View
-	 *
-	 * @since 3.3.0
-	 */
-	public static function getViewFromBacktrace()
-	{
-		// In case we are on a braindead host
-		if (!function_exists('debug_backtrace'))
-		{
-			throw new \RuntimeException("Your host has disabled the <code>debug_backtrace</code> PHP function. Please ask them to re-enable it. It's required for running this software.");
-		}
-
-		/**
-		 * For performance reasons I look into the last 4 call stack entries. If I don't find a container I
-		 * will expand my search by another 2 entries and so on until I either find a container or I stop
-		 * finding new call stack entries.
-		 */
-		$lastNumberOfEntries = 0;
-		$limit               = 4;
-		$skip                = 0;
-		$container           = null;
-
-		while (true)
-		{
-			$backtrace = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, $limit);
-
-			if (count($backtrace) == $lastNumberOfEntries)
-			{
-				throw new \RuntimeException(__METHOD__ . ": Cannot retrieve FOF View from call stack. You are either calling me from a non-FEF extension or your PHP is broken.");
-			}
-
-			$lastNumberOfEntries = count($backtrace);
-
-			if ($skip)
-			{
-				$backtrace = array_slice($backtrace, $skip);
-			}
-
-			foreach ($backtrace as $bt)
-			{
-				if (!isset($bt['object']))
-				{
-					continue;
-				}
-
-				if ($bt['object'] instanceof View)
-				{
-					return $bt['object'];
-				}
-			}
-
-			$skip  = $limit;
-			$limit += 2;
-		}
-
-		throw new \RuntimeException(__METHOD__ . ": Cannot retrieve FOF View from call stack. You are either calling me from a non-FEF extension or your PHP is broken.");
+		throw new RuntimeException(__METHOD__ . ": Cannot retrieve FOF container from call stack. You are either calling me from a non-FEF extension or your PHP is broken.");
 	}
 
 }

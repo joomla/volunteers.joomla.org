@@ -9,7 +9,7 @@
 
 namespace Akeeba\Engine\Util;
 
-
+defined('AKEEBAENGINE') || die();
 
 /**
  * A utility class to parse INI files.

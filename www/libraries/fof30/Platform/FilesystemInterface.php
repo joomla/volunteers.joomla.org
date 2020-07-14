@@ -7,16 +7,18 @@
 
 namespace FOF30\Platform;
 
-use FOF30\Container\Container;
+defined('_JEXEC') || die;
 
-defined('_JEXEC') or die;
+use Exception;
+use FOF30\Container\Container;
+use UnexpectedValueException;
 
 interface FilesystemInterface
 {
 	/**
 	 * Public constructor.
 	 *
-	 * @param   \FOF30\Container\Container  $c  The component container
+	 * @param   Container  $c  The component container
 	 */
 	public function __construct(Container $c);
 
@@ -42,8 +44,8 @@ interface FilesystemInterface
 	/**
 	 * Copies a file
 	 *
-	 * @param   string   $src          The path to the source file
-	 * @param   string   $dest         The path to the destination file
+	 * @param   string  $src   The path to the source file
+	 * @param   string  $dest  The path to the destination file
 	 *
 	 * @return  boolean  True on success
 	 */
@@ -52,8 +54,8 @@ interface FilesystemInterface
 	/**
 	 * Write contents to a file
 	 *
-	 * @param   string   $file         The full file path
-	 * @param   string   &$buffer      The buffer to write
+	 * @param   string    $file    The full file path
+	 * @param   string   &$buffer  The buffer to write
 	 *
 	 * @return  boolean  True on success
 	 */
@@ -66,7 +68,7 @@ interface FilesystemInterface
 	 *
 	 * @return  string  A cleaned version of the path or exit on error.
 	 *
-	 * @throws  \Exception
+	 * @throws  Exception
 	 */
 	public function pathCheck($path);
 
@@ -78,7 +80,7 @@ interface FilesystemInterface
 	 *
 	 * @return  string  The cleaned path.
 	 *
-	 * @throws  \UnexpectedValueException
+	 * @throws  UnexpectedValueException
 	 */
 	public function pathClean($path, $ds = DIRECTORY_SEPARATOR);
 
@@ -88,7 +90,8 @@ interface FilesystemInterface
 	 * @param   mixed   $paths  An path string or array of path strings to search in
 	 * @param   string  $file   The file name to look for.
 	 *
-	 * @return  mixed   The full path and file name for the target file, or boolean false if the file is not found in any of the paths.
+	 * @return  mixed   The full path and file name for the target file, or boolean false if the file is not found in
+	 *                  any of the paths.
 	 */
 	public function pathFind($paths, $file);
 
@@ -106,30 +109,37 @@ interface FilesystemInterface
 	 *
 	 * @param   string   $path           The path of the folder to read.
 	 * @param   string   $filter         A filter for file names.
-	 * @param   mixed    $recurse        True to recursively search into sub-folders, or an integer to specify the maximum depth.
+	 * @param   mixed    $recurse        True to recursively search into sub-folders, or an integer to specify the
+	 *                                   maximum depth.
 	 * @param   boolean  $full           True to return the full path to the file.
 	 * @param   array    $exclude        Array with names of files which should not be shown in the result.
 	 * @param   array    $excludefilter  Array of filter to exclude
 	 *
 	 * @return  array  Files in the given folder.
 	 */
-	public function folderFiles($path, $filter = '.', $recurse = false, $full = false, $exclude = array('.svn', 'CVS', '.DS_Store', '__MACOSX'),
-								$excludefilter = array('^\..*', '.*~'));
+	public function folderFiles($path, $filter = '.', $recurse = false, $full = false, $exclude = [
+		'.svn', 'CVS', '.DS_Store', '__MACOSX',
+	],
+	                            $excludefilter = ['^\..*', '.*~']);
 
 	/**
 	 * Utility function to read the folders in a folder.
 	 *
 	 * @param   string   $path           The path of the folder to read.
 	 * @param   string   $filter         A filter for folder names.
-	 * @param   mixed    $recurse        True to recursively search into sub-folders, or an integer to specify the maximum depth.
+	 * @param   mixed    $recurse        True to recursively search into sub-folders, or an integer to specify the
+	 *                                   maximum depth.
 	 * @param   boolean  $full           True to return the full path to the folders.
 	 * @param   array    $exclude        Array with names of folders which should not be shown in the result.
-	 * @param   array    $excludefilter  Array with regular expressions matching folders which should not be shown in the result.
+	 * @param   array    $excludefilter  Array with regular expressions matching folders which should not be shown in
+	 *                                   the result.
 	 *
 	 * @return  array  Folders in the given folder.
 	 */
-	public function folderFolders($path, $filter = '.', $recurse = false, $full = false, $exclude = array('.svn', 'CVS', '.DS_Store', '__MACOSX'),
-								  $excludefilter = array('^\..*'));
+	public function folderFolders($path, $filter = '.', $recurse = false, $full = false, $exclude = [
+		'.svn', 'CVS', '.DS_Store', '__MACOSX',
+	],
+	                              $excludefilter = ['^\..*']);
 
 	/**
 	 * Create a folder -- and all necessary parent folders.

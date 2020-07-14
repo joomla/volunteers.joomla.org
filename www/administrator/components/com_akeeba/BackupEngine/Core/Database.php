@@ -9,9 +9,10 @@
 
 namespace Akeeba\Engine\Core;
 
-
+defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Driver\Base as DriverBase;
+use Akeeba\Engine\Driver\Mysqli;
 use Akeeba\Engine\Platform;
 use Exception;
 
@@ -84,7 +85,7 @@ class Database
 			// Useful for PHP 7 which does NOT have the ancient mysql adapter
 			if (($driver == '\\Akeeba\\Engine\\Driver\\Mysql') && !function_exists('mysql_connect'))
 			{
-				$driver = '\\Akeeba\\Engine\\Driver\\Mysqli';
+				$driver = Mysqli::class;
 			}
 
 			self::$instances[$signature] = new $driver($options);

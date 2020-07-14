@@ -9,6 +9,8 @@
 
 namespace Akeeba\Engine\Postproc\Connector;
 
+defined('AKEEBAENGINE') || die();
+
 use Exception;
 use RuntimeException;
 
@@ -17,7 +19,7 @@ class OneDriveBusiness extends OneDrive
 	/**
 	 * The URL of the helper script which is used to get fresh API tokens
 	 */
-	const helperUrl = 'https://www.akeebabackup.com/oauth2/onedrivebusiness.php';
+	public const helperUrl = 'https://www.akeeba.com/oauth2/onedrivebusiness.php';
 
 	/**
 	 * The root URL for the MS Graph API
@@ -31,14 +33,14 @@ class OneDriveBusiness extends OneDrive
 	 *
 	 * This is 4MB per https://docs.microsoft.com/en-us/graph/api/driveitem-put-content?view=graph-rest-1.0&tabs=http
 	 */
-	const simpleUploadSizeLimit = 4194304;
+	public const simpleUploadSizeLimit = 4194304;
 
 	/**
 	 * Item property to set the name conflict behavior
 	 *
 	 * @see https://docs.microsoft.com/en-us/onedrive/developer/rest-api/concepts/direct-endpoint-differences?view=odsp-graph-online#instance-annotations
 	 */
-	const nameConflictBehavior = '@microsoft.graph.conflictBehavior';
+	public const nameConflictBehavior = '@microsoft.graph.conflictBehavior';
 
 	/**
 	 * Get the raw listing of a folder

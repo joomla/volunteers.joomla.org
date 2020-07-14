@@ -7,7 +7,11 @@
 
 namespace FOF30\Utils;
 
-defined('_JEXEC') or die;
+defined('_JEXEC') || die;
+
+use ArrayAccess;
+use InvalidArgumentException;
+use Traversable;
 
 /**
  * ArrayHelper is an array utility class for doing all sorts of odds and ends with arrays.
@@ -46,7 +50,7 @@ final class ArrayHelper
 
 		if ($default === null)
 		{
-			return array();
+			return [];
 		}
 
 		if (is_array($default))
@@ -54,7 +58,7 @@ final class ArrayHelper
 			return static::toInteger($default, null);
 		}
 
-		return array((int) $default);
+		return [(int) $default];
 	}
 
 	/**
@@ -101,7 +105,7 @@ final class ArrayHelper
 	 */
 	public static function toString(array $array, $inner_glue = '=', $outer_glue = ' ', $keepOuterKey = false)
 	{
-		$output = array();
+		$output = [];
 
 		foreach ($array as $key => $item)
 		{
@@ -142,57 +146,7 @@ final class ArrayHelper
 			return self::arrayFromObject($p_obj, $recurse, $regex);
 		}
 
-		return array();
-	}
-
-	/**
-	 * Utility function to map an object or array to an array
-	 *
-	 * @param   mixed    $item     The source object or array
-	 * @param   boolean  $recurse  True to recurse through multi-level objects
-	 * @param   string   $regex    An optional regular expression to match on field names
-	 *
-	 * @return  array
-	 *
-	 * @since   1.0
-	 */
-	private static function arrayFromObject($item, $recurse, $regex)
-	{
-		if (is_object($item))
-		{
-			$result = array();
-
-			foreach (get_object_vars($item) as $k => $v)
-			{
-				if (!$regex || preg_match($regex, $k))
-				{
-					if ($recurse)
-					{
-						$result[$k] = self::arrayFromObject($v, $recurse, $regex);
-					}
-					else
-					{
-						$result[$k] = $v;
-					}
-				}
-			}
-
-			return $result;
-		}
-
-		if (is_array($item))
-		{
-			$result = array();
-
-			foreach ($item as $k => $v)
-			{
-				$result[$k] = self::arrayFromObject($v, $recurse, $regex);
-			}
-
-			return $result;
-		}
-
-		return $item;
+		return [];
 	}
 
 	/**
@@ -212,7 +166,7 @@ final class ArrayHelper
 	 */
 	public static function getColumn(array $array, $valueCol, $keyCol = null)
 	{
-		$result = array();
+		$result = [];
 
 		foreach ($array as $item)
 		{
@@ -247,21 +201,21 @@ final class ArrayHelper
 	/**
 	 * Utility function to return a value from a named array or a specified default
 	 *
-	 * @param   array|\ArrayAccess  $array    A named array or object that implements ArrayAccess
-	 * @param   string              $name     The key to search for
-	 * @param   mixed               $default  The default value to give if no key found
-	 * @param   string              $type     Return type for the variable (INT, FLOAT, STRING, WORD, BOOLEAN, ARRAY)
+	 * @param   array|ArrayAccess  $array    A named array or object that implements ArrayAccess
+	 * @param   string             $name     The key to search for
+	 * @param   mixed              $default  The default value to give if no key found
+	 * @param   string             $type     Return type for the variable (INT, FLOAT, STRING, WORD, BOOLEAN, ARRAY)
 	 *
 	 * @return  mixed
 	 *
+	 * @throws  InvalidArgumentException
 	 * @since   1.0
-	 * @throws  \InvalidArgumentException
 	 */
 	public static function getValue($array, $name, $default = null, $type = '')
 	{
-		if (!is_array($array) && !($array instanceof \ArrayAccess))
+		if (!is_array($array) && !($array instanceof ArrayAccess))
 		{
-			throw new \InvalidArgumentException('The object must be an array or an object that implements ArrayAccess');
+			throw new InvalidArgumentException('The object must be an array or an object that implements ArrayAccess');
 		}
 
 		$result = null;
@@ -302,7 +256,7 @@ final class ArrayHelper
 			case 'ARRAY':
 				if (!is_array($result))
 				{
-					$result = array($result);
+					$result = [$result];
 				}
 				break;
 
@@ -352,7 +306,7 @@ final class ArrayHelper
 	 */
 	public static function invert(array $array)
 	{
-		$return = array();
+		$return = [];
 
 		foreach ($array as $base => $values)
 		{
@@ -405,14 +359,15 @@ final class ArrayHelper
 	 * @param   array   $source  The source array.
 	 * @param   string  $key     Where the elements of the source array are objects or arrays, the key to pivot on.
 	 *
-	 * @return  array  An array of arrays pivoted either on the value of the keys, or an individual key of an object or array.
+	 * @return  array  An array of arrays pivoted either on the value of the keys, or an individual key of an object or
+	 *                 array.
 	 *
 	 * @since   1.0
 	 */
 	public static function pivot(array $source, $key = null)
 	{
-		$result  = array();
-		$counter = array();
+		$result  = [];
+		$counter = [];
 
 		foreach ($source as $index => $value)
 		{
@@ -450,16 +405,16 @@ final class ArrayHelper
 			if (empty($counter[$resultKey]))
 			{
 				// The first time around we just assign the value to the key.
-				$result[$resultKey] = $resultValue;
+				$result[$resultKey]  = $resultValue;
 				$counter[$resultKey] = 1;
 			}
 			elseif ($counter[$resultKey] == 1)
 			{
 				// If there is a second time, we convert the value into an array.
-				$result[$resultKey] = array(
+				$result[$resultKey] = [
 					$result[$resultKey],
 					$resultValue,
-				);
+				];
 				$counter[$resultKey]++;
 			}
 			else
@@ -532,7 +487,7 @@ final class ArrayHelper
 	 */
 	public static function flatten($array, $separator = '.', $prefix = '')
 	{
-		if ($array instanceof \Traversable)
+		if ($array instanceof Traversable)
 		{
 			$array = iterator_to_array($array);
 		}
@@ -556,5 +511,55 @@ final class ArrayHelper
 		}
 
 		return $array;
+	}
+
+	/**
+	 * Utility function to map an object or array to an array
+	 *
+	 * @param   mixed    $item     The source object or array
+	 * @param   boolean  $recurse  True to recurse through multi-level objects
+	 * @param   string   $regex    An optional regular expression to match on field names
+	 *
+	 * @return  array
+	 *
+	 * @since   1.0
+	 */
+	private static function arrayFromObject($item, $recurse, $regex)
+	{
+		if (is_object($item))
+		{
+			$result = [];
+
+			foreach (get_object_vars($item) as $k => $v)
+			{
+				if (!$regex || preg_match($regex, $k))
+				{
+					if ($recurse)
+					{
+						$result[$k] = self::arrayFromObject($v, $recurse, $regex);
+					}
+					else
+					{
+						$result[$k] = $v;
+					}
+				}
+			}
+
+			return $result;
+		}
+
+		if (is_array($item))
+		{
+			$result = [];
+
+			foreach ($item as $k => $v)
+			{
+				$result[$k] = self::arrayFromObject($v, $recurse, $regex);
+			}
+
+			return $result;
+		}
+
+		return $item;
 	}
 }

@@ -13,9 +13,9 @@ use Akeeba\Engine\Util\Complexify;
 use DateInterval;
 use Exception;
 use FOF30\Date\Date;
-use JText;
+use Joomla\CMS\Language\Text;
 
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 /**
  * Provides the method to check whether front-end backup is enabled and weather the key is correct
@@ -56,7 +56,7 @@ trait FrontEndPermissions
 		if (!$febEnabled || ($key != $validKey) || (empty($validKeyTrim)))
 		{
 			@ob_end_clean();
-			echo '403 ' . JText::_('COM_AKEEBA_COMMON_ERR_NOT_ENABLED');
+			echo sprintf("403 %s", Text::_('COM_AKEEBA_COMMON_ERR_NOT_ENABLED'));
 			flush();
 
 			$this->container->platform->closeApplication();

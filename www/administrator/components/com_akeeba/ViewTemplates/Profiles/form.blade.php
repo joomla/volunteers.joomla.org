@@ -5,7 +5,7 @@
  * @license   GNU General Public License version 3, or later
  */
 
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 ?>
 <form action="index.php" method="post" name="adminForm" id="adminForm"

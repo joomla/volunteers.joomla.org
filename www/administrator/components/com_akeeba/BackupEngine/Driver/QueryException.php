@@ -9,6 +9,8 @@
 
 namespace Akeeba\Engine\Driver;
 
+defined('AKEEBAENGINE') || die();
+
 use Exception;
 
 class QueryException extends Exception

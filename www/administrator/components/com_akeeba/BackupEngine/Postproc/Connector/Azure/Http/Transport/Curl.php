@@ -41,7 +41,7 @@
 
 namespace Akeeba\Engine\Postproc\Connector\Azure\Http\Transport;
 
-
+defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Postproc\Connector\Azure\Exception\Transport as TransportException;
 use Akeeba\Engine\Postproc\Connector\Azure\Http\Response;

@@ -9,7 +9,7 @@
 
 namespace Akeeba\Engine\Util\Transfer;
 
-
+defined('AKEEBAENGINE') || die();
 
 /**
  * An interface for Transfer adapters which support remote resources, allowing us to efficient read from / write to

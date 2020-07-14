@@ -7,9 +7,9 @@
 
 namespace FOF30\Container;
 
-use FOF30\Pimple\Container;
+defined('_JEXEC') || die;
 
-defined('_JEXEC') or die;
+use FOF30\Pimple\Container;
 
 class ContainerBase extends Container
 {

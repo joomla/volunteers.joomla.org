@@ -8,7 +8,7 @@
 namespace Akeeba\Backup\Admin\Model\Exceptions;
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 class TransferFatalError extends \RuntimeException
 {

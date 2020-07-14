@@ -8,12 +8,11 @@
 namespace Akeeba\Backup\Admin\Model\Mixin;
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
-use JClientFtp;
-use JClientHelper;
-use JLoader;
-use JPath;
+use Joomla\CMS\Client\ClientHelper;
+use Joomla\CMS\Client\FtpClient;
+use Joomla\CMS\Filesystem\Path;
 
 trait Chmod
 {
@@ -41,11 +40,10 @@ trait Chmod
 		}
 
 		// Initialize variables
-		JLoader::import('joomla.client.helper');
-		$ftpOptions = JClientHelper::getCredentials('ftp');
+		$ftpOptions = ClientHelper::getCredentials('ftp');
 
 		// Check to make sure the path valid and clean
-		$path = JPath::clean($path);
+		$path = Path::clean($path);
 
 		if (@chmod($path, $mode))
 		{
@@ -54,14 +52,13 @@ trait Chmod
 		elseif ($ftpOptions['enabled'] == 1)
 		{
 			// Connect the FTP client
-			JLoader::import('joomla.client.ftp');
-			$ftp = JClientFtp::getInstance(
-				$ftpOptions['host'], $ftpOptions['port'], array(),
+			$ftp = FtpClient::getInstance(
+				$ftpOptions['host'], $ftpOptions['port'], [],
 				$ftpOptions['user'], $ftpOptions['pass']
 			);
 
 			// Translate path and delete
-			$path = JPath::clean(str_replace(JPATH_ROOT, $ftpOptions['root'], $path), '/');
+			$path = Path::clean(str_replace(JPATH_ROOT, $ftpOptions['root'], $path), '/');
 			// FTP connector throws an error
 			$ret = $ftp->chmod($path, $mode);
 		}

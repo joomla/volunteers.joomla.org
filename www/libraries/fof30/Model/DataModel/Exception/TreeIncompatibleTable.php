@@ -7,17 +7,19 @@
 
 namespace FOF30\Model\DataModel\Exception;
 
+defined('_JEXEC') || die;
+
 use Exception;
+use Joomla\CMS\Language\Text;
+use UnexpectedValueException;
 
-defined('_JEXEC') or die;
-
-class TreeIncompatibleTable extends \UnexpectedValueException
+class TreeIncompatibleTable extends UnexpectedValueException
 {
-	public function __construct( $tableName, $code = 500, Exception $previous = null )
+	public function __construct($tableName, $code = 500, Exception $previous = null)
 	{
-		$message = \JText::sprintf('LIB_FOF_MODEL_ERR_TREE_INCOMPATIBLETABLE', $tableName);
+		$message = Text::sprintf('LIB_FOF_MODEL_ERR_TREE_INCOMPATIBLETABLE', $tableName);
 
-		parent::__construct( $message, $code, $previous );
+		parent::__construct($message, $code, $previous);
 	}
 
 }

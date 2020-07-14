@@ -8,7 +8,7 @@
 namespace Akeeba\Backup\Admin\View\Log;
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 use Akeeba\Backup\Admin\Model\Log;
 use Akeeba\Engine\Platform;

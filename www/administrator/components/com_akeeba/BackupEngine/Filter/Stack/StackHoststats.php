@@ -9,10 +9,9 @@
 
 namespace Akeeba\Engine\Filter\Stack;
 
+defined('AKEEBAENGINE') || die();
+
 use Akeeba\Engine\Filter\Base;
-
-
-
 
 /**
  * Exclude folders and files belonging to the host web stat (ie Webalizer)

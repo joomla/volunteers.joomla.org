@@ -7,9 +7,10 @@
 
 namespace FOF30\Controller\Exception;
 
-use Exception;
+defined('_JEXEC') || die;
 
-defined('_JEXEC') or die;
+use Exception;
+use Joomla\CMS\Language\Text;
 
 /**
  * Exception thrown when the provided Model is locked for writing by another user
@@ -20,7 +21,7 @@ class LockedRecord extends \RuntimeException
 	{
 		if (empty($message))
 		{
-			$message = \JText::_('LIB_FOF_CONTROLLER_ERR_LOCKED');
+			$message = Text::_('LIB_FOF_CONTROLLER_ERR_LOCKED');
 		}
 
 		parent::__construct($message, $code, $previous);

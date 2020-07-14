@@ -9,6 +9,7 @@
 
 namespace Akeeba\Engine\Core\Domain;
 
+defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Base\Part;
 use Akeeba\Engine\Factory;
@@ -329,7 +330,7 @@ class Init extends Part
 		Factory::getLog()->info("Loaded profile #$profile_id");
 
 		// Get archive name
-		list($relativeArchiveName, $absoluteArchiveName) = $this->getArchiveName();
+		[$relativeArchiveName, $absoluteArchiveName] = $this->getArchiveName();
 
 		// ==== Stats initialisation ===
 		$origin     = Platform::getInstance()->get_backup_origin(); // Get backup origin

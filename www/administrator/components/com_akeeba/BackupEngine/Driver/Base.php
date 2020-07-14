@@ -9,10 +9,10 @@
 
 namespace Akeeba\Engine\Driver;
 
+defined('AKEEBAENGINE') || die();
+
 use Akeeba\Engine\Driver\Query\Base as QueryBase;
 use RuntimeException;
-
-
 
 /**
  * Database driver superclass. Used as the base of all Akeeba Engine database drivers.
@@ -178,7 +178,7 @@ abstract class Base
 		switch ($method)
 		{
 			case 'q':
-				return $this->quote($args[0], isset($args[1]) ? $args[1] : true);
+				return $this->quote($args[0], $args[1] ?? true);
 				break;
 			case 'nq':
 			case 'qn':
@@ -573,7 +573,7 @@ abstract class Base
 		foreach (get_object_vars($object) as $k => $v)
 		{
 			// Only process non-null scalars.
-			if (is_array($v) or is_object($v) or $v === null)
+			if (is_array($v) || is_object($v) || ($v === null))
 			{
 				continue;
 			}
@@ -679,7 +679,7 @@ abstract class Base
 		// Get all of the rows from the result set.
 		while ($row = $this->fetchAssoc($cursor))
 		{
-			$value = ($column) ? (isset($row[$column]) ? $row[$column] : $row) : $row;
+			$value = ($column) ? ($row[$column] ?? $row) : $row;
 			if ($key)
 			{
 				$array[$row[$key]] = $value;
@@ -1010,7 +1010,7 @@ abstract class Base
 			$quotedAs = '';
 			if (!is_null($as))
 			{
-				settype($as, 'array');
+				$as = (array) $as;
 				$quotedAs .= ' AS ' . $this->quoteNameStr($as);
 			}
 
@@ -1259,7 +1259,7 @@ abstract class Base
 		foreach (get_object_vars($object) as $k => $v)
 		{
 			// Only process scalars that are not internal fields.
-			if (is_array($v) or is_object($v) or $k[0] == '_')
+			if (is_array($v) || is_object($v) || ($k[0] == '_'))
 			{
 				continue;
 			}
@@ -1379,7 +1379,7 @@ abstract class Base
 	{
 		$results = [];
 
-		settype($tables, 'array');
+		$tables = (array) $tables;
 
 		foreach ($tables as $table)
 		{

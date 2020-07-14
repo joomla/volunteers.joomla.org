@@ -7,10 +7,12 @@
 
 namespace FOF30\Params;
 
+defined('_JEXEC') || die;
+
+use Exception;
 use FOF30\Container\Container;
 use FOF30\Utils\CacheCleaner;
-
-defined('_JEXEC') or die;
+use Joomla\Registry\Registry;
 
 /**
  * A helper class to quickly get the component parameters
@@ -24,14 +26,14 @@ class Params
 	/**
 	 * Cached component parameters
 	 *
-	 * @var \Joomla\Registry\Registry
+	 * @var Registry
 	 */
 	private $params = null;
 
 	/**
 	 * Public constructor for the params object
 	 *
-	 * @param  \FOF30\Container\Container $container  The container we belong to
+	 * @param   Container  $container  The container we belong to
 	 */
 	public function __construct(Container $container)
 	{
@@ -47,21 +49,21 @@ class Params
 	{
 		$db = $this->container->db;
 
-		$sql = $db->getQuery(true)
-				  ->select($db->qn('params'))
-				  ->from($db->qn('#__extensions'))
-				  ->where($db->qn('type') . " = " . $db->q('component'))
-				  ->where($db->qn('element') . " = " . $db->q($this->container->componentName));
+		$sql  = $db->getQuery(true)
+			->select($db->qn('params'))
+			->from($db->qn('#__extensions'))
+			->where($db->qn('type') . " = " . $db->q('component'))
+			->where($db->qn('element') . " = " . $db->q($this->container->componentName));
 		$json = $db->setQuery($sql)->loadResult();
 
-		$this->params = new \Joomla\Registry\Registry($json);
+		$this->params = new Registry($json);
 	}
 
 	/**
 	 * Returns the value of a component configuration parameter
 	 *
-	 * @param   string $key     The parameter to get
-	 * @param   mixed  $default Default value
+	 * @param   string  $key      The parameter to get
+	 * @param   mixed   $default  Default value
 	 *
 	 * @return  mixed
 	 */
@@ -81,19 +83,6 @@ class Params
 	}
 
 	/**
-	 * Sets the value of a component configuration parameter
-	 *
-	 * @param   string $key    The parameter to set
-	 * @param   mixed  $value  The value to set
-	 *
-	 * @return  void
-	 */
-	public function set($key, $value)
-	{
-		$this->setParams(array($key => $value));
-	}
-
-	/**
 	 * Sets the value of multiple component configuration parameters at once
 	 *
 	 * @param   array  $params  The parameters to set
@@ -109,6 +98,19 @@ class Params
 	}
 
 	/**
+	 * Sets the value of a component configuration parameter
+	 *
+	 * @param   string  $key    The parameter to set
+	 * @param   mixed   $value  The value to set
+	 *
+	 * @return  void
+	 */
+	public function set($key, $value)
+	{
+		$this->setParams([$key => $value]);
+	}
+
+	/**
 	 * Actually Save the params into the db
 	 */
 	public function save()
@@ -116,11 +118,11 @@ class Params
 		$db   = $this->container->db;
 		$data = $this->params->toString();
 
-		$sql  = $db->getQuery(true)
-				   ->update($db->qn('#__extensions'))
-				   ->set($db->qn('params') . ' = ' . $db->q($data))
-				   ->where($db->qn('element') . ' = ' . $db->q($this->container->componentName))
-				   ->where($db->qn('type') . ' = ' . $db->q('component'));
+		$sql = $db->getQuery(true)
+			->update($db->qn('#__extensions'))
+			->set($db->qn('params') . ' = ' . $db->q($data))
+			->where($db->qn('element') . ' = ' . $db->q($this->container->componentName))
+			->where($db->qn('type') . ' = ' . $db->q('component'));
 
 		$db->setQuery($sql);
 
@@ -130,7 +132,7 @@ class Params
 			// The component parameters are cached. We just changed them. Therefore we MUST reset the system cache which holds them.
 			CacheCleaner::clearCacheGroups(['_system'], $this->container->platform->isBackend() ? [0] : [1]);
 		}
-		catch (\Exception $e)
+		catch (Exception $e)
 		{
 			// Don't sweat if it fails
 		}

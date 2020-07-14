@@ -9,6 +9,7 @@
 
 namespace Akeeba\Engine\Dump;
 
+defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Base\Part;
 use Akeeba\Engine\Core\Domain\Pack;
@@ -428,8 +429,16 @@ abstract class Base extends Part
 	protected function _finalize()
 	{
 		Factory::getLog()->debug("Adding any extra SQL statements imposed by the filters");
-		$filters = Factory::getFilters();
-		$this->writeline($filters->getExtraSQL($this->databaseRoot));
+
+		foreach (Factory::getFilters()->getExtraSQL($this->databaseRoot) as $sqlStatement)
+		{
+			$sqlStatement = trim($sqlStatement) . "\n";
+
+			$this->writeDump($sqlStatement, true);
+		}
+
+		// We need this to write out the cached extra SQL statements before closing the file.
+		$this->writeDump(null);
 
 		// Close the file pointer (otherwise the SQL file is left behind)
 		$this->closeFile();
@@ -535,7 +544,6 @@ abstract class Base extends Part
 		 * If you are here the SQL dump part file is completely added to the backup archive. All we have to do now is
 		 * remove it and create a new dump part file.
 		 */
-
 		// Remove the old file
 		Factory::getLog()->debug("Removing dump part's temporary file");
 		Factory::getTempFiles()->unregisterAndDeleteTempFile($this->tempFile, true);

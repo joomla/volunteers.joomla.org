@@ -9,11 +9,10 @@
 
 namespace Akeeba\Engine\Dump\Native;
 
-
+defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Dump\Base;
 use Akeeba\Engine\Factory;
-
 
 /**
  * Dump class for the "None" database driver (ie no database used by the application)

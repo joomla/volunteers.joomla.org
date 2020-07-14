@@ -8,15 +8,14 @@
 namespace Akeeba\Backup\Admin\Model;
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 use Akeeba\Backup\Admin\Model\Mixin\ExclusionFilter;
-use Akeeba\Engine\Driver\Base as EngineDBDriver;
 use Akeeba\Engine\Factory;
 use Exception;
 use FOF30\Container\Container;
 use FOF30\Model\Model;
-use JText;
+use Joomla\CMS\Language\Text;
 
 /**
  * Database Filters model
@@ -49,7 +48,7 @@ class DatabaseFilters extends Model
 		$database_list = $filters->getInclusions('db');
 
 		// Load the database object for the selected database
-		$config         = $database_list[ $root ];
+		$config         = $database_list[$root];
 		$config['user'] = $config['username'];
 		$db             = Factory::getDatabase($config);
 
@@ -60,7 +59,7 @@ class DatabaseFilters extends Model
 		}
 		catch (Exception $e)
 		{
-			$table_data = array();
+			$table_data = [];
 		}
 
 		$tableMeta = [];
@@ -86,7 +85,7 @@ class DatabaseFilters extends Model
 		}
 
 		// Process filters
-		$tables = array();
+		$tables = [];
 
 		if (!empty($table_data))
 		{
@@ -125,10 +124,10 @@ class DatabaseFilters extends Model
 			}
 		}
 
-		return array(
+		return [
 			'tables' => $tables,
-			'root'   => $root
-		);
+			'root'   => $root,
+		];
 	}
 
 	/**
@@ -142,7 +141,7 @@ class DatabaseFilters extends Model
 		$filters       = Factory::getFilters();
 		$database_list = $filters->getInclusions('db');
 
-		$ret = array();
+		$ret = [];
 
 		foreach ($database_list as $name => $definition)
 		{
@@ -157,12 +156,12 @@ class DatabaseFilters extends Model
 
 			if ($name == '[SITEDB]')
 			{
-				$root = JText::_('COM_AKEEBA_DBFILTER_LABEL_SITEDB');
+				$root = Text::_('COM_AKEEBA_DBFILTER_LABEL_SITEDB');
 			}
 
-			$ret[] = (object)[
-				'value'	=> $name,
-				'text'	=> $root,
+			$ret[] = (object) [
+				'value' => $name,
+				'text'  => $root,
 			];
 		}
 
@@ -262,7 +261,7 @@ class DatabaseFilters extends Model
 		$action = $this->getState('action');
 		$verb   = array_key_exists('verb', get_object_vars($action)) ? $action->verb : null;
 
-		$ret_array = array();
+		$ret_array = [];
 
 		switch ($verb)
 		{

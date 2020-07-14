@@ -9,7 +9,7 @@
 
 namespace Akeeba\Engine\Core;
 
-
+defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Factory;
 
@@ -192,7 +192,7 @@ class Timer
 	 */
 	protected function microtime_float()
 	{
-		list($usec, $sec) = explode(" ", microtime());
+		[$usec, $sec] = explode(" ", microtime());
 
 		return ((float) $usec + (float) $sec);
 	}

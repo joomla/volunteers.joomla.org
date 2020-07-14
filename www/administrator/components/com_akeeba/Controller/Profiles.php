@@ -8,11 +8,11 @@
 namespace Akeeba\Backup\Admin\Controller;
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 use Akeeba\Backup\Admin\Controller\Mixin\CustomACL;
 use FOF30\Controller\DataController;
-use JText;
+use Joomla\CMS\Language\Text;
 use RuntimeException;
 
 class Profiles extends DataController
@@ -28,7 +28,7 @@ class Profiles extends DataController
 
 		if (!$this->container->platform->authorise('akeeba.configure', 'com_akeeba'))
 		{
-			throw new RuntimeException(JText::_('JERROR_ALERTNOAUTHOR'), 403);
+			throw new RuntimeException(\Joomla\CMS\Language\Text::_('JERROR_ALERTNOAUTHOR'), 403);
 		}
 
 		/** @var \Akeeba\Backup\Admin\Model\Profiles $model */
@@ -39,7 +39,7 @@ class Profiles extends DataController
 
 		if (!isset($file['name']))
 		{
-			$this->setRedirect('index.php?option=com_akeeba&view=Profiles', JText::_('MSG_UPLOAD_INVALID_REQUEST'), 'error');
+			$this->setRedirect('index.php?option=com_akeeba&view=Profiles', \Joomla\CMS\Language\Text::_('MSG_UPLOAD_INVALID_REQUEST'), 'error');
 
 			return;
 		}
@@ -52,7 +52,7 @@ class Profiles extends DataController
 		$data = json_decode($data, true);
 
 		// Import
-		$message     = JText::_('COM_AKEEBA_PROFILES_MSG_IMPORT_COMPLETE');
+		$message     = \Joomla\CMS\Language\Text::_('COM_AKEEBA_PROFILES_MSG_IMPORT_COMPLETE');
 		$messageType = null;
 
 		try

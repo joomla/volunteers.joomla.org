@@ -7,7 +7,8 @@
 
 namespace FOF30\Cli\Traits;
 
-use JFilterInput;
+defined('_JEXEC') || die;
+
 use Joomla\CMS\Filter\InputFilter;
 
 /**
@@ -29,7 +30,7 @@ trait CustomOptionsAware
 	/**
 	 * Filter object to use for custom options parsing.
 	 *
-	 * @var    JFilterInput|InputFilter
+	 * @var    InputFilter
 	 */
 	protected $filter = null;
 
@@ -40,15 +41,8 @@ trait CustomOptionsAware
 	 */
 	protected function initialiseCustomOptions()
 	{
-		// Create a new JFilterInput
-		if (class_exists('JFilterInput'))
-		{
-			$this->filter = JFilterInput::getInstance();
-		}
-		else
-		{
-			$this->filter = InputFilter::getInstance();
-		}
+		// Create a new InputFilter
+		$this->filter = InputFilter::getInstance();
 
 		// Parse the POSIX options
 		$this->parseOptions();
@@ -107,7 +101,7 @@ trait CustomOptionsAware
 
 				if (strstr($argument, '='))
 				{
-					list($name, $value) = explode('=', $argument, 2);
+					[$name, $value] = explode('=', $argument, 2);
 				}
 
 				$currentName = $name;

@@ -9,7 +9,7 @@
 
 namespace Akeeba\Engine\Util;
 
-
+defined('AKEEBAENGINE') || die();
 
 /**
  * Generic Buffer stream handler
@@ -187,4 +187,4 @@ class Buffer
 }
 
 // Register the stream
-stream_wrapper_register("buffer", "\\Akeeba\\Engine\\Util\\Buffer");
+stream_wrapper_register("buffer", Buffer::class);

@@ -9,6 +9,8 @@
 
 namespace Akeeba\Engine\Util\Log;
 
+defined('AKEEBAENGINE') || die();
+
 interface WarningsLoggerInterface
 {
 	/**

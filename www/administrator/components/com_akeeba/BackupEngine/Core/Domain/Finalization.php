@@ -9,6 +9,7 @@
 
 namespace Akeeba\Engine\Core\Domain;
 
+defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Base\Part;
 use Akeeba\Engine\Factory;
@@ -722,7 +723,8 @@ class Finalization extends Part
 			return true;
 		}
 
-		$exception = null;
+		$exception          = null;
+		$finishedProcessing = false;
 
 		try
 		{
@@ -911,7 +913,7 @@ class Finalization extends Part
 
 				// Get the log file name
 				$tag      = $stat['tag'];
-				$backupId = isset($stat['backupid']) ? $stat['backupid'] : '';
+				$backupId = $stat['backupid'] ?? '';
 				$logName  = '';
 
 				if (!empty($backupId))
@@ -1064,7 +1066,7 @@ class Finalization extends Part
 										$killLogs[] = dirname($filePath) . '/' . $def['logname'];
 
 									}
-									elseif(@file_exists(dirname($filePath) . '/' . substr($def['logname'], 0, -4)))
+									elseif (@file_exists(dirname($filePath) . '/' . substr($def['logname'], 0, -4)))
 									{
 										/**
 										 * Transitional period: the log file akeeba.tag.log.php may not exist but the
@@ -1219,7 +1221,7 @@ class Finalization extends Part
 		{
 			$filename = array_shift($this->remote_files_killlist);
 
-			list($engineName, $path) = explode('://', $filename);
+			[$engineName, $path] = explode('://', $filename);
 
 			$engine = Factory::getPostprocEngine($engineName);
 

@@ -8,7 +8,7 @@
 namespace Akeeba\Backup\Site\Model;
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 use Akeeba\Backup\Admin\Model\Updates as AdminModel;
 

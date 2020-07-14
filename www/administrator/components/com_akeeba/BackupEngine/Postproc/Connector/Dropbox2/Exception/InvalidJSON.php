@@ -9,6 +9,8 @@
 
 namespace Akeeba\Engine\Postproc\Connector\Dropbox2\Exception;
 
+defined('AKEEBAENGINE') || die();
+
 use Exception;
 
 class InvalidJSON extends Base

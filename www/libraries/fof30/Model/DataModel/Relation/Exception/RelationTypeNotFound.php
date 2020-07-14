@@ -7,6 +7,10 @@
 
 namespace FOF30\Model\DataModel\Relation\Exception;
 
-defined('_JEXEC') or die;
+defined('_JEXEC') || die;
 
-class RelationTypeNotFound extends \Exception {}
+use Exception;
+
+class RelationTypeNotFound extends Exception
+{
+}

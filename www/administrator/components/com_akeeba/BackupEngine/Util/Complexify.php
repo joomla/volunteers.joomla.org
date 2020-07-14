@@ -9,7 +9,7 @@
 
 namespace Akeeba\Engine\Util;
 
-
+defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Platform;
 use RuntimeException;
@@ -310,7 +310,7 @@ class Complexify
 		}
 
 		// Use natural log to produce linear scale
-		$complexity = log(pow($complexity, mb_strlen($password, $this->encoding))) * (1 / $this->strengthScaleFactor);
+		$complexity = log($complexity ** mb_strlen($password, $this->encoding)) * (1 / $this->strengthScaleFactor);
 
 		if ($complexity <= self::$MIN_COMPLEXITY)
 		{

@@ -9,7 +9,7 @@
 
 namespace Akeeba\Engine\Postproc\Connector\Cloudfiles\Exception;
 
-
+defined('AKEEBAENGINE') || die();
 
 use Exception;
 

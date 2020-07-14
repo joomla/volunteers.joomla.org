@@ -9,6 +9,8 @@
 
 namespace Akeeba\Engine\Postproc;
 
+defined('AKEEBAENGINE') || die();
+
 use Akeeba\Engine\Postproc\Exception\DeleteNotSupported;
 use Akeeba\Engine\Postproc\Exception\DownloadToBrowserNotSupported;
 use Akeeba\Engine\Postproc\Exception\DownloadToServerNotSupported;

@@ -8,13 +8,13 @@
 namespace Akeeba\Backup\Admin\Helper;
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 use Akeeba\Engine\Factory;
 use Akeeba\Engine\Platform;
 use FOF30\Container\Container;
 use FOF30\Date\Date;
-use JText;
+use Joomla\CMS\Language\Text;
 
 /**
  * Status helper. Used by the Control Panel and the backup page to report detected warnings which may impact your backup
@@ -48,7 +48,18 @@ class Status
 	 *
 	 * @var  array
 	 */
-	protected $warnings = array();
+	protected $warnings = [];
+
+	/**
+	 * Public constructor. Automatically initializes the object with the status and warnings.
+	 *
+	 * @return  self
+	 */
+	public function __construct()
+	{
+		$this->status   = Factory::getConfigurationChecks()->getShortStatus();
+		$this->warnings = Factory::getConfigurationChecks()->getDetailedStatus();
+	}
 
 	/**
 	 * Get a Singleton instance
@@ -68,17 +79,6 @@ class Status
 	}
 
 	/**
-	 * Public constructor. Automatically initializes the object with the status and warnings.
-	 *
-	 * @return  self
-	 */
-	public function __construct()
-	{
-		$this->status         = Factory::getConfigurationChecks()->getShortStatus();
-		$this->warnings       = Factory::getConfigurationChecks()->getDetailedStatus();
-	}
-
-	/**
 	 * Returns the HTML for the backup status cell
 	 *
 	 * @return  string  HTML
@@ -90,15 +90,15 @@ class Status
 
 		if ($status && empty($quirks))
 		{
-			$html = '<div class="akeeba-block--success"><p>' . JText::_('COM_AKEEBA_CPANEL_LBL_STATUS_OK') . '</p></div>';
+			$html = '<div class="akeeba-block--success"><p>' . Text::_('COM_AKEEBA_CPANEL_LBL_STATUS_OK') . '</p></div>';
 		}
 		elseif ($status && !empty($quirks))
 		{
-			$html = '<div class="akeeba-block--warning"><p>' . JText::_('COM_AKEEBA_CPANEL_LBL_STATUS_WARNING') . '</p></div>';
+			$html = '<div class="akeeba-block--warning"><p>' . Text::_('COM_AKEEBA_CPANEL_LBL_STATUS_WARNING') . '</p></div>';
 		}
 		else
 		{
-			$html = '<div class="akeeba-block--failure"><p>' . JText::_('COM_AKEEBA_CPANEL_LBL_STATUS_ERROR') . '</p></div>';
+			$html = '<div class="akeeba-block--failure"><p>' . Text::_('COM_AKEEBA_CPANEL_LBL_STATUS_ERROR') . '</p></div>';
 		}
 
 		return $html;
@@ -113,7 +113,7 @@ class Status
 	 */
 	public function getQuirksCell($onlyErrors = false)
 	{
-		$html   = '<p>' . JText::_('COM_AKEEBA_CPANEL_WARNING_QNONE') . '</p>';
+		$html   = '<p>' . Text::_('COM_AKEEBA_CPANEL_WARNING_QNONE') . '</p>';
 		$quirks = Factory::getConfigurationChecks()->getDetailedStatus();
 
 		if (!empty($quirks))
@@ -144,28 +144,6 @@ class Status
 	}
 
 	/**
-	 * Gets the HTML for a single line of the warnings area.
-	 *
-	 * @param   array  $quirk       A quirk definition array
-	 * @param   bool   $onlyErrors  Should I only return errors? If false (default) errors AND warnings are returned.
-	 *
-	 * @return  string  HTML
-	 */
-	private function renderWarnings($quirk, $onlyErrors = false)
-	{
-		if ($onlyErrors && ($quirk['severity'] != 'critical'))
-		{
-			return '';
-		}
-
-		$quirk['severity'] = $quirk['severity'] == 'critical' ? 'high' : $quirk['severity'];
-
-		return  '<li><a class="severity-' . $quirk['severity'] .
-			'" href="' . $quirk['help_url'] . '" target="_blank">' . $quirk['description'] . '</a>' . "</li>\n";
-
-	}
-
-	/**
 	 * Returns the details of the latest backup as HTML
 	 *
 	 * @return  string  HTML
@@ -183,7 +161,7 @@ class Status
 
 		if (empty($id))
 		{
-			return '<p class="label">' . JText::_('COM_AKEEBA_BACKUP_STATUS_NONE') . '</p>';
+			return '<p class="label">' . Text::_('COM_AKEEBA_BACKUP_STATUS_NONE') . '</p>';
 		}
 
 		$record = Platform::getInstance()->get_statistics($id);
@@ -191,17 +169,17 @@ class Status
 		switch ($record['status'])
 		{
 			case 'run':
-				$status      = JText::_('COM_AKEEBA_BUADMIN_LABEL_STATUS_PENDING');
+				$status      = Text::_('COM_AKEEBA_BUADMIN_LABEL_STATUS_PENDING');
 				$statusClass = "akeeba-label--warning";
 				break;
 
 			case 'fail':
-				$status      = JText::_('COM_AKEEBA_BUADMIN_LABEL_STATUS_FAIL');
+				$status      = Text::_('COM_AKEEBA_BUADMIN_LABEL_STATUS_FAIL');
 				$statusClass = "akeeba-label--failure";
 				break;
 
 			case 'complete':
-				$status      = JText::_('COM_AKEEBA_BUADMIN_LABEL_STATUS_OK');
+				$status      = Text::_('COM_AKEEBA_BUADMIN_LABEL_STATUS_OK');
 				$statusClass = "akeeba-label--success";
 				break;
 
@@ -213,15 +191,15 @@ class Status
 		switch ($record['origin'])
 		{
 			case 'frontend':
-				$origin = JText::_('COM_AKEEBA_BUADMIN_LABEL_ORIGIN_FRONTEND');
+				$origin = Text::_('COM_AKEEBA_BUADMIN_LABEL_ORIGIN_FRONTEND');
 				break;
 
 			case 'backend':
-				$origin = JText::_('COM_AKEEBA_BUADMIN_LABEL_ORIGIN_BACKEND');
+				$origin = Text::_('COM_AKEEBA_BUADMIN_LABEL_ORIGIN_BACKEND');
 				break;
 
 			case 'cli':
-				$origin = JText::_('COM_AKEEBA_BUADMIN_LABEL_ORIGIN_CLI');
+				$origin = Text::_('COM_AKEEBA_BUADMIN_LABEL_ORIGIN_CLI');
 				break;
 
 			default:
@@ -242,14 +220,36 @@ class Status
 		$startTime->setTimezone($tz);
 
 		$html = '<table class="akeeba-table--striped">';
-		$html .= '<tr><td>' . JText::_('COM_AKEEBA_BUADMIN_LABEL_START') . '</td><td>' . $startTime->format(JText::_('DATE_FORMAT_LC2'), true) . '</td></tr>';
-		$html .= '<tr><td>' . JText::_('COM_AKEEBA_BUADMIN_LABEL_DESCRIPTION') . '</td><td>' . $record['description'] . '</td></tr>';
-		$html .= '<tr><td>' . JText::_('COM_AKEEBA_BUADMIN_LABEL_STATUS') . '</td><td><span class="label ' . $statusClass . '">' . $status . '</span></td></tr>';
-		$html .= '<tr><td>' . JText::_('COM_AKEEBA_BUADMIN_LABEL_ORIGIN') . '</td><td>' . $origin . '</td></tr>';
-		$html .= '<tr><td>' . JText::_('COM_AKEEBA_BUADMIN_LABEL_TYPE') . '</td><td>' . $type . '</td></tr>';
+		$html .= '<tr><td>' . Text::_('COM_AKEEBA_BUADMIN_LABEL_START') . '</td><td>' . $startTime->format(Text::_('DATE_FORMAT_LC2'), true) . '</td></tr>';
+		$html .= '<tr><td>' . Text::_('COM_AKEEBA_BUADMIN_LABEL_DESCRIPTION') . '</td><td>' . $record['description'] . '</td></tr>';
+		$html .= '<tr><td>' . Text::_('COM_AKEEBA_BUADMIN_LABEL_STATUS') . '</td><td><span class="label ' . $statusClass . '">' . $status . '</span></td></tr>';
+		$html .= '<tr><td>' . Text::_('COM_AKEEBA_BUADMIN_LABEL_ORIGIN') . '</td><td>' . $origin . '</td></tr>';
+		$html .= '<tr><td>' . Text::_('COM_AKEEBA_BUADMIN_LABEL_TYPE') . '</td><td>' . $type . '</td></tr>';
 		$html .= '</table>';
 
 		return $html;
+	}
+
+	/**
+	 * Gets the HTML for a single line of the warnings area.
+	 *
+	 * @param   array  $quirk       A quirk definition array
+	 * @param   bool   $onlyErrors  Should I only return errors? If false (default) errors AND warnings are returned.
+	 *
+	 * @return  string  HTML
+	 */
+	private function renderWarnings($quirk, $onlyErrors = false)
+	{
+		if ($onlyErrors && ($quirk['severity'] != 'critical'))
+		{
+			return '';
+		}
+
+		$quirk['severity'] = $quirk['severity'] == 'critical' ? 'high' : $quirk['severity'];
+
+		return '<li><a class="severity-' . $quirk['severity'] .
+			'" href="' . $quirk['help_url'] . '" target="_blank">' . $quirk['description'] . '</a>' . "</li>\n";
+
 	}
 
 }

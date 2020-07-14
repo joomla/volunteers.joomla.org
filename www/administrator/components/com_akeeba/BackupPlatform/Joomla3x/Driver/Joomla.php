@@ -8,10 +8,11 @@
 namespace Akeeba\Engine\Driver;
 
 // Protection against direct access
-defined('AKEEBAENGINE') or die();
+defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Platform;
 use Exception;
+use Joomla\CMS\Factory;
 
 class Joomla
 {
@@ -21,15 +22,15 @@ class Joomla
 	/**
 	 * Database object constructor
 	 *
-	 * @param    array $options List of options used to configure the connection
+	 * @param   array  $options  List of options used to configure the connection
 	 */
-	public function __construct($options = array())
+	public function __construct($options = [])
 	{
 		// Get best matching Akeeba Backup driver instance
 		if (class_exists('JFactory'))
 		{
 			// Get the database driver *AND* make sure it's connected.
-			$db = \JFactory::getDBO();
+			$db = Factory::getDBO();
 			$db->connect();
 
 			$options['connection'] = $db->getConnection();
@@ -111,7 +112,7 @@ class Joomla
 			throw new Exception('Akeeba Engine database driver is not loaded');
 		}
 
-		if (method_exists($this->dbo, $name) || in_array($name, array('q', 'nq', 'qn')))
+		if (method_exists($this->dbo, $name) || in_array($name, ['q', 'nq', 'qn']))
 		{
 			// Call_user_func_array is ~3 times slower than direct method calls.
 			// (thank you, Nooku Framework, for the tip!)
@@ -137,8 +138,9 @@ class Joomla
 					break;
 				default:
 					// Resort to using call_user_func_array for many segments
-					$result = call_user_func_array(array($this->dbo, $name), $arguments);
+					$result = call_user_func_array([$this->dbo, $name], $arguments);
 			}
+
 			return $result;
 		}
 		else

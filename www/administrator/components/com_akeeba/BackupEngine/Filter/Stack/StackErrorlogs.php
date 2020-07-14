@@ -9,9 +9,9 @@
 
 namespace Akeeba\Engine\Filter\Stack;
 
+defined('AKEEBAENGINE') || die();
+
 use Akeeba\Engine\Filter\Base;
-
-
 
 /**
  * Files exclusion filter based on regular expressions

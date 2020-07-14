@@ -9,7 +9,7 @@
 
 namespace Akeeba\Engine\Postproc\Connector\S3v4\Response;
 
-
+defined('AKEEBAENGINE') || die();
 
 /**
  * S3 response error object
@@ -66,7 +66,7 @@ class Error
 	/**
 	 * Set the error code
 	 *
-	 * @param   int  $code  Set to zeroo or a negative value to clear errors
+	 * @param   int  $code  Set to zero or a negative value to clear errors
 	 *
 	 * @return  void
 	 */

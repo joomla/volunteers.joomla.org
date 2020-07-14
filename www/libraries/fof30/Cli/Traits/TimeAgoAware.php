@@ -7,6 +7,8 @@
 
 namespace FOF30\Cli\Traits;
 
+defined('_JEXEC') || die;
+
 /**
  * Allows the developer to show the relative time difference between two timestamps.
  *

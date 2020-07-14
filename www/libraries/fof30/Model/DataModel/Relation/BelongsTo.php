@@ -7,9 +7,9 @@
 
 namespace FOF30\Model\DataModel\Relation;
 
-use FOF30\Model\DataModel;
+defined('_JEXEC') || die;
 
-defined('_JEXEC') or die;
+use FOF30\Model\DataModel;
 
 /**
  * BelongsTo (reverse 1-to-1 or 1-to-many) relation: this model is a child which belongs to the foreign table
@@ -25,13 +25,15 @@ class BelongsTo extends HasOne
 	/**
 	 * Public constructor. Initialises the relation.
 	 *
-	 * @param   DataModel  $parentModel        The data model we are attached to
-	 * @param   string     $foreignModelName   The name of the foreign key's model in the format "modelName@com_something"
-	 * @param   string     $localKey           The local table key for this relation, default: parentModel's ID field name
-	 * @param   string     $foreignKey         The foreign key for this relation, default: parentModel's ID field name
-	 * @param   string     $pivotTable         IGNORED
-	 * @param   string     $pivotLocalKey      IGNORED
-	 * @param   string     $pivotForeignKey    IGNORED
+	 * @param   DataModel  $parentModel       The data model we are attached to
+	 * @param   string     $foreignModelName  The name of the foreign key's model in the format
+	 *                                        "modelName@com_something"
+	 * @param   string     $localKey          The local table key for this relation, default: parentModel's ID field
+	 *                                        name
+	 * @param   string     $foreignKey        The foreign key for this relation, default: parentModel's ID field name
+	 * @param   string     $pivotTable        IGNORED
+	 * @param   string     $pivotLocalKey     IGNORED
+	 * @param   string     $pivotForeignKey   IGNORED
 	 */
 	public function __construct(DataModel $parentModel, $foreignModelName, $localKey = null, $foreignKey = null, $pivotTable = null, $pivotLocalKey = null, $pivotForeignKey = null)
 	{

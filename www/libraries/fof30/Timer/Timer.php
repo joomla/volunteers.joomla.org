@@ -7,7 +7,7 @@
 
 namespace FOF30\Timer;
 
-defined('_JEXEC') or die;
+defined('_JEXEC') || die;
 
 /**
  * Timeout prevention timer

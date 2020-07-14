@@ -5,16 +5,16 @@
  * @license   GNU General Public License version 3, or later
  */
 
-defined('_JEXEC') or die;
+defined('_JEXEC') || die;
 
 // Old PHP version detected. EJECT! EJECT! EJECT!
-if ( !version_compare(PHP_VERSION, '5.6.0', '>='))
+if (!version_compare(PHP_VERSION, '7.1.0', '>='))
 {
 	return;
 }
 
 // Make sure Akeeba Backup is installed
-if ( !file_exists(JPATH_ADMINISTRATOR . '/components/com_akeeba'))
+if (!file_exists(JPATH_ADMINISTRATOR . '/components/com_akeeba'))
 {
 	return;
 }
@@ -27,17 +27,25 @@ if (version_compare(JVERSION, '2.5', 'lt'))
 }
 
 
+use Akeeba\Backup\Admin\Model\Statistics;
 use Akeeba\Engine\Factory;
 use Akeeba\Engine\Platform;
+use FOF30\Container\Container;
 use FOF30\Date\Date;
+use FOF30\Utils\CacheCleaner;
+use Joomla\CMS\Component\ComponentHelper;
+use Joomla\CMS\Factory as JFactory;
+use Joomla\CMS\Language\Text;
+use Joomla\CMS\Plugin\CMSPlugin;
+use Joomla\CMS\Uri\Uri;
 
 // Deactivate self
 $db    = JFactory::getDbo();
 $query = $db->getQuery(true)
-			->update($db->qn('#__extensions'))
-			->set($db->qn('enabled') . ' = ' . $db->q('0'))
-			->where($db->qn('element') . ' = ' . $db->q('akeebabackup'))
-			->where($db->qn('folder') . ' = ' . $db->q('quickicon'));
+	->update($db->qn('#__extensions'))
+	->set($db->qn('enabled') . ' = ' . $db->q('0'))
+	->where($db->qn('element') . ' = ' . $db->q('akeebabackup'))
+	->where($db->qn('folder') . ' = ' . $db->q('quickicon'));
 $db->setQuery($query);
 $db->execute();
 
@@ -47,7 +55,7 @@ if (!defined('FOF30_INCLUDED') && !@include_once(JPATH_LIBRARIES . '/fof30/inclu
 	return;
 }
 
-\FOF30\Utils\CacheCleaner::clearPluginsCache();
+CacheCleaner::clearPluginsCache();
 
 // Timezone fix; avoids errors printed out by PHP 5.3.3+ (thanks Yannick!)
 if (function_exists('date_default_timezone_get') && function_exists('date_default_timezone_set'))
@@ -76,17 +84,14 @@ if (function_exists('date_default_timezone_get') && function_exists('date_defaul
 // Make sure Akeeba Backup is installed, or quit
 $akeeba_installed = @file_exists(JPATH_ADMINISTRATOR . '/components/com_akeeba/BackupEngine/Factory.php');
 
-if ( !$akeeba_installed)
+if (!$akeeba_installed)
 {
 	return;
 }
 
 // Make sure Akeeba Backup is enabled
-JLoader::import('joomla.application.component.helper');
-
-if ( !JComponentHelper::isEnabled('com_akeeba', true))
+if (!ComponentHelper::isEnabled('com_akeeba'))
 {
-	//JError::raiseError('E_JPNOTENABLED', JText('MOD_AKADMIN_AKEEBA_NOT_ENABLED'));
 	return;
 }
 
@@ -97,7 +102,7 @@ if ( !JComponentHelper::isEnabled('com_akeeba', true))
 $continueLoadingIcon = true;
 $user                = JFactory::getUser();
 
-if ( !$user->authorise('akeeba.backup', 'com_akeeba'))
+if (!$user->authorise('akeeba.backup', 'com_akeeba'))
 {
 	$continueLoadingIcon = false;
 }
@@ -105,14 +110,14 @@ if ( !$user->authorise('akeeba.backup', 'com_akeeba'))
 // Do we really, REALLY have Akeeba Engine?
 if ($continueLoadingIcon)
 {
-	if ( !defined('AKEEBAENGINE'))
+	if (!defined('AKEEBAENGINE'))
 	{
 		define('AKEEBAENGINE', 1); // Required for accessing Akeeba Engine's factory class
 	}
 	try
 	{
 		@include_once JPATH_ADMINISTRATOR . '/components/com_akeeba/BackupEngine/Factory.php';
-		if ( !class_exists('\Akeeba\Engine\Factory', false))
+		if (!class_exists('\Akeeba\Engine\Factory', false))
 		{
 			$continueLoadingIcon = false;
 		}
@@ -124,18 +129,18 @@ if ($continueLoadingIcon)
 }
 
 // Enable self if we have to bail out
-if ( !$continueLoadingIcon)
+if (!$continueLoadingIcon)
 {
 	$db    = JFactory::getDbo();
 	$query = $db->getQuery(true)
-				->update($db->qn('#__extensions'))
-				->set($db->qn('enabled') . ' = ' . $db->q('1'))
-				->where($db->qn('element') . ' = ' . $db->q('akeebabackup'))
-				->where($db->qn('folder') . ' = ' . $db->q('quickicon'));
+		->update($db->qn('#__extensions'))
+		->set($db->qn('enabled') . ' = ' . $db->q('1'))
+		->where($db->qn('element') . ' = ' . $db->q('akeebabackup'))
+		->where($db->qn('folder') . ' = ' . $db->q('quickicon'));
 	$db->setQuery($query);
 	$db->execute();
 
-	\FOF30\Utils\CacheCleaner::clearPluginsCache();
+	CacheCleaner::clearPluginsCache();
 
 	return;
 }
@@ -144,17 +149,17 @@ unset($continueLoadingIcon);
 /**
  * Akeeba Backup Notification plugin
  */
-class plgQuickiconAkeebabackup extends JPlugin
+class plgQuickiconAkeebabackup extends CMSPlugin
 {
 	/**
 	 * Constructor
 	 *
-	 * @param       object $subject The object to observe
-	 * @param       array  $config  An array that holds the plugin configuration
+	 * @param   object  $subject  The object to observe
+	 * @param   array   $config   An array that holds the plugin configuration
 	 *
 	 * @since       2.5
 	 */
-	public function __construct(& $subject, $config)
+	public function __construct(&$subject, $config)
 	{
 		/**
 		 * I know that this piece of code cannot possibly be executed since I have already returned BEFORE declaring
@@ -186,7 +191,7 @@ class plgQuickiconAkeebabackup extends JPlugin
 	 */
 	public function onGetIcons($context)
 	{
-		$container           = \FOF30\Container\Container::getInstance('com_akeeba');
+		$container           = Container::getInstance('com_akeeba');
 		$user                = $container->platform->getUser();
 		$j4WarningJavascript = false;
 
@@ -220,7 +225,7 @@ class plgQuickiconAkeebabackup extends JPlugin
 		 * which actually makes it FAR MORE RELEVANT in an "updates" area on the page than the friggin' privacy
 		 * requests!
 		 */
-		$configuredContext    = version_compare(JVERSION, '3.999.999', 'gt') ? 'update_quickicon' : 'mod_quickicon';
+		$configuredContext = version_compare(JVERSION, '3.999.999', 'gt') ? 'update_quickicon' : 'mod_quickicon';
 
 		/**/
 		if (
@@ -253,7 +258,7 @@ class plgQuickiconAkeebabackup extends JPlugin
 
 		Platform::addPlatform('joomla3x', JPATH_ADMINISTRATOR . '/components/com_akeeba/BackupPlatform/Joomla3x');
 
-		$url = JUri::base();
+		$url = Uri::base();
 		$url = rtrim($url, '/');
 
 		$profileId = (int) $this->params->get('profileid', 1);
@@ -269,7 +274,7 @@ class plgQuickiconAkeebabackup extends JPlugin
 		$ret = [
 			'link'  => 'index.php?option=com_akeeba&view=Backup&autostart=1&returnurl=' . base64_encode($url) . '&profileid=' . $profileId . "&$token=1",
 			'image' => 'akeeba-black',
-			'text'  => JText::_('PLG_QUICKICON_AKEEBABACKUP_OK'),
+			'text'  => Text::_('PLG_QUICKICON_AKEEBABACKUP_OK'),
 			'id'    => 'plg_quickicon_akeebabackup',
 			'group' => 'MOD_QUICKICON_MAINTENANCE',
 		];
@@ -305,7 +310,7 @@ class plgQuickiconAkeebabackup extends JPlugin
 				'order' => 'DESC',
 			];
 
-			/** @var \Akeeba\Backup\Admin\Model\Statistics $model */
+			/** @var Statistics $model */
 			$model = $container->factory->model('Statistics')->tmpInstance();
 			$list  = $model->getStatisticsListWithMeta(false, $filters, $ordering);
 
@@ -334,8 +339,7 @@ class plgQuickiconAkeebabackup extends JPlugin
 			}
 			else
 			{
-				$maxperiod = $this->params->get('maxbackupperiod', 24);
-				JLoader::import('joomla.utilities.date');
+				$maxperiod        = $this->params->get('maxbackupperiod', 24);
 				$lastBackupRaw    = $record->backupstart;
 				$lastBackupObject = new Date($lastBackupRaw);
 				$lastBackup       = $lastBackupObject->toUnix();
@@ -349,7 +353,7 @@ class plgQuickiconAkeebabackup extends JPlugin
 			if ($warning)
 			{
 				$ret['image'] = 'akeeba-red';
-				$ret['text']  = JText::_('PLG_QUICKICON_AKEEBABACKUP_BACKUPREQUIRED');
+				$ret['text']  = Text::_('PLG_QUICKICON_AKEEBABACKUP_BACKUPREQUIRED');
 
 				if ($isJoomla4)
 				{
@@ -450,7 +454,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 JS;
 
-			\Joomla\CMS\Factory::getApplication()->getDocument()->addScriptDeclaration($inlineJS);
+			JFactory::getApplication()->getDocument()->addScriptDeclaration($inlineJS);
 		}
 
 		// Re-enable self
@@ -463,7 +467,7 @@ JS;
 		$db->setQuery($query);
 		$db->execute();
 
-		\FOF30\Utils\CacheCleaner::clearPluginsCache();
+		CacheCleaner::clearPluginsCache();
 
 		return [$ret];
 	}

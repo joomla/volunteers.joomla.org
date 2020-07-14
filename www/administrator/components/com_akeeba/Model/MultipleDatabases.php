@@ -8,13 +8,13 @@
 namespace Akeeba\Backup\Admin\Model;
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 use Akeeba\Backup\Admin\Model\Mixin\ExclusionFilter;
 use Akeeba\Engine\Factory;
 use Exception;
 use FOF30\Model\Model;
-use JText;
+use Joomla\CMS\Language\Text;
 
 /**
  * Model for Include Multiple Databases.
@@ -32,7 +32,7 @@ class MultipleDatabases extends Model
 	public function get_databases()
 	{
 		// Get database inclusion filters
-		$filter        = Factory::getFilterObject('multidb');
+		$filter = Factory::getFilterObject('multidb');
 
 		return $filter->getInclusions('db');
 	}
@@ -85,7 +85,7 @@ class MultipleDatabases extends Model
 		catch (Exception $e)
 		{
 			$success = false;
-			$error = $e->getMessage();
+			$error   = $e->getMessage();
 		}
 
 		if (
@@ -93,16 +93,16 @@ class MultipleDatabases extends Model
 			|| empty($data['database'])
 		)
 		{
-			return array(
+			return [
 				'status'  => false,
-				'message' => JText::_('COM_AKEEBA_MULTIDB_ERR_MISSINGINFO'),
-			);
+				'message' => Text::_('COM_AKEEBA_MULTIDB_ERR_MISSINGINFO'),
+			];
 		}
 
-		return array(
+		return [
 			'status'  => $success,
-			'message' => $error
-		);
+			'message' => $error,
+		];
 	}
 
 	/**
@@ -115,7 +115,7 @@ class MultipleDatabases extends Model
 		$action = $this->getState('action');
 		$verb   = array_key_exists('verb', $action) ? $action['verb'] : null;
 
-		$ret_array = array();
+		$ret_array = [];
 
 		switch ($verb)
 		{
@@ -126,7 +126,7 @@ class MultipleDatabases extends Model
 
 			// Remove a filter (used by the editor)
 			case 'remove':
-				$ret_array = array('success' => $this->remove($action['root']));
+				$ret_array = ['success' => $this->remove($action['root'])];
 				break;
 
 			// Test connection (used by the editor)

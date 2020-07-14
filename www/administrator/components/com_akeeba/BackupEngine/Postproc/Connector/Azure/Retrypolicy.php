@@ -41,7 +41,7 @@
 
 namespace Akeeba\Engine\Postproc\Connector\Azure;
 
-
+defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Postproc\Connector\Azure\Retrypolicy\None;
 use Akeeba\Engine\Postproc\Connector\Azure\Retrypolicy\Ntimes;

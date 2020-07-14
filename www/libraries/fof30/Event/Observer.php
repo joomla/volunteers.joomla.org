@@ -7,7 +7,10 @@
 
 namespace FOF30\Event;
 
-defined('_JEXEC') or die;
+defined('_JEXEC') || die;
+
+use ReflectionMethod;
+use ReflectionObject;
 
 class Observer
 {
@@ -19,7 +22,7 @@ class Observer
 	/**
 	 * Creates the observer and attaches it to the observable subject object
 	 *
-	 * @param   Observable $subject The observable object to attach the observer to
+	 * @param   Observable  $subject  The observable object to attach the observer to
 	 */
 	function __construct(Observable &$subject)
 	{
@@ -40,11 +43,11 @@ class Observer
 	{
 		if (is_null($this->events))
 		{
-            // Assign an empty array to protect us from behaviours without any valid method
-            $this->events = array();
+			// Assign an empty array to protect us from behaviours without any valid method
+			$this->events = [];
 
-			$reflection = new \ReflectionObject($this);
-			$methods = $reflection->getMethods(\ReflectionMethod::IS_PUBLIC);
+			$reflection = new ReflectionObject($this);
+			$methods    = $reflection->getMethods(ReflectionMethod::IS_PUBLIC);
 
 			foreach ($methods as $m)
 			{

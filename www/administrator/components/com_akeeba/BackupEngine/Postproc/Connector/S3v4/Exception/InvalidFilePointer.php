@@ -9,7 +9,7 @@
 
 namespace Akeeba\Engine\Postproc\Connector\S3v4\Exception;
 
-
+defined('AKEEBAENGINE') || die();
 
 use Exception;
 use InvalidArgumentException;

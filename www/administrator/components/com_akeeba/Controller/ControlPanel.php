@@ -8,7 +8,7 @@
 namespace Akeeba\Backup\Admin\Controller;
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 use Akeeba\Backup\Admin\Controller\Mixin\CustomACL;
 use Akeeba\Backup\Admin\Controller\Mixin\PredefinedTaskList;
@@ -21,8 +21,8 @@ use Akeeba\Engine\Platform;
 use Exception;
 use FOF30\Container\Container;
 use FOF30\Controller\Controller;
-use JText;
-use JUri;
+use Joomla\CMS\Language\Text;
+use Joomla\CMS\Uri\Uri;
 use RuntimeException;
 
 /**
@@ -51,7 +51,7 @@ class ControlPanel extends Controller
 
 		if (!is_numeric($newProfile) || ($newProfile <= 0))
 		{
-			$this->setRedirect(JUri::base() . 'index.php?option=com_akeeba', JText::_('COM_AKEEBA_CPANEL_PROFILE_SWITCH_ERROR'), 'error');
+			$this->setRedirect(\Joomla\CMS\Uri\Uri::base() . 'index.php?option=com_akeeba', \Joomla\CMS\Language\Text::_('COM_AKEEBA_CPANEL_PROFILE_SWITCH_ERROR'), 'error');
 
 			return;
 		}
@@ -62,10 +62,10 @@ class ControlPanel extends Controller
 
 		if (empty($url))
 		{
-			$url = JUri::base() . 'index.php?option=com_akeeba';
+			$url = \Joomla\CMS\Uri\Uri::base() . 'index.php?option=com_akeeba';
 		}
 
-		$this->setRedirect($url, JText::_('COM_AKEEBA_CPANEL_PROFILE_SWITCH_OK'));
+		$this->setRedirect($url, \Joomla\CMS\Language\Text::_('COM_AKEEBA_CPANEL_PROFILE_SWITCH_OK'));
 	}
 
 	public function UpdateInfo()
@@ -80,10 +80,10 @@ class ControlPanel extends Controller
 		if ($updateInfo->hasUpdate)
 		{
 			$strings = [
-				'header'  => JText::sprintf('COM_AKEEBA_CPANEL_MSG_UPDATEFOUND', $updateInfo->version),
-				'button'  => JText::sprintf('COM_AKEEBA_CPANEL_MSG_UPDATENOW', $updateInfo->version),
+				'header'  => \Joomla\CMS\Language\Text::sprintf('COM_AKEEBA_CPANEL_MSG_UPDATEFOUND', $updateInfo->version),
+				'button'  => \Joomla\CMS\Language\Text::sprintf('COM_AKEEBA_CPANEL_MSG_UPDATENOW', $updateInfo->version),
 				'infourl' => $updateInfo->infoURL,
-				'infolbl' => JText::_('COM_AKEEBA_CPANEL_MSG_MOREINFO'),
+				'infolbl' => \Joomla\CMS\Language\Text::_('COM_AKEEBA_CPANEL_MSG_MOREINFO'),
 			];
 
 			$result = <<<HTML
@@ -118,7 +118,7 @@ HTML;
 		// CSRF prevention
 		$this->csrfProtection();
 
-		$msg     = JText::_('COM_AKEEBA_CPANEL_ERR_INVALIDDOWNLOADID');
+		$msg     = \Joomla\CMS\Language\Text::_('COM_AKEEBA_CPANEL_ERR_INVALIDDOWNLOADID');
 		$msgType = 'error';
 		$dlid    = $this->input->getString('dlid', '');
 
@@ -142,7 +142,7 @@ HTML;
 
 		if (empty($url))
 		{
-			$url = JUri::base() . 'index.php?option=com_akeeba';
+			$url = \Joomla\CMS\Uri\Uri::base() . 'index.php?option=com_akeeba';
 		}
 
 		$this->setRedirect($url, $msg, $msgType);
@@ -170,7 +170,7 @@ HTML;
 		$this->container->params->set('frontend_secret_word', $newSecret);
 		$this->container->params->save();
 
-		$msg = JText::sprintf('COM_AKEEBA_CPANEL_MSG_FESECRETWORD_RESET', $newSecret);
+		$msg = \Joomla\CMS\Language\Text::sprintf('COM_AKEEBA_CPANEL_MSG_FESECRETWORD_RESET', $newSecret);
 
 		$url = 'index.php?option=com_akeeba';
 		$this->setRedirect($url, $msg);
@@ -184,7 +184,7 @@ HTML;
 		$model = $this->container->factory->model('Updates')->tmpInstance();
 		$model->getUpdates(true);
 
-		$msg = JText::_('COM_AKEEBA_COMMON_UPDATE_INFORMATION_RELOADED');
+		$msg = \Joomla\CMS\Language\Text::_('COM_AKEEBA_COMMON_UPDATE_INFORMATION_RELOADED');
 		$url = 'index.php?option=com_akeeba';
 
 		$this->setRedirect($url, $msg);

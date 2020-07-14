@@ -7,7 +7,7 @@
 
 namespace FOF30\Model\DataModel\Filter;
 
-defined('_JEXEC') or die;
+defined('_JEXEC') || die;
 
 class Boolean extends Number
 {
@@ -22,4 +22,4 @@ class Boolean extends Number
 	{
 		return is_null($value) || ($value === '');
 	}
-} 
+}

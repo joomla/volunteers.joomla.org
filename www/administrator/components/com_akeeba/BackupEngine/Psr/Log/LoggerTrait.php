@@ -9,7 +9,7 @@
 
 namespace Psr\Log;
 
-
+defined('AKEEBAENGINE') || die();
 
 /**
  * This is a simple Logger trait that classes unable to extend AbstractLogger

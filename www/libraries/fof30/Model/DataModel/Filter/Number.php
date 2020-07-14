@@ -7,7 +7,7 @@
 
 namespace FOF30\Model\DataModel\Filter;
 
-defined('_JEXEC') or die;
+defined('_JEXEC') || die;
 
 class Number extends AbstractFilter
 {
@@ -54,7 +54,7 @@ class Number extends AbstractFilter
 		}
 
 		$from = $this->sanitiseValue($from);
-		$to = $this->sanitiseValue($to);
+		$to   = $this->sanitiseValue($to);
 
 		$sql = '((' . $this->getFieldName() . ' >' . $extra . ' ' . $from . ') AND ';
 		$sql .= '(' . $this->getFieldName() . ' <' . $extra . ' ' . $to . '))';
@@ -93,7 +93,7 @@ class Number extends AbstractFilter
 		}
 
 		$from = $this->sanitiseValue($from);
-		$to = $this->sanitiseValue($to);
+		$to   = $this->sanitiseValue($to);
 
 		$sql = '((' . $this->getFieldName() . ' <' . $extra . ' ' . $from . ') OR ';
 		$sql .= '(' . $this->getFieldName() . ' >' . $extra . ' ' . $to . '))';
@@ -124,7 +124,7 @@ class Number extends AbstractFilter
 		$interval = (float) $interval;
 
 		$from = $value - $interval;
-		$to = $value + $interval;
+		$to   = $value + $interval;
 
 		$extra = '';
 
@@ -134,7 +134,7 @@ class Number extends AbstractFilter
 		}
 
 		$from = $this->sanitiseValue($from);
-		$to = $this->sanitiseValue($to);
+		$to   = $this->sanitiseValue($to);
 
 		$sql = '((' . $this->getFieldName() . ' >' . $extra . ' ' . $from . ') AND ';
 		$sql .= '(' . $this->getFieldName() . ' <' . $extra . ' ' . $to . '))';
@@ -169,7 +169,7 @@ class Number extends AbstractFilter
 			$extra = '=';
 		}
 
-		$sql = array();
+		$sql = [];
 
 		if ($from)
 		{
@@ -262,7 +262,7 @@ class Number extends AbstractFilter
 		}
 		else
 		{
-			$value = array_map(array($this, 'sanitiseValue'), $value);
+			$value = array_map([$this, 'sanitiseValue'], $value);
 		}
 
 		return $value;

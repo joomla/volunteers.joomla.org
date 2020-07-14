@@ -7,12 +7,16 @@
 
 namespace FOF30\Utils;
 
-use JCache;
-use JFactory;
-use JHtml;
-use JText;
+defined('_JEXEC') || die;
 
-defined('_JEXEC') or die;
+use InvalidArgumentException;
+use Joomla\CMS\Cache\Cache;
+use Joomla\CMS\Factory;
+use Joomla\CMS\Helper\UserGroupsHelper;
+use Joomla\CMS\HTML\HTMLHelper;
+use Joomla\CMS\Language\LanguageHelper;
+use Joomla\CMS\Language\Text;
+use stdClass;
 
 /**
  * Returns arrays of JHtml select options for Joomla-specific information such as access levels.
@@ -27,9 +31,9 @@ class SelectOptions
 	 * @param   string  $name       The name of the static method being called
 	 * @param   string  $arguments  Ignored.
 	 *
+	 * @return mixed
 	 * @since   3.3.0
 	 *
-	 * @return mixed
 	 */
 	public static function __callStatic($name, $arguments)
 	{
@@ -50,18 +54,18 @@ class SelectOptions
 	 *
 	 * See the private static methods of this class for more information on params.
 	 *
-	 * @param   string $type   The options type to get
-	 * @param   array  $params Optional arguments, if they are supported by the options type.
+	 * @param   string  $type    The options type to get
+	 * @param   array   $params  Optional arguments, if they are supported by the options type.
 	 *
+	 * @return  stdClass[]
 	 * @since   3.3.0
 	 *
-	 * @return  \stdClass[]
 	 */
 	public static function getOptions($type, array $params = [])
 	{
 		if ((substr($type, 0, 1) == '_') || !method_exists(__CLASS__, $type))
 		{
-			throw new \InvalidArgumentException(__CLASS__ . "does not support option type '$type'.");
+			throw new InvalidArgumentException(__CLASS__ . "does not support option type '$type'.");
 		}
 
 		$useCache = true;
@@ -101,19 +105,19 @@ class SelectOptions
 	 *
 	 * @param   array  $params  Parameters
 	 *
+	 * @return  stdClass[]
+	 *
 	 * @since   3.3.0
 	 *
-	 * @return  \stdClass[]
-	 *
-	 * @see \JHtmlAccess::level()
+	 * @see     \JHtmlAccess::level()
 	 */
 	private static function access(array $params = [])
 	{
-		$db = JFactory::getDbo();
+		$db    = Factory::getDbo();
 		$query = $db->getQuery(true)
 			->select($db->quoteName('a.id', 'value') . ', ' . $db->quoteName('a.title', 'text'))
 			->from($db->quoteName('#__viewlevels', 'a'))
-			->group($db->quoteName(array('a.id', 'a.title', 'a.ordering')))
+			->group($db->quoteName(['a.id', 'a.title', 'a.ordering']))
 			->order($db->quoteName('a.ordering') . ' ASC')
 			->order($db->quoteName('title') . ' ASC');
 
@@ -123,7 +127,7 @@ class SelectOptions
 
 		if (isset($params['allLevels']) && $params['allLevels'])
 		{
-			array_unshift($options, JHtml::_('select.option', '', JText::_('JOPTION_ACCESS_SHOW_ALL_LEVELS')));
+			array_unshift($options, HTMLHelper::_('select.option', '', Text::_('JOPTION_ACCESS_SHOW_ALL_LEVELS')));
 		}
 
 		return $options;
@@ -137,26 +141,26 @@ class SelectOptions
 	 *
 	 * @param   array  $params  Parameters
 	 *
+	 * @return  stdClass[]
+	 *
 	 * @since   3.3.0
 	 *
-	 * @return  \stdClass[]
-	 *
-	 * @see \JHtmlAccess::usergroup()
+	 * @see     \JHtmlAccess::usergroup()
 	 */
 	private static function usergroups(array $params = [])
 	{
-		$options = array_values(\JHelperUsergroups::getInstance()->getAll());
+		$options = array_values(UserGroupsHelper::getInstance()->getAll());
 
 		for ($i = 0, $n = count($options); $i < $n; $i++)
 		{
 			$options[$i]->value = $options[$i]->id;
-			$options[$i]->text = str_repeat('- ', $options[$i]->level) . $options[$i]->title;
+			$options[$i]->text  = str_repeat('- ', $options[$i]->level) . $options[$i]->title;
 		}
 
 		// If all usergroups is allowed, push it into the array.
 		if (isset($params['allGroups']) && $params['allGroups'])
 		{
-			array_unshift($options, JHtml::_('select.option', '', JText::_('JOPTION_ACCESS_SHOW_ALL_GROUPS')));
+			array_unshift($options, HTMLHelper::_('select.option', '', Text::_('JOPTION_ACCESS_SHOW_ALL_GROUPS')));
 		}
 
 		return $options;
@@ -165,18 +169,18 @@ class SelectOptions
 	/**
 	 * Joomla cache handlers
 	 *
+	 * @return  stdClass[]
 	 * @since   3.3.0
 	 *
-	 * @return  \stdClass[]
 	 */
 	private static function cachehandlers()
 	{
-		$options = array();
+		$options = [];
 
 		// Convert to name => name array.
-		foreach (JCache::getStores() as $store)
+		foreach (Cache::getStores() as $store)
 		{
-			$options[] = JHtml::_('select.option', $store, JText::_('JLIB_FORM_VALUE_CACHE_' . $store), 'value', 'text');
+			$options[] = HTMLHelper::_('select.option', $store, Text::_('JLIB_FORM_VALUE_CACHE_' . $store), 'value', 'text');
 		}
 
 		return $options;
@@ -190,16 +194,16 @@ class SelectOptions
 	 *
 	 * @param   array  $params
 	 *
+	 * @return    stdClass[]
 	 * @since   3.3.0
 	 *
-	 * @return 	\stdClass[]
 	 */
 	private static function components(array $params)
 	{
-		$db = JFactory::getDbo();
+		$db = Factory::getDbo();
 
 		// Check for client_ids override
-		$client_ids = isset($params['client_ids']) ? $params['client_ids'] : [0, 1];
+		$client_ids = $params['client_ids'] ?? [0, 1];
 
 		if (is_string($client_ids))
 		{
@@ -228,7 +232,7 @@ class SelectOptions
 		// Convert to array of objects, so we can use sortObjects()
 		// Also translate component names with JText::_()
 		$aComponents = [];
-		$user        = JFactory::getUser();
+		$user        = Factory::getUser();
 
 		foreach ($components as $component)
 		{
@@ -264,15 +268,15 @@ class SelectOptions
 	 * - client  'site' (default) or 'administrator'
 	 * - none    Text to show for "all languages" option, use empty string to remove it
 	 *
+	 * @return  array  Languages for the specified client
 	 * @since   3.3.0
 	 *
-	 * @return  \stdClass  Languages for the specifed client
 	 */
 	private static function languages($params)
 	{
-		$db = JFactory::getDbo();
+		$db = Factory::getDbo();
 
-		$client = isset($params['client']) ? $params['client'] : 'site';
+		$client = $params['client'] ?? 'site';
 
 		if (!in_array($client, ['site', 'administrator']))
 		{
@@ -280,24 +284,23 @@ class SelectOptions
 		}
 
 		// Make sure the languages are sorted base on locale instead of random sorting
-		$options = \JLanguageHelper::createLanguageList(null, constant('JPATH_' . strtoupper($client)), true, true);
+		$options = LanguageHelper::createLanguageList(null, constant('JPATH_' . strtoupper($client)), true, true);
 
 		if (count($options) > 1)
 		{
 			usort(
 				$options,
-				function ($a, $b)
-				{
+				function ($a, $b) {
 					return strcmp($a['value'], $b['value']);
 				}
 			);
 		}
 
-		$none = isset($params['none']) ? $params['none'] : '*';
+		$none = $params['none'] ?? '*';
 
 		if (!empty($none))
 		{
-			array_unshift($options, JHtml::_('select.option', '*', JText::_($none)));
+			array_unshift($options, HTMLHelper::_('select.option', '*', Text::_($none)));
 		}
 
 		return $options;
@@ -329,36 +332,36 @@ class SelectOptions
 			'all'         => false,
 		], $params);
 
-		$options = array();
+		$options = [];
 
 		if (!empty($config['none']))
 		{
-			$options[] = JHtml::_('select.option', '', JText::_($config['none']));
+			$options[] = HTMLHelper::_('select.option', '', Text::_($config['none']));
 		}
 
 		if ($config['published'])
 		{
-			$options[] = JHtml::_('select.option', '1', JText::_('JPUBLISHED'));
+			$options[] = HTMLHelper::_('select.option', '1', Text::_('JPUBLISHED'));
 		}
 
 		if ($config['unpublished'])
 		{
-			$options[] = JHtml::_('select.option', '0', JText::_('JUNPUBLISHED'));
+			$options[] = HTMLHelper::_('select.option', '0', Text::_('JUNPUBLISHED'));
 		}
 
 		if ($config['archived'])
 		{
-			$options[] = JHtml::_('select.option', '2', JText::_('JARCHIVED'));
+			$options[] = HTMLHelper::_('select.option', '2', Text::_('JARCHIVED'));
 		}
 
 		if ($config['trash'])
 		{
-			$options[] = JHtml::_('select.option', '-2', JText::_('JTRASHED'));
+			$options[] = HTMLHelper::_('select.option', '-2', Text::_('JTRASHED'));
 		}
 
 		if ($config['all'])
 		{
-			$options[] = JHtml::_('select.option', '*', JText::_('JALL'));
+			$options[] = HTMLHelper::_('select.option', '*', Text::_('JALL'));
 		}
 
 		return $options;
@@ -377,18 +380,18 @@ class SelectOptions
 	private static function boolean(array $params = [])
 	{
 		$config = array_merge([
-			'none'        => '',
+			'none' => '',
 		], $params);
 
-		$options = array();
+		$options = [];
 
 		if (!empty($config['none']))
 		{
-			$options[] = JHtml::_('select.option', '', JText::_($config['none']));
+			$options[] = HTMLHelper::_('select.option', '', Text::_($config['none']));
 		}
 
-		$options[] = JHtml::_('select.option', '1', JText::_('JYES'));
-		$options[] = JHtml::_('select.option', '0', JText::_('JNO'));
+		$options[] = HTMLHelper::_('select.option', '1', Text::_('JYES'));
+		$options[] = HTMLHelper::_('select.option', '0', Text::_('JNO'));
 
 		return $options;
 	}
@@ -397,13 +400,13 @@ class SelectOptions
 	/**
 	 * Translate a component name
 	 *
-	 * @param   \stdClass  $item  The component object
-	 *
-	 * @since   3.3.0
+	 * @param   stdClass  $item  The component object
 	 *
 	 * @return  string  $text  The translated name of the extension
 	 *
-	 * @see administrator/com_installer/models/extension.php
+	 * @since   3.3.0
+	 *
+	 * @see     administrator/com_installer/models/extension.php
 	 */
 	private static function _translateComponentName($item)
 	{
@@ -425,13 +428,13 @@ class SelectOptions
 			}
 		}
 
-		$lang   = JFactory::getLanguage();
+		$lang   = Factory::getLanguage();
 		$source = JPATH_ADMINISTRATOR . '/components/' . $item->element;
 		$lang->load("$item->element.sys", JPATH_ADMINISTRATOR, null, false, false)
 		|| $lang->load("$item->element.sys", $source, null, false, false)
 		|| $lang->load("$item->element.sys", JPATH_ADMINISTRATOR, $lang->getDefault(), false, false)
 		|| $lang->load("$item->element.sys", $source, $lang->getDefault(), false, false);
 
-		return JText::_($item->name);
+		return Text::_($item->name);
 	}
 }

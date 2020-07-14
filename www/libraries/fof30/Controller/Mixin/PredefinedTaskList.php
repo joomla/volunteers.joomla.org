@@ -7,9 +7,9 @@
 
 namespace FOF30\Controller\Mixin;
 
-use FOF30\Controller\Controller;
+defined('_JEXEC') || die;
 
-defined('_JEXEC') or die;
+use FOF30\Controller\Controller;
 
 /**
  * Force a Controller to allow access to specific tasks only, no matter which tasks are already defined in this
@@ -29,7 +29,7 @@ trait PredefinedTaskList
 	 *
 	 * @var array
 	 */
-	protected $predefinedTaskList = array();
+	protected $predefinedTaskList = [];
 
 	/**
 	 * Overrides the execute method to implement the predefined task list feature

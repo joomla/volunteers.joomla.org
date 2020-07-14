@@ -9,7 +9,7 @@
 
 namespace Akeeba\Engine\Driver;
 
-
+defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Driver\Query\Base as QueryBase;
 use Akeeba\Engine\Driver\Query\Limitable;
@@ -179,7 +179,7 @@ class Sqlite extends Base
 		$this->open();
 
 		// Sanitize input to an array and iterate over the list.
-		settype($tables, 'array');
+		$tables = (array) $tables;
 
 		return $tables;
 	}
@@ -556,14 +556,10 @@ class Sqlite extends Base
 	{
 		if ($new)
 		{
-			$class = '\\Akeeba\\Engine\\Driver\\Query\\Sqlite';
+			return new Query\Sqlite($this);
+		}
 
-			return new $class($this);
-		}
-		else
-		{
-			return $this->sql;
-		}
+		return $this->sql;
 	}
 
 	public function open()

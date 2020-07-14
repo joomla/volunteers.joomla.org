@@ -41,7 +41,7 @@
 
 namespace Akeeba\Engine\Postproc\Connector\Azure\Http;
 
-
+defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Postproc\Connector\Azure\Exception\Http;
 
@@ -191,7 +191,7 @@ class Response
 			{
 				if (is_int($name))
 				{
-					list($name, $value) = explode(":", $value, 1);
+					[$name, $value] = explode(":", $value, 1);
 				}
 
 				$this->_headers[ucwords(strtolower($name))] = trim($value);

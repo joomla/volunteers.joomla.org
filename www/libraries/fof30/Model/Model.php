@@ -7,19 +7,21 @@
 
 namespace FOF30\Model;
 
+defined('_JEXEC') || die;
+
 use FOF30\Container\Container;
 use FOF30\Input\Input;
 use FOF30\Model\Exception\CannotGetName;
-use FOF30\Utils\StringHelper;
-
-defined('_JEXEC') or die;
+use Joomla\CMS\Filter\InputFilter;
+use RuntimeException;
+use stdClass;
 
 /**
  * Class Model
  *
  * A generic MVC model implementation
  *
- * @property-read  \FOF30\Input\Input  $input  The input object (magic __get returns the Input from the Container)
+ * @property-read  Input $input  The input object (magic __get returns the Input from the Container)
  */
 class Model
 {
@@ -78,14 +80,14 @@ class Model
 	 *
 	 * You can use the $config array to pass some configuration values to the object:
 	 *
-	 * state			stdClass|array. The state variables of the Model.
-	 * use_populate		Boolean. When true the model will set its state from populateState() instead of the request.
-	 * ignore_request	Boolean. When true getState will not automatically load state data from the request.
+	 * state            stdClass|array. The state variables of the Model.
+	 * use_populate        Boolean. When true the model will set its state from populateState() instead of the request.
+	 * ignore_request    Boolean. When true getState will not automatically load state data from the request.
 	 *
 	 * @param   Container  $container  The configuration variables to this model
 	 * @param   array      $config     Configuration values for this model
 	 */
-	public function __construct(Container $container, array $config = array())
+	public function __construct(Container $container, array $config = [])
 	{
 		$this->container = $container;
 
@@ -117,17 +119,17 @@ class Model
 			}
 			elseif (is_array($config['state']))
 			{
-				$this->state = (object)$config['state'];
+				$this->state = (object) $config['state'];
 			}
 			// Protect vs malformed state
 			else
 			{
-				$this->state = new \stdClass();
+				$this->state = new stdClass();
 			}
 		}
 		else
 		{
-			$this->state = new \stdClass();
+			$this->state = new stdClass();
 		}
 
 		// Set the internal state marker
@@ -151,7 +153,7 @@ class Model
 	 *
 	 * @return  string  The name of the model
 	 *
-	 * @throws  \RuntimeException  If it's impossible to get the name
+	 * @throws  RuntimeException  If it's impossible to get the name
 	 */
 	public function getName()
 	{
@@ -173,9 +175,9 @@ class Model
 	/**
 	 * Get a filtered state variable
 	 *
-	 * @param   string $key         The state variable's name
-	 * @param   mixed  $default     The default value to return if it's not already set
-	 * @param   string $filter_type The filter type to use
+	 * @param   string  $key          The state variable's name
+	 * @param   mixed   $default      The default value to return if it's not already set
+	 * @param   string  $filter_type  The filter type to use
 	 *
 	 * @return  mixed  The state variable's contents
 	 */
@@ -189,25 +191,25 @@ class Model
 		// Get the savestate status
 		$value = $this->internal_getState($key);
 
-        // Value is not found in the internal state
+		// Value is not found in the internal state
 		if (is_null($value))
 		{
-            // Can I fetch it from the request?
-            if (!$this->_ignoreRequest)
-            {
-                $value = $this->container->platform->getUserStateFromRequest($this->getHash() . $key, $key, $this->input, $value, 'none', $this->_savestate);
+			// Can I fetch it from the request?
+			if (!$this->_ignoreRequest)
+			{
+				$value = $this->container->platform->getUserStateFromRequest($this->getHash() . $key, $key, $this->input, $value, 'none', $this->_savestate);
 
-                // Did I get any useful value from the request?
-                if (is_null($value))
-                {
-                    return $default;
-                }
-            }
-            // Nope! Let's return the default value
-            else
-            {
-                return $default;
-            }
+				// Did I get any useful value from the request?
+				if (is_null($value))
+				{
+					return $default;
+				}
+			}
+			// Nope! Let's return the default value
+			else
+			{
+				return $default;
+			}
 		}
 
 		if (strtoupper($filter_type) == 'RAW')
@@ -216,10 +218,28 @@ class Model
 		}
 		else
 		{
-			$filter = new \JFilterInput();
+			$filter = new InputFilter();
 
 			return $filter->clean($value, $filter_type);
 		}
+	}
+
+	/**
+	 * Method to set model state variables
+	 *
+	 * @param   string  $property  The name of the property.
+	 * @param   mixed   $value     The value of the property to set or null.
+	 *
+	 * @return  mixed  The previous value of the property or null if not set.
+	 */
+	public function setState($property, $value = null)
+	{
+		if (is_null($this->state))
+		{
+			$this->state = new stdClass();
+		}
+
+		return $this->state->$property = $value;
 	}
 
 	/**
@@ -264,7 +284,7 @@ class Model
 	public function setHash($hash)
 	{
 		// Clean the hash, it has to conform to 'CMD' filtering
-		$tempInput = new Input(array('hash' => $hash));
+		$tempInput = new Input(['hash' => $hash]);
 		$hash      = $tempInput->getCmd('hash', null);
 
 		if (empty($hash))
@@ -286,75 +306,6 @@ class Model
 	}
 
 	/**
-	 * Method to get model state variables
-	 *
-	 * @param   string $property Optional parameter name
-	 * @param   mixed  $default  Optional default value
-	 *
-	 * @return  object  The property where specified, the state object where omitted
-	 */
-	private function internal_getState($property = null, $default = null)
-	{
-		if (!$this->_state_set)
-		{
-			// Protected method to auto-populate the model state.
-			$this->populateState();
-
-			// Set the model state set flag to true.
-			$this->_state_set = true;
-		}
-
-		if (is_null($property))
-		{
-			return $this->state;
-		}
-		else
-		{
-			if (property_exists($this->state, $property))
-			{
-				return $this->state->$property;
-			}
-			else
-			{
-				return $default;
-			}
-		}
-	}
-
-	/**
-	 * Method to auto-populate the model state.
-	 *
-	 * This method should only be called once per instantiation and is designed
-	 * to be called on the first call to the getState() method unless the model
-	 * configuration flag to ignore the request is set.
-	 *
-	 * @return  void
-	 *
-	 * @note    Calling getState in this method will result in recursion.
-	 */
-	protected function populateState()
-	{
-	}
-
-	/**
-	 * Method to set model state variables
-	 *
-	 * @param   string $property The name of the property.
-	 * @param   mixed  $value    The value of the property to set or null.
-	 *
-	 * @return  mixed  The previous value of the property or null if not set.
-	 */
-	public function setState($property, $value = null)
-	{
-		if (is_null($this->state))
-		{
-			$this->state = new \stdClass();
-		}
-
-		return $this->state->$property = $value;
-	}
-
-	/**
 	 * Clears the model state, but doesn't touch the internal lists of records,
 	 * record tables or record id variables. To clear these values, please use
 	 * reset().
@@ -363,7 +314,7 @@ class Model
 	 */
 	public function clearState()
 	{
-		$this->state = new \stdClass();
+		$this->state = new stdClass();
 
 		return $this;
 	}
@@ -383,7 +334,7 @@ class Model
 	/**
 	 * Returns a reference to the model's container
 	 *
-	 * @return \FOF30\Container\Container
+	 * @return Container
 	 */
 	public function getContainer()
 	{
@@ -394,7 +345,7 @@ class Model
 	 * Magic getter; allows to use the name of model state keys as properties. Also handles magic properties:
 	 * $this->input  mapped to $this->container->input
 	 *
-	 * @param   string $name The state variable key
+	 * @param   string  $name  The state variable key
 	 *
 	 * @return  static
 	 */
@@ -412,8 +363,8 @@ class Model
 	/**
 	 * Magic setter; allows to use the name of model state keys as properties
 	 *
-	 * @param   string $name  The state variable key
-	 * @param   mixed  $value The state variable value
+	 * @param   string  $name   The state variable key
+	 * @param   mixed   $value  The state variable value
 	 *
 	 * @return  static
 	 */
@@ -426,8 +377,8 @@ class Model
 	 * Magic caller; allows to use the name of model state keys as methods to
 	 * set their values.
 	 *
-	 * @param   string $name      The state variable key
-	 * @param   mixed  $arguments The state variable contents
+	 * @param   string  $name       The state variable key
+	 * @param   mixed   $arguments  The state variable contents
 	 *
 	 * @return  static
 	 */
@@ -443,7 +394,7 @@ class Model
 	 * Sets the model state auto-save status. By default the model is set up to
 	 * save its state to the session.
 	 *
-	 * @param  boolean $newState True to save the state, false to not save it.
+	 * @param   boolean  $newState  True to save the state, false to not save it.
 	 *
 	 * @return  static
 	 */
@@ -475,21 +426,6 @@ class Model
 	}
 
 	/**
-	 * Sets the ignore request flag. When false, getState() will try to populate state variables not already set from
-	 * same-named state variables in the request.
-	 *
-	 * @param boolean $ignoreRequest
-	 *
-	 * @return  static
-	 */
-	public function setIgnoreRequest($ignoreRequest)
-	{
-		$this->_ignoreRequest = $ignoreRequest;
-
-		return $this;
-	}
-
-	/**
 	 * Gets the ignore request flag. When false, getState() will try to populate state variables not already set from
 	 * same-named state variables in the request.
 	 *
@@ -498,6 +434,21 @@ class Model
 	public function getIgnoreRequest()
 	{
 		return $this->_ignoreRequest;
+	}
+
+	/**
+	 * Sets the ignore request flag. When false, getState() will try to populate state variables not already set from
+	 * same-named state variables in the request.
+	 *
+	 * @param   boolean  $ignoreRequest
+	 *
+	 * @return  static
+	 */
+	public function setIgnoreRequest($ignoreRequest)
+	{
+		$this->_ignoreRequest = $ignoreRequest;
+
+		return $this;
 	}
 
 	/**
@@ -510,6 +461,21 @@ class Model
 	public function tmpInstance()
 	{
 		return $this->getClone()->savestate(false)->setIgnoreRequest(true)->clearState();
+	}
+
+	/**
+	 * Method to auto-populate the model state.
+	 *
+	 * This method should only be called once per instantiation and is designed
+	 * to be called on the first call to the getState() method unless the model
+	 * configuration flag to ignore the request is set.
+	 *
+	 * @return  void
+	 *
+	 * @note    Calling getState in this method will result in recursion.
+	 */
+	protected function populateState()
+	{
 	}
 
 	/**
@@ -529,7 +495,7 @@ class Model
 	 *
 	 * @return  void
 	 */
-	protected function triggerEvent($event, array $arguments = array())
+	protected function triggerEvent($event, array $arguments = [])
 	{
 		// If there is an object method for this event, call it
 		if (method_exists($this, $event))
@@ -555,7 +521,7 @@ class Model
 					$this->{$event}($arguments[0], $arguments[1], $arguments[2], $arguments[3], $arguments[4]);
 					break;
 				default:
-					call_user_func_array(array($this, $event), $arguments);
+					call_user_func_array([$this, $event], $arguments);
 					break;
 			}
 		}
@@ -578,7 +544,7 @@ class Model
 		if (substr($event, 0, 2) == 'on')
 		{
 			$prefix = 'on';
-			$event = substr($event, 2);
+			$event  = substr($event, 2);
 		}
 
 		// Get the component/model prefix for the event
@@ -590,5 +556,41 @@ class Model
 
 		// Call the Joomla! plugins
 		$this->container->platform->runPlugins($event, $arguments);
+	}
+
+	/**
+	 * Method to get model state variables
+	 *
+	 * @param   string  $property  Optional parameter name
+	 * @param   mixed   $default   Optional default value
+	 *
+	 * @return  object  The property where specified, the state object where omitted
+	 */
+	private function internal_getState($property = null, $default = null)
+	{
+		if (!$this->_state_set)
+		{
+			// Protected method to auto-populate the model state.
+			$this->populateState();
+
+			// Set the model state set flag to true.
+			$this->_state_set = true;
+		}
+
+		if (is_null($property))
+		{
+			return $this->state;
+		}
+		else
+		{
+			if (property_exists($this->state, $property))
+			{
+				return $this->state->$property;
+			}
+			else
+			{
+				return $default;
+			}
+		}
 	}
 }

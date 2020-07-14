@@ -8,7 +8,7 @@
 namespace Akeeba\Backup\Site\Controller;
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 use Akeeba\Backup\Site\Controller\Mixin\ActivateProfile;
 use Akeeba\Backup\Site\Controller\Mixin\CustomRedirection;
@@ -19,9 +19,9 @@ use FOF30\Controller\Controller;
 use FOF30\Controller\Mixin\PredefinedTaskList;
 use FOF30\Date\Date;
 use JLoader;
-use JRoute;
-use JText;
-use JUri;
+use Joomla\CMS\Language\Text;
+use Joomla\CMS\Router\Route;
+use Joomla\CMS\Uri\Uri;
 
 if (!defined('AKEEBA_BACKUP_ORIGIN'))
 {
@@ -75,12 +75,11 @@ class Backup extends Controller
 		/** @var \Akeeba\Backup\Site\Model\Backup $model */
 		$model = $this->container->factory->model('Backup')->tmpInstance();
 
-		JLoader::import('joomla.utilities.date');
 		$dateNow = new Date();
 
 		$model->setState('tag', AKEEBA_BACKUP_ORIGIN);
 		$model->setState('backupid', $backupId);
-		$model->setState('description', JText::_('COM_AKEEBA_BACKUP_DEFAULT_DESCRIPTION') . ' ' . $dateNow->format(JText::_('DATE_FORMAT_LC2'), true));
+		$model->setState('description', Text::_('COM_AKEEBA_BACKUP_DEFAULT_DESCRIPTION') . ' ' . $dateNow->format(Text::_('DATE_FORMAT_LC2'), true));
 		$model->setState('comment', '');
 
 		$array = $model->startBackup();
@@ -167,10 +166,10 @@ class Backup extends Controller
 			$this->container->platform->closeApplication();
 		}
 
-		$curUri  = JUri::getInstance();
+		$curUri  = Uri::getInstance();
 		$ssl     = $curUri->isSSL() ? 1 : 0;
-		$tempURL = JRoute::_('index.php?option=com_akeeba', false, $ssl);
-		$uri     = new JUri($tempURL);
+		$tempURL = Route::_('index.php?option=com_akeeba', false, $ssl);
+		$uri     = new Uri($tempURL);
 
 		$uri->setVar('view', 'Backup');
 		$uri->setVar('task', 'step');

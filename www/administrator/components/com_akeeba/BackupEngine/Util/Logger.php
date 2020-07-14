@@ -9,6 +9,7 @@
 
 namespace Akeeba\Engine\Util;
 
+defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Factory;
 use Akeeba\Engine\Platform;
@@ -92,7 +93,7 @@ class Logger implements LoggerInterface, LogInterface, WarningsLoggerInterface
 
 		if ($fp !== false)
 		{
-			fputs($fp, '<' . '?' . 'php die(); ' . '?' . '>' . "\n");
+			fwrite($fp, '<' . '?' . 'php die(); ' . '?' . '>' . "\n");
 			@fclose($fp);
 		}
 

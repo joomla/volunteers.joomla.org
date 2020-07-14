@@ -7,17 +7,9 @@
  * @license   GNU General Public License version 3, or later
  */
 
-/**
- * @package     Awf
- * @copyright   2006-2019 Nicholas K. Dionysopoulos / Akeeba Ltd
- * @license     GNU GPL version 3 or later
- *
- * This class is adapted from the Joomla! Framework
- */
-
 namespace Akeeba\Engine\Driver\Query;
 
-
+defined('AKEEBAENGINE') || die();
 
 use PDO;
 use stdClass;

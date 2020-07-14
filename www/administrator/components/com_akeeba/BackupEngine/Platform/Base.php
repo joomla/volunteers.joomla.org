@@ -9,8 +9,9 @@
 
 namespace Akeeba\Engine\Platform;
 
+defined('AKEEBAENGINE') || die();
 
-
+use Akeeba\Engine\Driver\Mysqli;
 use Akeeba\Engine\Driver\QueryException;
 use Akeeba\Engine\Factory;
 use Akeeba\Engine\Platform\Exception\DecryptionException;
@@ -399,7 +400,7 @@ abstract class Base implements PlatformInterface
 
 	public function get_default_database_driver($use_platform = true)
 	{
-		return '\\Akeeba\\Engine\\Driver\\Mysqli';
+		return Mysqli::class;
 	}
 
 	/**
@@ -497,7 +498,7 @@ abstract class Base implements PlatformInterface
 			->where($db->qn('id') . ' = ' . $db->q($id));
 		$db->setQuery($query);
 
-		return $db->loadAssoc(true);
+		return $db->loadAssoc();
 	}
 
 	/**

@@ -7,18 +7,19 @@
 
 namespace FOF30\Factory\Exception;
 
-use Exception;
-use RuntimeException;
+defined('_JEXEC') || die;
 
-defined('_JEXEC') or die;
+use Exception;
+use Joomla\CMS\Language\Text;
+use RuntimeException;
 
 class TransparentAuthenticationNotFound extends RuntimeException
 {
-	public function __construct( $taClass, $code = 500, Exception $previous = null )
+	public function __construct($taClass, $code = 500, Exception $previous = null)
 	{
-		$message = \JText::sprintf('LIB_FOF_TRANSPARENTAUTH_ERR_NOT_FOUND', $taClass);
+		$message = Text::sprintf('LIB_FOF_TRANSPARENTAUTH_ERR_NOT_FOUND', $taClass);
 
-		parent::__construct( $message, $code, $previous );
+		parent::__construct($message, $code, $previous);
 	}
 
 }

@@ -6,7 +6,7 @@
  */
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 /** @var  \Akeeba\Backup\Admin\View\Manage\Html $this */
 
@@ -25,11 +25,11 @@ $this->container->platform->getDocument()->addScriptOptions('akeeba.Manage.ShowH
     <div class="akeeba-renderer-fef">
         <h4>@lang('COM_AKEEBA_BUADMIN_LABEL_HOWDOIRESTORE_LEGEND')</h4>
         <p>
-            @sprintf('COM_AKEEBA_BUADMIN_LABEL_HOWDOIRESTORE_TEXT_' . (AKEEBA_PRO ? 'PRO' : 'CORE'), 'https://www.akeebabackup.com/videos/1212-akeeba-backup-core/1618-abtc04-restore-site-new-server.html', 'index.php?option=com_akeeba&view=Transfer', 'https://www.akeebabackup.com/latest-kickstart-core.zip')
+            @sprintf('COM_AKEEBA_BUADMIN_LABEL_HOWDOIRESTORE_TEXT_' . (AKEEBA_PRO ? 'PRO' : 'CORE'), 'http://akee.ba/abrestoreanywhere', 'index.php?option=com_akeeba&view=Transfer', 'https://www.akeeba.com/latest-kickstart-core.zip')
         </p>
         <p>
             @if (!AKEEBA_PRO)
-                @sprintf('COM_AKEEBA_BUADMIN_LABEL_HOWDOIRESTORE_TEXT_CORE_INFO_ABOUT_PRO', 'https://www.akeebabackup.com/products/akeeba-backup.html')
+                @sprintf('COM_AKEEBA_BUADMIN_LABEL_HOWDOIRESTORE_TEXT_CORE_INFO_ABOUT_PRO', 'https://www.akeeba.com/products/akeeba-backup.html')
             @endif
         </p>
 

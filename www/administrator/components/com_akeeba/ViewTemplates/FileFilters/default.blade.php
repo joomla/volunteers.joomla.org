@@ -5,14 +5,14 @@
  * @license   GNU General Public License version 3, or later
  */
 
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 /** @var \Akeeba\Backup\Admin\View\FileFilters\Html $this */
 ?>
 @include('admin:com_akeeba/CommonTemplates/ErrorModal')
 @include('admin:com_akeeba/CommonTemplates/ProfileName')
 
-<div class="akeeba-form--inline akeeba-panel--info">
+<div class="AKEEBA_MASTER_FORM_STYLING akeeba-form--inline akeeba-panel--info">
     <div class="akeeba-form-group">
         <label>
             @lang('COM_AKEEBA_FILEFILTERS_LABEL_ROOTDIR')

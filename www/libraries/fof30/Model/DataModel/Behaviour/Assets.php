@@ -7,11 +7,13 @@
 
 namespace FOF30\Model\DataModel\Behaviour;
 
+defined('_JEXEC') || die;
+
+use Exception;
 use FOF30\Event\Observer;
 use FOF30\Model\DataModel;
-use JDatabaseQuery;
-
-defined('_JEXEC') or die;
+use Joomla\CMS\Access\Rules;
+use Joomla\CMS\Table\Table;
 
 /**
  * FOF model behavior class to add Joomla! ACL assets support
@@ -28,17 +30,17 @@ class Assets extends Observer
 		}
 
 		$assetFieldAlias = $model->getFieldAlias('asset_id');
-        $currentAssetId  = $model->getFieldValue('asset_id');
+		$currentAssetId  = $model->getFieldValue('asset_id');
 
-        unset($model->$assetFieldAlias);
+		unset($model->$assetFieldAlias);
 
-		// Create the object used for inserting/udpating data to the database
+		// Create the object used for inserting/updating data to the database
 		$fields = $model->getTableFields();
 
 		// Let's remove the asset_id field, since we unset the property above and we would get a PHP notice
-		if (isset($fields[ $assetFieldAlias ]))
+		if (isset($fields[$assetFieldAlias]))
 		{
-			unset($fields[ $assetFieldAlias ]);
+			unset($fields[$assetFieldAlias]);
 		}
 
 		// Asset Tracking
@@ -46,7 +48,7 @@ class Assets extends Observer
 		$name     = $model->getAssetName();
 		$title    = $model->getAssetTitle();
 
-		$asset = \JTable::getInstance('Asset');
+		$asset = Table::getInstance('Asset');
 		$asset->loadByName($name);
 
 		// Re-inject the asset id.
@@ -59,7 +61,7 @@ class Assets extends Observer
 		// @codeCoverageIgnoreStart
 		if ($error)
 		{
-			throw new \Exception($error);
+			throw new Exception($error);
 		}
 		// @codeCoverageIgnoreEnd
 
@@ -75,7 +77,7 @@ class Assets extends Observer
 		$asset->name      = $name;
 		$asset->title     = $title;
 
-		if ($model->getRules() instanceof \JAccessRules)
+		if ($model->getRules() instanceof Rules)
 		{
 			$asset->rules = (string) $model->getRules();
 		}
@@ -84,7 +86,7 @@ class Assets extends Observer
 		// @codeCoverageIgnoreStart
 		if (!$asset->check() || !$asset->store())
 		{
-			throw new \Exception($asset->getError());
+			throw new Exception($asset->getError());
 		}
 		// @codeCoverageIgnoreEnd
 
@@ -99,9 +101,9 @@ class Assets extends Observer
 			$db = $model->getDbo();
 
 			$query = $db->getQuery(true)
-			            ->update($db->qn($model->getTableName()))
-			            ->set($db->qn($assetFieldAlias) . ' = ' . (int) $model->$assetFieldAlias)
-			            ->where($db->qn($k) . ' = ' . (int) $model->$k);
+				->update($db->qn($model->getTableName()))
+				->set($db->qn($assetFieldAlias) . ' = ' . (int) $model->$assetFieldAlias)
+				->where($db->qn($k) . ' = ' . (int) $model->$k);
 
 			$db->setQuery($query)->execute();
 		}
@@ -137,12 +139,12 @@ class Assets extends Observer
 		{
 			// We have to manually remove any empty value, since they will be converted to int,
 			// and "Inherited" values will become "Denied". Joomla is doing this manually, too.
-			$rules = array();
+			$rules = [];
 
 			foreach ($rawRules as $action => $ids)
 			{
 				// Build the rules array.
-				$rules[$action] = array();
+				$rules[$action] = [];
 
 				foreach ($ids as $id => $p)
 				{
@@ -169,7 +171,7 @@ class Assets extends Observer
 		$k = $model->getKeyName();
 
 		// If the table is not loaded, let's try to load it with the id
-		if(!$model->$k)
+		if (!$model->$k)
 		{
 			$model->load($oid);
 		}
@@ -178,7 +180,7 @@ class Assets extends Observer
 		$name = $model->getAssetName();
 
 		// Do NOT touch JTable here -- we are loading the core asset table which is a JTable, not a FOF Table
-		$asset =\ JTable::getInstance('Asset');
+		$asset = Table::getInstance('Asset');
 
 		if ($asset->loadByName($name))
 		{
@@ -186,7 +188,7 @@ class Assets extends Observer
 			// @codeCoverageIgnoreStart
 			if (!$asset->delete())
 			{
-				throw new \Exception($asset->getError());
+				throw new Exception($asset->getError());
 			}
 			// @codeCoverageIgnoreEnd
 		}

@@ -7,7 +7,7 @@
 
 namespace FOF30\View\Compiler;
 
-defined('_JEXEC') or die;
+defined('_JEXEC') || die;
 
 interface CompilerInterface
 {
@@ -27,7 +27,7 @@ interface CompilerInterface
 	 *
 	 * @return mixed
 	 */
-	public function compile($path, array $forceParams = array());
+	public function compile($path, array $forceParams = []);
 
 	/**
 	 * Returns the file extension supported by this compiler

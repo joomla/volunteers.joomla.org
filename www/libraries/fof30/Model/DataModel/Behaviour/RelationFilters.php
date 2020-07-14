@@ -7,12 +7,12 @@
 
 namespace FOF30\Model\DataModel\Behaviour;
 
+defined('_JEXEC') || die;
+
 use FOF30\Event\Observer;
 use FOF30\Model\DataModel;
+use JDatabaseQuery;
 use Joomla\Registry\Registry;
-use JRegistry;
-
-defined('_JEXEC') or die;
 
 class RelationFilters extends Observer
 {
@@ -20,8 +20,8 @@ class RelationFilters extends Observer
 	 * This event runs after we have built the query used to fetch a record list in a model. It is used to apply
 	 * automatic query filters based on model relations.
 	 *
-	 * @param   DataModel  &$model  The model which calls this event
-	 * @param   \JDatabaseQuery      &$query  The query we are manipulating
+	 * @param   DataModel  &          $model  The model which calls this event
+	 * @param   JDatabaseQuery      & $query  The query we are manipulating
 	 *
 	 * @return  void
 	 */
@@ -34,22 +34,22 @@ class RelationFilters extends Observer
 			$relationName = $filterState['relation'];
 
 			$tableAlias = $model->getBehaviorParam('tableAlias', null);
-			$subQuery = $model->getRelations()->getCountSubquery($relationName, $tableAlias);
+			$subQuery   = $model->getRelations()->getCountSubquery($relationName, $tableAlias);
 
 			// Callback method needs different handling
 			if (isset($filterState['method']) && ($filterState['method'] == 'callback'))
 			{
-				call_user_func_array($filterState['value'], array(&$subQuery));
-				$filterState['method'] = 'search';
+				call_user_func_array($filterState['value'], [&$subQuery]);
+				$filterState['method']   = 'search';
 				$filterState['operator'] = '>=';
-				$filterState['value'] = '1';
+				$filterState['value']    = '1';
 			}
 
-			$options = class_exists('JRegistry') ? new JRegistry($filterState) : new Registry($filterState);
+			$options = class_exists('JRegistry') ? new Registry($filterState) : new Registry($filterState);
 
-			$filter = new DataModel\Filter\Relation($model->getDbo(), $relationName, $subQuery);
+			$filter  = new DataModel\Filter\Relation($model->getDbo(), $relationName, $subQuery);
 			$methods = $filter->getSearchMethods();
-			$method = $options->get('method', $filter->getDefaultSearchMethod());
+			$method  = $options->get('method', $filter->getDefaultSearchMethod());
 
 			if (!in_array($method, $methods))
 			{
@@ -82,4 +82,4 @@ class RelationFilters extends Observer
 			}
 		}
 	}
-} 
+}

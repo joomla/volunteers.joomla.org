@@ -8,10 +8,11 @@
 namespace Akeeba\Backup\Site\Model\Json\Task;
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 use Akeeba\Backup\Site\Model\DatabaseFilters;
 use Akeeba\Engine\Platform;
+use Joomla\CMS\Filter\InputFilter;
 
 /**
  * Get the database entities along with their filtering status (typically for rendering a GUI)
@@ -21,21 +22,21 @@ class GetDBEntities extends AbstractTask
 	/**
 	 * Execute the JSON API task
 	 *
-	 * @param   array $parameters The parameters to this task
+	 * @param   array  $parameters  The parameters to this task
 	 *
 	 * @return  mixed
 	 *
 	 * @throws  \RuntimeException  In case of an error
 	 */
-	public function execute(array $parameters = array())
+	public function execute(array $parameters = [])
 	{
-		$filter = \JFilterInput::getInstance();
+		$filter = InputFilter::getInstance();
 
 		// Get the passed configuration values
-		$defConfig = array(
+		$defConfig = [
 			'profile' => 0,
 			'root'    => '[SITEDB]',
-		);
+		];
 
 		$defConfig = array_merge($defConfig, $parameters);
 

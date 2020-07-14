@@ -9,7 +9,7 @@
 
 namespace Psr\Log;
 
-
+defined('AKEEBAENGINE') || die();
 
 /**
  * This Logger can be used to avoid conditional log calls

@@ -8,7 +8,7 @@
 namespace Akeeba\Backup\Admin\Model;
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 use Akeeba\Engine\Base\Part;
 use Akeeba\Engine\Factory;
@@ -23,7 +23,7 @@ use FOF30\Model\Model;
 use FOF30\Timer\Timer;
 use JDatabaseDriver;
 use JLoader;
-use JText;
+use Joomla\CMS\Language\Text;
 use Psr\Log\LogLevel;
 use RuntimeException;
 
@@ -102,7 +102,6 @@ class Backup extends Model
 		// Use the default description if none specified
 		if (empty($description))
 		{
-			JLoader::import('joomla.utilities.date');
 			$dateNow  = new Date();
 			$timezone = $this->container->platform->getConfig()->get('offset', 'UTC');
 
@@ -119,8 +118,8 @@ class Backup extends Model
 			$tz = new DateTimeZone($timezone);
 			$dateNow->setTimezone($tz);
 			$description =
-				JText::_('COM_AKEEBA_BACKUP_DEFAULT_DESCRIPTION') . ' ' .
-				$dateNow->format(JText::_('DATE_FORMAT_LC2'), true);
+				Text::_('COM_AKEEBA_BACKUP_DEFAULT_DESCRIPTION') . ' ' .
+				$dateNow->format(Text::_('DATE_FORMAT_LC2'), true);
 		}
 
 		// Try resetting the engine
@@ -181,7 +180,7 @@ class Backup extends Model
 					'Domain'   => 'init',
 					'Step'     => '',
 					'Substep'  => '',
-					'Error'    => 'Failed configuration check Q' . $checkItem['code'] . ': ' . $checkItem['description'] . '. Please refer to https://www.akeebabackup.com/documentation/warnings/q' . $checkItem['code'] . '.html for more information and troubleshooting instructions.',
+					'Error'    => 'Failed configuration check Q' . $checkItem['code'] . ': ' . $checkItem['description'] . '. Please refer to https://www.akeeba.com/documentation/warnings/q' . $checkItem['code'] . '.html for more information and troubleshooting instructions.',
 					'Warnings' => [],
 					'Progress' => 0,
 				];

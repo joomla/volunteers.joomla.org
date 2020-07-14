@@ -9,7 +9,7 @@
 
 namespace Akeeba\Engine\Dump;
 
-
+defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Base\Exceptions\ErrorException;
 use Akeeba\Engine\Base\Part;

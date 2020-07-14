@@ -6,13 +6,12 @@
  */
 
 use Akeeba\Engine\Platform;
-use Joomla\CMS\Plugin\PluginHelper;
 
 // Enable and include Akeeba Engine
 define('AKEEBAENGINE', 1);
 
 // Setup and import the base CLI script
-$minphp = '5.6.0';
+$minphp = '7.1.0';
 
 // Boilerplate -- START
 define('_JEXEC', 1);
@@ -44,6 +43,9 @@ require_once JPATH_LIBRARIES . '/fof30/Cli/Application.php';
 // Load the version file
 require_once JPATH_ADMINISTRATOR . '/components/com_akeeba/version.php';
 
+// Set up the cacert.pem location
+define('AKEEBA_CACERT_PEM', JPATH_LIBRARIES . '/src/Http/Transport/cacert.pem');
+
 /**
  * Akeeba Backup CLI application
  */
@@ -66,10 +68,10 @@ class AkeebaBackupAltCLI extends FOFApplicationCLI
 		// Get the backup profile and description
 		$profile = $this->input->get('profile', 1, 'int');
 
-        if($profile <= 0)
-        {
-            $profile = 1;
-        }
+		if ($profile <= 0)
+		{
+			$profile = 1;
+		}
 
 		$version   = AKEEBA_VERSION;
 		$date      = AKEEBA_DATE;
@@ -264,9 +266,9 @@ Backup Method : $method
 ENDBLOCK;
 
 		// Perform the backup
-		$url    = rtrim($url, '/');
-		$secret = urlencode($secret);
-		$url .= "/index.php?option=com_akeeba&view=Backup&key={$secret}&noredirect=1&profile=$profile";
+		$url          = rtrim($url, '/');
+		$secret       = urlencode($secret);
+		$url          .= "/index.php?option=com_akeeba&view=Backup&key={$secret}&noredirect=1&profile=$profile";
 		$prototypeURL = '';
 
 		$inLoop    = true;
@@ -302,7 +304,7 @@ ENDTEXT;
 				// Extract the backup ID
 				$backupId = null;
 				$startPos = strpos($result, 'BACKUPID ###');
-				$endPos = false;
+				$endPos   = false;
 
 				if ($startPos !== false)
 				{
@@ -398,8 +400,8 @@ ENDTEXT;
 	/**
 	 * Fetches a remote URL using curl, fsockopen or fopen
 	 *
-	 * @param  string $url    The remote URL to fetch
-	 * @param  string $method The method to use: curl, fsockopen or fopen (optional)
+	 * @param   string  $url     The remote URL to fetch
+	 * @param   string  $method  The method to use: curl, fsockopen or fopen (optional)
 	 *
 	 * @return string The contents of the URL which was fetched
 	 */
@@ -409,7 +411,7 @@ ENDTEXT;
 		{
 			case 'curl':
 				$ch         = curl_init($url);
-				$cacertPath = JPATH_ADMINISTRATOR . '/components/com_akeeba/akeeba/Engine/cacert.pem';
+				$cacertPath = JPATH_LIBRARIES . '/src/Http/Transport/cacert.pem';
 				if (file_exists($cacertPath))
 				{
 					@curl_setopt($ch, CURLOPT_CAINFO, $cacertPath);
@@ -441,7 +443,7 @@ ENDTEXT;
 
 				if (strpos($host, ':') !== false)
 				{
-					list($host, $port) = explode(':', $host);
+					[$host, $port] = explode(':', $host);
 				}
 				else
 				{
@@ -479,7 +481,7 @@ ENDTEXT;
 				$body   = substr($response, $pos + 2 * strlen($crlf));
 
 				// parse headers
-				$headers = array();
+				$headers = [];
 				$lines   = explode($crlf, $header);
 				foreach ($lines as $line)
 				{
@@ -502,12 +504,12 @@ ENDTEXT;
 				break;
 
 			case 'fopen':
-				$opts = array(
-					'http' => array(
+				$opts = [
+					'http' => [
 						'method' => "GET",
-						'header' => "Accept-language: en\r\n"
-					)
-				);
+						'header' => "Accept-language: en\r\n",
+					],
+				];
 
 				$context = stream_context_create($opts);
 				$result  = @file_get_contents($url, false, $context);

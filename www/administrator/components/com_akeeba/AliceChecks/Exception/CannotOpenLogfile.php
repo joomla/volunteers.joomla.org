@@ -7,16 +7,16 @@
 
 namespace Akeeba\Alice\Exception;
 
+use Exception;
 use Joomla\CMS\Language\Text;
 use RuntimeException;
-use Throwable;
 
 /**
  * ALICE Exception: cannot open log file
  */
 class CannotOpenLogfile extends RuntimeException
 {
-	public function __construct($logFile, Throwable $previous = null)
+	public function __construct($logFile, Exception $previous = null)
 	{
 		$message = Text::sprintf('COM_AKEEBA_ALICE_ERR_CANNOT_OPEN_LOGFILE', $logFile);
 

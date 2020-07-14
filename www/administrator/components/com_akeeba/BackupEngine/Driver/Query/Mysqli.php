@@ -9,7 +9,7 @@
 
 namespace Akeeba\Engine\Driver\Query;
 
-
+defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Driver\Query\Base as BaseQuery;
 

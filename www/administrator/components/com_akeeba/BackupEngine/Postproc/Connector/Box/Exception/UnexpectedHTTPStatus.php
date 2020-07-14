@@ -9,6 +9,8 @@
 
 namespace Akeeba\Engine\Postproc\Connector\Box\Exception;
 
+defined('AKEEBAENGINE') || die();
+
 use Exception;
 
 class UnexpectedHTTPStatus extends Base

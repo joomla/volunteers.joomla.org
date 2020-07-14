@@ -9,7 +9,7 @@
 
 namespace Akeeba\Engine\Postproc\Connector;
 
-
+defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Postproc\Connector\Backblaze\AccountInformation;
 use Akeeba\Engine\Postproc\Connector\Backblaze\BucketInformation;
@@ -30,7 +30,7 @@ use RuntimeException;
 class Backblaze
 {
 	/** The API entry point URL, only used to retrieve the authorization token */
-	const apiURL = "https://api.backblazeb2.com/b2api/v1/";
+	public const apiURL = "https://api.backblazeb2.com/b2api/v1/";
 	/** @var  string  The Backblaze B2 Account ID */
 	private $accountId;
 	/** @var  string  The Backblaze B2 Application Key */
@@ -1093,7 +1093,7 @@ class Backblaze
 			 * new upload URL and continue the upload.
 			 *
 			 * @see https://www.backblaze.com/blog/b2-503-500-server-error/
-			 * @see https://www.akeebabackup.com/support/32973
+			 * @see https://www.akeeba.com/support/32973
 			 */
 			if ($decodedError['code'] == 'service_unavailable')
 			{

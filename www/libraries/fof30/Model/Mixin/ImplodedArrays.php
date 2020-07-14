@@ -7,7 +7,7 @@
 
 namespace FOF30\Model\Mixin;
 
-defined('_JEXEC') or die;
+defined('_JEXEC') || die;
 
 /**
  * Trait for dealing with imploded arrays, stored as comma-separated values
@@ -30,7 +30,7 @@ trait ImplodedArrays
 
 		if (empty($value))
 		{
-			return array();
+			return [];
 		}
 
 		$value = explode(',', $value);

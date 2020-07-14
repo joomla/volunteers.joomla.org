@@ -9,10 +9,10 @@
 
 namespace Akeeba\Engine\Filter\Stack;
 
+defined('AKEEBAENGINE') || die();
+
 use Akeeba\Engine\Factory;
 use Akeeba\Engine\Filter\Base;
-
-
 
 /**
  * Date conditional filter

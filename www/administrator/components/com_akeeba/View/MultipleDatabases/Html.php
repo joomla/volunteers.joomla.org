@@ -8,7 +8,7 @@
 namespace Akeeba\Backup\Admin\View\MultipleDatabases;
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 use Akeeba\Backup\Admin\Model\MultipleDatabases;
 use Akeeba\Backup\Admin\View\ViewTraits\ProfileIdAndName;

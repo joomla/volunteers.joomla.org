@@ -8,13 +8,12 @@
 namespace Akeeba\Backup\Admin\View\Schedule;
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
-use Akeeba\Backup\Admin\Model\Profiles;
 use Akeeba\Backup\Admin\Model\Schedule;
 use Akeeba\Backup\Admin\View\ViewTraits\ProfileIdAndName;
-use Akeeba\Engine\Platform;
 use FOF30\View\DataView\Html as BaseView;
+use Joomla\CMS\HTML\HTMLHelper;
 
 /**
  * View controller for the Scheduling Information page
@@ -47,6 +46,6 @@ class Html extends BaseView
 		$this->croninfo  = $model->getPaths();
 		$this->checkinfo = $model->getCheckPaths();
 
-		\JHtml::_('bootstrap.framework');
+		HTMLHelper::_('bootstrap.framework');
 	}
 }

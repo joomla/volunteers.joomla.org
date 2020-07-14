@@ -9,7 +9,7 @@
 
 namespace Akeeba\Engine\Postproc\Connector\Cloudfiles\Exception;
 
-
+defined('AKEEBAENGINE') || die();
 
 /**
  * Generic exception thrown upon failure of a REST API call

@@ -9,7 +9,7 @@
 
 namespace Akeeba\Engine\Core\Domain;
 
-
+defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Archiver\Base as BaseArchiverClass;
 use Akeeba\Engine\Base\Exceptions\WarningException;
@@ -147,11 +147,11 @@ class Pack extends Part
 	public static function postProcessDonePartFile(BaseArchiverClass $archiver, Configuration $configuration)
 	{
 		// Get configuration parameters
-		$postprocEngine                   = Factory::getPostprocEngine();
-		$allowImmediatePostProcessing     = $configuration->get('engine.postproc.common.after_part', 0);
-		$filename                         = $configuration->get('volatile.postproc.filename', null);
-		$shouldDeleteProcessedPart        = $configuration->get('engine.postproc.common.delete_after', false);
-		$engineCanDeleteFiles             = $postprocEngine->isFileDeletionAfterProcessingAdvisable();
+		$postprocEngine               = Factory::getPostprocEngine();
+		$allowImmediatePostProcessing = $configuration->get('engine.postproc.common.after_part', 0);
+		$filename                     = $configuration->get('volatile.postproc.filename', null);
+		$shouldDeleteProcessedPart    = $configuration->get('engine.postproc.common.delete_after', false);
+		$engineCanDeleteFiles         = $postprocEngine->isFileDeletionAfterProcessingAdvisable();
 
 		// Is the immediate post-processing disabled? Return false.
 		if (!$allowImmediatePostProcessing)
@@ -186,8 +186,8 @@ class Pack extends Part
 		$configuration->set('volatile.postproc.filename', $filename);
 
 		// Try to post-process the file
-		$timer               = Factory::getTimer();
-		$startTime           = $timer->getRunningTime();
+		$timer     = Factory::getTimer();
+		$startTime = $timer->getRunningTime();
 
 		try
 		{
@@ -249,9 +249,9 @@ class Pack extends Part
 				$configuration->set('volatile.breakflag', true);
 			}
 		}
-		/**
-		 * POST-PROCESSING FAILED
-		 */
+			/**
+			 * POST-PROCESSING FAILED
+			 */
 		catch (Exception $e)
 		{
 			// Indicate no further processing is possible on this file.
@@ -322,6 +322,8 @@ class Pack extends Part
 	{
 		Factory::getLog()->debug(__CLASS__ . " :: Starting _prepare()");
 
+		$registry = Factory::getConfiguration();
+
 		// Get a list of directories to include
 		Factory::getLog()->debug(__CLASS__ . " :: Getting directory inclusion filters");
 		$filters                = Factory::getFilters();
@@ -347,10 +349,10 @@ structure. You'll have to restore these files manually!
 
 
 ENDVCONTENT;
-			$registry        = Factory::getConfiguration();
-			$counter         = 0;
-			$vdir            = trim($registry->get('akeeba.advanced.virtual_folder'), '/') . '/';
-			$effini          = ['eff' => []];
+
+			$counter = 0;
+			$vdir    = trim($registry->get('akeeba.advanced.virtual_folder'), '/') . '/';
+			$effini  = ['eff' => []];
 
 			foreach ($this->root_definitions as $dir)
 			{
@@ -501,7 +503,7 @@ ENDVCONTENT;
 		 *
 		 * If the file .akeeba_engine_automated_tests_error file is present in the site's root I will throw an error.
 		 */
-		list($root, $translated_root, $dir) = $this->getCleanDirectoryComponents();
+		[$root, $translated_root, $dir] = $this->getCleanDirectoryComponents();
 
 		if (@file_exists($translated_root . '/.akeeba_engine_automated_tests_error'))
 		{
@@ -594,7 +596,7 @@ ENDVCONTENT;
 			$this->processed_files_counter = 0;
 		}
 
-		list($root, $translated_root, $dir) = $this->getCleanDirectoryComponents();
+		[$root, $translated_root, $dir] = $this->getCleanDirectoryComponents();
 
 		// Get a filters instance
 		$filters = Factory::getFilters();
@@ -672,9 +674,9 @@ ENDVCONTENT;
 	protected function pack_files()
 	{
 		// Get a reference to the archiver and the timer classes
-		$archiver                     = Factory::getArchiverEngine();
-		$timer                        = Factory::getTimer();
-		$configuration                = Factory::getConfiguration();
+		$archiver      = Factory::getArchiverEngine();
+		$timer         = Factory::getTimer();
+		$configuration = Factory::getConfiguration();
 
 		// Check whether we need to immediately post-processing a done part
 		if (self::postProcessDonePartFile($archiver, $configuration))
@@ -716,7 +718,7 @@ ENDVCONTENT;
 			$packedSize    = 0;
 			$numberOfFiles = 0;
 
-			list($usec, $sec) = explode(" ", microtime());
+			[$usec, $sec] = explode(" ", microtime());
 			$opStartTime = ((float) $usec + (float) $sec);
 
 			$largeFileThreshold = Factory::getConfiguration()->get('engine.scan.common.largefile', 10485760);
@@ -748,7 +750,7 @@ ENDVCONTENT;
 
 				// Proactive potential timeout detection
 				// Rough estimation of packing speed in bytes per second
-				list($usec, $sec) = explode(" ", microtime());
+				[$usec, $sec] = explode(" ", microtime());
 
 				$opEndTime = ((float) $usec + (float) $sec);
 
@@ -901,9 +903,10 @@ ENDVCONTENT;
 	 */
 	protected function scanSubdirs()
 	{
-		$engine = Factory::getScanEngine();
+		$engine         = Factory::getScanEngine();
+		$subdirectories = false;
 
-		list($root, $translated_root, $dir) = $this->getCleanDirectoryComponents();
+		[$root, $translated_root, $dir] = $this->getCleanDirectoryComponents();
 
 		// Get a filters instance
 		$filters = Factory::getFilters();
@@ -1034,9 +1037,10 @@ ENDVCONTENT;
 	 */
 	protected function scanFiles()
 	{
-		$engine = Factory::getScanEngine();
+		$engine   = Factory::getScanEngine();
+		$fileList = false;
 
-		list($root, $translated_root, $dir) = $this->getCleanDirectoryComponents();
+		[$root, $translated_root, $dir] = $this->getCleanDirectoryComponents();
 
 		// Get a filters instance
 		$filters = Factory::getFilters();

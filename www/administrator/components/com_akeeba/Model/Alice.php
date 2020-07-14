@@ -8,7 +8,7 @@
 namespace Akeeba\Backup\Admin\Model;
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 use Akeeba\Alice\Check\Base;
 use Akeeba\Engine\Factory;

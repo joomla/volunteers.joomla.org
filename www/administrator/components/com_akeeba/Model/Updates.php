@@ -8,13 +8,13 @@
 namespace Akeeba\Backup\Admin\Model;
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 use Exception;
 use FOF30\Container\Container;
 use FOF30\Update\Update;
-use JFile;
-use JLoader;
+use Joomla\CMS\Factory as JFactory;
+use Joomla\CMS\Filesystem\File;
 
 /**
  * Updates model. Acts as an intermediary between the component and Joomla!,
@@ -43,18 +43,18 @@ class Updates extends Update
 	{
 		$container = Container::getInstance('com_akeeba');
 
-		$config['update_component']  = 'pkg_akeeba';
-		$config['update_sitename']   = 'Akeeba Backup Core';
-		$config['update_site']       = 'https://cdn.akeebabackup.com/updates/pkgakeebacore.xml';
-		$config['update_paramskey']  = 'update_dlid';
-		$config['update_container']  = $container;
+		$config['update_component'] = 'pkg_akeeba';
+		$config['update_sitename']  = 'Akeeba Backup Core';
+		$config['update_site']      = 'https://cdn.akeeba.com/updates/pkgakeebacore.xml';
+		$config['update_paramskey'] = 'update_dlid';
+		$config['update_container'] = $container;
 
 		$isPro = defined('AKEEBA_PRO') ? AKEEBA_PRO : 0;
 
 		if ($isPro)
 		{
-			$config['update_sitename']   = 'Akeeba Backup Professional';
-			$config['update_site']       = 'https://cdn.akeebabackup.com/updates/pkgakeebapro.xml';
+			$config['update_sitename'] = 'Akeeba Backup Professional';
+			$config['update_site']     = 'https://cdn.akeeba.com/updates/pkgakeebapro.xml';
 		}
 
 		if (defined('AKEEBA_VERSION') && !in_array(substr(AKEEBA_VERSION, 0, 3), ['dev', 'rev']))
@@ -153,7 +153,7 @@ ENDBODY;
 
 		try
 		{
-			$mailer = \JFactory::getMailer();
+			$mailer = JFactory::getMailer();
 
 			$mailfrom = $jconfig->get('mailfrom');
 			$fromname = $jconfig->get('fromname');
@@ -165,7 +165,7 @@ ENDBODY;
 
 			return $mailer->Send();
 		}
-		catch (\Exception $e)
+		catch (Exception $e)
 		{
 			return false;
 		}
@@ -403,7 +403,7 @@ ENDBODY;
 		{
 			$db->setQuery($query)->execute();
 		}
-		catch (\Exception $e)
+		catch (Exception $e)
 		{
 			// Your database if FUBAR.
 			return;
@@ -426,16 +426,16 @@ ENDBODY;
 
 		$content = <<< XML
 <?xml version="1.0" encoding="utf-8"?>
-<extension version="3.8.0" type="package" method="upgrade">
+<extension version="3.9.0" type="package" method="upgrade">
 	$dlid
     <name>Akeeba Backup package</name>
     <author>Nicholas K. Dionysopoulos</author>
     <creationDate>2016-04-20</creationDate>
     <packagename>akeeba</packagename>
     <version>{$this->version}</version>
-    <url>https://www.akeebabackup.com</url>
+    <url>https://www.akeeba.com</url>
     <packager>Akeeba Ltd</packager>
-    <packagerurl>https://www.akeebabackup.com</packagerurl>
+    <packagerurl>https://www.akeeba.com</packagerurl>
     <copyright>Copyright (c)2006-2019 Akeeba Ltd / Nicholas K. Dionysopoulos</copyright>
     <license>GNU GPL v3 or later</license>
     <description>Akeeba Backup installation package v.revD5C5D46</description>
@@ -454,8 +454,7 @@ XML;
 
 		if (!@file_put_contents($content, $path))
 		{
-			JLoader::import('joomla.filesystem.file');
-			JFile::write($path, $content);
+			File::write($path, $content);
 		}
 	}
 }

@@ -10,7 +10,7 @@ namespace Akeeba\Backup\Admin\Model\Mixin;
 // Protect from unauthorized access
 use Akeeba\Engine\Factory;
 
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 /**
  * Trait for handling Akeeba Engine exclusion filters in models

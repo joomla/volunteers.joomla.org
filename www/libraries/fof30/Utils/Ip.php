@@ -7,7 +7,7 @@
 
 namespace FOF30\Utils;
 
-defined('_JEXEC') or die;
+defined('_JEXEC') || die;
 
 /**
  * IP address helper
@@ -33,7 +33,7 @@ class Ip
 	/**
 	 * See self::detectAndCleanIP and setUseFirstIpInChain
 	 *
-	 * If this is enabled (default) self::detectAndCleanIP will return the FIRST IP in case there is an IP chaing coming
+	 * If this is enabled (default) self::detectAndCleanIP will return the FIRST IP in case there is an IP chain coming
 	 * for example from an X-Forwarded-For HTTP header. When set to false it will simulate the old behavior in FOF up to
 	 * and including 3.1.1 which returned the LAST IP in the list.
 	 *
@@ -112,27 +112,11 @@ class Ip
 	}
 
 	/**
-	 * Is it an IPv6 IP address?
-	 *
-	 * @param   string   $ip  An IPv4 or IPv6 address
-	 *
-	 * @return  boolean  True if it's IPv6
-	 */
-	protected static function isIPv6($ip)
-	{
-		if (strstr($ip, ':'))
-		{
-			return true;
-		}
-
-		return false;
-	}
-
-	/**
 	 * Checks if an IP is contained in a list of IPs or IP expressions
 	 *
 	 * @param   string        $ip       The IPv4/IPv6 address to check
-	 * @param   array|string  $ipTable  An IP expression (or a comma-separated or array list of IP expressions) to check against
+	 * @param   array|string  $ipTable  An IP expression (or a comma-separated or array list of IP expressions) to
+	 *                                  check against
 	 *
 	 * @return  null|boolean  True if it's in the list
 	 */
@@ -150,12 +134,14 @@ class Ip
 			if (strpos($ipTable, ',') !== false)
 			{
 				$ipTable = explode(',', $ipTable);
-				$ipTable = array_map(function($x) { return trim($x); }, $ipTable);
+				$ipTable = array_map(function ($x) {
+					return trim($x);
+				}, $ipTable);
 			}
 			else
 			{
 				$ipTable = trim($ipTable);
-				$ipTable = array($ipTable);
+				$ipTable = [$ipTable];
 			}
 		}
 
@@ -195,7 +181,7 @@ class Ip
 			// Inclusive IP range, i.e. 123.123.123.123-124.125.126.127
 			if (strstr($ipExpression, '-'))
 			{
-				list($from, $to) = explode('-', $ipExpression, 2);
+				[$from, $to] = explode('-', $ipExpression, 2);
 
 				if ($ipv6 && (!self::isIPv6($from) || !self::isIPv6($to)))
 				{
@@ -209,7 +195,7 @@ class Ip
 				}
 
 				$from = @inet_pton(trim($from));
-				$to = @inet_pton(trim($to));
+				$to   = @inet_pton(trim($to));
 
 				// Sanity check
 				if (($from === false) || ($to === false))
@@ -220,7 +206,7 @@ class Ip
 				// Swap from/to if they're in the wrong order
 				if ($from > $to)
 				{
-					list($from, $to) = array($to, $from);
+					[$from, $to] = [$to, $from];
 				}
 
 				if (($myIP >= $from) && ($myIP <= $to))
@@ -233,7 +219,7 @@ class Ip
 			{
 				$binaryip = self::inet_to_bits($myIP);
 
-				list($net, $maskbits) = explode('/', $ipExpression, 2);
+				[$net, $maskbits] = explode('/', $ipExpression, 2);
 				if ($ipv6 && !self::isIPv6($net))
 				{
 					// Do not apply IPv4 filtering on an IPv6 address
@@ -258,8 +244,8 @@ class Ip
 				elseif (!$ipv6 && strstr($maskbits, '.'))
 				{
 					// Convert IPv4 netmask to CIDR
-					$long = ip2long($maskbits);
-					$base = ip2long('255.255.255.255');
+					$long     = ip2long($maskbits);
+					$base     = ip2long('255.255.255.255');
 					$maskbits = 32 - log(($long ^ $base) + 1, 2);
 				}
 
@@ -273,13 +259,13 @@ class Ip
 				}
 
 				// Get the network's binary representation
-				$binarynet = self::inet_to_bits($net);
+				$binarynet            = self::inet_to_bits($net);
 				$expectedNumberOfBits = $ipv6 ? 128 : 24;
-				$binarynet = str_pad($binarynet, $expectedNumberOfBits, '0', STR_PAD_RIGHT);
+				$binarynet            = str_pad($binarynet, $expectedNumberOfBits, '0', STR_PAD_RIGHT);
 
 				// Check the corresponding bits of the IP and the network
 				$ip_net_bits = substr($binaryip, 0, $maskbits);
-				$net_bits = substr($binarynet, 0, $maskbits);
+				$net_bits    = substr($binarynet, 0, $maskbits);
 
 				if ($ip_net_bits == $net_bits)
 				{
@@ -329,17 +315,17 @@ class Ip
 						switch ($dots)
 						{
 							case 1:
-								$netmask = '255.0.0.0';
+								$netmask      = '255.0.0.0';
 								$ipExpression .= '0.0.0';
 								break;
 
 							case 2:
-								$netmask = '255.255.0.0';
+								$netmask      = '255.255.0.0';
 								$ipExpression .= '0.0';
 								break;
 
 							case 3:
-								$netmask = '255.255.255.0';
+								$netmask      = '255.255.255.0';
 								$ipExpression .= '0';
 								break;
 
@@ -352,8 +338,8 @@ class Ip
 							$binaryip = self::inet_to_bits($myIP);
 
 							// Convert netmask to CIDR
-							$long = ip2long($netmask);
-							$base = ip2long('255.255.255.255');
+							$long     = ip2long($netmask);
+							$base     = ip2long('255.255.255.255');
 							$maskbits = 32 - log(($long ^ $base) + 1, 2);
 
 							$net = @inet_pton($ipExpression);
@@ -365,13 +351,13 @@ class Ip
 							}
 
 							// Get the network's binary representation
-							$binarynet = self::inet_to_bits($net);
+							$binarynet            = self::inet_to_bits($net);
 							$expectedNumberOfBits = $ipv6 ? 128 : 24;
-							$binarynet = str_pad($binarynet, $expectedNumberOfBits, '0', STR_PAD_RIGHT);
+							$binarynet            = str_pad($binarynet, $expectedNumberOfBits, '0', STR_PAD_RIGHT);
 
 							// Check the corresponding bits of the IP and the network
 							$ip_net_bits = substr($binaryip, 0, $maskbits);
-							$net_bits = substr($binarynet, 0, $maskbits);
+							$net_bits    = substr($binarynet, 0, $maskbits);
 
 							if ($ip_net_bits == $net_bits)
 							{
@@ -434,11 +420,29 @@ class Ip
 	}
 
 	/**
+	 * Is it an IPv6 IP address?
+	 *
+	 * @param   string  $ip  An IPv4 or IPv6 address
+	 *
+	 * @return  boolean  True if it's IPv6
+	 */
+	protected static function isIPv6($ip)
+	{
+		if (strstr($ip, ':'))
+		{
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
 	 * Gets the visitor's IP address. Automatically handles reverse proxies
 	 * reporting the IPs of intermediate devices, like load balancers. Examples:
-	 * https://www.akeebabackup.com/support/admin-tools/13743-double-ip-adresses-in-security-exception-log-warnings.html
+	 * https://www.akeeba.com/support/admin-tools/13743-double-ip-adresses-in-security-exception-log-warnings.html
 	 * http://stackoverflow.com/questions/2422395/why-is-request-envremote-addr-returning-two-ips
-	 * The solution used is assuming that the first IP address is the external one (unless $useFirstIpInChain is set to false)
+	 * The solution used is assuming that the first IP address is the external one (unless $useFirstIpInChain is set to
+	 * false)
 	 *
 	 * @return  string
 	 */
@@ -448,10 +452,10 @@ class Ip
 
 		if ((strstr($ip, ',') !== false) || (strstr($ip, ' ') !== false))
 		{
-			$ip = str_replace(' ', ',', $ip);
-			$ip = str_replace(',,', ',', $ip);
+			$ip  = str_replace(' ', ',', $ip);
+			$ip  = str_replace(',,', ',', $ip);
 			$ips = explode(',', $ip);
-			$ip = '';
+			$ip  = '';
 
 			// Loop until we're running out of parts or we have a hit
 			while ($ips)
@@ -496,9 +500,9 @@ class Ip
 			// Get the embedded IPv4 (in hex notation)
 			$ip = substr($ip, strpos($ip, ':FFFF:') + 6);
 			// Convert each 16-bit WORD to decimal
-			list($word1, $word2) = explode(':', $ip);
-			$word1 = hexdec($word1);
-			$word2 = hexdec($word2);
+			[$word1, $word2] = explode(':', $ip);
+			$word1  = hexdec($word1);
+			$word2  = hexdec($word2);
 			$longIp = $word1 * 65536 + $word2;
 
 			return long2ip($longIp);
@@ -574,7 +578,7 @@ class Ip
 	/**
 	 * Converts inet_pton output to bits string
 	 *
-	 * @param   string $inet The in_addr representation of an IPv4 or IPv6 address
+	 * @param   string  $inet  The in_addr representation of an IPv4 or IPv6 address
 	 *
 	 * @return  string
 	 */
@@ -612,7 +616,7 @@ class Ip
 		$ip       = inet_pton($ip);
 		$binaryip = self::inet_to_bits($ip);
 
-		list($net, $maskbits) = explode('/', $cidrnet);
+		[$net, $maskbits] = explode('/', $cidrnet);
 		$net       = inet_pton($net);
 		$binarynet = self::inet_to_bits($net);
 

@@ -8,13 +8,11 @@
 namespace Akeeba\Backup\Site\Model\Json\Task;
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 // Protect from unauthorized access
 use Akeeba\Backup\Site\Model\Json\TaskInterface;
 use FOF30\Container\Container;
-
-defined('_JEXEC') or die();
 
 class AbstractTask implements TaskInterface
 {

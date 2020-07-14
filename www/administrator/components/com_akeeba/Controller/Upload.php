@@ -8,7 +8,7 @@
 namespace Akeeba\Backup\Admin\Controller;
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 use Akeeba\Backup\Admin\Controller\Mixin\CustomACL;
 use Akeeba\Backup\Admin\Model\Mixin\GetErrorsFromExceptions;
@@ -16,7 +16,7 @@ use Akeeba\Backup\Admin\View\Upload\Html as UploadView;
 use Akeeba\Engine\Platform;
 use Exception;
 use FOF30\Controller\Controller;
-use JText;
+use Joomla\CMS\Language\Text;
 
 class Upload extends Controller
 {
@@ -38,7 +38,7 @@ class Upload extends Controller
 		if ($id === false)
 		{
 			$url = 'index.php?option=com_akeeba&view=Upload&tmpl=component&task=cancelled&id=' . $id;
-			$this->setRedirect($url, JText::_('COM_AKEEBA_TRANSFER_ERR_INVALIDID'), 'error');
+			$this->setRedirect($url, \Joomla\CMS\Language\Text::_('COM_AKEEBA_TRANSFER_ERR_INVALIDID'), 'error');
 
 			return;
 		}
@@ -131,7 +131,7 @@ class Upload extends Controller
 		if ($id === false)
 		{
 			$url = 'index.php?option=com_akeeba&view=Upload&tmpl=component&task=cancelled&id=' . $id;
-			$this->setRedirect($url, JText::_('COM_AKEEBA_TRANSFER_ERR_INVALIDID'), 'error');
+			$this->setRedirect($url, \Joomla\CMS\Language\Text::_('COM_AKEEBA_TRANSFER_ERR_INVALIDID'), 'error');
 
 			return;
 		}

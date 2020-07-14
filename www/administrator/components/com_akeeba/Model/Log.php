@@ -8,12 +8,12 @@
 namespace Akeeba\Backup\Admin\Model;
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 use Akeeba\Engine\Factory;
 use FOF30\Model\Model;
-use JHtml;
-use JText;
+use Joomla\CMS\HTML\HTMLHelper;
+use Joomla\CMS\Language\Text;
 
 class Log extends Model
 {
@@ -93,20 +93,20 @@ class Log extends Model
 
 		if (!empty($list))
 		{
-			$options[] = JHtml::_('select.option', null, JText::_('COM_AKEEBA_LOG_CHOOSE_FILE_VALUE'));
+			$options[] = HTMLHelper::_('select.option', null, Text::_('COM_AKEEBA_LOG_CHOOSE_FILE_VALUE'));
 
 			foreach ($list as $item)
 			{
-				$text = JText::_('COM_AKEEBA_BUADMIN_LABEL_ORIGIN_' . $item);
+				$text = Text::_('COM_AKEEBA_BUADMIN_LABEL_ORIGIN_' . $item);
 
 				if (strstr($item, '.') !== false)
 				{
 					list($origin, $backupId) = explode('.', $item, 2);
 
-					$text = JText::_('COM_AKEEBA_BUADMIN_LABEL_ORIGIN_' . $origin) . ' (' . $backupId . ')';
+					$text = Text::_('COM_AKEEBA_BUADMIN_LABEL_ORIGIN_' . $origin) . ' (' . $backupId . ')';
 				}
 
-				$options[] = JHtml::_('select.option', $item, $text);
+				$options[] = HTMLHelper::_('select.option', $item, $text);
 			}
 		}
 
@@ -158,7 +158,7 @@ class Log extends Model
 		}
 
 		$firstLine = @fgets($fp);
-		if (substr($firstLine, 0, 5) != ('<' . '?' . 'php'))
+		if (substr($firstLine, 0, 5) != '<' . '?' . 'php')
 		{
 			@fclose($fp);
 			@readfile($logFile);

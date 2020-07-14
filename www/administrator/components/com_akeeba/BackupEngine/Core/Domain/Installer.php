@@ -9,7 +9,7 @@
 
 namespace Akeeba\Engine\Core\Domain;
 
-
+defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Base\Part;
 use Akeeba\Engine\Factory;

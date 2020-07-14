@@ -7,12 +7,16 @@
 
 namespace FOF30\Model\DataModel\Behaviour;
 
+defined('_JEXEC') || die;
+
 use FOF30\Event\Observer;
 use FOF30\Model\DataModel;
 use JDatabaseQuery;
+use Joomla\CMS\Application\SiteApplication;
+use Joomla\CMS\Factory;
+use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\Registry\Registry;
-
-defined('_JEXEC') or die;
+use PlgSystemLanguageFilter;
 
 /**
  * FOF model behavior class to filter front-end access to items
@@ -22,8 +26,8 @@ defined('_JEXEC') or die;
  */
 class Language extends Observer
 {
-    /** @var  \PlgSystemLanguageFilter */
-    protected $lang_filter_plugin;
+	/** @var  PlgSystemLanguageFilter */
+	protected $lang_filter_plugin;
 
 	/**
 	 * This event runs before we have built the query used to fetch a record
@@ -47,8 +51,8 @@ class Language extends Observer
 			return;
 		}
 
-		/** @var \JApplicationSite $app */
-		$app = \JFactory::getApplication();
+		/** @var SiteApplication $app */
+		$app               = Factory::getApplication();
 		$hasLanguageFilter = method_exists($app, 'getLanguageFilter');
 
 		if ($hasLanguageFilter)
@@ -61,36 +65,36 @@ class Language extends Observer
 			return;
 		}
 
-        // Ask Joomla for the plugin only if we don't already have it. Useful for tests
-        if(!$this->lang_filter_plugin)
-        {
-            $this->lang_filter_plugin = \JPluginHelper::getPlugin('system', 'languagefilter');
-        }
+		// Ask Joomla for the plugin only if we don't already have it. Useful for tests
+		if (!$this->lang_filter_plugin)
+		{
+			$this->lang_filter_plugin = PluginHelper::getPlugin('system', 'languagefilter');
+		}
 
-		$lang_filter_params = class_exists('JRegistry') ? new \JRegistry($this->lang_filter_plugin->params) : new Registry($this->lang_filter_plugin->params);
+		$lang_filter_params = class_exists('JRegistry') ? new Registry($this->lang_filter_plugin->params) : new Registry($this->lang_filter_plugin->params);
 
-		$languages = array('*');
+		$languages = ['*'];
 
 		if ($lang_filter_params->get('remove_default_prefix'))
 		{
 			// Get default site language
-            $platform    = $model->getContainer()->platform;
+			$platform    = $model->getContainer()->platform;
 			$lg          = $platform->getLanguage();
 			$languages[] = $lg->getTag();
 		}
 		else
 		{
-            // We have to use JInput since the language fragment is not set in the $_REQUEST, thus we won't have it in our model
-            // TODO Double check the previous assumption
-			$languages[] = \JFactory::getApplication()->input->getCmd('language', '*');
+			// We have to use JInput since the language fragment is not set in the $_REQUEST, thus we won't have it in our model
+			// TODO Double check the previous assumption
+			$languages[] = Factory::getApplication()->input->getCmd('language', '*');
 		}
 
 		// Filter out double languages
 		$languages = array_unique($languages);
 
 		// And filter the query output by these languages
-		$db = $model->getDbo();
-		$languages = array_map(array($db, 'quote'), $languages);
+		$db        = $model->getDbo();
+		$languages = array_map([$db, 'quote'], $languages);
 		$fieldName = $model->getFieldAlias('language');
 
 		$model->whereRaw($db->qn($fieldName) . ' IN(' . implode(', ', $languages) . ')');
@@ -120,8 +124,8 @@ class Language extends Observer
 		}
 
 		// Make sure it is a multilingual site and get a list of languages
-		/** @var \JApplicationSite $app */
-		$app = \JFactory::getApplication();
+		/** @var SiteApplication $app */
+		$app               = Factory::getApplication();
 		$hasLanguageFilter = method_exists($app, 'getLanguageFilter');
 
 		if ($hasLanguageFilter)
@@ -134,25 +138,25 @@ class Language extends Observer
 			return;
 		}
 
-        // Ask Joomla for the plugin only if we don't already have it. Useful for tests
-        if(!$this->lang_filter_plugin)
-        {
-            $this->lang_filter_plugin = \JPluginHelper::getPlugin('system', 'languagefilter');
-        }
+		// Ask Joomla for the plugin only if we don't already have it. Useful for tests
+		if (!$this->lang_filter_plugin)
+		{
+			$this->lang_filter_plugin = PluginHelper::getPlugin('system', 'languagefilter');
+		}
 
-		$lang_filter_params = class_exists('JRegistry') ? new \JRegistry($this->lang_filter_plugin->params) : new Registry($this->lang_filter_plugin->params);
+		$lang_filter_params = class_exists('JRegistry') ? new Registry($this->lang_filter_plugin->params) : new Registry($this->lang_filter_plugin->params);
 
-		$languages = array('*');
+		$languages = ['*'];
 
 		if ($lang_filter_params->get('remove_default_prefix'))
 		{
 			// Get default site language
-			$lg = $model->getContainer()->platform->getLanguage();
+			$lg          = $model->getContainer()->platform->getLanguage();
 			$languages[] = $lg->getTag();
 		}
 		else
 		{
-			$languages[] = \JFactory::getApplication()->input->getCmd('language', '*');
+			$languages[] = Factory::getApplication()->input->getCmd('language', '*');
 		}
 
 		// Filter out double languages

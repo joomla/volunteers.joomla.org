@@ -9,6 +9,7 @@
 
 namespace Akeeba\Engine\Postproc;
 
+defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Factory;
 use Akeeba\Engine\Postproc\Connector\Azure as AzureConnector;

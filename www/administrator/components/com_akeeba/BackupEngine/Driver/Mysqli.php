@@ -9,7 +9,7 @@
 
 namespace Akeeba\Engine\Driver;
 
-
+defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Driver\Query\Mysqli as QueryMysqli;
 use RuntimeException;
@@ -200,7 +200,7 @@ class Mysqli extends Mysql
 	 */
 	public function getNumRows($cursor = null)
 	{
-		return mysqli_num_rows($cursor ? $cursor : $this->cursor);
+		return mysqli_num_rows($cursor ?: $this->cursor);
 	}
 
 	/**
@@ -387,7 +387,7 @@ class Mysqli extends Mysql
 	 */
 	public function fetchAssoc($cursor = null)
 	{
-		return mysqli_fetch_assoc($cursor ? $cursor : $this->cursor);
+		return mysqli_fetch_assoc($cursor ?: $this->cursor);
 	}
 
 	/**
@@ -399,7 +399,7 @@ class Mysqli extends Mysql
 	 */
 	public function freeResult($cursor = null)
 	{
-		mysqli_free_result($cursor ? $cursor : $this->cursor);
+		mysqli_free_result($cursor ?: $this->cursor);
 	}
 
 	/**
@@ -436,7 +436,7 @@ class Mysqli extends Mysql
 	 */
 	protected function fetchArray($cursor = null)
 	{
-		return mysqli_fetch_row($cursor ? $cursor : $this->cursor);
+		return mysqli_fetch_row($cursor ?: $this->cursor);
 	}
 
 	/**
@@ -449,7 +449,7 @@ class Mysqli extends Mysql
 	 */
 	protected function fetchObject($cursor = null, $class = 'stdClass')
 	{
-		return mysqli_fetch_object($cursor ? $cursor : $this->cursor, $class);
+		return mysqli_fetch_object($cursor ?: $this->cursor, $class);
 	}
 
 	/**

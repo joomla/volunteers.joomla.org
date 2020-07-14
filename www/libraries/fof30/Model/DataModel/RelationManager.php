@@ -7,29 +7,28 @@
 
 namespace FOF30\Model\DataModel;
 
-use FOF30\Inflector\Inflector;
-use FOF30\Model\DataModel;
+defined('_JEXEC') || die;
 
-defined('_JEXEC') or die;
+use DirectoryIterator;
+use FOF30\Model\DataModel;
+use InvalidArgumentException;
+use JDatabaseQuery;
 
 class RelationManager
 {
+	/** @var array The known relation types */
+	protected static $relationTypes = [];
 	/** @var DataModel The data model we are attached to */
 	protected $parentModel = null;
-
 	/** @var Relation[] The relations known to us */
-	protected $relations = array();
-
+	protected $relations = [];
 	/** @var array A list of the names of eager loaded relations */
-	protected $eager = array();
-
-	/** @var array The known relation types */
-	protected static $relationTypes = array();
+	protected $eager = [];
 
 	/**
 	 * Creates a new relation manager for the defined parent model
 	 *
-	 * @param DataModel $parentModel The model we are attached to
+	 * @param   DataModel  $parentModel  The model we are attached to
 	 */
 	public function __construct(DataModel $parentModel)
 	{
@@ -43,11 +42,52 @@ class RelationManager
 	}
 
 	/**
+	 * Populates the static map of relation type methods and relation handling classes
+	 *
+	 * @return array Key = method name, Value = relation handling class
+	 */
+	public static function getRelationTypes()
+	{
+		if (empty(static::$relationTypes))
+		{
+			$relationTypeDirectory = __DIR__ . '/Relation';
+			$fs                    = new DirectoryIterator($relationTypeDirectory);
+
+			/** @var $file DirectoryIterator */
+			foreach ($fs as $file)
+			{
+				if ($file->isDir())
+				{
+					continue;
+				}
+
+				if ($file->getExtension() != 'php')
+				{
+					continue;
+				}
+
+				$baseName   = ucfirst($file->getBasename('.php'));
+				$methodName = strtolower($baseName[0]) . substr($baseName, 1);
+				$className  = '\\FOF30\\Model\\DataModel\\Relation\\' . $baseName;
+
+				if (!class_exists($className, true))
+				{
+					continue;
+				}
+
+				static::$relationTypes[$methodName] = $className;
+			}
+		}
+
+		return static::$relationTypes;
+	}
+
+	/**
 	 * Implements deep cloning of the relation object
 	 */
 	function __clone()
 	{
-		$relations = array();
+		$relations = [];
 
 		if (!empty($this->relations))
 		{
@@ -65,7 +105,7 @@ class RelationManager
 	/**
 	 * Rebase a relation manager
 	 *
-	 * @param DataModel $parentModel
+	 * @param   DataModel  $parentModel
 	 */
 	public function rebase(DataModel $parentModel)
 	{
@@ -85,9 +125,9 @@ class RelationManager
 	 * Populates the internal $this->data collection of a relation from the contents of the provided collection. This is
 	 * used by DataModel to push the eager loaded data into each item's relation.
 	 *
-	 * @param string     $name      Relation name
-	 * @param Collection $data      The relation data to push into this relation
-	 * @param mixed      $keyMap    Used by many-to-many relations to pass around the local to foreign key map
+	 * @param   string      $name    Relation name
+	 * @param   Collection  $data    The relation data to push into this relation
+	 * @param   mixed       $keyMap  Used by many-to-many relations to pass around the local to foreign key map
 	 *
 	 * @return void
 	 *
@@ -104,57 +144,16 @@ class RelationManager
 	}
 
 	/**
-	 * Populates the static map of relation type methods and relation handling classes
-	 *
-	 * @return array Key = method name, Value = relation handling class
-	 */
-	public static function getRelationTypes()
-	{
-		if (empty(static::$relationTypes))
-		{
-			$relationTypeDirectory = __DIR__ . '/Relation';
-			$fs = new \DirectoryIterator($relationTypeDirectory);
-
-			/** @var $file \DirectoryIterator */
-			foreach ($fs as $file)
-			{
-				if ($file->isDir())
-				{
-					continue;
-				}
-
-				if ($file->getExtension() != 'php')
-				{
-					continue;
-				}
-
-				$baseName = ucfirst($file->getBasename('.php'));
-				$methodName = strtolower($baseName[0]) . substr($baseName, 1);
-				$className = '\\FOF30\\Model\\DataModel\\Relation\\' . $baseName;
-
-				if (!class_exists($className, true))
-				{
-					continue;
-				}
-
-				static::$relationTypes[$methodName] = $className;
-			}
-		}
-
-		return static::$relationTypes;
-	}
-
-	/**
 	 * Adds a relation to the relation manager
 	 *
-	 * @param   string $name               The name of the relation as known to this relation manager, e.g. 'phone'
-	 * @param   string $type               The relation type, e.g. 'hasOne'
-	 * @param   string $foreignModelName   The name of the foreign key's model in the format "modelName@com_something"
-	 * @param   string $localKey           The local table key for this relation
-	 * @param   string $foreignKey         The foreign key for this relation
-	 * @param   string $pivotTable         For many-to-many relations, the pivot (glue) table
-	 * @param   string $pivotLocalKey      For many-to-many relations, the pivot table's column storing the local key
-	 * @param   string $pivotForeignKey    For many-to-many relations, the pivot table's column storing the foreign key
+	 * @param   string  $name              The name of the relation as known to this relation manager, e.g. 'phone'
+	 * @param   string  $type              The relation type, e.g. 'hasOne'
+	 * @param   string  $foreignModelName  The name of the foreign key's model in the format "modelName@com_something"
+	 * @param   string  $localKey          The local table key for this relation
+	 * @param   string  $foreignKey        The foreign key for this relation
+	 * @param   string  $pivotTable        For many-to-many relations, the pivot (glue) table
+	 * @param   string  $pivotLocalKey     For many-to-many relations, the pivot table's column storing the local key
+	 * @param   string  $pivotForeignKey   For many-to-many relations, the pivot table's column storing the foreign key
 	 *
 	 * @return DataModel The parent model, for chaining
 	 *
@@ -188,7 +187,7 @@ class RelationManager
 	/**
 	 * Removes a known relation
 	 *
-	 * @param string $name The name of the relation to remove
+	 * @param   string  $name  The name of the relation to remove
 	 *
 	 * @return DataModel The parent model, for chaining
 	 */
@@ -207,7 +206,7 @@ class RelationManager
 	 */
 	public function resetRelations()
 	{
-		$this->relations = array();
+		$this->relations = [];
 	}
 
 	/**
@@ -217,7 +216,7 @@ class RelationManager
 	 * @param   array  $relationsToReset  The names of the relations to reset. Pass an empty array (default) to reset
 	 *                                    all relations.
 	 */
-	public function resetRelationData(array $relationsToReset = array())
+	public function resetRelationData(array $relationsToReset = [])
 	{
 		/** @var Relation $relation */
 		foreach ($this->relations as $name => $relation)
@@ -244,7 +243,7 @@ class RelationManager
 	/**
 	 * Gets the related items of a relation
 	 *
-	 * @param string                $name           The name of the relation to return data for
+	 * @param   string  $name  The name of the relation to return data for
 	 *
 	 * @return Relation
 	 *
@@ -264,7 +263,7 @@ class RelationManager
 	/**
 	 * Get a new related item which satisfies relation $name and adds it to this relation's data list.
 	 *
-	 * @param string $name The relation based on which a new item is returned
+	 * @param   string  $name  The relation based on which a new item is returned
 	 *
 	 * @return DataModel
 	 *
@@ -284,7 +283,7 @@ class RelationManager
 	 * Saves all related items belonging to the specified relation or, if $name is null, all known relations which
 	 * support saving.
 	 *
-	 * @param null|string $name The relation to save, or null to save all known relations
+	 * @param   null|string  $name  The relation to save, or null to save all known relations
 	 *
 	 * @return DataModel The parent model, for chaining
 	 *
@@ -322,15 +321,15 @@ class RelationManager
 	/**
 	 * Gets the related items of a relation
 	 *
-	 * @param string                $name           The name of the relation to return data for
-	 * @param callable              $callback       A callback to customise the returned data
-	 * @param \FOF30\Utils\Collection $dataCollection Used when fetching the data of an eager loaded relation
-	 *
-	 * @see Relation::getData()
+	 * @param   string                   $name            The name of the relation to return data for
+	 * @param   callable                 $callback        A callback to customise the returned data
+	 * @param   \FOF30\Utils\Collection  $dataCollection  Used when fetching the data of an eager loaded relation
 	 *
 	 * @return Collection|DataModel
 	 *
 	 * @throws Relation\Exception\RelationNotFound
+	 * @see Relation::getData()
+	 *
 	 */
 	public function getData($name, $callback = null, \FOF30\Utils\Collection $dataCollection = null)
 	{
@@ -345,7 +344,7 @@ class RelationManager
 	/**
 	 * Gets the foreign key map of a many-to-many relation
 	 *
-	 * @param string                $name           The name of the relation to return data for
+	 * @param   string  $name  The name of the relation to return data for
 	 *
 	 * @return array
 	 *
@@ -367,7 +366,7 @@ class RelationManager
 	 * @param   string  $name        The relation to get the sub-query for
 	 * @param   string  $tableAlias  The alias to use for the local table
 	 *
-	 * @return \JDatabaseQuery
+	 * @return JDatabaseQuery
 	 * @throws Relation\Exception\RelationNotFound
 	 */
 	public function getCountSubquery($name, $tableAlias = null)
@@ -387,12 +386,12 @@ class RelationManager
 	 * You can also use it to get data of a relation using shorthand notation, e.g. $manager->getPhone($callback)
 	 * instead of $manager->getData('phone', $callback);
 	 *
-	 * @param string $name      The magic method to call
-	 * @param array  $arguments The arguments to the magic method
+	 * @param   string  $name       The magic method to call
+	 * @param   array   $arguments  The arguments to the magic method
 	 *
 	 * @return DataModel The parent model, for chaining
 	 *
-	 * @throws \InvalidArgumentException
+	 * @throws InvalidArgumentException
 	 * @throws DataModel\Relation\Exception\RelationTypeNotFound
 	 */
 	function __call($name, $arguments)
@@ -431,7 +430,7 @@ class RelationManager
 			}
 			else
 			{
-				throw new \InvalidArgumentException("You can not create an unnamed '$name' relation");
+				throw new InvalidArgumentException("You can not create an unnamed '$name' relation");
 			}
 		}
 		elseif (substr($name, 0, 3) == 'get')
@@ -453,7 +452,7 @@ class RelationManager
 			}
 			else
 			{
-				throw new \InvalidArgumentException("Invalid number of arguments getting data for the '$relationName' relation");
+				throw new InvalidArgumentException("Invalid number of arguments getting data for the '$relationName' relation");
 			}
 		}
 
@@ -464,7 +463,7 @@ class RelationManager
 	/**
 	 * Is $name a magic-callable method?
 	 *
-	 * @param string $name The name of a potential magic-callable method
+	 * @param   string  $name  The name of a potential magic-callable method
 	 *
 	 * @return bool
 	 */
@@ -491,7 +490,7 @@ class RelationManager
 	/**
 	 * Is $name a magic property? Corollary: returns true if a relation of this name is known to the relation manager.
 	 *
-	 * @param string $name The name of a potential magic property
+	 * @param   string  $name  The name of a potential magic property
 	 *
 	 * @return bool
 	 */

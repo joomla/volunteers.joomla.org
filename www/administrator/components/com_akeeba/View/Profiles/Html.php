@@ -8,7 +8,7 @@
 namespace Akeeba\Backup\Admin\View\Profiles;
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 use Akeeba\Backup\Admin\View\ViewTraits\ProfileIdAndName;
 use FOF30\View\DataView\Html as BaseView;

@@ -9,7 +9,7 @@
 
 namespace Akeeba\Engine\Postproc\Connector;
 
-
+defined('AKEEBAENGINE') || die();
 
 use Exception;
 use SimpleXMLElement;
@@ -252,7 +252,7 @@ class Idrivesync
 		$fp = @fopen($localFile, 'wb');
 		if ($fp === false)
 		{
-			throw new Exception("Cannot open $locaFile for writing", 500);
+			throw new Exception(sprintf("Cannot open %s for writing", $localFile), 500);
 		}
 		curl_setopt($ch, CURLOPT_FILE, $fp);
 

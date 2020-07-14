@@ -9,7 +9,7 @@
 
 namespace Psr\Log;
 
-
+defined('AKEEBAENGINE') || die();
 
 class InvalidArgumentException extends \InvalidArgumentException
 {

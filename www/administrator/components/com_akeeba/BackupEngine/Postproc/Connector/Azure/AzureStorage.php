@@ -41,7 +41,7 @@
 
 namespace Akeeba\Engine\Postproc\Connector\Azure;
 
-
+defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Postproc\Connector\Azure\Credentials\Sharedkey;
 use Akeeba\Engine\Postproc\Connector\Azure\Exception\Api;
@@ -61,35 +61,35 @@ class AzureStorage
 	/**
 	 * Development storage URLS
 	 */
-	const URL_DEV_BLOB = "127.0.0.1:10000";
+	public const URL_DEV_BLOB = "127.0.0.1:10000";
 
-	const URL_DEV_QUEUE = "127.0.0.1:10001";
+	public const URL_DEV_QUEUE = "127.0.0.1:10001";
 
-	const URL_DEV_TABLE = "127.0.0.1:10002";
+	public const URL_DEV_TABLE = "127.0.0.1:10002";
 
 	/**
 	 * Live storage URLS
 	 */
-	const URL_CLOUD_BLOB = "blob.core.windows.net";
+	public const URL_CLOUD_BLOB = "blob.core.windows.net";
 
-	const URL_CLOUD_QUEUE = "queue.core.windows.net";
+	public const URL_CLOUD_QUEUE = "queue.core.windows.net";
 
-	const URL_CLOUD_TABLE = "table.core.windows.net";
+	public const URL_CLOUD_TABLE = "table.core.windows.net";
 
 	/**
 	 * Resource types
 	 */
-	const RESOURCE_UNKNOWN = "unknown";
+	public const RESOURCE_UNKNOWN = "unknown";
 
-	const RESOURCE_CONTAINER = "c";
+	public const RESOURCE_CONTAINER = "c";
 
-	const RESOURCE_BLOB = "b";
+	public const RESOURCE_BLOB = "b";
 
-	const RESOURCE_TABLE = "t";
+	public const RESOURCE_TABLE = "t";
 
-	const RESOURCE_ENTITY = "e";
+	public const RESOURCE_ENTITY = "e";
 
-	const RESOURCE_QUEUE = "q";
+	public const RESOURCE_QUEUE = "q";
 
 	/**
 	 * Current API version

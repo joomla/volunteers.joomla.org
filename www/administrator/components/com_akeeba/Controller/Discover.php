@@ -8,11 +8,11 @@
 namespace Akeeba\Backup\Admin\Controller;
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 use Akeeba\Backup\Admin\Model\Discover as DiscoverModel;
 use FOF30\Controller\Controller;
-use JText;
+use Joomla\CMS\Language\Text;
 
 class Discover extends Controller
 {
@@ -30,7 +30,7 @@ class Discover extends Controller
 		if (empty($directory))
 		{
 			$url = 'index.php?option=com_akeeba&view=Discover';
-			$msg = JText::_('COM_AKEEBA_DISCOVER_ERROR_NODIRECTORY');
+			$msg = \Joomla\CMS\Language\Text::_('COM_AKEEBA_DISCOVER_ERROR_NODIRECTORY');
 			$this->setRedirect($url, $msg, 'error');
 
 			return;
@@ -57,7 +57,7 @@ class Discover extends Controller
 		if (empty($files))
 		{
 			$url = 'index.php?option=com_akeeba&view=Discover';
-			$msg = JText::_('COM_AKEEBA_DISCOVER_ERROR_NOFILESSELECTED');
+			$msg = \Joomla\CMS\Language\Text::_('COM_AKEEBA_DISCOVER_ERROR_NOFILESSELECTED');
 			$this->setRedirect($url, $msg, 'error');
 
 			return;
@@ -73,7 +73,7 @@ class Discover extends Controller
 		}
 
 		$url = 'index.php?option=com_akeeba&view=Manage';
-		$msg = JText::_('COM_AKEEBA_DISCOVER_LABEL_IMPORTDONE');
+		$msg = \Joomla\CMS\Language\Text::_('COM_AKEEBA_DISCOVER_LABEL_IMPORTDONE');
 
 		$this->setRedirect($url, $msg);
 	}

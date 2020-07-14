@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<extension type="package" version="3.7" method="upgrade">
+    <name>PKG_YOURSITESCLIENT</name>
+    <packagename>yoursitesclient</packagename>
+    <url>http://www.gwesystems.com</url>
+    <creationDate>June 2020</creationDate>
+    <license>http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL</license>
+    <version>1.11.3</version>
+    <author>Geraint Edwards</author>
+    <copyright>(C) 2017-2020 GWE Systems Ltd</copyright>
+    <authorEmail></authorEmail>
+    <authorUrl>www.gwesystems.com</authorUrl>
+    <packager>GWE Systems Ltd</packager>
+    <packagerurl>http://www.gwesystems.com</packagerurl>
+    <description>PKG_YOURSITESCLIENT_XML_DESCRIPTION</description>
+    <update></update>
+    <scriptfile>installpkg.php</scriptfile>
+    <languages folder="language">
+        <language tag="en-GB">en-GB/en-GB.pkg_yoursitesclient.sys.ini</language>
+    </languages>
+    <files>
+        <!--
+        <file type="plugin" group="system" id="gwejson">gwejson.zip</file>
+        //-->
+        <file type="plugin" group="system" id="yoursites">yoursites.zip</file>
+    </files>
+    <updateservers>
+        <server type="extension" name="YourSites Updates">
+            https://www.yoursites.net/updates/pkg_yoursitesclient-update.xml
+        </server>
+    </updateservers>
+
+</extension>

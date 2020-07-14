@@ -1,0 +1,75 @@
+{
+    "_information": {
+        "title": "COM_AKEEBA_CONFIG_ENGINE_POSTPROC_FTP_TITLE",
+        "description": "COM_AKEEBA_CONFIG_ENGINE_POSTPROC_FTP_DESCRIPTION"
+    },
+    "engine.postproc.common.after_part": {
+        "default": "0",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_POSTPROCPARTS_TITLE",
+        "description": "COM_AKEEBA_CONFIG_POSTPROCPARTS_DESCRIPTION"
+    },
+    "engine.postproc.common.delete_after": {
+        "default": "1",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_DELETEAFTER_TITLE",
+        "description": "COM_AKEEBA_CONFIG_DELETEAFTER_DESCRIPTION"
+    },
+    "engine.postproc.ftp.host": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_POSTPROCFTP_HOST_TITLE",
+        "description": "COM_AKEEBA_CONFIG_POSTPROCFTP_HOST_DESCRIPTION"
+    },
+    "engine.postproc.ftp.port": {
+        "default": "21",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_POSTPROCFTP_PORT_TITLE",
+        "description": "COM_AKEEBA_CONFIG_POSTPROCFTP_PORT_DESCRIPTION"
+    },
+    "engine.postproc.ftp.user": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_POSTPROCFTP_USER_TITLE",
+        "description": "COM_AKEEBA_CONFIG_POSTPROCFTP_USER_DESCRIPTION"
+    },
+    "engine.postproc.ftp.pass": {
+        "default": "",
+        "type": "password",
+        "title": "COM_AKEEBA_CONFIG_POSTPROCFTP_PASSWORD_TITLE",
+        "description": "COM_AKEEBA_CONFIG_POSTPROCFTP_PASSWORD_DESCRIPTION"
+    },
+    "engine.postproc.ftp.initial_directory": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_POSTPROCFTP_INITDIR_TITLE",
+        "description": "COM_AKEEBA_CONFIG_POSTPROCFTP_INITDIR_DESCRIPTION",
+        "hook": "akeeba_postprocftp_init_browser",
+        "buttontitle": "UI-BROWSE"
+    },
+    "engine.postproc.ftp.subdirectory": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_POSTPROCFTP_OPTSUBDIR_TITLE",
+        "description": "COM_AKEEBA_CONFIG_POSTPROCFTP_OPTSUBDIR_DESCRIPTION"
+    },
+    "engine.postproc.ftp.ftps": {
+        "default": "0",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_POSTPROCFTP_FTPS_TITLE",
+        "description": "COM_AKEEBA_CONFIG_POSTPROCFTP_FTPS_DESCRIPTION"
+    },
+    "engine.postproc.ftp.passive_mode": {
+        "default": "1",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_POSTPROCFTP_PASSIVE_TITLE",
+        "description": "COM_AKEEBA_CONFIG_POSTPROCFTP_PASSIVE_DESCRIPTION"
+    },
+    "engine.postproc.ftp.ftp_test": {
+        "default": "0",
+        "type": "button",
+        "hook": "postprocftp_test_connection",
+        "title": "COM_AKEEBA_CONFIG_POSTPROCFTP_TEST_TITLE",
+        "description": "COM_AKEEBA_CONFIG_POSTPROCFTP_TEST_DESCRIPTION"
+    }
+}

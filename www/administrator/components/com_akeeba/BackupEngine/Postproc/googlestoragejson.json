@@ -1,0 +1,59 @@
+{
+    "_information": {
+        "title": "COM_AKEEBA_CONFIG_ENGINE_POSTPROC_GOOGLESTORAGEJSON_TITLE",
+        "description": "COM_AKEEBA_CONFIG_ENGINE_POSTPROC_GOOGLESTORAGEJSON_DESCRIPTION"
+    },
+    "engine.postproc.common.after_part": {
+        "default": "0",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_POSTPROCPARTS_TITLE",
+        "description": "COM_AKEEBA_CONFIG_POSTPROCPARTS_DESCRIPTION"
+    },
+    "engine.postproc.common.delete_after": {
+        "default": "1",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_DELETEAFTER_TITLE",
+        "description": "COM_AKEEBA_CONFIG_DELETEAFTER_DESCRIPTION"
+    },
+    "engine.postproc.googlestoragejson.chunk_upload": {
+        "default": "1",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_BOX_CHUNKUPLOAD_ENABLE"
+    },
+    "engine.postproc.googlestoragejson.chunk_upload_size": {
+        "default": "10",
+        "type": "integer",
+        "min": "1",
+        "max": "1024",
+        "shortcuts": "1|5|10|20|40|60|100",
+        "scale": "1",
+        "uom": "MB",
+        "title": "COM_AKEEBA_CONFIG_BOX_CHUNKUPLOAD_SIZE"
+    },
+    "engine.postproc.googlestoragejson.bucket": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_GOOGLESTORAGEBUCKET_TITLE",
+        "description": "COM_AKEEBA_CONFIG_GOOGLESTORAGEBUCKET_DESCRIPTION"
+    },
+    "engine.postproc.googlestoragejson.directory": {
+        "default": "\/",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_GOOGLESTORAGEDIRECTORY_TITLE",
+        "description": "COM_AKEEBA_CONFIG_GOOGLESTORAGEDIRECTORY_DESCRIPTION"
+    },
+    "engine.postproc.googlestoragejson.storageclass": {
+        "default": "0",
+        "type": "enum",
+        "enumkeys": "COM_AKEEBA_CONFIG_GOOGLESTORAGE_STORAGECLASS_NONE|COM_AKEEBA_CONFIG_GOOGLESTORAGE_STORAGECLASS_STANDARD|COM_AKEEBA_CONFIG_GOOGLESTORAGE_STORAGECLASS_NEARLINE|COM_AKEEBA_CONFIG_GOOGLESTORAGE_STORAGECLASS_COLDLINE",
+        "enumvalues": "|standard|nearline|coldline",
+        "title": "COM_AKEEBA_CONFIG_GOOGLESTORAGE_STORAGECLASS_TITLE",
+        "description": "COM_AKEEBA_CONFIG_GOOGLESTORAGE_STORAGECLASS_DESCRIPTION"
+    },
+    "engine.postproc.googlestoragejson.jsoncreds": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_GOOGLESTORAGEJSON_CREDS_TITLE",
+        "description": "COM_AKEEBA_CONFIG_GOOGLESTORAGEJSON_CREDS_DESC"
+    }
+}

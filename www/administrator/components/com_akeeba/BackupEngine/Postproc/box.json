@@ -1,0 +1,43 @@
+{
+    "_information": {
+        "title": "COM_AKEEBA_CONFIG_ENGINE_POSTPROC_BOX_TITLE",
+        "description": "COM_AKEEBA_CONFIG_ENGINE_POSTPROC_BOX_DESCRIPTION"
+    },
+    "engine.postproc.common.after_part": {
+        "default": "0",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_POSTPROCPARTS_TITLE",
+        "description": "COM_AKEEBA_CONFIG_POSTPROCPARTS_DESCRIPTION"
+    },
+    "engine.postproc.common.delete_after": {
+        "default": "1",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_DELETEAFTER_TITLE",
+        "description": "COM_AKEEBA_CONFIG_DELETEAFTER_DESCRIPTION"
+    },
+    "engine.postproc.box.openoauth": {
+        "default": "",
+        "type": "button",
+        "title": "COM_AKEEBA_CONFIG_BOX_OPENOAUTH_TITLE",
+        "description": "COM_AKEEBA_CONFIG_BOX_OPENOAUTH_DESC",
+        "hook": "akconfig_box_openoauth"
+    },
+    "engine.postproc.box.directory": {
+        "default": "\/",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_BOX_DIRECTORY_TITLE",
+        "description": "COM_AKEEBA_CONFIG_BOX_DIRECTORY_DESCRIPTION"
+    },
+    "engine.postproc.box.access_token": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_BOX_ACCESSTOKEN_TITLE",
+        "description": "COM_AKEEBA_CONFIG_BOX_REFRESHTOKEN_DESCRIPTION"
+    },
+    "engine.postproc.box.refresh_token": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_BOX_REFRESHTOKEN_TITLE",
+        "description": "COM_AKEEBA_CONFIG_BOX_REFRESHTOKEN_DESCRIPTION"
+    }
+}

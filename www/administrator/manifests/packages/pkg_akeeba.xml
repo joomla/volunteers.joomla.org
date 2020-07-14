@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ @package   akeebabackup
+  ~ @copyright Copyright (c)2006-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
+  ~ @license   GNU General Public License version 3, or later
+  -->
+
+<extension version="3.8.0" type="package" method="upgrade">
+    <dlid prefix="dlid=" suffix=""/>
+    <name>Akeeba Backup package</name>
+    <author>Nicholas K. Dionysopoulos</author>
+    <creationDate>2020-05-21</creationDate>
+    <packagename>akeeba</packagename>
+    <version>7.1.4</version>
+    <url>https://www.akeebabackup.com</url>
+    <packager>Akeeba Ltd</packager>
+    <packagerurl>https://www.akeebabackup.com</packagerurl>
+    <copyright>Copyright (c)2006-2019 Akeeba Ltd / Nicholas K. Dionysopoulos</copyright>
+    <license>GNU GPL v3 or later</license>
+    <description>Akeeba Backup installation package v.7.1.4</description>
+
+    <!-- List of extensions to install -->
+    <files>
+        <!-- Component -->
+        <file type="component" id="com_akeeba">com_akeeba-pro.zip</file>
+
+        <!-- CLI scripts -->
+        <file type="file" id="file_akeeba">file_akeeba-pro.zip</file>
+
+        <!-- Modules -->
+        <!--<file type="module" client="site" id="mod_example">mod_example.zip</file>-->
+
+        <!-- Plugins: quickicon -->
+        <file type="plugin" group="quickicon" id="akeebabackup">plg_quickicon_akeebabackup.zip</file>
+
+        <!-- Plugins: system -->
+        <file type="plugin" group="system" id="akeebaupdatecheck">plg_system_akeebaupdatecheck.zip</file>
+        <file type="plugin" group="system" id="backuponupdate">plg_system_backuponupdate.zip</file>
+
+        <!-- Plugins: actionlog -->
+        <file type="plugin" group="actionlog" id="akeebabackup">plg_actionlog_akeebabackup.zip</file>
+
+        <!-- Plugins: installer (Pro only) -->
+        <file type="plugin" group="installer" id="akeebabackup">plg_installer_akeebabackup.zip</file>
+    </files>
+
+    <!-- Installation script -->
+    <scriptfile>script.akeeba.php</scriptfile>
+
+    <!-- Update servers -->
+    <updateservers>
+        <server type="extension" priority="1" name="Akeeba Backup Professional">https://cdn.akeebabackup.com/updates/pkgakeebapro.xml</server>
+    </updateservers>
+</extension>

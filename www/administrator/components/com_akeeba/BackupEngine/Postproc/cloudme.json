@@ -1,0 +1,36 @@
+{
+    "_information": {
+        "title": "COM_AKEEBA_CONFIG_ENGINE_POSTPROC_CLOUDME_TITLE",
+        "description": "COM_AKEEBA_CONFIG_ENGINE_POSTPROC_CLOUDME_DESCRIPTION"
+    },
+    "engine.postproc.common.after_part": {
+        "default": "0",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_POSTPROCPARTS_TITLE",
+        "description": "COM_AKEEBA_CONFIG_POSTPROCPARTS_DESCRIPTION"
+    },
+    "engine.postproc.common.delete_after": {
+        "default": "1",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_DELETEAFTER_TITLE",
+        "description": "COM_AKEEBA_CONFIG_DELETEAFTER_DESCRIPTION"
+    },
+    "engine.postproc.cloudme.username": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_CLOUDME_USERNAME_TITLE",
+        "description": "COM_AKEEBA_CONFIG_CLOUDME_USERNAME_DESCRIPTION"
+    },
+    "engine.postproc.cloudme.password": {
+        "default": "",
+        "type": "password",
+        "title": "COM_AKEEBA_CONFIG_CLOUDME_PASSWORD_TITLE",
+        "description": "COM_AKEEBA_CONFIG_CLOUDME_PASSWORD_DESCRIPTION"
+    },
+    "engine.postproc.cloudme.directory": {
+        "default": "\/",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_CLOUDME_DIRECTORY_TITLE",
+        "description": "COM_AKEEBA_CONFIG_CLOUDME_DIRECTORY_DESCRIPTION"
+    }
+}

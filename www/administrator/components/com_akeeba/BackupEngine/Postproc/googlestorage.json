@@ -1,0 +1,54 @@
+{
+    "_information": {
+        "title": "COM_AKEEBA_CONFIG_ENGINE_POSTPROC_GOOGLESTORAGE_TITLE",
+        "description": "COM_AKEEBA_CONFIG_ENGINE_POSTPROC_GOOGLESTORAGE_DESCRIPTION"
+    },
+    "engine.postproc.common.after_part": {
+        "default": "0",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_POSTPROCPARTS_TITLE",
+        "description": "COM_AKEEBA_CONFIG_POSTPROCPARTS_DESCRIPTION"
+    },
+    "engine.postproc.common.delete_after": {
+        "default": "1",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_DELETEAFTER_TITLE",
+        "description": "COM_AKEEBA_CONFIG_DELETEAFTER_DESCRIPTION"
+    },
+    "engine.postproc.googlestorage.accesskey": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_GOOGLESTORAGEACCESSKEY_TITLE",
+        "description": "COM_AKEEBA_CONFIG_GOOGLESTORAGEACCESSKEY_DESCRIPTION"
+    },
+    "engine.postproc.googlestorage.secretkey": {
+        "default": "",
+        "type": "password",
+        "title": "COM_AKEEBA_CONFIG_GOOGLESTORAGESECRETKEY_TITLE",
+        "description": "COM_AKEEBA_CONFIG_GOOGLESTORAGESECRETKEY_DESCRIPTION"
+    },
+    "engine.postproc.googlestorage.usessl": {
+        "default": "1",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_GOOGLESTORAGEUSESSL_TITLE",
+        "description": "COM_AKEEBA_CONFIG_GOOGLESTORAGEUSESSL_DESCRIPTION"
+    },
+    "engine.postproc.googlestorage.bucket": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_GOOGLESTORAGEBUCKET_TITLE",
+        "description": "COM_AKEEBA_CONFIG_GOOGLESTORAGEBUCKET_DESCRIPTION"
+    },
+    "engine.postproc.googlestorage.lowercase": {
+        "default": "1",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_GOOGLESTORAGELOWERCASE_TITLE",
+        "description": "COM_AKEEBA_CONFIG_GOOGLESTORAGELOWERCASE_DESCRIPTION"
+    },
+    "engine.postproc.googlestorage.directory": {
+        "default": "\/",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_GOOGLESTORAGEDIRECTORY_TITLE",
+        "description": "COM_AKEEBA_CONFIG_GOOGLESTORAGEDIRECTORY_DESCRIPTION"
+    }
+}

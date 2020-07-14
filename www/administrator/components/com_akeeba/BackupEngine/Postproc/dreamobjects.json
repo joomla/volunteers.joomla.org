@@ -1,0 +1,54 @@
+{
+    "_information": {
+        "title": "COM_AKEEBA_CONFIG_ENGINE_POSTPROC_DREAMOBJECTS_TITLE",
+        "description": "COM_AKEEBA_CONFIG_ENGINE_POSTPROC_DREAMOBJECTS_DESCRIPTION"
+    },
+    "engine.postproc.common.after_part": {
+        "default": "0",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_POSTPROCPARTS_TITLE",
+        "description": "COM_AKEEBA_CONFIG_POSTPROCPARTS_DESCRIPTION"
+    },
+    "engine.postproc.common.delete_after": {
+        "default": "1",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_DELETEAFTER_TITLE",
+        "description": "COM_AKEEBA_CONFIG_DELETEAFTER_DESCRIPTION"
+    },
+    "engine.postproc.dreamobjects.accesskey": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_DREAMOBJECTSACCESSKEY_TITLE",
+        "description": "COM_AKEEBA_CONFIG_DREAMOBJECTSACCESSKEY_DESCRIPTION"
+    },
+    "engine.postproc.dreamobjects.secretkey": {
+        "default": "",
+        "type": "password",
+        "title": "COM_AKEEBA_CONFIG_DREAMOBJECTSSECRETKEY_TITLE",
+        "description": "COM_AKEEBA_CONFIG_DREAMOBJECTSSECRETKEY_DESCRIPTION"
+    },
+    "engine.postproc.dreamobjects.usessl": {
+        "default": "1",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_DREAMOBJECTSUSESSL_TITLE",
+        "description": "COM_AKEEBA_CONFIG_DREAMOBJECTSUSESSL_DESCRIPTION"
+    },
+    "engine.postproc.dreamobjects.bucket": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_DREAMOBJECTSBUCKET_TITLE",
+        "description": "COM_AKEEBA_CONFIG_DREAMOBJECTSBUCKET_DESCRIPTION"
+    },
+    "engine.postproc.dreamobjects.lowercase": {
+        "default": "1",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_DREAMOBJECTSLOWERCASE_TITLE",
+        "description": "COM_AKEEBA_CONFIG_DREAMOBJECTSLOWERCASE_DESCRIPTION"
+    },
+    "engine.postproc.dreamobjects.directory": {
+        "default": "\/",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_DREAMOBJECTSDIRECTORY_TITLE",
+        "description": "COM_AKEEBA_CONFIG_DREAMOBJECTSDIRECTORY_DESCRIPTION"
+    }
+}

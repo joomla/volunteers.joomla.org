@@ -1,0 +1,48 @@
+{
+    "_information": {
+        "title": "COM_AKEEBA_CONFIG_ENGINE_POSTPROC_SUGARSYNC_TITLE",
+        "description": "COM_AKEEBA_CONFIG_ENGINE_POSTPROC_SUGARSYNC_DESCRIPTION"
+    },
+    "engine.postproc.common.after_part": {
+        "default": "0",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_POSTPROCPARTS_TITLE",
+        "description": "COM_AKEEBA_CONFIG_POSTPROCPARTS_DESCRIPTION"
+    },
+    "engine.postproc.common.delete_after": {
+        "default": "1",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_DELETEAFTER_TITLE",
+        "description": "COM_AKEEBA_CONFIG_DELETEAFTER_DESCRIPTION"
+    },
+    "engine.postproc.sugarsync.access": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_SUGARSYNC_ACCESS_TITLE",
+        "description": "COM_AKEEBA_CONFIG_SUGARSYNC_ACCESS_DESCRIPTION"
+    },
+    "engine.postproc.sugarsync.private": {
+        "default": "",
+        "type": "password",
+        "title": "COM_AKEEBA_CONFIG_SUGARSYNC_PRIVATE_TITLE",
+        "description": "COM_AKEEBA_CONFIG_SUGARSYNC_PRIVATE_DESCRIPTION"
+    },
+    "engine.postproc.sugarsync.email": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_SUGARSYNC_EMAIL_TITLE",
+        "description": "COM_AKEEBA_CONFIG_SUGARSYNC_EMAIL_DESCRIPTION"
+    },
+    "engine.postproc.sugarsync.password": {
+        "default": "",
+        "type": "password",
+        "title": "COM_AKEEBA_CONFIG_SUGARSYNC_PASSWORD_TITLE",
+        "description": "COM_AKEEBA_CONFIG_SUGARSYNC_PASSWORD_DESCRIPTION"
+    },
+    "engine.postproc.sugarsync.directory": {
+        "default": "\/",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_SUGARSYNC_DIRECTORY_TITLE",
+        "description": "COM_AKEEBA_CONFIG_SUGARSYNC_DIRECTORY_DESCRIPTION"
+    }
+}

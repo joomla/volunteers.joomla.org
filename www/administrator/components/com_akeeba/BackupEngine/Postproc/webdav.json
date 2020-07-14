@@ -1,0 +1,42 @@
+{
+    "_information": {
+        "title": "COM_AKEEBA_CONFIG_ENGINE_POSTPROC_WEBDAV_TITLE",
+        "description": "COM_AKEEBA_CONFIG_ENGINE_POSTPROC_WEBDAV_DESCRIPTION"
+    },
+    "engine.postproc.common.after_part": {
+        "default": "0",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_POSTPROCPARTS_TITLE",
+        "description": "COM_AKEEBA_CONFIG_POSTPROCPARTS_DESCRIPTION"
+    },
+    "engine.postproc.common.delete_after": {
+        "default": "1",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_DELETEAFTER_TITLE",
+        "description": "COM_AKEEBA_CONFIG_DELETEAFTER_DESCRIPTION"
+    },
+    "engine.postproc.webdav.username": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_WEBDAV_USERNAME_TITLE",
+        "description": "COM_AKEEBA_CONFIG_WEBDAV_USERNAME_DESCRIPTION"
+    },
+    "engine.postproc.webdav.password": {
+        "default": "",
+        "type": "password",
+        "title": "COM_AKEEBA_CONFIG_WEBDAV_PASSWORD_TITLE",
+        "description": "COM_AKEEBA_CONFIG_WEBDAV_PASSWORD_DESCRIPTION"
+    },
+    "engine.postproc.webdav.url": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_WEBDAV_URL_TITLE",
+        "description": "COM_AKEEBA_CONFIG_WEBDAV_URL_DESCRIPTION"
+    },
+    "engine.postproc.webdav.directory": {
+        "default": "\/",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_WEBDAV_DIRECTORY_TITLE",
+        "description": "COM_AKEEBA_CONFIG_WEBDAV_DIRECTORY_DESCRIPTION"
+    }
+}

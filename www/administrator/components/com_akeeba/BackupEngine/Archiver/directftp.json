@@ -1,0 +1,57 @@
+{
+    "_information": {
+        "title": "COM_AKEEBA_CONFIG_ENGINE_ARCHIVER_DIRECTFTP_TITLE",
+        "description": "COM_AKEEBA_CONFIG_ENGINE_ARCHIVER_DIRECTFTP_DESCRIPTION"
+    },
+    "engine.archiver.directftp.host": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_DIRECTFTP_HOST_TITLE",
+        "description": "COM_AKEEBA_CONFIG_DIRECTFTP_HOST_DESCRIPTION"
+    },
+    "engine.archiver.directftp.port": {
+        "default": "21",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_DIRECTFTP_PORT_TITLE",
+        "description": "COM_AKEEBA_CONFIG_DIRECTFTP_PORT_DESCRIPTION"
+    },
+    "engine.archiver.directftp.user": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_DIRECTFTP_USER_TITLE",
+        "description": "COM_AKEEBA_CONFIG_DIRECTFTP_USER_DESCRIPTION"
+    },
+    "engine.archiver.directftp.pass": {
+        "default": "",
+        "type": "password",
+        "title": "COM_AKEEBA_CONFIG_DIRECTFTP_PASSWORD_TITLE",
+        "description": "COM_AKEEBA_CONFIG_DIRECTFTP_PASSWORD_DESCRIPTION"
+    },
+    "engine.archiver.directftp.initial_directory": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_DIRECTFTP_INITDIR_TITLE",
+        "description": "COM_AKEEBA_CONFIG_DIRECTFTP_INITDIR_DESCRIPTION",
+        "hook": "akeeba_directftp_init_browser",
+        "buttontitle": "UI-BROWSE"
+    },
+    "engine.archiver.directftp.ftps": {
+        "default": "0",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_DIRECTFTP_FTPS_TITLE",
+        "description": "COM_AKEEBA_CONFIG_DIRECTFTP_FTPS_DESCRIPTION"
+    },
+    "engine.archiver.directftp.passive_mode": {
+        "default": "1",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_DIRECTFTP_PASSIVE_TITLE",
+        "description": "COM_AKEEBA_CONFIG_DIRECTFTP_PASSIVE_DESCRIPTION"
+    },
+    "engine.archiver.directftp.ftp_test": {
+        "default": "0",
+        "type": "button",
+        "hook": "directftp_test_connection",
+        "title": "COM_AKEEBA_CONFIG_DIRECTFTP_TEST_TITLE",
+        "description": "COM_AKEEBA_CONFIG_DIRECTFTP_TEST_DESCRIPTION"
+    }
+}

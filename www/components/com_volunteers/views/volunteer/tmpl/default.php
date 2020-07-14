@@ -26,8 +26,8 @@ defined('_JEXEC') or die;
 
 		<?php if ($this->item->certification): ?>
             <div class="volunteer-certificated">
-                <a href="https://exam.joomla.org/directory/user/<?php echo($this->item->certification) ?>" target="_blank">
-                    <img src="https://exam.joomla.org/images/badge.png" class="img-responsive"/>
+                <a href="https://certification.joomla.org/certified-user-directory/<?php echo($this->item->certification) ?>" target="_blank">
+                    <img src="https://certification.joomla.org/images/Badges/3x_certified_administrator_badge.png" class="img-responsive"/>
                 </a>
             </div>
 		<?php endif; ?>

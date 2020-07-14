@@ -1,0 +1,67 @@
+{
+    "_group": {
+        "description": "COM_AKEEBA_CONFIG_PLATFORM"
+    },
+    "akeeba.platform.override_root": {
+        "default": "0",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_PLATFORM_OVERRIDEROOT_TITLE",
+        "description": "COM_AKEEBA_CONFIG_PLATFORM_OVERRIDEROOT_DESCRIPTION"
+    },
+    "akeeba.platform.newroot": {
+        "default": "",
+        "type": "browsedir",
+        "title": "COM_AKEEBA_CONFIG_PLATFORM_NEWROOT_TITLE",
+        "description": "COM_AKEEBA_CONFIG_PLATFORM_NEWROOT_DESCRIPTION"
+    },
+    "akeeba.platform.override_db": {
+        "default": "0",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_PLATFORM_OVERRIDEDB_TITLE",
+        "description": "COM_AKEEBA_CONFIG_PLATFORM_OVERRIDEDB_DESCRIPTION"
+    },
+    "akeeba.platform.dbdriver": {
+        "default": "mysqli",
+        "type": "enum",
+        "enumkeys": "MySQL|MySQLi",
+        "enumvalues": "mysql|mysqli",
+        "title": "COM_AKEEBA_CONFIG_PLATFORM_DBDRIVER_TITLE",
+        "description": "COM_AKEEBA_CONFIG_PLATFORM_DBDRIVER_DESCRIPTION"
+    },
+    "akeeba.platform.dbhost": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_PLATFORM_DBHOST_TITLE",
+        "description": "COM_AKEEBA_CONFIG_PLATFORM_DBHOST_DESCRIPTION"
+    },
+    "akeeba.platform.dbport": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_PLATFORM_DBPORT_TITLE",
+        "description": "COM_AKEEBA_CONFIG_PLATFORM_DBPORT_DESCRIPTION"
+    },
+    "akeeba.platform.dbusername": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_PLATFORM_DBUSERNAME_TITLE",
+        "description": "COM_AKEEBA_CONFIG_PLATFORM_DBUSERNAME_DESCRIPTION"
+    },
+    "akeeba.platform.dbpassword": {
+        "default": "",
+        "type": "password",
+        "title": "COM_AKEEBA_CONFIG_PLATFORM_DBPASSWORD_TITLE",
+        "description": "COM_AKEEBA_CONFIG_PLATFORM_DBPASSWORD_DESCRIPTION"
+    },
+    "akeeba.platform.dbname": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_PLATFORM_DBDATABASE_TITLE",
+        "description": "COM_AKEEBA_CONFIG_PLATFORM_DBDATABASE_DESCRIPTION"
+    },
+    "akeeba.platform.dbprefix": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_PLATFORM_DBPREFIX_TITLE",
+        "description": "COM_AKEEBA_CONFIG_PLATFORM_DBPREFIX_DESCRIPTION"
+    }
+}

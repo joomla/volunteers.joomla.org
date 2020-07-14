@@ -1,0 +1,69 @@
+{
+    "_information": {
+        "title": "COM_AKEEBA_CONFIG_ENGINE_POSTPROC_SFTPCURL_TITLE",
+        "description": "COM_AKEEBA_CONFIG_ENGINE_POSTPROC_SFTPCURL_DESCRIPTION"
+    },
+    "engine.postproc.common.after_part": {
+        "default": "0",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_POSTPROCPARTS_TITLE",
+        "description": "COM_AKEEBA_CONFIG_POSTPROCPARTS_DESCRIPTION"
+    },
+    "engine.postproc.common.delete_after": {
+        "default": "1",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_DELETEAFTER_TITLE",
+        "description": "COM_AKEEBA_CONFIG_DELETEAFTER_DESCRIPTION"
+    },
+    "engine.postproc.sftpcurl.host": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_POSTPROCSFTP_HOST_TITLE",
+        "description": "COM_AKEEBA_CONFIG_POSTPROCSFTP_HOST_DESCRIPTION"
+    },
+    "engine.postproc.sftpcurl.port": {
+        "default": "22",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_POSTPROCSFTP_PORT_TITLE",
+        "description": "COM_AKEEBA_CONFIG_POSTPROCSFTP_PORT_DESCRIPTION"
+    },
+    "engine.postproc.sftpcurl.user": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_POSTPROCSFTP_USER_TITLE",
+        "description": "COM_AKEEBA_CONFIG_POSTPROCSFTP_USER_DESCRIPTION"
+    },
+    "engine.postproc.sftpcurl.pass": {
+        "default": "",
+        "type": "password",
+        "title": "COM_AKEEBA_CONFIG_POSTPROCSFTP_PASSWORD_TITLE",
+        "description": "COM_AKEEBA_CONFIG_POSTPROCSFTP_PASSWORD_DESCRIPTION"
+    },
+    "engine.postproc.sftpcurl.privkey": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_POSTPROCSFTP_PRIVKEY_TITLE",
+        "description": "COM_AKEEBA_CONFIG_POSTPROCSFTP_PRIVKEY_DESCRIPTION"
+    },
+    "engine.postproc.sftpcurl.pubkey": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_POSTPROCSFTP_PUBKEY_TITLE",
+        "description": "COM_AKEEBA_CONFIG_POSTPROCSFTP_PUBKEY_DESCRIPTION"
+    },
+    "engine.postproc.sftpcurl.initial_directory": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_POSTPROCSFTP_INITDIR_TITLE",
+        "description": "COM_AKEEBA_CONFIG_POSTPROCSFTP_INITDIR_DESCRIPTION",
+        "hook": "akeeba_postprocsftpcurl_init_browser",
+        "buttontitle": "UI-BROWSE"
+    },
+    "engine.postproc.sftpcurl.sftp_test": {
+        "default": "0",
+        "type": "button",
+        "hook": "postprocsftpcurl_test_connection",
+        "title": "COM_AKEEBA_CONFIG_POSTPROCSFTP_TEST_TITLE",
+        "description": "COM_AKEEBA_CONFIG_POSTPROCSFTP_TEST_DESCRIPTION"
+    }
+}

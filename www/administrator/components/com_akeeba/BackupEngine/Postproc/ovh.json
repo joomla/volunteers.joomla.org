@@ -1,0 +1,48 @@
+{
+    "_information": {
+        "title": "COM_AKEEBA_CONFIG_ENGINE_POSTPROC_OVH_TITLE",
+        "description": "COM_AKEEBA_CONFIG_ENGINE_POSTPROC_OVH_DESCRIPTION"
+    },
+    "engine.postproc.common.after_part": {
+        "default": "0",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_POSTPROCPARTS_TITLE",
+        "description": "COM_AKEEBA_CONFIG_POSTPROCPARTS_DESCRIPTION"
+    },
+    "engine.postproc.common.delete_after": {
+        "default": "1",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_DELETEAFTER_TITLE",
+        "description": "COM_AKEEBA_CONFIG_DELETEAFTER_DESCRIPTION"
+    },
+    "engine.postproc.ovh.projectid": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_OVH_PROJECTID_TITLE",
+        "description": "COM_AKEEBA_CONFIG_OVH_PROJECTID_DESCRIPTION"
+    },
+    "engine.postproc.ovh.username": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_OVH_USERNAME_TITLE",
+        "description": "COM_AKEEBA_CONFIG_OVH_USERNAME_DESCRIPTION"
+    },
+    "engine.postproc.ovh.password": {
+        "default": "",
+        "type": "password",
+        "title": "COM_AKEEBA_CONFIG_OVH_PASSWORD_TITLE",
+        "description": "COM_AKEEBA_CONFIG_OVH_PASSWORD_DESCRIPTION"
+    },
+    "engine.postproc.ovh.containerurl": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_OVH_CONTAINERURL_TITLE",
+        "description": "COM_AKEEBA_CONFIG_OVH_CONTAINERURL_DESCRIPTION"
+    },
+    "engine.postproc.ovh.directory": {
+        "default": "\/",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_OVH_DIRECTORY_TITLE",
+        "description": "COM_AKEEBA_CONFIG_OVH_DIRECTORY_DESCRIPTION"
+    }
+}

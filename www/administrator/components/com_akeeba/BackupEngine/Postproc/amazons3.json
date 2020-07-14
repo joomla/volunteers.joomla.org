@@ -1,0 +1,92 @@
+{
+    "_information": {
+        "title": "COM_AKEEBA_CONFIG_ENGINE_POSTPROC_S3_TITLE",
+        "description": "COM_AKEEBA_CONFIG_ENGINE_POSTPROC_S3_DESCRIPTION"
+    },
+    "engine.postproc.common.after_part": {
+        "default": "0",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_POSTPROCPARTS_TITLE",
+        "description": "COM_AKEEBA_CONFIG_POSTPROCPARTS_DESCRIPTION"
+    },
+    "engine.postproc.common.delete_after": {
+        "default": "1",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_DELETEAFTER_TITLE",
+        "description": "COM_AKEEBA_CONFIG_DELETEAFTER_DESCRIPTION"
+    },
+    "engine.postproc.amazons3.accesskey": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_S3ACCESSKEY_TITLE",
+        "description": "COM_AKEEBA_CONFIG_S3ACCESSKEY_DESCRIPTION"
+    },
+    "engine.postproc.amazons3.secretkey": {
+        "default": "",
+        "type": "password",
+        "title": "COM_AKEEBA_CONFIG_S3SECRETKEY_TITLE",
+        "description": "COM_AKEEBA_CONFIG_S3SECRETKEY_DESCRIPTION"
+    },
+    "engine.postproc.amazons3.usessl": {
+        "default": "1",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_S3USESSL_TITLE",
+        "description": "COM_AKEEBA_CONFIG_S3USESSL_DESCRIPTION"
+    },
+    "engine.postproc.amazons3.bucket": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_S3BUCKET_TITLE",
+        "description": "COM_AKEEBA_CONFIG_S3BUCKET_DESCRIPTION"
+    },
+    "engine.postproc.amazons3.region": {
+        "default": "us-east-1",
+        "type": "enum",
+        "enumkeys": "COM_AKEEBA_S3_REGION_NONE|COM_AKEEBA_S3_REGION_USEAST2|COM_AKEEBA_S3_REGION_USEAST1|COM_AKEEBA_S3_REGION_USWEST1|COM_AKEEBA_S3_REGION_USWEST2|COM_AKEEBA_S3_REGION_APEAST1|COM_AKEEBA_S3_REGION_APSOUTH1|COM_AKEEBA_S3_REGION_APNORTHEAST3|COM_AKEEBA_S3_REGION_APNORTHEAST2|COM_AKEEBA_S3_REGION_APSOUTHEAST1|COM_AKEEBA_S3_REGION_APSOUTHEAST2|COM_AKEEBA_S3_REGION_APNORTHEAST1|COM_AKEEBA_S3_REGION_CACENTRAL1|COM_AKEEBA_S3_REGION_CNNORTH1|COM_AKEEBA_S3_REGION_CNNORTHWEST1|COM_AKEEBA_S3_REGION_EUCENTRAL1|COM_AKEEBA_S3_REGION_EUWEST1|COM_AKEEBA_S3_REGION_EUWEST2|COM_AKEEBA_S3_REGION_EUWEST3|COM_AKEEBA_S3_REGION_EUNORTH1|COM_AKEEBA_S3_REGION_SAEAST1|COM_AKEEBA_S3_REGION_MESOUTH1",
+        "enumvalues": "|us-east-2|us-east-1|us-west-1|us-west-2|ap-east-1|ap-south-1|ap-northeast-3|ap-northeast-2|ap-southeast-1|ap-southeast-2|ap-northeast-1|ca-central-1|cn-north-1|cn-northwest-1|eu-central-1|eu-west-1|eu-west-2|eu-west-3|eu-north-1|sa-east-1|me-south-1",
+        "title": "COM_AKEEBA_S3_REGION_TITLE",
+        "description": "COM_AKEEBA_S3_REGION_DESCRIPTION"
+    },
+    "engine.postproc.amazons3.signature": {
+        "default": "v4",
+        "type": "enum",
+        "enumkeys": "COM_AKEEBA_S3_SIGNATURE_V4|COM_AKEEBA_S3_SIGNATURE_V2",
+        "enumvalues": "v4|v2",
+        "title": "COM_AKEEBA_S3_SIGNATURE_TITLE",
+        "description": "COM_AKEEBA_S3_SIGNATURE_DESCRIPTION"
+    },
+    "engine.postproc.amazons3.pathaccess": {
+        "default": "0",
+        "type": "enum",
+        "enumkeys": "COM_AKEEBA_S3_ACCESS_VIRTUALHOST|COM_AKEEBA_S3_ACCESS_PATH",
+        "enumvalues": "0|1",
+        "title": "COM_AKEEBA_S3_ACCESS_TITLE",
+        "description": "COM_AKEEBA_S3_ACCESS_DESCRIPTION"
+    },
+    "engine.postproc.amazons3.directory": {
+        "default": "\/",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_S3DIRECTORY_TITLE",
+        "description": "COM_AKEEBA_CONFIG_S3DIRECTORY_DESCRIPTION"
+    },
+    "engine.postproc.amazons3.legacy": {
+        "default": "0",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_S3LEGACY_TITLE",
+        "description": "COM_AKEEBA_CONFIG_S3LEGACY_DESCRIPTION"
+    },
+    "engine.postproc.amazons3.rrs": {
+        "default": "0",
+        "type": "enum",
+        "enumkeys": "COM_AKEEBA_S3_RRS_STANDARD|COM_AKEEBA_S3_RRS_RRS|COM_AKEEBA_S3_RRS_STANDARD_IA|COM_AKEEBA_S3_RRS_ONEZONE_IA|COM_AKEEBA_S3_RRS_INTELLIGENT_TIERING|COM_AKEEBA_S3_RRS_GLACIER|COM_AKEEBA_S3_RRS_DEEP_ARCHIVE",
+        "enumvalues": "0|1|2|3|4|5|6",
+        "title": "COM_AKEEBA_CONFIG_S3RRS_TITLE",
+        "description": "COM_AKEEBA_CONFIG_S3RRS_DESCRIPTION"
+    },
+    "engine.postproc.amazons3.customendpoint": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_S3CUSTOMENDPOINT_TITLE",
+        "description": "COM_AKEEBA_CONFIG_S3CUSTOMENDPOINT_DESCRIPTION"
+    }
+}

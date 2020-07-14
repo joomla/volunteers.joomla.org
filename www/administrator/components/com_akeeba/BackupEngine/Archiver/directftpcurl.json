@@ -1,0 +1,63 @@
+{
+    "_information": {
+        "title": "COM_AKEEBA_CONFIG_ENGINE_ARCHIVER_DIRECTFTPCURL_TITLE",
+        "description": "COM_AKEEBA_CONFIG_ENGINE_ARCHIVER_DIRECTFTPCURL_DESCRIPTION"
+    },
+    "engine.archiver.directftpcurl.host": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_DIRECTFTP_HOST_TITLE",
+        "description": "COM_AKEEBA_CONFIG_DIRECTFTP_HOST_DESCRIPTION"
+    },
+    "engine.archiver.directftpcurl.port": {
+        "default": "21",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_DIRECTFTP_PORT_TITLE",
+        "description": "COM_AKEEBA_CONFIG_DIRECTFTP_PORT_DESCRIPTION"
+    },
+    "engine.archiver.directftpcurl.user": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_DIRECTFTP_USER_TITLE",
+        "description": "COM_AKEEBA_CONFIG_DIRECTFTP_USER_DESCRIPTION"
+    },
+    "engine.archiver.directftpcurl.pass": {
+        "default": "",
+        "type": "password",
+        "title": "COM_AKEEBA_CONFIG_DIRECTFTP_PASSWORD_TITLE",
+        "description": "COM_AKEEBA_CONFIG_DIRECTFTP_PASSWORD_DESCRIPTION"
+    },
+    "engine.archiver.directftpcurl.initial_directory": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_DIRECTFTP_INITDIR_TITLE",
+        "description": "COM_AKEEBA_CONFIG_DIRECTFTP_INITDIR_DESCRIPTION",
+        "hook": "akeeba_directftp_init_browser",
+        "buttontitle": "UI-BROWSE"
+    },
+    "engine.archiver.directftpcurl.ftps": {
+        "default": "0",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_DIRECTFTP_FTPS_TITLE",
+        "description": "COM_AKEEBA_CONFIG_DIRECTFTP_FTPS_DESCRIPTION"
+    },
+    "engine.archiver.directftpcurl.passive_mode": {
+        "default": "1",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_DIRECTFTP_PASSIVE_TITLE",
+        "description": "COM_AKEEBA_CONFIG_DIRECTFTP_PASSIVE_DESCRIPTION"
+    },
+    "engine.archiver.directftpcurl.passive_mode_workaround": {
+        "default": "1",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_ENGINE_ARCHIVER_DIRECTFTPCURL_PASVWORKAROUND_TITLE",
+        "description": "COM_AKEEBA_CONFIG_ENGINE_ARCHIVER_DIRECTFTPCURL_PASVWORKAROUND_DESCRIPTION"
+    },
+    "engine.archiver.directftpcurl.ftp_test": {
+        "default": "0",
+        "type": "button",
+        "hook": "directftpcurl_test_connection",
+        "title": "COM_AKEEBA_CONFIG_DIRECTFTP_TEST_TITLE",
+        "description": "COM_AKEEBA_CONFIG_DIRECTFTP_TEST_DESCRIPTION"
+    }
+}

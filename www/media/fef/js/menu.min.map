@@ -1,0 +1,8 @@
+{
+"version":3,
+"file":"/Users/nicholas/Projects/akeeba/fef/out/js/menu.min.js",
+"lineCount":1,
+"mappings":"AAUsB,WAAtB,GAAI,MAAOA,OAAX,GAEIA,MAFJ,CAEa,EAFb,CAK0B,YAA1B,GAAI,MAAOA,OAAAC,IAAX,GAEID,MAAAC,IAFJ,CAEiB,EAFjB,CAKAD,OAAAC,IAAAC,WAAA,CAAwBC,QAAQ,CAACC,CAAD,CAChC,CAEI,GAAyB,WAAzB,GAAK,MAAOA,EAAZ,EAAuD,EAAvD,GAA0CA,CAA1C,CAEIA,CAAA,CAAW,sBAGXC,EAAAA,CAAkBC,QAAAC,iBAAA,CAA0BH,CAA1B,CAES,EAA/B,GAAIC,CAAAG,OAAJ,EAKAH,CAAAI,QAAA,CAAwB,QAAQ,CAACC,CAAD,CAAW,CACvCA,CAAAC,iBAAA,CAA0B,OAA1B,CAAmC,QAAQ,CAACC,CAAD,CAAQ,CAC3CC,CAAAA,CAAQH,CAAAI,cAAAA,cAAAC,cAAA,CAAmD,KAAnD,CAIRF,EAAAG,MAAAC,QAAA,CAFwB,MAA5B,GAAIJ,CAAAG,MAAAC,QAAJ,CAE0B,MAF1B,CAOsB,IAVyB,CAAnD,CADuC,CAA3C,CAdJ;",
+"sources":["/Users/nicholas/Projects/akeeba/fef/out/js/menu.js"],
+"names":["akeeba","fef","menuButton","akeeba.fef.menuButton","selector","menuButtonsList","document","querySelectorAll","length","forEach","elButton","addEventListener","event","elNav","parentElement","querySelector","style","display"]
+}

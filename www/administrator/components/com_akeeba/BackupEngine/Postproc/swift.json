@@ -1,0 +1,54 @@
+{
+    "_information": {
+        "title": "COM_AKEEBA_CONFIG_ENGINE_POSTPROC_SWIFT_TITLE",
+        "description": "COM_AKEEBA_CONFIG_ENGINE_POSTPROC_SWIFT_DESCRIPTION"
+    },
+    "engine.postproc.common.after_part": {
+        "default": "0",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_POSTPROCPARTS_TITLE",
+        "description": "COM_AKEEBA_CONFIG_POSTPROCPARTS_DESCRIPTION"
+    },
+    "engine.postproc.common.delete_after": {
+        "default": "1",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_DELETEAFTER_TITLE",
+        "description": "COM_AKEEBA_CONFIG_DELETEAFTER_DESCRIPTION"
+    },
+    "engine.postproc.swift.authurl": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_SWIFT_AUTHURL_TITLE",
+        "description": "COM_AKEEBA_CONFIG_SWIFT_AUTHURL_DESCRIPTION"
+    },
+    "engine.postproc.swift.tenantid": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_SWIFT_TENANTID_TITLE",
+        "description": "COM_AKEEBA_CONFIG_SWIFT_TENANTID_DESCRIPTION"
+    },
+    "engine.postproc.swift.username": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_SWIFT_USERNAME_TITLE",
+        "description": "COM_AKEEBA_CONFIG_SWIFT_USERNAME_DESCRIPTION"
+    },
+    "engine.postproc.swift.password": {
+        "default": "",
+        "type": "password",
+        "title": "COM_AKEEBA_CONFIG_SWIFT_PASSWORD_TITLE",
+        "description": "COM_AKEEBA_CONFIG_SWIFT_PASSWORD_DESCRIPTION"
+    },
+    "engine.postproc.swift.containerurl": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_SWIFT_CONTAINERURL_TITLE",
+        "description": "COM_AKEEBA_CONFIG_SWIFT_CONTAINERURL_DESCRIPTION"
+    },
+    "engine.postproc.swift.directory": {
+        "default": "\/",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_SWIFT_DIRECTORY_TITLE",
+        "description": "COM_AKEEBA_CONFIG_SWIFT_DIRECTORY_DESCRIPTION"
+    }
+}

@@ -1,0 +1,55 @@
+{
+    "_information": {
+        "title": "COM_AKEEBA_CONFIG_ENGINE_ARCHIVER_DIRECTSFTP_TITLE",
+        "description": "COM_AKEEBA_CONFIG_ENGINE_ARCHIVER_DIRECTSFTP_DESCRIPTION"
+    },
+    "engine.archiver.directsftp.host": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_DIRECTSFTP_HOST_TITLE",
+        "description": "COM_AKEEBA_CONFIG_DIRECTSFTP_HOST_DESCRIPTION"
+    },
+    "engine.archiver.directsftp.port": {
+        "default": "22",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_DIRECTSFTP_PORT_TITLE",
+        "description": "COM_AKEEBA_CONFIG_DIRECTSFTP_PORT_DESCRIPTION"
+    },
+    "engine.archiver.directsftp.user": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_DIRECTSFTP_USER_TITLE",
+        "description": "COM_AKEEBA_CONFIG_DIRECTSFTP_USER_DESCRIPTION"
+    },
+    "engine.archiver.directsftp.pass": {
+        "default": "",
+        "type": "password",
+        "title": "COM_AKEEBA_CONFIG_DIRECTSFTP_PASSWORD_TITLE",
+        "description": "COM_AKEEBA_CONFIG_DIRECTSFTP_PASSWORD_DESCRIPTION"
+    },
+    "engine.archiver.directsftp.privkey": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_POSTPROCSFTP_PRIVKEY_TITLE",
+        "description": "COM_AKEEBA_CONFIG_POSTPROCSFTP_PRIVKEY_DESCRIPTION"
+    },
+    "engine.archiver.directsftp.pubkey": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_POSTPROCSFTP_PUBKEY_TITLE",
+        "description": "COM_AKEEBA_CONFIG_POSTPROCSFTP_PUBKEY_DESCRIPTION"
+    },
+    "engine.archiver.directsftp.initial_directory": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_DIRECTSFTP_INITDIR_TITLE",
+        "description": "COM_AKEEBA_CONFIG_DIRECTSFTP_INITDIR_DESCRIPTION"
+    },
+    "engine.archiver.directsftp.sftp_test": {
+        "default": "0",
+        "type": "button",
+        "hook": "directsftp_test_connection",
+        "title": "COM_AKEEBA_CONFIG_DIRECTSFTP_TEST_TITLE",
+        "description": "COM_AKEEBA_CONFIG_DIRECTSFTP_TEST_DESCRIPTION"
+    }
+}

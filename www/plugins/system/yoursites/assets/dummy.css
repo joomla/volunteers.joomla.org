@@ -1,0 +1,62 @@
+/**
+ * @version    CVS: 1.11.3
+ * @package    com_yoursites
+ * @author     Geraint Edwards <yoursites@gwesystems.com>
+ * @copyright  2016-2020 GWE Systems Ltd
+ * @license    GNU General Public License version 2 or later; see LICENSE.txt
+ */
+
+/* These are dummy style declarations only used to test compression of website output */
+
+.color-box-sites {
+    float: left;
+    width: 15px;
+    height: 15px;
+    margin-right: 5px;
+    border: 1px solid rgba(0, 0, 0, .2);
+}
+
+.color-box-siteowners {
+    float: left;
+    width: 15px;
+    height: 15px;
+    margin-right: 5px;
+    border: 1px solid rgba(0, 0, 0, .2);
+}
+
+.color-box-extensions {
+    float: left;
+    width: 15px;
+    height: 15px;
+    margin-right: 5px;
+    border: 1px solid rgba(0, 0, 0, .2);
+}
+
+.other-filters {
+    padding: 0 14px;
+}
+
+#extensionList .disabledextension:before
+{
+    color:#ff0000;
+    background-color:#fff;
+}
+
+#extensionList .disabledextension:hover, #extensionList .disabledextension:focus,
+#extensionList .enabledextension:hover,  #extensionList .enabledextension:focus
+{
+    text-decoration: none;
+    cursor: pointer;
+}
+
+#extensionList .enabledextension:before
+{
+    color:#2f6f2f;
+    background-color:#fff;
+}
+
+#extensionList .extensionUpdateInfo
+{
+    display:inline-block;
+}
+

@@ -1,0 +1,58 @@
+{
+    "_information": {
+        "title": "COM_AKEEBA_CONFIG_ENGINE_POSTPROC_ONEDRIVE_TITLE",
+        "description": "COM_AKEEBA_CONFIG_ENGINE_POSTPROC_ONEDRIVE_DESCRIPTION"
+    },
+    "engine.postproc.common.after_part": {
+        "default": "0",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_POSTPROCPARTS_TITLE",
+        "description": "COM_AKEEBA_CONFIG_POSTPROCPARTS_DESCRIPTION"
+    },
+    "engine.postproc.common.delete_after": {
+        "default": "1",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_DELETEAFTER_TITLE",
+        "description": "COM_AKEEBA_CONFIG_DELETEAFTER_DESCRIPTION"
+    },
+    "engine.postproc.onedrive.chunk_upload": {
+        "default": "1",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_BOX_CHUNKUPLOAD_ENABLE"
+    },
+    "engine.postproc.onedrive.chunk_upload_size": {
+        "default": "10",
+        "type": "integer",
+        "min": "4",
+        "max": "60",
+        "shortcuts": "5|10|20|40|60",
+        "scale": "1",
+        "uom": "MB",
+        "title": "COM_AKEEBA_CONFIG_BOX_CHUNKUPLOAD_SIZE"
+    },
+    "engine.postproc.onedrive.openoauth": {
+        "default": "",
+        "type": "button",
+        "title": "COM_AKEEBA_CONFIG_BOX_OPENOAUTH_TITLE",
+        "description": "COM_AKEEBA_CONFIG_BOX_OPENOAUTH_DESC",
+        "hook": "akconfig_onedrive_openoauth"
+    },
+    "engine.postproc.onedrive.directory": {
+        "default": "\/",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_ONEDRIVE_DIRECTORY_TITLE",
+        "description": "COM_AKEEBA_CONFIG_ONEDRIVE_DIRECTORY_DESCRIPTION"
+    },
+    "engine.postproc.onedrive.access_token": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_ONEDRIVE_ACCESSTOKEN_TITLE",
+        "description": "COM_AKEEBA_CONFIG_ONEDRIVE_ACCESSTOKEN_DESCRIPTION"
+    },
+    "engine.postproc.onedrive.refresh_token": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_ONEDRIVE_REFRESHTOKEN_TITLE",
+        "description": "COM_AKEEBA_CONFIG_ONEDRIVE_REFRESHTOKEN_DESCRIPTION"
+    }
+}

@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension version="3.1" type="plugin" group="system" method="upgrade">
+    <name>PLG_YOURSITES_HANDLER</name>
+    <author>GWE Systems Ltd</author>
+    <creationDate>July 2020</creationDate>
+    <copyright>(C) 2017-2020 GWE Systems Ltd. All rights reserved.</copyright>
+    <license>GNU General Public License version 2 or later; see	LICENSE.txt</license>
+    <authorEmail>via website</authorEmail>
+    <authorUrl>www.gwesystems.com</authorUrl>
+    <version>1.11.3</version>
+    <description>PLG_YOURSITES_HANDLER_DESC</description>
+    <scriptfile>install.php</scriptfile>
+    <files>
+        <filename plugin="yoursites">yoursites.php</filename>
+        <filename>sitechecks.php</filename>
+        <filename>Compatibility.php</filename>
+        <folder>assets</folder>
+        <folder>customchecks</folder>
+        <folder>customactions</folder>
+        <filename>yoursites_getupdatedata.php</filename>
+    </files>
+    <languages>
+        <language tag="en-GB">language/en-GB/en-GB.plg_system_yoursites.ini</language>
+        <language tag="en-GB">language/en-GB/en-GB.plg_system_yoursites.sys.ini</language>
+    </languages>
+    <config>
+        <fields name="params">
+            <fieldset
+                name="basic"
+            >
+                <field
+                    name="checkserverdomain"
+                    type="radio"
+                    class="btn-group"
+                    default="0"
+                    label="PLG_YOURSITES_HANDLER_CHECK_SERVER_DOMAIN"
+                    description="PLG_YOURSITES_HANDLER_CHECK_SERVER_DOMAIN_DESC"
+                >
+                    <option value="0">JNO</option>
+                    <option value="1">JYES</option>
+                </field>
+                <field
+                    name="serverdomain"
+                    type="text"
+                    default=""
+                    label="PLG_YOURSITES_HANDLER_SERVER_DOMAIN"
+                    description="PLG_YOURSITES_HANDLER_SERVER_DOMAIN_DESC"
+                    showon="checkserverdomain:1"
+                />
+
+                <field
+                    name="checkserverip"
+                    type="radio"
+                    class="btn-group"
+                    default="0"
+                    label="PLG_YOURSITES_HANDLER_CHECK_SERVER_IP"
+                    description="PLG_YOURSITES_HANDLER_CHECK_SERVER_IP_DESC"
+                >
+                    <option value="0">JNO</option>
+                    <option value="1">JYES</option>
+                </field>
+
+                <field
+                    name="serverip"
+                    type="text"
+                    default=""
+                    label="PLG_YOURSITES_HANDLER_SERVER_IP"
+                    description="PLG_YOURSITES_HANDLER_SERVER_IP_DESC"
+                    showon="checkserverip:1[OR]checkip_directlogin:1"
+                />
+
+                <field
+                    name="checkservertoken"
+                    type="radio"
+                    class="btn-group"
+                    default="1"
+                    label="PLG_YOURSITES_HANDLER_CHECK_SERVER_TOKEN"
+                    description="PLG_YOURSITES_HANDLER_CHECK_SERVER_TOKEN_DESC"
+                >
+                    <option value="0">JNO</option>
+                    <option value="1">JYES</option>
+                </field>
+                <field
+                    name="servertoken"
+                    type="text"
+                    default=""
+                    label="PLG_YOURSITES_HANDLER_SERVER_TOKEN"
+                    description="PLG_YOURSITES_HANDLER_SERVER_TOKEN_DESC"
+                    showon="checkservertoken:1"
+                />
+
+                <field name="allowdirectlogin"
+                       type="radio"
+                       class="btn-group btn-group-yesno"
+                       default="1"
+                       label="PLG_YOURSITES_ALLOW_DIRECT_LOGIN"
+                       description="PLG_YOURSITES_ALLOW_DIRECT_LOGIN_DESC"
+                >
+                    <option value="0">JNO</option>
+                    <option value="1">JYES</option>
+                </field>
+
+                <field
+                        name="checkip_directlogin"
+                        type="radio"
+                        class="btn-group"
+                        default="1"
+                        label="PLG_YOURSITES_HANDLER_CHECK_IP_DIRECT_LOGIN"
+                        description="PLG_YOURSITES_HANDLER_CHECK_IP_DIRECT_LOGIN_DESC"
+                        showon="allowdirectlogin:1"
+                >
+                    <option value="0">JNO</option>
+                    <option value="1">JYES</option>
+                </field>
+
+                <field
+                        name="check2factor"
+                        type="radio"
+                        class="btn-group"
+                        default="0"
+                        label="PLG_YOURSITES_HANDLER_CHECK_2FACTOR_DIRECT_LOGIN"
+                        description="PLG_YOURSITES_HANDLER_CHECK_2FACTOR_DIRECT_LOGIN_DESC"
+                        showon="allowdirectlogin:1"
+                >
+                    <option value="0">JNO</option>
+                    <option value="1">JYES</option>
+                </field>
+
+
+                <field name="dluser"
+                       type="user"
+                       default=""
+                       label="PLG_YOURSITES_DIRECT_LOGIN_ALLOWED_USER"
+                       description="PLG_YOURSITES_DIRECT_LOGIN_ALLOWED_USER_DESC"
+                       showon="allowdirectlogin:1"
+                />
+
+            </fieldset>
+        </fields>
+    </config>
+
+</extension>

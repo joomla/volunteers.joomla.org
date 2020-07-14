@@ -1,0 +1,42 @@
+{
+    "_information": {
+        "title": "COM_AKEEBA_CONFIG_ENGINE_POSTPROC_CLOUDFILES_TITLE",
+        "description": "COM_AKEEBA_CONFIG_ENGINE_POSTPROC_CLOUDFILES_DESCRIPTION"
+    },
+    "engine.postproc.common.after_part": {
+        "default": "0",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_POSTPROCPARTS_TITLE",
+        "description": "COM_AKEEBA_CONFIG_POSTPROCPARTS_DESCRIPTION"
+    },
+    "engine.postproc.common.delete_after": {
+        "default": "1",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_DELETEAFTER_TITLE",
+        "description": "COM_AKEEBA_CONFIG_DELETEAFTER_DESCRIPTION"
+    },
+    "engine.postproc.cloudfiles.username": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_CLOUDFILESUSERNAME_TITLE",
+        "description": "COM_AKEEBA_CONFIG_CLOUDFILESUSERNAME_DESCRIPTION"
+    },
+    "engine.postproc.cloudfiles.apikey": {
+        "default": "",
+        "type": "password",
+        "title": "COM_AKEEBA_CONFIG_CLOUDFILESAPIKEY_TITLE",
+        "description": "COM_AKEEBA_CONFIG_CLOUDFILESAPIKEY_DESCRIPTION"
+    },
+    "engine.postproc.cloudfiles.container": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_CLOUDFILESCONTAINER_TITLE",
+        "description": "COM_AKEEBA_CONFIG_CLOUDFILESCONTAINER_DESCRIPTION"
+    },
+    "engine.postproc.cloudfiles.directory": {
+        "default": "\/",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_CLOUDFILESDIRECTORY_TITLE",
+        "description": "COM_AKEEBA_CONFIG_CLOUDFILESDIRECTORY_DESCRIPTION"
+    }
+}

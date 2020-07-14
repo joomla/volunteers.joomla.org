@@ -9,7 +9,7 @@
 
 namespace Akeeba\Engine\Util\Pushbullet;
 
-
+defined('AKEEBAENGINE') || die();
 
 use CURLFile;
 
@@ -45,15 +45,15 @@ use CURLFile;
  */
 class Connector
 {
-	const URL_PUSHES = 'https://api.pushbullet.com/v2/pushes';
-	const URL_DEVICES = 'https://api.pushbullet.com/v2/devices';
-	const URL_CONTACTS = 'https://api.pushbullet.com/v2/contacts';
-	const URL_UPLOAD_REQUEST = 'https://api.pushbullet.com/v2/upload-request';
-	const URL_USERS = 'https://api.pushbullet.com/v2/users';
-	const URL_SUBSCRIPTIONS = 'https://api.pushbullet.com/v2/subscriptions';
-	const URL_CHANNEL_INFO = 'https://api.pushbullet.com/v2/channel-info';
-	const URL_EPHEMERALS = 'https://api.pushbullet.com/v2/ephemerals';
-	const URL_PHONEBOOK = 'https://api.pushbullet.com/v2/permanents/phonebook';
+	public const URL_PUSHES = 'https://api.pushbullet.com/v2/pushes';
+	public const URL_DEVICES = 'https://api.pushbullet.com/v2/devices';
+	public const URL_CONTACTS = 'https://api.pushbullet.com/v2/contacts';
+	public const URL_UPLOAD_REQUEST = 'https://api.pushbullet.com/v2/upload-request';
+	public const URL_USERS = 'https://api.pushbullet.com/v2/users';
+	public const URL_SUBSCRIPTIONS = 'https://api.pushbullet.com/v2/subscriptions';
+	public const URL_CHANNEL_INFO = 'https://api.pushbullet.com/v2/channel-info';
+	public const URL_EPHEMERALS = 'https://api.pushbullet.com/v2/ephemerals';
+	public const URL_PHONEBOOK = 'https://api.pushbullet.com/v2/permanents/phonebook';
 	private $_apiKey;
 	private $_curlCallback;
 
@@ -200,10 +200,10 @@ class Connector
 			throw new ApiException('File: File size exceeds 25 MB.');
 		}
 
-		$data['file_name'] = $altFileName === null ? basename($fullFilePath) : $altFileName;
+		$data['file_name'] = $altFileName ?? basename($fullFilePath);
 
 		// Try to guess the MIME type if the argument is NULL
-		$data['file_type'] = $mimeType === null ? mime_content_type($fullFilePath) : $mimeType;
+		$data['file_type'] = $mimeType ?? mime_content_type($fullFilePath);
 
 		// Request authorization to upload the file
 		$response         = $this->_curlRequest(self::URL_UPLOAD_REQUEST, 'GET', $data);

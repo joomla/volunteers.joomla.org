@@ -7,12 +7,12 @@
 
 namespace FOF30\Model\DataModel\Behaviour;
 
+defined('_JEXEC') || die;
+
 use FOF30\Event\Observer;
 use FOF30\Model\DataModel;
 use JDatabaseQuery;
 use Joomla\Registry\Registry;
-
-defined('_JEXEC') or die;
 
 class Filters extends Observer
 {
@@ -20,7 +20,7 @@ class Filters extends Observer
 	 * This event runs after we have built the query used to fetch a record
 	 * list in a model. It is used to apply automatic query filters.
 	 *
-	 * @param   DataModel  &$model  The model which calls this event
+	 * @param   DataModel  &         $model  The model which calls this event
 	 * @param   JDatabaseQuery      &$query  The query we are manipulating
 	 *
 	 * @return  void
@@ -28,7 +28,7 @@ class Filters extends Observer
 	public function onAfterBuildQuery(&$model, &$query)
 	{
 		$tableKey = $model->getIdFieldName();
-		$db = $model->getDbo();
+		$db       = $model->getDbo();
 
 		$fields     = $model->getTableFields();
 		$blacklist  = $model->getBlacklistFilters();
@@ -42,14 +42,14 @@ class Filters extends Observer
 				continue;
 			}
 
-			$fieldInfo = (object)array(
-				'name'	=> $fieldname,
-				'type'	=> $fieldmeta->Type,
+			$fieldInfo = (object) [
+				'name'       => $fieldname,
+				'type'       => $fieldmeta->Type,
 				'filterZero' => $filterZero,
 				'tableAlias' => $tableAlias,
-			);
+			];
 
-			$filterName = $fieldInfo->name;
+			$filterName  = $fieldInfo->name;
 			$filterState = $model->getState($filterName, null);
 
 			// Special primary key handling: if ignore request is set we'll also look for an 'id' state variable if a
@@ -71,7 +71,7 @@ class Filters extends Observer
 				}
 			}
 
-			$field = DataModel\Filter\AbstractFilter::getField($fieldInfo, array('dbo' => $db));
+			$field = DataModel\Filter\AbstractFilter::getField($fieldInfo, ['dbo' => $db]);
 
 			if (!is_object($field) || !($field instanceof DataModel\Filter\AbstractFilter))
 			{
@@ -84,16 +84,16 @@ class Filters extends Observer
 						array_key_exists('to', $filterState)
 					)) || is_object($filterState))
 			{
-				$options = class_exists('JRegistry') ? new \JRegistry($filterState) : new Registry($filterState);
+				$options = class_exists('JRegistry') ? new Registry($filterState) : new Registry($filterState);
 			}
 			else
 			{
-				$options = class_exists('JRegistry') ? new \JRegistry() : new Registry();
+				$options = class_exists('JRegistry') ? new Registry() : new Registry();
 				$options->set('value', $filterState);
 			}
 
 			$methods = $field->getSearchMethods();
-			$method = $options->get('method', $field->getDefaultSearchMethod());
+			$method  = $options->get('method', $field->getDefaultSearchMethod());
 
 			if (!in_array($method, $methods))
 			{

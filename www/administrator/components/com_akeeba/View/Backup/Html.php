@@ -8,7 +8,7 @@
 namespace Akeeba\Backup\Admin\View\Backup;
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 use Akeeba\Backup\Admin\Helper\Status;
 use Akeeba\Backup\Admin\Helper\Utils;
@@ -19,11 +19,7 @@ use Akeeba\Backup\Admin\View\ViewTraits\ProfileList;
 use Akeeba\Engine\Factory;
 use FOF30\Date\Date;
 use FOF30\View\DataView\Html as BaseView;
-use JFactory;
-use JHtml;
-use JLoader;
-use JText;
-use JUri;
+use Joomla\CMS\Language\Text;
 
 /**
  * View controller for the Backup Now page
@@ -187,9 +183,6 @@ class Html extends BaseView
 		// Load the view-specific Javascript
 		$this->container->template->addJS('media://com_akeeba/js/Backup.min.js');
 
-		// Preload Joomla! behaviours
-		JLoader::import('joomla.utilities.date');
-
 		// Load the models
 		/** @var  Backup $model */
 		$model = $this->getModel();
@@ -204,9 +197,9 @@ class Html extends BaseView
 		$default_description = $this->getDefaultDescription();
 
 		// Load data from the model state
-		$backup_description  = $model->getState('description', $default_description, 'string');
-		$comment             = $model->getState('comment', '', 'html');
-		$returnurl           = Utils::safeDecodeReturnUrl($model->getState('returnurl', ''));
+		$backup_description = $model->getState('description', $default_description, 'string');
+		$comment            = $model->getState('comment', '', 'html');
+		$returnurl          = Utils::safeDecodeReturnUrl($model->getState('returnurl', ''));
 
 		// Get the maximum execution time and bias
 		$engineConfiguration = Factory::getConfiguration();
@@ -261,8 +254,8 @@ class Html extends BaseView
 		$user                = $this->container->platform->getUser();
 		$tz                  = $user->getParam('timezone', $tzDefault);
 		$dateNow             = new Date('now', $tz);
-		$default_description = JText::_('COM_AKEEBA_BACKUP_DEFAULT_DESCRIPTION') . ' ' .
-			$dateNow->format(JText::_('DATE_FORMAT_LC2'), true);
+		$default_description = Text::_('COM_AKEEBA_BACKUP_DEFAULT_DESCRIPTION') . ' ' .
+			$dateNow->format(Text::_('DATE_FORMAT_LC2'), true);
 
 		return $default_description;
 	}
@@ -277,18 +270,18 @@ class Html extends BaseView
 		$engineConfiguration = Factory::getConfiguration();
 		$script              = $engineConfiguration->get('akeeba.basic.backup_type', 'full');
 		$scripting           = Factory::getEngineParamsProvider()->loadScripting();
-		$domains             = array();
+		$domains             = [];
 
 		if (empty($scripting))
 		{
 			return $domains;
 		}
 
-		foreach ($scripting['scripts'][ $script ]['chain'] as $domain)
+		foreach ($scripting['scripts'][$script]['chain'] as $domain)
 		{
-			$description = JText::_($scripting['domains'][ $domain ]['text']);
-			$domain_key  = $scripting['domains'][ $domain ]['domain'];
-			$domains[]   = array($domain_key, $description);
+			$description = Text::_($scripting['domains'][$domain]['text']);
+			$domain_key  = $scripting['domains'][$domain]['domain'];
+			$domains[]   = [$domain_key, $description];
 		}
 
 		return $domains;

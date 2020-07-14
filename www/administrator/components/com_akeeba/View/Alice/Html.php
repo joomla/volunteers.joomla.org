@@ -8,7 +8,7 @@
 namespace Akeeba\Backup\Admin\View\Alice;
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 use Akeeba\Backup\Admin\Model\Alice;
 use Akeeba\Backup\Admin\Model\Log;

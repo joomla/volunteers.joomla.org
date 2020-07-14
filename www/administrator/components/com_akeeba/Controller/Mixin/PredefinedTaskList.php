@@ -8,7 +8,7 @@
 namespace Akeeba\Backup\Admin\Controller\Mixin;
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 /**
  * Force a Controller to allow access to specific tasks only, no matter which tasks are already defined in this

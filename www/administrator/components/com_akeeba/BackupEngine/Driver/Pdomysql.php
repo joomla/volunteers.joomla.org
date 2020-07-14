@@ -9,7 +9,7 @@
 
 namespace Akeeba\Engine\Driver;
 
-
+defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Driver\Query\Pdomysql as QueryPdomysql;
 use Exception;
@@ -150,7 +150,7 @@ class Pdomysql extends Mysql
 			$this->charset = 'utf8mb4';
 		}
 
-		$this->port = $this->port ? $this->port : 3306;
+		$this->port = $this->port ?: 3306;
 
 		$format = 'mysql:host=#HOST#;port=#PORT#;dbname=#DBNAME#;charset=#CHARSET#';
 

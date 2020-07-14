@@ -9,7 +9,7 @@
 
 namespace Akeeba\Engine\Postproc;
 
-
+defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Base\Exceptions\ErrorException;
 use Akeeba\Engine\Configuration;

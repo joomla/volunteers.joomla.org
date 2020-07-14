@@ -8,22 +8,23 @@
 namespace Akeeba\Backup\Admin\Model;
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 use Akeeba\Engine\Factory;
 use Akeeba\Engine\Platform;
 use FOF30\Container\Container;
 use FOF30\Model\DataModel;
+use Joomla\CMS\Language\Text;
 use RuntimeException;
 
 /**
  * Backup profile model
  *
- * @property  int     id             Profile ID
- * @property  string  description    Description
- * @property  string  configuration  Engine configuration data
- * @property  string  filters        Engine filters
- * @property  int     quickicon      Should I include this profile in the One Click Backup profiles (1) or not (0)?
+ * @property  int    id             Profile ID
+ * @property  string description    Description
+ * @property  string configuration  Engine configuration data
+ * @property  string filters        Engine filters
+ * @property  int    quickicon      Should I include this profile in the One Click Backup profiles (1) or not (0)?
  */
 class Profiles extends DataModel
 {
@@ -46,7 +47,7 @@ class Profiles extends DataModel
 		$this->addBehaviour('filters');
 		$this->blacklistFilters([
 			'configuration',
-			'filters'
+			'filters',
 		]);
 	}
 
@@ -88,8 +89,8 @@ class Profiles extends DataModel
 		// Get the IDs of all profiles
 		$db    = $this->getDbo();
 		$query = $db->getQuery(true)
-					->select($db->qn('id'))
-					->from($db->qn('#__ak_profiles'));
+			->select($db->qn('id'))
+			->from($db->qn('#__ak_profiles'));
 		$db->setQuery($query);
 		$profiles = $db->loadColumn();
 
@@ -100,8 +101,8 @@ class Profiles extends DataModel
 		foreach ($profiles as $profileId)
 		{
 			Platform::getInstance()->load_configuration($profileId);
-			$profileConfiguration  = Factory::getConfiguration();
-			$engines[ $profileId ] = $profileConfiguration->get('akeeba.advanced.postproc_engine');
+			$profileConfiguration = Factory::getConfiguration();
+			$engines[$profileId]  = $profileConfiguration->get('akeeba.advanced.postproc_engine');
 		}
 
 		// Reload the current profile
@@ -120,15 +121,15 @@ class Profiles extends DataModel
 		// You cannot delete the default record
 		if ($id <= 1)
 		{
-			throw new RuntimeException(\JText::_('COM_AKEEBA_PROFILE_ERR_CANNOTDELETEDEFAULT'), 500);
+			throw new RuntimeException(Text::_('COM_AKEEBA_PROFILE_ERR_CANNOTDELETEDEFAULT'), 500);
 		}
 
 		// If you're deleting the current backup profile we have to switch to the default profile (#1)
-		$activeProfile     = Platform::getInstance()->get_active_profile();
+		$activeProfile = Platform::getInstance()->get_active_profile();
 
 		if ($id == $activeProfile)
 		{
-			throw new RuntimeException(\JText::sprintf('COM_AKEEBA_PROFILE_ERR_CANNOTDELETEACTIVE', $id), 500);
+			throw new RuntimeException(Text::sprintf('COM_AKEEBA_PROFILE_ERR_CANNOTDELETEACTIVE', $id), 500);
 		}
 	}
 
@@ -137,7 +138,7 @@ class Profiles extends DataModel
 	 * description), configuration (engine configuration INI data) and filters (inclusion and inclusion filters JSON
 	 * configuration data).
 	 *
-	 * @param    array  $data  See above
+	 * @param   array  $data  See above
 	 *
 	 * @returns  void
 	 *
@@ -155,7 +156,7 @@ class Profiles extends DataModel
 
 		if (!$isValid)
 		{
-			throw new RuntimeException(\JText::_('COM_AKEEBA_PROFILES_ERR_IMPORT_INVALID'));
+			throw new RuntimeException(Text::_('COM_AKEEBA_PROFILES_ERR_IMPORT_INVALID'));
 		}
 
 		// Unset the id, if it exists
@@ -171,7 +172,7 @@ class Profiles extends DataModel
 
 		if (!$result)
 		{
-			throw new RuntimeException(\JText::_('COM_AKEEBA_PROFILES_ERR_IMPORT_FAILED'));
+			throw new RuntimeException(Text::_('COM_AKEEBA_PROFILES_ERR_IMPORT_FAILED'));
 		}
 	}
 }

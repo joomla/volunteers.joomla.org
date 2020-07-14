@@ -7,15 +7,18 @@
 
 namespace FOF30\Platform;
 
+defined('_JEXEC') || die;
+
 use Exception;
 use FOF30\Container\Container;
 use FOF30\Date\Date;
 use FOF30\Input\Input;
+use JDatabaseDriver;
+use Joomla\CMS\Document\Document;
+use Joomla\CMS\Language\Language;
 use Joomla\CMS\User\User;
 use Joomla\Registry\Registry;
 use JsonSerializable;
-
-defined('_JEXEC') or die;
 
 /**
  * Part of the F0F Platform Abstraction Layer. It implements everything that
@@ -28,7 +31,7 @@ interface PlatformInterface
 	/**
 	 * Public constructor.
 	 *
-	 * @param   \FOF30\Container\Container  $c  The component container
+	 * @param   Container  $c  The component container
 	 */
 	public function __construct(Container $c);
 
@@ -211,7 +214,7 @@ interface PlatformInterface
 	 * @param   integer  $id  The user ID to load. Skip or use null to retrieve
 	 *                        the object for the currently logged in user.
 	 *
-	 * @return  \JUser  The \JUser object for the specified user
+	 * @return  User  The \JUser object for the specified user
 	 */
 	public function getUser($id = null);
 
@@ -222,7 +225,7 @@ interface PlatformInterface
 	 * FOF will not attempt to load CSS and Javascript files (as it doesn't make
 	 * sense if there's no \JDocument to handle them).
 	 *
-	 * @return  \JDocument
+	 * @return  Document
 	 */
 	public function getDocument();
 
@@ -240,14 +243,14 @@ interface PlatformInterface
 	/**
 	 * Return the \JLanguage instance of the CMS/application
 	 *
-	 * @return \JLanguage
+	 * @return Language
 	 */
 	public function getLanguage();
 
 	/**
 	 * Returns the database driver object of the CMS/application
 	 *
-	 * @return \JDatabaseDriver
+	 * @return JDatabaseDriver
 	 */
 	public function getDbo();
 
@@ -264,6 +267,13 @@ interface PlatformInterface
 	 * @return  boolean
 	 */
 	public function isFrontend();
+
+	/**
+	 * Is this the Joomla 4 API application?
+	 *
+	 * @return  boolean
+	 */
+	public function isApi();
 
 	/**
 	 * Is this a component running in a CLI application?
@@ -329,7 +339,7 @@ interface PlatformInterface
 	/**
 	 * logs in a user
 	 *
-	 * @param   array  $authInfo  authentification information
+	 * @param   array  $authInfo  Authentication information
 	 *
 	 * @return  boolean  True on success
 	 */
@@ -440,7 +450,7 @@ interface PlatformInterface
 	 *
 	 * @return  void
 	 *
-	 * @throws  \Exception
+	 * @throws  Exception
 	 */
 	public function redirect($url, $status = 301, $msg = null, $type = 'message');
 

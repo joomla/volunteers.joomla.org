@@ -8,20 +8,19 @@
 namespace Akeeba\Backup\Admin\Model;
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
-use Akeeba\Engine\Factory;
-use Akeeba\Engine\Util\RandomValue;
 use Akeeba\Backup\Admin\Model\Exceptions\TransferFatalError;
 use Akeeba\Backup\Admin\Model\Exceptions\TransferIgnorableError;
+use Akeeba\Engine\Factory;
+use Akeeba\Engine\Util\RandomValue;
 use Akeeba\Engine\Util\Transfer as EngineTransfer;
 use Exception;
 use FOF30\Download\Download;
 use FOF30\Model\Model;
-use JFile;
-use Joomla\Uri\Uri;
-use JText;
-use JUri;
+use Joomla\CMS\Filesystem\File;
+use Joomla\CMS\Language\Text;
+use Joomla\CMS\Uri\Uri;
 use RuntimeException;
 
 class Transfer extends Model
@@ -30,9 +29,11 @@ class Transfer extends Model
 	/**
 	 * Get the information for the latest backup
 	 *
-	 * @param   $profileID  int|null  The profile ID for which to get the latest backup. Set to null to search all profiles.
+	 * @param   $profileID  int|null  The profile ID for which to get the latest backup. Set to null to search all
+	 *                      profiles.
 	 *
-	 * @return  array|null  An array of backup record information or null if there is no usable backup for site transfer
+	 * @return  array|null  An array of backup record information or null if there is no usable backup for site
+	 *                      transfer
 	 */
 	public function getLatestBackupInformation($profileID = null)
 	{
@@ -79,8 +80,8 @@ class Transfer extends Model
 
 	/**
 	 * Returns the amount of space required on the target server. The two array keys are
-	 * size		In bytes
-	 * string	Pretty formatted, user-friendly string
+	 * size        In bytes
+	 * string    Pretty formatted, user-friendly string
 	 *
 	 * @return  array
 	 */
@@ -92,25 +93,25 @@ class Transfer extends Model
 		{
 			return [
 				'size'   => 0,
-				'string' => '0.00 KB'
+				'string' => '0.00 KB',
 			];
 		}
 
 		$approximateSize = 2.5 * (float) $backup['size'];
 
-		$unit	 = array('b', 'KB', 'MB', 'GB', 'TB', 'PB');
+		$unit = ['b', 'KB', 'MB', 'GB', 'TB', 'PB'];
 
 		if (version_compare(PHP_VERSION, '5.6.0', 'lt'))
 		{
 			return [
 				'size'   => $approximateSize,
-				'string' => @round($approximateSize / pow(1024, ($i = floor(log($approximateSize, 1024)))), 2) . ' ' . $unit[$i]
+				'string' => @round($approximateSize / 1024 ** ($i = floor(log($approximateSize, 1024))), 2) . ' ' . $unit[$i],
 			];
 		}
 
 		return [
 			'size'   => $approximateSize,
-			'string' => @round($approximateSize / (1024 ** ($i = floor(log($approximateSize, 1024)))), 2) . ' ' . $unit[$i]
+			'string' => @round($approximateSize / (1024 ** ($i = floor(log($approximateSize, 1024)))), 2) . ' ' . $unit[$i],
 		];
 	}
 
@@ -125,8 +126,8 @@ class Transfer extends Model
 	{
 		// Initialise
 		$result = [
-			'status'	=> 'ok',
-			'url'		=> $url
+			'status' => 'ok',
+			'url'    => $url,
 		];
 
 		// Am I missing the protocol?
@@ -138,7 +139,7 @@ class Transfer extends Model
 		$result['url'] = $url;
 
 		// Verify that it is an HTTP or HTTPS URL.
-		$uri = JUri::getInstance($url);
+		$uri      = Uri::getInstance($url);
 		$protocol = $uri->getScheme();
 
 		if (!in_array($protocol, ['http', 'https']))
@@ -152,7 +153,7 @@ class Transfer extends Model
 		$path = $this->simplifyPath($uri->getPath());
 		$uri->setPath('/' . $path);
 
-		$siteUri = JUri::getInstance();
+		$siteUri = Uri::getInstance();
 
 		if ($siteUri->getHost() == $uri->getHost())
 		{
@@ -183,7 +184,7 @@ class Transfer extends Model
 		if (!$isValid)
 		{
 			$download = new Download($this->container);
-			$dummy = $download->getFromURL($uri->toString());
+			$dummy    = $download->getFromURL($uri->toString());
 
 			$isValid = $dummy !== false;
 		}
@@ -197,51 +198,6 @@ class Transfer extends Model
 
 		// All checks pass
 		return $result;
-	}
-
-	/**
-	 * Tries to simplify a server path to get the site's root. It can handle most forms on non-SEF and non-rewrite SEF
-	 * URLs (as in index.php?foo=bar, something.php/this/is?completely=nuts#ok). It can't fix stupid but it tries really
-	 * bloody hard to.
-	 *
-	 * @param   string  $path  The path to simplify. We *expect* this to contain nonsense.
-	 *
-	 * @return  string  The scrubbed clean URL, hopefully leading to the site's root.
-	 */
-	private function simplifyPath($path)
-	{
-		$path = ltrim($path, '/');
-
-		if (empty($path))
-		{
-			return $path;
-		}
-
-		// Trim out anything after a .php file (including the .php file itself)
-		if (substr($path, -1) != '/')
-		{
-			$parts = explode('/', $path);
-			$newParts = [];
-
-			foreach ($parts as $part)
-			{
-				if (substr($part, -4) == '.php')
-				{
-					break;
-				}
-
-				$newParts[] = $part;
-			}
-
-			$path = implode('/', $newParts);
-		}
-
-		if (substr($path, -13) == 'administrator')
-		{
-			$path = substr($path, 0, -13);
-		}
-
-		return $path;
 	}
 
 	/**
@@ -271,17 +227,25 @@ class Transfer extends Model
 				'ftp'      => false,
 				'ftps'     => false,
 				'sftp'     => false,
-			]
+			],
 		];
 
 		// Necessary functions for each connection method
 		$supportChecks = [
-			'ftpcurl'	=> ['curl_init', 'curl_exec', 'curl_setopt', 'curl_errno', 'curl_error'],
-			'ftpscurl'	=> ['curl_init', 'curl_exec', 'curl_setopt', 'curl_errno', 'curl_error'],
-			'sftpcurl'	=> ['curl_init', 'curl_exec', 'curl_setopt', 'curl_errno', 'curl_error'],
-			'ftp'	    => ['ftp_connect', 'ftp_login', 'ftp_close', 'ftp_chdir', 'ftp_mkdir', 'ftp_pasv', 'ftp_put', 'ftp_delete'],
-			'ftps'	    => ['ftp_ssl_connect', 'ftp_login', 'ftp_close', 'ftp_chdir', 'ftp_mkdir', 'ftp_pasv', 'ftp_put', 'ftp_delete'],
-			'sftp'	    => ['ssh2_connect', 'ssh2_auth_password', 'ssh2_auth_pubkey_file', 'ssh2_sftp', 'ssh2_exec', 'ssh2_sftp_unlink', 'ssh2_sftp_stat', 'ssh2_sftp_mkdir'],
+			'ftpcurl'  => ['curl_init', 'curl_exec', 'curl_setopt', 'curl_errno', 'curl_error'],
+			'ftpscurl' => ['curl_init', 'curl_exec', 'curl_setopt', 'curl_errno', 'curl_error'],
+			'sftpcurl' => ['curl_init', 'curl_exec', 'curl_setopt', 'curl_errno', 'curl_error'],
+			'ftp'      => [
+				'ftp_connect', 'ftp_login', 'ftp_close', 'ftp_chdir', 'ftp_mkdir', 'ftp_pasv', 'ftp_put', 'ftp_delete',
+			],
+			'ftps'     => [
+				'ftp_ssl_connect', 'ftp_login', 'ftp_close', 'ftp_chdir', 'ftp_mkdir', 'ftp_pasv', 'ftp_put',
+				'ftp_delete',
+			],
+			'sftp'     => [
+				'ssh2_connect', 'ssh2_auth_password', 'ssh2_auth_pubkey_file', 'ssh2_sftp', 'ssh2_exec',
+				'ssh2_sftp_unlink', 'ssh2_sftp_stat', 'ssh2_sftp_mkdir',
+			],
 		];
 
 		// Determine which connection methods are supported
@@ -305,16 +269,17 @@ class Transfer extends Model
 		$result['supported'] = $supported;
 
 		// Check firewall settings -- Disabled because the 3PD test server got clogged :(
+
 		/**
-		$result['firewalled'] = array(
-			'ftp'      => !$result['supported']['ftp'] ? false : EngineTransfer\Ftp::isFirewalled(),
-			'ftpcurl'  => !$result['supported']['ftp'] ? false : EngineTransfer\FtpCurl::isFirewalled(),
-			'ftps'     => !$result['supported']['ftps'] ? false : EngineTransfer\Ftp::isFirewalled(['ssl' => true]),
-			'ftpscurl' => !$result['supported']['ftp'] ? false : EngineTransfer\FtpCurl::isFirewalled(['ssl' => true]),
-			'sftp'     => !$result['supported']['sftp'] ? false : EngineTransfer\Sftp::isFirewalled(),
-			'sftpcurl' => !$result['supported']['sftp'] ? false : EngineTransfer\SftpCurl::isFirewalled(),
-		);
-		/**/
+		 * $result['firewalled'] = array(
+		 * 'ftp'      => !$result['supported']['ftp'] ? false : EngineTransfer\Ftp::isFirewalled(),
+		 * 'ftpcurl'  => !$result['supported']['ftp'] ? false : EngineTransfer\FtpCurl::isFirewalled(),
+		 * 'ftps'     => !$result['supported']['ftps'] ? false : EngineTransfer\Ftp::isFirewalled(['ssl' => true]),
+		 * 'ftpscurl' => !$result['supported']['ftp'] ? false : EngineTransfer\FtpCurl::isFirewalled(['ssl' => true]),
+		 * 'sftp'     => !$result['supported']['sftp'] ? false : EngineTransfer\Sftp::isFirewalled(),
+		 * 'sftpcurl' => !$result['supported']['sftp'] ? false : EngineTransfer\SftpCurl::isFirewalled(),
+		 * );
+		 * /**/
 
 		return $result;
 	}
@@ -363,13 +328,13 @@ class Transfer extends Model
 
 		// Can I upload Kickstart and my extra script?
 		$files = [
-			JPATH_ADMINISTRATOR . '/components/com_akeeba/Master/Installers/kickstart.txt'  => 'kickstart.php',
-			JPATH_ADMINISTRATOR . '/components/com_akeeba/Master/Installers/kickstart.transfer.php' => 'kickstart.transfer.php'
+			JPATH_ADMINISTRATOR . '/components/com_akeeba/Master/Installers/kickstart.txt'          => 'kickstart.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeeba/Master/Installers/kickstart.transfer.php' => 'kickstart.transfer.php',
 		];
 
-		$createdFiles = [];
+		$createdFiles    = [];
 		$transferredSize = 0;
-		$transferTime = 0;
+		$transferTime    = 0;
 
 		try
 		{
@@ -377,10 +342,10 @@ class Transfer extends Model
 			{
 				$start = microtime(true);
 				$connector->upload($localFile, $connector->getPath($remoteFile));
-				$end = microtime(true);
-				$createdFiles[] = $remoteFile;
+				$end             = microtime(true);
+				$createdFiles[]  = $remoteFile;
 				$transferredSize += filesize($localFile);
-				$transferTime += $end - $start;
+				$transferTime    += $end - $start;
 			}
 		}
 		catch (Exception $e)
@@ -388,7 +353,7 @@ class Transfer extends Model
 			// An upload failed. Remove existing files.
 			$this->removeRemoteFiles($connector, $createdFiles, true);
 
-			throw new RuntimeException(JText::_('COM_AKEEBA_TRANSFER_ERR_CANNOTUPLOADKICKSTART'));
+			throw new RuntimeException(Text::_('COM_AKEEBA_TRANSFER_ERR_CANNOTUPLOADKICKSTART'));
 		}
 
 		// Get the transfer speed between the two servers in bytes / second
@@ -418,7 +383,7 @@ class Transfer extends Model
 
 		// Get the lowest maximum execution time between our local and remote server
 		$remoteTimeout = $this->container->platform->getSessionVar('transfer.remoteTimeLimit', 5, 'akeeba');
-		$localTimeout = 5;
+		$localTimeout  = 5;
 
 		if (function_exists('ini_get'))
 		{
@@ -455,11 +420,11 @@ class Transfer extends Model
 		 * upload size (minus 10Kb for overhead data)
 		 */
 		// Maximum chunk size determined by local server's memory constraints
-		$chunkSizeLimit  = $this->getMaxChunkSize();
+		$chunkSizeLimit = $this->getMaxChunkSize();
 		// Chunk size selected by the user
 		$userUploadLimit = $this->container->platform->getSessionVar('transfer.chunkSize', 5242880, 'akeeba') - 10240;
 		// Maximum chunk size determined by the remote server
-		$maxUploadLimit  = $this->container->platform->getSessionVar('transfer.uploadLimit', 5242880, 'akeeba') - 10240;
+		$maxUploadLimit = $this->container->platform->getSessionVar('transfer.uploadLimit', 5242880, 'akeeba') - 10240;
 		// Calculated optimum chunk size (maxTransferSize is calculated by server-to-server speed limits)
 		$maxTransferSize = min($maxUploadLimit, $userUploadLimit, $maxTransferSize, $chunkSizeLimit);
 
@@ -481,9 +446,9 @@ class Transfer extends Model
 	 *
 	 * @param   array  $config  FTP/SFTP connection details
 	 *
+	 * @return  array
 	 * @throws  Exception
 	 *
-	 * @return  array
 	 */
 	public function uploadChunk(array $config)
 	{
@@ -492,16 +457,16 @@ class Transfer extends Model
 			'done'      => false,
 			'message'   => '',
 			'totalSize' => 0,
-			'doneSize'  => 0
+			'doneSize'  => 0,
 		];
 
 		// Get information from the session
-		$fragSize   = $this->container->platform->getSessionVar('transfer.fragSize', 5242880, 'akeeba');
-		$backup     = $this->container->platform->getSessionVar('transfer.lastBackup', [], 'akeeba');
-		$totalSize  = $this->container->platform->getSessionVar('transfer.totalSize', 0, 'akeeba');
-		$doneSize   = $this->container->platform->getSessionVar('transfer.doneSize', 0, 'akeeba');
-		$part       = $this->container->platform->getSessionVar('transfer.part', -1, 'akeeba');
-		$frag       = $this->container->platform->getSessionVar('transfer.frag', -1, 'akeeba');
+		$fragSize  = $this->container->platform->getSessionVar('transfer.fragSize', 5242880, 'akeeba');
+		$backup    = $this->container->platform->getSessionVar('transfer.lastBackup', [], 'akeeba');
+		$totalSize = $this->container->platform->getSessionVar('transfer.totalSize', 0, 'akeeba');
+		$doneSize  = $this->container->platform->getSessionVar('transfer.doneSize', 0, 'akeeba');
+		$part      = $this->container->platform->getSessionVar('transfer.part', -1, 'akeeba');
+		$frag      = $this->container->platform->getSessionVar('transfer.frag', -1, 'akeeba');
 
 		// Do I need to update the total size?
 		if (!$totalSize)
@@ -535,12 +500,13 @@ class Transfer extends Model
 
 			// We are done
 			$ret['done'] = true;
+
 			return $ret;
 		}
 
 		// Get the information for this part
 		$fileName = $this->getPartFilename($backup['absolute_path'], $part);
-		$fileSize  = filesize($fileName);
+		$fileSize = filesize($fileName);
 
 		$intendedSeekPosition = $fragSize * $frag;
 
@@ -548,6 +514,7 @@ class Transfer extends Model
 		if ($intendedSeekPosition >= $fileSize)
 		{
 			$this->container->platform->setSessionVar('transfer.frag', -1, 'akeeba');
+
 			return $this->uploadChunk($config);
 		}
 
@@ -556,8 +523,8 @@ class Transfer extends Model
 
 		if ($fp === false)
 		{
-			$ret['result'] = false;
-			$ret['message'] = JText::sprintf('COM_AKEEBA_TRANSFER_ERR_CANNOTREADLOCALFILE', $fileName);
+			$ret['result']  = false;
+			$ret['message'] = Text::sprintf('COM_AKEEBA_TRANSFER_ERR_CANNOTREADLOCALFILE', $fileName);
 
 			return $ret;
 		}
@@ -567,15 +534,15 @@ class Transfer extends Model
 		{
 			@fclose($fp);
 
-			$ret['result'] = false;
-			$ret['message'] = JText::sprintf('COM_AKEEBA_TRANSFER_ERR_CANNOTREADLOCALFILE', $fileName);
+			$ret['result']  = false;
+			$ret['message'] = Text::sprintf('COM_AKEEBA_TRANSFER_ERR_CANNOTREADLOCALFILE', $fileName);
 
 			return $ret;
 		}
 
 		// Read the data
-		$data = fread($fp, $fragSize);
-		$doneSize += strlen($data);
+		$data            = fread($fp, $fragSize);
+		$doneSize        += strlen($data);
 		$ret['doneSize'] = $doneSize;
 		$this->container->platform->setSessionVar('transfer.doneSize', $doneSize, 'akeeba');
 
@@ -596,8 +563,8 @@ class Transfer extends Model
 					break;
 			}
 		}
-		// A finally{} block is what we really need but it's not supported until PHP 5.5 and I'm stuck supporting 5.4 :(
-		catch (\RuntimeException $e)
+			// A finally{} block is what we really need but it's not supported until PHP 5.5 and I'm stuck supporting 5.4 :(
+		catch (RuntimeException $e)
 		{
 			// Close the part
 			fclose($fp);
@@ -646,6 +613,78 @@ class Transfer extends Model
 		$this->container->platform->setSessionVar('transfer.doneSize', 0, 'akeeba');
 		$this->container->platform->setSessionVar('transfer.part', -1, 'akeeba');
 		$this->container->platform->setSessionVar('transfer.frag', -1, 'akeeba');
+	}
+
+	/**
+	 * Gets the FTP configuration from the session
+	 *
+	 * @return  array
+	 */
+	public function getFtpConfig()
+	{
+		$transferOption = $this->container->platform->getSessionVar('transfer.transferOption', '', 'akeeba');
+
+		return [
+			'method'      => $transferOption,
+			'force'       => $this->container->platform->getSessionVar('transfer.force', 0, 'akeeba'),
+			'host'        => $this->container->platform->getSessionVar('transfer.ftpHost', '', 'akeeba'),
+			'port'        => $this->container->platform->getSessionVar('transfer.ftpPort', '', 'akeeba'),
+			'username'    => $this->container->platform->getSessionVar('transfer.ftpUsername', '', 'akeeba'),
+			'password'    => $this->container->platform->getSessionVar('transfer.ftpPassword', '', 'akeeba'),
+			'directory'   => $this->container->platform->getSessionVar('transfer.ftpDirectory', '', 'akeeba'),
+			'ssl'         => $transferOption == 'ftps',
+			'passive'     => $this->container->platform->getSessionVar('transfer.ftpPassive', 1, 'akeeba'),
+			'passive_fix' => $this->container->platform->getSessionVar('transfer.ftpPassiveFix', 1, 'akeeba'),
+			'privateKey'  => $this->container->platform->getSessionVar('transfer.ftpPrivateKey', '', 'akeeba'),
+			'publicKey'   => $this->container->platform->getSessionVar('transfer.ftpPubKey', '', 'akeeba'),
+			'chunkMode'   => $this->container->platform->getSessionVar('transfer.chunkMode', 'chunked', 'akeeba'),
+			'chunkSize'   => $this->container->platform->getSessionVar('transfer.chunkSize', '5242880', 'akeeba'),
+		];
+	}
+
+	/**
+	 * Tries to simplify a server path to get the site's root. It can handle most forms on non-SEF and non-rewrite SEF
+	 * URLs (as in index.php?foo=bar, something.php/this/is?completely=nuts#ok). It can't fix stupid but it tries really
+	 * bloody hard to.
+	 *
+	 * @param   string  $path  The path to simplify. We *expect* this to contain nonsense.
+	 *
+	 * @return  string  The scrubbed clean URL, hopefully leading to the site's root.
+	 */
+	private function simplifyPath($path)
+	{
+		$path = ltrim($path, '/');
+
+		if (empty($path))
+		{
+			return $path;
+		}
+
+		// Trim out anything after a .php file (including the .php file itself)
+		if (substr($path, -1) != '/')
+		{
+			$parts    = explode('/', $path);
+			$newParts = [];
+
+			foreach ($parts as $part)
+			{
+				if (substr($part, -4) == '.php')
+				{
+					break;
+				}
+
+				$newParts[] = $part;
+			}
+
+			$path = implode('/', $newParts);
+		}
+
+		if (substr($path, -13) == 'administrator')
+		{
+			$path = substr($path, 0, -13);
+		}
+
+		return $path;
 	}
 
 	/**
@@ -709,7 +748,7 @@ class Transfer extends Model
 
 		if ($otherConfiguration == $myConfiguration)
 		{
-			throw new RuntimeException(JText::_('COM_AKEEBA_TRANSFER_ERR_SAMESITE'));
+			throw new RuntimeException(Text::_('COM_AKEEBA_TRANSFER_ERR_SAMESITE'));
 		}
 	}
 
@@ -739,7 +778,7 @@ class Transfer extends Model
 				continue;
 			}
 
-			throw new TransferIgnorableError(JText::sprintf('COM_AKEEBA_TRANSFER_ERR_HTACCESS', $file));
+			throw new TransferIgnorableError(Text::sprintf('COM_AKEEBA_TRANSFER_ERR_HTACCESS', $file));
 		}
 	}
 
@@ -776,7 +815,7 @@ class Transfer extends Model
 				continue;
 			}
 
-			throw new TransferIgnorableError(JText::_('COM_AKEEBA_TRANSFER_ERR_EXISTINGSITE'));
+			throw new TransferIgnorableError(Text::_('COM_AKEEBA_TRANSFER_ERR_EXISTINGSITE'));
 		}
 	}
 
@@ -796,7 +835,7 @@ class Transfer extends Model
 		}
 		catch (Exception $e)
 		{
-			$errorMessage = JText::sprintf('COM_AKEEBA_TRANSFER_ERR_CANNOTUPLOADTESTFILE', basename($sourceFile));
+			$errorMessage = Text::sprintf('COM_AKEEBA_TRANSFER_ERR_CANNOTUPLOADTESTFILE', basename($sourceFile));
 
 			$errorMessage .= "  &mdash;  [ " . $e->getMessage() . ' ]';
 
@@ -834,7 +873,7 @@ class Transfer extends Model
 				$connector->delete($connector->getPath(basename($sourceFile)));
 
 				// And now throw the error
-				throw new TransferFatalError(JText::sprintf('COM_AKEEBA_TRANSFER_ERR_WRONGSSL', $hostname));
+				throw new TransferFatalError(Text::sprintf('COM_AKEEBA_TRANSFER_ERR_WRONGSSL', $hostname));
 			}
 
 			/**
@@ -872,49 +911,22 @@ class Transfer extends Model
 		// Downloaded data is verified but the SSL certificate was bad: tell the user to fix the SSL certificate.
 		if ($wrongSSL && ($originalData == $data))
 		{
-			throw new TransferFatalError(JText::_('COM_AKEEBA_TRANSFER_ERR_WRONGSSL'));
+			throw new TransferFatalError(Text::_('COM_AKEEBA_TRANSFER_ERR_WRONGSSL'));
 		}
 
 		// Downloaded data did not match (no matter of the SSL verification): configuration error.
 		if ($originalData != $data)
 		{
-			throw new TransferFatalError(JText::_('COM_AKEEBA_TRANSFER_ERR_CANNOTACCESSTESTFILE'));
+			throw new TransferFatalError(Text::_('COM_AKEEBA_TRANSFER_ERR_CANNOTACCESSTESTFILE'));
 		}
-	}
-
-	/**
-	 * Gets the FTP configuration from the session
-	 *
-	 * @return  array
-	 */
-	public function getFtpConfig()
-	{
-		$transferOption = $this->container->platform->getSessionVar('transfer.transferOption', '', 'akeeba');
-
-		return array(
-			'method'      => $transferOption,
-			'force'       => $this->container->platform->getSessionVar('transfer.force', 0, 'akeeba'),
-			'host'        => $this->container->platform->getSessionVar('transfer.ftpHost', '', 'akeeba'),
-			'port'        => $this->container->platform->getSessionVar('transfer.ftpPort', '', 'akeeba'),
-			'username'    => $this->container->platform->getSessionVar('transfer.ftpUsername', '', 'akeeba'),
-			'password'    => $this->container->platform->getSessionVar('transfer.ftpPassword', '', 'akeeba'),
-			'directory'   => $this->container->platform->getSessionVar('transfer.ftpDirectory', '', 'akeeba'),
-			'ssl'         => $transferOption == 'ftps',
-			'passive'     => $this->container->platform->getSessionVar('transfer.ftpPassive', 1, 'akeeba'),
-			'passive_fix' => $this->container->platform->getSessionVar('transfer.ftpPassiveFix', 1, 'akeeba'),
-			'privateKey'  => $this->container->platform->getSessionVar('transfer.ftpPrivateKey', '', 'akeeba'),
-			'publicKey'   => $this->container->platform->getSessionVar('transfer.ftpPubKey', '', 'akeeba'),
-			'chunkMode'   => $this->container->platform->getSessionVar('transfer.chunkMode', 'chunked', 'akeeba'),
-			'chunkSize'   => $this->container->platform->getSessionVar('transfer.chunkSize', '5242880', 'akeeba'),
-		);
 	}
 
 	/**
 	 * Removes files stored remotely
 	 *
 	 * @param   EngineTransfer\TransferInterface  $connector         The transfer object
-	 * @param   array                       $files             The list of remote files to delete (relative paths)
-	 * @param   bool|true                   $ignoreExceptions  Should I ignore exceptions thrown?
+	 * @param   array                             $files             The list of remote files to delete (relative paths)
+	 * @param   bool|true                         $ignoreExceptions  Should I ignore exceptions thrown?
 	 *
 	 * @return  void
 	 *
@@ -949,7 +961,7 @@ class Transfer extends Model
 	/**
 	 * Check if the remote server environment matches our expectations.
 	 *
-	 * @param   bool    $forced     Are we forcing the transfer? If so some checks are ignored
+	 * @param   bool  $forced  Are we forcing the transfer? If so some checks are ignored
 	 *
 	 * @throws  Exception
 	 */
@@ -960,12 +972,12 @@ class Transfer extends Model
 		$baseUrl = rtrim($baseUrl, '/');
 
 		$downloader = new Download($this->container);
-		$rawData       = $downloader->getFromURL($baseUrl . '/kickstart.php?task=serverinfo');
+		$rawData    = $downloader->getFromURL($baseUrl . '/kickstart.php?task=serverinfo');
 
 		if ($rawData == false)
 		{
 			// Cannot access Kickstart on the remote server
-			throw new RuntimeException(JText::_('COM_AKEEBA_TRANSFER_ERR_CANNOTRUNKICKSTART'));
+			throw new RuntimeException(Text::_('COM_AKEEBA_TRANSFER_ERR_CANNOTRUNKICKSTART'));
 		}
 
 		// Try to get the raw JSON data
@@ -974,7 +986,7 @@ class Transfer extends Model
 		if ($pos === false)
 		{
 			// Invalid AJAX data, no leading ###
-			throw new RuntimeException(JText::_('COM_AKEEBA_TRANSFER_ERR_CANNOTRUNKICKSTART'));
+			throw new RuntimeException(Text::_('COM_AKEEBA_TRANSFER_ERR_CANNOTRUNKICKSTART'));
 		}
 
 		// Remove the leading ###
@@ -985,7 +997,7 @@ class Transfer extends Model
 		if ($pos === false)
 		{
 			// Invalid AJAX data, no trailing ###
-			throw new RuntimeException(JText::_('COM_AKEEBA_TRANSFER_ERR_CANNOTRUNKICKSTART'));
+			throw new RuntimeException(Text::_('COM_AKEEBA_TRANSFER_ERR_CANNOTRUNKICKSTART'));
 		}
 
 		// Remove the trailing ###
@@ -997,7 +1009,7 @@ class Transfer extends Model
 		if (empty($data))
 		{
 			// Invalid AJAX data, can't decode this stuff
-			throw new RuntimeException(JText::_('COM_AKEEBA_TRANSFER_ERR_CANNOTRUNKICKSTART'));
+			throw new RuntimeException(Text::_('COM_AKEEBA_TRANSFER_ERR_CANNOTRUNKICKSTART'));
 		}
 
 		// Disk space check could be ignored since some hosts return the wrong value for the available disk space
@@ -1010,20 +1022,20 @@ class Transfer extends Model
 
 			if ($requiredSize['size'] > $freeSpace)
 			{
-				$unit	 = array('b', 'KB', 'MB', 'GB', 'TB', 'PB');
+				$unit            = ['b', 'KB', 'MB', 'GB', 'TB', 'PB'];
 				$freeSpaceString = @round($freeSpace / 1024 ** ($i = floor(log($freeSpace, 1024))), 2) . ' ' . $unit[$i];
 
-				throw new TransferIgnorableError(JText::sprintf('COM_AKEEBA_TRANSFER_ERR_NOTENOUGHSPACE', $requiredSize['string'], $freeSpaceString));
+				throw new TransferIgnorableError(Text::sprintf('COM_AKEEBA_TRANSFER_ERR_NOTENOUGHSPACE', $requiredSize['string'], $freeSpaceString));
 			}
 		}
 
 		// Can I write to remote files?
-		$canWrite = $data['canWrite'];
+		$canWrite     = $data['canWrite'];
 		$canWriteTemp = $data['canWriteTemp'];
 
 		if (!$canWrite && !$canWriteTemp)
 		{
-			throw new RuntimeException(JText::_('COM_AKEEBA_TRANSFER_ERR_CANNOTWRITEREMOTEFILES'));
+			throw new RuntimeException(Text::_('COM_AKEEBA_TRANSFER_ERR_CANNOTWRITEREMOTEFILES'));
 		}
 
 		if ($canWrite)
@@ -1072,15 +1084,15 @@ class Transfer extends Model
 			return $baseFile;
 		}
 
-		$dirname = dirname($baseFile);
+		$dirname  = dirname($baseFile);
 		$basename = basename($baseFile);
 
-		$pos = strrpos($basename, '.');
+		$pos       = strrpos($basename, '.');
 		$extension = substr($basename, $pos + 1);
 
 		$newExtension = substr($baseFile, 0, 1) . sprintf('%02u', $part);
 
-		return $dirname . '/' . basename($basename, '.' . $extension) . '.'  .$newExtension;
+		return $dirname . '/' . basename($basename, '.' . $extension) . '.' . $newExtension;
 	}
 
 	/**
@@ -1115,7 +1127,7 @@ class Transfer extends Model
 	private function getMaxChunkSize()
 	{
 		$memoryLimit = $this->getServerMemoryLimit();
-		$usedMemory = max(memory_get_usage(), memory_get_peak_usage(), 2048);
+		$usedMemory  = max(memory_get_usage(), memory_get_peak_usage(), 2048);
 
 		$maxChunkSize = max(($memoryLimit - $usedMemory) / 2, 524288);
 
@@ -1163,8 +1175,8 @@ class Transfer extends Model
 	 * which have a sensitive server protection, e.g. the very tight mod_security2 rules on SiteGround servers. In those
 	 * cases the remote server will respond with a 500 Internal Server Error, a 403 Forbidden or another server error.
 	 *
-	 * @param   string   $fileName     The filename to upload
-	 * @param   string   $data         The data to upload
+	 * @param   string  $fileName  The filename to upload
+	 * @param   string  $data      The data to upload
 	 *
 	 * @return  int      The length of the data we managed to upload
 	 *
@@ -1178,7 +1190,7 @@ class Transfer extends Model
 		$directory = $this->container->platform->getSessionVar('transfer.targetPath', '', 'akeeba');
 
 		$url = rtrim($url, '/') . '/kickstart.php';
-		$uri = JUri::getInstance($url);
+		$uri = Uri::getInstance($url);
 		$uri->setVar('task', 'uploadFile');
 		$uri->setVar('file', basename($fileName));
 		$uri->setVar('directory', $directory);
@@ -1189,8 +1201,8 @@ class Transfer extends Model
 		$downloader->setAdapterOptions([
 			CURLOPT_CUSTOMREQUEST => 'POST',
 			CURLOPT_POSTFIELDS    => [
-				'data' => $data
-			]
+				'data' => $data,
+			],
 		]);
 		$dataLength = strlen($data);
 		unset($data);
@@ -1202,7 +1214,7 @@ class Transfer extends Model
 		if ($pos === false)
 		{
 			// Invalid AJAX data, no leading ###
-			throw new RuntimeException(JText::sprintf('COM_AKEEBA_TRANSFER_ERR_CANNOTUPLOADARCHIVE', basename($fileName)));
+			throw new RuntimeException(Text::sprintf('COM_AKEEBA_TRANSFER_ERR_CANNOTUPLOADARCHIVE', basename($fileName)));
 		}
 
 		// Remove the leading ###
@@ -1213,7 +1225,7 @@ class Transfer extends Model
 		if ($pos === false)
 		{
 			// Invalid AJAX data, no trailing ###
-			throw new RuntimeException(JText::sprintf('COM_AKEEBA_TRANSFER_ERR_CANNOTUPLOADARCHIVE', basename($fileName)));
+			throw new RuntimeException(Text::sprintf('COM_AKEEBA_TRANSFER_ERR_CANNOTUPLOADARCHIVE', basename($fileName)));
 		}
 
 		// Remove the trailing ###
@@ -1225,12 +1237,12 @@ class Transfer extends Model
 		if (empty($data))
 		{
 			// Invalid AJAX data, can't decode this stuff
-			throw new RuntimeException(JText::sprintf('COM_AKEEBA_TRANSFER_ERR_CANNOTUPLOADARCHIVE', basename($fileName)));
+			throw new RuntimeException(Text::sprintf('COM_AKEEBA_TRANSFER_ERR_CANNOTUPLOADARCHIVE', basename($fileName)));
 		}
 
 		if (!$data['status'])
 		{
-			throw new RuntimeException(JText::sprintf('COM_AKEEBA_TRANSFER_ERR_ERRORFROMREMOTE', $data['message']));
+			throw new RuntimeException(Text::sprintf('COM_AKEEBA_TRANSFER_ERR_ERRORFROMREMOTE', $data['message']));
 		}
 
 		return $dataLength;
@@ -1242,9 +1254,9 @@ class Transfer extends Model
 	 * This is a new upload method which works better on servers with tighter security. The only downside is that we
 	 * have to open many FTP/SFTP upload sessions which may result in the remote server eventually blocking our uploads.
 	 *
-	 * @param   string   $fileName     The filename to upload
-	 * @param   string   $data         The data to upload
-	 * @param   array    $config       The FTP/SFTP configuration
+	 * @param   string  $fileName  The filename to upload
+	 * @param   string  $data      The data to upload
+	 * @param   array   $config    The FTP/SFTP configuration
 	 *
 	 * @return  int      The length of the data we managed to upload
 	 *
@@ -1260,21 +1272,21 @@ class Transfer extends Model
 
 		// ==== Upload the data to the same folder as Kickstart, under a temporary name
 		// Even though the connector has the write() method, it's not very good for over 1M files. So we create a temp file instead.
-		$engineConfig = Factory::getConfiguration();
+		$engineConfig  = Factory::getConfiguration();
 		$localTempFile = tempnam($this->container->platform->getConfig()->get('tmp_path', sys_get_temp_dir()), 'stw');
 		$localTempFile = ($localTempFile === false) ? tempnam(sys_get_temp_dir(), 'stw') : $localTempFile;
 		$localTempFile = ($localTempFile === false) ? tempnam($engineConfig->get('akeeba.basic.output_directory', '[DEFAULT_OUTPUT]'), 'stw') : $localTempFile;
 
 		if ($localTempFile === false)
 		{
-			throw new \RuntimeException(JText::_('COM_AKEEBA_TRANSFER_ERR_CANTCREATETEMPCHUNK'));
+			throw new RuntimeException(Text::_('COM_AKEEBA_TRANSFER_ERR_CANTCREATETEMPCHUNK'));
 		}
 
 		if (!file_put_contents($localTempFile, $data))
 		{
-			if (!JFile::write($localTempFile, $data))
+			if (!File::write($localTempFile, $data))
 			{
-				throw new \RuntimeException(JText::_('COM_AKEEBA_TRANSFER_ERR_CANTCREATETEMPCHUNK'));
+				throw new RuntimeException(Text::_('COM_AKEEBA_TRANSFER_ERR_CANTCREATETEMPCHUNK'));
 			}
 		}
 
@@ -1289,16 +1301,16 @@ class Transfer extends Model
 
 			$connector->upload($localTempFile, $remoteFile, true);
 		}
-		catch (\RuntimeException $e)
+		catch (RuntimeException $e)
 		{
-			JFile::delete($localTempFile);
+			File::delete($localTempFile);
 
 			throw $e;
 		}
 
 		// ==== Call Kickstart to piece together the file
 		$url = rtrim($url, '/') . '/kickstart.php';
-		$uri = JUri::getInstance($url);
+		$uri = Uri::getInstance($url);
 		$uri->setVar('task', 'uploadFile');
 		$uri->setVar('file', basename($fileName));
 		$uri->setVar('directory', $directory);
@@ -1314,7 +1326,7 @@ class Transfer extends Model
 		// ==== Delete the temporary files
 		if (!@unlink($localTempFile))
 		{
-			JFile::delete($localTempFile);
+			File::delete($localTempFile);
 		}
 		$connector->delete($remoteFile);
 
@@ -1326,7 +1338,7 @@ class Transfer extends Model
 		if ($pos === false)
 		{
 			// Invalid AJAX data, no leading ###
-			throw new \RuntimeException(JText::sprintf('COM_AKEEBA_TRANSFER_ERR_CANNOTUPLOADARCHIVE', basename($fileName)));
+			throw new RuntimeException(Text::sprintf('COM_AKEEBA_TRANSFER_ERR_CANNOTUPLOADARCHIVE', basename($fileName)));
 		}
 
 		// Remove the leading ###
@@ -1337,7 +1349,7 @@ class Transfer extends Model
 		if ($pos === false)
 		{
 			// Invalid AJAX data, no trailing ###
-			throw new \RuntimeException(JText::sprintf('COM_AKEEBA_TRANSFER_ERR_CANNOTUPLOADARCHIVE', basename($fileName)));
+			throw new RuntimeException(Text::sprintf('COM_AKEEBA_TRANSFER_ERR_CANNOTUPLOADARCHIVE', basename($fileName)));
 		}
 
 		// Remove the trailing ###
@@ -1349,12 +1361,12 @@ class Transfer extends Model
 		if (empty($data))
 		{
 			// Invalid AJAX data, can't decode this stuff
-			throw new \RuntimeException(JText::sprintf('COM_AKEEBA_TRANSFER_ERR_CANNOTUPLOADARCHIVE', basename($fileName)));
+			throw new RuntimeException(Text::sprintf('COM_AKEEBA_TRANSFER_ERR_CANNOTUPLOADARCHIVE', basename($fileName)));
 		}
 
 		if (!$data['status'])
 		{
-			throw new \RuntimeException(JText::sprintf('COM_AKEEBA_TRANSFER_ERR_ERRORFROMREMOTE', $data['message']));
+			throw new RuntimeException(Text::sprintf('COM_AKEEBA_TRANSFER_ERR_ERRORFROMREMOTE', $data['message']));
 		}
 
 		return $dataLength;

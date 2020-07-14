@@ -7,12 +7,12 @@
 
 namespace FOF30\Update;
 
+defined('_JEXEC') || die;
+
+use Exception;
 use FOF30\Container\Container;
 use FOF30\Download\Download;
-use Exception;
 use SimpleXMLElement;
-
-defined('_JEXEC') or die;
 
 class Collection
 {
@@ -34,25 +34,25 @@ class Collection
 		}
 
 		// Initialise return value
-		$updates = array(
-			'metadata'		=> array(
-				'name'			=> '',
-				'description'	=> '',
-			),
-			'categories'	=> array(),
-			'extensions'	=> array(),
-		);
+		$updates = [
+			'metadata'   => [
+				'name'        => '',
+				'description' => '',
+			],
+			'categories' => [],
+			'extensions' => [],
+		];
 
 		// Download and parse the XML file
-		$container = Container::getInstance('com_foobar');
+		$container  = Container::getInstance('com_foobar');
 		$downloader = new Download($container);
-		$xmlSource = $downloader->getFromURL($url);
+		$xmlSource  = $downloader->getFromURL($url);
 
 		try
 		{
 			$xml = new SimpleXMLElement($xmlSource, LIBXML_NONET);
 		}
-		catch(Exception $e)
+		catch (Exception $e)
 		{
 			return $updates;
 		}
@@ -69,14 +69,14 @@ class Collection
 		$rootAttributes = $xml->attributes();
 		foreach ($rootAttributes as $k => $v)
 		{
-			$updates['metadata'][$k] = (string)$v;
+			$updates['metadata'][$k] = (string) $v;
 		}
 
 		// Initialise the raw list of updates
-		$rawUpdates = array(
-			'categories'	=> array(),
-			'extensions'	=> array(),
-		);
+		$rawUpdates = [
+			'categories' => [],
+			'extensions' => [],
+		];
 
 		// Segregate the raw list to a hierarchy of extension and category entries
 		/** @var SimpleXMLElement $extension */
@@ -86,13 +86,13 @@ class Collection
 			{
 				case 'category':
 					// These are the parameters we expect in a category
-					$params = array(
-						'name'					=> '',
-						'description'			=> '',
-						'category'				=> '',
-						'ref'					=> '',
-						'targetplatformversion'	=> $jVersion,
-					);
+					$params = [
+						'name'                  => '',
+						'description'           => '',
+						'category'              => '',
+						'ref'                   => '',
+						'targetplatformversion' => $jVersion,
+					];
 
 					// These are the attributes of the element
 					$attributes = $extension->attributes();
@@ -100,7 +100,7 @@ class Collection
 					// Merge them all
 					foreach ($attributes as $k => $v)
 					{
-						$params[$k] = (string)$v;
+						$params[$k] = (string) $v;
 					}
 
 					// We can't have a category with an empty category name
@@ -122,7 +122,7 @@ class Collection
 
 					if (!array_key_exists($params['category'], $rawUpdates['categories']))
 					{
-						$rawUpdates['categories'][$params['category']] = array();
+						$rawUpdates['categories'][$params['category']] = [];
 					}
 
 					$rawUpdates['categories'][$params['category']][] = $params;
@@ -131,14 +131,14 @@ class Collection
 
 				case 'extension':
 					// These are the parameters we expect in a category
-					$params = array(
-						'element'				=> '',
-						'type'					=> '',
-						'version'				=> '',
-						'name'					=> '',
-						'detailsurl'			=> '',
-						'targetplatformversion'	=> $jVersion,
-					);
+					$params = [
+						'element'               => '',
+						'type'                  => '',
+						'version'               => '',
+						'name'                  => '',
+						'detailsurl'            => '',
+						'targetplatformversion' => $jVersion,
+					];
 
 					// These are the attributes of the element
 					$attributes = $extension->attributes();
@@ -146,7 +146,7 @@ class Collection
 					// Merge them all
 					foreach ($attributes as $k => $v)
 					{
-						$params[$k] = (string)$v;
+						$params[$k] = (string) $v;
 					}
 
 					// We can't have an extension with an empty element
@@ -174,12 +174,12 @@ class Collection
 
 					if (!array_key_exists($params['type'], $rawUpdates['extensions']))
 					{
-						$rawUpdates['extensions'][$params['type']] = array();
+						$rawUpdates['extensions'][$params['type']] = [];
 					}
 
 					if (!array_key_exists($params['element'], $rawUpdates['extensions'][$params['type']]))
 					{
-						$rawUpdates['extensions'][$params['type']][$params['element']] = array();
+						$rawUpdates['extensions'][$params['type']][$params['element']] = [];
 					}
 
 					$rawUpdates['extensions'][$params['type']][$params['element']][] = $params;
@@ -196,7 +196,7 @@ class Collection
 		{
 			foreach ($rawUpdates['categories'] as $category => $entries)
 			{
-				$update = $this->filterListByPlatform($entries, $jVersion);
+				$update                           = $this->filterListByPlatform($entries, $jVersion);
 				$updates['categories'][$category] = $update;
 			}
 		}
@@ -205,13 +205,13 @@ class Collection
 		{
 			foreach ($rawUpdates['extensions'] as $type => $extensions)
 			{
-				$updates['extensions'][$type] = array();
+				$updates['extensions'][$type] = [];
 
 				if (!empty($extensions))
 				{
 					foreach ($extensions as $element => $entries)
 					{
-						$update = $this->filterListByPlatform($entries, $jVersion);
+						$update                                 = $this->filterListByPlatform($entries, $jVersion);
 						$updates['extensions'][$type][$element] = $update;
 					}
 				}
@@ -219,62 +219,6 @@ class Collection
 		}
 
 		return $updates;
-	}
-
-	/**
-	 * Filters a list of updates, returning only those available for the
-	 * specified platform version $jVersion
-	 *
-	 * @param   array   $updates   An array containing update definitions (categories or extensions)
-	 * @param   string  $jVersion  Joomla! version to fetch updates for, or null to use JVERSION
-	 *
-	 * @return  array|null  The update definition that is compatible, or null if none is compatible
-	 */
-	private function filterListByPlatform($updates, $jVersion = null)
-	{
-		// Get the target platform
-		if (is_null($jVersion))
-		{
-			$jVersion = JVERSION;
-		}
-
-		$versionParts = explode('.', $jVersion, 4);
-		$platformVersionMajor = $versionParts[0];
-		$platformVersionMinor = (count($versionParts) > 1) ? $platformVersionMajor . '.' . $versionParts[1] : $platformVersionMajor;
-		$platformVersionNormal = (count($versionParts) > 2) ? $platformVersionMinor . '.' . $versionParts[2] : $platformVersionMinor;
-		$platformVersionFull = (count($versionParts) > 3) ? $platformVersionNormal . '.' . $versionParts[3] : $platformVersionNormal;
-
-		$pickedExtension = null;
-		$pickedSpecificity = -1;
-
-		foreach ($updates as $update)
-		{
-			// Test the target platform
-			$targetPlatform = (string)$update['targetplatformversion'];
-
-			if ($targetPlatform === $platformVersionFull)
-			{
-				$pickedExtension = $update;
-				$pickedSpecificity = 4;
-			}
-			elseif (($targetPlatform === $platformVersionNormal) && ($pickedSpecificity <= 3))
-			{
-				$pickedExtension = $update;
-				$pickedSpecificity = 3;
-			}
-			elseif (($targetPlatform === $platformVersionMinor) && ($pickedSpecificity <= 2))
-			{
-				$pickedExtension = $update;
-				$pickedSpecificity = 2;
-			}
-			elseif (($targetPlatform === $platformVersionMajor) && ($pickedSpecificity <= 1))
-			{
-				$pickedExtension = $update;
-				$pickedSpecificity = 1;
-			}
-		}
-
-		return $pickedExtension;
 	}
 
 	/**
@@ -370,5 +314,61 @@ class Collection
 		{
 			return null;
 		}
+	}
+
+	/**
+	 * Filters a list of updates, returning only those available for the
+	 * specified platform version $jVersion
+	 *
+	 * @param   array   $updates   An array containing update definitions (categories or extensions)
+	 * @param   string  $jVersion  Joomla! version to fetch updates for, or null to use JVERSION
+	 *
+	 * @return  array|null  The update definition that is compatible, or null if none is compatible
+	 */
+	private function filterListByPlatform($updates, $jVersion = null)
+	{
+		// Get the target platform
+		if (is_null($jVersion))
+		{
+			$jVersion = JVERSION;
+		}
+
+		$versionParts          = explode('.', $jVersion, 4);
+		$platformVersionMajor  = $versionParts[0];
+		$platformVersionMinor  = (count($versionParts) > 1) ? $platformVersionMajor . '.' . $versionParts[1] : $platformVersionMajor;
+		$platformVersionNormal = (count($versionParts) > 2) ? $platformVersionMinor . '.' . $versionParts[2] : $platformVersionMinor;
+		$platformVersionFull   = (count($versionParts) > 3) ? $platformVersionNormal . '.' . $versionParts[3] : $platformVersionNormal;
+
+		$pickedExtension   = null;
+		$pickedSpecificity = -1;
+
+		foreach ($updates as $update)
+		{
+			// Test the target platform
+			$targetPlatform = (string) $update['targetplatformversion'];
+
+			if ($targetPlatform === $platformVersionFull)
+			{
+				$pickedExtension   = $update;
+				$pickedSpecificity = 4;
+			}
+			elseif (($targetPlatform === $platformVersionNormal) && ($pickedSpecificity <= 3))
+			{
+				$pickedExtension   = $update;
+				$pickedSpecificity = 3;
+			}
+			elseif (($targetPlatform === $platformVersionMinor) && ($pickedSpecificity <= 2))
+			{
+				$pickedExtension   = $update;
+				$pickedSpecificity = 2;
+			}
+			elseif (($targetPlatform === $platformVersionMajor) && ($pickedSpecificity <= 1))
+			{
+				$pickedExtension   = $update;
+				$pickedSpecificity = 1;
+			}
+		}
+
+		return $pickedExtension;
 	}
 }

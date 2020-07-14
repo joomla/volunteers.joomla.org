@@ -7,11 +7,11 @@
 
 namespace FOF30\Utils;
 
-use Exception;
-use JFactory;
-use SimpleXMLElement;
+defined('_JEXEC') || die;
 
-defined('_JEXEC') or die;
+use Exception;
+use Joomla\CMS\Factory;
+use SimpleXMLElement;
 
 /**
  * Retrieve the version of a component from the cached XML manifest or, if it's not present, the version recorded in the
@@ -26,7 +26,7 @@ abstract class ComponentVersion
 	 *
 	 * @since 3.1.5
 	 */
-	private static $version = array();
+	private static $version = [];
 
 	/**
 	 * Get a component's version. The XML manifest on disk will be tried first. If it's not there or does not have a
@@ -66,7 +66,7 @@ abstract class ComponentVersion
 	/**
 	 * Get a component's version from the manifest cache in the database
 	 *
-	 * @param   string  $component  The component's bname
+	 * @param   string  $component  The component's name
 	 *
 	 * @return  string  The component version or null if none is defined
 	 *
@@ -74,8 +74,8 @@ abstract class ComponentVersion
 	 */
 	private static function getVersionFromDatabase($component)
 	{
-		$db      = JFactory::getDbo();
-		$query   = $db->getQuery(true)
+		$db    = Factory::getDbo();
+		$query = $db->getQuery(true)
 			->select($db->qn('manifest_cache'))
 			->from($db->qn('#__extensions'))
 			->where($db->qn('element') . ' = ' . $db->q($component))
@@ -114,7 +114,7 @@ abstract class ComponentVersion
 	 * Get a component's version from the manifest file on disk. IMPORTANT! The manifest for com_something must be named
 	 * something.xml.
 	 *
-	 * @param   string  $component  The component's bname
+	 * @param   string  $component  The component's name
 	 *
 	 * @return  string  The component version or null if none is defined
 	 *
@@ -123,7 +123,7 @@ abstract class ComponentVersion
 	private static function getVersionFromManifest($component)
 	{
 		$bareComponent = str_replace('com_', '', $component);
-		$file = JPATH_ADMINISTRATOR . '/components/' . $component . '/' . $bareComponent . '.xml';
+		$file          = JPATH_ADMINISTRATOR . '/components/' . $component . '/' . $bareComponent . '.xml';
 
 		if (!is_file($file) || !is_readable($file))
 		{
@@ -153,6 +153,6 @@ abstract class ComponentVersion
 			return null;
 		}
 
-		return (string)($versionNode[0]);
+		return (string) ($versionNode[0]);
 	}
 }

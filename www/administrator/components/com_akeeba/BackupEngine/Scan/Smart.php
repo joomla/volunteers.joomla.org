@@ -9,7 +9,7 @@
 
 namespace Akeeba\Engine\Scan;
 
-
+defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Base\Exceptions\WarningException;
 use Akeeba\Engine\Factory;

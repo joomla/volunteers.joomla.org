@@ -9,7 +9,7 @@
 
 namespace Akeeba\Engine\Util\Transfer;
 
-
+defined('AKEEBAENGINE') || die();
 
 use Exception;
 use RuntimeException;
@@ -153,7 +153,7 @@ class Ftp implements TransferInterface, RemoteResourceInterface
 				'username'  => 'demo',
 				'password'  => 'password',
 				'directory' => '',
-				'ssl'       => isset($params['ssl']) ? $params['ssl'] : false,
+				'ssl'       => $params['ssl'] ?? false,
 				'passive'   => true,
 				'timeout'   => 5,
 			]);

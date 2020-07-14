@@ -7,19 +7,21 @@
 
 namespace FOF30\Render;
 
-use FOF30\Container\Container;
-use FOF30\Form\Form;
-use FOF30\Model\DataModel;
-use Joomla\Registry\Registry;
+defined('_JEXEC') || die;
 
-defined('_JEXEC') or die;
+use FOF30\Container\Container;
+use Joomla\Registry\Registry;
+use LogicException;
+use stdClass;
 
 /**
  * Base class for other render classes
+ *
+ * @package FOF30\Render
+ * @since   3.0.0
  */
 abstract class RenderBase implements RenderInterface
 {
-
 	/** @var   Container|null  The container we are attached to */
 	protected $container = null;
 
@@ -29,7 +31,7 @@ abstract class RenderBase implements RenderInterface
 	/** @var   int  The priority of this renderer in case we have multiple available ones */
 	protected $priority = 0;
 
-	/** @var   \JRegistry|Registry  A registry object holding renderer options */
+	/** @var   Registry  A registry object holding renderer options */
 	protected $optionsRegistry = null;
 
 	/**
@@ -39,18 +41,18 @@ abstract class RenderBase implements RenderInterface
 	{
 		$this->container = $container;
 
-		$this->optionsRegistry = class_exists('JRegistry') ? new \JRegistry() : new Registry();
+		$this->optionsRegistry = new Registry();
 	}
 
 	/**
 	 * Set a renderer option (depends on the renderer)
 	 *
-	 * @param   string $key   The name of the option to set
-	 * @param   string $value The value of the option
+	 * @param   string  $key    The name of the option to set
+	 * @param   mixed   $value  The value of the option
 	 *
 	 * @return  void
 	 */
-	public function setOption($key, $value)
+	function setOption(string $key, $value = null): void
 	{
 		$this->optionsRegistry->set($key, $value);
 	}
@@ -58,11 +60,11 @@ abstract class RenderBase implements RenderInterface
 	/**
 	 * Set multiple renderer options at once (depends on the renderer)
 	 *
-	 * @param   array $options The options to set as key => value pairs
+	 * @param   array  $options  The options to set as key => value pairs
 	 *
 	 * @return  void
 	 */
-	public function setOptions(array $options)
+	function setOptions(array $options): void
 	{
 		foreach ($options as $key => $value)
 		{
@@ -73,12 +75,12 @@ abstract class RenderBase implements RenderInterface
 	/**
 	 * Get the value of a renderer option
 	 *
-	 * @param   string $key     The name of the parameter
-	 * @param   mixed  $default The default value to return if the parameter is not set
+	 * @param   string  $key      The name of the parameter
+	 * @param   mixed   $default  The default value to return if the parameter is not set
 	 *
 	 * @return  mixed  The parameter value
 	 */
-	public function getOption($key, $default = null)
+	function getOption(string $key, $default = null)
 	{
 		return $this->optionsRegistry->get($key, $default);
 	}
@@ -86,25 +88,28 @@ abstract class RenderBase implements RenderInterface
 	/**
 	 * Returns the information about this renderer
 	 *
-	 * @return object
+	 * @return  stdClass
 	 */
-	public function getInformation()
+	function getInformation(): stdClass
 	{
-		return (object) array(
+		$classParts = explode('\\', get_class($this));
+
+		return (object) [
 			'enabled'  => $this->enabled,
-			'priority' => $this->priority
-		);
+			'priority' => $this->priority,
+			'name'     => strtolower(array_pop($classParts)),
+		];
 	}
 
 	/**
 	 * Echoes any HTML to show before the view template
 	 *
-	 * @param   string $view The current view
-	 * @param   string $task The current task
+	 * @param   string  $view  The current view
+	 * @param   string  $task  The current task
 	 *
 	 * @return  void
 	 */
-	function preRender($view, $task)
+	function preRender(string $view, string $task): void
 	{
 		$this->loadCustomCss();
 	}
@@ -112,94 +117,14 @@ abstract class RenderBase implements RenderInterface
 	/**
 	 * Echoes any HTML to show after the view template
 	 *
-	 * @param   string $view The current view
-	 * @param   string $task The current task
+	 * @param   string  $view  The current view
+	 * @param   string  $task  The current task
 	 *
 	 * @return  void
 	 */
-	function postRender($view, $task)
+	function postRender(string $view, string $task): void
 	{
 	}
-
-	/**
-	 * Renders a Form and returns the corresponding HTML
-	 *
-	 * @param   Form      &$form         The form to render
-	 * @param   DataModel $model         The model providing our data
-	 * @param   string    $formType      The form type: edit, browse or read
-	 * @param   boolean   $raw           If true, the raw form fields rendering (without the surrounding form tag) is
-	 *                                   returned.
-	 *
-	 * @return  string    The HTML rendering of the form
-	 *
-	 * @deprecated 3.1  Support for XML forms will be removed in FOF 4
-	 */
-	function renderForm(Form &$form, DataModel $model, $formType = null, $raw = false)
-	{
-		throw new \LogicException(sprintf('Renderer class %s must implement the %s method', get_class($this), __METHOD__));
-	}
-
-	/**
-	 * Renders a F0FForm for a Browse view and returns the corresponding HTML
-	 *
-	 * @param   Form      &$form The form to render
-	 * @param   DataModel $model The model providing our data
-	 *
-	 * @return  string    The HTML rendering of the form
-	 *
-	 * @deprecated 3.1  Support for XML forms will be removed in FOF 4
-	 */
-	function renderFormBrowse(Form &$form, DataModel $model)
-	{
-		throw new \LogicException(sprintf('Renderer class %s must implement the %s method', get_class($this), __METHOD__));
-	}
-
-	/**
-	 * Renders a F0FForm for a Read view and returns the corresponding HTML
-	 *
-	 * @param   Form      &$form The form to render
-	 * @param   DataModel $model The model providing our data
-	 *
-	 * @return  string    The HTML rendering of the form
-	 *
-	 * @deprecated 3.1  Support for XML forms will be removed in FOF 4
-	 */
-	function renderFormRead(Form &$form, DataModel $model)
-	{
-		throw new \LogicException(sprintf('Renderer class %s must implement the %s method', get_class($this), __METHOD__));
-	}
-
-	/**
-	 * Renders a F0FForm for an Edit view and returns the corresponding HTML
-	 *
-	 * @param   Form      &$form The form to render
-	 * @param   DataModel $model The model providing our data
-	 *
-	 * @return  string    The HTML rendering of the form
-	 *
-	 * @deprecated 3.1  Support for XML forms will be removed in FOF 4
-	 */
-	function renderFormEdit(Form &$form, DataModel $model)
-	{
-		throw new \LogicException(sprintf('Renderer class %s must implement the %s method', get_class($this), __METHOD__));
-	}
-
-	/**
-	 * Renders a F0FForm for an Edit view and returns the corresponding HTML
-	 *
-	 * @param   Form      &$form    The form to render
-	 * @param   DataModel $model    The model providing our data
-	 * @param   string    $formType The form type: edit, browse or read
-	 *
-	 * @return  string    The HTML rendering of the form
-	 *
-	 * @deprecated 3.1  Support for XML forms will be removed in FOF 4
-	 */
-	function renderFormRaw(Form &$form, DataModel $model, $formType = null)
-	{
-		throw new \LogicException(sprintf('Renderer class %s must implement the %s method', get_class($this), __METHOD__));
-	}
-
 
 	/**
 	 * Renders the submenu (link bar) for a category view when it is used in a
@@ -211,72 +136,67 @@ abstract class RenderBase implements RenderInterface
 	 *
 	 * @return  void
 	 */
-	function renderCategoryLinkbar()
+	function renderCategoryLinkbar(): void
 	{
-		throw new \LogicException(sprintf('Renderer class %s must implement the %s method', get_class($this), __METHOD__));
+		throw new LogicException(sprintf('Renderer class %s must implement the %s method', get_class($this), __METHOD__));
 	}
 
 	/**
-	 * Renders a raw fieldset of a F0FForm and returns the corresponding HTML
+	 * Opens a wrapper DIV. Our component's output will be inside this wrapper.
 	 *
-	 * @param   \stdClass &$fieldset  The fieldset to render
-	 * @param   Form      &$form      The form to render
-	 * @param   DataModel $model      The model providing our data
-	 * @param   string    $formType   The form type e.g. 'edit' or 'read'
-	 * @param   boolean   $showHeader Should I render the fieldset's header?
+	 * @param   array  $classes  An array of additional CSS classes to add to the outer page wrapper element.
 	 *
-	 * @return  string    The HTML rendering of the fieldset
-	 *
-	 * @deprecated 3.1  Support for XML forms will be removed in FOF 4
+	 * @return  void
 	 */
-	function renderFieldset(\stdClass &$fieldset, Form &$form, DataModel $model, $formType, $showHeader = true)
+	protected function openPageWrapper(array $classes): void
 	{
-		throw new \LogicException(sprintf('Renderer class %s must implement the %s method', get_class($this), __METHOD__));
+		$removeClasses = $this->getOption('remove_wrapper_classes', []);
+
+		if (!is_array($removeClasses))
+		{
+			$removeClasses = explode(',', $removeClasses);
+		}
+
+		$removeClasses = array_map('trim', $removeClasses);
+
+		foreach ($removeClasses as $class)
+		{
+			$x = array_search($class, $classes);
+
+			if ($x !== false)
+			{
+				unset($classes[$x]);
+			}
+		}
+
+		// Add the following classes to the wrapper div
+		$addClasses = $this->getOption('add_wrapper_classes', '');
+
+		if (!is_array($addClasses))
+		{
+			$addClasses = explode(',', $addClasses);
+		}
+
+		$addClasses    = array_map('trim', $addClasses);
+		$customClasses = implode(' ', array_unique(array_merge($classes, $addClasses)));
+
+		$id = $this->getOption('wrapper_id', null);
+		$id = empty($id) ? "" : sprintf(' id="%s"', $id);
+
+		echo <<< HTML
+<div class="$customClasses"$id>
+
+HTML;
 	}
 
 	/**
-	 * Renders a label for a fieldset.
+	 * Outputs HTML which closes the page wrappers opened with openPageWrapper.
 	 *
-	 * @param   object  $field The field of the label to render
-	 * @param   Form    &$form The form to render
-	 * @param    string $title The title of the label
-	 *
-	 * @return    string        The rendered label
-	 *
-	 * @deprecated 3.1  Support for XML forms will be removed in FOF 4
+	 * @return  void
 	 */
-	function renderFieldsetLabel($field, Form &$form, $title)
+	protected function closePageWrapper(): void
 	{
-		throw new \LogicException(sprintf('Renderer class %s must implement the %s method', get_class($this), __METHOD__));
-	}
-
-	/**
-	 * Checks if the fieldset defines a tab pane
-	 *
-	 * @param   \SimpleXMLElement $fieldset
-	 *
-	 * @return  boolean
-	 *
-	 * @deprecated 3.1  Support for XML forms will be removed in FOF 4
-	 */
-	function isTabFieldset($fieldset)
-	{
-		if (!isset($fieldset->class) || !$fieldset->class)
-		{
-			return false;
-		}
-
-		$class = $fieldset->class;
-		$classes = explode(' ', $class);
-
-		if (!in_array('tab-pane', $classes))
-		{
-			return false;
-		}
-		else
-		{
-			return in_array('active', $classes) ? 2 : 1;
-		}
+		echo "</div>\n";
 	}
 
 	/**

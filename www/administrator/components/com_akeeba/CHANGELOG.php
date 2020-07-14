@@ -1,4 +1,37 @@
 <?php die();?>
+Akeeba Backup 7.2.2
+================================================================================
+# [LOW] The package would install on unsupported PHP versions 5.6 and 7.0 and Joomla 3.8, leading to errors
+# [HIGH] The System - Akeeba Backup Update Check plugin throws a fatal error since version 7.1.4 when an update is available
+
+Akeeba Backup 7.2.1
+================================================================================
+~ Small change in the FOF library to prevent harmless but confusing and annoying errors from appearing during upgrade
+~ The following items are carried over from unpublished version 7.2.0
++ Restoration: Enable UTF8MB4 compatibility detection by default
+~ Minimum requirements raised to PHP 7.1, Joomla 3.9
+~ Using Joomla's cacert.pem instead of providing our own copy
+~ Component Options page looks a bit nicer on Joomla 4
+~ Joomla 4: fix profile selection drop-down display
+# [HIGH] The restoration script can't read unquoted numeric values from the configuration.php file (used in Joomla 4)
+# [HIGH] Joomla 4: Using the Smart Search filter during backup makes it impossible to use Smart Search on the restored site.
+# [HIGH] Import from S3: infinite redirection loop
+# [LOW] Very rare backup failures with a JS error
+# [LOW] Unhandled exception page was incompatible with Joomla 4
+
+Akeeba Backup 7.2.0
+================================================================================
++ Restoration: Enable UTF8MB4 compatibility detection by default
+~ Minimum requirements raised to PHP 7.1, Joomla 3.9
+~ Using Joomla's cacert.pem instead of providing our own copy
+~ Component Options page looks a bit nicer on Joomla 4
+~ Joomla 4: fix profile selection drop-down display
+# [HIGH] The restoration script can't read unquoted numeric values from the configuration.php file (used in Joomla 4)
+# [HIGH] Joomla 4: Using the Smart Search filter during backup makes it impossible to use Smart Search on the restored site.
+# [HIGH] Import from S3: infinite redirection loop
+# [LOW] Very rare backup failures with a JS error
+# [LOW] Unhandled exception page was incompatible with Joomla 4
+
 Akeeba Backup 7.1.4
 ================================================================================
 ~ Now getting Super Users list using core Joomla API instead of direct database queries

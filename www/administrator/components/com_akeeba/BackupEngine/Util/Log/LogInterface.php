@@ -9,7 +9,7 @@
 
 namespace Akeeba\Engine\Util\Log;
 
-
+defined('AKEEBAENGINE') || die();
 
 /**
  * The interface for Akeeba Engine logger objects

@@ -8,7 +8,7 @@
 namespace Akeeba\Backup\Site\Model\Json\Task;
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 use Akeeba\Backup\Site\Model\Statistics;
 use Akeeba\Engine\Platform;

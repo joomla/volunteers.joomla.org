@@ -9,7 +9,7 @@
 
 namespace Akeeba\Engine\Archiver;
 
-
+defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Base\Exceptions\ErrorException;
 use Akeeba\Engine\Factory;
@@ -354,7 +354,7 @@ class Jpa extends BaseArchiver
 		}
 
 		// Get real size before compression
-		list($fileSize, $fileModTime) =
+		[$fileSize, $fileModTime] =
 			$this->getFileSizeAndModificationTime($sourceNameOrData, $isVirtual, $isSymlink, $isDir);
 
 		// Decide if we will compress

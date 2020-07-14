@@ -7,7 +7,7 @@
 
 namespace FOF30\Utils;
 
-defined('_JEXEC') or die;
+defined('_JEXEC') || die;
 
 /**
  * Intercept calls to PHP functions.
@@ -15,7 +15,6 @@ defined('_JEXEC') or die;
  * Based on the Session package of Aura for PHP – https://github.com/auraphp/Aura.Session
  *
  * @method  function_exists(string $function)
- * @method  mcrypt_list_algorithms()
  * @method  hash_algos()
  */
 class Phpfunc
@@ -24,9 +23,9 @@ class Phpfunc
 	 *
 	 * Magic call to intercept any function pass to it.
 	 *
-	 * @param string $func The function to call.
+	 * @param   string  $func  The function to call.
 	 *
-	 * @param array  $args Arguments passed to the function.
+	 * @param   array   $args  Arguments passed to the function.
 	 *
 	 * @return mixed The result of the function call.
 	 *

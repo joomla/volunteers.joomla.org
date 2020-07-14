@@ -15,7 +15,7 @@ use Joomla\CMS\HTML\HTMLHelper as JHtml;
 use Joomla\CMS\Language\Text as JText;
 use Joomla\CMS\Uri\Uri as JUri;
 
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 class Html extends \FOF30\View\DataView\Html
 {

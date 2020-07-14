@@ -7,26 +7,26 @@
 
 namespace FOF30\Download\Adapter;
 
+defined('_JEXEC') || die;
+
 use FOF30\Download\DownloadInterface;
 use FOF30\Download\Exception\DownloadError;
-use JText;
-
-defined('_JEXEC') or die;
+use Joomla\CMS\Language\Text;
 
 /**
  * A download adapter using the cURL PHP integration
  */
 class Curl extends AbstractAdapter implements DownloadInterface
 {
-	protected $headers = array();
+	protected $headers = [];
 
 	public function __construct()
 	{
-		$this->priority = 110;
-		$this->supportsFileSize = true;
+		$this->priority              = 110;
+		$this->supportsFileSize      = true;
 		$this->supportsChunkDownload = true;
-		$this->name = 'curl';
-		$this->isSupported = function_exists('curl_init') && function_exists('curl_exec') && function_exists('curl_close');
+		$this->name                  = 'curl';
+		$this->isSupported           = function_exists('curl_init') && function_exists('curl_exec') && function_exists('curl_close');
 	}
 
 	/**
@@ -41,14 +41,15 @@ class Curl extends AbstractAdapter implements DownloadInterface
 	 *
 	 * @param   string   $url     The remote file's URL
 	 * @param   integer  $from    Byte range to start downloading from. Use null for start of file.
-	 * @param   integer  $to      Byte range to stop downloading. Use null to download the entire file ($from is ignored)
+	 * @param   integer  $to      Byte range to stop downloading. Use null to download the entire file ($from is
+	 *                            ignored)
 	 * @param   array    $params  Additional params that will be added before performing the download
 	 *
 	 * @return  string  The raw file data retrieved from the remote URL.
 	 *
 	 * @throws  DownloadError  A generic exception is thrown on error
 	 */
-	public function downloadAndReturn($url, $from = null, $to = null, array $params = array())
+	public function downloadAndReturn($url, $from = null, $to = null, array $params = [])
 	{
 		$ch = curl_init();
 
@@ -65,7 +66,7 @@ class Curl extends AbstractAdapter implements DownloadInterface
 		if ($to < $from)
 		{
 			$temp = $to;
-			$to = $from;
+			$to   = $from;
 			$from = $temp;
 			unset($temp);
 		}
@@ -78,8 +79,8 @@ class Curl extends AbstractAdapter implements DownloadInterface
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 1);
 		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
 		curl_setopt($ch, CURLOPT_SSLVERSION, 0);
-		curl_setopt($ch, CURLOPT_CAINFO, __DIR__ . '/cacert.pem');
-		curl_setopt($ch, CURLOPT_HEADERFUNCTION, array($this, 'reponseHeaderCallback'));
+		curl_setopt($ch, CURLOPT_CAINFO, JPATH_LIBRARIES . '/src/Http/Transport/cacert.pem');
+		curl_setopt($ch, CURLOPT_HEADERFUNCTION, [$this, 'reponseHeaderCallback']);
 
 		if (!(empty($from) && empty($to)))
 		{
@@ -88,7 +89,7 @@ class Curl extends AbstractAdapter implements DownloadInterface
 
 		if (!is_array($params))
 		{
-			$params = array();
+			$params = [];
 		}
 
 		$patched_accept_encoding = false;
@@ -129,21 +130,21 @@ class Curl extends AbstractAdapter implements DownloadInterface
 		// Accept encoding wasn't patched, let's manually do that
 		if (!$patched_accept_encoding)
 		{
-			@curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept-Encoding: identity'));
+			@curl_setopt($ch, CURLOPT_HTTPHEADER, ['Accept-Encoding: identity']);
 
 			$patched_accept_encoding = true;
 		}
 
 		$result = curl_exec($ch);
 
-		$errno = curl_errno($ch);
-		$errmsg = curl_error($ch);
-		$error = '';
+		$errno       = curl_errno($ch);
+		$errmsg      = curl_error($ch);
+		$error       = '';
 		$http_status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
 		if ($result === false)
 		{
-			$error = JText::sprintf('LIB_FOF_DOWNLOAD_ERR_CURL_ERROR', $errno, $errmsg);
+			$error = Text::sprintf('LIB_FOF_DOWNLOAD_ERR_CURL_ERROR', $errno, $errmsg);
 		}
 		elseif (($http_status >= 300) && ($http_status <= 399) && isset($this->headers['location']) && !empty($this->headers['location']))
 		{
@@ -152,8 +153,8 @@ class Curl extends AbstractAdapter implements DownloadInterface
 		elseif ($http_status > 399)
 		{
 			$result = false;
-			$errno = $http_status;
-			$error = JText::sprintf('LIB_FOF_DOWNLOAD_ERR_HTTPERROR', $http_status);
+			$errno  = $http_status;
+			$error  = Text::sprintf('LIB_FOF_DOWNLOAD_ERR_HTTPERROR', $http_status);
 		}
 
 		curl_close($ch);
@@ -187,11 +188,11 @@ class Curl extends AbstractAdapter implements DownloadInterface
 		curl_setopt($ch, CURLOPT_SSLVERSION, 0);
 
 		curl_setopt($ch, CURLOPT_URL, $url);
-		curl_setopt($ch, CURLOPT_NOBODY, true );
-		curl_setopt($ch, CURLOPT_HEADER, true );
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true );
-		@curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true );
-		curl_setopt($ch, CURLOPT_CAINFO, __DIR__ . '/cacert.pem');
+		curl_setopt($ch, CURLOPT_NOBODY, true);
+		curl_setopt($ch, CURLOPT_HEADER, true);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		@curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+		curl_setopt($ch, CURLOPT_CAINFO, JPATH_LIBRARIES . '/src/Http/Transport/cacert.pem');
 
 		$data = curl_exec($ch);
 		curl_close($ch);
@@ -199,25 +200,25 @@ class Curl extends AbstractAdapter implements DownloadInterface
 		if ($data)
 		{
 			$content_length = "unknown";
-			$status = "unknown";
-			$redirection = null;
+			$status         = "unknown";
+			$redirection    = null;
 
-			if (preg_match( "/^HTTP\/1\.[01] (\d\d\d)/i", $data, $matches))
+			if (preg_match("/^HTTP\/1\.[01] (\d\d\d)/i", $data, $matches))
 			{
-				$status = (int)$matches[1];
+				$status = (int) $matches[1];
 			}
 
-			if (preg_match( "/Content-Length: (\d+)/i", $data, $matches))
+			if (preg_match("/Content-Length: (\d+)/i", $data, $matches))
 			{
-				$content_length = (int)$matches[1];
+				$content_length = (int) $matches[1];
 			}
 
-			if (preg_match( "/Location: (.*)/i", $data, $matches))
+			if (preg_match("/Location: (.*)/i", $data, $matches))
 			{
-				$redirection = (int)$matches[1];
+				$redirection = (int) $matches[1];
 			}
 
-			if( $status == 200 || ($status > 300 && $status <= 308) )
+			if ($status == 200 || ($status > 300 && $status <= 308))
 			{
 				$result = $content_length;
 			}
@@ -263,7 +264,7 @@ class Curl extends AbstractAdapter implements DownloadInterface
 			return $strlen;
 		}
 
-		list($header, $value) = explode(': ', trim($data), 2);
+		[$header, $value] = explode(': ', trim($data), 2);
 
 		$this->headers[strtolower($header)] = $value;
 

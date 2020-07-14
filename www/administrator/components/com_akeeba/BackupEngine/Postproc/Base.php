@@ -9,7 +9,7 @@
 
 namespace Akeeba\Engine\Postproc;
 
-
+defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Platform;
 use Akeeba\Engine\Postproc\Exception\BadConfiguration;

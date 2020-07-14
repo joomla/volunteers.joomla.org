@@ -7,9 +7,9 @@
 
 namespace FOF30\Factory\Magic;
 
-use FOF30\Dispatcher\Dispatcher;
+defined('_JEXEC') || die;
 
-defined('_JEXEC') or die;
+use FOF30\Dispatcher\Dispatcher;
 
 /**
  * Creates a Dispatcher object instance based on the information provided by the fof.xml configuration file
@@ -19,15 +19,15 @@ class DispatcherFactory extends BaseFactory
 	/**
 	 * Create a new object instance
 	 *
-	 * @param   array   $config    The config parameters which override the fof.xml information
+	 * @param   array  $config  The config parameters which override the fof.xml information
 	 *
 	 * @return  Dispatcher  A new Dispatcher object
 	 */
-	public function make(array $config = array())
+	public function make(array $config = [])
 	{
-		$appConfig = $this->container->appConfig;
+		$appConfig     = $this->container->appConfig;
 		$defaultConfig = $appConfig->get('dispatcher.*');
-		$config = array_merge($defaultConfig, $config);
+		$config        = array_merge($defaultConfig, $config);
 
 		$className = $this->container->getNamespacePrefix($this->getSection()) . 'Dispatcher\\DefaultDispatcher';
 

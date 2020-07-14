@@ -8,7 +8,7 @@
 namespace Akeeba\Engine\Filter;
 
 // Protection against direct access
-defined('AKEEBAENGINE') or die();
+defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Factory;
 

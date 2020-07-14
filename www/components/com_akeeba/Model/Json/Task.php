@@ -8,7 +8,7 @@
 namespace Akeeba\Backup\Site\Model\Json;
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 use FOF30\Container\Container;
 

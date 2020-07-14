@@ -41,6 +41,9 @@
 
 namespace Akeeba\Engine\Postproc\Connector\Azure\Http;
 
+defined('AKEEBAENGINE') || die();
+
+use Akeeba\Engine\Postproc\Connector\Azure\Http\Transport\Curl;
 use Akeeba\Engine\Postproc\Connector\S3v4\Input;
 
 /**
@@ -53,17 +56,17 @@ use Akeeba\Engine\Postproc\Connector\S3v4\Input;
 abstract class Transport
 {
 	/** HTTP VERBS */
-	const VERB_GET = 'GET';
+	public const VERB_GET = 'GET';
 
-	const VERB_PUT = 'PUT';
+	public const VERB_PUT = 'PUT';
 
-	const VERB_POST = 'POST';
+	public const VERB_POST = 'POST';
 
-	const VERB_DELETE = 'DELETE';
+	public const VERB_DELETE = 'DELETE';
 
-	const VERB_HEAD = 'HEAD';
+	public const VERB_HEAD = 'HEAD';
 
-	const VERB_MERGE = 'MERGE';
+	public const VERB_MERGE = 'MERGE';
 
 	/**
 	 * Use proxy?
@@ -106,7 +109,7 @@ abstract class Transport
 	 *
 	 * @return Response
 	 */
-	public static function createChannel($type = '\\Akeeba\\Engine\\Postproc\\Connector\\Azure\\Http\\Transport\\Curl')
+	public static function createChannel($type = Curl::class)
 	{
 		return new $type();
 	}

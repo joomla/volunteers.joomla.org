@@ -9,7 +9,7 @@
 
 namespace Akeeba\Engine\Util;
 
-
+defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Factory;
 use Akeeba\Engine\Platform;
@@ -214,7 +214,7 @@ class ConfigurationCheck
 	 *
 	 * @return  array
 	 */
-	public function getDetailedStatus($low_priority = false, $help_url_template = 'https://www.akeebabackup.com/documentation/warnings/q%s.html')
+	public function getDetailedStatus($low_priority = false, $help_url_template = 'https://www.akeeba.com/documentation/warnings/q%s.html')
 	{
 		static $detailedStatus = null;
 
@@ -521,13 +521,13 @@ class ConfigurationCheck
 	/**
 	 * Q201 - MEDIUM - Outdated PHP version.
 	 *
-	 * We currently check for PHP lower than 5.5.
+	 * We currently check for PHP lower than 7.3.
 	 *
 	 * @return  bool
 	 */
 	private function q201()
 	{
-		return version_compare(PHP_VERSION, '5.5.0', 'lt');
+		return version_compare(PHP_VERSION, '7.3.0', 'lt');
 	}
 
 	/**

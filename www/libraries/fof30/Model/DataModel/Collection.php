@@ -7,10 +7,10 @@
 
 namespace FOF30\Model\DataModel;
 
+defined('_JEXEC') || die;
+
 use FOF30\Model\DataModel;
 use FOF30\Utils\Collection as BaseCollection;
-
-defined('_JEXEC') or die;
 
 /**
  * A collection of data models. You can enumerate it like an array, use it everywhere a collection is expected (e.g. a
@@ -21,7 +21,7 @@ defined('_JEXEC') or die;
  * @method void archive()
  * @method void save(mixed $data, string $orderingFilter = '', bool $ignore = null)
  * @method void push(mixed $data, string $orderingFilter = '', bool $ignore = null, array $relations = null)
- * @method void bind(mixed $data, array $ignore = array())
+ * @method void bind(mixed $data, array $ignore = [])
  * @method void check()
  * @method void reorder(string $where = '')
  * @method void delete(mixed $id = null)
@@ -40,8 +40,8 @@ class Collection extends BaseCollection
 	/**
 	 * Find a model in the collection by key.
 	 *
-	 * @param  mixed  $key
-	 * @param  mixed  $default
+	 * @param   mixed  $key
+	 * @param   mixed  $default
 	 *
 	 * @return DataModel
 	 */
@@ -52,8 +52,7 @@ class Collection extends BaseCollection
 			$key = $key->getId();
 		}
 
-		return array_first($this->items, function($itemKey, $model) use ($key)
-		{
+		return array_first($this->items, function ($itemKey, $model) use ($key) {
 			/** @var DataModel $model */
 			return $model->getId() == $key;
 
@@ -63,7 +62,7 @@ class Collection extends BaseCollection
 	/**
 	 * Remove an item in the collection by key
 	 *
-	 * @param  mixed  $key
+	 * @param   mixed  $key
 	 *
 	 * @return void
 	 */
@@ -85,7 +84,7 @@ class Collection extends BaseCollection
 	/**
 	 * Add an item to the collection.
 	 *
-	 * @param  mixed  $item
+	 * @param   mixed  $item
 	 *
 	 * @return Collection
 	 */
@@ -99,19 +98,19 @@ class Collection extends BaseCollection
 	/**
 	 * Determine if a key exists in the collection.
 	 *
-	 * @param  mixed  $key
+	 * @param   mixed  $key
 	 *
 	 * @return bool
 	 */
 	public function contains($key)
 	{
-		return ! is_null($this->find($key));
+		return !is_null($this->find($key));
 	}
 
 	/**
 	 * Fetch a nested element of the collection.
 	 *
-	 * @param  string  $key
+	 * @param   string  $key
 	 *
 	 * @return Collection
 	 */
@@ -123,14 +122,13 @@ class Collection extends BaseCollection
 	/**
 	 * Get the max value of a given key.
 	 *
-	 * @param  string  $key
+	 * @param   string  $key
 	 *
 	 * @return mixed
 	 */
 	public function max($key)
 	{
-		return $this->reduce(function($result, $item) use ($key)
-		{
+		return $this->reduce(function ($result, $item) use ($key) {
 			return (is_null($result) || $item->{$key} > $result) ? $item->{$key} : $result;
 		});
 	}
@@ -138,14 +136,13 @@ class Collection extends BaseCollection
 	/**
 	 * Get the min value of a given key.
 	 *
-	 * @param  string  $key
+	 * @param   string  $key
 	 *
 	 * @return mixed
 	 */
 	public function min($key)
 	{
-		return $this->reduce(function($result, $item) use ($key)
-		{
+		return $this->reduce(function ($result, $item) use ($key) {
 			return (is_null($result) || $item->{$key} < $result) ? $item->{$key} : $result;
 		});
 	}
@@ -158,7 +155,7 @@ class Collection extends BaseCollection
 	public function modelKeys()
 	{
 		return array_map(
-			function($m) {
+			function ($m) {
 				/** @var DataModel $m */
 				return $m->getId();
 			},
@@ -168,7 +165,7 @@ class Collection extends BaseCollection
 	/**
 	 * Merge the collection with the given items.
 	 *
-	 * @param  BaseCollection|array  $collection
+	 * @param   BaseCollection|array  $collection
 	 *
 	 * @return BaseCollection
 	 */
@@ -200,7 +197,7 @@ class Collection extends BaseCollection
 		foreach ($this->items as $item)
 		{
 			/** @var DataModel $item */
-			if ( ! isset($dictionary[$item->getId()]))
+			if (!isset($dictionary[$item->getId()]))
 			{
 				$diff->add($item);
 			}
@@ -247,25 +244,6 @@ class Collection extends BaseCollection
 	}
 
 	/**
-	 * Get a dictionary keyed by primary keys.
-	 *
-	 * @param  BaseCollection  $collection
-	 *
-	 * @return array
-	 */
-	protected function getDictionary($collection)
-	{
-		$dictionary = array();
-
-		foreach ($collection as $value)
-		{
-			$dictionary[$value->getId()] = $value;
-		}
-
-		return $dictionary;
-	}
-
-	/**
 	 * Get a base Support collection instance from this collection.
 	 *
 	 * @return BaseCollection
@@ -283,8 +261,8 @@ class Collection extends BaseCollection
 	 *
 	 * IMPORTANT: The return value of the method call is not returned back to you!
 	 *
-	 * @param string $name       The method to call
-	 * @param array  $arguments  The arguments to the method
+	 * @param   string  $name       The method to call
+	 * @param   array   $arguments  The arguments to the method
 	 */
 	public function __call($name, $arguments)
 	{
@@ -330,10 +308,29 @@ class Collection extends BaseCollection
 						break;
 
 					default:
-						call_user_func_array(array($item, $name), $arguments);
+						call_user_func_array([$item, $name], $arguments);
 						break;
 				}
 			}
 		}
+	}
+
+	/**
+	 * Get a dictionary keyed by primary keys.
+	 *
+	 * @param   BaseCollection  $collection
+	 *
+	 * @return array
+	 */
+	protected function getDictionary($collection)
+	{
+		$dictionary = [];
+
+		foreach ($collection as $value)
+		{
+			$dictionary[$value->getId()] = $value;
+		}
+
+		return $dictionary;
 	}
 }

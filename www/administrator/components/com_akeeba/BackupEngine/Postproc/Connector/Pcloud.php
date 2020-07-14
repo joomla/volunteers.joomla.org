@@ -9,6 +9,8 @@
 
 namespace Akeeba\Engine\Postproc\Connector;
 
+defined('AKEEBAENGINE') || die();
+
 use RuntimeException;
 
 /**
@@ -21,7 +23,7 @@ class Pcloud
 	/**
 	 * The URL of the helper script which is used to get fresh API tokens
 	 */
-	const helperUrl = 'https://www.akeebabackup.com/oauth2/pcloud.php';
+	public const helperUrl = 'https://www.akeeba.com/oauth2/pcloud.php';
 
 	/**
 	 * The root URL for the pCloud API
@@ -62,7 +64,7 @@ class Pcloud
 	 * Public constructor
 	 *
 	 * @param   string  $accessToken  The access token for accessing pCloud
-	 * @param   string  $dlid         The AkeebaBackup.com Download ID, used whenever you try to refresh the token
+	 * @param   string  $dlid         The akeeba.com Download ID, used whenever you try to refresh the token
 	 */
 	public function __construct($accessToken, $dlid)
 	{
@@ -437,7 +439,7 @@ class Pcloud
 		if (!isset($response['result']) || ($response['result'] != 0))
 		{
 			$error            = $response['result'];
-			$errorDescription = isset($response['error']) ? $response['error'] : sprintf('pCloud error %d', $response['result']);
+			$errorDescription = $response['error'] ?? sprintf('pCloud error %d', $response['result']);
 
 			if (!$closeConnection)
 			{

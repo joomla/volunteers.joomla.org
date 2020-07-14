@@ -9,11 +9,11 @@
 
 namespace Akeeba\Engine\Postproc\Connector\S3v4;
 
+defined('AKEEBAENGINE') || die();
+
 use Akeeba\Engine\Postproc\Connector\S3v4\Exception\PropertyNotFound;
 use Akeeba\Engine\Postproc\Connector\S3v4\Response\Error;
 use SimpleXMLElement;
-
-
 
 /**
  * Amazon S3 API response object

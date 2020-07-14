@@ -7,36 +7,42 @@
 
 namespace FOF30\Model\DataModel\Filter;
 
+defined('_JEXEC') || die;
+
 use FOF30\Model\DataModel\Filter\Exception\InvalidFieldObject;
 use FOF30\Model\DataModel\Filter\Exception\NoDatabaseObject;
-
-defined('_JEXEC') or die;
+use InvalidArgumentException;
+use JDatabaseDriver;
+use ReflectionClass;
+use ReflectionMethod;
 
 abstract class AbstractFilter
 {
+	/**
+	 * The null value for this type
+	 *
+	 * @var  mixed
+	 */
+	public $null_value = null;
 	protected $db = null;
-
 	/**
 	 * The column name of the table field
 	 *
 	 * @var string
 	 */
 	protected $name = '';
-
 	/**
 	 * The column type of the table field
 	 *
 	 * @var string
 	 */
 	protected $type = '';
-
 	/**
 	 * Should I allow filtering against the number 0?
 	 *
 	 * @var bool
 	 */
 	protected $filterZero = true;
-
 	/**
 	 * Prefix each table name with this table alias. For example, field bar normally creates a WHERE clause:
 	 * `bar` = '1'
@@ -48,23 +54,16 @@ abstract class AbstractFilter
 	protected $tableAlias = null;
 
 	/**
-	 * The null value for this type
-	 *
-	 * @var  mixed
-	 */
-	public $null_value = null;
-
-	/**
 	 * Constructor
 	 *
-	 * @param   \JDatabaseDriver   $db           The database object
-	 * @param   object   $field        The field information as taken from the db
+	 * @param   JDatabaseDriver  $db     The database object
+	 * @param   object            $field  The field information as taken from the db
 	 */
 	public function __construct($db, $field)
 	{
 		$this->db = $db;
 
-		if(!is_object($field) || !isset($field->name) || !isset($field->type))
+		if (!is_object($field) || !isset($field->name) || !isset($field->type))
 		{
 			throw new InvalidFieldObject;
 		}
@@ -81,6 +80,139 @@ abstract class AbstractFilter
 		{
 			$this->tableAlias = $field->tableAlias;
 		}
+	}
+
+	/**
+	 * Creates a field Object based on the field column type
+	 *
+	 * @param   object  $field   The field information
+	 * @param   array   $config  The field configuration (like the db object to use)
+	 *
+	 * @return  AbstractFilter  The Filter object
+	 *
+	 * @throws  InvalidArgumentException
+	 */
+	public static function getField($field, $config = [])
+	{
+		if (!is_object($field) || !isset($field->name) || !isset($field->type))
+		{
+			throw new InvalidFieldObject;
+		}
+
+		$type = $field->type;
+
+		$classType = self::getFieldType($type);
+
+		$className = '\\FOF30\\Model\\DataModel\\Filter\\' . ucfirst($classType);
+
+		if (($classType !== false) && class_exists($className, true))
+		{
+			if (!isset($config['dbo']))
+			{
+				throw new NoDatabaseObject($className);
+			}
+
+			$db = $config['dbo'];
+
+			$field = new $className($db, $field);
+
+			return $field;
+		}
+
+		return null;
+	}
+
+	/**
+	 * Get the class name based on the field Type
+	 *
+	 * @param   string  $type  The type of the field
+	 *
+	 * @return  string  the class name suffix
+	 */
+	public static function getFieldType($type)
+	{
+		// Remove parentheses, indicating field options / size (they don't matter in type detection)
+		if (!empty($type))
+		{
+			[$type, ] = explode('(', $type);
+		}
+
+		$detectedType = null;
+
+		switch (trim($type))
+		{
+			case 'varchar':
+			case 'text':
+			case 'smalltext':
+			case 'longtext':
+			case 'char':
+			case 'mediumtext':
+			case 'character varying':
+			case 'nvarchar':
+			case 'nchar':
+				$detectedType = 'Text';
+				break;
+
+			case 'date':
+			case 'datetime':
+			case 'time':
+			case 'year':
+			case 'timestamp':
+			case 'timestamp without time zone':
+			case 'timestamp with time zone':
+				$detectedType = 'Date';
+				break;
+
+			case 'tinyint':
+			case 'smallint':
+				$detectedType = 'Boolean';
+				break;
+		}
+
+		// Sometimes we have character types followed by a space and some cruft. Let's handle them.
+		if (is_null($detectedType) && !empty($type))
+		{
+			[$type, ] = explode(' ', $type);
+
+			switch (trim($type))
+			{
+				case 'varchar':
+				case 'text':
+				case 'smalltext':
+				case 'longtext':
+				case 'char':
+				case 'mediumtext':
+				case 'nvarchar':
+				case 'nchar':
+					$detectedType = 'Text';
+					break;
+
+				case 'date':
+				case 'datetime':
+				case 'time':
+				case 'year':
+				case 'timestamp':
+					$detectedType = 'Date';
+					break;
+
+				case 'tinyint':
+				case 'smallint':
+					$detectedType = 'Boolean';
+					break;
+
+				default:
+					$detectedType = 'Number';
+					break;
+			}
+		}
+
+		// If all else fails assume it's a Number and hope for the best
+		if (empty($detectedType))
+		{
+			$detectedType = 'Number';
+		}
+
+		return $detectedType;
 	}
 
 	/**
@@ -102,9 +234,9 @@ abstract class AbstractFilter
 	 * values are exact, partial, between and outside, unless something
 	 * different is returned by getSearchMethods().
 	 *
+	 * @return  string
 	 * @see  self::getSearchMethods()
 	 *
-	 * @return  string
 	 */
 	public function getDefaultSearchMethod()
 	{
@@ -118,12 +250,15 @@ abstract class AbstractFilter
 	 */
 	public function getSearchMethods()
 	{
-		$ignore = array('isEmpty', 'getField', 'getFieldType', '__construct', 'getDefaultSearchMethod', 'getSearchMethods', 'getFieldName');
+		$ignore = [
+			'isEmpty', 'getField', 'getFieldType', '__construct', 'getDefaultSearchMethod', 'getSearchMethods',
+			'getFieldName',
+		];
 
-		$class = new \ReflectionClass(__CLASS__);
-		$methods = $class->getMethods(\ReflectionMethod::IS_PUBLIC);
+		$class   = new ReflectionClass(__CLASS__);
+		$methods = $class->getMethods(ReflectionMethod::IS_PUBLIC);
 
-		$tmp = array();
+		$tmp = [];
 
 		foreach ($methods as $method)
 		{
@@ -137,7 +272,7 @@ abstract class AbstractFilter
 			return $methods;
 		}
 
-		return array();
+		return [];
 	}
 
 	/**
@@ -157,7 +292,7 @@ abstract class AbstractFilter
 		if (is_array($value))
 		{
 			$db    = $this->db;
-			$value = array_map(array($db, 'quote'), $value);
+			$value = array_map([$db, 'quote'], $value);
 
 			return '(' . $this->getFieldName() . ' IN (' . implode(',', $value) . '))';
 		}
@@ -185,7 +320,7 @@ abstract class AbstractFilter
 	 * $from < VALUE < $to
 	 *
 	 * @param   mixed    $from     The lowest value to compare to
-	 * @param   mixed    $to       The higherst value to compare to
+	 * @param   mixed    $to       The highest value to compare to
 	 * @param   boolean  $include  Should we include the boundaries in the search?
 	 *
 	 * @return  string  The SQL where clause for this search
@@ -227,7 +362,7 @@ abstract class AbstractFilter
 	 * $from < VALUE < $to
 	 *
 	 * @param   mixed    $from     The lowest value to compare to
-	 * @param   mixed    $to       The higherst value to compare to
+	 * @param   mixed    $to       The highest value to compare to
 	 * @param   boolean  $include  Should we include the boundaries in the search?
 	 *
 	 * @return  string  The SQL where clause for this search
@@ -264,7 +399,7 @@ abstract class AbstractFilter
 
 		if (substr($operator, 0, 1) == '!')
 		{
-			$prefix = 'NOT ';
+			$prefix   = 'NOT ';
 			$operator = substr($operator, 1);
 		}
 
@@ -274,7 +409,7 @@ abstract class AbstractFilter
 	/**
 	 * Get the field name
 	 *
-	 * @return  string 	The field name
+	 * @return  string    The field name
 	 */
 	public function getFieldName()
 	{
@@ -286,138 +421,5 @@ abstract class AbstractFilter
 		}
 
 		return $name;
-	}
-
-	/**
-	 * Creates a field Object based on the field column type
-	 *
-	 * @param   object  $field   The field informations
-	 * @param   array   $config  The field configuration (like the db object to use)
-	 *
-	 * @return  AbstractFilter  The Filter object
-	 *
-	 * @throws  \InvalidArgumentException
-	 */
-	public static function getField($field, $config = array())
-	{
-		if(!is_object($field) || !isset($field->name) || !isset($field->type))
-		{
-			throw new InvalidFieldObject;
-		}
-
-		$type = $field->type;
-
-		$classType = self::getFieldType($type);
-
-		$className = '\\FOF30\\Model\\DataModel\\Filter\\' . ucfirst($classType);
-
-		if (($classType !== false) && class_exists($className, true))
-		{
-			if (!isset($config['dbo']))
-			{
-				throw new NoDatabaseObject($className);
-			}
-
-			$db = $config['dbo'];
-
-			$field = new $className($db, $field);
-
-			return $field;
-		}
-
-		return null;
-	}
-
-	/**
-	 * Get the class name based on the field Type
-	 *
-	 * @param   string  $type  The type of the field
-	 *
-	 * @return  string  the class name suffix
-	 */
-	public static function getFieldType($type)
-	{
-		// Remove parentheses, indicating field options / size (they don't matter in type detection)
-		if (!empty($type))
-		{
-			list($type, ) = explode('(', $type);
-		}
-
-		$detectedType = null;
-
-		switch (trim($type))
-		{
-			case 'varchar':
-			case 'text':
-			case 'smalltext':
-			case 'longtext':
-			case 'char':
-			case 'mediumtext':
-			case 'character varying':
-			case 'nvarchar':
-			case 'nchar':
-				$detectedType = 'Text';
-				break;
-
-			case 'date':
-			case 'datetime':
-			case 'time':
-			case 'year':
-			case 'timestamp':
-			case 'timestamp without time zone':
-			case 'timestamp with time zone':
-				$detectedType = 'Date';
-				break;
-
-			case 'tinyint':
-			case 'smallint':
-				$detectedType = 'Boolean';
-				break;
-		}
-
-		// Sometimes we have character types followed by a space and some cruft. Let's handle them.
-		if (is_null($detectedType) && !empty($type))
-		{
-			list ($type, ) = explode(' ', $type);
-
-			switch (trim($type))
-			{
-				case 'varchar':
-				case 'text':
-				case 'smalltext':
-				case 'longtext':
-				case 'char':
-				case 'mediumtext':
-				case 'nvarchar':
-				case 'nchar':
-					$detectedType = 'Text';
-					break;
-
-				case 'date':
-				case 'datetime':
-				case 'time':
-				case 'year':
-				case 'timestamp':
-					$detectedType = 'Date';
-					break;
-
-				case 'tinyint':
-				case 'smallint':
-					$detectedType = 'Boolean';
-					break;
-
-				default:
-					$detectedType = 'Number';
-					break;
-			}
-		}
-
-		// If all else fails assume it's a Number and hope for the best
-		if (empty($detectedType))
-		{
-			$detectedType = 'Number';
-		}
-
-		return $detectedType;
 	}
 }

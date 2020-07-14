@@ -5,9 +5,10 @@
  * @license   GNU General Public License version 3, or later
  */
 
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 use Akeeba\Engine\Factory;
+use Joomla\CMS\Document\JsonDocument;
 
 /** @var Akeeba\Backup\Admin\View\Profiles\Json $this */
 
@@ -31,7 +32,7 @@ if (substr($data['configuration'], 0, 12) == '###AES128###')
 $defaultName = $this->input->get('view', 'joomla', 'cmd');
 $filename    = $this->input->get('basename', $defaultName, 'cmd');
 
-/** @var JDocumentJson $document */
+/** @var JsonDocument $document */
 $document = \Joomla\CMS\Factory::getApplication()->getDocument();
 $document->setName($filename);
 

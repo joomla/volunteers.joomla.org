@@ -9,6 +9,8 @@
 
 namespace Akeeba\Engine\Postproc\Connector\Davclient;
 
+defined('AKEEBAENGINE') || die();
+
 use DOMDocument;
 use DOMElement;
 use DOMNode;

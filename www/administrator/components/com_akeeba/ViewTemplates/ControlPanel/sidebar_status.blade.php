@@ -8,7 +8,7 @@
 /** @var $this \Akeeba\Backup\Admin\View\ControlPanel\Html */
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 ?>
 <div class="akeeba-panel">
@@ -78,7 +78,7 @@ defined('_JEXEC') or die();
         {{-- Pro upsell --}}
         @if(!AKEEBA_PRO && (time() - $this->lastUpsellDismiss < 1296000))
             <p style="margin: 0.5em 0">
-                <a href="https://www.akeebabackup.com/landing/akeeba-backup.html"
+                <a href="https://www.akeeba.com/landing/akeeba-backup.html"
                    class="akeeba-btn--ghost--small">
                     <span class="aklogo-backup-j"></span>
                     @lang('COM_AKEEBA_CONTROLPANEL_BTN_LEARNMORE')

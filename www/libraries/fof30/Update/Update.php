@@ -7,20 +7,21 @@
 
 namespace FOF30\Update;
 
+defined('_JEXEC') || die;
+
 use Exception;
 use FOF30\Container\Container;
 use FOF30\Model\Model;
-use JUpdater;
+use Joomla\CMS\Component\ComponentHelper;
+use Joomla\CMS\Updater\Updater;
 use SimpleXMLElement;
-
-defined('_JEXEC') or die;
 
 /**
  * A helper Model to interact with Joomla!'s extensions update feature
  */
 class Update extends Model
 {
-	/** @var JUpdater The Joomla! updater object */
+	/** @var Updater The Joomla! updater object */
 	protected $updater = null;
 
 	/** @var int The extension_id of this component */
@@ -67,7 +68,7 @@ class Update extends Model
 		parent::__construct($container);
 
 		// Get an instance of the updater class
-		$this->updater = JUpdater::getInstance();
+		$this->updater = Updater::getInstance();
 
 		// Get the component name
 		if (isset($config['update_component']))
@@ -186,8 +187,8 @@ class Update extends Model
 	public function getUpdateSites()
 	{
 		$updateSiteIDs = $this->getUpdateSiteIds();
-		$db    = $this->container->db;
-		$query = $db->getQuery(true)
+		$db            = $this->container->db;
+		$query         = $db->getQuery(true)
 			->select('*')
 			->from($db->qn('#__update_sites'))
 			->where($db->qn('update_site_id') . ' IN (' . implode(', ', $updateSiteIDs) . ')');
@@ -423,7 +424,7 @@ class Update extends Model
 		}
 
 		// Use the update cache timeout specified in com_installer
-		$comInstallerParams = \JComponentHelper::getParams('com_installer', false);
+		$comInstallerParams = ComponentHelper::getParams('com_installer', false);
 		$timeout            = 3600 * $comInstallerParams->get('cachetimeout', '6');
 
 		// Load any updates from the network into the #__updates table
@@ -473,7 +474,8 @@ class Update extends Model
 			$ret = null;
 		}
 
-		return is_array($ret) ? $ret : [];	}
+		return is_array($ret) ? $ret : [];
+	}
 
 	/**
 	 * Get the currently installed version as reported by the #__extensions table
@@ -610,7 +612,7 @@ class Update extends Model
 					->where($db->qn('update_site_id') . ' IN (' . implode(',', $obsoleteIDsQuoted) . ')');
 				$db->setQuery($query)->execute();
 			}
-			catch (\Exception $e)
+			catch (Exception $e)
 			{
 				// Do nothing on failure
 				return;
@@ -681,7 +683,7 @@ class Update extends Model
 				$db->setQuery($query)->execute();
 			}
 		}
-		catch (\Exception $e)
+		catch (Exception $e)
 		{
 			// Do nothing on failure
 			return;
@@ -733,7 +735,7 @@ class Update extends Model
 	 */
 	public function getExtensionObject()
 	{
-		list($extensionPrefix, $extensionName) = explode('_', $this->component);
+		[$extensionPrefix, $extensionName] = explode('_', $this->component);
 
 		switch ($extensionPrefix)
 		{

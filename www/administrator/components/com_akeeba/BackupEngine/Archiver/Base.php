@@ -9,7 +9,7 @@
 
 namespace Akeeba\Engine\Archiver;
 
-
+defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Base\Exceptions\ErrorException;
 use Akeeba\Engine\Base\Exceptions\WarningException;
@@ -253,6 +253,8 @@ abstract class Base
 	{
 		static $totalSize = 0;
 
+		$xform_source = null;
+
 		// Do we have to open the file?
 		if (!$this->_xform_fp)
 		{
@@ -344,13 +346,13 @@ abstract class Base
 			}
 
 			// 2.3: Try to use sane default if the indicated installer doesn't exist
-			if (!file_exists($xform_source) && (basename($xform_source) != 'angie.jpa'))
+			if (!is_null($xform_source) && !file_exists($xform_source) && (basename($xform_source) != 'angie.jpa'))
 			{
 				throw new RuntimeException(__CLASS__ . ":: Installer package $xform_source of embedded installer $embedded_installer not found. Please go to the configuration page, select an Embedded Installer, save the configuration and try backing up again.");
 			}
 
 			// Try opening the file
-			if (file_exists($xform_source))
+			if (!is_null($xform_source) && file_exists($xform_source))
 			{
 				$this->_xform_fp = @fopen($xform_source, 'r');
 
@@ -483,8 +485,8 @@ abstract class Base
 	 * the archive.
 	 *
 	 * @param   boolean  $isVirtual         If true, the next parameter contains file data instead of a file name
-	 * @param   string   $sourceNameOrData  Absolute file name to read data from or the file data itself is $isVirtual is
-	 *                                      true
+	 * @param   string   $sourceNameOrData  Absolute file name to read data from or the file data itself is $isVirtual
+	 *                                      is true
 	 * @param   string   $targetName        The (relative) file name under which to store the file in the archive
 	 *
 	 * @return  boolean  True on success, false otherwise. DEPRECATED: Use exceptions instead.
@@ -593,9 +595,9 @@ abstract class Base
 
 		// ----- Explode dir and path by directory separator
 		$v_list_dir       = explode("/", $p_dir);
-		$v_list_dir_size  = sizeof($v_list_dir);
+		$v_list_dir_size  = count($v_list_dir);
 		$v_list_path      = explode("/", $p_path);
-		$v_list_path_size = sizeof($v_list_path);
+		$v_list_path_size = count($v_list_path);
 
 		// ----- Study directories paths
 		$i = 0;

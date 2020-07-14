@@ -7,9 +7,10 @@
 
 namespace FOF30\Utils;
 
-use FOF30\Timer\Timer;
+defined('_JEXEC') || die;
 
-defined('_JEXEC') or die;
+use FOF30\Timer\Timer;
+use Joomla\CMS\Factory;
 
 /**
  * A utility class to check that your extension's files are not missing and have not been tampered with.
@@ -24,7 +25,8 @@ defined('_JEXEC') or die;
  *     ....
  *   ),
  *   'files' => array(
- *     'administrator/components/com_foobar/access.xml' => array('705', '09aa0351a316bf011ecc8c1145134761', 'b95f00c7b49a07a60570dc674f2497c45c4e7152'),
+ *     'administrator/components/com_foobar/access.xml' => array('705', '09aa0351a316bf011ecc8c1145134761',
+ *     'b95f00c7b49a07a60570dc674f2497c45c4e7152'),
  *     ....
  *   )
  * );
@@ -47,10 +49,10 @@ class FilesCheck
 	protected $date = null;
 
 	/** @var array List of files to check as filepath => (filesize, md5, sha1) */
-	protected $fileList = array();
+	protected $fileList = [];
 
 	/** @var array List of directories to check that exist */
-	protected $dirList = array();
+	protected $dirList = [];
 
 	/** @var bool Is the reported component version different than the version of the #__extensions table? */
 	protected $wrongComponentVersion = false;
@@ -61,20 +63,20 @@ class FilesCheck
 	/**
 	 * Create and initialise the object
 	 *
-	 * @param string $option Component name, e.g. com_foobar
-	 * @param string $version The current component version, as reported by the component
-	 * @param string $date The current component release date, as reported by the component
+	 * @param   string  $option   Component name, e.g. com_foobar
+	 * @param   string  $version  The current component version, as reported by the component
+	 * @param   string  $date     The current component release date, as reported by the component
 	 */
 	public function __construct($option, $version, $date)
 	{
 		// Initialise from parameters
-		$this->option = $option;
+		$this->option  = $option;
 		$this->version = $version;
-		$this->date = $date;
+		$this->date    = $date;
 
 		// Retrieve the date and version from the #__extensions table
-		$db = \JFactory::getDbo();
-		$query = $db->getQuery(true)->select('*')->from($db->qn('#__extensions'))
+		$db        = Factory::getDbo();
+		$query     = $db->getQuery(true)->select('*')->from($db->qn('#__extensions'))
 			->where($db->qn('element') . ' = ' . $db->q($this->option))
 			->where($db->qn('type') . ' = ' . $db->q('component'));
 		$extension = $db->setQuery($query)->loadObject();
@@ -134,7 +136,7 @@ class FilesCheck
 
 		// Initialise the files and directories lists
 		$this->fileList = $phpFileChecker['files'];
-		$this->dirList = $phpFileChecker['directories'];
+		$this->dirList  = $phpFileChecker['directories'];
 	}
 
 	/**
@@ -200,22 +202,22 @@ class FilesCheck
 	/**
 	 * Performs a slow, thorough check of all files and folders (including MD5/SHA1 sum checks)
 	 *
-	 * @param int $idx The index from where to start
+	 * @param   int  $idx  The index from where to start
 	 *
 	 * @return array Progress report
 	 */
 	public function slowCheck($idx = 0)
 	{
-		$ret = array(
-			'done'	=> false,
-			'files'	=> array(),
-			'folders'	=> array(),
-			'idx'	=> $idx
-		);
+		$ret = [
+			'done'    => false,
+			'files'   => [],
+			'folders' => [],
+			'idx'     => $idx,
+		];
 
-		$totalFiles = count($this->fileList);
+		$totalFiles   = count($this->fileList);
 		$totalFolders = count($this->dirList);
-		$fileKeys = array_keys($this->fileList);
+		$fileKeys     = array_keys($this->fileList);
 
 		$timer = new Timer(3.0, 75.0);
 
@@ -233,7 +235,7 @@ class FilesCheck
 
 			if ($idx < $totalFiles)
 			{
-				$fileKey = $fileKeys[$idx];
+				$fileKey  = $fileKeys[$idx];
 				$filePath = JPATH_ROOT . '/' . $fileKey;
 				$fileData = $this->fileList[$fileKey];
 

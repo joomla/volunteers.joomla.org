@@ -8,7 +8,7 @@
 /** @var $this \Akeeba\Backup\Admin\View\ControlPanel\Html */
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 use FOF30\Date\Date;
 
@@ -16,5 +16,5 @@ use FOF30\Date\Date;
 {{-- Old PHP version reminder --}}
 @include('admin:com_akeeba/CommonTemplates/phpversion_warning', [
     'softwareName'  => 'Akeeba Backup',
-    'minPHPVersion' => '5.6.0',
+    'minPHPVersion' => '7.1.0',
 ])

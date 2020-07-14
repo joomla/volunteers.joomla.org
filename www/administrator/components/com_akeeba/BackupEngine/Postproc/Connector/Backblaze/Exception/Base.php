@@ -9,7 +9,7 @@
 
 namespace Akeeba\Engine\Postproc\Connector\Backblaze\Exception;
 
-
+defined('AKEEBAENGINE') || die();
 
 use RuntimeException;
 

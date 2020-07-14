@@ -9,6 +9,8 @@
 
 namespace Akeeba\Engine\Archiver;
 
+defined('AKEEBAENGINE') || die();
+
 use Akeeba\Engine\Base\Exceptions\ErrorException;
 use Akeeba\Engine\Base\Exceptions\WarningException;
 use Akeeba\Engine\Factory;

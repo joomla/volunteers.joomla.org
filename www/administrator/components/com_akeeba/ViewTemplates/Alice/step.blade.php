@@ -8,7 +8,7 @@
 use Joomla\CMS\HTML\HTMLHelper as HTMLHelperAlias;
 use Joomla\CMS\Language\Text;
 
-defined('_JEXEC') or die;
+defined('_JEXEC') || die;
 
 /** @var  \Akeeba\Backup\Admin\View\Alice\Html $this */
 

@@ -5,7 +5,9 @@
  * @license   GNU General Public License version 3, or later
  */
 
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
+
+use Joomla\CMS\Form\FormField;
 
 if (class_exists('JFormFieldBackupprofiles'))
 {
@@ -15,7 +17,7 @@ if (class_exists('JFormFieldBackupprofiles'))
 /**
  * Our main element class, creating a multi-select list out of an SQL statement
  */
-class JFormFieldBackupprofiles extends JFormField
+class JFormFieldBackupprofiles extends FormField
 {
 	/**
 	 * Element name
@@ -26,13 +28,13 @@ class JFormFieldBackupprofiles extends JFormField
 
 	function getInput()
 	{
-		$db = JFactory::getDBO();
+		$db = \Joomla\CMS\Factory::getDBO();
 
 		$query = $db->getQuery(true)
-			->select(array(
+			->select([
 				$db->qn('id'),
 				$db->qn('description'),
-			))->from($db->qn('#__ak_profiles'));
+			])->from($db->qn('#__ak_profiles'));
 		$db->setQuery($query);
 		$key = 'id';
 		$val = 'description';
@@ -41,7 +43,7 @@ class JFormFieldBackupprofiles extends JFormField
 
 		if (!is_array($objectList))
 		{
-			$objectList = array();
+			$objectList = [];
 		}
 
 		foreach ($objectList as $o)
@@ -49,19 +51,19 @@ class JFormFieldBackupprofiles extends JFormField
 			$o->description = "#{$o->id}: {$o->description}";
 		}
 
-		$showNone = $this->element['show_none'] ? (string)$this->element['show_none'] : '';
-		$showNone = in_array(strtolower($showNone), array('yes', '1', 'true', 'on'));
+		$showNone = $this->element['show_none'] ? (string) $this->element['show_none'] : '';
+		$showNone = in_array(strtolower($showNone), ['yes', '1', 'true', 'on']);
 
 		if ($showNone)
 		{
-			$defaultItem = (object)array(
-				'id' => '0',
-				'description' => JText::_('COM_AKEEBA_FORMFIELD_BACKUPPROFILES_NONE')
-			);
+			$defaultItem = (object) [
+				'id'          => '0',
+				'description' => \Joomla\CMS\Language\Text::_('COM_AKEEBA_FORMFIELD_BACKUPPROFILES_NONE'),
+			];
 
 			array_unshift($objectList, $defaultItem);
 		}
 
-		return JHtml::_('select.genericlist', $objectList, $this->name, 'class="inputbox"', $key, $val, $this->value, $this->id);
+		return \Joomla\CMS\HTML\HTMLHelper::_('select.genericlist', $objectList, $this->name, 'class="inputbox"', $key, $val, $this->value, $this->id);
 	}
 }

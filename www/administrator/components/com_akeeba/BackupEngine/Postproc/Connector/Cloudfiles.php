@@ -9,7 +9,7 @@
 
 namespace Akeeba\Engine\Postproc\Connector;
 
-
+defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Postproc\Connector\Cloudfiles\Exception\Missing\Apikey as MissingApikey;
 use Akeeba\Engine\Postproc\Connector\Cloudfiles\Exception\Missing\Username as MissingUsername;

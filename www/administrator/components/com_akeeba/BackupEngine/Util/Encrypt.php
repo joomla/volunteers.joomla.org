@@ -9,6 +9,8 @@
 
 namespace Akeeba\Engine\Util;
 
+defined('AKEEBAENGINE') || die();
+
 use Akeeba\Engine\Util\AesAdapter\AdapterInterface;
 use Akeeba\Engine\Util\AesAdapter\Mcrypt;
 use Akeeba\Engine\Util\AesAdapter\OpenSSL;
@@ -417,6 +419,7 @@ class Encrypt
 		$params        = $this->getKeyDerivationParameters();
 		$useStaticSalt = $params['useStaticSalt'];
 		$keySizeBytes  = $params['keySize'];
+		$salt          = null;
 
 		if ($useStaticSalt)
 		{

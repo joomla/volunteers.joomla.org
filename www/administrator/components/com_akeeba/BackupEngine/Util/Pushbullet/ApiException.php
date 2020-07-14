@@ -9,6 +9,8 @@
 
 namespace Akeeba\Engine\Util\Pushbullet;
 
+defined('AKEEBAENGINE') || die();
+
 use Exception;
 
 class ApiException extends Exception

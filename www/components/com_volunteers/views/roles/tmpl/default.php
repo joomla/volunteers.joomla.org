@@ -28,7 +28,7 @@ defined('_JEXEC') or die;
                 <table class="table table-striped table-hover table-vertical-align">
                     <thead>
                     <th><?php echo JText::_('COM_VOLUNTEERS_FIELD_ROLE') ?></th>
-                    <th width="140px"></th>
+                    <th width="300px"></th>
                     </thead>
                     <tbody>
 					<?php foreach ($roles as $role): ?>
@@ -38,8 +38,11 @@ defined('_JEXEC') or die;
 								<?php echo $role->description; ?>
                             </td>
                             <td>
+	                            <a class="btn btn-small pull-right" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=team&id=' . $role->team . '#contact') ?>">
+		                            <span class="icon-mail"></span> <?php echo JText::_('COM_VOLUNTEERS_TAB_CONTACT') ?>
+	                            </a>
                                 <a class="btn btn-small pull-right" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=team&id=' . $role->team . '#getinvolved') ?>">
-                                    <span class="icon-edit"></span> <?php echo JText::_('COM_VOLUNTEERS_ROLE_APPLY') ?>
+                                    <span class="icon-chevron-right"></span> <?php echo JText::_('COM_VOLUNTEERS_ROLE_APPLY') ?>
                                 </a>
                             </td>
                         </tr>

@@ -7,27 +7,32 @@
 
 namespace FOF30\View\DataView;
 
+defined('_JEXEC') || die;
+
+use Exception;
 use FOF30\Container\Container;
 use FOF30\Model\DataModel;
 use FOF30\Model\DataModel\Collection;
 use FOF30\View\View;
+use Joomla\CMS\Application\SiteApplication;
+use Joomla\CMS\Factory;
 use Joomla\CMS\HTML\HTMLHelper;
+use Joomla\CMS\Pagination\Pagination;
 use Joomla\Registry\Registry;
-
-defined('_JEXEC') or die;
+use stdClass;
 
 /**
  * View for a raw data-driven view
  */
 class Raw extends View implements DataViewInterface
 {
-	/** @var   \stdClass  Data lists */
+	/** @var   stdClass  Data lists */
 	protected $lists = null;
 
-	/** @var \JPagination The pagination object */
+	/** @var Pagination The pagination object */
 	protected $pagination = null;
 
-	/** @var \JRegistry|Registry Page parameters object, for front-end views */
+	/** @var Registry|Registry Page parameters object, for front-end views */
 	protected $pageParams = null;
 
 	/** @var Collection The records loaded (browse views) */
@@ -39,7 +44,7 @@ class Raw extends View implements DataViewInterface
 	/** @var int The total number of items in the model (more than those loaded) */
 	protected $itemCount = 0;
 
-	/** @var \stdClass ACL permissions map */
+	/** @var stdClass ACL permissions map */
 	protected $permissions = null;
 
 	/** @var array Additional permissions to fetch on object creation, see getPermissions() */
@@ -98,7 +103,7 @@ class Raw extends View implements DataViewInterface
 	/**
 	 * Returns the internal list of useful variables to the benefit of header fields.
 	 *
-	 * @return \stdClass
+	 * @return stdClass
 	 */
 	public function getLists()
 	{
@@ -108,7 +113,7 @@ class Raw extends View implements DataViewInterface
 	/**
 	 * Returns a reference to the permissions object of this view
 	 *
-	 * @return \stdClass
+	 * @return stdClass
 	 */
 	public function getPerms()
 	{
@@ -118,7 +123,7 @@ class Raw extends View implements DataViewInterface
 	/**
 	 * Returns a reference to the pagination object of this view
 	 *
-	 * @return \JPagination
+	 * @return Pagination
 	 */
 	public function getPagination()
 	{
@@ -158,7 +163,7 @@ class Raw extends View implements DataViewInterface
 	/**
 	 * Get the Joomla! page parameters
 	 *
-	 * @return \JRegistry|Registry
+	 * @return Registry|Registry
 	 */
 	public function getPageParams()
 	{
@@ -238,7 +243,7 @@ class Raw extends View implements DataViewInterface
 	protected function onBeforeBrowse()
 	{
 		// Create the lists object
-		$this->lists = new \stdClass();
+		$this->lists = new stdClass();
 
 		// Load the model
 		/** @var DataModel $model */
@@ -252,7 +257,7 @@ class Raw extends View implements DataViewInterface
 
 		if (!$this->container->platform->isCli() && class_exists('JFactory'))
 		{
-			$app = \JFactory::getApplication();
+			$app = Factory::getApplication();
 
 			if (method_exists($app, 'get'))
 			{
@@ -284,13 +289,13 @@ class Raw extends View implements DataViewInterface
 		}
 
 		// Pagination
-		$this->pagination = new \JPagination($this->itemCount, $this->lists->limitStart, $this->lists->limit);
+		$this->pagination = new Pagination($this->itemCount, $this->lists->limitStart, $this->lists->limit);
 
 		// Pass page params on frontend only
 		if ($this->container->platform->isFrontend())
 		{
-			/** @var \JApplicationSite $app */
-			$app              = \JFactory::getApplication();
+			/** @var SiteApplication $app */
+			$app              = Factory::getApplication();
 			$params           = $app->getParams();
 			$this->pageParams = $params;
 		}
@@ -320,7 +325,7 @@ class Raw extends View implements DataViewInterface
 			{
 				$this->item->setFieldValue($k, $v);
 			}
-			catch (\Exception $e)
+			catch (Exception $e)
 			{
 				// Suppress errors in field assignments at this stage
 			}
@@ -371,4 +376,4 @@ class Raw extends View implements DataViewInterface
 
 		$this->item = $model->findOrFail();
 	}
-} 
+}

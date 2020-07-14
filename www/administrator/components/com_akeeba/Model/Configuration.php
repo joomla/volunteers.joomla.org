@@ -8,7 +8,7 @@
 namespace Akeeba\Backup\Admin\Model;
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 use Akeeba\Engine\Archiver\Directftp;
 use Akeeba\Engine\Archiver\Directsftp;
@@ -18,8 +18,8 @@ use Akeeba\Engine\Util\Transfer\FtpCurl;
 use Akeeba\Engine\Util\Transfer\SftpCurl;
 use Exception;
 use FOF30\Model\Model;
-use JText;
-use JUri;
+use Joomla\CMS\Language\Text;
+use Joomla\CMS\Uri\Uri;
 use RuntimeException;
 
 class Configuration extends Model
@@ -78,7 +78,7 @@ class Configuration extends Model
 		// Check for bad settings
 		if (substr($config['host'], 0, 6) == 'ftp://')
 		{
-			throw new RuntimeException(JText::_('COM_AKEEBA_CONFIG_FTPTEST_BADPREFIX'), 500);
+			throw new RuntimeException(Text::_('COM_AKEEBA_CONFIG_FTPTEST_BADPREFIX'), 500);
 		}
 
 		// Special case for cURL transport
@@ -116,7 +116,7 @@ class Configuration extends Model
 		// Check for bad settings
 		if (substr($config['host'], 0, 7) == 'sftp://')
 		{
-			throw new RuntimeException(JText::_('COM_AKEEBA_CONFIG_SFTPTEST_BADPREFIX'), 500);
+			throw new RuntimeException(Text::_('COM_AKEEBA_CONFIG_SFTPTEST_BADPREFIX'), 500);
 		}
 
 		// Special case for cURL transport
@@ -145,7 +145,7 @@ class Configuration extends Model
 		$params = $this->getState('params', []);
 
 		// Get a callback URI for OAuth 2
-		$params['callbackURI'] = rtrim(JUri::base(), '/') . '/index.php?option=com_akeeba&view=Configuration&task=dpecustomapiraw&engine=' . $engine;
+		$params['callbackURI'] = rtrim(Uri::base(), '/') . '/index.php?option=com_akeeba&view=Configuration&task=dpecustomapiraw&engine=' . $engine;
 
 		// Get the Input object
 		$params['input'] = $this->input->getData();

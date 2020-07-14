@@ -9,7 +9,7 @@
 
 namespace Akeeba\Engine\Postproc;
 
-
+defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Factory;
 use Akeeba\Engine\Postproc\Connector\Davclient as ConnectorDavclient;
@@ -108,6 +108,7 @@ class Webdav extends Base
 		/** @var ConnectorDavclient $connector */
 		$connector = $this->getConnector();
 		$try       = 0;
+		$handle    = null;
 
 		while ($try < 2)
 		{

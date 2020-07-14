@@ -7,11 +7,14 @@
 
 namespace FOF30\Model\DataModel\Behaviour;
 
+defined('_JEXEC') || die;
+
+use Exception;
+use FOF30\Event\Observable;
 use FOF30\Event\Observer;
 use FOF30\Model\DataModel;
-use FOF30\Event\Observable;
-
-defined('_JEXEC') or die;
+use Joomla\CMS\Helper\TagsHelper;
+use stdClass;
 
 /**
  * FOF model behavior class to add Joomla! Tags support
@@ -20,21 +23,21 @@ defined('_JEXEC') or die;
  */
 class Tags extends Observer
 {
-    /** @var \JHelperTags  */
-    protected $tagsHelper;
+	/** @var TagsHelper */
+	protected $tagsHelper;
 
 	public function __construct(Observable &$subject)
 	{
 		parent::__construct($subject);
 
-		$this->tagsHelper = new \JHelperTags();
+		$this->tagsHelper = new TagsHelper();
 	}
 
 	/**
 	 * This event runs after unpublishing a record in a model
 	 *
-	 * @param   DataModel  &$model        The model which calls this event
-	 * @param   \stdClass  &$dataObject   The data to bind to the form
+	 * @param   DataModel  &$model       The model which calls this event
+	 * @param   stdClass  & $dataObject  The data to bind to the form
 	 *
 	 * @return  void
 	 */
@@ -48,8 +51,8 @@ class Tags extends Observer
 	/**
 	 * This event runs after unpublishing a record in a model
 	 *
-	 * @param   DataModel  &$model        The model which calls this event
-	 * @param   \stdClass  &$dataObject   The data to bind to the form
+	 * @param   DataModel  &$model       The model which calls this event
+	 * @param   stdClass  & $dataObject  The data to bind to the form
 	 *
 	 * @return  void
 	 */
@@ -67,14 +70,14 @@ class Tags extends Observer
 	 *
 	 * @return  void
 	 *
-	 * @throws  \Exception  Error message if failed to store tags
+	 * @throws  Exception  Error message if failed to store tags
 	 */
 	public function onAfterSave(&$model)
 	{
 		$tagField = $model->getBehaviorParam('tagFieldName', 'tags');
 
 		// Avoid to update on other method (e.g. publish, ...)
-		if (!in_array($model->getContainer()->input->getCmd('task'), array('apply', 'save', 'savenew')))
+		if (!in_array($model->getContainer()->input->getCmd('task'), ['apply', 'save', 'savenew']))
 		{
 			return;
 		}
@@ -95,19 +98,19 @@ class Tags extends Observer
 
 		if (!$this->tagsHelper->postStoreProcess($model, $model->$tagField))
 		{
-			throw new \Exception('Error storing tags');
+			throw new Exception('Error storing tags');
 		}
 	}
 
 	/**
 	 * The event which runs after deleting a record
 	 *
-	 * @param   DataModel &$model The model which calls this event
-	 * @param   integer   $oid    The PK value of the record which was deleted
+	 * @param   DataModel &$model  The model which calls this event
+	 * @param   integer    $oid    The PK value of the record which was deleted
 	 *
 	 * @return  void
 	 *
-	 * @throws  \Exception  Error message if failed to detele tags
+	 * @throws  Exception  Error message if failed to delete tags
 	 */
 	public function onAfterDelete(&$model, $oid)
 	{
@@ -115,7 +118,7 @@ class Tags extends Observer
 
 		if (!$this->tagsHelper->deleteTagData($model, $oid))
 		{
-			throw new \Exception('Error deleting Tags');
+			throw new Exception('Error deleting Tags');
 		}
 	}
 
@@ -123,7 +126,7 @@ class Tags extends Observer
 	 * This event runs after unpublishing a record in a model
 	 *
 	 * @param   DataModel  &$model  The model which calls this event
-	 * @param   mixed      $data    An associative array or object to bind to the DataModel instance.
+	 * @param   mixed       $data   An associative array or object to bind to the DataModel instance.
 	 *
 	 * @return  void
 	 */

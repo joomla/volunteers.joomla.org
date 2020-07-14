@@ -7,7 +7,7 @@
 
 namespace FOF30\Event;
 
-defined('_JEXEC') or die;
+defined('_JEXEC') || die;
 
 /**
  * Interface Observable
@@ -42,5 +42,5 @@ interface Observable
 	 *
 	 * @return  array
 	 */
-	public function trigger($event, array $args = array());
-} 
+	public function trigger($event, array $args = []);
+}

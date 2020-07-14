@@ -5,7 +5,7 @@
  * @license   GNU General Public License version 3, or later
  */
 
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 ?>
 @include('admin:com_akeeba/CommonTemplates/ErrorModal')
@@ -13,7 +13,7 @@ defined('_JEXEC') or die();
 
 <div class="akeeba-panel--information">
     <div class="akeeba-form-section">
-        <div class="akeeba-form--inline">
+        <div class="AKEEBA_MASTER_FORM_STYLING akeeba-form--inline">
             <label>@lang('COM_AKEEBA_FILEFILTERS_LABEL_ROOTDIR')</label>
             <span id="ak_roots_container_tab">
 			{{ $this->root_select }}

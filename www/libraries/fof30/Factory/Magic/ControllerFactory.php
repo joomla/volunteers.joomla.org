@@ -7,25 +7,25 @@
 
 namespace FOF30\Factory\Magic;
 
+defined('_JEXEC') || die;
+
 use FOF30\Controller\DataController;
 use FOF30\Factory\Exception\ControllerNotFound;
 
-defined('_JEXEC') or die;
-
 /**
- * Creates a DataControler object instance based on the information provided by the fof.xml configuration file
+ * Creates a DataController object instance based on the information provided by the fof.xml configuration file
  */
 class ControllerFactory extends BaseFactory
 {
 	/**
 	 * Create a new object instance
 	 *
-	 * @param   string $name   The name of the class we're making
-	 * @param   array  $config The config parameters which override the fof.xml information
+	 * @param   string  $name    The name of the class we're making
+	 * @param   array   $config  The config parameters which override the fof.xml information
 	 *
 	 * @return  DataController  A new DataController object
 	 */
-	public function make($name = null, array $config = array())
+	public function make($name = null, array $config = [])
 	{
 		if (empty($name))
 		{
@@ -35,7 +35,7 @@ class ControllerFactory extends BaseFactory
 		$appConfig = $this->container->appConfig;
 		$name      = ucfirst($name);
 
-		$defaultConfig = array(
+		$defaultConfig = [
 			'name'           => $name,
 			'default_task'   => $appConfig->get("views.$name.config.default_task", 'main'),
 			'autoRouting'    => $appConfig->get("views.$name.config.autoRouting", 1),
@@ -43,12 +43,12 @@ class ControllerFactory extends BaseFactory
 			'viewName'       => $appConfig->get("views.$name.config.viewName", null),
 			'modelName'      => $appConfig->get("views.$name.config.modelName", null),
 			'taskPrivileges' => $appConfig->get("views.$name.acl"),
-			'cacheableTasks' => $appConfig->get("views.$name.config.cacheableTasks", array(
+			'cacheableTasks' => $appConfig->get("views.$name.config.cacheableTasks", [
 				'browse',
-				'read'
-			)),
+				'read',
+			]),
 			'taskMap'        => $appConfig->get("views.$name.taskmap"),
-		);
+		];
 
 		$config = array_merge($defaultConfig, $config);
 

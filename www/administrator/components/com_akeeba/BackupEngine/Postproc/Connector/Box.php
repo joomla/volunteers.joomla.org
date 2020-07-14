@@ -9,6 +9,8 @@
 
 namespace Akeeba\Engine\Postproc\Connector;
 
+defined('AKEEBAENGINE') || die();
+
 use Akeeba\Engine\Postproc\Connector\Box\Exception\APIError;
 use Akeeba\Engine\Postproc\Connector\Box\Exception\cURLError;
 use Akeeba\Engine\Postproc\Connector\Box\Exception\InvalidJSON;
@@ -34,17 +36,17 @@ class Box
 	/**
 	 * The root URL for the Box API
 	 */
-	const rootUrl = 'https://api.box.com/2.0/';
+	public const rootUrl = 'https://api.box.com/2.0/';
 
 	/**
 	 * The root URL for the Box API
 	 */
-	const uploadUrl = 'https://upload.box.com/api/2.0/';
+	public const uploadUrl = 'https://upload.box.com/api/2.0/';
 
 	/**
 	 * The URL of the helper script which is used to get fresh API tokens
 	 */
-	const helperUrl = 'https://www.akeebabackup.com/oauth2/box.php';
+	public const helperUrl = 'https://www.akeeba.com/oauth2/box.php';
 
 	/**
 	 * The access token for connecting to Box.com
@@ -87,7 +89,7 @@ class Box
 	 *
 	 * @param   string  $accessToken   The Box access token
 	 * @param   string  $refreshToken  The Box refresh token
-	 * @param   string  $dlid          The AkeebaBackup.com Download ID, used whenever you try to refresh the token
+	 * @param   string  $dlid          The akeeba.com Download ID, used whenever you try to refresh the token
 	 */
 	public function __construct($accessToken, $refreshToken, $dlid)
 	{
@@ -211,7 +213,7 @@ class Box
 			return $ret;
 		}
 
-		$totalCount = isset($apiReturn['total_count']) ? $apiReturn['total_count'] : 0;
+		$totalCount = $apiReturn['total_count'] ?? 0;
 
 		if ($totalCount === 0)
 		{
@@ -240,8 +242,8 @@ class Box
 		 * The API paginates at $limit (default: 1000) items. If we get exactly $limit items we probably have more
 		 * pages of information to fetch. This will recurse through all the pages.
 		 */
-		$limit  = isset($apiReturn['limit']) ? $apiReturn['limit'] : 1000;
-		$offset = isset($apiReturn['offset']) ? $apiReturn['offset'] : $offset;
+		$limit  = $apiReturn['limit'] ?? 1000;
+		$offset = $apiReturn['offset'] ?? $offset;
 
 		if ($totalCount == $limit)
 		{
@@ -263,6 +265,7 @@ class Box
 	 */
 	public function createFolder($name, $parentId = 0)
 	{
+		$apiReturn  = [];
 		$parentId   = (int) $parentId;
 		$url        = "folders";
 		$postData   = json_encode([

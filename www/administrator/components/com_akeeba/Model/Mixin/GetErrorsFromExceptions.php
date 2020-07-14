@@ -8,7 +8,7 @@
 namespace Akeeba\Backup\Admin\Model\Mixin;
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 use Exception;
 use Throwable;

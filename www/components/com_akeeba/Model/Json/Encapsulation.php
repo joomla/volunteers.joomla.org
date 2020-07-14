@@ -8,7 +8,7 @@
 namespace Akeeba\Backup\Site\Model\Json;
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 /**
  * Handles data encapsulation
@@ -100,7 +100,7 @@ class Encapsulation
 	 * @throw   \RuntimeException  When the server capabilities don't match the requested encapsulation
 	 * @throw   \InvalidArgumentException  When $data cannot be decoded successfully
 	 *
-	 * @see     https://www.akeebabackup.com/documentation/json-api/ar01s02.html
+	 * @see     https://www.akeeba.com/documentation/json-api/ar01s02.html
 	 */
 	public function decode($encapsulation, $data)
 	{
@@ -181,7 +181,7 @@ class Encapsulation
 	 *
 	 * @return  string  The encapsulated data
 	 *
-	 * @see     https://www.akeebabackup.com/documentation/json-api/ar01s02s02.html
+	 * @see     https://www.akeeba.com/documentation/json-api/ar01s02s02.html
 	 *
 	 * @throw   \RuntimeException  When the server capabilities don't match the requested encapsulation
 	 * @throw   \InvalidArgumentException  When $data cannot be converted to JSON

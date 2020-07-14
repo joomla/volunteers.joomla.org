@@ -8,10 +8,10 @@
 namespace Akeeba\Backup\Site\Model\Json\Task;
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 use Akeeba\Backup\Site\Model\Browser;
-use Akeeba\Engine\Platform;
+use Joomla\CMS\Filter\InputFilter;
 
 /**
  * Return folder browser results
@@ -21,21 +21,21 @@ class Browse extends AbstractTask
 	/**
 	 * Execute the JSON API task
 	 *
-	 * @param   array $parameters The parameters to this task
+	 * @param   array  $parameters  The parameters to this task
 	 *
 	 * @return  mixed
 	 *
 	 * @throws  \RuntimeException  In case of an error
 	 */
-	public function execute(array $parameters = array())
+	public function execute(array $parameters = [])
 	{
-		$filter = \JFilterInput::getInstance();
+		$filter = InputFilter::getInstance();
 
 		// Get the passed configuration values
-		$defConfig = array(
+		$defConfig = [
 			'folder'        => '',
-			'processfolder' => 0
-		);
+			'processfolder' => 0,
+		];
 
 		$defConfig = array_merge($defConfig, $parameters);
 
@@ -48,7 +48,7 @@ class Browse extends AbstractTask
 		$model->setState('processfolder', $processFolder);
 		$model->makeListing();
 
-		$ret = array(
+		$ret = [
 			'folder'                => $model->getState('folder'),
 			'folder_raw'            => $model->getState('folder_raw'),
 			'parent'                => $model->getState('parent'),
@@ -58,7 +58,7 @@ class Browse extends AbstractTask
 			'writable'              => $model->getState('writable'),
 			'subfolders'            => $model->getState('subfolders'),
 			'breadcrumbs'           => $model->getState('breadcrumbs'),
-		);
+		];
 
 		return $ret;
 	}

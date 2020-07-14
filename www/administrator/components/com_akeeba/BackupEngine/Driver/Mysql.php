@@ -9,7 +9,7 @@
 
 namespace Akeeba\Engine\Driver;
 
-
+defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Driver\Query\Mysql as QueryMysql;
 use Akeeba\Engine\Factory;
@@ -311,7 +311,7 @@ class Mysql extends Base
 	 */
 	public function getNumRows($cursor = null)
 	{
-		return mysql_num_rows($cursor ? $cursor : $this->cursor);
+		return mysql_num_rows($cursor ?: $this->cursor);
 	}
 
 	/**
@@ -346,7 +346,7 @@ class Mysql extends Base
 		$result = [];
 
 		// Sanitize input to an array and iterate over the list.
-		settype($tables, 'array');
+		$tables = (array) $tables;
 		foreach ($tables as $table)
 		{
 			// Set the query to get the table CREATE statement.
@@ -662,7 +662,7 @@ class Mysql extends Base
 	 */
 	public function fetchAssoc($cursor = null)
 	{
-		return mysql_fetch_assoc($cursor ? $cursor : $this->cursor);
+		return mysql_fetch_assoc($cursor ?: $this->cursor);
 	}
 
 	/**
@@ -674,7 +674,7 @@ class Mysql extends Base
 	 */
 	public function freeResult($cursor = null)
 	{
-		mysql_free_result($cursor ? $cursor : $this->cursor);
+		mysql_free_result($cursor ?: $this->cursor);
 	}
 
 	/**
@@ -904,7 +904,7 @@ class Mysql extends Base
 	 */
 	protected function fetchArray($cursor = null)
 	{
-		return mysql_fetch_row($cursor ? $cursor : $this->cursor);
+		return mysql_fetch_row($cursor ?: $this->cursor);
 	}
 
 	/**
@@ -917,7 +917,7 @@ class Mysql extends Base
 	 */
 	protected function fetchObject($cursor = null, $class = 'stdClass')
 	{
-		return mysql_fetch_object($cursor ? $cursor : $this->cursor, $class);
+		return mysql_fetch_object($cursor ?: $this->cursor, $class);
 	}
 
 	/**

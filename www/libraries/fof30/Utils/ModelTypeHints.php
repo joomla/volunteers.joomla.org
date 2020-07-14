@@ -7,9 +7,10 @@
 
 namespace FOF30\Utils;
 
-use FOF30\Model\DataModel;
+defined('_JEXEC') || die;
 
-defined('_JEXEC') or die;
+use FOF30\Model\DataModel;
+use FOF30\Model\DataModel\Relation\Exception\RelationNotFound;
 
 /**
  * Generate phpDoc type hints for the magic fields of your DataModels
@@ -25,190 +26,28 @@ class ModelTypeHints
 	 */
 	protected $model = null;
 
-    /**
-     * Name of the class. If empty will be inferred from the current object
-     *
-     * @var string
-     */
-    protected $className = null;
-
-    /**
-     * @param string $className
-     */
-    public function setClassName($className)
-    {
-        $this->className = $className;
-    }
+	/**
+	 * Name of the class. If empty will be inferred from the current object
+	 *
+	 * @var string
+	 */
+	protected $className = null;
 
 	/**
 	 * Public constructor
 	 *
-	 * @param   \FOF30\Model\DataModel  $model  The model to create hints for
+	 * @param   DataModel  $model  The model to create hints for
 	 */
 	public function __construct(DataModel $model)
 	{
 		$this->model     = $model;
-        $this->className = get_class($model);
+		$this->className = get_class($model);
 	}
-
-	/**
-	 * Return the raw hints array
-	 *
-	 * @return  array
-	 *
-	 * @throws  \FOF30\Model\DataModel\Relation\Exception\RelationNotFound
-	 */
-	public function getRawHints()
-	{
-		$model = $this->model;
-
-		$hints = array(
-			'property'      => array(),
-			'method'        => array(),
-			'property-read' => array()
-		);
-
-		$hasFilters = $model->getBehavioursDispatcher()->hasObserverClass('FOF30\Model\DataModel\Behaviour\Filters');
-
-		$magicFields = array(
-			'enabled', 'ordering', 'created_on', 'created_by', 'modified_on', 'modified_by',  'locked_on', 'locked_by',
-		);
-
-		foreach ($model->getTableFields() as $fieldName => $fieldMeta)
-		{
-			$fieldType = $this->getFieldType($fieldMeta->Type);
-
-			if (!in_array($fieldName, $magicFields))
-			{
-				$hints['property'][] = array($fieldType, '$' . $fieldName);
-			}
-
-			if ($hasFilters)
-			{
-				$hints['method'][] = array(
-					'$this',
-					$fieldName . '()',
-					$fieldName . '(' . $fieldType . ' $v)'
-				);
-			}
-		}
-
-		$relations = $model->getRelations()->getRelationNames();
-
-		$modelType = get_class($model);
-		$modelTypeParts = explode('\\', $modelType);
-		array_pop($modelTypeParts);
-		$modelType = implode('\\', $modelTypeParts) . '\\';
-
-		if ($relations)
-		{
-			foreach($relations as $relationName)
-			{
-				$relationObject = $model->getRelations()->getRelation($relationName)->getForeignModel();
-				$relationType = get_class($relationObject);
-				$relationType = str_replace($modelType, '', $relationType);
-
-				$hints['property-read'][] = array(
-					$relationType,
-					'$' . $relationName
-				);
-			}
-		}
-
-		return $hints;
-	}
-
-	/**
-	 * Returns the docblock with the magic field hints for the model class
-	 *
-	 * @return  string
-	 */
-	public function getHints()
-	{
-		$modelName = $this->className;
-
-		$text = "/**\n * Model $modelName\n *\n";
-
-		$hints = $this->getRawHints();
-
-		if (!empty($hints['property']))
-		{
-			$text .= " * Fields:\n *\n";
-
-			$colWidth = 0;
-
-			foreach ($hints['property'] as $hintLine)
-			{
-				$colWidth = max($colWidth, strlen($hintLine[0]));
-			}
-
-			$colWidth += 2;
-
-			foreach ($hints['property'] as $hintLine)
-			{
-				$text .= " * @property  " . str_pad($hintLine[0], $colWidth, ' ') . $hintLine[1] . "\n";
-			}
-
-			$text .= " *\n";
-		}
-
-		if (!empty($hints['method']))
-		{
-			$text .= " * Filters:\n *\n";
-
-			$colWidth = 0;
-			$col2Width = 0;
-
-			foreach ($hints['method'] as $hintLine)
-			{
-				$colWidth = max($colWidth, strlen($hintLine[0]));
-				$col2Width = max($col2Width, strlen($hintLine[1]));
-			}
-
-			$colWidth += 2;
-			$col2Width += 2;
-
-			foreach ($hints['method'] as $hintLine)
-			{
-				$text .= " * @method  " . str_pad($hintLine[0], $colWidth, ' ')
-					. str_pad($hintLine[1], $col2Width, ' ')
-					. $hintLine[2] . "\n";
-			}
-
-			$text .= " *\n";
-		}
-
-		if (!empty($hints['property-read']))
-		{
-			$text .= " * Relations:\n *\n";
-
-			$colWidth = 0;
-
-			foreach ($hints['property-read'] as $hintLine)
-			{
-				$colWidth = max($colWidth, strlen($hintLine[0]));
-			}
-
-			$colWidth += 2;
-
-			foreach ($hints['property-read'] as $hintLine)
-			{
-				$text .= " * @property  " . str_pad($hintLine[0], $colWidth, ' ') . $hintLine[1] . "\n";
-			}
-
-			$text .= " *\n";
-		}
-
-		$text .= "**/\n";
-
-		return $text;
-	}
-
 
 	/**
 	 * Translates the database field type into a PHP base type
 	 *
-	 * @param   string $type The type of the field
+	 * @param   string  $type  The type of the field
 	 *
 	 * @return  string  The PHP base type
 	 */
@@ -217,7 +56,7 @@ class ModelTypeHints
 		// Remove parentheses, indicating field options / size (they don't matter in type detection)
 		if (!empty($type))
 		{
-			list($type,) = explode('(', $type);
+			[$type, ] = explode('(', $type);
 		}
 
 		$detectedType = null;
@@ -262,7 +101,7 @@ class ModelTypeHints
 		// Sometimes we have character types followed by a space and some cruft. Let's handle them.
 		if (is_null($detectedType) && !empty($type))
 		{
-			list ($type,) = explode(' ', $type);
+			[$type, ] = explode(' ', $type);
 
 			switch (trim($type))
 			{
@@ -311,5 +150,166 @@ class ModelTypeHints
 		}
 
 		return $detectedType;
+	}
+
+	/**
+	 * @param   string  $className
+	 */
+	public function setClassName($className)
+	{
+		$this->className = $className;
+	}
+
+	/**
+	 * Return the raw hints array
+	 *
+	 * @return  array
+	 *
+	 * @throws  RelationNotFound
+	 */
+	public function getRawHints()
+	{
+		$model = $this->model;
+
+		$hints = [
+			'property'      => [],
+			'method'        => [],
+			'property-read' => [],
+		];
+
+		$hasFilters = $model->getBehavioursDispatcher()->hasObserverClass('FOF30\Model\DataModel\Behaviour\Filters');
+
+		$magicFields = [
+			'enabled', 'ordering', 'created_on', 'created_by', 'modified_on', 'modified_by', 'locked_on', 'locked_by',
+		];
+
+		foreach ($model->getTableFields() as $fieldName => $fieldMeta)
+		{
+			$fieldType = self::getFieldType($fieldMeta->Type);
+
+			if (!in_array($fieldName, $magicFields))
+			{
+				$hints['property'][] = [$fieldType, '$' . $fieldName];
+			}
+
+			if ($hasFilters)
+			{
+				$hints['method'][] = [
+					'$this',
+					$fieldName . '()',
+					$fieldName . '(' . $fieldType . ' $v)',
+				];
+			}
+		}
+
+		$relations = $model->getRelations()->getRelationNames();
+
+		$modelType      = get_class($model);
+		$modelTypeParts = explode('\\', $modelType);
+		array_pop($modelTypeParts);
+		$modelType = implode('\\', $modelTypeParts) . '\\';
+
+		if ($relations)
+		{
+			foreach ($relations as $relationName)
+			{
+				$relationObject = $model->getRelations()->getRelation($relationName)->getForeignModel();
+				$relationType   = get_class($relationObject);
+				$relationType   = str_replace($modelType, '', $relationType);
+
+				$hints['property-read'][] = [
+					$relationType,
+					'$' . $relationName,
+				];
+			}
+		}
+
+		return $hints;
+	}
+
+	/**
+	 * Returns the docblock with the magic field hints for the model class
+	 *
+	 * @return  string
+	 */
+	public function getHints()
+	{
+		$modelName = $this->className;
+
+		$text = "/**\n * Model $modelName\n *\n";
+
+		$hints = $this->getRawHints();
+
+		if (!empty($hints['property']))
+		{
+			$text .= " * Fields:\n *\n";
+
+			$colWidth = 0;
+
+			foreach ($hints['property'] as $hintLine)
+			{
+				$colWidth = max($colWidth, strlen($hintLine[0]));
+			}
+
+			$colWidth += 2;
+
+			foreach ($hints['property'] as $hintLine)
+			{
+				$text .= " * @property  " . str_pad($hintLine[0], $colWidth, ' ') . $hintLine[1] . "\n";
+			}
+
+			$text .= " *\n";
+		}
+
+		if (!empty($hints['method']))
+		{
+			$text .= " * Filters:\n *\n";
+
+			$colWidth  = 0;
+			$col2Width = 0;
+
+			foreach ($hints['method'] as $hintLine)
+			{
+				$colWidth  = max($colWidth, strlen($hintLine[0]));
+				$col2Width = max($col2Width, strlen($hintLine[1]));
+			}
+
+			$colWidth  += 2;
+			$col2Width += 2;
+
+			foreach ($hints['method'] as $hintLine)
+			{
+				$text .= " * @method  " . str_pad($hintLine[0], $colWidth, ' ')
+					. str_pad($hintLine[1], $col2Width, ' ')
+					. $hintLine[2] . "\n";
+			}
+
+			$text .= " *\n";
+		}
+
+		if (!empty($hints['property-read']))
+		{
+			$text .= " * Relations:\n *\n";
+
+			$colWidth = 0;
+
+			foreach ($hints['property-read'] as $hintLine)
+			{
+				$colWidth = max($colWidth, strlen($hintLine[0]));
+			}
+
+			$colWidth += 2;
+
+			foreach ($hints['property-read'] as $hintLine)
+			{
+				$text .= " * @property  " . str_pad($hintLine[0], $colWidth, ' ') . $hintLine[1] . "\n";
+			}
+
+			$text .= " *\n";
+		}
+
+		$text .= "**/\n";
+
+		return $text;
 	}
 }

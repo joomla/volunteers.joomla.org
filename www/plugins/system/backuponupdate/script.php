@@ -7,7 +7,7 @@
 
 use FOF30\Utils\InstallScript\Plugin;
 
-defined('_JEXEC') or die;
+defined('_JEXEC') || die;
 
 // Load FOF if not already loaded
 if (!defined('FOF30_INCLUDED') && !@include_once(JPATH_LIBRARIES . '/fof30/include.php'))

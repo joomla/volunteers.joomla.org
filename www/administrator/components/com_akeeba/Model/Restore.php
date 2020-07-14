@@ -8,32 +8,31 @@
 namespace Akeeba\Backup\Admin\Model;
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 use Akeeba\Backup\Admin\Model\Mixin\GetErrorsFromExceptions;
 use Akeeba\Engine\Archiver\Directftp;
 use Akeeba\Engine\Factory;
 use Akeeba\Engine\Platform;
+use Exception;
 use FOF30\Model\Model;
-use JFile;
-use JLoader;
-use JText;
+use Joomla\CMS\Filesystem\File;
+use Joomla\CMS\Language\Text;
+use Joomla\CMS\User\UserHelper;
+use RuntimeException;
 
 class Restore extends Model
 {
 	use GetErrorsFromExceptions;
 
-	/** @var   array  The backup record being restored */
-	private $data;
-
-	/** @var   string  The extension of the archive being restored */
-	private $extension;
-
-	/** @var   string  Absolute path to the archive being restored */
-	private $path;
-
 	/** @var   string  Random password, used to secure the restoration */
 	public $password;
+	/** @var   array  The backup record being restored */
+	private $data;
+	/** @var   string  The extension of the archive being restored */
+	private $extension;
+	/** @var   string  Absolute path to the archive being restored */
+	private $path;
 
 	/**
 	 * Generates a pseudo-random password
@@ -44,9 +43,7 @@ class Restore extends Model
 	 */
 	public function makeRandomPassword($length = 32)
 	{
-		\JLoader::import('joomla.user.helper');
-
-		return \JUserHelper::genRandomPassword($length);
+		return UserHelper::genRandomPassword($length);
 	}
 
 	/**
@@ -64,7 +61,7 @@ class Restore extends Model
 		// No backup IDs in the request and no backup profile (which means I should use its latest backup record) is found.
 		if (empty($id) && ($profileID <= 0))
 		{
-			return JText::_('COM_AKEEBA_RESTORE_ERROR_INVALID_RECORD');
+			return Text::_('COM_AKEEBA_RESTORE_ERROR_INVALID_RECORD');
 		}
 
 		if (empty($id))
@@ -73,7 +70,7 @@ class Restore extends Model
 			{
 				$id = $this->getLatestBackupForProfile($profileID);
 			}
-			catch (\RuntimeException $e)
+			catch (RuntimeException $e)
 			{
 				return $e->getMessage();
 			}
@@ -83,12 +80,12 @@ class Restore extends Model
 
 		if (empty($data))
 		{
-			return JText::_('COM_AKEEBA_RESTORE_ERROR_INVALID_RECORD');
+			return Text::_('COM_AKEEBA_RESTORE_ERROR_INVALID_RECORD');
 		}
 
 		if ($data['status'] != 'complete')
 		{
-			return JText::_('COM_AKEEBA_RESTORE_ERROR_INVALID_RECORD');
+			return Text::_('COM_AKEEBA_RESTORE_ERROR_INVALID_RECORD');
 		}
 
 		// Load the profile ID (so that we can find out the output directory)
@@ -108,7 +105,7 @@ class Restore extends Model
 
 		if (!$exists)
 		{
-			return JText::_('COM_AKEEBA_RESTORE_ERROR_ARCHIVE_MISSING');
+			return Text::_('COM_AKEEBA_RESTORE_ERROR_ARCHIVE_MISSING');
 		}
 
 		$filename  = basename($path);
@@ -117,7 +114,7 @@ class Restore extends Model
 
 		if (!in_array($extension, ['JPS', 'JPA', 'ZIP']))
 		{
-			return JText::_('COM_AKEEBA_RESTORE_ERROR_INVALID_TYPE');
+			return Text::_('COM_AKEEBA_RESTORE_ERROR_INVALID_TYPE');
 		}
 
 		$this->data      = $data;
@@ -137,7 +134,7 @@ class Restore extends Model
 	 *
 	 * @return  int
 	 *
-	 * @throws  \RuntimeException
+	 * @throws  RuntimeException
 	 *
 	 * @since   5.3.0
 	 */
@@ -149,7 +146,7 @@ class Restore extends Model
 
 		if (empty($latestBackup))
 		{
-			throw new \RuntimeException(JText::sprintf('COM_AKEEBA_RESTORE_ERROR_NO_LATEST', $profileID));
+			throw new RuntimeException(Text::sprintf('COM_AKEEBA_RESTORE_ERROR_NO_LATEST', $profileID));
 		}
 
 		return $latestBackup['id'];
@@ -239,20 +236,20 @@ ENDDATA;
 		$data .= ');';
 
 		// Remove the old file, if it's there...
-		JLoader::import('joomla.filesystem.file');
 		$configpath = JPATH_COMPONENT_ADMINISTRATOR . '/restoration.php';
+
 		clearstatcache(true, $configpath);
 
 		if (@file_exists($configpath))
 		{
 			if (!@unlink($configpath))
 			{
-				JFile::delete($configpath);
+				File::delete($configpath);
 			}
 		}
 
 		// Write new file
-		$result = JFile::write($configpath, $data);
+		$result = File::write($configpath, $data);
 
 		// Clear opcode caches for the generated .php file
 		if (function_exists('opcache_invalidate'))
@@ -308,7 +305,7 @@ ENDDATA;
 				{
 					$test->initialize('', $config);
 				}
-				catch (\Exception $e)
+				catch (Exception $e)
 				{
 					return implode("\n", $this->getErrorsFromExceptions($e));
 				}

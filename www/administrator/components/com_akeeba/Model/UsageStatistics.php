@@ -8,13 +8,12 @@
 namespace Akeeba\Backup\Admin\Model;
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 use AkeebaUsagestats;
-use FOF30\Database\Installer;
+use FOF30\Encrypt\Randval;
 use FOF30\Model\Model;
-use JCrypt;
-use JUri;
+use Joomla\CMS\Uri\Uri;
 
 /**
  * Usage statistics collection model. Implements the anonymous collection of PHP, MySQL and Joomla! version information
@@ -37,12 +36,12 @@ class UsageStatistics extends Model
 
 		// No id or the saved URL is not the same as the current one (ie site restored to a new url)?
 		// Create a new, random site ID and save it to the database
-		if (empty($siteId) || (md5(JUri::base()) != $siteUrl))
+		if (empty($siteId) || (md5(Uri::base()) != $siteUrl))
 		{
-			$siteUrl = md5(JUri::base());
+			$siteUrl = md5(Uri::base());
 			$this->setCommonVariable('stats_siteurl', $siteUrl);
 
-			$randomData = JCrypt::genRandomBytes(120);
+			$randomData = (new Randval())->genRandomBytes(120);
 			$siteId     = sha1($randomData);
 
 			$this->setCommonVariable('stats_siteid', $siteId);
@@ -106,7 +105,7 @@ class UsageStatistics extends Model
 			define('AKEEBA_DATE', date('Y-m-d'));
 		}
 
-		$db    = $container->db;
+		$db = $container->db;
 
 		try
 		{
@@ -182,9 +181,9 @@ class UsageStatistics extends Model
 	{
 		$db    = $this->container->db;
 		$query = $db->getQuery(true)
-					->select($db->qn('value'))
-					->from($db->qn('#__akeeba_common'))
-					->where($db->qn('key') . ' = ' . $db->q($key));
+			->select($db->qn('value'))
+			->from($db->qn('#__akeeba_common'))
+			->where($db->qn('key') . ' = ' . $db->q($key));
 
 		try
 		{
@@ -211,9 +210,9 @@ class UsageStatistics extends Model
 	{
 		$db    = $this->container->db;
 		$query = $db->getQuery(true)
-					->select('COUNT(*)')
-					->from($db->qn('#__akeeba_common'))
-					->where($db->qn('key') . ' = ' . $db->q($key));
+			->select('COUNT(*)')
+			->from($db->qn('#__akeeba_common'))
+			->where($db->qn('key') . ' = ' . $db->q($key));
 
 		try
 		{
@@ -229,20 +228,20 @@ class UsageStatistics extends Model
 		{
 			if (!$count)
 			{
-				$insertObject = (object)array(
+				$insertObject = (object) [
 					'key'   => $key,
 					'value' => $value,
-				);
+				];
 				$db->insertObject('#__akeeba_common', $insertObject);
 			}
 			else
 			{
 				$keyName = version_compare(JVERSION, '1.7.0', 'lt') ? $db->qn('key') : 'key';
 
-				$insertObject = (object)array(
+				$insertObject = (object) [
 					$keyName => $key,
 					'value'  => $value,
-				);
+				];
 
 				$db->updateObject('#__akeeba_common', $insertObject, $keyName);
 			}

@@ -9,7 +9,7 @@
 
 namespace Akeeba\Engine\Scan;
 
-
+defined('AKEEBAENGINE') || die();
 
 abstract class Base
 {

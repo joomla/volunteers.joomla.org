@@ -8,7 +8,7 @@
 namespace Akeeba\Backup\Admin\Controller;
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 use Akeeba\Backup\Admin\Controller\Mixin\CustomACL;
 use Akeeba\Backup\Admin\Model\Statistics;
@@ -16,8 +16,8 @@ use Akeeba\Engine\Factory;
 use Akeeba\Engine\Platform;
 use FOF30\Container\Container;
 use FOF30\Controller\Controller;
-use JText;
-use JUri;
+use Joomla\CMS\Language\Text;
+use Joomla\CMS\Uri\Uri;
 
 /**
  * Backup page controller
@@ -52,7 +52,7 @@ class Manage extends Controller
 
 		if ($id <= 0)
 		{
-			$this->setRedirect(JUri::base() . 'index.php?option=com_akeeba&view=Manage', JText::_('COM_AKEEBA_BUADMIN_ERROR_INVALIDID'), 'error');
+			$this->setRedirect(\Joomla\CMS\Uri\Uri::base() . 'index.php?option=com_akeeba&view=Manage', \Joomla\CMS\Language\Text::_('COM_AKEEBA_BUADMIN_ERROR_INVALIDID'), 'error');
 
 			return;
 		}
@@ -74,7 +74,7 @@ class Manage extends Controller
 
 		if (is_null($filename) || empty($filename) || !@file_exists($filename))
 		{
-			$this->setRedirect(JUri::base() . 'index.php?option=com_akeeba&view=Manage', JText::_('COM_AKEEBA_BUADMIN_ERROR_INVALIDDOWNLOAD'), 'error');
+			$this->setRedirect(\Joomla\CMS\Uri\Uri::base() . 'index.php?option=com_akeeba&view=Manage', \Joomla\CMS\Language\Text::_('COM_AKEEBA_BUADMIN_ERROR_INVALIDDOWNLOAD'), 'error');
 
 			return;
 		}
@@ -172,7 +172,7 @@ class Manage extends Controller
 
 		if (empty($ids))
 		{
-			$this->setRedirect(JUri::base() . 'index.php?option=com_akeeba&view=Manage', JText::_('COM_AKEEBA_BUADMIN_ERROR_INVALIDID'), 'error');
+			$this->setRedirect(\Joomla\CMS\Uri\Uri::base() . 'index.php?option=com_akeeba&view=Manage', \Joomla\CMS\Language\Text::_('COM_AKEEBA_BUADMIN_ERROR_INVALIDID'), 'error');
 
 			return;
 		}
@@ -181,7 +181,7 @@ class Manage extends Controller
 		{
 			try
 			{
-				$msg    = JText::_('COM_AKEEBA_BUADMIN_ERROR_INVALIDID');
+				$msg    = \Joomla\CMS\Language\Text::_('COM_AKEEBA_BUADMIN_ERROR_INVALIDID');
 				$result = false;
 
 				if ($id > 0)
@@ -201,13 +201,13 @@ class Manage extends Controller
 
 			if (!$result)
 			{
-				$this->setRedirect(JUri::base() . 'index.php?option=com_akeeba&view=Manage', $msg, 'error');
+				$this->setRedirect(\Joomla\CMS\Uri\Uri::base() . 'index.php?option=com_akeeba&view=Manage', $msg, 'error');
 
 				return;
 			}
 		}
 
-		$this->setRedirect(JUri::base() . 'index.php?option=com_akeeba&view=Manage', JText::_('COM_AKEEBA_BUADMIN_MSG_DELETED'));
+		$this->setRedirect(\Joomla\CMS\Uri\Uri::base() . 'index.php?option=com_akeeba&view=Manage', \Joomla\CMS\Language\Text::_('COM_AKEEBA_BUADMIN_MSG_DELETED'));
 	}
 
 	/**
@@ -222,7 +222,7 @@ class Manage extends Controller
 
 		if (empty($ids))
 		{
-			$this->setRedirect(JUri::base() . 'index.php?option=com_akeeba&view=Manage', JText::_('COM_AKEEBA_BUADMIN_ERROR_INVALIDID'), 'error');
+			$this->setRedirect(\Joomla\CMS\Uri\Uri::base() . 'index.php?option=com_akeeba&view=Manage', \Joomla\CMS\Language\Text::_('COM_AKEEBA_BUADMIN_ERROR_INVALIDID'), 'error');
 
 			return;
 		}
@@ -231,7 +231,7 @@ class Manage extends Controller
 		{
 			try
 			{
-				$msg    = JText::_('COM_AKEEBA_BUADMIN_ERROR_INVALIDID');
+				$msg    = \Joomla\CMS\Language\Text::_('COM_AKEEBA_BUADMIN_ERROR_INVALIDID');
 				$result = false;
 
 				if ($id > 0)
@@ -250,13 +250,13 @@ class Manage extends Controller
 
 			if (!$result)
 			{
-				$this->setRedirect(JUri::base() . 'index.php?option=com_akeeba&view=Manage', $msg, 'error');
+				$this->setRedirect(\Joomla\CMS\Uri\Uri::base() . 'index.php?option=com_akeeba&view=Manage', $msg, 'error');
 
 				return;
 			}
 		}
 
-		$this->setRedirect(JUri::base() . 'index.php?option=com_akeeba&view=Manage', JText::_('COM_AKEEBA_BUADMIN_MSG_DELETEDFILE'));
+		$this->setRedirect(\Joomla\CMS\Uri\Uri::base() . 'index.php?option=com_akeeba&view=Manage', \Joomla\CMS\Language\Text::_('COM_AKEEBA_BUADMIN_MSG_DELETEDFILE'));
 	}
 
 	public function showcomment()
@@ -272,7 +272,7 @@ class Manage extends Controller
 
 		if ($id <= 0)
 		{
-			$this->setRedirect(JUri::base() . 'index.php?option=com_akeeba&view=Manage', JText::_('COM_AKEEBA_BUADMIN_ERROR_INVALIDID'), 'error');
+			$this->setRedirect(\Joomla\CMS\Uri\Uri::base() . 'index.php?option=com_akeeba&view=Manage', \Joomla\CMS\Language\Text::_('COM_AKEEBA_BUADMIN_ERROR_INVALIDID'), 'error');
 		}
 
 		/** @var Statistics $model */
@@ -301,16 +301,16 @@ class Manage extends Controller
 
 		$result = Platform::getInstance()->set_or_update_statistics($id, $statistic);
 
-		$message = JText::_('COM_AKEEBA_BUADMIN_LOG_SAVEDOK');
+		$message = \Joomla\CMS\Language\Text::_('COM_AKEEBA_BUADMIN_LOG_SAVEDOK');
 		$type    = 'message';
 
 		if ($result === false)
 		{
-			$message = JText::_('COM_AKEEBA_BUADMIN_LOG_SAVEERROR');
+			$message = \Joomla\CMS\Language\Text::_('COM_AKEEBA_BUADMIN_LOG_SAVEERROR');
 			$type    = 'error';
 		}
 
-		$this->setRedirect(JUri::base() . 'index.php?option=com_akeeba&view=Manage', $message, $type);
+		$this->setRedirect(\Joomla\CMS\Uri\Uri::base() . 'index.php?option=com_akeeba&view=Manage', $message, $type);
 	}
 
 	public function restore()
@@ -327,7 +327,7 @@ class Manage extends Controller
 
 		$id = array_pop($ids);
 
-		$url = JUri::base() . 'index.php?option=com_akeeba&view=Restore&id=' . $id;
+		$url = \Joomla\CMS\Uri\Uri::base() . 'index.php?option=com_akeeba&view=Restore&id=' . $id;
 		$this->setRedirect($url);
 	}
 
@@ -336,7 +336,7 @@ class Manage extends Controller
 		// CSRF prevention
 		$this->csrfProtection();
 
-		$this->setRedirect(JUri::base() . 'index.php?option=com_akeeba&view=Manage');
+		$this->setRedirect(\Joomla\CMS\Uri\Uri::base() . 'index.php?option=com_akeeba&view=Manage');
 	}
 
 	public function hidemodal()
@@ -345,7 +345,7 @@ class Manage extends Controller
 		$model = $this->getModel();
 		$model->hideRestorationInstructionsModal();
 
-		$this->setRedirect(JUri::base() . 'index.php?option=com_akeeba&view=Manage');
+		$this->setRedirect(\Joomla\CMS\Uri\Uri::base() . 'index.php?option=com_akeeba&view=Manage');
 	}
 
 	/**

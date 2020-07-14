@@ -7,13 +7,14 @@
 
 namespace FOF30\Platform\Base;
 
+defined('_JEXEC') || die;
+
 use Exception;
 use FOF30\Container\Container;
 use FOF30\Input\Input;
 use FOF30\Platform\PlatformInterface;
+use Joomla\CMS\Document\Document;
 use Joomla\CMS\User\User;
-
-defined('_JEXEC') or die;
 
 /**
  * Abstract implementation of the Platform integration
@@ -31,7 +32,7 @@ abstract class Platform implements PlatformInterface
 	/**
 	 * Public constructor.
 	 *
-	 * @param   \FOF30\Container\Container  $c  The component container
+	 * @param   Container  $c  The component container
 	 */
 	public function __construct(Container $c)
 	{
@@ -44,18 +45,18 @@ abstract class Platform implements PlatformInterface
 	 * @param   string  $component  The name of the component. For Joomla! this
 	 *                              is something like "com_example"
 	 *
+	 * @return  array  A hash array with keys main, alt, site and admin.
 	 * @see F0FPlatformInterface::getComponentBaseDirs()
 	 *
-	 * @return  array  A hash array with keys main, alt, site and admin.
 	 */
 	public function getComponentBaseDirs($component)
 	{
-		return array(
-			'main'	=> '',
-			'alt'	=> '',
-			'site'	=> '',
-			'admin'	=> '',
-		);
+		return [
+			'main'  => '',
+			'alt'   => '',
+			'site'  => '',
+			'admin' => '',
+		];
 	}
 
 	/**
@@ -78,7 +79,7 @@ abstract class Platform implements PlatformInterface
 	 */
 	public function getTemplateSuffixes()
 	{
-		return array();
+		return [];
 	}
 
 	/**
@@ -103,9 +104,9 @@ abstract class Platform implements PlatformInterface
 	 * @param   string  $component  The name of the component. For Joomla! this
 	 *                              is something like "com_example"
 	 *
+	 * @return  void
 	 * @see F0FPlatformInterface::loadTranslations()
 	 *
-	 * @return  void
 	 */
 	public function loadTranslations($component)
 	{
@@ -117,9 +118,9 @@ abstract class Platform implements PlatformInterface
 	 *
 	 * @param   string  $component  The name of the component.
 	 *
+	 * @return  boolean  True to allow loading the component, false to halt loading
 	 * @see F0FPlatformInterface::authorizeAdmin()
 	 *
-	 * @return  boolean  True to allow loading the component, false to halt loading
 	 */
 	public function authorizeAdmin($component)
 	{
@@ -131,9 +132,9 @@ abstract class Platform implements PlatformInterface
 	 *
 	 * @param   integer  $id  The ID of the user to fetch
 	 *
+	 * @return  Document
 	 * @see F0FPlatformInterface::getUser()
 	 *
-	 * @return  \JDocument
 	 */
 	public function getUser($id = null)
 	{
@@ -143,9 +144,9 @@ abstract class Platform implements PlatformInterface
 	/**
 	 * Returns the JDocument object which handles this component's response.
 	 *
+	 * @return  Document
 	 * @see F0FPlatformInterface::getDocument()
 	 *
-	 * @return  \JDocument
 	 */
 	public function getDocument()
 	{
@@ -155,16 +156,16 @@ abstract class Platform implements PlatformInterface
 	/**
 	 * This method will try retrieving a variable from the request (input) data.
 	 *
-	 * @param   string    $key           The user state key for the variable
-	 * @param   string    $request       The request variable name for the variable
-	 * @param   Input     $input         The Input object with the request (input) data
-	 * @param   mixed     $default       The default value. Default: null
-	 * @param   string    $type          The filter type for the variable data. Default: none (no filtering)
-	 * @param   boolean   $setUserState  Should I set the user state with the fetched value?
-	 *
-	 * @see F0FPlatformInterface::getUserStateFromRequest()
+	 * @param   string   $key           The user state key for the variable
+	 * @param   string   $request       The request variable name for the variable
+	 * @param   Input    $input         The Input object with the request (input) data
+	 * @param   mixed    $default       The default value. Default: null
+	 * @param   string   $type          The filter type for the variable data. Default: none (no filtering)
+	 * @param   boolean  $setUserState  Should I set the user state with the fetched value?
 	 *
 	 * @return  mixed  The value of the variable
+	 * @see F0FPlatformInterface::getUserStateFromRequest()
+	 *
 	 */
 	public function getUserStateFromRequest($key, $request, $input, $default = null, $type = 'none', $setUserState = true)
 	{
@@ -177,9 +178,9 @@ abstract class Platform implements PlatformInterface
 	 *
 	 * @param   string  $type  The type of the plugins to be loaded
 	 *
+	 * @return void
 	 * @see F0FPlatformInterface::importPlugin()
 	 *
-	 * @return void
 	 */
 	public function importPlugin($type)
 	{
@@ -192,13 +193,13 @@ abstract class Platform implements PlatformInterface
 	 * @param   string  $event  The event (trigger) name, e.g. onBeforeScratchMyEar
 	 * @param   array   $data   A hash array of data sent to the plugins as part of the trigger
 	 *
+	 * @return  array  A simple array containing the results of the plugins triggered
 	 * @see F0FPlatformInterface::runPlugins()
 	 *
-	 * @return  array  A simple array containing the results of the plugins triggered
 	 */
 	public function runPlugins($event, $data)
 	{
-		return array();
+		return [];
 	}
 
 	/**
@@ -207,9 +208,9 @@ abstract class Platform implements PlatformInterface
 	 * @param   string  $action     The ACL privilege to check, e.g. core.edit
 	 * @param   string  $assetname  The asset name to check, typically the component's name
 	 *
+	 * @return  boolean  True if the user is allowed this action
 	 * @see F0FPlatformInterface::authorise()
 	 *
-	 * @return  boolean  True if the user is allowed this action
 	 */
 	public function authorise($action, $assetname)
 	{
@@ -219,9 +220,9 @@ abstract class Platform implements PlatformInterface
 	/**
 	 * Is this the administrative section of the component?
 	 *
+	 * @return  boolean
 	 * @see F0FPlatformInterface::isBackend()
 	 *
-	 * @return  boolean
 	 */
 	public function isBackend()
 	{
@@ -231,9 +232,9 @@ abstract class Platform implements PlatformInterface
 	/**
 	 * Is this the public section of the component?
 	 *
+	 * @return  boolean
 	 * @see F0FPlatformInterface::isFrontend()
 	 *
-	 * @return  boolean
 	 */
 	public function isFrontend()
 	{
@@ -243,9 +244,9 @@ abstract class Platform implements PlatformInterface
 	/**
 	 * Is this a component running in a CLI application?
 	 *
+	 * @return  boolean
 	 * @see F0FPlatformInterface::isCli()
 	 *
-	 * @return  boolean
 	 */
 	public function isCli()
 	{
@@ -256,9 +257,9 @@ abstract class Platform implements PlatformInterface
 	 * Is AJAX re-ordering supported? This is 100% Joomla!-CMS specific. All
 	 * other platforms should return false and never ask why.
 	 *
+	 * @return  boolean
 	 * @see F0FPlatformInterface::supportsAjaxOrdering()
 	 *
-	 * @return  boolean
 	 */
 	public function supportsAjaxOrdering()
 	{
@@ -320,7 +321,7 @@ abstract class Platform implements PlatformInterface
 	/**
 	 * logs in a user
 	 *
-	 * @param   array  $authInfo  authentification information
+	 * @param   array  $authInfo  Authentication information
 	 *
 	 * @return  boolean  True on success
 	 */

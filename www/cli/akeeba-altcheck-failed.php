@@ -6,13 +6,12 @@
  */
 
 use Akeeba\Engine\Platform;
-use Joomla\CMS\Plugin\PluginHelper;
 
 // Enable and include Akeeba Engine
 define('AKEEBAENGINE', 1);
 
 // Setup and import the base CLI script
-$minphp = '5.6.0';
+$minphp = '7.1.0';
 
 // Boilerplate -- START
 define('_JEXEC', 1);
@@ -44,6 +43,9 @@ require_once JPATH_LIBRARIES . '/fof30/Cli/Application.php';
 // Load the version file
 require_once JPATH_ADMINISTRATOR . '/components/com_akeeba/version.php';
 
+// Set up the cacert.pem location
+define('AKEEBA_CACERT_PEM', JPATH_LIBRARIES . '/src/Http/Transport/cacert.pem');
+
 /**
  * Akeeba Backup alternative check failed application
  */
@@ -51,8 +53,8 @@ class AkeebaBackupAltCheckfailed extends FOFApplicationCLI
 {
 	public function doExecute()
 	{
-		$version		 = AKEEBA_VERSION;
-		$date			 = AKEEBA_DATE;
+		$version = AKEEBA_VERSION;
+		$date    = AKEEBA_DATE;
 
 		if ($this->input->get('quiet', -1, 'int') == -1)
 		{
@@ -128,7 +130,7 @@ ENDTEXT;
 
 		// Get the front-end backup settings
 		$frontend_enabled = Platform::getInstance()->get_platform_configuration_option('akeebabackup', 'legacyapi_enabled');
-		$secret				 = Platform::getInstance()->get_platform_configuration_option('frontend_secret_word', '');
+		$secret           = Platform::getInstance()->get_platform_configuration_option('frontend_secret_word', '');
 
 		if (!$frontend_enabled)
 		{
@@ -209,38 +211,38 @@ ENDTEXT;
 		}
 
 		// Perform the backup
-		$url	 = rtrim($url, '/');
-		$secret	 = urlencode($secret);
-		$url .= "/index.php?option=com_akeeba&view=check&key={$secret}";
+		$url    = rtrim($url, '/');
+		$secret = urlencode($secret);
+		$url    .= "/index.php?option=com_akeeba&view=check&key={$secret}";
 
 
-        $timestamp	 = date('Y-m-d H:i:s');
+		$timestamp = date('Y-m-d H:i:s');
 
-        $result = $this->fetchURL($url, $method);
+		$result = $this->fetchURL($url, $method);
 
-        if (empty($result) || ($result === false))
-        {
-            echo "[{$timestamp}] No message received\n";
-            echo <<<ENDTEXT
+		if (empty($result) || ($result === false))
+		{
+			echo "[{$timestamp}] No message received\n";
+			echo <<<ENDTEXT
 ERROR:
     Your check for failures attempt has timed out, or a fatal PHP error has occurred.
 
 ENDTEXT;
-        }
-        elseif (strpos($result, '200 ') !== false)
-        {
-            echo "[{$timestamp}] Checks finalization message received\n";
-            echo <<<ENDTEXT
+		}
+		elseif (strpos($result, '200 ') !== false)
+		{
+			echo "[{$timestamp}] Checks finalization message received\n";
+			echo <<<ENDTEXT
 
 Checks are finished successfully.
 
 ENDTEXT;
-        }
-        elseif (strpos($result, '500 ') !== false)
-        {
-            // Backup error
-            echo "[{$timestamp}] Error signal received\n";
-            echo <<<ENDTEXT
+		}
+		elseif (strpos($result, '500 ') !== false)
+		{
+			// Backup error
+			echo "[{$timestamp}] Error signal received\n";
+			echo <<<ENDTEXT
 ERROR:
 An error has occurred. The server's response was:
 
@@ -249,12 +251,12 @@ $result
 Backup failed.
 
 ENDTEXT;
-        }
-        elseif (strpos($result, '403 ') !== false)
-        {
-            // This should never happen: invalid authentication or front-end backup disabled
-            echo "[{$timestamp}] Connection denied (403) message received\n";
-            echo <<<ENDTEXT
+		}
+		elseif (strpos($result, '403 ') !== false)
+		{
+			// This should never happen: invalid authentication or front-end backup disabled
+			echo "[{$timestamp}] Connection denied (403) message received\n";
+			echo <<<ENDTEXT
 ERROR:
 The server denied the connection. Please make sure that the front-end
 backup feature is enabled and a valid secret word is in place.
@@ -264,12 +266,12 @@ Server response: $result
 Backup failed.
 
 ENDTEXT;
-        }
-        else
-        {
-            // Unknown result?!
-            echo "[{$timestamp}] Could not parse the server response.\n";
-            echo <<<ENDTEXT
+		}
+		else
+		{
+			// Unknown result?!
+			echo "[{$timestamp}] Could not parse the server response.\n";
+			echo <<<ENDTEXT
 ERROR:
 We could not understand the server's response. Most likely an error
 has occurred. The server's response was:
@@ -279,14 +281,15 @@ $result
 If you do not see "200 OK" at the end of this output, checks failed.
 
 ENDTEXT;
-        }
-    }
+		}
+	}
 
 	/**
 	 * Fetches a remote URL using curl, fsockopen or fopen
 	 *
-	 * @param  string	$url		The remote URL to fetch
-	 * @param  string	$method		The method to use: curl, fsockopen or fopen (optional)
+	 * @param   string  $url     The remote URL to fetch
+	 * @param   string  $method  The method to use: curl, fsockopen or fopen (optional)
+	 *
 	 * @return string The contents of the URL which was fetched
 	 */
 	private function fetchURL($url, $method = 'curl')
@@ -294,8 +297,8 @@ ENDTEXT;
 		switch ($method)
 		{
 			case 'curl':
-				$ch			 = curl_init($url);
-				$cacertPath	 = JPATH_ADMINISTRATOR . '/components/com_akeeba/akeeba/Engine/cacert.pem';
+				$ch         = curl_init($url);
+				$cacertPath = JPATH_LIBRARIES . '/src/Http/Transport/cacert.pem';
 				if (file_exists($cacertPath))
 				{
 					@curl_setopt($ch, CURLOPT_CAINFO, $cacertPath);
@@ -309,57 +312,70 @@ ENDTEXT;
 				@curl_setopt($ch, CURLOPT_TIMEOUT, 180);
 				$result = curl_exec($ch);
 				curl_close($ch);
+
 				return $result;
 				break;
 
 			case 'fsockopen':
-				$pos		 = strpos($url, '://');
-				$protocol	 = strtolower(substr($url, 0, $pos));
-				$req		 = substr($url, $pos + 3);
-				$pos		 = strpos($req, '/');
+				$pos      = strpos($url, '://');
+				$protocol = strtolower(substr($url, 0, $pos));
+				$req      = substr($url, $pos + 3);
+				$pos      = strpos($req, '/');
 				if ($pos === false)
-					$pos		 = strlen($req);
-				$host		 = substr($req, 0, $pos);
+				{
+					$pos = strlen($req);
+				}
+				$host = substr($req, 0, $pos);
 
 				if (strpos($host, ':') !== false)
 				{
-					list($host, $port) = explode(':', $host);
+					[$host, $port] = explode(':', $host);
 				}
 				else
 				{
-					$host	 = $host;
-					$port	 = ($protocol == 'https') ? 443 : 80;
+					$host = $host;
+					$port = ($protocol == 'https') ? 443 : 80;
 				}
 
 				$uri = substr($req, $pos);
 				if ($uri == '')
+				{
 					$uri = '/';
+				}
 
-				$crlf	 = "\r\n";
-				$req	 = 'GET ' . $uri . ' HTTP/1.0' . $crlf
+				$crlf = "\r\n";
+				$req  = 'GET ' . $uri . ' HTTP/1.0' . $crlf
 					. 'Host: ' . $host . $crlf
 					. $crlf;
 
-				$fp			 = fsockopen(($protocol == 'https' ? 'ssl://' : '') . $host, $port);
+				$fp = fsockopen(($protocol == 'https' ? 'ssl://' : '') . $host, $port);
 				fwrite($fp, $req);
-				$response	 = '';
+				$response = '';
 				while (is_resource($fp) && $fp && !feof($fp))
+				{
 					$response .= fread($fp, 1024);
+				}
 				fclose($fp);
 
 				// split header and body
-				$pos	 = strpos($response, $crlf . $crlf);
+				$pos = strpos($response, $crlf . $crlf);
 				if ($pos === false)
-					return($response);
-				$header	 = substr($response, 0, $pos);
-				$body	 = substr($response, $pos + 2 * strlen($crlf));
+				{
+					return ($response);
+				}
+				$header = substr($response, 0, $pos);
+				$body   = substr($response, $pos + 2 * strlen($crlf));
 
 				// parse headers
-				$headers											 = array();
-				$lines												 = explode($crlf, $header);
+				$headers = [];
+				$lines   = explode($crlf, $header);
 				foreach ($lines as $line)
-					if (($pos												 = strpos($line, ':')) !== false)
-						$headers[strtolower(trim(substr($line, 0, $pos)))]	 = trim(substr($line, $pos + 1));
+				{
+					if (($pos = strpos($line, ':')) !== false)
+					{
+						$headers[strtolower(trim(substr($line, 0, $pos)))] = trim(substr($line, $pos + 1));
+					}
+				}
 
 				//redirection?
 				if (isset($headers['location']))
@@ -368,21 +384,21 @@ ENDTEXT;
 				}
 				else
 				{
-					return($body);
+					return ($body);
 				}
 
 				break;
 
 			case 'fopen':
-				$opts = array(
-					'http' => array(
+				$opts = [
+					'http' => [
 						'method' => "GET",
-						'header' => "Accept-language: en\r\n"
-					)
-				);
+						'header' => "Accept-language: en\r\n",
+					],
+				];
 
 				$context = stream_context_create($opts);
-				$result	 = @file_get_contents($url, false, $context);
+				$result  = @file_get_contents($url, false, $context);
 				break;
 		}
 

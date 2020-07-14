@@ -9,6 +9,7 @@
 
 namespace Akeeba\Engine\Postproc\Connector;
 
+defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Postproc\Connector\Dropbox2\Exception\APIError;
 use Akeeba\Engine\Postproc\Connector\Dropbox2\Exception\cURLError;
@@ -27,17 +28,17 @@ class Dropbox2
 	/**
 	 * The root URL for the Dropbox RPC API, ref https://www.dropbox.com/developers/documentation/http
 	 */
-	const rootUrl = 'https://api.dropboxapi.com/2/';
+	public const rootUrl = 'https://api.dropboxapi.com/2/';
 
 	/**
 	 * The root URL for the Dropbox Content API, ref https://www.dropbox.com/developers/documentation/http
 	 */
-	const contentRootUrl = 'https://content.dropboxapi.com/2/';
+	public const contentRootUrl = 'https://content.dropboxapi.com/2/';
 
 	/**
 	 * The URL of the helper script which is used to authenticate you with Dropbox
 	 */
-	const helperUrl = 'https://www.akeebabackup.com/oauth2/dropbox.php';
+	public const helperUrl = 'https://www.akeeba.com/oauth2/dropbox.php';
 
 	/**
 	 * The access token for connecting to Dropbox
@@ -74,7 +75,7 @@ class Dropbox2
 	 * Public constructor
 	 *
 	 * @param   string  $accessToken  The access token for accessing Dropbox
-	 * @param   string  $dlid         The AkeebaBackup.com Download ID, used whenever you try to refresh the token
+	 * @param   string  $dlid         The akeeba.com Download ID, used whenever you try to refresh the token
 	 */
 	public function __construct($accessToken, $dlid)
 	{
@@ -891,7 +892,7 @@ class Dropbox2
 		if (isset($response['error']))
 		{
 			$error            = $response['error'];
-			$errorDescription = isset($response['error_description']) ? $response['error_description'] : 'No error description provided';
+			$errorDescription = $response['error_description'] ?? 'No error description provided';
 
 			throw new APIError($error, $errorDescription, 500);
 		}

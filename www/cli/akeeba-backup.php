@@ -5,14 +5,16 @@
  * @license   GNU General Public License version 3, or later
  */
 
-use Akeeba\Engine\Platform;
+use Akeeba\Backup\Site\Model\Backup;
 use Akeeba\Engine\Factory;
+use Akeeba\Engine\Platform;
+use FOF30\Container\Container;
 
 // Enable and include Akeeba Engine
 define('AKEEBAENGINE', 1);
 
 // Setup and import the base CLI script
-$minphp = '5.6.0';
+$minphp = '7.1.0';
 
 // Boilerplate -- START
 define('_JEXEC', 1);
@@ -44,6 +46,9 @@ require_once JPATH_LIBRARIES . '/fof30/Cli/Application.php';
 // Load the version file
 require_once JPATH_ADMINISTRATOR . '/components/com_akeeba/version.php';
 
+// Set up the cacert.pem location
+define('AKEEBA_CACERT_PEM', JPATH_LIBRARIES . '/src/Http/Transport/cacert.pem');
+
 /**
  * Akeeba Backup CLI application
  */
@@ -52,23 +57,23 @@ class AkeebaBackupCLI extends FOFApplicationCLI
 	public function doExecute()
 	{
 		// Load the language files
-		$paths	 = array(JPATH_ADMINISTRATOR, JPATH_ROOT);
-		$jlang	 = JFactory::getLanguage();
+		$paths = [JPATH_ADMINISTRATOR, JPATH_ROOT];
+		$jlang = JFactory::getLanguage();
 		$jlang->load('com_akeeba', $paths[0], 'en-GB', true);
 		$jlang->load('com_akeeba', $paths[1], 'en-GB', true);
 		$jlang->load('com_akeeba' . '.override', $paths[0], 'en-GB', true);
 		$jlang->load('com_akeeba' . '.override', $paths[1], 'en-GB', true);
 
 		// Get the backup profile and description
-		$profile	 = $this->getOption('profile', 1, 'int');
+		$profile = $this->getOption('profile', 1, 'int');
 
-        if($profile <= 0)
-        {
-            $profile = 1;
-        }
+		if ($profile <= 0)
+		{
+			$profile = 1;
+		}
 
 		$description = $this->getOption('description', 'Command-line backup', 'string');
-		$overrides	 = $this->getOption('override', array(), 'array');
+		$overrides   = $this->getOption('override', [], 'array');
 
 		if (!empty($overrides))
 		{
@@ -103,16 +108,16 @@ class AkeebaBackupCLI extends FOFApplicationCLI
 			$debugmessage = "*** DEBUG MODE ENABLED ***\n";
 		}
 
-		$version		 = AKEEBA_VERSION;
-		$date			 = AKEEBA_DATE;
-		$start_backup	 = time();
-		$memusage		 = $this->memUsage();
-		$jVersion        = JVERSION;
+		$version      = AKEEBA_VERSION;
+		$date         = AKEEBA_DATE;
+		$start_backup = time();
+		$memusage     = $this->memUsage();
+		$jVersion     = JVERSION;
 
-		$phpversion		 = PHP_VERSION;
-		$phpenvironment	 = PHP_SAPI;
+		$phpversion     = PHP_VERSION;
+		$phpenvironment = PHP_SAPI;
 
-		$verboseMode  = $this->getOption('quiet', -1, 'int') == -1;
+		$verboseMode = $this->getOption('quiet', -1, 'int') == -1;
 
 		if ($verboseMode)
 		{
@@ -212,17 +217,17 @@ ENDBLOCK;
 		$this->checkSettingsDecryption($profile);
 
 		// Dummy array so that the loop iterates once
-		$array = array(
-			'HasRun' => 0,
-			'Error'	 => '',
-			'cli_firstrun' => 1
-		);
+		$array = [
+			'HasRun'       => 0,
+			'Error'        => '',
+			'cli_firstrun' => 1,
+		];
 
 		$warnings_flag = false;
 
-		/** @var \Akeeba\Backup\Site\Model\Backup $model */
-		$container = \FOF30\Container\Container::getInstance('com_akeeba');
-		$model = $container->factory->model('Backup')->tmpInstance();
+		/** @var Backup $model */
+		$container = Container::getInstance('com_akeeba');
+		$model     = $container->factory->model('Backup')->tmpInstance();
 
 		$model->setState('tag', AKEEBA_BACKUP_ORIGIN);
 		$model->setState('backupid', null);
@@ -232,7 +237,7 @@ ENDBLOCK;
 		{
 			if (isset($array['cli_firstrun']))
 			{
-				$overrides = array_merge(array(
+				$overrides = array_merge([
 					'akeeba.tuning.min_exec_time'           => 0,
 					'akeeba.tuning.nobreak.beforelargefile' => 1,
 					'akeeba.tuning.nobreak.afterlargefile'  => 1,
@@ -240,21 +245,21 @@ ENDBLOCK;
 					'akeeba.tuning.nobreak.finalization'    => 1,
 					'akeeba.tuning.settimelimit'            => 0,
 					'akeeba.tuning.nobreak.domains'         => 0,
-				), $overrides);
+				], $overrides);
 			}
 
 			$array = isset($array['cli_firstrun']) ? $model->startBackup($overrides) : $model->stepBackup();
 
-			$time		 = date('Y-m-d H:i:s \G\M\TO (T)');
-			$memusage	 = $this->memUsage();
+			$time     = date('Y-m-d H:i:s \G\M\TO (T)');
+			$memusage = $this->memUsage();
 
-			$warnings		 = "no warnings issued (good)";
-			$stepWarnings	 = false;
+			$warnings     = "no warnings issued (good)";
+			$stepWarnings = false;
 
 			if (!empty($array['Warnings']))
 			{
-				$warnings_flag	 = true;
-				$warnings		 = "POTENTIAL PROBLEMS DETECTED; " . count($array['Warnings']) . " warnings issued (see below).\n";
+				$warnings_flag = true;
+				$warnings      = "POTENTIAL PROBLEMS DETECTED; " . count($array['Warnings']) . " warnings issued (see below).\n";
 				foreach ($array['Warnings'] as $line)
 				{
 					$warnings .= "\t$line\n";
@@ -265,6 +270,7 @@ ENDBLOCK;
 			$progress = sprintf('%u', array_key_exists('Progress', $array) ? $array['Progress'] : 0);
 
 			if (($verboseMode) || $stepWarnings)
+			{
 				echo <<<ENDSTEPINFO
 Last Tick   : $time
 Progress    : $progress %
@@ -276,6 +282,7 @@ Warnings    : $warnings
 
 
 ENDSTEPINFO;
+			}
 
 			// Recycle the database connection to minimise problems with database timeouts
 			$db = Factory::getDatabase();
@@ -338,7 +345,7 @@ ENDSTEPINFO;
 	{
 		try
 		{
-			$platform = Platform::getInstance();
+			$platform                      = Platform::getInstance();
 			$platform->decryptionException = true;
 			$platform->load_configuration();
 			$platform->decryptionException = false;
@@ -361,7 +368,7 @@ ENDSTEPINFO;
 			$fName1 .= 'code';
 			$fName2 .= 'code';
 
-			$errors         = array();
+			$errors         = [];
 			$hostResolution = false;
 
 			if ((!function_exists($fName1) || !function_exists($fName2)))

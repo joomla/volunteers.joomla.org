@@ -8,7 +8,7 @@
 namespace Akeeba\Backup\Admin\Controller;
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 use Akeeba\Backup\Admin\Controller\Mixin\CustomACL;
 use Akeeba\Engine\Factory;
@@ -16,7 +16,7 @@ use Akeeba\Engine\Platform;
 use Exception;
 use FOF30\Container\Container;
 use FOF30\Controller\Controller;
-use JText;
+use Joomla\CMS\Language\Text;
 use RuntimeException;
 
 class RemoteFiles extends Controller
@@ -50,7 +50,7 @@ class RemoteFiles extends Controller
 	 */
 	public function invalidTask()
 	{
-		throw new RuntimeException(JText::_('JERROR_ALERTNOAUTHOR'), 403);
+		throw new RuntimeException(\Joomla\CMS\Language\Text::_('JERROR_ALERTNOAUTHOR'), 403);
 	}
 
 	/**
@@ -69,7 +69,7 @@ class RemoteFiles extends Controller
 
 		if ($id === false)
 		{
-			throw new RuntimeException(JText::_('JGLOBAL_RESOURCE_NOT_FOUND'), 404);
+			throw new RuntimeException(\Joomla\CMS\Language\Text::_('JGLOBAL_RESOURCE_NOT_FOUND'), 404);
 		}
 
 		$this->display(false);
@@ -93,7 +93,7 @@ class RemoteFiles extends Controller
 		if ($id === false)
 		{
 			$url = 'index.php?option=com_akeeba&view=RemoteFiles&tmpl=component&task=listactions&id=' . $id;
-			$this->setRedirect($url, JText::_('COM_AKEEBA_REMOTEFILES_ERR_INVALIDID'), 'error');
+			$this->setRedirect($url, \Joomla\CMS\Language\Text::_('COM_AKEEBA_REMOTEFILES_ERR_INVALIDID'), 'error');
 
 			return;
 		}
@@ -118,7 +118,7 @@ class RemoteFiles extends Controller
 		if ($result === true)
 		{
 			$url = 'index.php?option=com_akeeba&view=RemoteFiles&tmpl=component&task=listactions&id=' . $id;
-			$this->setRedirect($url, JText::_('COM_AKEEBA_REMOTEFILES_LBL_JUSTFINISHED'));
+			$this->setRedirect($url, \Joomla\CMS\Language\Text::_('COM_AKEEBA_REMOTEFILES_LBL_JUSTFINISHED'));
 
 			return;
 		}
@@ -139,7 +139,7 @@ class RemoteFiles extends Controller
 		if ($id === false)
 		{
 			$url = 'index.php?option=com_akeeba&view=RemoteFiles&tmpl=component&task=listactions&id=' . $id;
-			$this->setRedirect($url, JText::_('COM_AKEEBA_REMOTEFILES_ERR_INVALIDID'), 'error');
+			$this->setRedirect($url, \Joomla\CMS\Language\Text::_('COM_AKEEBA_REMOTEFILES_ERR_INVALIDID'), 'error');
 
 			return;
 		}
@@ -238,7 +238,7 @@ class RemoteFiles extends Controller
 		if ($id === false)
 		{
 			$url = 'index.php?option=com_akeeba&view=RemoteFiles&tmpl=component&task=listactions&id=' . $id;
-			$this->setRedirect($url, JText::_('COM_AKEEBA_REMOTEFILES_ERR_INVALIDID'), 'error');
+			$this->setRedirect($url, \Joomla\CMS\Language\Text::_('COM_AKEEBA_REMOTEFILES_ERR_INVALIDID'), 'error');
 
 			return;
 		}
@@ -265,7 +265,7 @@ class RemoteFiles extends Controller
 		if ($result['finished'])
 		{
 			$url = 'index.php?option=com_akeeba&view=RemoteFiles&tmpl=component&task=listactions&id=' . $id;
-			$this->setRedirect($url, JText::_('COM_AKEEBA_REMOTEFILES_LBL_JUSTFINISHEDELETING'));
+			$this->setRedirect($url, \Joomla\CMS\Language\Text::_('COM_AKEEBA_REMOTEFILES_LBL_JUSTFINISHEDELETING'));
 
 			return;
 		}

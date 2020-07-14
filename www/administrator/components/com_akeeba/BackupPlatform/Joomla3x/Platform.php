@@ -8,16 +8,29 @@
 namespace Akeeba\Engine\Platform;
 
 // Protection against direct access
-defined('AKEEBAENGINE') or die();
+defined('AKEEBAENGINE') || die();
 
+use Akeeba\Engine\Driver\Joomla;
+use Akeeba\Engine\Driver\Mysql;
+use Akeeba\Engine\Driver\Mysqli;
+use Akeeba\Engine\Driver\Pdomysql;
 use Akeeba\Engine\Factory;
 use Akeeba\Engine\Finalization\TestExtract;
 use Akeeba\Engine\Platform;
 use Akeeba\Engine\Platform\Base as BasePlatform;
 use DateTimeZone;
+use Exception;
 use FOF30\Container\Container;
 use FOF30\Date\Date;
+use JLoader;
+use JMail;
 use Joomla\CMS\Access\Access;
+use Joomla\CMS\Filesystem\File;
+use Joomla\CMS\Filesystem\Folder;
+use Joomla\CMS\Language\Text;
+use Joomla\CMS\Mail\Mail;
+use Joomla\CMS\Uri\Uri;
+use Joomla\CMS\Version;
 use Psr\Log\LogLevel;
 
 if (!defined('DS'))
@@ -231,17 +244,16 @@ class Joomla3x extends BasePlatform
 			return false;
 		}
 
-		// Check if JFactory exists
-		if (!class_exists('JFactory'))
+		// Check if the Joomla Factory class exists
+		if (!class_exists('JFactory') && !class_exists('Joomla\CMS\Factory'))
 		{
 			return false;
 		}
 
-		// Check if JApplication exists
-		$appExists = class_exists('JApplication');
-		$appExists = $appExists || class_exists('JCli');
-		$appExists = $appExists || class_exists('JApplicationCli');
-		$appExists = $appExists || class_exists('AkeebaCliBase');
+		// Check if a valid application class exists
+		$appExists = class_exists('Joomla\CMS\Application\CMSApplication')
+			|| class_exists('Joomla\CMS\Application\CliApplication')
+			|| class_exists('FOFApplicationCLI');
 
 		if (!$appExists)
 		{
@@ -433,7 +445,6 @@ class Joomla3x extends BasePlatform
 	 */
 	public function get_timestamp_database($date = 'now')
 	{
-		\JLoader::import('joomla.utilities.date');
 		$date = new Date($date);
 
 		if (method_exists($date, 'toSql'))
@@ -460,9 +471,6 @@ class Joomla3x extends BasePlatform
 	 */
 	public function get_local_timestamp($format)
 	{
-		\JLoader::import('joomla.utilities.date');
-		\JLoader::import('joomla.environment.request');
-
 		// Do I have a forced timezone?
 		$tz = $this->get_platform_configuration_option('forced_backup_timezone', 'AKEEBA/DEFAULT');
 
@@ -489,16 +497,13 @@ class Joomla3x extends BasePlatform
 	{
 		if ($this->container->platform->isCli())
 		{
-			\JLoader::import('joomla.environment.uri');
-			\JLoader::import('joomla.uri.uri');
-
 			$url  = Platform::getInstance()->get_platform_configuration_option('siteurl', '');
-			$oURI = new \JUri($url);
+			$oURI = new Uri($url);
 		}
 		else
 		{
 			// Running under the web server
-			$oURI = \JUri::getInstance();
+			$oURI = Uri::getInstance();
 		}
 
 		return $oURI->getHost();
@@ -530,17 +535,17 @@ class Joomla3x extends BasePlatform
 		$hasMySQLi = function_exists('mysqli_connect');
 
 		// Prime with a default return value, favoring PDO MySQL if available
-		$defaultDriver = '\\Akeeba\\Engine\\Driver\\Pdomysql';
+		$defaultDriver = Pdomysql::class;
 
 		if (!$hasPdo)
 		{
 			// Second best choice is MySQLi
-			$defaultDriver = '\\Akeeba\\Engine\\Driver\\Mysqli';
+			$defaultDriver = Mysqli::class;
 
 			// Third best choice is MySQL
 			if (!$hasMySQLi && $hasMySQL)
 			{
-				$defaultDriver = '\\Akeeba\\Engine\\Driver\\Mysql';
+				$defaultDriver = Mysql::class;
 			}
 		}
 
@@ -557,37 +562,37 @@ class Joomla3x extends BasePlatform
 					// So, Joomla! 4's "mysql" is, actually, "pdomysql". Therefore I can use our own wrapper driver
 					if (version_compare(JVERSION, '3.99999.99999', 'gt'))
 					{
-						return '\\Akeeba\\Engine\\Driver\\Joomla';
+						return Joomla::class;
 					}
 
 					// The piece of crap called FaLang is lying about the database driver
 					if (!$hasMySQL)
 					{
-						return '\\Akeeba\\Engine\\Driver\\Mysqli';
+						return Mysqli::class;
 					}
 
 					if ($hasNookuContent)
 					{
-						return '\\Akeeba\\Engine\\Driver\\Mysql';
+						return Mysql::class;
 					}
 
-					return '\\Akeeba\\Engine\\Driver\\Joomla';
+					return Joomla::class;
 
 					break;
 
 				case 'mysqli':
 					if ($hasNookuContent)
 					{
-						return '\\Akeeba\\Engine\\Driver\\Mysqli';
+						return Mysqli::class;
 					}
 
-					return '\\Akeeba\\Engine\\Driver\\Joomla';
+					return Joomla::class;
 
 					break;
 
 				// Any other case, use our platform-specific driver
 				default:
-					return '\\Akeeba\\Engine\\Driver\\Joomla';
+					return Joomla::class;
 
 					break;
 			}
@@ -596,31 +601,31 @@ class Joomla3x extends BasePlatform
 		// Is this a subcase of mysqli or mysql drivers?
 		if (substr($driver, 0, 8) == 'pdomysql')
 		{
-			return '\\Akeeba\\Engine\\Driver\\Pdomysql';
+			return Pdomysql::class;
 		}
 		elseif (substr($driver, 0, 6) == 'mysqli')
 		{
-			return '\\Akeeba\\Engine\\Driver\\Mysqli';
+			return Mysqli::class;
 		}
 		elseif (substr($driver, 0, 5) == 'mysql')
 		{
 			// The piece of crap called FaLang is lying about the database driver
 			if (!$hasMySQL)
 			{
-				return '\\Akeeba\\Engine\\Driver\\Mysqli';
+				return Mysqli::class;
 			}
 
-			return '\\Akeeba\\Engine\\Driver\\Mysql';
+			return Mysql::class;
 		}
 
 		// Sometimes we get driver names in the form of foomysql instead of mysqlfoo. Let's look for that too.
 		if (substr($driver, -8) == 'pdomysql')
 		{
-			return '\\Akeeba\\Engine\\Driver\\Pdomysql';
+			return Pdomysql::class;
 		}
 		elseif (substr($driver, -6) == 'mysqli')
 		{
-			return '\\Akeeba\\Engine\\Driver\\Mysqli';
+			return Mysqli::class;
 		}
 		elseif (substr($driver, -5) == 'mysql')
 		{
@@ -634,10 +639,10 @@ class Joomla3x extends BasePlatform
 			 */
 			if (!$hasMySQL)
 			{
-				return '\\Akeeba\\Engine\\Driver\\Mysqli';
+				return Mysqli::class;
 			}
 
-			return '\\Akeeba\\Engine\\Driver\\Mysql';
+			return Mysql::class;
 		}
 
 		// I give up! You'd better be usign a MySQL db server.
@@ -677,7 +682,7 @@ class Joomla3x extends BasePlatform
 	 */
 	public function translate($key)
 	{
-		return \JText::_($key);
+		return Text::_($key);
 	}
 
 	/**
@@ -702,8 +707,8 @@ class Joomla3x extends BasePlatform
 		}
 		if (!defined('AKEEBA_DATE'))
 		{
-			\JLoader::import('joomla.utilities.date');
 			$date = new Date();
+
 			define("AKEEBA_DATE", $date->format('Y-m-d'));
 		}
 	}
@@ -716,7 +721,7 @@ class Joomla3x extends BasePlatform
 	 */
 	public function getPlatformVersion()
 	{
-		$v = new \JVersion();
+		$v = new Version();
 
 		return [
 			'name'    => 'Joomla!',
@@ -854,12 +859,12 @@ class Joomla3x extends BasePlatform
 	{
 		Factory::getLog()->log(LogLevel::DEBUG, "-- Fetching mailer object");
 
-		/** @var \JMail $mailer */
+		/** @var JMail $mailer */
 		try
 		{
 			$mailer = Platform::getInstance()->getMailer();
 		}
-		catch (\Exception $e)
+		catch (Exception $e)
 		{
 			$mailer = null;
 		}
@@ -881,7 +886,7 @@ class Joomla3x extends BasePlatform
 			$mailer->setSubject($subject);
 			$mailer->setBody($body);
 		}
-		catch (\Exception $e)
+		catch (Exception $e)
 		{
 			Factory::getLog()->log(LogLevel::WARNING, "Could not send email to $to - Problem setting up the email. Joomla! reports error: " . $e->getMessage());
 
@@ -970,7 +975,7 @@ class Joomla3x extends BasePlatform
 				$mailer->addAttachment($attachFile);
 			}
 		}
-		catch (\Exception $e)
+		catch (Exception $e)
 		{
 			Factory::getLog()->log(LogLevel::WARNING, "Could not send email to $to - Problem attaching file. Joomla! reports error: " . $e->getMessage());
 
@@ -983,12 +988,12 @@ class Joomla3x extends BasePlatform
 		{
 			$result = $mailer->Send();
 		}
-		catch (\Exception $e)
+		catch (Exception $e)
 		{
 			$result = $e;
 		}
 
-		if ($result instanceof \Exception)
+		if ($result instanceof Exception)
 		{
 			Factory::getLog()->log(LogLevel::WARNING, "Could not email $to:");
 			Factory::getLog()->log(LogLevel::WARNING, $result->getMessage());
@@ -1015,8 +1020,8 @@ class Joomla3x extends BasePlatform
 	{
 		if (function_exists('jimport'))
 		{
-			\JLoader::import('joomla.filesystem.file');
-			$result = \JFile::delete($file);
+			$result = File::delete($file);
+
 			if (!$result)
 			{
 				$result = @unlink($file);
@@ -1042,8 +1047,8 @@ class Joomla3x extends BasePlatform
 	{
 		if (function_exists('jimport'))
 		{
-			\JLoader::import('joomla.filesystem.file');
-			$result = \JFile::move($from, $to);
+			$result = File::move($from, $to);
+
 			// JFile failed. Let's try rename()
 			if (!$result)
 			{
@@ -1053,7 +1058,7 @@ class Joomla3x extends BasePlatform
 			if (!$result)
 			{
 				// Try copying with JFile. If it fails, use copy().
-				$result = \JFile::copy($from, $to);
+				$result = File::copy($from, $to);
 				if (!$result)
 				{
 					$result = @copy($from, $to);
@@ -1077,11 +1082,11 @@ class Joomla3x extends BasePlatform
 	/**
 	 * Joomla!-specific function to get an instance of the mailer class
 	 *
-	 * @return \JMail
+	 * @return Mail
 	 */
 	public function &getMailer()
 	{
-		$mailer = \JFactory::getMailer();
+		$mailer = \Joomla\CMS\Factory::getMailer();
 		if (!is_object($mailer))
 		{
 			Factory::getLog()->log(LogLevel::WARNING, "Fetching Joomla!'s mailer was impossible; imminent crash!");
@@ -1160,7 +1165,7 @@ class Joomla3x extends BasePlatform
 	public function apply_quirk_definitions()
 	{
 		Factory::getConfigurationChecks()->addConfigurationCheckDefinition('013', 'critical', 'COM_AKEEBA_CPANEL_WARNING_Q013', [
-			'\\Akeeba\\Engine\\Platform\\Joomla3x', 'quirk_013',
+			Joomla3x::class, 'quirk_013',
 		]);
 	}
 
@@ -1172,7 +1177,7 @@ class Joomla3x extends BasePlatform
 	protected function register_akeeba_engine_classes($path_prefix)
 	{
 		global $Akeeba_Class_Map;
-		\JLoader::import('joomla.filesystem.folder');
+
 		foreach ($Akeeba_Class_Map as $class_prefix => $path_suffix)
 		{
 			// Bail out if there is such directory, so as not to have Joomla! throw errors
@@ -1181,13 +1186,13 @@ class Joomla3x extends BasePlatform
 				continue;
 			}
 
-			$file_list = \JFolder::files($path_prefix . '/' . $path_suffix, '.*\.php');
+			$file_list = Folder::files($path_prefix . '/' . $path_suffix, '.*\.php');
 			if (is_array($file_list) && !empty($file_list))
 			{
 				foreach ($file_list as $file)
 				{
 					$class_suffix = ucfirst(basename($file, '.php'));
-					\JLoader::register($class_prefix . $class_suffix, $path_prefix . '/' . $path_suffix . '/' . $file);
+					JLoader::register($class_prefix . $class_suffix, $path_prefix . '/' . $path_suffix . '/' . $file);
 				}
 			}
 		}

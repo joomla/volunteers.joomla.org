@@ -7,29 +7,30 @@
 
 use FOF30\Date\Date;
 use Joomla\CMS\Access\Access;
+use Joomla\CMS\Component\ComponentHelper;
+use Joomla\CMS\Factory as JFactory;
+use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\CMS\User\User;
 
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 // PHP version check
-if (!version_compare(PHP_VERSION, '5.6.0', '>='))
+if (!version_compare(PHP_VERSION, '7.1.0', '>='))
 {
 	return;
 }
 
-JLoader::import('joomla.application.plugin');
-
-class plgSystemAkeebaupdatecheck extends JPlugin
+class plgSystemAkeebaupdatecheck extends CMSPlugin
 {
 	/**
 	 * Constructor
 	 *
-	 * @param       object $subject The object to observe
-	 * @param       array  $config  An array that holds the plugin configuration
+	 * @param   object  $subject  The object to observe
+	 * @param   array   $config   An array that holds the plugin configuration
 	 *
 	 * @since       2.5
 	 */
-	public function __construct(& $subject, $config)
+	public function __construct(&$subject, $config)
 	{
 		/**
 		 * I know that this piece of code cannot possibly be executed since I have already returned BEFORE declaring
@@ -56,9 +57,7 @@ class plgSystemAkeebaupdatecheck extends JPlugin
 		}
 
 		// Make sure Akeeba Backup is enabled
-		JLoader::import('joomla.application.component.helper');
-
-		if ( !JComponentHelper::isEnabled('com_akeeba'))
+		if (!ComponentHelper::isEnabled('com_akeeba'))
 		{
 			return;
 		}
@@ -70,15 +69,12 @@ class plgSystemAkeebaupdatecheck extends JPlugin
 		}
 
 		// Do we have to run (at most once per 3 hours)?
-		JLoader::import('joomla.html.parameter');
-		JLoader::import('joomla.application.component.helper');
-
 		$db = JFactory::getDbo();
 
 		$query = $db->getQuery(true)
-		            ->select($db->qn('lastupdate'))
-		            ->from($db->qn('#__ak_storage'))
-		            ->where($db->qn('tag') . ' = ' . $db->q('akeebaupdatecheck_lastrun'));
+			->select($db->qn('lastupdate'))
+			->from($db->qn('#__ak_storage'))
+			->where($db->qn('tag') . ' = ' . $db->q('akeebaupdatecheck_lastrun'));
 
 		$last = $db->setQuery($query)->loadResult();
 
@@ -115,16 +111,16 @@ class plgSystemAkeebaupdatecheck extends JPlugin
 		if ($last)
 		{
 			$query = $db->getQuery(true)
-			            ->update($db->qn('#__ak_storage'))
-			            ->set($db->qn('lastupdate') . ' = ' . $db->q($now->toSql()))
-			            ->where($db->qn('tag') . ' = ' . $db->q('akeebaupdatecheck_lastrun'));
+				->update($db->qn('#__ak_storage'))
+				->set($db->qn('lastupdate') . ' = ' . $db->q($now->toSql()))
+				->where($db->qn('tag') . ' = ' . $db->q('akeebaupdatecheck_lastrun'));
 		}
 		else
 		{
 			$query = $db->getQuery(true)
-			            ->insert($db->qn('#__ak_storage'))
-			            ->columns(array($db->qn('tag'), $db->qn('lastupdate')))
-			            ->values($db->q('akeebaupdatecheck_lastrun') . ', ' . $db->q($now->toSql()));
+				->insert($db->qn('#__ak_storage'))
+				->columns([$db->qn('tag'), $db->qn('lastupdate')])
+				->values($db->q('akeebaupdatecheck_lastrun') . ', ' . $db->q($now->toSql()));
 		}
 
 		try
@@ -145,7 +141,7 @@ class plgSystemAkeebaupdatecheck extends JPlugin
 		$container = FOF30\Container\Container::getInstance('com_akeeba');
 
 		/** @var \Akeeba\Backup\Admin\Model\Updates $model */
-		$model = $container->factory->model('Updates')->tmpInstance();
+		$model      = $container->factory->model('Updates')->tmpInstance();
 		$updateInfo = $model->getUpdates();
 
 		if (!$updateInfo['hasUpdate'])
@@ -153,7 +149,7 @@ class plgSystemAkeebaupdatecheck extends JPlugin
 			return;
 		}
 
-		$superAdmins     = array();
+		$superAdmins     = [];
 		$superAdminEmail = $this->params->get('email', '');
 
 		if (!empty($superAdminEmail))
@@ -205,7 +201,7 @@ class plgSystemAkeebaupdatecheck extends JPlugin
 		}
 
 		// Get all usergroups with Super User access
-		$db     = $this->getContainer()->db;
+		$db     = JFactory::getDbo();
 		$q      = $db->getQuery(true)
 			->select([$db->qn('id')])
 			->from($db->qn('#__usergroups'));
@@ -223,7 +219,7 @@ class plgSystemAkeebaupdatecheck extends JPlugin
 			$uids = Access::getUsersByGroup($gid);
 
 			array_walk($uids, function ($uid, $index) use (&$userList) {
-				$userList[$uid] = $this->container->platform->getUser($uid);
+				$userList[$uid] = JFactory::getUser($uid);
 			});
 		}
 

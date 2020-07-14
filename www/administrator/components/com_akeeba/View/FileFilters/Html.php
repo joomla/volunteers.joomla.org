@@ -8,7 +8,7 @@
 namespace Akeeba\Backup\Admin\View\FileFilters;
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 use Akeeba\Backup\Admin\Model\FileFilters;
 use Akeeba\Backup\Admin\View\ViewTraits\ProfileIdAndName;

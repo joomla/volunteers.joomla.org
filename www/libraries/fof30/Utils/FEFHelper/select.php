@@ -5,9 +5,11 @@
  * @license   GNU General Public License version 2, or later
  */
 
-use FOF30\Utils\ArrayHelper;
+defined('_JEXEC') || die;
 
-defined('_JEXEC') or die;
+use FOF30\Utils\ArrayHelper;
+use Joomla\CMS\HTML\HTMLHelper;
+use Joomla\CMS\Language\Text;
 
 /**
  * Custom JHtml (HTMLHelper) class. Offers selects compatible with Akeeba Frontend Framework (FEF)
@@ -21,21 +23,21 @@ abstract class FEFHelperSelect
 	 *
 	 * @var     array
 	 */
-	protected static $optionDefaults = array(
-		'option' => array(
-			'option.attr' => null,
-			'option.disable' => 'disable',
-			'option.id' => null,
-			'option.key' => 'value',
-			'option.key.toHtml' => true,
-			'option.label' => null,
+	protected static $optionDefaults = [
+		'option' => [
+			'option.attr'         => null,
+			'option.disable'      => 'disable',
+			'option.id'           => null,
+			'option.key'          => 'value',
+			'option.key.toHtml'   => true,
+			'option.label'        => null,
 			'option.label.toHtml' => true,
-			'option.text' => 'text',
-			'option.text.toHtml' => true,
-			'option.class' => 'class',
-			'option.onclick' => 'onclick',
-		),
-	);
+			'option.text'         => 'text',
+			'option.text.toHtml'  => true,
+			'option.class'        => 'class',
+			'option.onclick'      => 'onclick',
+		],
+	];
 
 	/**
 	 * Generates a yes/no radio list.
@@ -52,15 +54,15 @@ abstract class FEFHelperSelect
 	 * @since   1.5
 	 * @see     JFormFieldRadio
 	 */
-	public static function booleanlist($name, $attribs = array(), $selected = null, $yes = 'JYES', $no = 'JNO', $id = false)
+	public static function booleanlist($name, $attribs = [], $selected = null, $yes = 'JYES', $no = 'JNO', $id = false)
 	{
-		$options     = [
-			JHtml::_('FEFHelper.select.option', '0', JText::_($no)),
-			JHtml::_('FEFHelper.select.option', '1', JText::_($yes)),
+		$options = [
+			HTMLHelper::_('FEFHelper.select.option', '0', Text::_($no)),
+			HTMLHelper::_('FEFHelper.select.option', '1', Text::_($yes)),
 		];
 		$attribs = array_merge(['forSelect' => 1], $attribs);
 
-		return JHtml::_('FEFHelper.select.radiolist', $options, $name, $attribs, 'value', 'text', (int) $selected, $id);
+		return HTMLHelper::_('FEFHelper.select.radiolist', $options, $name, $attribs, 'value', 'text', (int) $selected, $id);
 	}
 
 	/**
@@ -94,7 +96,7 @@ abstract class FEFHelperSelect
 	                                   $translate = false)
 	{
 		// Set default options
-		$options = array_merge(JHtml::$formatOptions, array('format.depth' => 0, 'id' => false));
+		$options = array_merge(HTMLHelper::$formatOptions, ['format.depth' => 0, 'id' => false]);
 
 		if (is_array($attribs) && func_num_args() === 3)
 		{
@@ -104,12 +106,12 @@ abstract class FEFHelperSelect
 		else
 		{
 			// Get options from the parameters
-			$options['id'] = $idtag;
-			$options['list.attr'] = $attribs;
+			$options['id']             = $idtag;
+			$options['list.attr']      = $attribs;
 			$options['list.translate'] = $translate;
-			$options['option.key'] = $optKey;
-			$options['option.text'] = $optText;
-			$options['list.select'] = $selected;
+			$options['option.key']     = $optKey;
+			$options['option.text']    = $optText;
+			$options['list.select']    = $selected;
 		}
 
 		$attribs = '';
@@ -132,10 +134,10 @@ abstract class FEFHelperSelect
 		}
 
 		$id = $options['id'] !== false ? $options['id'] : $name;
-		$id = str_replace(array('[', ']', ' '), '', $id);
+		$id = str_replace(['[', ']', ' '], '', $id);
 
 		$baseIndent = str_repeat($options['format.indent'], $options['format.depth']++);
-		$html = $baseIndent . '<select' . ($id !== '' ? ' id="' . $id . '"' : '') . ' name="' . $name . '"' . $attribs . '>' . $options['format.eol']
+		$html       = $baseIndent . '<select' . ($id !== '' ? ' id="' . $id . '"' : '') . ' name="' . $name . '"' . $attribs . '>' . $options['format.eol']
 			. static::options($data, $options) . $baseIndent . '</select>' . $options['format.eol'];
 
 		return $html;
@@ -171,12 +173,15 @@ abstract class FEFHelperSelect
 	 *
 	 * @throws  RuntimeException If a group has contents that cannot be processed.
 	 */
-	public static function groupedlist($data, $name, $options = array())
+	public static function groupedlist($data, $name, $options = [])
 	{
 		// Set default options and overwrite with anything passed in
 		$options = array_merge(
-			JHtml::$formatOptions,
-			array('format.depth' => 0, 'group.items' => 'items', 'group.label' => 'text', 'group.label.toHtml' => true, 'id' => false),
+			HTMLHelper::$formatOptions,
+			[
+				'format.depth' => 0, 'group.items' => 'items', 'group.label' => 'text', 'group.label.toHtml' => true,
+				'id'           => false,
+			],
 			$options
 		);
 
@@ -206,19 +211,19 @@ abstract class FEFHelperSelect
 		}
 
 		$id = $options['id'] !== false ? $options['id'] : $name;
-		$id = str_replace(array('[', ']', ' '), '', $id);
+		$id = str_replace(['[', ']', ' '], '', $id);
 
 		// Disable groups in the options.
 		$options['groups'] = false;
 
-		$baseIndent = str_repeat($options['format.indent'], $options['format.depth']++);
-		$html = $baseIndent . '<select' . ($id !== '' ? ' id="' . $id . '"' : '') . ' name="' . $name . '"' . $attribs . '>' . $options['format.eol'];
+		$baseIndent  = str_repeat($options['format.indent'], $options['format.depth']++);
+		$html        = $baseIndent . '<select' . ($id !== '' ? ' id="' . $id . '"' : '') . ' name="' . $name . '"' . $attribs . '>' . $options['format.eol'];
 		$groupIndent = str_repeat($options['format.indent'], $options['format.depth']++);
 
 		foreach ($data as $dataKey => $group)
 		{
-			$label = $dataKey;
-			$id = '';
+			$label   = $dataKey;
+			$id      = '';
 			$noGroup = is_int($dataKey);
 
 			if ($options['group.items'] == null)
@@ -233,13 +238,13 @@ abstract class FEFHelperSelect
 
 				if (isset($group[$options['group.label']]))
 				{
-					$label = $group[$options['group.label']];
+					$label   = $group[$options['group.label']];
 					$noGroup = false;
 				}
 
 				if (isset($options['group.id']) && isset($group[$options['group.id']]))
 				{
-					$id = $group[$options['group.id']];
+					$id      = $group[$options['group.id']];
 					$noGroup = false;
 				}
 			}
@@ -250,13 +255,13 @@ abstract class FEFHelperSelect
 
 				if (isset($group->{$options['group.label']}))
 				{
-					$label = $group->{$options['group.label']};
+					$label   = $group->{$options['group.label']};
 					$noGroup = false;
 				}
 
 				if (isset($options['group.id']) && isset($group->{$options['group.id']}))
 				{
-					$id = $group->{$options['group.id']};
+					$id      = $group->{$options['group.id']};
 					$noGroup = false;
 				}
 			}
@@ -300,7 +305,9 @@ abstract class FEFHelperSelect
 	public static function integerlist($start, $end, $inc, $name, $attribs = null, $selected = null, $format = '')
 	{
 		// Set default options
-		$options = array_merge(JHtml::$formatOptions, array('format.depth' => 0, 'option.format' => '', 'id' => null));
+		$options = array_merge(HTMLHelper::$formatOptions, [
+			'format.depth' => 0, 'option.format' => '', 'id' => null,
+		]);
 
 		if (is_array($attribs) && func_num_args() === 5)
 		{
@@ -314,7 +321,7 @@ abstract class FEFHelperSelect
 		else
 		{
 			// Get options from the parameters
-			$options['list.attr'] = $attribs;
+			$options['list.attr']   = $attribs;
 			$options['list.select'] = $selected;
 		}
 
@@ -322,7 +329,7 @@ abstract class FEFHelperSelect
 		$end   = (int) $end;
 		$inc   = (int) $inc;
 
-		$data = array();
+		$data = [];
 
 		for ($i = $start; $i <= $end; $i += $inc)
 		{
@@ -332,7 +339,7 @@ abstract class FEFHelperSelect
 		// Tell genericlist() to use array keys
 		$options['option.key'] = null;
 
-		return JHtml::_('FEFHelper.select.genericlist', $data, $name, $options);
+		return HTMLHelper::_('FEFHelper.select.genericlist', $data, $name, $options);
 	}
 
 	/**
@@ -366,15 +373,15 @@ abstract class FEFHelperSelect
 	 */
 	public static function option($value, $text = '', $optKey = 'value', $optText = 'text', $disable = false)
 	{
-		$options = array(
-			'attr' => null,
-			'disable' => false,
-			'option.attr' => null,
+		$options = [
+			'attr'           => null,
+			'disable'        => false,
+			'option.attr'    => null,
 			'option.disable' => 'disable',
-			'option.key' => 'value',
-			'option.label' => null,
-			'option.text' => 'text',
-		);
+			'option.key'     => 'value',
+			'option.label'   => null,
+			'option.text'    => 'text',
+		];
 
 		if (is_array($optKey))
 		{
@@ -384,12 +391,12 @@ abstract class FEFHelperSelect
 		else
 		{
 			// Get options from the parameters
-			$options['option.key'] = $optKey;
+			$options['option.key']  = $optKey;
 			$options['option.text'] = $optText;
-			$options['disable'] = $disable;
+			$options['disable']     = $disable;
 		}
 
-		$obj = new stdClass;
+		$obj                            = new stdClass;
 		$obj->{$options['option.key']}  = $value;
 		$obj->{$options['option.text']} = trim($text) ? $text : $value;
 
@@ -401,7 +408,7 @@ abstract class FEFHelperSelect
 
 		if (isset($options['label']))
 		{
-			$labelProperty = $hasProperty ? $options['option.label'] : 'label';
+			$labelProperty       = $hasProperty ? $options['option.label'] : 'label';
 			$obj->$labelProperty = $options['label'];
 		}
 		elseif ($hasProperty)
@@ -428,49 +435,49 @@ abstract class FEFHelperSelect
 	 * Generates the option tags for an HTML select list (with no select tag
 	 * surrounding the options).
 	 *
-	 * @param   array    $arr        An array of objects, arrays, or values.
-	 * @param   mixed    $optKey     If a string, this is the name of the object variable for
-	 *                               the option value. If null, the index of the array of objects is used. If
-	 *                               an array, this is a set of options, as key/value pairs. Valid options are:
-	 *                               -Format options, {@see JHtml::$formatOptions}.
-	 *                               -groups: Boolean. If set, looks for keys with the value
+	 * @param   array    $arr         An array of objects, arrays, or values.
+	 * @param   mixed    $optKey      If a string, this is the name of the object variable for
+	 *                                the option value. If null, the index of the array of objects is used. If
+	 *                                an array, this is a set of options, as key/value pairs. Valid options are:
+	 *                                -Format options, {@see JHtml::$formatOptions}.
+	 *                                -groups: Boolean. If set, looks for keys with the value
 	 *                                "&lt;optgroup>" and synthesizes groups from them. Deprecated. Defaults
 	 *                                true for backwards compatibility.
-	 *                               -list.select: either the value of one selected option or an array
+	 *                                -list.select: either the value of one selected option or an array
 	 *                                of selected options. Default: none.
-	 *                               -list.translate: Boolean. If set, text and labels are translated via
+	 *                                -list.translate: Boolean. If set, text and labels are translated via
 	 *                                JText::_(). Default is false.
-	 *                               -option.id: The property in each option array to use as the
+	 *                                -option.id: The property in each option array to use as the
 	 *                                selection id attribute. Defaults to none.
-	 *                               -option.key: The property in each option array to use as the
+	 *                                -option.key: The property in each option array to use as the
 	 *                                selection value. Defaults to "value". If set to null, the index of the
 	 *                                option array is used.
-	 *                               -option.label: The property in each option array to use as the
+	 *                                -option.label: The property in each option array to use as the
 	 *                                selection label attribute. Defaults to null (none).
-	 *                               -option.text: The property in each option array to use as the
-	 *                               displayed text. Defaults to "text". If set to null, the option array is
-	 *                               assumed to be a list of displayable scalars.
-	 *                               -option.attr: The property in each option array to use for
+	 *                                -option.text: The property in each option array to use as the
+	 *                                displayed text. Defaults to "text". If set to null, the option array is
+	 *                                assumed to be a list of displayable scalars.
+	 *                                -option.attr: The property in each option array to use for
 	 *                                additional selection attributes. Defaults to none.
-	 *                               -option.disable: The property that will hold the disabled state.
+	 *                                -option.disable: The property that will hold the disabled state.
 	 *                                Defaults to "disable".
-	 *                               -option.key: The property that will hold the selection value.
+	 *                                -option.key: The property that will hold the selection value.
 	 *                                Defaults to "value".
-	 *                               -option.text: The property that will hold the the displayed text.
-	 *                               Defaults to "text". If set to null, the option array is assumed to be a
-	 *                               list of displayable scalars.
-	 * @param   string   $optText    The name of the object variable for the option text.
-	 * @param   mixed    $selected   The key that is selected (accepts an array or a string)
-	 * @param   boolean  $translate  Translate the option values.
+	 *                                -option.text: The property that will hold the the displayed text.
+	 *                                Defaults to "text". If set to null, the option array is assumed to be a
+	 *                                list of displayable scalars.
+	 * @param   string   $optText     The name of the object variable for the option text.
+	 * @param   mixed    $selected    The key that is selected (accepts an array or a string)
+	 * @param   boolean  $translate   Translate the option values.
 	 *
 	 * @return  string  HTML for the select list
 	 */
 	public static function options($arr, $optKey = 'value', $optText = 'text', $selected = null, $translate = false)
 	{
 		$options = array_merge(
-			JHtml::$formatOptions,
+			HTMLHelper::$formatOptions,
 			static::$optionDefaults['option'],
-			array('format.depth' => 0, 'groups' => true, 'list.select' => null, 'list.translate' => false)
+			['format.depth' => 0, 'groups' => true, 'list.select' => null, 'list.translate' => false]
 		);
 
 		if (is_array($optKey))
@@ -481,25 +488,25 @@ abstract class FEFHelperSelect
 		else
 		{
 			// Get options from the parameters
-			$options['option.key'] = $optKey;
-			$options['option.text'] = $optText;
-			$options['list.select'] = $selected;
+			$options['option.key']     = $optKey;
+			$options['option.text']    = $optText;
+			$options['list.select']    = $selected;
 			$options['list.translate'] = $translate;
 		}
 
-		$html = '';
+		$html       = '';
 		$baseIndent = str_repeat($options['format.indent'], $options['format.depth']);
 
 		foreach ($arr as $elementKey => &$element)
 		{
-			$attr = '';
+			$attr  = '';
 			$extra = '';
 			$label = '';
-			$id = '';
+			$id    = '';
 
 			if (is_array($element))
 			{
-				$key = $options['option.key'] === null ? $elementKey : $element[$options['option.key']];
+				$key  = $options['option.key'] === null ? $elementKey : $element[$options['option.key']];
 				$text = $element[$options['option.text']];
 
 				if (isset($element[$options['option.attr']]))
@@ -524,7 +531,7 @@ abstract class FEFHelperSelect
 			}
 			elseif (is_object($element))
 			{
-				$key = $options['option.key'] === null ? $elementKey : $element->{$options['option.key']};
+				$key  = $options['option.key'] === null ? $elementKey : $element->{$options['option.key']};
 				$text = $element->{$options['option.text']};
 
 				if (isset($element->{$options['option.attr']}))
@@ -560,7 +567,7 @@ abstract class FEFHelperSelect
 			else
 			{
 				// This is a simple associative array
-				$key = $elementKey;
+				$key  = $elementKey;
 				$text = $element;
 			}
 
@@ -576,19 +583,19 @@ abstract class FEFHelperSelect
 
 			if ($key === '<OPTGROUP>' && $options['groups'])
 			{
-				$html .= $baseIndent . '<optgroup label="' . ($options['list.translate'] ? JText::_($text) : $text) . '">' . $options['format.eol'];
+				$html       .= $baseIndent . '<optgroup label="' . ($options['list.translate'] ? Text::_($text) : $text) . '">' . $options['format.eol'];
 				$baseIndent = str_repeat($options['format.indent'], ++$options['format.depth']);
 			}
 			elseif ($key === '</OPTGROUP>' && $options['groups'])
 			{
 				$baseIndent = str_repeat($options['format.indent'], --$options['format.depth']);
-				$html .= $baseIndent . '</optgroup>' . $options['format.eol'];
+				$html       .= $baseIndent . '</optgroup>' . $options['format.eol'];
 			}
 			else
 			{
 				// If no string after hyphen - take hyphen out
 				$splitText = explode(' - ', $text, 2);
-				$text = $splitText[0];
+				$text      = $splitText[0];
 
 				if (isset($splitText[1]) && $splitText[1] !== '' && !preg_match('/^[\s]+$/', $splitText[1]))
 				{
@@ -597,7 +604,7 @@ abstract class FEFHelperSelect
 
 				if (!empty($label) && $options['list.translate'])
 				{
-					$label = JText::_($label);
+					$label = Text::_($label);
 				}
 
 				if ($options['option.label.toHtml'])
@@ -636,7 +643,7 @@ abstract class FEFHelperSelect
 
 				if ($options['list.translate'])
 				{
-					$text = JText::_($text);
+					$text = Text::_($text);
 				}
 
 				// Generate the option, encoding as required
@@ -688,8 +695,8 @@ abstract class FEFHelperSelect
 		foreach ($data as $optionObject)
 		{
 			$optionValue = $optionObject->$optKey;
-			$labelText   = $translate ? JText::_($optionObject->$optText) : $optionObject->$optText;
-			$id          = (isset($optionObject->id) ? $optionObject->id : null);
+			$labelText   = $translate ? Text::_($optionObject->$optText) : $optionObject->$optText;
+			$id          = ($optionObject->id ?? null);
 
 			$extra = '';
 			$id    = $id ? $optionObject->id : $id_text . $optionValue;
@@ -736,17 +743,17 @@ abstract class FEFHelperSelect
 	/**
 	 * Creates two radio buttons styled with FEF to appear as a YES/NO switch
 	 *
-	 * @param	string	$name		Name of the field
-	 * @param	string	$selected	Selected field
-	 * @param	array	$attribs	Additional attributes to add to the switch
+	 * @param   string  $name      Name of the field
+	 * @param   string  $selected  Selected field
+	 * @param   array   $attribs   Additional attributes to add to the switch
 	 *
-	 * @return	string	The HTML for the switch
+	 * @return    string    The HTML for the switch
 	 */
-	public static function booleanswitch($name, $selected, array $attribs = array())
+	public static function booleanswitch($name, $selected, array $attribs = [])
 	{
 		if (empty($attribs))
 		{
-			$attribs = array('class' => 'akeeba-toggle');
+			$attribs = ['class' => 'akeeba-toggle'];
 		}
 		else
 		{
@@ -772,11 +779,11 @@ abstract class FEFHelperSelect
 		$checked_1 = $selected ? '' : 'checked ';
 		$checked_2 = $selected ? 'checked ' : '';
 
-		$html  = '<div '.$attribs.'>';
-		$html .= 	'<input type="radio" class="radio-yes" name="'.$name.'" '.$checked_2.'id="'.$name .'-2" value="1">';
-		$html .=	'<label for="'.$name.'-2" class="green">'.JText::_('JYES').'</label>';
-		$html .=	'<input type="radio" class="radio-no" name="'.$name.'" '.$checked_1.'id="'.$name .'-1" value="0">';
-		$html .= 	'<label for="'.$name.'-1" class="red">'.JText::_('JNO').'</label>';
+		$html = '<div ' . $attribs . '>';
+		$html .= '<input type="radio" class="radio-yes" name="' . $name . '" ' . $checked_2 . 'id="' . $name . '-2" value="1">';
+		$html .= '<label for="' . $name . '-2" class="green">' . Text::_('JYES') . '</label>';
+		$html .= '<input type="radio" class="radio-no" name="' . $name . '" ' . $checked_1 . 'id="' . $name . '-1" value="0">';
+		$html .= '<label for="' . $name . '-1" class="red">' . Text::_('JNO') . '</label>';
 		$html .= '</div>';
 
 		return $html;

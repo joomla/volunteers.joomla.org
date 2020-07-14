@@ -9,7 +9,7 @@
 
 namespace Akeeba\Engine\Postproc\Connector\Sugarsync\Exception;
 
-
+defined('AKEEBAENGINE') || die();
 
 use Exception;
 

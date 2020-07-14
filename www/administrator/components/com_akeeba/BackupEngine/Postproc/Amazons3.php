@@ -9,7 +9,7 @@
 
 namespace Akeeba\Engine\Postproc;
 
-
+defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Factory;
 use Akeeba\Engine\Postproc\Connector\S3v4\Configuration;
@@ -25,13 +25,13 @@ use RuntimeException;
  */
 class Amazons3 extends Base
 {
-	const STORAGE_STANDARD = 0;
-	const STORAGE_REDUCED_REDUNDANCY = 1;
-	const STORAGE_STANDARD_IA = 2;
-	const STORAGE_ONEZONE_IA = 3;
-	const STORAGE_INTELLIGENT_TIERING = 4;
-	const STORAGE_GLACIER = 5;
-	const STORAGE_DEEP_ARCHIVE = 6;
+	public const STORAGE_STANDARD = 0;
+	public const STORAGE_REDUCED_REDUNDANCY = 1;
+	public const STORAGE_STANDARD_IA = 2;
+	public const STORAGE_ONEZONE_IA = 3;
+	public const STORAGE_INTELLIGENT_TIERING = 4;
+	public const STORAGE_GLACIER = 5;
+	public const STORAGE_DEEP_ARCHIVE = 6;
 
 	/**
 	 * Used in log messages. Check out children classes to understand why we have this here.
@@ -199,8 +199,7 @@ class Amazons3 extends Base
 
 		if ($fromOffset && $length)
 		{
-			$toOffset                  = $fromOffset + $length - 1;
-			$serviceArguments['Range'] = $fromOffset . '-' . $toOffset;
+			$toOffset         = $fromOffset + $length - 1;
 		}
 
 		$connector->getObject($bucket, $remotePath, $localFile, $fromOffset, $toOffset);
@@ -783,7 +782,7 @@ class Amazons3 extends Base
 			return $strlen;
 		}
 
-		list($header, $value) = explode(': ', trim($data), 2);
+		[$header, $value] = explode(': ', trim($data), 2);
 
 		$this->headers[strtolower($header)] = $value;
 

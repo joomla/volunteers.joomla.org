@@ -7,18 +7,18 @@
 
 namespace FOF30\Dispatcher;
 
+defined('_JEXEC') || die;
+
 use Exception;
 use FOF30\Container\Container;
 use FOF30\Controller\Controller;
 use FOF30\Dispatcher\Exception\AccessForbidden;
 use FOF30\TransparentAuthentication\TransparentAuthentication;
 
-defined('_JEXEC') or die;
-
 /**
  * A generic MVC dispatcher
  *
- * @property-read  \FOF30\Input\Input  $input  The input object (magic __get returns the Input from the Container)
+ * @property-read  \FOF30\Input\Input $input  The input object (magic __get returns the Input from the Container)
  */
 class Dispatcher
 {
@@ -26,7 +26,7 @@ class Dispatcher
 	public $defaultView = null;
 
 	/** @var  array  Local cache of the dispatcher configuration */
-	protected $config = array();
+	protected $config = [];
 
 	/** @var  Container  The container we belong to */
 	protected $container = null;
@@ -37,7 +37,7 @@ class Dispatcher
 	/** @var  string  The layout for rendering the view */
 	protected $layout = null;
 
-	/** @var  Controller  The controller which will be used  */
+	/** @var  Controller  The controller which will be used */
 	protected $controller = null;
 
 	/** @var  bool  Is this user transparently logged in? */
@@ -52,10 +52,10 @@ class Dispatcher
 	 * Do note that $config is passed to the Controller and through it to the Model and View. Please see these classes
 	 * for more information on the configuration variables they accept.
 	 *
-	 * @param \FOF30\Container\Container $container
-	 * @param array                      $config
+	 * @param   \FOF30\Container\Container  $container
+	 * @param   array                       $config
 	 */
-	public function __construct(Container $container, array $config = array())
+	public function __construct(Container $container, array $config = [])
 	{
 		$this->container = $container;
 
@@ -69,7 +69,7 @@ class Dispatcher
 		}
 
 		// Get the default values for the view and layout names
-		$this->view = $this->input->getCmd('view', null);
+		$this->view   = $this->input->getCmd('view', null);
 		$this->layout = $this->input->getCmd('layout', null);
 
 		// Not redundant; you may pass an empty but non-null view which is invalid, so we need the fallback
@@ -236,7 +236,7 @@ class Dispatcher
 	 *
 	 * @return  bool
 	 */
-	protected function triggerEvent($event, array $arguments = array())
+	protected function triggerEvent($event, array $arguments = [])
 	{
 		$result = true;
 
@@ -264,7 +264,7 @@ class Dispatcher
 					$result = $this->{$event}($arguments[0], $arguments[1], $arguments[2], $arguments[3], $arguments[4]);
 					break;
 				default:
-					$result = call_user_func_array(array($this, $event), $arguments);
+					$result = call_user_func_array([$this, $event], $arguments);
 					break;
 			}
 		}
@@ -284,7 +284,7 @@ class Dispatcher
 		if (substr($event, 0, 2) == 'on')
 		{
 			$prefix = 'on';
-			$event = substr($event, 2);
+			$event  = substr($event, 2);
 		}
 
 		// Get the component/model prefix for the event
@@ -317,7 +317,7 @@ class Dispatcher
 	{
 		/** @var TransparentAuthentication $transparentAuth */
 		$transparentAuth = $this->container->transparentAuth;
-		$authInfo = $transparentAuth->getTransparentAuthenticationCredentials();
+		$authInfo        = $transparentAuth->getTransparentAuthenticationCredentials();
 
 		if (empty($authInfo))
 		{

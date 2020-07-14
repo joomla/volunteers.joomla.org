@@ -6,7 +6,7 @@
  */
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 ?>
 <form action="index.php" method="get" name="akeebaform" id="akeebaform">
     <input type="hidden" name="option" value="com_akeeba" />

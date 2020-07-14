@@ -7,9 +7,11 @@
 
 namespace FOF30\Controller\Exception;
 
-defined('_JEXEC') or die;
+defined('_JEXEC') || die;
 
 /**
  * Exception thrown when we can't get a Controller's name
  */
-class CannotGetName extends \RuntimeException {}
+class CannotGetName extends \RuntimeException
+{
+}

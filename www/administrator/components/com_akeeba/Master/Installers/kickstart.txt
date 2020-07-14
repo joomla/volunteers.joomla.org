@@ -25,9 +25,12 @@
 // =====================================================================================================================
 define('KICKSTART', 1);
 
+define('KICKSTART_MIN_PHP', '5.6.0');
+define('KICKSTART_RECOMMENDED_PHP', '7.3.0');
+
 if (!defined('VERSION'))
 {
-	define('VERSION', '7.0.0');
+	define('VERSION', '7.0.1');
 }
 
 if (!defined('KICKSTARTPRO'))
@@ -59,7 +62,7 @@ if (defined('KSDEBUG'))
 }
 else
 {
-	@error_reporting(E_NONE);
+	@error_reporting(0);
 }
 
 // ==========================================================================================
@@ -2281,7 +2284,7 @@ class AKPostprocFTP extends AKAbstractPostproc
 		// Turn off error reporting
 		if (!defined('KSDEBUG'))
 		{
-			$oldErrorReporting = @error_reporting(E_NONE);
+			$oldErrorReporting = @error_reporting(0);
 		}
 
 		// Get UNIX style paths
@@ -2933,7 +2936,7 @@ class AKPostprocSFTP extends AKAbstractPostproc
 		// Turn off error reporting
 		if (!defined('KSDEBUG'))
 		{
-			$oldErrorReporting = @error_reporting(E_NONE);
+			$oldErrorReporting = @error_reporting(0);
 		}
 
 		// Get UNIX style paths
@@ -6938,8 +6941,10 @@ class AKUtilsZapper extends AKAbstractPart
 
 		/**
 		 * Exclude .htaccess if the stealth feature is enabled. Otherwise we'd unset the stealth mode.
+		 * Exclude it even if we have any AddHandler directive, otherwise the site will be borked if the user
+		 * chooses not to rename the .htaccess file
 		 */
-		if (AKFactory::get('kickstart.stealth.enable'))
+		if (AKFactory::get('kickstart.stealth.enable') || AKFactory::get('kickstart.setup.phphandlers', array()))
 		{
 			$ret[] = $destDir . '/.htaccess';
 		}
@@ -7103,7 +7108,6 @@ class AKText extends AKAbstractObject
 		'FTP_COULDNT_UPLOAD'              => 'Could not upload %s',
 		'THINGS_HEADER'                   => 'Things you should know about Akeeba Kickstart',
 		'THINGS_01'                       => 'Kickstart is not an installer. It is an archive extraction tool. The actual installer was put inside the archive file at backup time.',
-		'THINGS_02'                       => 'Kickstart is not the only way to extract the backup archive. You can use Akeeba eXtract Wizard and upload the extracted files using FTP instead.',
 		'THINGS_03'                       => 'Kickstart is bound by your server\'s configuration. As such, it may not work at all.',
 		'THINGS_04'                       => 'You should download and upload your archive files using FTP in Binary transfer mode. Any other method could lead to a corrupt backup archive and restoration failure.',
 		'THINGS_05'                       => 'Post-restoration site load errors are usually caused by .htaccess or php.ini directives. You should understand that blank pages, 404 and 500 errors can usually be worked around by editing the aforementioned files. It is not our job to mess with your configuration files, because this could be dangerous for your site.',
@@ -9399,6 +9403,7 @@ if (!defined('KICKSTART'))
 
 				$timer = AKFactory::getTimer();
 				$timer->enforce_min_exec_time();
+
 				break;
 
 			case 'finalizeRestore':
@@ -9422,6 +9427,7 @@ if (!defined('KICKSTART'))
 						{
 							$postproc->unlink($root . '/.htaccess');
 						}
+
 						$postproc->rename($root . '/htaccess.bak', $root . '/.htaccess');
 					}
 
@@ -9432,6 +9438,7 @@ if (!defined('KICKSTART'))
 						{
 							$postproc->unlink($root . '/web.config');
 						}
+
 						$postproc->rename($root . '/web.config.bak', $root . '/web.config');
 					}
 				}
@@ -9439,14 +9446,17 @@ if (!defined('KICKSTART'))
 				// Remove restoration.php
 				$basepath = KSROOTDIR;
 				$basepath = rtrim(str_replace('\\', '/', $basepath), '/');
+
 				if (!empty($basepath))
 				{
 					$basepath .= '/';
 				}
+
 				$postproc->unlink($basepath . 'restoration.php');
 
 				// Import a custom finalisation file
 				$filename = dirname(__FILE__) . '/restore_finalisation.php';
+
 				if (file_exists($filename))
 				{
 					// opcode cache busting before including the filename
@@ -9454,18 +9464,22 @@ if (!defined('KICKSTART'))
 					{
 						opcache_invalidate($filename);
 					}
+
 					if (function_exists('apc_compile_file'))
 					{
 						apc_compile_file($filename);
 					}
+
 					if (function_exists('wincache_refresh_if_changed'))
 					{
 						wincache_refresh_if_changed([$filename]);
 					}
+
 					if (function_exists('xcache_asm'))
 					{
 						xcache_asm($filename);
 					}
+
 					include_once $filename;
 				}
 
@@ -9474,6 +9488,7 @@ if (!defined('KICKSTART'))
 				{
 					finalizeRestore($root, $basepath);
 				}
+
 				break;
 
 			default:
@@ -9512,6 +9527,7 @@ function recursive_remove_directory($directory)
 	{
 		$directory = substr($directory, 0, -1);
 	}
+
 	// if the path is not valid or is not a directory ...
 	if (!file_exists($directory) || !is_dir($directory))
 	{
@@ -9530,15 +9546,18 @@ function recursive_remove_directory($directory)
 		// we open the directory
 		$handle   = opendir($directory);
 		$postproc = AKFactory::getPostProc();
+
 		// and scan through the items inside
 		while (false !== ($item = readdir($handle)))
 		{
 			// if the filepointer is not the current directory
 			// or the parent directory
+
 			if ($item != '.' && $item != '..')
 			{
 				// we build the new path to delete
 				$path = $directory . '/' . $item;
+
 				// if the new path is a directory
 				if (is_dir($path))
 				{
@@ -9553,8 +9572,10 @@ function recursive_remove_directory($directory)
 				}
 			}
 		}
+
 		// close the directory
 		closedir($handle);
+
 		// try to delete the now empty directory
 		if (!$postproc->rmdir($directory))
 		{
@@ -9625,6 +9646,7 @@ class AKKickstartUtils
 	{
 		$path = KSROOTDIR;
 		$path = rtrim(str_replace('\\', '/', $path), '/');
+
 		if (!empty($path))
 		{
 			$path .= '/';
@@ -9775,6 +9797,118 @@ class AKKickstartUtils
 
 		return $ret;
 	}
+
+	/**
+	 * Extract the PHP handler configuration from a .htaccess file.
+	 *
+	 * This method supports AddHandler lines and SetHandler blocks.
+	 *
+	 * @param   string  $htaccess
+	 *
+	 * @return  string|null  NULL when not found
+	 */
+	public static function extractHandler($htaccess)
+	{
+		// Normalize the .htaccess
+		$htaccess = self::normalizeHtaccess($htaccess);
+
+		// Look for SetHandler and AddHandler in Files and FilesMatch containers
+		foreach (['Files', 'FilesMatch'] as $container)
+		{
+			$result = self::extractContainer($container, $htaccess);
+
+			if (!is_null($result))
+			{
+				return $result;
+			}
+		}
+
+		// Fallback: extract an AddHandler line
+		$found = preg_match('#^AddHandler\s?.*\.php.*$#mi', $htaccess, $matches);
+
+		if ($found >= 1)
+		{
+			return $matches[0];
+		}
+
+		return null;
+	}
+
+	/**
+	 * Extracts a Files or FilesMatch container with an AddHandler or SetHandler line
+	 *
+	 * @param   string  $container  "Files" or "FilesMatch"
+	 * @param   string  $htaccess   The .htaccess file content
+	 *
+	 * @return  string|null  NULL when not found
+	 */
+	protected static function extractContainer($container, $htaccess)
+	{
+		// Try to find the opening container tag e.g. <Files....>
+		$pattern = sprintf('#<%s\s*.*\.php.*>#m', $container);
+		$found   = preg_match($pattern, $htaccess, $matches, PREG_OFFSET_CAPTURE);
+
+		if (!$found)
+		{
+			return null;
+		}
+
+		// Get the rest of the .htaccess sample
+		$openContainer = $matches[0][0];
+		$htaccess      = trim(substr($htaccess, $matches[0][1] + strlen($matches[0][0])));
+
+		// Try to find the closing container tag
+		$pattern = sprintf('#</%s\s*>#m', $container);
+		$found   = preg_match($pattern, $htaccess, $matches, PREG_OFFSET_CAPTURE);
+
+		if (!$found)
+		{
+			return null;
+		}
+
+		// Get the rest of the .htaccess sample
+		$htaccess       = trim(substr($htaccess, 0, $matches[$found - 1][1]));
+		$closeContainer = $matches[$found - 1][0];
+
+		if (empty($htaccess))
+		{
+			return null;
+		}
+
+		// Now we'll explode remaining lines and find the first SetHandler or AddHandler line
+		$lines = array_map('trim', explode("\n", $htaccess));
+		$lines = array_filter($lines, function ($line) {
+			return preg_match('#(Add|Set)Handler\s?#i', $line) >= 1;
+		});
+
+		if (empty($lines))
+		{
+			return null;
+		}
+
+		return $openContainer . "\n" . array_shift($lines) . "\n" . $closeContainer;
+	}
+
+	/**
+	 * Normalize the .htaccess file content, making it suitable for handler extraction
+	 *
+	 * @param   string  $htaccess  The original file
+	 *
+	 * @return  string  The normalized file
+	 */
+	private static function normalizeHtaccess($htaccess)
+	{
+		// Convert all newlines into UNIX style
+		$htaccess = str_replace("\r\n", "\n", $htaccess);
+		$htaccess = str_replace("\r", "\n", $htaccess);
+
+		// Return only non-comment, non-empty lines
+		return implode("\n", array_filter(explode("\n", $htaccess), function ($line) {
+			$line = trim($line);
+
+			return !empty($line) && (substr($line, 0, 1) !== '#');
+		}));
+	}
 }
 
 
@@ -9924,6 +10058,7 @@ function TranslateWinPath($p_path)
 	{
 		// Is this a UNC path?
 		$is_unc = (substr($p_path, 0, 2) == '\\\\') || (substr($p_path, 0, 2) == '//');
+
 		// Change potential windows directory separator
 		if ((strpos($p_path, '\\') > 0) || (substr($p_path, 0, 1) == '\\'))
 		{
@@ -9962,6 +10097,7 @@ function getListing($directory, $host, $port, $username, $password, $passive, $s
 	{
 		$copy_of_parts = $parts;
 		array_pop($copy_of_parts);
+
 		if (!empty($copy_of_parts))
 		{
 			$parent_directory = '/' . implode('/', $copy_of_parts);
@@ -9985,6 +10121,7 @@ function getListing($directory, $host, $port, $username, $password, $passive, $s
 	{
 		$con = @ftp_connect($host, $port);
 	}
+
 	if ($con === false)
 	{
 		return array(
@@ -9994,6 +10131,7 @@ function getListing($directory, $host, $port, $username, $password, $passive, $s
 
 	// Login
 	$result = @ftp_login($con, $username, $password);
+
 	if ($result === false)
 	{
 		return array(
@@ -10008,6 +10146,7 @@ function getListing($directory, $host, $port, $username, $password, $passive, $s
 	if (!empty($dir))
 	{
 		$result = @ftp_chdir($con, $dir);
+
 		if ($result === false)
 		{
 			return array(
@@ -10050,13 +10189,16 @@ function getListing($directory, $host, $port, $username, $password, $passive, $s
 function parse_rawlist($list)
 {
 	$folders = array();
+
 	foreach ($list as $v)
 	{
 		$info  = array();
 		$vinfo = preg_split("/[\s]+/", $v, 9);
+
 		if ($vinfo[0] !== "total")
 		{
 			$perms = $vinfo[0];
+
 			if (substr($perms, 0, 1) == 'd')
 			{
 				$folders[] = $vinfo[8];
@@ -10083,6 +10225,7 @@ function getSftpListing($directory, $host, $port, $username, $password)
 	{
 		$copy_of_parts = $parts;
 		array_pop($copy_of_parts);
+
 		if (!empty($copy_of_parts))
 		{
 			$parent_directory = '/' . implode('/', $copy_of_parts);
@@ -10217,17 +10360,20 @@ function resolvePath($filename)
 	$filename = str_replace('//', '/', $filename);
 	$parts    = explode('/', $filename);
 	$out      = array();
+
 	foreach ($parts as $part)
 	{
 		if ($part == '.')
 		{
 			continue;
 		}
+
 		if ($part == '..')
 		{
 			array_pop($out);
 			continue;
 		}
+
 		$out[] = $part;
 	}
 
@@ -10237,13 +10383,16 @@ function resolvePath($filename)
 function createStealthURL()
 {
 	$filename = AKFactory::get('kickstart.stealth.url', '');
+
 	// We need an HTML file!
 	if (empty($filename))
 	{
 		return;
 	}
+
 	// Make sure it ends in .html or .htm
 	$filename = basename($filename);
+
 	if ((strtolower(substr($filename, -5)) != '.html') && (strtolower(substr($filename, -4)) != '.htm'))
 	{
 		return;
@@ -10267,11 +10416,81 @@ RewriteRule (.*)				$filename	[R=307,L]
 
 ENDHTACCESS;
 
+	$customHandlers = portPhpHandlers();
+
+	// Port any custom handlers in the stealth file
+	if ($customHandlers)
+	{
+		$stealthHtaccess .= "\n".$customHandlers."\n";
+	}
+
 	// Write the new .htaccess, removing the old one first
 	$postproc = AKFactory::getpostProc();
 	$postproc->unlink('.htaccess');
 	$tempfile = $postproc->processFilename('.htaccess');
 	@file_put_contents($tempfile, $stealthHtaccess);
+	$postproc->process();
+}
+
+/**
+ * Checks if there is an .htaccess file and has any AddHandler directive in it.
+ * In that case, we return the affected lines so they could be stored for later use
+ *
+ * @return  array
+ */
+function getPhpHandlers()
+{
+	$root       = AKKickstartUtils::getPath();
+	$htaccess   = $root.'/.htaccess';
+	$directives = array();
+
+	if (!file_exists($htaccess))
+	{
+		return $directives;
+	}
+
+	$contents   = file_get_contents($htaccess);
+	$directives = AKKickstartUtils::extractHandler($contents);
+	$directives = explode("\n", $directives);
+
+	return $directives;
+}
+
+/**
+ * Fetches any stored php handler directive stored inside the factory and creates a string with the correct markers
+ *
+ * @return string
+ */
+function portPhpHandlers()
+{
+	$phpHandlers = AKFactory::get('kickstart.setup.phphandlers', array());
+
+	if (!$phpHandlers)
+	{
+		return '';
+	}
+
+	$customHandler  = "### AKEEBA_KICKSTART_PHP_HANDLER_BEGIN ###\n";
+	$customHandler .= implode("\n", $phpHandlers)."\n";
+	$customHandler .= "### AKEEBA_KICKSTART_PHP_HANDLER_END ###\n";
+
+	return $customHandler;
+}
+
+function writePhpHandlers()
+{
+	$contents = portPhpHandlers();
+
+	if (!$contents)
+	{
+		return;
+	}
+
+	// Write the new .htaccess, removing the old one first
+	$postproc = AKFactory::getpostProc();
+	$postproc->unlink('.htaccess');
+	$tempfile = $postproc->processFilename('.htaccess');
+	@file_put_contents($tempfile, $contents);
 	$postproc->process();
 }
 
@@ -10394,10 +10613,30 @@ body {
     text-align: center;
 }
 
-#error h3, .error h3 {
+#error h3, .error h3, .warning h3, .notice h3 {
     margin: 0;
     padding: 0;
     font-size: 12pt;
+}
+
+.warning {
+    border: solid var(--orange-dark);
+    border-width: 4px 0;
+    background: var(--orange-light);
+    color: var(--grey-dark);
+    padding: 1em 2em;
+    margin-bottom: 1.15em;
+    text-align: center;
+}
+
+.notice {
+    border: solid var(--teal-dark);
+    border-width: 4px 0;
+    background: var(--teal-light);
+    color: var(--grey-dark);
+    padding: 1em 2em;
+    margin-bottom: 1.15em;
+    text-align: center;
 }
 
 .clr {
@@ -13534,7 +13773,6 @@ function echoPage()
 			<h2>THINGS_HEADER</h2>
 			<ol>
 				<li>THINGS_01</li>
-				<li>THINGS_02</li>
 				<li>THINGS_03</li>
 				<li>THINGS_04</li>
 				<li>THINGS_05</li>
@@ -13553,18 +13791,30 @@ function echoPage()
 		<div id="header">
 			<div class="title">
 				<span id="logo" alt="Akeeba Kickstart logo"></span>
-				Akeeba Kickstart <?php echo $edition ?> 7.0.0
+				Akeeba Kickstart <?php echo $edition ?> 7.0.1
 			</div>
 		</div>
 
 		<div id="page1">
+			<?php
+			akeeba_common_phpversion_warning(array(
+				'minPHPVersion'          => defined('KICKSTART_MIN_PHP') ? KICKSTART_MIN_PHP : "5.6.0",
+				'recommendedPHPVersion'  => defined('KICKSTART_RECOMMENDED_PHP') ? KICKSTART_RECOMMENDED_PHP : '7.3',
+				'softwareName'           => "Akeeba Kickstart",
+				'class_priority_high'    => 'error',
+				'class_priority_medium'  => 'warning',
+				'class_priority_low'     => 'notice',
+				'warn_about_maintenance' => false,
+			));
+			?>
+
 			<?php callExtraFeature('onPage1'); ?>
 
 			<div id="page1-content">
 
 				<div class="helpme">
 					<span>NEEDSOMEHELPKS</span> <a
-						href="https://www.akeebabackup.com/documentation/quick-start-guide/using-kickstart.html"
+						href="https://www.akeeba.com/documentation/akeeba-kickstart-documentation/using-kickstart.html"
 						target="_blank">QUICKSTART</a>
 				</div>
 
@@ -13590,7 +13840,7 @@ function echoPage()
 						<?php echo $filelist; ?>
 					</select>
 				<?php else: ?>
-					<a href="https://www.akeebabackup.com/documentation/troubleshooter/ksnoarchives.html"
+					<a href="https://www.akeeba.com/documentation/akeeba-kickstart-documentation/ksnoarchives.html"
 					   target="_blank">NOARCHIVESCLICKHERE</a>
 				<?php endif; ?>
 			</span>
@@ -13656,7 +13906,7 @@ function echoPage()
 							<label></label>
 							<span class="button" id="testFTP">BTN_TESTFTPCON</span>
 							<a id="notWorking" class="button"
-							   href="https://www.akeebabackup.com/documentation/troubleshooter/kscantextract.html"
+							   href="https://www.akeeba.com/documentation/akeeba-kickstart-documentation/kscantextract.html"
 							   target="_blank">CANTGETITTOWORK</a>
 							<br/>
 						</div>
@@ -13742,7 +13992,7 @@ function echoPage()
 				<div id="gotoSite" class="button" style="display:none">BTN_SITEFE</div>
 				<div id="gotoAdministrator" class="button" style="display:none">BTN_SITEBE</div>
 				<div id="gotoPostRestorationRroubleshooting" style="display:none">
-					<a href="https://www.akeebabackup.com/documentation/troubleshooter/post-restoration.html"
+					<a href="https://www.akeeba.com/documentation/akeeba-kickstart-documentation/post-restoration.html"
 					   target="_blank">POSTRESTORATIONTROUBLESHOOTING</a>
 				</div>
 			</div>
@@ -13761,7 +14011,7 @@ function echoPage()
 				<p id="errorMessage"></p>
 				<div id="gotoStart" class="button">BTN_GOTOSTART</div>
 				<div>
-					<a href="https://www.akeebabackup.com/documentation/troubleshooter/kscantextract.html"
+					<a href="https://www.akeeba.com/documentation/akeeba-kickstart-documentation/kscantextract.html"
 					   target="_blank">CANTGETITTOWORK</a>
 				</div>
 			</div>
@@ -13769,8 +14019,8 @@ function echoPage()
 
 		<div id="footer">
 			<div class="copyright">Copyright &copy; 2008&ndash;<?php echo date('Y'); ?> <a
-					href="http://www.akeebabackup.com">Nicholas K.
-					Dionysopoulos / Akeeba Backup</a>. All legal rights reserved.<br/>
+					href="https://www.akeeba.com">Nicholas K.
+					Dionysopoulos / Akeeba Ltd</a>. All legal rights reserved.<br/>
 
 				This program is free software: you can redistribute it and/or modify it under the terms of
 				the <a href="http://www.gnu.org/gpl-3.html">GNU General
@@ -13784,6 +14034,495 @@ function echoPage()
 	</body>
 	</html>
 	<?php
+}
+
+/**
+ * Old PHP version notification
+ *
+ * @copyright Copyright Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @license   GNU General Public License version 3, or later
+ */
+
+(defined('_JEXEC') || defined('WPINC') || defined('APATH_BASE') || defined('AKEEBA_COMMON_WRONGPHP') || defined('KICKSTART')) or die;
+
+if (!function_exists('akeeba_common_phpversion_warning'))
+{
+	/**
+	 * The function checks if you are using an obsolete PHP version and outputs a warning if you do.
+	 *
+	 * Configuration array:
+	 *
+	 * * minPHPVersion: minimum PHP version supported by this software, e.g. "7.2.0"
+	 * * recommendedPHPVersion: recommended PHP version to use with this software, e.g. "7.3"
+	 * * softwareName: human-readable software name, e.g. "Akeeba Example"
+	 * * class_priority_low: CSS class for low priority notices
+	 * * class_priority_medium: CSS class for medium priority warnings
+	 * * class_priority_high: CSS class for high priority errors
+	 * * warn_about_maintenance: should I warn about PHP versions which have entered maintenance mode? Def: TRUE.
+	 * * eol_period_too_old: how long after EOL is the PHP version considered dangerous, as DateInterval text, e.g. P3M
+	 * * longVersion: current PHP version, long format, e.g. "7.3.1-12ubuntu3.2". Skip to automatically determine.
+	 * * shortVersion: current PHP version, short format, e.g. "7.3". Skip to automatically determine.
+	 * * currentTimestamp: current UNIX timestamp. Skip to automatically determine.
+	 *
+	 * You need to provide at the very least the minPHPVersion, recommendedPHPVersion and softwareName. The default CSS
+	 * classes are compatible with Akeeba FEF. PHP versions in maintenance will be warned about and the period after
+	 * which an EOL version of PHP is dangerous is considered to be 3 months.
+	 *
+	 * @param   array  $config  See above
+	 *
+	 * @throws  Exception
+	 */
+	function akeeba_common_phpversion_warning($config = array())
+	{
+		/**
+		 * Format: version => [maintenance_date, eol_date]
+		 *
+		 * For versions older than 5.6 we use a fake maintenance_date because this information no longer exists on PHP's
+		 * site and it's irrelevant anyway; these PHP versions are already EOL therefore we only use their EOL date.
+		 */
+		$phpDates = array(
+			'3.0' => array('1990-01-01 00:00:00', '2000-10-20 00:00:00'),
+			'4.0' => array('1990-01-01 00:00:00', '2001-06-23 00:00:00'),
+			'4.1' => array('1990-01-01 00:00:00', '2002-03-12 00:00:00'),
+			'4.2' => array('1990-01-01 00:00:00', '2002-09-06 00:00:00'),
+			'4.3' => array('1990-01-01 00:00:00', '2005-03-31 00:00:00'),
+			'4.4' => array('1990-01-01 00:00:00', '2008-08-07 00:00:00'),
+			'5.0' => array('1990-01-01 00:00:00', '2005-09-05 00:00:00'),
+			'5.1' => array('1990-01-01 00:00:00', '2006-08-24 00:00:00'),
+			'5.2' => array('1990-01-01 00:00:00', '2011-01-11 00:00:00'),
+			'5.3' => array('1990-01-01 00:00:00', '2014-08-14 00:00:00'),
+			'5.4' => array('1990-01-01 00:00:00', '2015-09-03 00:00:00'),
+			'5.5' => array('1990-01-01 00:00:00', '2016-07-10 00:00:00'),
+			'5.6' => array('2017-01-10 00:00:00', '2018-12-31 00:00:00'),
+			'7.0' => array('2018-01-01 00:00:00', '2019-01-10 00:00:00'),
+			'7.1' => array('2018-12-01 00:00:00', '2019-12-01 00:00:00'),
+			'7.2' => array('2019-11-30 00:00:00', '2020-11-30 00:00:00'),
+			'7.3' => array('2020-12-06 00:00:00', '2021-12-06 00:00:00'),
+			'7.4' => array('2021-11-28 00:00:00', '2022-11-28 00:00:00'),
+		);
+
+		// Make sure I have all necessary configuration variables
+		$config = array_merge(array(
+			'minPHPVersion'          => '7.2.0',
+			'recommendedPHPVersion'  => '7.3',
+			'softwareName'           => 'This software',
+			'class_priority_low'     => 'akeeba-block--info',
+			'class_priority_medium'  => 'akeeba-block--warning',
+			'class_priority_high'    => 'akeeba-block--failure',
+			'warn_about_maintenance' => true,
+			'eol_period_too_old'     => 'P3M',
+			'longVersion'            => PHP_VERSION,
+			'shortVersion'           => sprintf('%d.%d', PHP_MAJOR_VERSION, PHP_MINOR_VERSION),
+			'currentTimestamp'       => time(),
+		), $config);
+
+		// Selectively extract configuration variables. Do not use extract(), it's potentially dangerous.
+		$minPHPVersion          = $config['minPHPVersion'];
+		$recommendedPHPVersion  = $config['recommendedPHPVersion'];
+		$softwareName           = $config['softwareName'];
+		$class_priority_low     = $config['class_priority_low'];
+		$class_priority_medium  = $config['class_priority_medium'];
+		$class_priority_high    = $config['class_priority_high'];
+		$warn_about_maintenance = $config['warn_about_maintenance'];
+		$eol_period_too_old     = $config['eol_period_too_old'];
+		$longVersion            = $config['longVersion'];
+		$shortVersion           = $config['shortVersion'];
+		$currentTimestamp       = $config['currentTimestamp'];
+
+		/**
+		 * Safe defaults for PHP versions older than 5.3.0.
+		 *
+		 * Older PHP versions don't even have support for DateTime so we need these defaults to prevent this warning script from
+		 * bringing the site down with an error.
+		 */
+		$isEol      = true;
+		$isAncient  = true;
+		$isSecurity = false;
+		$isCurrent  = false;
+
+		$eolDateFormatted      = $phpDates[$shortVersion][1];
+		$securityDateFormatted = $phpDates[$shortVersion][0];
+
+		/**
+		 * This can only work on PHP 5.3.0 or later since we are using DatePeriod (PHP >= 5.3.0)
+		 */
+		if (version_compare($longVersion, '5.2.0', 'ge'))
+		{
+			$tzGmt         = new DateTimeZone('GMT');
+			$securityDate  = new DateTime($phpDates[$shortVersion][0], $tzGmt);
+			$eolDate       = new DateTime($phpDates[$shortVersion][1], $tzGmt);
+			$ancientPeriod = new DateInterval($eol_period_too_old);
+			$ancientDate   = clone $eolDate;
+			$ancientDate->add($ancientPeriod);
+
+			/**
+			 * Ancient:  This PHP version has reached end-of-life more than $eol_period_too_old ago
+			 * EOL:      This PHP version has reached end-of-life
+			 * Security: This PHP version has reached the Security Support date but not the EOL date yet
+			 * Current:  This PHP version is still in Active Support
+			 */
+			$isEol      = $eolDate->getTimestamp() <= $currentTimestamp;
+			$isAncient  = $ancientDate->getTimestamp() <= $currentTimestamp;
+			$isSecurity = !$isEol && ($securityDate->getTimestamp() <= $currentTimestamp);
+			$isCurrent  = !$isEol && !$isSecurity;
+
+			$eolDateFormatted      = $eolDate->format('l, d F Y');
+			$securityDateFormatted = $securityDate->format('l, d F Y');
+		}
+
+		if ($isCurrent)
+		{
+			return;
+		}
+
+		if ($isAncient):
+			?>
+			<!-- Your PHP version has been End-of-Life for a very long time -->
+			<div class="<?php echo $class_priority_high ?>">
+				<h3>Severely outdated PHP version <?php echo $shortVersion ?></h3>
+
+				<p>
+					Your site is currently using PHP <?php echo $longVersion ?>. This version of PHP has become <a
+						href="https://php.net/eol.php" target="_blank">End-of-Life since <?php echo $eolDateFormatted ?></a>. It has
+					not received security updates for a <em>very long time</em>. You MUST NOT use it for a live site!
+				</p>
+				<p>
+					<?php echo $softwareName ?> will stop supporting your version of PHP very soon. You must <strong>very
+						urgently</strong> upgrade to a newer version of PHP. We recommend PHP <?php echo $recommendedPHPVersion ?>
+					or later. You can ask your host or your system administrator for instructions. It's easy and it will make
+					your site faster and more secure.
+				</p>
+			</div>
+		<?php
+		elseif ($isEol):
+			?>
+			<!-- Your PHP version has recently been marked End-of-Life -->
+			<div class="<?php echo $class_priority_medium ?>">
+				<h3>Outdated PHP version <?php echo $shortVersion ?></h3>
+
+				<p>
+					Your site is currently using PHP <?php echo $longVersion ?>. This version of PHP has recently become <a
+						href="https://php.net/eol.php" target="_blank">End-of-Life since <?php echo $eolDateFormatted ?></a>. It has
+					stopped receiving security updates. You should not use it for a live site.
+				</p>
+				<p>
+					<?php echo $softwareName ?> will stop supporting your version of PHP in the near future. You should
+					upgrade to a newer version of PHP at your earliest convenience. We recommend PHP <?php echo
+					$recommendedPHPVersion ?> or later. You can ask your host or your system administrator for instructions.
+					It's easy and it will make your site faster and more secure.
+				</p>
+			</div>
+		<?php
+		elseif ($warn_about_maintenance):
+			?>
+			<!-- Your PHP version has entered “Security Support” and will become EOL rather soon -->
+			<div class="<?php echo $class_priority_low ?>">
+				<h3>Older PHP version <?php echo $shortVersion ?></h3>
+
+				<p>
+					Your site is currently using PHP <?php echo $longVersion ?>. This version of PHP has entered its
+					“Security maintenance” phase since <?php echo $securityDateFormatted ?> and has stopped receiving bug fixes. It
+					will stop receiving security updates on <?php echo $eolDateFormatted ?> at which point it will be unsuitable for
+					use on a live site.
+				</p>
+				<p>
+					<?php echo $softwareName ?> will stop supporting your version of PHP soon after it becomes End-of-Life on
+					<?php echo $eolDateFormatted ?>. We recommend that you plan your migration to a newer version of PHP before that
+					date. We recommend PHP <?php echo $recommendedPHPVersion ?> or later. You can ask your host or your system
+					administrator for instructions. It's easy and it will make your site faster and more secure.
+				</p>
+			</div>
+		<?php
+		endif;
+	}
+}
+
+/**
+ * Immediately executes the akeeba_common_phpversion_warning() function on all of our software except Kickstart.
+ */
+if (!defined('KICKSTART'))
+{
+	try
+	{
+		akeeba_common_phpversion_warning(array(
+			// Configuration -- Override before calling this script
+			'minPHPVersion'          => isset($minPHPVersion) ? $minPHPVersion : '7.2.0',
+			'recommendedPHPVersion'  => isset($recommendedPHPVersion) ? $recommendedPHPVersion : '7.3',
+			'softwareName'           => isset($softwareName) ? $softwareName : 'This software',
+			'class_priority_low'     => isset($class_priority_low) ? $class_priority_low : 'akeeba-block--info',
+			'class_priority_medium'  => isset($class_priority_medium) ? $class_priority_medium : 'akeeba-block--warning',
+			'class_priority_high'    => isset($class_priority_high) ? $class_priority_high : 'akeeba-block--failure',
+			'warn_about_maintenance' => isset($warn_about_maintenance) ? ((bool) $warn_about_maintenance) : true,
+			'eol_period_too_old'     => isset($eol_period_too_old) ? $eol_period_too_old : 'P3M',
+			// Override these to test the script
+			'longVersion'            => isset($longVersion) ? $longVersion : PHP_VERSION,
+			'shortVersion'           => isset($shortVersion) ? $shortVersion : sprintf('%d.%d', PHP_MAJOR_VERSION, PHP_MINOR_VERSION),
+			'currentTimestamp'       => isset($currentTimestamp) ? $currentTimestamp : time(),
+		));
+	}
+	catch (Exception $e)
+	{
+		// This should never happen
+		return;
+	}
+}
+
+/**
+ * Obsolete PHP version notification
+ *
+ * @copyright Copyright Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @license   GNU General Public License version 3, or later
+ */
+
+(defined('_JEXEC') || defined('WPINC') || defined('APATH_BASE') || defined('AKEEBA_COMMON_WRONGPHP') || defined('KICKSTART')) or die;
+
+if (!function_exists('akeeba_common_wrongphp'))
+{
+	/**
+	 * This function checks if you are using an obsolete PHP version. It returns and boolean status and optionally
+	 * prints an error page if your PHP version is, indeed, too old.
+	 *
+	 * * minPHPVersion: minimum PHP version supported by this software, e.g. "7.2.0"
+	 * * recommendedPHPVersion: recommended PHP version to use with this software, e.g. "7.3"
+	 * * softwareName: human-readable software name, e.g. "Akeeba Example"
+	 * * silentResutls: suppress error messages on old PHP version, just return false (default: TRUE)
+	 * * longVersion: current PHP version, long format, e.g. "7.3.1-12ubuntu3.2". Skip to automatically determine.
+	 * * shortVersion: current PHP version, short format, e.g. "7.3". Skip to automatically determine.
+	 * * currentTimestamp: current UNIX timestamp. Skip to automatically determine.
+	 *
+	 * You need to provide at the very least the minPHPVersion, recommendedPHPVersion and softwareName.
+	 *
+	 * @param  array  $config
+	 *
+	 * @return bool  FALSE if your PHP version is too old. TRUE if your PHP version is still supported.
+	 * @throws Exception
+	 */
+	function akeeba_common_wrongphp($config = array())
+	{
+		/**
+		 * Format: version => [maintenance_date, eol_date]
+		 *
+		 * For versions older than 5.6 we use a fake maintenance_date because this information no longer exists on PHP's
+		 * site and it's irrelevant anyway; these PHP versions are already EOL therefore we only use their EOL date.
+		 */
+		$phpDates = array(
+			'3.0' => array('1990-01-01 00:00:00', '2000-10-20 00:00:00'),
+			'4.0' => array('1990-01-01 00:00:00', '2001-06-23 00:00:00'),
+			'4.1' => array('1990-01-01 00:00:00', '2002-03-12 00:00:00'),
+			'4.2' => array('1990-01-01 00:00:00', '2002-09-06 00:00:00'),
+			'4.3' => array('1990-01-01 00:00:00', '2005-03-31 00:00:00'),
+			'4.4' => array('1990-01-01 00:00:00', '2008-08-07 00:00:00'),
+			'5.0' => array('1990-01-01 00:00:00', '2005-09-05 00:00:00'),
+			'5.1' => array('1990-01-01 00:00:00', '2006-08-24 00:00:00'),
+			'5.2' => array('1990-01-01 00:00:00', '2011-01-11 00:00:00'),
+			'5.3' => array('1990-01-01 00:00:00', '2014-08-14 00:00:00'),
+			'5.4' => array('1990-01-01 00:00:00', '2015-09-03 00:00:00'),
+			'5.5' => array('1990-01-01 00:00:00', '2016-07-10 00:00:00'),
+			'5.6' => array('2017-01-10 00:00:00', '2018-12-31 00:00:00'),
+			'7.0' => array('2018-01-01 00:00:00', '2019-01-10 00:00:00'),
+			'7.1' => array('2018-12-01 00:00:00', '2019-12-01 00:00:00'),
+			'7.2' => array('2019-11-30 00:00:00', '2020-11-30 00:00:00'),
+			'7.3' => array('2020-12-06 00:00:00', '2021-12-06 00:00:00'),
+			'7.4' => array('2021-11-28 00:00:00', '2022-11-28 00:00:00'),
+		);
+
+		// Make sure I have all necessary configuration variables
+		$config = array_merge(array(
+			'minPHPVersion'         => '7.2.0',
+			'recommendedPHPVersion' => '7.3',
+			'softwareName'          => 'This software',
+			'silentResults'         => false,
+			'longVersion'           => PHP_VERSION,
+			'shortVersion'          => sprintf('%d.%d', PHP_MAJOR_VERSION, PHP_MINOR_VERSION),
+			'currentTimestamp'      => time(),
+		), $config);
+
+		// Selectively extract configuration variables. Do not use extract(), it's potentially dangerous.
+		$minPHPVersion         = $config['minPHPVersion'];
+		$recommendedPHPVersion = $config['recommendedPHPVersion'];
+		$softwareName          = $config['softwareName'];
+		$silentResults         = $config['silentResults'];
+		$longVersion           = $config['longVersion'];
+		$shortVersion          = $config['shortVersion'];
+		$currentTimestamp      = $config['currentTimestamp'];
+
+		if (!version_compare($longVersion, $minPHPVersion, 'lt'))
+		{
+			unset($minPHPVersion, $recommendedPHPVersion, $softwareName, $longVersion, $shortVersion, $phpDates,
+				$silentResults, $currentTimestamp);
+
+			return true;
+		}
+
+// Typically used in the frontend to not divulge any information about the server
+		if ($silentResults)
+		{
+			return false;
+		}
+
+		/**
+		 * Safe defaults for PHP versions older than 5.3.0.
+		 *
+		 * Older PHP versions don't even have support for DateTime so we need these defaults to prevent this warning script from
+		 * bringing the site down with an error.
+		 */
+		$isEol      = true;
+		$isAncient  = true;
+		$isSecurity = false;
+		$isCurrent  = false;
+
+		$eolDateFormatted      = $phpDates[$shortVersion][1];
+		$securityDateFormatted = $phpDates[$shortVersion][0];
+
+
+		/**
+		 * This can only work on PHP 5.2.0 or later
+		 */
+		if (version_compare($longVersion, '5.2.0', 'ge'))
+		{
+			$tzGmt        = new DateTimeZone('GMT');
+			$securityDate = new DateTime($phpDates[$shortVersion][0], $tzGmt);
+			$eolDate      = new DateTime($phpDates[$shortVersion][1], $tzGmt);
+
+			/**
+			 * Ancient:  This PHP version has reached end-of-life more than 2 years ago
+			 * EOL:      This PHP version has reached end-of-life
+			 * Security: This PHP version has reached the Security Support date but not the EOL date yet
+			 * Current:  This PHP version is still in Active Support
+			 */
+			$isEol      = $eolDate->getTimestamp() <= $currentTimestamp;
+			$isAncient  = $isEol && (($currentTimestamp - $eolDate->getTimestamp()) >= 63072000);
+			$isSecurity = !$isEol && ($securityDate->getTimestamp() <= $currentTimestamp);
+			$isCurrent  = !$isEol && !$isSecurity;
+
+			$eolDateFormatted      = $eolDate->format('l, d F Y');
+			$securityDateFormatted = $securityDate->format('l, d F Y');
+		}
+
+		$characterization = $isCurrent ? 'unsupported' : 'older';
+		$characterization = $isEol ? 'obsolete' : $characterization;
+		$characterization = $isAncient ? 'dangerously obsolete' : $characterization;
+
+		?>
+
+		<div style="margin: 1em">
+			<p style="font-size: 180%; margin: 2em 1em; padding: 2em 1em; text-align: center; border: thin solid #f0ad4e; background-color: gold; font-weight: bold; border-radius: 0.25em">
+				<?php echo $softwareName ?> requires PHP <?php echo $minPHPVersion ?> or later.
+			</p>
+			<h2><?php echo ucfirst($characterization) ?> PHP version <?php echo $longVersion ?> detected</h2>
+			<hr />
+			<p>
+				We recommend that you upgrade your site to PHP <?php echo $recommendedPHPVersion ?> or later. If you are
+				unsure how to do this, please ask your host.
+			</p>
+			<p>
+				<a href="https://www.akeeba.com/how-do-version-numbers-work.html">Version numbers don't make
+					sense?</a>
+			</p>
+
+			<hr />
+
+			<?php if ($isAncient): ?>
+				<h3>Urgent security advice</h3>
+
+				<p>
+					Your version of PHP, <?php echo $longVersion ?>, <a href="http://php.net/eol.php">has reached the end
+						of its life</a> a <strong>very</strong> long time ago, namely on
+					<?php echo $eolDateFormatted ?>. It has known security vulnerabilities which are used to
+					compromise (“hack”) web servers. It is no longer safe using it in production. You are <strong>VERY
+						STRONGLY</strong> advised to upgrade your server to a <a
+							href="https://www.php.net/supported-versions.php">supported PHP version</a> as soon as possible.
+				</p>
+			<?php elseif ($isEol): ?>
+				<h3>Security advice</h3>
+
+				<p>
+					Your version of PHP, <?php echo $longVersion ?>, <a href="http://php.net/eol.php">has reached the end
+						of its life</a> on <?php echo $eolDateFormatted ?>. End-of-life PHP versions may have
+					as-yet-undiscovered security vulnerabilities which can be used to compromise (“hack”) your site. It is
+					no
+					longer safe using it in production, even if your host or your Linux distribution claim otherwise – the
+					PHP
+					developers themselves have said time over time that not all security vulnerabilities fixes can be
+					backported
+					to End-of-Life versions of PHP since they may require architectural changes in PHP itself. You are
+					<strong>strongly</strong> advised to upgrade your server to a <a
+							href="https://www.php.net/supported-versions.php">supported PHP version</a> as soon as possible.
+				</p>
+
+			<?php elseif ($isSecurity): ?>
+				<h3>Security reminder</h3>
+
+				<p>
+					Your version of PHP, <?php echo $longVersion ?>, has entered the “Security Support” phase of its life on
+					<?php echo $securityDateFormatted ?>. As such, only security issues will be addressed but not
+					any of its known functional issues (“bugs”). Unfixed functional issues in PHP can lead to your site not
+					working
+					properly. It is advisable to plan migrating your site to a
+					<a href="https://www.php.net/supported-versions.php">supported PHP version</a> no later than
+					<?php echo $eolDateFormatted ?> – that's when PHP
+					<?php echo $shortVersion ?> will become End-of-Life, therefore
+					completely
+					unsuitable for use on a live server.
+				</p>
+			<?php endif; ?>
+
+			<?php if ($isSecurity || $isCurrent): ?>
+				<h3>Why is my PHP version not supported?</h3>
+
+				<p>
+					Even though PHP <?php echo $shortVersion ?> will be supported by the PHP
+					project until <?php echo $eolDateFormatted ?> we are unfortunately unable to provide
+					support for it in our software. This has to do either with missing features or third party libraries.
+					Older
+					PHP versions are missing features we require for our software to work efficiently and be written in a
+					way
+					that makes it possible for us to provide a plethora of relevant features while maintaining good quality
+					control. Moreover, third party libraries we use to provide some of the software's features do not
+					support
+					older PHP versions for the same reason – so even if we don't absolutely need to use at least PHP
+					<?php echo $minPHPVersion ?> the third party libraries do, making it impossible for our software to run on
+					your
+					older version <?php echo $shortVersion ?>. We apologize for the inconvenience.
+				</p>
+				<p>
+					We'd like to remind you, however, that newer PHP versions are always faster and more well-tested than
+					their
+					predecessors. Upgrading your site to a newer PHP version will not only let our software run but will
+					also
+					make your site faster, more stable and help it perform better in search engine results.
+				</p>
+			<?php endif; ?>
+		</div>
+
+		<?php return false;
+	}
+}
+
+/**
+ * Immediately executes the akeeba_common_wrongphp() function on all of our software except Kickstart.
+ */
+if (!defined('KICKSTART'))
+{
+	try
+	{
+		return akeeba_common_wrongphp(array(
+			// Configuration -- Override before calling this script
+			'minPHPVersion'         => isset($minPHPVersion) ? $minPHPVersion : '7.2.0',
+			'recommendedPHPVersion' => isset($recommendedPHPVersion) ? $recommendedPHPVersion : '7.3',
+			'softwareName'          => isset($softwareName) ? $softwareName : 'This software',
+			'silentResults'         => isset($silentResults) ? $silentResults : false,
+			// Override these to test the script
+			'longVersion'           => isset($longVersion) ? $longVersion : PHP_VERSION,
+			'shortVersion'          => isset($shortVersion) ? $shortVersion : sprintf('%d.%d', PHP_MAJOR_VERSION, PHP_MINOR_VERSION),
+			'currentTimestamp'      => isset($currentTimestamp) ? $currentTimestamp : time(),
+		));
+	}
+	catch (Exception $e)
+	{
+		// This should never happen
+		return false;
+	}
 }
 
 /**
@@ -14211,7 +14950,7 @@ function kickstart_application_cli()
 	if (!$silent)
 	{
 		echo <<< BANNER
-Akeeba Kickstart CLI 7.0.0
+Akeeba Kickstart CLI 7.0.1
 Copyright (c) 2008-$year Akeeba Ltd / Nicholas K. Dionysopoulos
 -------------------------------------------------------------------------------
 Akeeba Kickstart is Free Software, distributed under the terms of the GNU General
@@ -14222,6 +14961,20 @@ license. See http://www.gnu.org/licenses/gpl-3.0.html for details.
 
 
 BANNER;
+	}
+
+	$phpCheckConfig = array(
+		'minPHPVersion'         => defined('KICKSTART_MIN_PHP') ? KICKSTART_MIN_PHP : "5.6.0",
+		'recommendedPHPVersion' => defined('KICKSTART_RECOMMENDED_PHP') ? KICKSTART_RECOMMENDED_PHP : '7.3',
+		'softwareName'          => "Akeeba Kickstart",
+		'silentResults'         => true
+	);
+
+	if (!akeeba_common_wrongphp($phpCheckConfig))
+	{
+		echo sprintf("%s requires PHP %s or later to function. Your current PHP version is %s which is older than the minimum requirement.", $phpCheckConfig['softwareName'], $phpCheckConfig['minPHPVersion'], PHP_VERSION);
+
+		die;
 	}
 
 	$paths = AKCliParams::getOption('', array(), true);
@@ -14421,6 +15174,14 @@ BANNER;
  */
 function kickstart_application_web()
 {
+	if (!akeeba_common_wrongphp(array(
+		'minPHPVersion'         => defined('KICKSTART_MIN_PHP') ? KICKSTART_MIN_PHP : "5.6.0",
+		'recommendedPHPVersion' => defined('KICKSTART_RECOMMENDED_PHP') ? KICKSTART_RECOMMENDED_PHP : '7.3',
+		'softwareName'          => "Akeeba Kickstart",
+	))) {
+		die;
+	}
+
 	$retArray = array(
 		'status'  => true,
 		'message' => null
@@ -14544,10 +15305,19 @@ function kickstart_application_web()
 
 				if ($task == 'startExtracting')
 				{
+					// Before starting, read and save any custom AddHandler directive
+					$phpHandlers = getPhpHandlers();
+					AKFactory::set('kickstart.setup.phphandlers', $phpHandlers);
+
 					// If the Stealth Mode is enabled, create the .htaccess file
 					if (AKFactory::get('kickstart.stealth.enable', false))
 					{
 						createStealthURL();
+					}
+					// No stealth mode, but we have custom handler directives, must write our own file
+					elseif ($phpHandlers)
+					{
+						writePhpHandlers();
 					}
 				}
 
@@ -14694,7 +15464,7 @@ function kickstart_application_web()
 			if (empty($filelist))
 			{
 				$retArray =
-					'<a href="https://www.akeebabackup.com/documentation/troubleshooter/ksnoarchives.html" target="_blank">' .
+					'<a href="https://www.akeeba.com/documentation/akeeba-kickstart-documentation/ksnoarchives.html" target="_blank">' .
 					AKText::_('NOARCHIVESCLICKHERE')
 					. '</a>';
 			}

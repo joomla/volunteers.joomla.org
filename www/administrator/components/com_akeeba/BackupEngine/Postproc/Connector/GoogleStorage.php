@@ -9,7 +9,7 @@
 
 namespace Akeeba\Engine\Postproc\Connector;
 
-
+defined('AKEEBAENGINE') || die();
 
 use Exception;
 use RuntimeException;
@@ -24,17 +24,17 @@ class GoogleStorage
 	 *
 	 * @see  https://cloud.google.com/storage/docs/json_api/v1/
 	 */
-	const rootUrl = 'https://storage.googleapis.com/storage/v1/';
+	public const rootUrl = 'https://storage.googleapis.com/storage/v1/';
 	/**
 	 * The upload URL for the Google Storage v1 file storage API
 	 *
 	 * @see  https://cloud.google.com/storage/docs/json_api/v1/how-tos/simple-upload
 	 */
-	const uploadUrl = 'https://www.googleapis.com/upload/storage/v1/';
+	public const uploadUrl = 'https://www.googleapis.com/upload/storage/v1/';
 	/**
 	 * The URL of the OAuth2 token service
 	 */
-	const tokenUrl = 'https://www.googleapis.com/oauth2/v4/token';
+	public const tokenUrl = 'https://www.googleapis.com/oauth2/v4/token';
 	/**
 	 * The access token for connecting to Google Storage
 	 *
@@ -181,7 +181,7 @@ class GoogleStorage
 		{
 			$result = $this->getRawContents($bucket, $path);
 
-			$pageToken = isset($result['nextPageToken']) ? $result['nextPageToken'] : null;
+			$pageToken = $result['nextPageToken'] ?? null;
 
 			if (isset($result['prefixes']))
 			{
@@ -360,7 +360,7 @@ class GoogleStorage
 		{
 			if (stripos($line, 'Location: ') === 0)
 			{
-				list($header, $location) = explode(': ', $line, 2);
+				[$header, $location] = explode(': ', $line, 2);
 
 				return $location;
 			}
@@ -782,7 +782,7 @@ class GoogleStorage
 		if (isset($response['error']) && is_array($response['error']))
 		{
 			$error            = $response['error']['code'];
-			$errorDescription = isset($response['error']['message']) ? $response['error']['message'] : 'No error description provided';
+			$errorDescription = $response['error']['message'] ?? 'No error description provided';
 
 			throw new RuntimeException("Error $error: $errorDescription", 500);
 		}
@@ -791,7 +791,7 @@ class GoogleStorage
 		if (isset($response['error']))
 		{
 			$error            = $response['error'];
-			$errorDescription = isset($response['error_description']) ? $response['error_description'] : 'No error description provided';
+			$errorDescription = $response['error_description'] ?? 'No error description provided';
 
 			throw new RuntimeException("Error $error: $errorDescription", 500);
 		}

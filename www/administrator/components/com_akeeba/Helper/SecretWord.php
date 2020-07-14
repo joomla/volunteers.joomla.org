@@ -8,7 +8,7 @@
 namespace Akeeba\Backup\Admin\Helper;
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 use Akeeba\Engine\Factory;
 use FOF30\Container\Container;

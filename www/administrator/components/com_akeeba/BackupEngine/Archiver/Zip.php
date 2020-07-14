@@ -9,7 +9,7 @@
 
 namespace Akeeba\Engine\Archiver;
 
-
+defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Base\Exceptions\ErrorException;
 use Akeeba\Engine\Base\Exceptions\WarningException;
@@ -538,7 +538,7 @@ class Zip extends BaseArchiver
 		}
 
 		// Get real size before compression
-		list($unc_len, $fileModTime) =
+		[$unc_len, $fileModTime] =
 			$this->getFileSizeAndModificationTime($sourceNameOrData, $isVirtual, $isSymlink, $isDir);
 
 		// Decide if we will compress

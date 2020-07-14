@@ -5,7 +5,7 @@
  * @license   GNU General Public License version 2, or later
  */
 
-// Do not put the JEXEC or die check on this file (necessary omission for testing)
+defined('_JEXEC') or die;
 
 if (!class_exists('FOF30\\Autoloader\\Autoloader'))
 {
@@ -17,7 +17,7 @@ if (!class_exists('FOF30\\Autoloader\\Autoloader'))
 
 if (!defined('FOF30_INCLUDED'))
 {
-	define('FOF30_INCLUDED', '3.5.4');
+	define('FOF30_INCLUDED', '3.6.2');
 
 	JFactory::getLanguage()->load('lib_fof30', JPATH_SITE, 'en-GB', true);
 	JFactory::getLanguage()->load('lib_fof30', JPATH_SITE, null, true);

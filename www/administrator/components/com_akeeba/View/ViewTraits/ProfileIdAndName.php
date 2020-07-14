@@ -8,7 +8,7 @@
 namespace Akeeba\Backup\Admin\View\ViewTraits;
 
 // Protect from unauthorized access
-defined('_JEXEC') or die();
+defined('_JEXEC') || die();
 
 use Akeeba\Backup\Admin\Model\Profiles;
 use Akeeba\Engine\Platform;

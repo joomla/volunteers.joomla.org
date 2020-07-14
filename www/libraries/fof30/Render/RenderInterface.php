@@ -7,12 +7,17 @@
 
 namespace FOF30\Render;
 
+defined('_JEXEC') || die;
+
 use FOF30\Container\Container;
-use FOF30\Model\DataModel;
-use FOF30\Form\Form;
+use stdClass;
 
-defined('_JEXEC') or die;
-
+/**
+ * Interface for FOF view renderers
+ *
+ * @package FOF30\Render
+ * @since   3.0.0
+ */
 interface RenderInterface
 {
 	/**
@@ -27,92 +32,27 @@ interface RenderInterface
 	 *
 	 * @return object
 	 */
-	function getInformation();
+	function getInformation(): stdClass;
 
 	/**
 	 * Echoes any HTML to show before the view template
 	 *
-	 * @param   string $view The current view
-	 * @param   string $task The current task
+	 * @param   string  $view  The current view
+	 * @param   string  $task  The current task
 	 *
 	 * @return  void
 	 */
-	function preRender($view, $task);
+	function preRender(string $view, string $task): void;
 
 	/**
 	 * Echoes any HTML to show after the view template
 	 *
-	 * @param   string $view The current view
-	 * @param   string $task The current task
+	 * @param   string  $view  The current view
+	 * @param   string  $task  The current task
 	 *
 	 * @return  void
 	 */
-	function postRender($view, $task);
-
-	/**
-	 * Renders a Form and returns the corresponding HTML
-	 *
-	 * @param   Form      &$form         The form to render
-	 * @param   DataModel $model         The model providing our data
-	 * @param   string    $formType      The form type: edit, browse or read
-	 * @param   boolean   $raw           If true, the raw form fields rendering (without the surrounding form tag) is
-	 *                                   returned.
-	 *
-	 * @return  string    The HTML rendering of the form
-	 *
-	 * @deprecated 3.1  Support for XML forms will be removed in FOF 4
-	 */
-	function renderForm(Form &$form, DataModel $model, $formType = null, $raw = false);
-
-	/**
-	 * Renders a F0FForm for a Browse view and returns the corresponding HTML
-	 *
-	 * @param   Form      &$form The form to render
-	 * @param   DataModel $model The model providing our data
-	 *
-	 * @return  string    The HTML rendering of the form
-	 *
-	 * @deprecated 3.1  Support for XML forms will be removed in FOF 4
-	 */
-	function renderFormBrowse(Form &$form, DataModel $model);
-
-	/**
-	 * Renders a F0FForm for a Read view and returns the corresponding HTML
-	 *
-	 * @param   Form      &$form The form to render
-	 * @param   DataModel $model The model providing our data
-	 *
-	 * @return  string    The HTML rendering of the form
-	 *
-	 * @deprecated 3.1  Support for XML forms will be removed in FOF 4
-	 */
-	function renderFormRead(Form &$form, DataModel $model);
-
-	/**
-	 * Renders a F0FForm for an Edit view and returns the corresponding HTML
-	 *
-	 * @param   Form      &$form The form to render
-	 * @param   DataModel $model The model providing our data
-	 *
-	 * @return  string    The HTML rendering of the form
-	 *
-	 * @deprecated 3.1  Support for XML forms will be removed in FOF 4
-	 */
-	function renderFormEdit(Form &$form, DataModel $model);
-
-	/**
-	 * Renders a F0FForm for an Edit view and returns the corresponding HTML
-	 *
-	 * @param   Form      &$form    The form to render
-	 * @param   DataModel $model    The model providing our data
-	 * @param   string    $formType The form type: edit, browse or read
-	 *
-	 * @return  string    The HTML rendering of the form
-	 *
-	 * @deprecated 3.1  Support for XML forms will be removed in FOF 4
-	 */
-	function renderFormRaw(Form &$form, DataModel $model, $formType = null);
-
+	function postRender(string $view, string $task): void;
 
 	/**
 	 * Renders the submenu (link bar) for a category view when it is used in a
@@ -124,56 +64,17 @@ interface RenderInterface
 	 *
 	 * @return  void
 	 */
-	function renderCategoryLinkbar();
-
-	/**
-	 * Renders a raw fieldset of a F0FForm and returns the corresponding HTML
-	 *
-	 * @param   \stdClass &$fieldset  The fieldset to render
-	 * @param   Form      &$form      The form to render
-	 * @param   DataModel $model      The model providing our data
-	 * @param   string    $formType   The form type e.g. 'edit' or 'read'
-	 * @param   boolean   $showHeader Should I render the fieldset's header?
-	 *
-	 * @return  string    The HTML rendering of the fieldset
-	 *
-	 * @deprecated 3.1  Support for XML forms will be removed in FOF 4
-	 */
-	function renderFieldset(\stdClass &$fieldset, Form &$form, DataModel $model, $formType, $showHeader = true);
-
-	/**
-	 * Renders a label for a fieldset.
-	 *
-	 * @param   object  $field The field of the label to render
-	 * @param   Form    &$form The form to render
-	 * @param    string $title The title of the label
-	 *
-	 * @return    string        The rendered label
-	 *
-	 * @deprecated 3.1  Support for XML forms will be removed in FOF 4
-	 */
-	function renderFieldsetLabel($field, Form &$form, $title);
-
-	/**
-	 * Checks if the fieldset defines a tab pane
-	 *
-	 * @param   \SimpleXMLElement $fieldset
-	 *
-	 * @return  boolean
-	 *
-	 * @deprecated 3.1  Support for XML forms will be removed in FOF 4
-	 */
-	function isTabFieldset($fieldset);
+	function renderCategoryLinkbar(): void;
 
 	/**
 	 * Set a renderer option (depends on the renderer)
 	 *
 	 * @param   string  $key    The name of the option to set
-	 * @param   string  $value  The value of the option
+	 * @param   mixed   $value  The value of the option
 	 *
 	 * @return  void
 	 */
-	function setOption($key, $value);
+	function setOption(string $key, $value = null): void;
 
 	/**
 	 * Set multiple renderer options at once (depends on the renderer)
@@ -182,7 +83,7 @@ interface RenderInterface
 	 *
 	 * @return  void
 	 */
-	function setOptions(array $options);
+	function setOptions(array $options): void;
 
 	/**
 	 * Get the value of a renderer option
@@ -192,5 +93,5 @@ interface RenderInterface
 	 *
 	 * @return  mixed  The parameter value
 	 */
-	function getOption($key, $default = null);
+	function getOption(string $key, $default = null);
 }

@@ -21,7 +21,7 @@ defined('_JEXEC') or die;
 		<?php foreach ($this->items as $team => $roles): ?>
             <div class="well well">
                 <h2 style="margin-top: 0;">
-                    <a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=team&id=' . $roles[0]->team) ?>">
+                    <a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=team&id=' . $roles[0]->team) ?>" id="<?php echo $roles[0]->team ?>">
 						<?php echo $team; ?>
                     </a>
                 </h2>

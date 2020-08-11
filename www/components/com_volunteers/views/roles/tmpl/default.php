@@ -5,6 +5,8 @@
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
+use Joomla\CMS\Filter\OutputFilter;
+
 // No direct access.
 defined('_JEXEC') or die;
 ?>
@@ -21,7 +23,7 @@ defined('_JEXEC') or die;
 		<?php foreach ($this->items as $team => $roles): ?>
             <div class="well well">
                 <h2 style="margin-top: 0;">
-                    <a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=team&id=' . $roles[0]->team) ?>" id="<?php echo $roles[0]->team ?>">
+                    <a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=team&id=' . $roles[0]->team) ?>" id="<?php echo OutputFilter::stringURLSafe($team); ?>">
 						<?php echo $team; ?>
                     </a>
                 </h2>

@@ -7,7 +7,7 @@
     <license>GNU General Public License version 2 or later; see	LICENSE.txt</license>
     <authorEmail>via website</authorEmail>
     <authorUrl>www.gwesystems.com</authorUrl>
-    <version>1.11.3</version>
+    <version>1.12.1</version>
     <description>PLG_YOURSITES_HANDLER_DESC</description>
     <scriptfile>install.php</scriptfile>
     <files>

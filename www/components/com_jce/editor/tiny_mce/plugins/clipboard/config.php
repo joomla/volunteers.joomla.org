@@ -20,14 +20,18 @@ class WFClipboardPluginConfig
         $settings['clipboard_paste_force_cleanup'] = $wf->getParam('clipboard.paste_force_cleanup', 0, 0, 'boolean');
         $settings['clipboard_paste_strip_class_attributes'] = $wf->getParam('clipboard.paste_strip_class_attributes', 2, 2);
         $settings['clipboard_paste_remove_styles'] = $wf->getParam('clipboard.paste_remove_styles', 1, 1, 'boolean');
+
         $settings['clipboard_paste_retain_style_properties'] = $wf->getParam('clipboard.paste_retain_style_properties', '', '');
         $settings['clipboard_paste_remove_style_properties'] = $wf->getParam('clipboard.paste_remove_style_properties', '', '');
-        $settings['clipboard_paste_remove_spans'] = $wf->getParam('clipboard.paste_remove_spans', 0, 0, 'boolean');
         $settings['clipboard_paste_remove_attributes'] = $wf->getParam('clipboard.paste_remove_attributes', '', '');
+
+        $settings['clipboard_paste_remove_spans'] = $wf->getParam('clipboard.paste_remove_spans', 0, 0, 'boolean');
         $settings['clipboard_paste_remove_styles_if_webkit'] = $wf->getParam('clipboard.paste_remove_styles_if_webkit', 0, 0, 'boolean');
         $settings['clipboard_paste_remove_empty_paragraphs'] = $wf->getParam('clipboard.paste_remove_empty_paragraphs', 1, 1, 'boolean');
         $settings['clipboard_paste_text'] = $wf->getParam('clipboard.paste_text', 1, 1, 'boolean');
         $settings['clipboard_paste_html'] = $wf->getParam('clipboard.paste_html', 1, 1, 'boolean');
+
+        $settings['clipboard_paste_allow_event_attributes'] = $wf->getParam('clipboard.paste_allow_event_attributes', 0, 0, 'boolean');
 
         $settings['clipboard_paste_process_footnotes'] = $wf->getParam('clipboard.paste_process_footnotes', 'convert', 'convert');
         $settings['clipboard_paste_upload_images'] = $wf->getParam('clipboard.paste_upload_images', 0, 0);
@@ -35,5 +39,26 @@ class WFClipboardPluginConfig
         $settings['clipboard_paste_remove_tags'] = $wf->getParam('clipboard.paste_remove_tags', '', '');
         $settings['clipboard_paste_keep_tags'] = $wf->getParam('clipboard.paste_keep_tags', '', '');
         $settings['clipboard_paste_filter'] = $wf->getParam('clipboard.paste_filter', '', '');
+
+        // clean to remove duplicate items and empty values
+        foreach(['clipboard_paste_retain_style_properties', 'clipboard_paste_remove_style_properties', 'clipboard_paste_remove_attributes', 'clipboard_paste_remove_tags', 'clipboard_paste_keep_tags'] as $key) {
+            $value = $settings[$key];
+
+            if ($value) {
+                $settings[$key] = self::cleanStringList($value);
+            }
+        }
+    }
+
+    private static function cleanStringList($value)
+    {
+        $value = trim($value);
+        $values = explode(',', $value);
+        // remove whitespace
+        $values = array_map('trim', $values);
+        // remove duplicates and emtpy values
+        $values = array_unique(array_filter($values));
+
+        return implode(',', $values);
     }
 }

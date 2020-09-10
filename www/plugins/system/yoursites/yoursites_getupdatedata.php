@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @version    CVS: 1.11.3
+ * @version    CVS: 1.12.1
  * @package    com_yoursites
  * @author     Geraint Edwards <via website>
  * @copyright  2016-2020 GWE Systems Ltd
@@ -22,6 +22,8 @@ use Joomla\Registry\Registry;
 use Joomla\CMS\Http\HttpFactory;
 use Joomla\CMS\Component\ComponentHelper;
 */
+
+use Joomla\CMS\Extension\ExtensionHelper;
 
 defined('_JEXEC') or die;
 
@@ -190,6 +192,10 @@ function ProcessJsonRequest(&$requestObject, $returnData)
 				upgradeJoomla($requestObject, $returnData);
 				break;
 
+			case "getfolderdata":
+				getFolderData($requestObject, $returnData);
+				break;
+
 			case "finalisejoomlaupgrade":
 				finaliseJoomlaUpgrade($requestObject, $returnData);
 				break;
@@ -261,6 +267,11 @@ function ProcessJsonRequest(&$requestObject, $returnData)
 			case "missing2factor":
 				include_once "sitechecks.php";
 				YstsSiteChecks::missing2factor($returnData);
+				break;
+
+			case "dormantspecials":
+				include_once "sitechecks.php";
+				YstsSiteChecks::dormantspecials($returnData);
 				break;
 
 			case "livesite":
@@ -482,6 +493,16 @@ function versionCompatibility($requestObject, & $returnData)
 	$nonJoomlaExtensionList = array();
 	foreach ($extensions as &$extension)
 	{
+		try {
+			if (ExtensionHelper::checkIfCoreExtension($extension->type, $extension->element, $extension->client_id, $extension->folder))
+			{
+				continue;
+			}
+		}
+		catch (Exception $e)
+		{
+		}
+
 		if ($extension->extension_id <= $nonJoomlaExtensions)
 		{
 			continue;
@@ -811,8 +832,13 @@ function findExtensions($requestObject, & $returnData)
 		$extension->type_translated = JText::_('COM_INSTALLER_TYPE_' . strtoupper($extension->type));
 		$extension->folder_translated = @$extension->folder ? $extension->folder : JText::_('COM_INSTALLER_TYPE_NONAPPLICABLE');
 
-		$extension->coresoftware = $extension->extension_id < $nonJoomlaExtensions ? 1 : 0;
-
+		try {
+			$extension->coresoftware = ExtensionHelper::checkIfCoreExtension($extension->type, $extension->element, $extension->client_id, $extension->folder) ? 1 : 0;
+		}
+		catch (Exception $e)
+		{
+			$extension->coresoftware = $extension->extension_id < $nonJoomlaExtensions ? 1 : 0;
+		}
 		$extension->currentversion = @$extension->version ? @$extension->version : "0.0.0";
 
 		$path = $extension->client_id ? JPATH_ADMINISTRATOR : JPATH_SITE;
@@ -1056,6 +1082,25 @@ function upgradeJoomla($requestObject, & $returnData)
 	//$requestObject->userid = 61;
 	//directLogin($requestObject, $returnData, false);
 
+	// Recent Joomla upgrades have required more memory for the unpacking
+	$memory_limit = trim(ini_get('memory_limit'));
+	$unit         = strtoupper(substr($memory_limit, -1));
+
+	if ($unit == 'G')
+	{
+		$memory_limit = substr($memory_limit , 0, strlen($memory_limit) - 1 );
+		$memory_limit = $memory_limit*1024*1024*1024 ;
+	}
+	else if ($unit == 'M')
+	{
+		$memory_limit = substr($memory_limit , 0, strlen($memory_limit) - 1 );
+		$memory_limit = $memory_limit*1024*1024 ;
+	}
+	if ($memory_limit < 64 * 1024 * 1024)
+	{
+		@ini_set('memory_limit', '64M');
+	}
+
 	// TODO must handle FTP credentials etc.
 	$lang = JFactory::getLanguage();
 	$lang->load("com_joomlaupdate", JPATH_ADMINISTRATOR);
@@ -1107,7 +1152,7 @@ function upgradeJoomla($requestObject, & $returnData)
 		if (isset($requestObject->blockedversion) && $requestObject->blockedversion && version_compare($updateInfo["latest"], $requestObject->blockedversion, "ge"))
 		{
 			$returnData->error = 1;
-			$returnData->errormessages[] = 'COM_1.11.3_UPGRADE_HAS_BEEN_BLOCKED';
+			$returnData->errormessages[] = 'COM_1.12.1_UPGRADE_HAS_BEEN_BLOCKED';
 			return;
 		}
 
@@ -2060,7 +2105,7 @@ function cloneSite($requestObject, & $returnData)
 		try
 		{
 			// hidden in unix
-			$success = copyr2(JPATH_SITE, JPATH_SITE . "/._" . $requestObject->prefix, "._" . $requestObject->prefix, $returnData);
+			$success = copyr2(JPATH_SITE, JPATH_SITE . "/._" . $requestObject->prefix, "._" . $requestObject->prefix, $returnData, $requestObject->exclusions);
 		}
 		catch (Exception $e)
 		{
@@ -2231,12 +2276,13 @@ function cloneSite($requestObject, & $returnData)
 		foreach ($tables as $table)
 		{
 
-			//$db->setQuery("INSERT INTO " . str_replace($oldPrefix , $requestObject->prefix ."_", $table->$tablefield)
-			//. " SELECT * FROM " . $table->$tablefield);
-			$db->setQuery("INSERT INTO " . str_replace($oldPrefix , $requestObject->prefix ."_", $table)
-				. " SELECT * FROM " . $table);
 			try
 			{
+				//$db->setQuery("INSERT INTO " . str_replace($oldPrefix , $requestObject->prefix ."_", $table->$tablefield)
+				//. " SELECT * FROM " . $table->$tablefield);
+				$db->setQuery("INSERT INTO " . str_replace($oldPrefix , $requestObject->prefix ."_", $table)
+					. " SELECT * FROM " . $table);
+
 				$db->execute();
 
 				// After the insert we re-implement the triggers
@@ -4585,7 +4631,9 @@ function onYstsDie(){
 			$returnData->errormessages = array();
 
 			$returnData->log[] = $message;
+			$returnData->log['error'] = $last_error;
 			$returnData->errormessages[] = "COM_YOURSITES_HELP_WE_DIED";
+			$returnData->errormessages[] = $last_error['message'];
 
 			echo encodeResults($returnData);
 			exit(0);
@@ -4624,10 +4672,10 @@ function getJoomlaUpdateSitesIds($column = 0)
  *
  * @return  boolean  True on success.
  *
- * @since   1.11.3
+ * @since   1.12.1
  * @throws  \RuntimeException
  */
-function copyr2($src, $dest, $prefix = "", & $returnData)
+function copyr2($src, $dest, $prefix = "", & $returnData, $exclusions = array())
 {
 
 	$FTPOptions = JClientHelper::getCredentials('ftp');
@@ -4688,6 +4736,12 @@ function copyr2($src, $dest, $prefix = "", & $returnData)
 			switch (filetype($sfid))
 			{
 				case 'dir':
+					if (in_array($file, $exclusions))
+					{
+						// should make directory
+						continue;
+					}
+
 					if ($file != '.' && $file != '..')
 					{
 						// recursive call
@@ -4730,7 +4784,7 @@ function copyr2($src, $dest, $prefix = "", & $returnData)
 			}
 
 			// Ingore any backups files
-			if (in_array(pathinfo($entry, PATHINFO_EXTENSION), array("jpa", "zip", "gz", "targz")))
+			if (in_array(pathinfo($entry, PATHINFO_EXTENSION), array("jpa", "zip", "gz", "targz", "jps", "bz", "rar")))
 			{
 				continue;
 			}
@@ -4741,6 +4795,12 @@ function copyr2($src, $dest, $prefix = "", & $returnData)
 			switch (filetype($sfid))
 			{
 				case 'dir':
+					if (in_array($file, $exclusions))
+					{
+						mkdir($sfid);
+						continue;
+					}
+
 					if ($file != '.' && $file != '..')
 					{
 						// recursive call
@@ -4773,7 +4833,7 @@ function copyr2($src, $dest, $prefix = "", & $returnData)
  *
  * @return  boolean  True on success.
  *
- * @since   1.11.3
+ * @since   1.12.1
  * @throws  \RuntimeException
  */
 function deleter2($src, & $returnData)
@@ -4918,6 +4978,17 @@ AND TABLE_NAME LIKE "' . $jconfig->get("dbprefix") . '%"';
 	$db->setQuery($sql);
 	$returnData->siteInfo["dbsize"]  = $db->loadResult();
 
+	// single tables like this
+	/*
+	$sqlsingletables = 'SELECT TABLE_NAME, ROUND(((DATA_LENGTH + INDEX_LENGTH) / 1024 / 1024 ), 2) as size
+FROM INFORMATION_SCHEMA.TABLES
+WHERE TABLE_SCHEMA = "' . $jconfig->get("db"). '"
+AND TABLE_NAME LIKE "' . $jconfig->get("dbprefix") . '%"
+ORDER BY size DESC';
+	$db->setQuery($sqlsingletables);
+	$returnData->siteInfo["dbsizetables"]  = $db->loadObjectList('TABLE_NAME');
+	*/
+
 	// Cache usage
 	$clientId = 0;
 	$options = array(
@@ -4999,6 +5070,74 @@ AND TABLE_NAME LIKE "' . $jconfig->get("dbprefix") . '%"';
 	$returnData->JVERSION = JVERSION;
 
 	return $returnData;
+}
+
+function getFolderData($requestObject, & $returnData)
+{
+	$basedir = JPATH_SITE;
+
+	$returnData->error  = 0;
+	$returnData->warning  = 0;
+
+	$folderdata = array();
+	$outputdata = array();
+	try
+	{
+		if ($basedir !== false && $basedir != '' && file_exists($basedir))
+		{
+			foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($basedir, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::CHILD_FIRST) as $object)
+			{
+				$path = $object->getPathname();
+				// no need to pick up embedded clone sites - we won't copy these!
+				if (strpos($path, '._ysts_') !== false)
+				{
+					continue;
+				}
+				if ($object->isDir())
+				{
+					$bytestotal = 0;
+					// Go one level down only here - i.e. no subfolders
+					foreach (new RecursiveDirectoryIterator($path, FilesystemIterator::SKIP_DOTS) as $object2)
+					{
+						$path2 = $object2->getPathname();
+						$path2 = str_replace($basedir, '', $path2);
+						if ($object2->isFile())
+						{
+							$bytestotal += $object2->getSize();
+						}
+						else if ($object2->isDir() && isset($folderdata[$path2]))
+						{
+							$bytestotal += $folderdata[$path2]['size'];
+						}
+					}
+
+					$path = str_replace($basedir, '', $path);
+					// site in megabytes
+					$folderdata[$path] = array('size' => $bytestotal);
+					$path              = trim($path, "/");
+					if (count(explode("/", $path)) < 3)
+					{
+						$outputdata[$path] = array('size' => $bytestotal);
+					}
+				}
+				else if (strpos($path , '/tmp') === false)
+				{
+					$x = 1;
+				}
+			}
+		}
+	}
+	catch (Exception $e)
+	{
+		$returnData->warning  = 1;
+		$returnData->folders  = array();
+		$returnData->log      = $basedir;
+		$returnData->log      = $e->getMessage();
+	}
+
+	ksort($outputdata);
+	$returnData->basedir  = $basedir;
+	$returnData->folders  = $outputdata;
 }
 
 function frontfatal($returnData)

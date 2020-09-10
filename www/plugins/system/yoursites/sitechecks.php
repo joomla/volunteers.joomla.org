@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @version    CVS: 1.11.3
+ * @version    CVS: 1.12.1
  * @package    com_yoursites
  * @author     Geraint Edwards <via website>
  * @copyright  2016-2020 GWE Systems Ltd
@@ -59,18 +59,18 @@ class YstsSiteChecks
 		$levels = $db->loadColumn();
 
 		// Get members of core.admin able user groups
-		$rules = JAccess::getAssetRules(1);
+		$rules = JAccess::getAssetRules(null);
 		$ruledata = $rules->getData();
-		// super users
-		// $coreadminGroups = array_keys($ruledata['core.admin']->getData());
 		// super users and administrators
-        $coreadminGroups = isset($ruledata['core.manage']) ? array_keys($ruledata['core.manage']->getData()) : array();
-		$coreadminGroups = array_merge($coreadminGroups, array_keys($ruledata['core.admin']->getData()));
+		// use array_keys with search value of 1 !!
+		$manageGroups    = isset($ruledata['core.manage']) ? array_keys($ruledata['core.manage']->getData(), 1) : array();
+		$adminGroups     = array_keys($ruledata['core.admin']->getData(), 1);
+		$coreadminGroups = array_merge($manageGroups, $adminGroups);
 
 		$query = $db->getQuery(true);
 		$query->select('u.username')
 			->from("#__users as u" )
-			->leftJoin('#__user_usergroup_map as m on m.user_id = u.id')
+			->innerJoin('#__user_usergroup_map as m on m.user_id = u.id')
 			->where('m.group_id in (' . implode(",", $coreadminGroups) . ')')
 			->where('u.otpKey = ""')
 			->where('u.block = 0')
@@ -84,6 +84,9 @@ class YstsSiteChecks
 		{
 			$returnData->warning = 1;
 			$returnData->messages[] = "COM_YOURSITES_ADVCHECK_MISSING2FACTOR_INCORRECT";
+			//$returnData->messages[] = "Checked admin groups " . implode(", ", $adminGroups);
+			//$returnData->messages[] = "Checked manage groups " . implode(", ", $manageGroups);
+
 			$returnData->checkinfo['key']  = "COM_YOURSITES_ADVCHECK_MISSING2FACTOR_INCORRECT_R";
 			$returnData->checkinfo['data'] = $adminusers;
 			$returnData->checkinfo['status'] = -1;
@@ -104,6 +107,63 @@ class YstsSiteChecks
 			{
 				$returnData->checkinfo['require2factortoken'] = 1;
 			}
+		}
+
+	}
+
+	public static function dormantspecials( & $returnData, $requestObject)
+	{
+
+		$db = JFactory::getDbo();
+
+		$returnData->checkinfo = array();
+		$returnData->checkinfo['data'] = array();
+		$returnData->checkinfo['status'] = 1;
+		$returnData->checkinfo['key']  = "COM_YOURSITES_ADVCHECK_DORMANTSPECIALS_CORRECT";
+
+		// find list of super users and admin users and authors
+
+		$query = $db->getQuery(true);
+		$query->select('id')
+			->from('#__usergroups');
+		$db->setQuery($query);
+		$levels = $db->loadColumn();
+
+		// Get members of core.admin able user groups
+		$rules = JAccess::getAssetRules(null);
+		$ruledata = $rules->getData();
+		// super users and administrators
+		$createGroups  = isset($ruledata['core.create'])  ? array_keys($ruledata['core.create']->getData(), 1)  : array();
+		$editGroups    = isset($ruledata['core.edit'])    ? array_keys($ruledata['core.edit']->getData(), 1)    : array();
+		$publishGroups = isset($ruledata['core.publish']) ? array_keys($ruledata['core.publish']->getData(), 1) : array();
+		$manageGroups  = isset($ruledata['core.manage'])  ? array_keys($ruledata['core.manage']->getData(), 1)  : array();
+		$adminGroups   = isset($ruledata['core.admin'])   ? array_keys($ruledata['core.admin']->getData(), 1)   : array();
+
+		$specialGroups = array_unique(array_merge($createGroups, $editGroups, $publishGroups, $manageGroups, $adminGroups));
+		$specialGroups[] = -1;
+
+		$cutoff = new JDate("- " . (int) $requestObject->dormantspecialstime . " months");
+		$query = $db->getQuery(true);
+		$query->select('CONCAT(u.username, " (" ,  u.lastvisitDate, ")")')
+			->from("#__users as u" )
+			->leftJoin('#__user_usergroup_map as m on m.user_id = u.id')
+			->where('m.group_id in (' . implode(",", $specialGroups) . ')')
+			->where('u.otpKey = ""')
+			->where('u.lastvisitDate < ' . $db->quote($cutoff->toSql()))
+			->where('u.block = 0')
+			->group('u.id');
+
+		$db->setQuery($query);
+
+		$specialusers = $db->loadColumn();
+
+		if (count($specialusers) !== 0)
+		{
+			$returnData->warning = 1;
+			$returnData->messages[] = "COM_YOURSITES_ADVCHECK_DORMANTSPECIALS_INCORRECT";
+			$returnData->checkinfo['key']  = "COM_YOURSITES_ADVCHECK_DORMANTSPECIALS_INCORRECT_R";
+			$returnData->checkinfo['data'] = $specialusers;
+			$returnData->checkinfo['status'] = -1;
 		}
 
 	}

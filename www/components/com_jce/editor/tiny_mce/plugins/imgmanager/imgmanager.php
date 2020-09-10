@@ -12,7 +12,7 @@ defined('JPATH_PLATFORM') or die;
 
 class WFImgManagerPlugin extends WFMediaManager
 {
-    public $_filetypes = 'jpg,jpeg,png,apng,gif,webp';
+    public $_filetypes = 'jpg,jpeg,png,apng,gif,webp,avif';
 
     protected $name = 'imgmanager';
 
@@ -42,7 +42,10 @@ class WFImgManagerPlugin extends WFMediaManager
         // Add tabs
         $tabs->addTab('image', 1, array('plugin' => $this));
 
-        $tabs->addTab('rollover', $this->getParam('tabs_rollover', 1));
+        if ($this->allowEvents()) {
+            $tabs->addTab('rollover', $this->getParam('tabs_rollover', 1));
+        }
+
         $tabs->addTab('advanced', $this->getParam('tabs_advanced', 1));
 
         $document->addScript(array('imgmanager'), 'plugins');
@@ -51,89 +54,11 @@ class WFImgManagerPlugin extends WFMediaManager
         $document->addScriptDeclaration('ImageManagerDialog.settings=' . json_encode($this->getSettings()) . ';');
     }
 
-    public function getAtttributes()
+    public function getDefaultAttributes()
     {
-        $defaults = $this->getDefaults();
+        $attribs = parent::getDefaultAttributes();
 
-        unset($defaults['always_include_dimensions']);
-
-        $attribs    = array();
-        $styles     = array();
-
-        foreach ($defaults as $k => $v) {
-            switch ($k) {
-                case 'align':
-                    // convert to float
-                    if ($v == 'left' || $v == 'right') {
-                        $k = 'float';
-                    } else {
-                        $k = 'vertical-align';
-                    }
-
-                    // check for value and exclude border state parameter
-                    if ($v != '') {
-                        $styles[str_replace('_', '-', $k)] = $v;
-                    }
-                    break;
-                case 'border_width':
-                case 'border_style':
-                case 'border_color':
-                    // only if border state set
-                    $v = $defaults['border'] ? $v : '';
-
-                    // add px unit to border-width
-                    if ($v && $k == 'border_width' && is_numeric($v)) {
-                        $v .= 'px';
-                    }
-
-                    // check for value and exclude border state parameter
-                    if ($v != '') {
-                        $styles[str_replace('_', '-', $k)] = $v;
-                    }
-
-                    break;
-                case 'margin_left':
-                case 'margin_right':
-                case 'margin_top':
-                case 'margin_bottom':
-                    // add px unit to border-width
-                    if ($v && is_numeric($v)) {
-                        $v .= 'px';
-                    }
-
-                    // check for value and exclude border state parameter
-                    if ($v != '') {
-                        $styles[str_replace('_', '-', $k)] = $v;
-                    }
-                    break;
-                case 'classes':
-                case 'title':
-                case 'id':
-                case 'direction':
-                case 'usemap':
-                case 'longdesc':
-                case 'style':
-                case 'alt':
-                case 'loading':
-                    if ($k == 'direction') {
-                        $k = 'dir';
-                    }
-
-                    if ($k == 'classes') {
-                        $k = 'class';
-                    }
-
-                    if ($v != '') {
-                        $attribs[$k] = $v;
-                    }
-
-                    break;
-            }
-        }
-
-        if (!empty($styles)) {
-            $attribs['styles'] = $styles;
-        }
+        unset($attribs['always_include_dimensions']);
 
         return $attribs;
     }
@@ -158,7 +83,7 @@ class WFImgManagerPlugin extends WFMediaManager
                 }
             }
 
-            $result = array_merge($result, $this->getAttributes());
+            $result = array_merge($result, array('attributes' => $this->getDefaultAttributes()));
 
             return $result;
         }

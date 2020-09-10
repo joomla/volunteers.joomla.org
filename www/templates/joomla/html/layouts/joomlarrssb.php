@@ -6,6 +6,7 @@
  * @license    http://www.gnu.org/licenses/gpl-2.0.txt GNU General Public License Version 2 or Later
  */
 
+use Joomla\CMS\Factory;
 use Joomla\CMS\Http\HttpFactory;
 
 defined('_JEXEC') or die;
@@ -26,7 +27,7 @@ if (JFactory::getDocument()->getDirection() == 'rtl')
 $displayData->image = !empty($displayData->image) ? $displayData->image : 'https://cdn.joomla.org/images/joomla-org-og.jpg';
 
 // Prevent recursion when crawled by YOURLs
-$agent = $this->app->input->server->get('HTTP_USER_AGENT', '', 'cmd');
+$agent = Factory::getApplication()->input->server->get('HTTP_USER_AGENT', '', 'cmd');
 
 // Apply our shortened URL if configured
 if ($displayData->shorten && $displayData->shortenKey && !JDEBUG && (stristr($agent, 'YOURLS') === false))

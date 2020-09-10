@@ -14,11 +14,11 @@
     <name>file_fef</name>
     <author>Nicholas K. Dionysopoulos</author>
     <authorEmail>nicholas@dionysopoulos.me</authorEmail>
-    <authorUrl>https://www.akeebabackup.com</authorUrl>
+    <authorUrl>https://www.akeeba.com</authorUrl>
     <copyright>(C) 2017-2018 Akeeba Ltd.</copyright>
     <license>GNU GPL v3 or later</license>
-    <version>1.0.13</version>
-    <creationDate>2020-06-15</creationDate>
+    <version>1.1.0</version>
+    <creationDate>2020-09-02</creationDate>
     <description>Akeeba Frontend Framework - The CSS framework for Akeeba Ltd extensions.</description>
 
     <!-- Fileset definition -->
@@ -38,6 +38,6 @@
 
     <!-- Update server -->
     <updateservers>
-        <server type="extension" priority="1" name="Akeeba FEF">http://cdn.akeebabackup.com/updates/fef.xml</server>
+        <server type="extension" priority="1" name="Akeeba FEF">http://cdn.akeeba.com/updates/fef.xml</server>
     </updateservers>
 </extension>

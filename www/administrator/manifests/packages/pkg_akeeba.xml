@@ -9,15 +9,15 @@
     <dlid prefix="dlid=" suffix=""/>
     <name>Akeeba Backup package</name>
     <author>Nicholas K. Dionysopoulos</author>
-    <creationDate>2020-07-14</creationDate>
+    <creationDate>2020-09-10</creationDate>
     <packagename>akeeba</packagename>
-    <version>7.2.2</version>
+    <version>7.3.1</version>
     <url>https://www.akeeba.com</url>
     <packager>Akeeba Ltd</packager>
     <packagerurl>https://www.akeeba.com</packagerurl>
     <copyright>Copyright (c)2006-2019 Akeeba Ltd / Nicholas K. Dionysopoulos</copyright>
     <license>GNU GPL v3 or later</license>
-    <description>Akeeba Backup installation package v.7.2.2</description>
+    <description>Akeeba Backup installation package v.7.3.1</description>
 
     <!-- List of extensions to install -->
     <files>
@@ -34,7 +34,6 @@
         <file type="plugin" group="quickicon" id="akeebabackup">plg_quickicon_akeebabackup.zip</file>
 
         <!-- Plugins: system -->
-        <file type="plugin" group="system" id="akeebaupdatecheck">plg_system_akeebaupdatecheck.zip</file>
         <file type="plugin" group="system" id="backuponupdate">plg_system_backuponupdate.zip</file>
 
         <!-- Plugins: actionlog -->

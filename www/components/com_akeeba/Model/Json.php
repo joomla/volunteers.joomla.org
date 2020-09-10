@@ -29,7 +29,12 @@ define('AKEEBA_JSON_API_VERSION', '350');
  * 330  Introduction of Akeeba Solo
  * 335  Configuration overrides in startBackup
  * 340  Advanced API allows full configuration
- * 341  exportConfiguration, importConfiguration
+ * 350  exportConfiguration, importConfiguration
+ *
+ * Notes:
+ *
+ * When support for non-Raw encapsulations was removed December 2019 the API level was left at 350 (same
+ * since May 2016). If you see API level 350 try using only ever using the RAW encapsulation.
  */
 
 if (!defined('AKEEBA_BACKUP_ORIGIN'))
@@ -44,14 +49,29 @@ class Json extends Model
 {
 	use FrontEndPermissions;
 
-	const    COM_AKEEBA_CPANEL_LBL_STATUS_OK = 200; // Normal reply
-	const    STATUS_NOT_AUTH = 401; // Invalid credentials
-	const    STATUS_NOT_ALLOWED = 403; // Not enough privileges
-	const    STATUS_NOT_FOUND = 404; // Requested resource not found
-	const    STATUS_INVALID_METHOD = 405; // Unknown JSON method
-	const    COM_AKEEBA_CPANEL_LBL_STATUS_ERROR = 500; // An error occurred
-	const    STATUS_NOT_IMPLEMENTED = 501; // Not implemented feature
-	const    STATUS_NOT_AVAILABLE = 503; // Remote service not activated
+	/** @var int Normal reply */
+	public const    COM_AKEEBA_CPANEL_LBL_STATUS_OK = 200;
+
+	/** @var int Invalid credentials */
+	public const    STATUS_NOT_AUTH = 401;
+
+	/** @var int Not enough privileges */
+	public const    STATUS_NOT_ALLOWED = 403;
+
+	/** @var int Requested resource not found */
+	public const    STATUS_NOT_FOUND = 404;
+
+	/** @var int Unknown JSON method */
+	public const    STATUS_INVALID_METHOD = 405;
+
+	/** @var int An error occurred */
+	public const    COM_AKEEBA_CPANEL_LBL_STATUS_ERROR = 500;
+
+	/** @var int Not implemented feature */
+	public const    STATUS_NOT_IMPLEMENTED = 501;
+
+	/** @var int Remote service not activated */
+	public const    STATUS_NOT_AVAILABLE = 503;
 
 	/** @var int Data encapsulation format */
 	private $encapsulationType = 1;
@@ -120,10 +140,10 @@ class Json extends Model
 		// Transform legacy requests
 		if (!is_array($request))
 		{
-			$request = array(
+			$request = [
 				'encapsulation' => $rawEncapsulation,
-				'body' => $request
-			);
+				'body'          => $request,
+			];
 		}
 
 		// Transform partial requests
@@ -155,17 +175,17 @@ class Json extends Model
 		$this->password = isset($request['body']['key']) ? $request['body']['key'] : $this->serverKey();
 
 		// Run the method
-		$params = array();
+		$params = [];
 
 		if (isset($request['body']['data']))
 		{
-			$params = (array)$request['body']['data'];
+			$params = (array) $request['body']['data'];
 		}
 
 		try
 		{
 			$taskHandler = new Task($this->container);
-			$data = $taskHandler->execute($request['body']['method'], $params);
+			$data        = $taskHandler->execute($request['body']['method'], $params);
 		}
 		catch (\RuntimeException $e)
 		{
@@ -187,13 +207,13 @@ class Json extends Model
 	private function getResponse($data, $status = 200)
 	{
 		// Initialize the response
-		$response = array(
+		$response = [
 			'encapsulation' => $this->encapsulationType,
-			'body'          => array(
+			'body'          => [
 				'status' => $status,
-				'data'   => null
-			)
-		);
+				'data'   => null,
+			],
+		];
 
 		if ($status != 200)
 		{
@@ -207,10 +227,10 @@ class Json extends Model
 		catch (\Exception $e)
 		{
 			$response['encapsulation'] = $this->encapsulation->getEncapsulationByCode('ENCAPSULATION_RAW');
-			$response['body'] = array(
+			$response['body']          = [
 				'status' => $e->getCode(),
-				'data' => $e->getMessage(),
-			);
+				'data'   => $e->getMessage(),
+			];
 		}
 
 		return '###' . json_encode($response) . '###';

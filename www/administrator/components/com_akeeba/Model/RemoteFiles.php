@@ -10,12 +10,14 @@ namespace Akeeba\Backup\Admin\Model;
 // Protect from unauthorized access
 defined('_JEXEC') || die();
 
+use Akeeba\Backup\Admin\Model\Exceptions\FrozenRecordError;
 use Akeeba\Backup\Admin\Model\Mixin\GetErrorsFromExceptions;
 use Akeeba\Engine\Factory;
 use Akeeba\Engine\Platform;
 use Akeeba\Engine\Postproc\Exception\RangeDownloadNotSupported;
 use Exception;
 use FOF30\Model\Model;
+use Joomla\CMS\Language\Text;
 use Joomla\CMS\Language\Text as JText;
 use RuntimeException;
 
@@ -109,7 +111,7 @@ class RemoteFiles extends Model
 	 * @return  bool  true when we're done downloading, false if we have more work to do
 	 * @throws  Exception  On error
 	 */
-	function downloadToServer($id, $part, $frag)
+	public function downloadToServer($id, $part, $frag)
 	{
 		// Gather the necessary information to perform the download
 		$backupRecord        = Platform::getInstance()->get_statistics($id);
@@ -129,7 +131,7 @@ class RemoteFiles extends Model
 		{
 			// Total size of the files to download
 			$this->container->platform->setSessionVar('dl_totalsize', $backupRecord['total_size'], 'akeeba');
-			// Cummulative bytes downloaded so far
+			// Cumulative bytes downloaded so far
 			$this->container->platform->setSessionVar('dl_donesize', 0, 'akeeba');
 			// Convert part -1 to 0, indicating it's the very first part
 			$part = 0;
@@ -180,7 +182,7 @@ class RemoteFiles extends Model
 			}
 
 			// Calculate the offset to start downloading from and try to download the next fragment
-			$from           = $frag * self::DOWNLOAD_FRAGMENT_SIZE + 1;
+			$from           = $frag * self::DOWNLOAD_FRAGMENT_SIZE;
 			$tempFilepath   = $localFilepath . '.tmp';
 			$allowMultipart = true;
 
@@ -297,6 +299,12 @@ class RemoteFiles extends Model
 
 		// Gather the necessary information to perform the delete
 		$stat                = Platform::getInstance()->get_statistics($id);
+
+		if ($stat['frozen'])
+		{
+			throw new FrozenRecordError(Text::_('COM_AKEEBA_BUADMIN_FROZENRECORD_ERROR'));
+		}
+
 		$remoteFilenameParts = explode('://', $stat['remote_filename']);
 		$engine              = Factory::getPostprocEngine($remoteFilenameParts[0]);
 		$remote_filename     = $remoteFilenameParts[1];

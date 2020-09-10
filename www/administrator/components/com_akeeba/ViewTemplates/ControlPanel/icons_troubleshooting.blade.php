@@ -16,7 +16,7 @@ defined('_JEXEC') || die();
         <h3>@lang('COM_AKEEBA_CPANEL_HEADER_TROUBLESHOOTING')</h3>
     </header>
 
-    <div class="akeeba-grid--small">
+    <div class="akeeba-grid">
 	    @if($this->permissions['backup'])
             <a class="akeeba-action--teal"
                 href="index.php?option=com_akeeba&view=Log">

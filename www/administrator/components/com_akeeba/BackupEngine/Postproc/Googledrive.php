@@ -73,7 +73,7 @@ class Googledrive extends Base
 
 		return <<< HTML
 <script type="application/javascript">
-	window.opener.akeeba_googledrive_oauth_callback($serialisedData)
+	window.opener.akeeba_googledrive_oauth_callback($serialisedData);
 </script>
 HTML;
 	}

@@ -19,17 +19,19 @@ if (defined('AKEEBA_VIEW_JAVASCRIPT_CONFWIZ_MODAL'))
 define('AKEEBA_VIEW_JAVASCRIPT_CONFWIZ_MODAL', 1);
 
 $js = <<< JS
-akeeba.System.documentReady(function(){
-	akeeba.System.addEventListener('comAkeebaConfigurationWizardModalClose', 'click', function() {
-	  akeeba.System.configurationWizardModal.close();
-	});
+akeeba.Loader.add('akeeba.System', function(){
+    akeeba.System.documentReady(function(){
+        akeeba.System.addEventListener('comAkeebaConfigurationWizardModalClose', 'click', function() {
+          akeeba.System.configurationWizardModal.close();
+        });
 
-	setTimeout(function() {
-	  akeeba.System.configurationWizardModal = akeeba.Modal.open({
-		inherit: '#akeeba-config-confwiz-bubble',
-		width: '80%'
-	});
-	}, 500);
+        setTimeout(function() {
+          akeeba.System.configurationWizardModal = akeeba.Modal.open({
+            inherit: '#akeeba-config-confwiz-bubble',
+            width: '80%'
+        });
+        }, 500);
+    });
 });
 
 JS;

@@ -87,91 +87,6 @@ class Updates extends Update
 	}
 
 	/**
-	 * Sends an update notification email
-	 *
-	 * @param   string  $version  The newest available version
-	 * @param   string  $email    The email address of the recipient
-	 *
-	 * @return  boolean  The result from JMailer::send()
-	 */
-	public function sendNotificationEmail($version, $email)
-	{
-		$email_subject = <<<ENDSUBJECT
-THIS EMAIL IS SENT FROM YOUR SITE "[SITENAME]" - Update available
-ENDSUBJECT;
-
-		$email_body = <<<ENDBODY
-This email IS NOT sent by the authors of Akeeba Backup. It is sent automatically
-by your own site, [SITENAME]
-
-================================================================================
-UPDATE INFORMATION
-================================================================================
-
-Your site has determined that there is an updated version of Akeeba Backup
-available for download.
-
-New version number: [VERSION]
-
-This email is sent to you by your site to remind you of this fact. The authors
-of the software will never contact you about available updates.
-
-================================================================================
-WHY AM I RECEIVING THIS EMAIL?
-================================================================================
-
-This email has been automatically sent by a CLI script you, or the person who built
-or manages your site, has installed and explicitly activated. This script looks
-for updated versions of the software and sends an email notification to all
-Super Users. You will receive several similar emails from your site, up to 6
-times per day, until you either update the software or disable these emails.
-
-To disable these emails, please contact your site administrator.
-
-If you do not understand what this means, please do not contact the authors of
-the software. They are NOT sending you this email and they cannot help you.
-Instead, please contact the person who built or manages your site.
-
-================================================================================
-WHO SENT ME THIS EMAIL?
-================================================================================
-
-This email is sent to you by your own site, [SITENAME]
-
-ENDBODY;
-
-		$jconfig  = $this->container->platform->getConfig();
-		$sitename = $jconfig->get('sitename');
-
-		$substitutions = [
-			'[VERSION]'  => $version,
-			'[SITENAME]' => $sitename,
-		];
-
-		$email_subject = str_replace(array_keys($substitutions), array_values($substitutions), $email_subject);
-		$email_body    = str_replace(array_keys($substitutions), array_values($substitutions), $email_body);
-
-		try
-		{
-			$mailer = JFactory::getMailer();
-
-			$mailfrom = $jconfig->get('mailfrom');
-			$fromname = $jconfig->get('fromname');
-
-			$mailer->setSender([$mailfrom, $fromname]);
-			$mailer->addRecipient($email);
-			$mailer->setSubject($email_subject);
-			$mailer->setBody($email_body);
-
-			return $mailer->Send();
-		}
-		catch (Exception $e)
-		{
-			return false;
-		}
-	}
-
-	/**
 	 * Removes the obsolete update sites for the component, since now we're dealing with a package.
 	 *
 	 * Controlled by componentName, packageName and obsoleteUpdateSiteLocations
@@ -444,7 +359,6 @@ ENDBODY;
         <file type="component" id="com_akeeba">com_akeeba-pro.zip</file>
         <file type="file" id="file_akeeba">file_akeeba-pro.zip</file>
         <file type="plugin" group="quickicon" id="akeebabackup">plg_quickicon_akeebabackup.zip</file>
-        <file type="plugin" group="system" id="akeebaupdatecheck">plg_system_akeebaupdatecheck.zip</file>
         <file type="plugin" group="system" id="backuponupdate">plg_system_backuponupdate.zip</file>
     </files>
 

@@ -26,9 +26,11 @@ $bareName  = basename($this->latestBackup['archivename'], '.' . $extension);
         @lang('COM_AKEEBA_TRANSFER_LBL_MANUALTRANSFER_INFO')
     </div>
 
-    <p style="text-align: center">
-        <iframe width="640" height="480" src="https://www.youtube.com/embed/5A8EqOux494"
-				frameborder="0"  allowfullscreen></iframe>
+    <p>
+        <a href="https://www.akeeba.com/videos/1212-akeeba-backup/1618-abtc04-restore-site-new-server.html" class="akeeba-btn--primary--large" target="_blank">
+            <span class="akion-play"></span>
+            @lang('COM_AKEEBA_TRANSFER_LBL_MANUALTRANSFER_LINK')
+        </a>
     </p>
 
     <h4>@lang('COM_AKEEBA_BUADMIN_LBL_BACKUPINFO')</h4>

@@ -5,9 +5,12 @@
  * @license   GNU General Public License version 3, or later
  */
 
-// Protect from unauthorized access
-defined('_JEXEC') or die();
+namespace Akeeba\Backup\Admin\Model\Exceptions;
 
-define('AKEEBA_PRO', '1');
-define('AKEEBA_VERSION', '7.3.1');
-define('AKEEBA_DATE', '2020-09-10');
+// Protect from unauthorized access
+defined('_JEXEC') || die();
+
+class FrozenRecordError extends \RuntimeException
+{
+
+}

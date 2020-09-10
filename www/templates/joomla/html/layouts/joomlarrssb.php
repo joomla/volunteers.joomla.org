@@ -6,6 +6,8 @@
  * @license    http://www.gnu.org/licenses/gpl-2.0.txt GNU General Public License Version 2 or Later
  */
 
+use Joomla\CMS\Http\HttpFactory;
+
 defined('_JEXEC') or die;
 
 // Import media
@@ -23,8 +25,11 @@ if (JFactory::getDocument()->getDirection() == 'rtl')
 // If the item has an image use it otherwise default is hardcoded to the card image used for Twitter
 $displayData->image = !empty($displayData->image) ? $displayData->image : 'https://cdn.joomla.org/images/joomla-org-og.jpg';
 
+// Prevent recursion when crawled by YOURLs
+$agent = $this->app->input->server->get('HTTP_USER_AGENT', '', 'cmd');
+
 // Apply our shortened URL if configured
-if ($displayData->shorten && $displayData->shortenKey && !JDEBUG)
+if ($displayData->shorten && $displayData->shortenKey && !JDEBUG && (stristr($agent, 'YOURLS') === false))
 {
 	$data = [
 		'signature' => $displayData->shortenKey,
@@ -35,7 +40,7 @@ if ($displayData->shorten && $displayData->shortenKey && !JDEBUG)
 
 	try
 	{
-		$response = JHttpFactory::getHttp()->post('https://joom.la/yourls-api.php', $data);
+		$response = HttpFactory::getHttp()->post('https://joom.la/yourls-api.php', $data);
 
 		if ($response->code == 200)
 		{

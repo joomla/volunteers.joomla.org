@@ -9,5 +9,5 @@
 defined('_JEXEC') or die();
 
 define('AKEEBA_PRO', '1');
-define('AKEEBA_VERSION', '7.2.2');
-define('AKEEBA_DATE', '2020-07-14');
+define('AKEEBA_VERSION', '7.3.1');
+define('AKEEBA_DATE', '2020-09-10');

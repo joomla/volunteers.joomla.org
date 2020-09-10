@@ -18,7 +18,6 @@ use FOF30\Container\Container;
 use FOF30\Controller\Controller;
 use FOF30\Controller\Mixin\PredefinedTaskList;
 use FOF30\Date\Date;
-use JLoader;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\Uri\Uri;
@@ -171,9 +170,9 @@ class Backup extends Controller
 		$tempURL = Route::_('index.php?option=com_akeeba', false, $ssl);
 		$uri     = new Uri($tempURL);
 
+		$uri->delVar('key');
 		$uri->setVar('view', 'Backup');
 		$uri->setVar('task', 'step');
-		$uri->setVar('key', $this->input->get('key', '', 'none', 2));
 		$uri->setVar('profile', $this->input->get('profile', 1, 'int'));
 
 		if (!empty($backupId))
@@ -187,7 +186,8 @@ class Backup extends Controller
 
 		$uri->setVar('lang', $languageTag);
 
-		$redirectionUrl = $uri->toString();
+		$key            = $this->input->get('key', '', 'none', 2);
+		$redirectionUrl = $uri->toString() . '&key=' . urlencode($key);
 
 		$this->customRedirect($redirectionUrl);
 	}

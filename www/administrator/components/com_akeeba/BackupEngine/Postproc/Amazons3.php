@@ -197,9 +197,9 @@ class Amazons3 extends Base
 		$connector = $this->getConnector();
 		$toOffset  = null;
 
-		if ($fromOffset && $length)
+		if (!is_null($fromOffset) && $length)
 		{
-			$toOffset         = $fromOffset + $length - 1;
+			$toOffset = $fromOffset + $length - 1;
 		}
 
 		$connector->getObject($bucket, $remotePath, $localFile, $fromOffset, $toOffset);

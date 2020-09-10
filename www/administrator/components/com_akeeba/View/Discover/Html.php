@@ -33,8 +33,8 @@ class Html extends BaseView
 
 	public function onBeforeMain()
 	{
-		$this->container->template->addJS('media://com_akeeba/js/Configuration.min.js');
-		$this->container->template->addJS('media://com_akeeba/js/Discover.min.js');
+		$this->container->template->addJS('media://com_akeeba/js/Configuration.min.js', true, false, $this->container->mediaVersion);
+		$this->container->template->addJS('media://com_akeeba/js/Discover.min.js', true, false, $this->container->mediaVersion);
 
 		/** @var Discover $model */
 		$model = $this->getModel();

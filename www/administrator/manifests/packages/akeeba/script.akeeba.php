@@ -76,6 +76,7 @@ class Pkg_AkeebaInstallerScript
 	protected $uninstallPlugins = [
 		['jsonapi', 'akeebabackup'],
 		['legacyapi', 'akeebabackup'],
+		['system', 'akeebaupdatecheck'],
 	];
 
 	/**

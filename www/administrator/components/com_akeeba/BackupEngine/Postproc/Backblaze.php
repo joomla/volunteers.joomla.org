@@ -180,10 +180,10 @@ class Backblaze extends Base
 		$bucket       = str_replace('/', '', $bucket);
 		$headers      = [];
 
-		if ($fromOffset && $length)
+		if (!is_null($fromOffset) && $length)
 		{
-			$toOffset         = $fromOffset + $length - 1;
-			$headers['Range'] = 'bytes=' . $fromOffset . '-' . $toOffset;
+			$toOffset  = $fromOffset + $length - 1;
+			$headers[] = 'Range: bytes=' . $fromOffset . '-' . $toOffset;
 		}
 
 		$connector->downloadFile($bucket, $remotePath, $localFile, $headers);

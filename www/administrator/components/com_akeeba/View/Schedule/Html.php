@@ -45,7 +45,5 @@ class Html extends BaseView
 		$model           = $this->getModel();
 		$this->croninfo  = $model->getPaths();
 		$this->checkinfo = $model->getCheckPaths();
-
-		HTMLHelper::_('bootstrap.framework');
 	}
 }

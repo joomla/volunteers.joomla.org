@@ -1,6 +1,30 @@
 <?php die();?>
+Akeeba Backup 7.3.1
+================================================================================
+- Removed the System - Akeeba Backup Update Check plugin
+~ Improved unhandled PHP exception error page
+# [HIGH] Media query strings missing from JavaScript, causing issues to people upgrading from 7.2.2 or earlier.
+# [LOW] Frontend backup URL does not work if the secret key contains the plus sign (+) character due to a PHP bug.
+
+Akeeba Backup 7.3.0
+================================================================================
++ S3: Add support for Cape Town and Milan regions
++ Inherit the base font size instead of defining a fixed one
++ Added feature to "freeze" some backup records to keep them indefinitely
+- Removed support for Internet Explorer
+~ Improve default header and body fonts for similar cross-platform "feel" without the need to use custom fonts.
+~ Rendering improvements
+~ Loading all JavaScript defered
+~ Do not show the Backup on Update icon when Joomla is in record add / edit mode (main menu hidden and status bar locked).
+~ Adjust size of control panel icons
+~ More clarity in the in-component update notifications, explaining they come from Joomla itself
+# [HIGH] Replacing (not just removing) AddHandler/SetHandler lines would fail during restoration
+# [MEDIUM] Fetching back to server the archives from these provides would result in invalid archives: Amazon S3, Backblaze, Cloudfiles, OVH, Swift
+# [MEDIUM] Greedy RegEx match in database dump could mess up views containing the literal ' view ' (word "view" surrounded by spaces) in their definition.
+
 Akeeba Backup 7.2.2
 ================================================================================
++ Automatic UTF8MB4 character encoding downgrades from MySQL 8 to 5.7/5.6/5.5 on restoration.
 # [LOW] The package would install on unsupported PHP versions 5.6 and 7.0 and Joomla 3.8, leading to errors
 # [HIGH] The System - Akeeba Backup Update Check plugin throws a fatal error since version 7.1.4 when an update is available
 

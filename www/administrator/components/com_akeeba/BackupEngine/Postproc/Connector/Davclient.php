@@ -692,6 +692,11 @@ class Davclient
 
 		$parts = parse_url($this->baseUri);
 
-		return $parts['scheme'] . '://' . $parts['host'] . (isset($parts['port']) ? ':' . $parts['port'] : '') . $parts['path'] . '/' . ltrim($url, '/');
+		$returnURL  = $parts['scheme'] . '://' . $parts['host'];
+		$returnURL .= (isset($parts['port']) ? ':' . $parts['port'] : '');
+		$returnURL .= (isset($parts['path']) ? ':' . $parts['path'] : '');
+		$returnURL .= '/' . ltrim($url, '/');
+
+		return $returnURL;
 	}
 }

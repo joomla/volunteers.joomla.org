@@ -51,9 +51,13 @@ function akeeba_backup_on_update_toggle()
 
 akeeba.System.documentReady(function() {
     var myItem = document.getElementById('plg_system_backuponupdate');
+    if (typeof myItem == "undefined") return;
     var myContainer = myItem.parentElement;
+    if (typeof myContainer == "undefined") return;
     var headerIconsContainer = myContainer.parentElement.parentElement;
+    if (typeof headerIconsContainer == "undefined") return;
     var headerIcons = headerIconsContainer.querySelectorAll('div.header-item');
+    if (typeof headerIcons == "undefined") return;
     
     if (headerIcons.length < 2)
 	{
@@ -64,7 +68,9 @@ akeeba.System.documentReady(function() {
 		headerIconsContainer.insertBefore(myItem, headerIcons[1]);
 	}
     
-    headerIconsContainer.removeChild(myContainer);
+    try {
+        headerIconsContainer.removeChild(myContainer);
+    } catch (e) {}
 })
 
 JS;

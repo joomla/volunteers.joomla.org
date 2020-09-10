@@ -109,7 +109,7 @@ class Html extends BaseView
 
 	protected function onBeforeMain()
 	{
-		$this->container->template->addJS('media://com_akeeba/js/Transfer.min.js');
+		$this->container->template->addJS('media://com_akeeba/js/Transfer.min.js', true, false, $this->container->mediaVersion);
 
 		/** @var Transfer $model */
 		$model    = $this->getModel();

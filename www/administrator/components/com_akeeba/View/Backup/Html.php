@@ -181,7 +181,7 @@ class Html extends BaseView
 	public function onBeforeMain()
 	{
 		// Load the view-specific Javascript
-		$this->container->template->addJS('media://com_akeeba/js/Backup.min.js');
+		$this->container->template->addJS('media://com_akeeba/js/Backup.min.js', true, false, $this->container->mediaVersion);
 
 		// Load the models
 		/** @var  Backup $model */

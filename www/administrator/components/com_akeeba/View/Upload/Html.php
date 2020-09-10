@@ -72,13 +72,12 @@ class Html extends BaseView
 	 */
 	public function onBeforeUpload()
 	{
-		$this->container->template->addJS('media://com_akeeba/js/Upload.min.js');
+		$this->container->template->addJS('media://com_akeeba/js/Upload.min.js', true, false, $this->container->mediaVersion);
 
 		$this->setLayout('uploading');
 
 		if ($this->done)
 		{
-			HTMLHelper::_('behavior.modal');
 			$this->setLayout('done');
 		}
 
@@ -95,7 +94,7 @@ class Html extends BaseView
 	 */
 	public function onBeforeCancelled()
 	{
-		$this->container->template->addJS('media://com_akeeba/js/Upload.min.js');
+		$this->container->template->addJS('media://com_akeeba/js/Upload.min.js', true, false, $this->container->mediaVersion);
 
 		$this->setLayout('error');
 	}
@@ -107,13 +106,12 @@ class Html extends BaseView
 	 */
 	public function onBeforeStart()
 	{
-		$this->container->template->addJS('media://com_akeeba/js/Upload.min.js');
+		$this->container->template->addJS('media://com_akeeba/js/Upload.min.js', true, false, $this->container->mediaVersion);
 
 		$this->setLayout('default');
 
 		if ($this->done)
 		{
-			HTMLHelper::_('behavior.modal');
 			$this->setLayout('done');
 		}
 

@@ -2,15 +2,28 @@
 /**
  * Akeeba Frontend Framework (FEF)
  *
- * @package   fef
+ * @package       fef
  * @copyright (c) 2017-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
- * @license   GNU General Public License version 3, or later
+ * @license       GNU General Public License version 3, or later
  *
  * Created by Crystal Dionysopoulou for Akeeba Ltd, https://www.akeeba.com
  */
 
 defined('_JEXEC') or die();
 
+use Joomla\CMS\Date\Date as JDate;
+use Joomla\CMS\Factory as JFactory;
+use Joomla\CMS\Filesystem\File;
+use Joomla\CMS\Filesystem\Folder;
+use Joomla\CMS\Installer\Adapter\FileAdapter as JInstallerAdapterFile;
+use Joomla\CMS\Installer\Installer as JInstaller;
+use Joomla\CMS\Log\Log as JLog;
+
+/**
+ * Akeeba FEF Installation Script
+ *
+ * @noinspection PhpUnused
+ */
 class file_fefInstallerScript
 {
 	/**
@@ -18,14 +31,14 @@ class file_fefInstallerScript
 	 *
 	 * @var   string
 	 */
-	protected $minimumPHPVersion = '5.4.0';
+	protected $minimumPHPVersion = '7.1.0';
 
 	/**
 	 * The minimum Joomla! version required to install this extension
 	 *
 	 * @var   string
 	 */
-	protected $minimumJoomlaVersion = '3.4.0';
+	protected $minimumJoomlaVersion = '3.9.0';
 
 	/**
 	 * The maximum Joomla! version this extension can be installed on
@@ -38,8 +51,8 @@ class file_fefInstallerScript
 	 * Joomla! pre-flight event. This runs before Joomla! installs or updates the component. This is our last chance to
 	 * tell Joomla! if it should abort the installation.
 	 *
-	 * @param   string     $type   Installation type (install, update, discover_install)
-	 * @param   JInstaller $parent Parent object
+	 * @param   string                            $type    Installation type (install, update, discover_install)
+	 * @param   JInstaller|JInstallerAdapterFile  $parent  Parent object
 	 *
 	 * @return  boolean  True to let the installation proceed, false to halt the installation
 	 */
@@ -75,7 +88,7 @@ class file_fefInstallerScript
 		if (!empty($this->minimumJoomlaVersion) && !version_compare(JVERSION, $this->minimumJoomlaVersion, 'ge'))
 		{
 			$jVersion = JVERSION;
-			$msg = "<p>You need Joomla! $this->minimumJoomlaVersion or later to install this package but you only have $jVersion installed.</p>";
+			$msg      = "<p>You need Joomla! $this->minimumJoomlaVersion or later to install this package but you only have $jVersion installed.</p>";
 
 			JLog::add($msg, JLog::WARNING, 'jerror');
 
@@ -86,7 +99,7 @@ class file_fefInstallerScript
 		if (!empty($this->maximumJoomlaVersion) && !version_compare(JVERSION, $this->maximumJoomlaVersion, 'le'))
 		{
 			$jVersion = JVERSION;
-			$msg = "<p>You need Joomla! $this->maximumJoomlaVersion or earlier to install this package but you have $jVersion installed</p>";
+			$msg      = "<p>You need Joomla! $this->maximumJoomlaVersion or earlier to install this package but you have $jVersion installed</p>";
 
 			JLog::add($msg, JLog::WARNING, 'jerror');
 
@@ -119,24 +132,24 @@ class file_fefInstallerScript
 					// Files renamed in 1.0.8
 					'css/reset.min.css',
 					'css/style.min.css',
-					// Files replaced with minified versions in 1.0.8
+					// JavaScript: Irrelevant for Joomla
 					'js/darkmode.js',
-					'js/dropdown.js',
+					'js/darkmode.min.js',
+					'js/darkmode.map',
 					'js/menu.js',
+					'js/menu.min.js',
+					'js/menu.map',
+					// JavaScript: Uncompressed and map files
+					'js/dropdown.js',
+					'js/dropdown.map',
+					'js/loader.js',
+					'js/loader.map',
 					'js/tabs.js',
+					'js/tabs.map',
 				],
 				'folders' => [
 				],
 			];
-
-			// We need this trick to prevent the Akeeba font being removed on case-insensitive Windows and macOS filesystems
-			$phpOS = strtoupper(PHP_OS);
-
-			if (!in_array(substr($phpOS, 0, 3), ['MAC', 'WIN']))
-			{
-				// The beta had this folder uppercase, then we moved it to lowercase
-				$removeFiles['folders'][] = 'media/fef/fonts/Akeeba';
-			}
 
 			// Remove obsolete files and folders
 			$this->removeFilesAndFolders($removeFiles);
@@ -150,10 +163,12 @@ class file_fefInstallerScript
 	 * or updating your component. This is the last chance you've got to perform any additional installations, clean-up,
 	 * database updates and similar housekeeping functions.
 	 *
-	 * @param   string                $type   install, update or discover_update
-	 * @param   JInstallerAdapterFile $parent Parent object
+	 * @param   string                 $type    install, update or discover_update
+	 * @param   JInstallerAdapterFile  $parent  Parent object
 	 *
 	 * @throws  Exception
+	 *
+	 * @noinspection PhpUnusedParameterInspection
 	 */
 	public function postflight($type, JInstallerAdapterFile $parent)
 	{
@@ -170,9 +185,11 @@ class file_fefInstallerScript
 	/**
 	 * Runs on uninstallation
 	 *
-	 * @param   JInstallerAdapterFile $parent The parent object
+	 * @param   JInstallerAdapterFile  $parent  The parent object
 	 *
 	 * @throws  RuntimeException  If the uninstallation is not allowed
+	 *
+	 * @noinspection PhpUnusedParameterInspection
 	 */
 	public function uninstall($parent)
 	{
@@ -188,14 +205,13 @@ class file_fefInstallerScript
 			throw new RuntimeException($msg, 500);
 		}
 
-		JLoader::import('joomla.filesystem.folder');
-		JFolder::delete(JPATH_SITE . '/media/fef');
+		Folder::delete(JPATH_SITE . '/media/fef');
 	}
 
 	/**
 	 * Removes obsolete files and folders
 	 *
-	 * @param   array $removeList The files and directories to remove
+	 * @param   array  $removeList  The files and directories to remove
 	 */
 	protected function removeFilesAndFolders($removeList)
 	{
@@ -211,7 +227,7 @@ class file_fefInstallerScript
 					continue;
 				}
 
-				JFile::delete($f);
+				File::delete($f);
 			}
 		}
 
@@ -227,7 +243,7 @@ class file_fefInstallerScript
 					continue;
 				}
 
-				JFolder::delete($f);
+				Folder::delete($f);
 			}
 		}
 	}
@@ -236,62 +252,57 @@ class file_fefInstallerScript
 	 * Is this package an update to the currently installed FEF? If not (we're a downgrade) we will return false
 	 * and prevent the installation from going on.
 	 *
-	 * @param   \JInstallerAdapterFile $parent The parent object
+	 * @param   JInstallerAdapterFile  $parent  The parent object
 	 *
 	 * @return  bool  Am I an update to an existing version>
 	 */
 	protected function amIAnUpdate($parent)
 	{
-		/** @var JInstaller $grandpa */
 		$grandpa = $parent->getParent();
+		$source  = $grandpa->getPath('source');
+		$target  = JPATH_ROOT . '/media/fef';
 
-		$source = $grandpa->getPath('source');
-
-		$target = JPATH_ROOT . '/media/fef';
-
-		if (!JFolder::exists($source))
+		if (!Folder::exists($source))
 		{
 			// WTF? I can't find myself. I can't install anything.
 			return false;
 		}
 
 		// If FEF is not really installed (someone removed the directory instead of uninstalling?) I have to install it.
-		if (!JFolder::exists($target))
+		if (!Folder::exists($target))
 		{
 			return true;
 		}
 
-		$fefVersion = array();
+		$fefVersion = [];
 
-		if (JFile::exists($target . '/version.txt'))
+		if (File::exists($target . '/version.txt'))
 		{
-			$rawData = @file_get_contents($target . '/version.txt');
-			$rawData = ($rawData === false) ? "0.0.0\n2011-01-01\n" : $rawData;
-			$info = explode("\n", $rawData);
-			$fefVersion['installed'] = array(
+			$rawData                 = @file_get_contents($target . '/version.txt');
+			$rawData                 = ($rawData === false) ? "0.0.0\n2011-01-01\n" : $rawData;
+			$info                    = explode("\n", $rawData);
+			$fefVersion['installed'] = [
 				'version' => trim($info[0]),
-				'date'    => new JDate(trim($info[1]))
-			);
+				'date'    => new JDate(trim($info[1])),
+			];
 		}
 		else
 		{
-			$fefVersion['installed'] = array(
+			$fefVersion['installed'] = [
 				'version' => '0.0',
-				'date'    => new JDate('2011-01-01')
-			);
+				'date'    => new JDate('2011-01-01'),
+			];
 		}
 
-		$rawData = @file_get_contents($source . '/version.txt');
-		$rawData = ($rawData === false) ? "0.0.0\n2011-01-01\n" : $rawData;
-		$info = explode("\n", $rawData);
-		$fefVersion['package'] = array(
+		$rawData               = @file_get_contents($source . '/version.txt');
+		$rawData               = ($rawData === false) ? "0.0.0\n2011-01-01\n" : $rawData;
+		$info                  = explode("\n", $rawData);
+		$fefVersion['package'] = [
 			'version' => trim($info[0]),
-			'date'    => new JDate(trim($info[1]))
-		);
+			'date'    => new JDate(trim($info[1])),
+		];
 
-		$haveToInstallFEF = $fefVersion['package']['date']->toUNIX() >= $fefVersion['installed']['date']->toUNIX();
-
-		return $haveToInstallFEF;
+		return $fefVersion['package']['date']->toUNIX() >= $fefVersion['installed']['date']->toUNIX();
 	}
 
 	/**
@@ -317,12 +328,12 @@ class file_fefInstallerScript
 
 			if (empty($dependencies))
 			{
-				$dependencies = array();
+				$dependencies = [];
 			}
 		}
 		catch (Exception $e)
 		{
-			$dependencies = array();
+			$dependencies = [];
 		}
 
 		return $dependencies;
@@ -351,10 +362,10 @@ class file_fefInstallerScript
 			// Do nothing if the old key wasn't found
 		}
 
-		$object = (object)array(
-			'key' => $package,
-			'value' => json_encode($dependencies)
-		);
+		$object = (object) [
+			'key'   => $package,
+			'value' => json_encode($dependencies),
+		];
 
 		try
 		{
@@ -363,24 +374,6 @@ class file_fefInstallerScript
 		catch (Exception $e)
 		{
 			// Do nothing if the old key wasn't found
-		}
-	}
-
-	/**
-	 * Adds a package dependency to #__akeeba_common
-	 *
-	 * @param   string  $package     The package
-	 * @param   string  $dependency  The dependency to add
-	 */
-	protected function addDependency($package, $dependency)
-	{
-		$dependencies = $this->getDependencies($package);
-
-		if (!in_array($dependency, $dependencies))
-		{
-			$dependencies[] = $dependency;
-
-			$this->setDependencies($package, $dependencies);
 		}
 	}
 
@@ -401,20 +394,5 @@ class file_fefInstallerScript
 
 			$this->setDependencies($package, $dependencies);
 		}
-	}
-
-	/**
-	 * Do I have a dependency for a package in #__akeeba_common
-	 *
-	 * @param   string  $package     The package
-	 * @param   string  $dependency  The dependency to check for
-	 *
-	 * @return bool
-	 */
-	protected function hasDependency($package, $dependency)
-	{
-		$dependencies = $this->getDependencies($package);
-
-		return in_array($dependency, $dependencies);
 	}
 }

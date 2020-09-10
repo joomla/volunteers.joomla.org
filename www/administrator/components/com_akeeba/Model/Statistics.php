@@ -10,6 +10,7 @@ namespace Akeeba\Backup\Admin\Model;
 // Protect from unauthorized access
 defined('_JEXEC') || die();
 
+use Akeeba\Backup\Admin\Model\Exceptions\FrozenRecordError;
 use Akeeba\Engine\Factory;
 use Akeeba\Engine\Platform;
 use Exception;
@@ -404,7 +405,7 @@ ENDBODY;
 			throw new RecordNotLoaded(Text::_('COM_AKEEBA_BUADMIN_ERROR_INVALIDID'));
 		}
 
-		// Try to delete files
+		// Try to delete files. This will check (and stop) if any record is a frozen one
 		$this->deleteFile();
 
 		if (!Platform::getInstance()->delete_statistics($id))
@@ -431,6 +432,12 @@ ENDBODY;
 
 		// Get the backup statistics record and the files to delete
 		$stat     = (array) Platform::getInstance()->get_statistics($id);
+
+		if ($stat['frozen'])
+		{
+			throw new FrozenRecordError(Text::_('COM_AKEEBA_BUADMIN_FROZENRECORD_ERROR'));
+		}
+
 		$allFiles = Factory::getStatistics()->get_all_filenames($stat, false);
 
 		// Remove the custom log file if necessary
@@ -496,6 +503,30 @@ ENDBODY;
 	{
 		$this->container->params->set('show_howtorestoremodal', 0);
 		$this->container->params->save();
+	}
+
+	/**
+	 * Freeze or melt a backup report
+	 *
+	 * @param array $ids        Array of backup IDs that should be updated
+	 * @param int   $freeze     1= freeze, 0= melt
+	 *
+	 * @throws Exception
+	 */
+	public function freezeUnfreezeRecords(array $ids, $freeze)
+	{
+		if (!$ids)
+		{
+			return;
+		}
+
+		$freeze = (int) $freeze;
+
+		foreach ($ids as $id)
+		{
+			// If anything wrong happens, let the exception bubble up, so it will be reported
+			Platform::getInstance()->set_or_update_statistics($id, ['frozen' => $freeze]);
+		}
 	}
 
 	/**

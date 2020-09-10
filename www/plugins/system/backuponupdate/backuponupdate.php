@@ -16,6 +16,9 @@ defined('_JEXEC') || die();
 
 class plgSystemBackuponupdate extends CMSPlugin
 {
+	/** @var \Joomla\CMS\Application\AdministratorApplication */
+	public $app;
+
 	private $isEnabled;
 
 	/**
@@ -163,7 +166,7 @@ class plgSystemBackuponupdate extends CMSPlugin
 	 */
 	public function onAfterModuleList(&$modules)
 	{
-		$app = Factory::getApplication();
+		$app = $this->app;
 
 		// Only work when format=html (since we try adding CSS and Javascript on the page which is only valid in HTML).
 		if ($app->input->getCmd('format', 'html') != 'html')
@@ -181,6 +184,12 @@ class plgSystemBackuponupdate extends CMSPlugin
 
 		// Make sure we are enabled
 		if (!$this->isEnabled())
+		{
+			return;
+		}
+
+		// Is the main menu supposed to be hidden?
+		if ($this->app->input->getBool('hidemainmenu', false))
 		{
 			return;
 		}

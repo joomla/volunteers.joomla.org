@@ -22,9 +22,9 @@ class Html extends BaseView
 
 	public function onBeforeMain()
 	{
-		$this->container->template->addJS('media://com_akeeba/js/Configuration.min.js');
-		$this->container->template->addJS('media://com_akeeba/js/FileFilters.min.js');
-		$this->container->template->addJS('media://com_akeeba/js/IncludeFolders.min.js');
+		$this->container->template->addJS('media://com_akeeba/js/Configuration.min.js', true, false, $this->container->mediaVersion);
+		$this->container->template->addJS('media://com_akeeba/js/FileFilters.min.js', true, false, $this->container->mediaVersion);
+		$this->container->template->addJS('media://com_akeeba/js/IncludeFolders.min.js', true, false, $this->container->mediaVersion);
 
 		// Get a JSON representation of the directories data
 		/** @var IncludeFolders $model */

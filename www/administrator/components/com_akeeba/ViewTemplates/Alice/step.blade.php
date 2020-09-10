@@ -13,10 +13,12 @@ defined('_JEXEC') || die;
 /** @var  \Akeeba\Backup\Admin\View\Alice\Html $this */
 
 $js = <<< JS
-akeeba.System.documentReady(function(){
-	window.setTimeout(function() {
-	  document.forms.adminForm.submit()
-	}, 500);
+akeeba.Loader.add('akeeba.System', function(){
+	akeeba.System.documentReady(function(){
+		window.setTimeout(function() {
+		  document.forms.adminForm.submit()
+		}, 500);
+	});
 });
 
 JS;

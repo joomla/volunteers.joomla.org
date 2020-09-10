@@ -64,7 +64,15 @@ defined('_JEXEC') || die();
                     @else
                         @jhtml('select.genericlist', $this->profilesList, 'profile', ['list.select' => $this->fltProfile, 'list.attr' => ['class' => 'advancedSelect'], 'id' => 'comAkeebaManageProfileSelector'])
                     @endif
+                </div>
 
+                <div class="akeeba-filter-element akeeba-form-group">
+                    {{-- Joomla 3.x: Chosen does not work with attached event handlers, only with inline event scripts (e.g. onchange) --}}
+                    @if (version_compare(JVERSION, '3.999.999', 'lt'))
+                        @jhtml('select.genericlist', $this->frozenList, 'frozen', ['list.select' => $this->fltFrozen, 'list.attr' => ['class' => 'advancedSelect', 'onchange' => 'document.forms.adminForm.submit();'], 'id' => 'comAkeebaManageFrozenSelector'])
+                    @else
+                        @jhtml('select.genericlist', $this->frozenList, 'frozen', ['list.select' => $this->fltFrozen, 'list.attr' => ['class' => 'advancedSelect'], 'id' => 'comAkeebaManageFrozenSelector'])
+                    @endif
                 </div>
             </div>
 
@@ -81,6 +89,9 @@ defined('_JEXEC') || die();
                 </th>
                 <th width="48" class="akeeba-hidden-phone">
 					@sortgrid('id', 'COM_AKEEBA_BUADMIN_LABEL_ID')
+                </th>
+                <th>
+                    @sortgrid('frozen', 'COM_AKEEBA_BUADMIN_LABEL_FROZEN')
                 </th>
                 <th>
 					@sortgrid('description', 'COM_AKEEBA_BUADMIN_LABEL_DESCRIPTION')
@@ -126,11 +137,27 @@ defined('_JEXEC') || die();
 					list($startTime, $duration, $timeZoneText) = $this->getTimeInformation($record);
 					list($statusClass, $statusIcon) = $this->getStatusInformation($record);
 					$profileName = $this->getProfileName($record);
+
+					$frozenIcon  = 'akion-waterdrop';
+					$frozenTask  = 'freeze';
+					$frozenTitle = \JText::_('COM_AKEEBA_BUADMIN_LABEL_ACTION_FREEZE');
+
+					if ($record['frozen'])
+                    {
+	                    $frozenIcon  = 'akion-ios-snowy';
+	                    $frozenTask  = 'unfreeze';
+	                    $frozenTitle = \JText::_('COM_AKEEBA_BUADMIN_LABEL_ACTION_UNFREEZE');
+                    }
 					?>
                     <tr class="row{{ $id }}">
                         <td>@jhtml('grid.id', ++$i, $record['id'])</td>
                         <td class="akeeba-hidden-phone">
                             {{{ $record['id'] }}}
+                        </td>
+                        <td>
+                            <a href="#" onclick="return listItemTask('cb{{ $i }}', '{{$frozenTask}}')" title="{{$frozenTitle}}">
+                                <span class="{{ $frozenIcon }}"></span>
+                            </a>
                         </td>
                         <td>
 						<span class="{{ $originIcon }} akeebaCommentPopover" rel="popover"

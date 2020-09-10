@@ -1403,7 +1403,7 @@ class Mysql extends Base
 			$table_sql = trim($table_sql);
 			$lines     = explode("\n", $table_sql);
 			$firstLine = array_shift($lines);
-			$pattern   = '/^CREATE(.*) ' . strtoupper($type) . ' (.*)/i';
+			$pattern   = '/^CREATE(.*?) ' . strtoupper($type) . ' (.*)/i';
 			$result    = preg_match($pattern, $firstLine, $matches);
 			$table_sql = 'CREATE ' . strtoupper($type) . ' ' . $matches[2] . "\n" . implode("\n", $lines);
 			$table_sql = trim($table_sql);
@@ -1418,7 +1418,7 @@ class Mysql extends Base
 		if (in_array($type, ['table', 'merge', 'view']))
 		{
 			// Check for CREATE VIEW
-			$pattern = '/^CREATE(.*) VIEW (.*)/i';
+			$pattern = '/^CREATE(.*?) VIEW (.*)/i';
 			$result  = preg_match($pattern, $table_sql, $matches);
 
 			if ($result === 1)

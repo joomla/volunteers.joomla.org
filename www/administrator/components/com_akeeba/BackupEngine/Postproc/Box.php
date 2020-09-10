@@ -67,7 +67,7 @@ class Box extends Base
 
 		return <<< HTML
 <script type="application/javascript">
-	window.opener.{$this->callbackMethod}($serialisedData;)
+	window.opener.{$this->callbackMethod}($serialisedData);
 </script>
 HTML;
 	}

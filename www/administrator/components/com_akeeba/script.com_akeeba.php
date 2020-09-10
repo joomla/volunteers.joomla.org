@@ -411,6 +411,9 @@ class Com_AkeebaInstallerScript extends \FOF30\Utils\InstallScript
 
 			// Obsolete cacert.pem in the Engine
 			"administrator/components/com_akeeba/BackupEngine/cacert.pem",
+
+			 // Workaround for CloudFlare RocketLoader. No longer needed, our JS is being loaded deferred anyway.
+			"administrator/components/com_akeeba/Dispatcher/after_render.php",
 		],
 		'folders' => [
 			// Directories used up to version 4.1 (inclusive)

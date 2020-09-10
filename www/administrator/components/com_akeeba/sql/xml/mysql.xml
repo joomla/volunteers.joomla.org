@@ -68,6 +68,7 @@ CREATE TABLE `#__ak_stats` (
 	`filesexist` tinyint(3) NOT NULL DEFAULT '1',
 	`remote_filename` varchar(1000) DEFAULT NULL,
 	`total_size` bigint(20) NOT NULL DEFAULT '0',
+	`frozen` tinyint(1) NOT NULL DEFAULT '0',
 	PRIMARY KEY (`id`),
 	KEY `idx_fullstatus` (`filesexist`,`status`),
 	KEY `idx_stale` (`status`,`origin`)
@@ -119,5 +120,12 @@ ALTER TABLE `#__ak_storage` ADD PRIMARY KEY (`tag`(100));
             ]]></query>
         </action>
 
+        <!-- Add the backupid column to #__ak_stats if it's missing -->
+        <action table="#__ak_stats" canfail="1">
+            <condition type="missing" value="frozen" />
+            <query><![CDATA[
+ALTER TABLE `#__ak_stats` ADD COLUMN `frozen` tinyint(1) DEFAULT '0';
+            ]]></query>
+        </action>
     </sql>
 </schema>

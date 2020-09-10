@@ -35,8 +35,8 @@ class Html extends BaseView
 		Text::script('COM_AKEEBA_BACKUP_TEXT_LASTRESPONSE', true);
 
 		// Load the Configuration Wizard Javascript file
-		$this->container->template->addJS('media://com_akeeba/js/Backup.min.js');
-		$this->container->template->addJS('media://com_akeeba/js/ConfigurationWizard.min.js');
+		$this->container->template->addJS('media://com_akeeba/js/Backup.min.js', true, false, $this->container->mediaVersion);
+		$this->container->template->addJS('media://com_akeeba/js/ConfigurationWizard.min.js', true, false, $this->container->mediaVersion);
 
 		$platform = $this->container->platform;
 		$platform->addScriptOptions('akeeba.System.params.AjaxURL', 'index.php?option=com_akeeba&view=ConfigurationWizard&task=ajax');

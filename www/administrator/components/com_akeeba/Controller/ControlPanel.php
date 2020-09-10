@@ -72,38 +72,20 @@ class ControlPanel extends Controller
 	{
 		/** @var Updates $updateModel */
 		$updateModel = $this->container->factory->model('Updates')->tmpInstance();
-		$infoArray   = $updateModel->getUpdates();
-		$updateInfo  = (object) $infoArray;
+		$updateInfo   = $updateModel->getUpdates();
 
 		$result = '';
 
-		if ($updateInfo->hasUpdate)
+		if ($updateInfo['hasUpdate'])
 		{
-			$strings = [
-				'header'  => \Joomla\CMS\Language\Text::sprintf('COM_AKEEBA_CPANEL_MSG_UPDATEFOUND', $updateInfo->version),
-				'button'  => \Joomla\CMS\Language\Text::sprintf('COM_AKEEBA_CPANEL_MSG_UPDATENOW', $updateInfo->version),
-				'infourl' => $updateInfo->infoURL,
-				'infolbl' => \Joomla\CMS\Language\Text::_('COM_AKEEBA_CPANEL_MSG_MOREINFO'),
-			];
-
-			$result = <<<HTML
-	<div class="akeeba-block--warning">
-		<h3>
-			<span class="icon icon-exclamation-sign glyphicon glyphicon-exclamation-sign"></span>
-			{$strings['header']}
-		</h3>
-		<p>
-			<a href="index.php?option=com_installer&view=update" class="akeeba-btn--primary">
-				{$strings['button']}
-			</a>
-			<a href="{$strings['infourl']}" target="_blank" class="akeeba-btn--ghost akeeba-btn--small">
-				{$strings['infolbl']}
-			</a>
-		</p>
-	</div>
-HTML;
+			$result = $this->getView()->loadAnyTemplate('admin:com_akeeba/ControlPanel/updateinfo', [
+				'updateInfo'     => $updateInfo,
+				'softwareName'   => 'Akeeba Backup',
+				'currentVersion' => AKEEBA_VERSION,
+				'currentDate'    => AKEEBA_DATE,
+				'compatibilitySlug'    => '#akeeba-backup-compatibility',
+			]);
 		}
-
 		echo '###' . $result . '###';
 
 		// Cut the execution short

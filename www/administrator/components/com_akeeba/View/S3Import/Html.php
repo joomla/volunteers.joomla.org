@@ -30,7 +30,7 @@ class Html extends BaseView
 
 	public function onBeforeMain()
 	{
-		$this->container->template->addJS('media://com_akeeba/js/S3Import.min.js');
+		$this->container->template->addJS('media://com_akeeba/js/S3Import.min.js', true, false, $this->container->mediaVersion);
 
 		/** @var S3Import $model */
 		$model = $this->getModel();
@@ -61,7 +61,7 @@ class Html extends BaseView
 
 	public function onBeforeDltoserver()
 	{
-		$this->container->template->addJS('media://com_akeeba/js/S3Import.min.js');
+		$this->container->template->addJS('media://com_akeeba/js/S3Import.min.js', true, false, $this->container->mediaVersion);
 
 		$this->setLayout('downloading');
 

@@ -899,6 +899,13 @@ class Finalization extends Part
 			{
 				$stat = Platform::getInstance()->get_statistics($id);
 
+				// Exclude frozen record from quota management
+				if (isset($stat['frozen']) && $stat['frozen'])
+				{
+					Factory::getLog()->debug(sprintf("Excluding frozen backup id %d from quota management", $id));
+					continue;
+				}
+
 				try
 				{
 					$backupstart = new DateTime($stat['backupstart']);
@@ -1033,7 +1040,7 @@ class Finalization extends Part
 			else
 			{
 				Factory::getLog()->debug("Processing count quotas");
-				// Yes, aply the quota setting. Add to $ret all entries minus the last
+				// Yes, apply the quota setting. Add to $ret all entries minus the last
 				// $countQuota ones.
 				$totalRecords = count($allFiles);
 				$checkLimit   = $totalRecords - $countQuota;
@@ -1290,6 +1297,12 @@ class Finalization extends Part
 		foreach ($allRecords as $item)
 		{
 			if ($item['id'] == $latestBackupId)
+			{
+				continue;
+			}
+
+			// Skip frozen records
+			if (isset($item['frozen']) && $item['frozen'])
 			{
 				continue;
 			}

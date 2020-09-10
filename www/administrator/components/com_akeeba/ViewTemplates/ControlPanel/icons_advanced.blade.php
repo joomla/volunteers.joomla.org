@@ -22,7 +22,7 @@ if (!$this->permissions['configure'])
             <h3>@lang('COM_AKEEBA_CPANEL_HEADER_ADVANCED')</h3>
         </header>
 
-        <div class="akeeba-grid--small">
+        <div class="akeeba-grid">
             @if($this->permissions['configure'])
                 <a class="akeeba-action--teal"
                    href="index.php?option=com_akeeba&view=Schedule">

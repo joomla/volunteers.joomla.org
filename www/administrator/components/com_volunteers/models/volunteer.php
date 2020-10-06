@@ -405,7 +405,7 @@ class VolunteersModelVolunteer extends JModelAdmin
 				$item->name = $item->team_title;
 			}
 
-			if ($item->date_ended == '0000-00-00')
+			if ($item->date_ended == '0000-00-00' && !$item->guest)
 			{
 				$teams->active[] = $item;
 			}

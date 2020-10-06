@@ -273,6 +273,14 @@ class VolunteersModelMembers extends JModelList
 				->where('team.department != 58');
 		}
 
+		// Filter guests on frontend
+		$filterGuests = $this->getState('filter.guests');
+
+		if ($filterGuests)
+		{
+			$query->where($db->quoteName('user.email') . ' NOT LIKE ' . $db->quote('%identity.joomla.org%'));
+		}
+
 		// Filter by active
 		$active = $this->getState('filter.active');
 
@@ -325,11 +333,17 @@ class VolunteersModelMembers extends JModelList
 		if ($items) foreach ($items as $item)
 		{
 			$item->address = false;
+			$item->guest   = false;
 
 			// Check if address is filled in
 			if ($item->volunteer_address && $item->volunteer_city && $item->volunteer_zip && $item->volunteer_country)
 			{
 				$item->address = true;
+			}
+
+			if ((strpos($item->user_email, 'identity.joomla.org') !== false))
+			{
+				$item->guest = true;
 			}
 
 			unset($item->volunteer_address);

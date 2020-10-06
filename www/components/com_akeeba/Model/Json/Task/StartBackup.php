@@ -51,6 +51,11 @@ class StartBackup extends AbstractTask
 		$backupid    = empty($backupid) ? null : $backupid; // Otherwise the Engine doesn't set a backup ID
 		$overrides   = $filter->clean($defConfig['overrides'], 'array');
 
+		if (empty($description))
+		{
+			$description = $this->container->factory->model('Backup')->getDefaultDescription() . ' (JSON API)';
+		}
+
 		$this->container->platform->setSessionVar('profile', $profile);
 		define('AKEEBA_PROFILE', $profile);
 

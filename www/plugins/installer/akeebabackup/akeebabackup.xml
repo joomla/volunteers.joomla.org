@@ -12,8 +12,8 @@
 	<authorUrl>https://www.akeeba.com</authorUrl>
 	<copyright>Copyright (c)2006-2019 Nicholas K. Dionysopoulos</copyright>
 	<license>GNU General Public License version 3, or later</license>
-	<creationDate>2020-09-10</creationDate>
-	<version>7.3.1</version>
+	<creationDate>2020-09-21</creationDate>
+	<version>7.3.2.1</version>
 	<description>PLG_INSTALLER_AKEEBABACKUP_XML_DESCRIPTION</description>
 	<files>
 		<filename plugin="akeebabackup">akeebabackup.php</filename>

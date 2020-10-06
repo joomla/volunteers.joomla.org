@@ -81,7 +81,7 @@ class Restore extends Controller
 			return;
 		}
 
-		$model->setState('jps_key', $this->input->get('jps_key', '', 'cmd'));
+		$model->setState('jps_key', $this->input->get('jps_key', '', 'none', 2));
 		$model->setState('procengine', $this->input->get('procengine', 'direct', 'cmd'));
 		$model->setState('zapbefore', $this->input->get('zapbefore', 0, 'int'));
 		$model->setState('min_exec', $this->input->get('min_exec', 0, 'int'));
@@ -99,7 +99,7 @@ class Restore extends Controller
 
 		if ($status === false)
 		{
-			$this->setRedirect('index.php?option=com_akeeba&view=Manage', \Joomla\CMS\Language\Text::_('COM_AKEEBA_RESTORE_ERROR_CANT_WRITE'), 'error');
+			$this->setRedirect('index.php?option=com_akeeba&view=Manage', Text::_('COM_AKEEBA_RESTORE_ERROR_CANT_WRITE'), 'error');
 			$this->redirect();
 
 			return;

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="plugin" version="3.8" group="content" method="upgrade">
+	<name>PLG_CONTENT_COPYME</name>
+	<creationDate>[DATE]</creationDate>
+	<author>Carlos Cámara</author>
+	<authorEmail>carlos@hepta.es</authorEmail>
+	<authorUrl>https://extensions.hepta.es</authorUrl>
+	<copyright>2019 Hepta Technologies SL</copyright>
+	<license>GNU General Public License version 2 or later; see LICENSE.txt</license>
+	<version>1.0</version>
+	<description>PLG_CONTENT_COPYME_XML_DESCRIPTION</description>
+
+	<!-- Scripts to run on installation -->
+	<scriptfile></scriptfile>
+
+	<!-- Language files -->
+	<languages folder="language">
+		<language tag="en-GB">en-GB/en-GB.plg_content_copyme.ini</language>
+		<language tag="en-GB">en-GB/en-GB.plg_content_copyme.sys.ini</language>
+	</languages>
+
+	<media folder="media" destination="hepta">
+		<folder>css</folder>
+		<folder>icons</folder>
+		<folder>vendor</folder>
+	</media>
+
+	<!-- Plugin files -->
+	<files>
+		<filename plugin="copyme">copyme.php</filename>
+		<folder>language</folder>
+		<folder>tmpl</folder>
+	</files>
+
+	<!-- Config parameter -->
+	<config>
+		<fields name="params">
+			<fieldset name="basic">
+				<field name="instructions" type="note" description="PLG_CONTENT_COPYME_INSTRUCTIONS" />
+			</fieldset>
+		</fields>
+	</config>
+
+	<!-- Update servers -->
+	<updateservers>
+		<server type="extension" priority="2" name="Content Plugin Copy Me">https://extensions.hepta.es/index.php?option=com_ars&amp;view=update&amp;task=stream&amp;format=xml&amp;id=5&amp;dummy.xml</server>
+	</updateservers>
+</extension>

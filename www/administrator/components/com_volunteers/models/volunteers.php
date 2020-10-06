@@ -161,8 +161,8 @@ class VolunteersModelVolunteers extends JModelList
 			}
 		}
 
-		// Filter guests on frontend
-		$filterGuests = $this->getState('filter.guests', ($frontend) ? 1 : null);
+		// Filter private profiles on frontend
+		$filterGuests = $this->getState('filter.private', ($frontend) ? 1 : null);
 
 		if ($filterGuests)
 		{

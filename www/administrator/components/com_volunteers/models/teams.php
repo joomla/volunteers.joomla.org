@@ -254,7 +254,7 @@ class VolunteersModelTeams extends JModelList
 			$members->setState('filter.active', 1);
 			$members->setState('filter.type', 'team');
 			$members->setState('filter.team', $teamIds);
-			$members->setState('filter.guests', 1);
+			$members->setState('filter.private', 1);
 			$members = $members->getItems();
 
 			if (!empty($members)) foreach ($members as $member)

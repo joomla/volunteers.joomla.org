@@ -60,21 +60,6 @@ defined('_JEXEC') || die();
             </a>
         @endif
 
-        {{-- Reload update information --}}
-        @if (!AKEEBA_PRO)
-            <p style="margin: 0.5em 0">
-                <a href="index.php?option=com_akeeba&view=ControlPanel&task=reloadUpdateInformation"
-                   class="akeeba-btn--dark">
-                    @lang('COM_AKEEBA_CPANEL_MSG_RELOADUPDATE')
-                </a>
-            </p>
-        @else
-            <a href="index.php?option=com_akeeba&view=ControlPanel&task=reloadUpdateInformation"
-               class="akeeba-btn--dark">
-                @lang('COM_AKEEBA_CPANEL_MSG_RELOADUPDATE')
-            </a>
-        @endif
-
         {{-- Pro upsell --}}
         @if(!AKEEBA_PRO && (time() - $this->lastUpsellDismiss < 1296000))
             <p style="margin: 0.5em 0">

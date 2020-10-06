@@ -39,10 +39,12 @@ class Davclient
 	 * Basic authentication
 	 */
 	public const AUTH_BASIC = 1;
+
 	/**
 	 * Digest authentication
 	 */
 	public const AUTH_DIGEST = 2;
+
 	/**
 	 * The propertyMap is a key-value array.
 	 *
@@ -56,12 +58,19 @@ class Davclient
 	 * @var array
 	 */
 	public $propertyMap = [];
+
 	protected $headers = '';
+
 	protected $baseUri;
+
 	protected $userName;
+
 	protected $password;
+
 	protected $proxy;
+
 	protected $trustedCertificates;
+
 	/**
 	 * The authentication type we're using.
 	 *
@@ -408,7 +417,7 @@ class Davclient
 				}
 
 				break;
-			CASE 'PUT':
+			case 'PUT':
 				// ATTENTION!!! If you want to upload a file, you have to directly supply the file content inside the request body.
 				// This is necessary because if we hit a redirect, cURL will screw up since he can't automatically rewind
 				// a file pointer resource, but he can do that with a string.
@@ -692,11 +701,12 @@ class Davclient
 
 		$parts = parse_url($this->baseUri);
 
-		$returnURL  = $parts['scheme'] . '://' . $parts['host'];
-		$returnURL .= (isset($parts['port']) ? ':' . $parts['port'] : '');
-		$returnURL .= (isset($parts['path']) ? ':' . $parts['path'] : '');
-		$returnURL .= '/' . ltrim($url, '/');
+		$schemeAndHost = $parts['scheme'] . '://' . $parts['host'];
+		$portString    = isset($parts['port']) ? (':' . $parts['port']) : '';
+		$path          = (isset($parts['path']) && !empty($parts['path'])) ? $parts['path'] : '';
+		$path          = trim($path, '/') . '/';
+		$path          = (strpos($path, '/') !== 0) ? ('/' . $path) : $path;
 
-		return $returnURL;
+		return $schemeAndHost . ($portString) . $path . ltrim($url, '/');
 	}
 }

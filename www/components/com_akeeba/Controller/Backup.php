@@ -78,7 +78,7 @@ class Backup extends Controller
 
 		$model->setState('tag', AKEEBA_BACKUP_ORIGIN);
 		$model->setState('backupid', $backupId);
-		$model->setState('description', Text::_('COM_AKEEBA_BACKUP_DEFAULT_DESCRIPTION') . ' ' . $dateNow->format(Text::_('DATE_FORMAT_LC2'), true));
+		$model->setState('description', $model->getDefaultDescription() . ' (Frontend)');
 		$model->setState('comment', '');
 
 		$array = $model->startBackup();

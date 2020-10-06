@@ -79,7 +79,9 @@ class AkeebaBackupCheckfailed extends FOFApplicationCLI
 		$phpversion     = PHP_VERSION;
 		$phpenvironment = PHP_SAPI;
 
-		if ($this->input->get('quiet', -1, 'int') == -1)
+		$verboseOutput = $this->input->get('quiet', -1, 'int') == -1;
+
+		if ($verboseOutput)
 		{
 			$year = gmdate('Y');
 			echo <<<ENDBLOCK
@@ -146,6 +148,12 @@ ENDBLOCK;
 		if (function_exists('error_reporting'))
 		{
 			error_reporting($oldLevel);
+		}
+
+		// JDEBUG needs to always be defined
+		if (!defined('JDEBUG'))
+		{
+			define('JDEBUG', $verboseOutput ? 1 : 0);
 		}
 
 		/** @var Statistics $model */

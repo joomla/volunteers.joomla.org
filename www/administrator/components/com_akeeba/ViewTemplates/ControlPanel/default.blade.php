@@ -14,10 +14,9 @@ defined('_JEXEC') || die();
 {{-- Display various possible warnings about issues which directly affect the user's experience --}}
 @include('admin:com_akeeba/ControlPanel/warnings')
 
-{{-- Update notification container --}}
-<div id="updateNotice"></div>
-
+{{-- Main area --}}
 <div class="akeeba-container--66-33">
+    {{-- LEFT COLUMN (66% desktop width) --}}
     <div>
 	    {{-- Active profile switch --}}
 	    @include('admin:com_akeeba/ControlPanel/profile')
@@ -43,9 +42,8 @@ defined('_JEXEC') || die();
 	    @if($this->permissions['configure'])
 		    @include('admin:com_akeeba/ControlPanel/icons_includeexclude')
 	    @endif
-
-
     </div>
+    {{-- RIGHT COLUMN (33% desktop width) --}}
     <div>
 	    {{-- Status Summary --}}
 	    @include('admin:com_akeeba/ControlPanel/sidebar_status')

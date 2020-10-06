@@ -64,27 +64,10 @@ class AkeebaBackupCLI extends FOFApplicationCLI
 		$jlang->load('com_akeeba' . '.override', $paths[0], 'en-GB', true);
 		$jlang->load('com_akeeba' . '.override', $paths[1], 'en-GB', true);
 
-		// Get the backup profile and description
-		$profile = $this->getOption('profile', 1, 'int');
+		/** @var Backup $model */
+		$container = Container::getInstance('com_akeeba');
+		$model     = $container->factory->model('Backup')->tmpInstance();
 
-		if ($profile <= 0)
-		{
-			$profile = 1;
-		}
-
-		$description = $this->getOption('description', 'Command-line backup', 'string');
-		$overrides   = $this->getOption('override', [], 'array');
-
-		if (!empty($overrides))
-		{
-			$override_message = "\nConfiguration variables overriden in the command line:\n";
-			$override_message .= implode(', ', array_keys($overrides));
-			$override_message .= "\n";
-		}
-		else
-		{
-			$override_message = "";
-		}
 
 		$debugmessage = '';
 
@@ -134,38 +117,8 @@ license. See http://www.gnu.org/licenses/gpl-3.0.html for details.
 
 You are using Joomla! $jVersion on PHP $phpversion ($phpenvironment)
 $debugmessage
-Starting a new backup with the following parameters:
-Profile ID  $profile
-Description "$description"
-$override_message
-Current memory usage: $memusage
-
 
 ENDBLOCK;
-		}
-
-		// Attempt to use an infinite time limit, in case you are using the PHP CGI binary instead
-		// of the PHP CLI binary. This will not work with Safe Mode, though.
-		if (function_exists('set_time_limit'))
-		{
-			if ($verboseMode)
-			{
-				echo "Unsetting time limit restrictions.\n";
-			}
-
-			@set_time_limit(0);
-		}
-		else
-		{
-			if ($verboseMode)
-			{
-				echo "Could not unset time limit restrictions; you may get a timeout error\n";
-			}
-		}
-
-		if ($verboseMode)
-		{
-			echo "\n";
 		}
 
 		// Log some paths
@@ -209,6 +162,57 @@ ENDBLOCK;
 		// Assign the correct platform
 		Platform::addPlatform('joomla3x', JPATH_COMPONENT_ADMINISTRATOR . '/BackupPlatform/Joomla3x');
 
+		// Get the backup profile
+		$profile = $this->getOption('profile', 1, 'int');
+
+		if ($profile <= 0)
+		{
+			$profile = 1;
+		}
+
+		// Get a default description
+		$description = $this->getOption('description', $model->getDefaultDescription() . ' (CLI)', 'string');
+		$overrides   = $this->getOption('override', [], 'array');
+
+		if (!empty($overrides))
+		{
+			$override_message = "\nConfiguration variables overriden in the command line:\n";
+			$override_message .= implode(', ', array_keys($overrides));
+			$override_message .= "\n";
+		}
+		else
+		{
+			$override_message = "";
+		}
+
+		if ($verboseMode) {
+			echo <<< ENDBLOCK
+Starting a new backup with the following parameters:
+Profile ID  $profile
+Description "$description"
+$override_message
+Current memory usage: $memusage
+
+ENDBLOCK;
+
+		}
+
+		// Attempt to use an infinite time limit, in case you are using the PHP CGI binary instead
+		// of the PHP CLI binary. This will not work with Safe Mode, though.
+		if (function_exists('set_time_limit'))
+		{
+			if ($verboseMode)
+			{
+				echo "Unsetting time limit restrictions.\n\n";
+			}
+
+			@set_time_limit(0);
+		}
+		elseif ($verboseMode)
+		{
+			echo "Could not unset time limit restrictions; you may get a timeout error\n\n";
+		}
+
 		// Forced CLI mode settings
 		define('AKEEBA_PROFILE', $profile);
 		define('AKEEBA_BACKUP_ORIGIN', 'cli');
@@ -224,10 +228,6 @@ ENDBLOCK;
 		];
 
 		$warnings_flag = false;
-
-		/** @var Backup $model */
-		$container = Container::getInstance('com_akeeba');
-		$model     = $container->factory->model('Backup')->tmpInstance();
 
 		$model->setState('tag', AKEEBA_BACKUP_ORIGIN);
 		$model->setState('backupid', null);

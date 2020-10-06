@@ -41,15 +41,13 @@ class GetBackupInfo extends AbstractTask
 		// Get the basic statistics
 		$record = Platform::getInstance()->get_statistics($backup_id);
 
-		// Get a list of filenames
-		$backup_stats = Platform::getInstance()->get_statistics($backup_id);
-
 		// Backup record doesn't exist
-		if (empty($backup_stats))
+		if (empty($record))
 		{
 			throw new \RuntimeException('Invalid backup record identifier', 404);
 		}
 
+		// Get a list of filenames
 		$filenames = Factory::getStatistics()->get_all_filenames($record);
 
 		if (empty($filenames))

@@ -244,4 +244,47 @@ class Statistics
 	{
 		return $this->cached_data;
 	}
+
+	/**
+	 * Updates the "in step" flag of the current backup record.
+	 *
+	 * @param   false  $inStep  Am I currently executing a backup step? False if just finished.
+	 *
+	 * @return  bool
+	 */
+	public function updateInStep($inStep = false)
+	{
+		if (!$this->getId())
+		{
+			return false;
+		}
+
+		$data = $this->getRecord();
+
+		/**
+		 * We will only update the instep of running backups for two reasons:
+		 *
+		 * 1. The very last Kettenrad entry is after the backup process is complete. The record is marked 'complete'. I
+		 *    must not touch it in this case.
+		 *
+		 * 2. When a record is marked 'fail' its instep is also set to 0. This happens in Factory::resetState().
+		 */
+		//
+		if ($data['status'] == 'complete')
+		{
+			return true;
+		}
+
+		$data['instep']    = $inStep ? 1 : 0;
+		$data['backupend'] = Platform::getInstance()->get_timestamp_database();
+
+		try
+		{
+			return $this->setStatistics($data);
+		}
+		catch (Exception $e)
+		{
+			return false;
+		}
+	}
 }

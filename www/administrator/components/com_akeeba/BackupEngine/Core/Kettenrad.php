@@ -438,6 +438,9 @@ class Kettenrad extends Part
 			}
 		}
 
+		// Update statistics, marking the backup as currently processing a backup step.
+		Factory::getStatistics()->updateInStep(true);
+
 		// Loop until time's up, we're done or an error occurred, or BREAKFLAG is set
 		$this->array_cache = null;
 		$object            = null;
@@ -675,6 +678,9 @@ class Kettenrad extends Part
 
 		// Log step end
 		$logger->debug('====== Finished Step number ' . $stepCounter . ' ======');
+
+		// Update statistics, marking the backup as having just finished processing a backup step.
+		Factory::getStatistics()->updateInStep(false);
 
 		if (!$registry->get('akeeba.tuning.nobreak.domains', 0))
 		{

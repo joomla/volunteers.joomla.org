@@ -37,7 +37,7 @@ class ControlPanel extends Controller
 		parent::__construct($container, $config);
 
 		$this->setPredefinedTaskList([
-			'main', 'SwitchProfile', 'UpdateInfo', 'applydlid', 'resetSecretWord', 'reloadUpdateInformation',
+			'main', 'SwitchProfile', 'applydlid', 'resetSecretWord',
 			'forceUpdateDb', 'dismissUpsell', 'fixOutputDirectory', 'checkOutputDirectory', 'addRandomToFilename',
 		]);
 	}
@@ -66,30 +66,6 @@ class ControlPanel extends Controller
 		}
 
 		$this->setRedirect($url, \Joomla\CMS\Language\Text::_('COM_AKEEBA_CPANEL_PROFILE_SWITCH_OK'));
-	}
-
-	public function UpdateInfo()
-	{
-		/** @var Updates $updateModel */
-		$updateModel = $this->container->factory->model('Updates')->tmpInstance();
-		$updateInfo   = $updateModel->getUpdates();
-
-		$result = '';
-
-		if ($updateInfo['hasUpdate'])
-		{
-			$result = $this->getView()->loadAnyTemplate('admin:com_akeeba/ControlPanel/updateinfo', [
-				'updateInfo'     => $updateInfo,
-				'softwareName'   => 'Akeeba Backup',
-				'currentVersion' => AKEEBA_VERSION,
-				'currentDate'    => AKEEBA_DATE,
-				'compatibilitySlug'    => '#akeeba-backup-compatibility',
-			]);
-		}
-		echo '###' . $result . '###';
-
-		// Cut the execution short
-		$this->container->platform->closeApplication();
 	}
 
 	/**
@@ -155,20 +131,6 @@ class ControlPanel extends Controller
 		$msg = \Joomla\CMS\Language\Text::sprintf('COM_AKEEBA_CPANEL_MSG_FESECRETWORD_RESET', $newSecret);
 
 		$url = 'index.php?option=com_akeeba';
-		$this->setRedirect($url, $msg);
-	}
-
-	public function reloadUpdateInformation()
-	{
-		$msg = null;
-
-		/** @var Updates $model */
-		$model = $this->container->factory->model('Updates')->tmpInstance();
-		$model->getUpdates(true);
-
-		$msg = \Joomla\CMS\Language\Text::_('COM_AKEEBA_COMMON_UPDATE_INFORMATION_RELOADED');
-		$url = 'index.php?option=com_akeeba';
-
 		$this->setRedirect($url, $msg);
 	}
 

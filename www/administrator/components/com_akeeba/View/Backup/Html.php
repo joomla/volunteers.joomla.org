@@ -250,14 +250,7 @@ class Html extends BaseView
 	 */
 	private function getDefaultDescription()
 	{
-		$tzDefault           = $this->container->platform->getConfig()->get('offset');
-		$user                = $this->container->platform->getUser();
-		$tz                  = $user->getParam('timezone', $tzDefault);
-		$dateNow             = new Date('now', $tz);
-		$default_description = Text::_('COM_AKEEBA_BACKUP_DEFAULT_DESCRIPTION') . ' ' .
-			$dateNow->format(Text::_('DATE_FORMAT_LC2'), true);
-
-		return $default_description;
+		return $this->getModel()->getDefaultDescription();
 	}
 
 	/**

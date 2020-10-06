@@ -1,4 +1,18 @@
 <?php die();?>
+Akeeba Backup 7.3.2.1
+================================================================================
+! CLI backups broken in version 7.3.2
+# [LOW] PHP notices from Joomla core code when running akeeba-check-failed.php in CLI
+
+Akeeba Backup 7.3.2
+================================================================================
+- Removed update notifications inside the component
+~ Normalized the default backup description under all backup methods (backend, frontend, CLI, JSON API)
+# [HIGH] WebDAV fails to upload because of the wrong absolute URL being calculated
+# [MEDIUM] The Resume and Cancel buttons in the backend backup didn't work due to a typo in the JavaScript
+# [MEDIUM] Restoring a JPS backup archive through the integrated restoration was broken if it contained charactes other than a-z, A-Z, 0-9, dash, dot or underscore.
+# [LOW] pCloud was erroneously listed in the free of charge Core version (it requires a paid subscription and was thus unusable)
+
 Akeeba Backup 7.3.1
 ================================================================================
 - Removed the System - Akeeba Backup Update Check plugin

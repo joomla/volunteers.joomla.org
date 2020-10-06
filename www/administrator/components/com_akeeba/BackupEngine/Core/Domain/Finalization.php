@@ -766,10 +766,11 @@ class Finalization extends Part
 		// We finished normally. Fetch the stats record
 		$statistics = Factory::getStatistics();
 		$registry   = Factory::getConfiguration();
-		$data       = [
+		$data = [
 			'backupend' => Platform::getInstance()->get_timestamp_database(),
 			'status'    => 'complete',
 			'multipart' => $registry->get('volatile.statistics.multipart', 0),
+			'instep'    => 0,
 		];
 
 		try

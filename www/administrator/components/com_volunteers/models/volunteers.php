@@ -161,6 +161,14 @@ class VolunteersModelVolunteers extends JModelList
 			}
 		}
 
+		// Filter guests on frontend
+		$filterGuests = $this->getState('filter.guests', ($frontend) ? 1 : null);
+
+		if ($filterGuests)
+		{
+			$query->where($db->quoteName('user.email') . ' NOT LIKE ' . $db->quote('%identity.joomla.org%'));
+		}
+
 		// Filter by active state
 		$active = $this->getState('filter.active', ($frontend) ? 1 : null);
 

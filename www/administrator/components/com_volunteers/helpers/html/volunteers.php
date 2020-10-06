@@ -72,6 +72,7 @@ abstract class JHtmlVolunteers
 			->from($db->quoteName('#__volunteers_volunteers') . ' AS a')
 			->join('LEFT', '#__users AS ' . $db->quoteName('user') . ' ON user.id = a.user_id')
 			->where('state = 1')
+			->where($db->quoteName('user.email') . ' NOT LIKE ' . $db->quote('%identity.joomla.org%'))
 			->order('name asc');
 
 		// Get the options.

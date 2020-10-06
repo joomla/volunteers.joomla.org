@@ -73,7 +73,7 @@ class VolunteersModelTeams extends JModelList
 	 * different modules that might need different sets of data or different
 	 * ordering requirements.
 	 *
-	 * @param   string $id A prefix for the store id.
+	 * @param   string  $id  A prefix for the store id.
 	 *
 	 * @return  string  A store id.
 	 */
@@ -254,6 +254,7 @@ class VolunteersModelTeams extends JModelList
 			$members->setState('filter.active', 1);
 			$members->setState('filter.type', 'team');
 			$members->setState('filter.team', $teamIds);
+			$members->setState('filter.guests', 1);
 			$members = $members->getItems();
 
 			if (!empty($members)) foreach ($members as $member)

@@ -273,8 +273,8 @@ class VolunteersModelMembers extends JModelList
 				->where('team.department != 58');
 		}
 
-		// Filter guests on frontend
-		$filterGuests = $this->getState('filter.guests');
+		// Filter private profile on frontend
+		$filterGuests = $this->getState('filter.private');
 
 		if ($filterGuests)
 		{

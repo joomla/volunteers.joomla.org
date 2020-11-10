@@ -78,17 +78,17 @@ class PlgSystemJoomlaIdentityVolunteers extends CMSPlugin
 	/**
 	 * Method triggered in processing Joomla identity data
 	 *
-	 * @param   integer $userId Joomla User ID
-	 * @param   string  $guid   GUID of user
-	 * @param   string  $task   Task triggered
-	 * @param   object  $data   Object containing user data
+	 * @param   integer  $userId  Joomla User ID
+	 * @param   string   $guid    GUID of user
+	 * @param   string   $task    Task triggered
+	 * @param   object   $data    Object containing user data
 	 *
 	 * @return  void
 	 *
 	 * @since   1.0.0
 	 */
 	public function onProcessIdentity($userId, $guid, $task, $data)
-	{		
+	{
 		try
 		{
 			$this->validateData($data);
@@ -107,9 +107,9 @@ class PlgSystemJoomlaIdentityVolunteers extends CMSPlugin
 	 *
 	 * @return  void
 	 *
+	 * @since   1.0.0
 	 * @throws  InvalidArgumentException
 	 *
-	 * @since   1.0.0
 	 */
 	private function validateData($data)
 	{
@@ -125,9 +125,9 @@ class PlgSystemJoomlaIdentityVolunteers extends CMSPlugin
 	/**
 	 * Method to update the volunteer data
 	 *
-	 * @param   integer $userId Joomla User ID
-	 * @param   string  $guid   GUID of user
-	 * @param   object  $data   Object containing user data
+	 * @param   integer  $userId  Joomla User ID
+	 * @param   string   $guid    GUID of user
+	 * @param   object   $data    Object containing user data
 	 *
 	 * @return  void
 	 *
@@ -160,9 +160,10 @@ class PlgSystemJoomlaIdentityVolunteers extends CMSPlugin
 			'longitude'           => $data->longitude,
 			'joomlaforum'         => $data->joomlaforum,
 			'joomladocs'          => $data->joomladocs,
-			'crowdin'             => $data->crowdin
+			'crowdin'             => $data->crowdin,
+			'osmAddress'          => $data->osmAddress
 		);
-		
+
 		JLog::add(json_encode($volunteer), JLog::INFO, 'idpjvp');
 
 		try

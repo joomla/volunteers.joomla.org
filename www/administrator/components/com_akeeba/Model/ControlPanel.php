@@ -347,7 +347,6 @@ class ControlPanel extends Model
 		$dbInstaller = new Installer(
 			$this->container->db,
 			JPATH_ADMINISTRATOR . '/components/com_akeeba/sql/xml'
-
 		);
 
 		$dbInstaller->updateSchema();

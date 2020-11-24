@@ -16,6 +16,8 @@ use Akeeba\Engine\Factory;
 use Akeeba\Engine\Platform;
 use FOF30\Container\Container;
 use FOF30\Dispatcher\Exception\AccessForbidden;
+use Joomla\CMS\Document\Document;
+use Joomla\CMS\Document\JsonDocument as JDocumentJSON;
 use Joomla\CMS\Factory as JFactory;
 use Joomla\CMS\Language\Text;
 
@@ -67,8 +69,8 @@ class Dispatcher extends AdminDispatcher
 			throw new AccessForbidden(Text::_('COM_AKEEBA_ERR_NO_FRONTEND_IN_CORE'));
 		}
 
-		$this->container->platform->importPlugin('akeebabackup');
-		$this->container->platform->runPlugins('onComAkeebaDispatcherBeforeDispatch', []);
+//		$this->container->platform->importPlugin('akeebabackup');
+//		$this->container->platform->runPlugins('onComAkeebaDispatcherBeforeDispatch', []);
 
 		$this->onBeforeDispatchViewAliases();
 
@@ -78,7 +80,7 @@ class Dispatcher extends AdminDispatcher
 		$lang->load('lib_fof30', JPATH_SITE, null, true, false);
 
 		// Necessary defines for Akeeba Engine
-		if ( !defined('AKEEBAENGINE'))
+		if (!defined('AKEEBAENGINE'))
 		{
 			define('AKEEBAENGINE', 1);
 			define('AKEEBAROOT', $this->container->backEndPath . '/BackupEngine');
@@ -107,11 +109,14 @@ class Dispatcher extends AdminDispatcher
 		// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 		// !!!!! WARNING: ALWAYS GO THROUGH JFactory; DO NOT GO THROUGH $this->container->db !!!!!
 		// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		$jDbo = JFactory::getDbo();
-
-		if ($jDbo->name == 'pdomysql')
+		if (version_compare(PHP_VERSION, '7.999.999', 'le'))
 		{
-			@JFactory::getDbo()->disconnect();
+			$jDbo = JFactory::getDbo();
+
+			if ($jDbo->name == 'pdomysql')
+			{
+				@JFactory::getDbo()->disconnect();
+			}
 		}
 
 		// Load the utils helper library
@@ -123,5 +128,48 @@ class Dispatcher extends AdminDispatcher
 
 		// Create a media file versioning tag
 		$this->container->mediaVersion = md5(AKEEBA_VERSION . AKEEBA_DATE);
+	}
+
+	public function onAfterDispatch()
+	{
+		// Make sure that Api and Json views forcibly get format=json
+		if (in_array($this->view, ['Api', 'Json']))
+		{
+			$format = $this->input->getCmd('format', 'html');
+
+			if ($format == 'json')
+			{
+				return;
+			}
+
+			$app     = JFactory::getApplication();
+			$content = $app->getDocument()->getBuffer();
+
+			var_dump($content);
+			die;
+
+			// Disable caching, disable offline, force use of index.php
+			$app->set('caching', 0);
+			$app->set('offline', 0);
+			$app->set('themeFile', 'index.php');
+
+
+			/** @var \Joomla\CMS\Document\JsonDocument $doc */
+			$doc = Document::getInstance('json');
+
+			$app->loadDocument($doc);
+
+			if (property_exists(JFactory::class, 'document'))
+			{
+				JFactory::$document = $doc;
+			}
+
+
+			// Set a custom document name
+			/** @var JDocumentJSON $document */
+			$document = $this->container->platform->getDocument();
+			$document->setName('akeeba_backup');
+
+		}
 	}
 }

@@ -77,7 +77,6 @@ class Logger implements LoggerInterface, LogInterface, WarningsLoggerInterface
 		// Get the file names for the default log and the tagged log
 		$currentLogName = $this->logName;
 		$this->logName  = $this->getLogFilename($tag);
-		$defaultLog     = $this->getLogFilename(null);
 
 		// Close the file if it's open
 		if ($currentLogName == $this->logName)
@@ -90,14 +89,38 @@ class Logger implements LoggerInterface, LogInterface, WarningsLoggerInterface
 
 		// Reset the log file
 		$fp = @fopen($this->logName, 'w');
+		$hasWritten = false;
 
 		if ($fp !== false)
 		{
-			fwrite($fp, '<' . '?' . 'php die(); ' . '?' . '>' . "\n");
+			$hasWritten = fwrite($fp, '<' . '?' . 'php die(); ' . '?' . '>' . "\n") !== false;
 			@fclose($fp);
 		}
 
-		// Delete the default log file if it exists
+		// If I could not write to a .log.php file try using a .log file instead.
+		if (!$hasWritten)
+		{
+			$this->logName  = $this->getLogFilename($tag, '');
+			$fp = @fopen($this->logName, 'w');
+			$hasWritten = false;
+
+			if ($fp !== false)
+			{
+				$hasWritten = fwrite($fp, "\n") !== false;
+				@fclose($fp);
+			}
+		}
+
+		// Delete the default log file(s) if they exists
+		$defaultLog     = $this->getLogFilename(null);
+
+		if (!empty($tag) && @file_exists($defaultLog))
+		{
+			@unlink($defaultLog);
+		}
+
+		$defaultLog     = $this->getLogFilename(null, '');
+
 		if (!empty($tag) && @file_exists($defaultLog))
 		{
 			@unlink($defaultLog);
@@ -239,15 +262,15 @@ class Logger implements LoggerInterface, LogInterface, WarningsLoggerInterface
 	 *
 	 * @return    string    The absolute path to the log file
 	 */
-	public function getLogFilename($tag = null)
+	public function getLogFilename($tag = null, $extension = '.php')
 	{
 		if (empty($tag))
 		{
-			$fileName = 'akeeba.log.php';
+			$fileName = 'akeeba.log' . $extension;
 		}
 		else
 		{
-			$fileName = "akeeba.$tag.log.php";
+			$fileName = "akeeba.$tag.log" . $extension;
 		}
 
 		// Get output directory
@@ -255,7 +278,9 @@ class Logger implements LoggerInterface, LogInterface, WarningsLoggerInterface
 		$outputDirectory = $registry->get('akeeba.basic.output_directory');
 
 		// Get the log file name
-		return Factory::getFilesystemTools()->TranslateWinPath($outputDirectory . DIRECTORY_SEPARATOR . $fileName);
+		$absoluteLogFilename = Factory::getFilesystemTools()->TranslateWinPath($outputDirectory . DIRECTORY_SEPARATOR . $fileName);
+
+		return $absoluteLogFilename;
 	}
 
 	/**
@@ -283,7 +308,7 @@ class Logger implements LoggerInterface, LogInterface, WarningsLoggerInterface
 	 *
 	 * @return void
 	 */
-	public function open($tag = null)
+	public function open($tag = null, $extension = '.php')
 	{
 		// If the log is already open do nothing
 		if (is_resource($this->fp) && ($tag == $this->currentTag))
@@ -304,18 +329,72 @@ class Logger implements LoggerInterface, LogInterface, WarningsLoggerInterface
 		$this->currentTag = $tag;
 
 		// Get the log filename
-		$this->logName = $this->getLogFilename($tag);
+		$this->logName = $this->getLogFilename($tag, $extension);
 
 		// Touch the file
 		@touch($this->logName);
 
-		// Open the log file
-		$this->fp = @fopen($this->logName, 'ab');
+		// Open the log file. DO NOT USE APPEND ('ab') MODE. I NEED TO SEEK INTO THE FILE. SEE FURTHER BELOW!
+		$this->fp = @fopen($this->logName, 'cb');
 
 		// If we couldn't open the file set the file pointer to null
 		if ($this->fp === false)
 		{
 			$this->fp = null;
+
+			return;
+		}
+
+		// Go to the end of the file, emulating append mode. DO NOT REPLACE THE fopen() FILE MODE!
+		if (@fseek($this->fp, 0, SEEK_END) === -1)
+		{
+			@fclose($this->fp);
+			@unlink($this->logName);
+
+			$this->fp = null;
+
+			return;
+		}
+
+		/**
+		 * The following sounds pretty stupid but there is a reason for that convoluted code.
+		 *
+		 * Some hosts, like WP Engine, will now allow you to write to a log file with a .php extension. The code below
+		 * tries to anticipate that when the log extension is .php. It will try to write to the *.log.php file and the
+		 * text is actually resembling PHP code. Hosts like WP Engine will fail the fwrite() which will cause this
+		 * method to terminate early and return a null pointer. Our code will catch this case and try to use a .log
+		 * extension as a safe fallback.
+		 */
+		if ($extension !== '.php')
+		{
+			return;
+		}
+
+		// Try to write something into the file
+		$written = @fwrite($this->fp, '<?php die("test"); ?>' . "\n");
+
+		if ($written === false)
+		{
+			@fclose($this->fp);
+			@unlink($this->logName);
+
+			$this->fp = null;
+
+			$this->open($tag, '');
+
+			return;
+		}
+
+		if (fseek($this->fp, -$written, SEEK_CUR) === -1)
+		{
+			@fclose($this->fp);
+			@unlink($this->logName);
+
+			$this->fp = null;
+
+			$this->open($tag, '');
+
+			return;
 		}
 	}
 
@@ -353,8 +432,10 @@ class Logger implements LoggerInterface, LogInterface, WarningsLoggerInterface
 		$fileName = $this->getLogFilename($tag);
 
 		/**
-		 * Transitional period: the log file akeeba.tag.log.php may not exist but the akeeba.tag.log does. This if-block
-		 * addresses this transition.
+		 * The log file akeeba.tag.log.php may not exist but the akeeba.tag.log does. This would be the case in some bad
+		 * hosts, like WPEngine, which do not allow us to create .php files EVEN THOUGH that's the only way to ensure
+		 * the privileged information in the log file is not readable over the web. You can't fix bad hosts, you can
+		 * only work around them.
 		 */
 		if (!@file_exists($fileName) && @file_exists(substr($fileName, 0, -4)))
 		{

@@ -20,11 +20,12 @@ interface LogInterface
 	 * Open a new log instance with the specified tag. If another log is already open it is closed before switching to
 	 * the new log tag. If the tag is null use the default log defined in the logging system.
 	 *
-	 * @param   string|null  $tag  The log to open
+	 * @param   string|null  $tag        The log to open
+	 * @param   string       $extension  The log file extension (default: .php, use empty string for .log files)
 	 *
 	 * @return void
 	 */
-	public function open($tag = null);
+	public function open($tag = null, $extension = '.php');
 
 	/**
 	 * Close the currently active log and set the current tag to null.

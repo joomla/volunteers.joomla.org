@@ -993,6 +993,27 @@ class DataModel extends Model implements TableInterface
 	}
 
 	/**
+	 * Is this field known to the model and marked as nullable in the database?
+	 *
+	 * Automatically uses aliases when necessary.
+	 *
+	 * @param   string  $fieldName  Field name to check
+	 *
+	 * @return  bool  True if the field is nullable or doesn't exist
+	 */
+	public function isNullableField(string $fieldName): bool
+	{
+		if (!$this->hasField($fieldName))
+		{
+			return true;
+		}
+
+		$realFieldName = $this->getFieldAlias($fieldName);
+
+		return strtolower($this->knownFields[$realFieldName]->Null ?? 'YES') == 'yes';
+	}
+
+	/**
 	 * Get the real name of a field name based on its alias. If the field is not aliased $alias is returned
 	 *
 	 * @param   string  $alias  The field to get an alias for
@@ -2886,7 +2907,7 @@ class DataModel extends Model implements TableInterface
 		if ($this->hasField('locked_on'))
 		{
 			$locked_on        = $this->getFieldAlias('locked_on');
-			$this->$locked_on = $db->getNullDate();
+			$this->$locked_on = $this->isNullableField('locked_on') ? null : $db->getNullDate();
 		}
 
 		if ($this->hasField('locked_by'))
@@ -2916,7 +2937,7 @@ class DataModel extends Model implements TableInterface
 			return false;
 		}
 
-		$nullDate = $this->getDbo()->getNullDate();
+		$nullDate = $this->isNullableField('locked_on') ? null : $this->getDbo()->getNullDate();
 
 		// Get the locked_by / locked_on
 		$locked_on = $nullDate;
@@ -2954,7 +2975,7 @@ class DataModel extends Model implements TableInterface
 			return false;
 		}
 
-		return $locked_on != $nullDate;
+		return !is_null($locked_on) && ($locked_on != $nullDate);
 	}
 
 	/**

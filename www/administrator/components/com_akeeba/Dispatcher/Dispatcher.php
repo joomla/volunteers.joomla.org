@@ -150,11 +150,15 @@ class Dispatcher extends BaseDispatcher
 		// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 		// !!!!! WARNING: ALWAYS GO THROUGH JFactory; DO NOT GO THROUGH $this->container->db !!!!!
 		// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		$jDbo = JFactory::getDbo();
 
-		if ($jDbo->name == 'pdomysql')
+		if (version_compare(PHP_VERSION, '7.999.999', 'le'))
 		{
-			@JFactory::getDbo()->disconnect();
+			$jDbo = JFactory::getDbo();
+
+			if ($jDbo->name == 'pdomysql')
+			{
+				@JFactory::getDbo()->disconnect();
+			}
 		}
 
 		// Load the utils helper library

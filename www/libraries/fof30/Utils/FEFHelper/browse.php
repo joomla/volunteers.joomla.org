@@ -218,8 +218,8 @@ abstract class FEFHelperBrowse
 
 			$tz = Factory::getUser()->getTimezone();
 
-			$publish_up   = ($publish_up != $nullDate) ? Factory::getDate($publish_up, 'UTC')->setTimeZone($tz) : false;
-			$publish_down = ($publish_down != $nullDate) ? Factory::getDate($publish_down, 'UTC')->setTimeZone($tz) : false;
+			$publish_up   = (!empty($publish_up) && ($publish_up != $nullDate)) ? Factory::getDate($publish_up, 'UTC')->setTimeZone($tz) : false;
+			$publish_down = (!empty($publish_down) && ($publish_down != $nullDate)) ? Factory::getDate($publish_down, 'UTC')->setTimeZone($tz) : false;
 
 			// Create tip text, only we have publish up or down settings
 			$tips = [];
@@ -244,13 +244,13 @@ abstract class FEFHelperBrowse
 				{
 					$states[$key][2] = $states[$key][3] = 'JLIB_HTML_PUBLISHED_ITEM';
 
-					if ($publish_up > $nullDate && $nowDate < $publish_up->toUnix())
+					if (!empty($publish_up) && ($publish_up != $nullDate) && $nowDate < $publish_up->toUnix())
 					{
 						$states[$key][2] = $states[$key][3] = 'JLIB_HTML_PUBLISHED_PENDING_ITEM';
 						$states[$key][5] = $states[$key][6] = 'android-time';
 					}
 
-					if ($publish_down > $nullDate && $nowDate > $publish_down->toUnix())
+					if (!empty($publish_down) && ($publish_down != $nullDate) && $nowDate > $publish_down->toUnix())
 					{
 						$states[$key][2] = $states[$key][3] = 'JLIB_HTML_PUBLISHED_EXPIRED_ITEM';
 						$states[$key][5] = $states[$key][6] = 'alert';

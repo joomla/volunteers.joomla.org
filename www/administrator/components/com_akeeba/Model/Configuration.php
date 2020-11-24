@@ -44,6 +44,10 @@ class Configuration extends Model
 			{
 				$data['akeeba.basic.output_directory'] = '[DEFAULT_OUTPUT]';
 			}
+			else
+			{
+				$data['akeeba.basic.output_directory'] = Factory::getFilesystemTools()->rebaseFolderToStockDirs($data['akeeba.basic.output_directory']);
+			}
 		}
 
 		// Unprotect the configuration and merge it

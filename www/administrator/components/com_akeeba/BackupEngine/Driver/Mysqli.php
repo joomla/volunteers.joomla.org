@@ -12,6 +12,7 @@ namespace Akeeba\Engine\Driver;
 defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Driver\Query\Mysqli as QueryMysqli;
+use mysqli_result;
 use RuntimeException;
 
 /**
@@ -28,8 +29,15 @@ class Mysqli extends Mysql
 	 * @since  11.1
 	 */
 	public $name = 'mysqli';
+
 	protected $port;
 	protected $socket;
+
+	/** @var \mysqli|null The db connection resource */
+	protected $connection = '';
+
+	/** @var mysqli_result|null The database connection cursor from the last query. */
+	protected $cursor;
 
 	/**
 	 * Database object constructor
@@ -133,14 +141,32 @@ class Mysqli extends Mysql
 	public function close()
 	{
 		$return = false;
-		if (is_resource($this->cursor))
+
+		if (is_object($this->cursor) && ($this->cursor instanceof mysqli_result))
 		{
-			mysqli_free_result($this->cursor);
+			try
+			{
+				@$this->cursor->free();
+			}
+			catch (\Throwable $e)
+			{
+			}
+
+			$this->cursor = null;
 		}
-		if (is_object($this->connection))
+
+		if (is_object($this->connection) && ($this->connection instanceof \mysqli))
 		{
-			$return = @mysqli_close($this->connection);
+			try
+			{
+				$return = @$this->connection->close();
+			}
+			catch (\Throwable $e)
+			{
+				$return = false;
+			}
 		}
+
 		$this->connection = null;
 
 		return $return;
@@ -157,6 +183,22 @@ class Mysqli extends Mysql
 	public function escape($text, $extra = false)
 	{
 		$result = @mysqli_real_escape_string($this->getConnection(), $text);
+
+		if ($result === false)
+		{
+			// Attempt to reconnect.
+			try
+			{
+				$this->connection = null;
+				$this->open();
+
+				$result = @mysqli_real_escape_string($this->getConnection(), $text);;
+			}
+			catch (RuntimeException $e)
+			{
+				$result = $this->unsafe_escape($text);
+			}
+		}
 
 		if ($extra)
 		{
@@ -194,7 +236,7 @@ class Mysqli extends Mysql
 	/**
 	 * Get the number of returned rows for the previous executed SQL statement.
 	 *
-	 * @param   resource  $cursor  An optional database cursor resource to extract the row count from.
+	 * @param   mysqli_result  $cursor  An optional database cursor resource to extract the row count from.
 	 *
 	 * @return  integer   The number of returned rows.
 	 */

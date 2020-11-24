@@ -107,6 +107,24 @@ class Input extends JInput
 	}
 
 	/**
+	 * Remove a key from the input data.
+	 *
+	 * @param   string  $name  The key name to remove from the input data.
+	 *
+	 * @return  void
+	 * @since   3.6.3
+	 */
+	public function remove($name)
+	{
+		if (!isset($this->data[$name]))
+		{
+			return;
+		}
+
+		unset($this->data[$name]);
+	}
+
+	/**
 	 * Returns a copy of the raw data stored in the class
 	 *
 	 * @return  array

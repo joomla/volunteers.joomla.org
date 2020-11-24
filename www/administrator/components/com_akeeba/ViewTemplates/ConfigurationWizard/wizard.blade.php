@@ -76,12 +76,14 @@ defined('_JEXEC') || die();
                         <span class="akion-wrench"></span>
                         @lang('COM_AKEEBA_CONFIG')
                     </a>
+                    @if (AKEEBA_PRO)
                     <a
                             class="akeeba-btn--ghost"
                             href="{{{ JUri::base() }}}index.php?option=com_akeeba&view=Schedule">
                         <span class="akion-calendar"></span>
                         @lang('COM_AKEEBA_SCHEDULE')
                     </a>
+                    @endif
                 </p>
             </div>
         </div>

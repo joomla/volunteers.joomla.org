@@ -19,7 +19,7 @@ use FOF30\Container\Container;
 use FOF30\Model\Model;
 
 // JSON API version number
-define('AKEEBA_JSON_API_VERSION', '350');
+define('AKEEBA_JSON_API_VERSION', '400');
 
 /*
  * Short API version history:
@@ -30,11 +30,14 @@ define('AKEEBA_JSON_API_VERSION', '350');
  * 335  Configuration overrides in startBackup
  * 340  Advanced API allows full configuration
  * 350  exportConfiguration, importConfiguration
+ * 400  API version 2
  *
  * Notes:
  *
  * When support for non-Raw encapsulations was removed December 2019 the API level was left at 350 (same
  * since May 2016). If you see API level 350 try using only ever using the RAW encapsulation.
+ *
+ * If you see API level 400 or greater you SHOULD try using JSON API v2. The legacy JSON API will eventually go away.
  */
 
 if (!defined('AKEEBA_BACKUP_ORIGIN'))

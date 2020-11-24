@@ -188,12 +188,24 @@ abstract class Factory
 		$logger->resetWarnings();
 
 		$serializedFactoryData = static::serialize();
-		$result                = $factoryStorage->set($serializedFactoryData, $saveTag);
+		$memoryFileExtension   = 'php';
+		$result                = $factoryStorage->set($serializedFactoryData, $saveTag, $memoryFileExtension);
+
+		/**
+		 * Some hosts, such as WPEngine, do not allow us to save the memory files in .php files. In this case we use the
+		 * far more insecure .dat extension.
+		 */
+		if ($result === false)
+		{
+			$memoryFileExtension = 'dat';
+			$result              = $factoryStorage->set($serializedFactoryData, $saveTag, $memoryFileExtension);
+		}
 
 		if ($result === false)
 		{
-			$saveKey      = $factoryStorage->get_storage_filename($saveTag);
+			$saveKey      = $factoryStorage->get_storage_filename($saveTag, $memoryFileExtension);
 			$errorMessage = "Cannot save factory state in storage, storage filename $saveKey";
+
 			$logger->error($errorMessage);
 
 			throw new RuntimeException($errorMessage);
@@ -253,8 +265,8 @@ abstract class Factory
 
 				if (is_array($statList))
 				{
-					$stat    = array_pop($statList);
-					$profile = $stat['profile_id'];
+					$stat    = array_pop($statList) ?? [];
+					$profile = $stat['profile_id'] ?? 1;
 				}
 			}
 

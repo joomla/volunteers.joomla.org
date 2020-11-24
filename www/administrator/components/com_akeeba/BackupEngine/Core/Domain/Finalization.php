@@ -14,6 +14,7 @@ defined('AKEEBAENGINE') || die();
 use Akeeba\Engine\Base\Part;
 use Akeeba\Engine\Factory;
 use Akeeba\Engine\Platform;
+use Akeeba\Engine\Postproc\Base;
 use DateTime;
 use Exception;
 use Psr\Log\LogLevel;
@@ -491,6 +492,14 @@ class Finalization extends Part
 
 		$post_proc = Factory::getPostprocEngine($engine_name);
 
+		if (!is_object($post_proc) || !($post_proc instanceof Base))
+		{
+			Factory::getLog()->debug("Post-processing engine “{$engine_name}” not found.");
+			Factory::getLog()->debug("The post-processing engine has either been removed or you are trying to use a profile created with the Professional version of the backup software in the Core version which doesn't have this post-processing engine.");
+
+			return true;
+		}
+
 		// Initialize the archive part list if required
 		if (empty($this->backup_parts))
 		{
@@ -770,7 +779,6 @@ class Finalization extends Part
 			'backupend' => Platform::getInstance()->get_timestamp_database(),
 			'status'    => 'complete',
 			'multipart' => $registry->get('volatile.statistics.multipart', 0),
-			'instep'    => 0,
 		];
 
 		try
@@ -790,6 +798,12 @@ class Finalization extends Part
 
 			return false;
 		}
+
+		/**
+		 * We could have handled it in $data above. However, if the schema has not been updated this function will
+		 * continue failing inifnitely, causing the backup to never end.
+		 */
+		$statistics->updateInStep(false);
 
 		$stat = (object) $statistics->getRecord();
 		Platform::getInstance()->remove_duplicate_backup_records($stat->archivename);
@@ -1013,8 +1027,8 @@ class Finalization extends Part
 							elseif (@file_exists(dirname($filePath) . '/' . substr($file['logname'], 0, -4)))
 							{
 								/**
-								 * Transitional period: the log file akeeba.tag.log.php may not exist but the
-								 * akeeba.tag.log does. This addresses this transition.
+								 * Bad host: the log file akeeba.tag.log.php may not exist but the akeeba.tag.log file
+								 * does. This code addresses this problem.
 								 */
 								$killLogs[] = dirname($filePath) . '/' . substr($file['logname'], 0, -4);
 							}
@@ -1077,8 +1091,8 @@ class Finalization extends Part
 									elseif (@file_exists(dirname($filePath) . '/' . substr($def['logname'], 0, -4)))
 									{
 										/**
-										 * Transitional period: the log file akeeba.tag.log.php may not exist but the
-										 * akeeba.tag.log does. This addresses this transition.
+										 * Bad host: the log file akeeba.tag.log.php may not exist but the akeeba.tag.log file
+										 * does. This code addresses this problem.
 										 */
 										$killLogs[] = dirname($filePath) . '/' . substr($def['logname'], 0, -4);
 									}
@@ -1131,7 +1145,19 @@ class Finalization extends Part
 
 							if (!empty($filePath))
 							{
-								$killLogs[] = dirname($filePath) . '/' . $def['logname'];
+								if (@file_exists(dirname($filePath) . '/' . $def['logname']))
+								{
+									$killLogs[] = dirname($filePath) . '/' . $def['logname'];
+
+								}
+								elseif (@file_exists(dirname($filePath) . '/' . substr($def['logname'], 0, -4)))
+								{
+									/**
+									 * Bad host: the log file akeeba.tag.log.php may not exist but the akeeba.tag.log file
+									 * does. This code addresses this problem.
+									 */
+									$killLogs[] = dirname($filePath) . '/' . substr($def['logname'], 0, -4);
+								}
 							}
 						}
 					}

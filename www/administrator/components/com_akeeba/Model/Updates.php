@@ -309,7 +309,7 @@ class Updates extends Update
 				$db->q('') . ',' .
 				$db->q('') . ',' .
 				$db->q(0) . ',' .
-				$db->q($db->getNullDate()) . ',' .
+				(version_compare(JVERSION, '3.9999.9999', 'le') ? $db->q($db->getNullDate()) : 'NULL') . ',' .
 				$db->q(0) . ',' .
 				$db->q(0),
 			]);

@@ -54,8 +54,8 @@ CREATE TABLE `#__ak_stats` (
 	`id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 	`description` varchar(255) NOT NULL,
 	`comment` longtext,
-	`backupstart` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
-	`backupend` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+	`backupstart` timestamp NULL DEFAULT NULL,
+	`backupend` timestamp NULL DEFAULT NULL,
 	`status` enum('run','fail','complete') NOT NULL DEFAULT 'run',
 	`origin` varchar(30) NOT NULL DEFAULT 'backend',
 	`type` varchar(30) NOT NULL DEFAULT 'full',
@@ -134,6 +134,38 @@ ALTER TABLE `#__ak_stats` ADD COLUMN `frozen` tinyint(1) DEFAULT '0';
             <condition type="missing" value="instep" />
             <query><![CDATA[
 ALTER TABLE `#__ak_stats` ADD COLUMN `instep` tinyint(1) DEFAULT '0';
+            ]]></query>
+        </action>
+
+        <!-- Change datetime fields to nullable -->
+        <action table="#__ak_stats" canfail="1">
+            <condition type="nullable" value="backupstart" operator="not"/>
+            <query><![CDATA[
+        ALTER TABLE `#__ak_stats` MODIFY `backupstart` TIMESTAMP NULL DEFAULT NULL;
+        ]]></query>
+            <query><![CDATA[
+        UPDATE `#__ak_stats` SET `backupstart` = NULL WHERE `backupstart` = '0000-00-00 00:00:00';
+        ]]></query>
+        </action>
+
+        <action table="#__ak_stats" canfail="1">
+            <condition type="nullable" value="backupend" operator="not"/>
+            <query><![CDATA[
+        ALTER TABLE `#__ak_stats` MODIFY `backupend` TIMESTAMP NULL DEFAULT NULL;
+        ]]></query>
+            <query><![CDATA[
+        UPDATE `#__ak_stats` SET `backupend` = NULL WHERE `backupend` = '0000-00-00 00:00:00';
+        ]]></query>
+        </action>
+
+        <!-- Nuke any old record inside the ak_storage table -->
+        <action table="#__ak_storage" canfail="1">
+            <condition type="equals" operator="not" value="0"><![CDATA[
+SELECT COUNT(*) FROM `#__ak_storage`;
+            ]]></condition>
+
+            <query><![CDATA[
+TRUNCATE TABLE `#__ak_storage`;
             ]]></query>
         </action>
     </sql>

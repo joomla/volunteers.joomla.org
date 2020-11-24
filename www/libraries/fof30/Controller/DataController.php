@@ -402,11 +402,10 @@ class DataController extends Controller
 		// CSRF prevention
 		$this->csrfProtection();
 
-		$model = $this->getModel()->savestate(false);
-
-		$ids = $this->getIDsFromRequest($model, true);
-
-		$error = null;
+		$model       = $this->getModel()->savestate(false);
+		$ids         = $this->getIDsFromRequest($model, true);
+		$error       = null;
+		$copiedCount = 0;
 
 		try
 		{
@@ -416,6 +415,7 @@ class DataController extends Controller
 			{
 				$model->find($id);
 				$model->copy();
+				$copiedCount++;
 			}
 		}
 		catch (\Exception $e)
@@ -435,12 +435,19 @@ class DataController extends Controller
 		if (!$status)
 		{
 			$this->setRedirect($url, $error, 'error');
+
+			return;
 		}
-		else
+
+		if ($copiedCount > 0)
 		{
 			$textKey = strtoupper($this->container->componentName . '_LBL_' . $this->container->inflector->singularize($this->view) . '_COPIED');
 			$this->setRedirect($url, Text::_($textKey));
+
+			return;
 		}
+
+		$this->setRedirect($url);
 	}
 
 	/**

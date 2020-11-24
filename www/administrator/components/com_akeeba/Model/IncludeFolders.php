@@ -36,6 +36,31 @@ class IncludeFolders extends Model
 	}
 
 	/**
+	 * Automatically rebase included folders to use path variables like [SITEROOT] and [ROOTPARENT]
+	 *
+	 * @return  void
+	 * @since   7.3.3
+	 */
+	public function rebaseFiltersToSiteDirs()
+	{
+		$includeFolders = $this->get_directories();
+
+		foreach ($includeFolders as $uuid => $def)
+		{
+			$originalDir  = $def[0];
+			$convertedDir = Factory::getFilesystemTools()->rebaseFolderToStockDirs($originalDir);
+
+			if ($originalDir == $convertedDir)
+			{
+				continue;
+			}
+
+			$def[0] = $convertedDir;
+			$this->setFilter($uuid, $def);
+		}
+	}
+
+	/**
 	 * Delete a database definition
 	 *
 	 * @param   string  $uuid  The external directory's filter root key (UUID) to remove
@@ -76,16 +101,16 @@ class IncludeFolders extends Model
 		$action = $this->getState('action');
 		$verb   = array_key_exists('verb', $action) ? $action['verb'] : null;
 
-		$ret_array = array();
+		$ret_array = [];
 
 		switch ($verb)
 		{
 			// Set a filter (used by the editor)
 			case 'set':
-				$new_data = array(
-					0 => $action['root'],
-					1 => $action['data']
-				);
+				$new_data = [
+					0 => Factory::getFilesystemTools()->rebaseFolderToStockDirs($action['root']),
+					1 => $action['data'],
+				];
 
 				// Set the new root
 				$ret_array = $this->setFilter($action['uuid'], $new_data);

@@ -26,24 +26,20 @@ class ConfigurationWizard extends Model
 	 * Attempts to automatically figure out where the output and temporary directories should point, adjusting their
 	 * permissions should it be necessary.
 	 *
-	 * @param   int  $dontRecurse  Used internally. Always skip this parameter when calling this method.
+	 * @param   bool  $dontRecurse  Used internally. Always skip this parameter when calling this method.
 	 *
 	 * @return  bool  True if we could fix the directories
 	 */
-	public function autofixDirectories($dontRecurse = 0)
+	public function autofixDirectories(bool $dontRecurse = false)
 	{
-		// Get the profile ID
-		$profile_id = Platform::getInstance()->get_active_profile();
+		// Get the output directory, translated
+		$engineConfig    = Factory::getConfiguration();
+		$outputDirectory = $engineConfig->get('akeeba.basic.output_directory', '');
+		$fixOut = true;
 
-		// Get the output and temporary directory
-		$engineConfig = Factory::getConfiguration();
-		$outputDirectory   = $engineConfig->get('akeeba.basic.output_directory', '');
-
-		$fixOut  = true;
-
+		// Is the folder writeable?
 		if (is_dir($outputDirectory))
 		{
-			// Test the writability of the directory
 			$filename = $outputDirectory . '/test.dat';
 			$fixOut   = !@file_put_contents($filename, 'test');
 
@@ -52,35 +48,59 @@ class ConfigurationWizard extends Model
 				// Directory writable, remove the temp file
 				@unlink($filename);
 			}
-			else
-			{
-				// Try to chmod the directory
-				$this->chmod($outputDirectory, 511);
-				// Repeat the test
-				$fixOut = !@file_put_contents($filename, 'test');
+		}
 
-				if (!$fixOut)
-				{
-					// Directory writable, remove the temp file
-					@unlink($filename);
-				}
+		// Do I need to change the permissions?
+		if ($fixOut)
+		{
+			// Try to chmod the directory
+			$this->chmod($outputDirectory, 511);
+
+			// Repeat the test
+			$fixOut = !@file_put_contents($filename, 'test');
+
+			if (!$fixOut)
+			{
+				// Directory writable, remove the temp file
+				@unlink($filename);
 			}
 		}
 
-		// Do I have to fix the output directory?
-		if ($fixOut && ($dontRecurse < 1))
+		/**
+		 * If we reached this point after recursion, we can't fix the permissions of the default backup output folder.
+		 * The user has to manually select a writeable backup output directory (or make the default otuput writeable).
+		 */
+		if ($fixOut && $dontRecurse)
 		{
-			$engineConfig->set('akeeba.basic.output_directory', '[DEFAULT_OUTPUT]');
-			Platform::getInstance()->save_configuration($profile_id);
-
-			// After fixing the directory, run ourselves again
-			return $this->autofixDirectories(1);
-		}
-		elseif ($fixOut)
-		{
-			// If we reached this point after recursing, we can't fix the permissions
-			// and the user has to RTFM and fix the issue!
 			return false;
+		}
+
+		/**
+		 * Write the output folder through the Configuration model. This ensures that:
+		 *
+		 * - we are not trying to use the site's root as the output folder.
+		 * - the output folder saved in the database contains an abstracted representation of the folder, using path
+		 *   variables instead of absolute filesystem folders.
+		 *
+		 * @var Configuration $model
+		 */
+		$model = $this->container->factory->model('Configuration')->tmpInstance();
+
+		// Do I have to fall back to the default output directory?
+		$outputDirectory = $fixOut ? '[DEFAULT_OUTPUT]' : $outputDirectory;
+
+		$model->setState('engineconfig', [
+			'akeeba.basic.output_directory' => $outputDirectory,
+		]);
+		$model->saveEngineConfig();
+
+		/**
+		 * If we had to revert to the default output we will run ourselves again to make sure that the default backup
+		 * output folder is, in fact, writeable.
+		 */
+		if ($fixOut)
+		{
+			return $this->autofixDirectories(true);
 		}
 
 		return true;

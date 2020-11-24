@@ -1,4 +1,23 @@
 <?php die();?>
+Akeeba Backup 7.4.0.1
+================================================================================
+! Akeeba Backup Core: cannot access the plugin or take a backup because of a PHP error due to an incorrect reference to a Pro-only class.
+# [LOW] Backup failure with an error if you import a profile that uses a post-processing engine created with the Pro version into the Core version which does not have this post-processing engine.
+
+Akeeba Backup 7.4.0
+================================================================================
++ Files and Directories Exclusion: mark folder and file symlinks as such [gh-676]
++ Automatically rewrite the Output Directory using site path variables such as [SITEROOT] for portability [gh-678]
++ Automatically rewrite the Off-site Folders Inclusion using site path variables for portability
++ Remote backup JSON API version 2
++ ANGIE: Added feature to resume restoring the database if an error occurs
+~ Deprecated Upload to pCloud
+~ Removed tooltips from Database Tables Exclusion and Files and Folders Exclusion pages to clean up the UI
+~ Using nullable TIMESTAMP fields instead of zero dates
+# [MEDIUM] Recent Chrome and Chromium-based browsers open OAuth2 windows without opener information, making linking to Google Drive, Dropbox etc impossible without manually copying the tokens (the button causes you to log out of the site)
+# [LOW] Files and Directories Exclusion: the folder up is not clickable / doesn't do anything [gh-675]
+# [LOW] Scheduling information button appears in the Configuration Wizard's finale page in the Core version
+
 Akeeba Backup 7.3.2.1
 ================================================================================
 ! CLI backups broken in version 7.3.2

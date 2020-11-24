@@ -5,10 +5,12 @@
  * @license   GNU General Public License version 3, or later
  */
 
+use Akeeba\Backup\Admin\Model\ConfigurationWizard;
 use Akeeba\Backup\Site\Model\Backup;
 use Akeeba\Engine\Factory;
 use Akeeba\Engine\Platform;
 use FOF30\Container\Container;
+use FOF30\Factory\Exception\ModelNotFound;
 
 // Enable and include Akeeba Engine
 define('AKEEBAENGINE', 1);
@@ -219,6 +221,23 @@ ENDBLOCK;
 
 		// Check is encrypted settings can be decrypted
 		$this->checkSettingsDecryption($profile);
+
+		// Autofix the output directory
+		/** @var ConfigurationWizard $confWizModel */
+		$confWizModel = $container->factory->model('ConfigurationWizard')->tmpInstance();
+		$confWizModel->autofixDirectories();
+
+		// Rebase Off-site Folder Inclusion filters to use site path variables
+		/** @var \Akeeba\Backup\Admin\Model\IncludeFolders $incFoldersModel */
+		try
+		{
+			$incFoldersModel = $container->factory->model('IncludeFolders')->tmpInstance();
+			$incFoldersModel->rebaseFiltersToSiteDirs();
+		}
+		catch (ModelNotFound $e)
+		{
+			// Not a problem. This is expected to happen in the Core version.
+		}
 
 		// Dummy array so that the loop iterates once
 		$array = [

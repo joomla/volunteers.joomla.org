@@ -30,7 +30,7 @@ define('KICKSTART_RECOMMENDED_PHP', '7.3.0');
 
 if (!defined('VERSION'))
 {
-	define('VERSION', '7.0.2');
+	define('VERSION', 'revCA70D25');
 }
 
 if (!defined('KICKSTARTPRO'))
@@ -13795,7 +13795,7 @@ function echoPage()
 		<div id="header">
 			<div class="title">
 				<span id="logo" alt="Akeeba Kickstart logo"></span>
-				Akeeba Kickstart <?php echo $edition ?> 7.0.2
+				Akeeba Kickstart <?php echo $edition ?> revCA70D25
 			</div>
 		</div>
 
@@ -14043,7 +14043,7 @@ function echoPage()
 /**
  * Old PHP version notification
  *
- * @copyright Copyright Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c) 2018-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -14293,7 +14293,7 @@ if (!defined('KICKSTART'))
 /**
  * Obsolete PHP version notification
  *
- * @copyright Copyright Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c) 2018-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -14973,7 +14973,7 @@ function kickstart_application_cli()
 	if (!$silent)
 	{
 		echo <<< BANNER
-Akeeba Kickstart CLI 7.0.2
+Akeeba Kickstart CLI revCA70D25
 Copyright (c) 2008-$year Akeeba Ltd / Nicholas K. Dionysopoulos
 -------------------------------------------------------------------------------
 Akeeba Kickstart is Free Software, distributed under the terms of the GNU General

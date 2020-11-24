@@ -21,6 +21,7 @@ use Akeeba\Engine\Platform;
 use Exception;
 use FOF30\Container\Container;
 use FOF30\Controller\Controller;
+use FOF30\Factory\Exception\ModelNotFound;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Uri\Uri;
 use RuntimeException;
@@ -298,6 +299,18 @@ class ControlPanel extends Controller
 		/** @var ConfigurationWizard $wizmodel */
 		$wizmodel = $this->container->factory->model('ConfigurationWizard')->tmpInstance();
 		$wizmodel->autofixDirectories();
+
+		// Rebase Off-site Folder Inclusion filters to use site path variables
+		/** @var \Akeeba\Backup\Admin\Model\IncludeFolders $incFoldersModel */
+		try
+		{
+			$incFoldersModel = $this->container->factory->model('IncludeFolders')->tmpInstance();
+			$incFoldersModel->rebaseFiltersToSiteDirs();
+		}
+		catch (ModelNotFound $e)
+		{
+			// Not a problem. This is expected to happen in the Core version.
+		}
 
 		// Check if we need to toggle the settings encryption feature
 		$model->checkSettingsEncryption();

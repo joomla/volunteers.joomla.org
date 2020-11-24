@@ -558,6 +558,26 @@ class Installer
 
 				break;
 
+			// Check if a column is nullable
+			case 'nullable':
+				try
+				{
+					$tableColumns = $this->db->getTableColumns($tableNormal, true);
+				}
+				catch (Exception $e)
+				{
+					$tableColumns = [];
+				}
+
+				$condition = false;
+
+				if (array_key_exists($value, $tableColumns))
+				{
+					$condition = (is_string($tableColumns[$value]) ? 'YES' : strtolower($tableColumns[$value]->Null)) == 'yes';
+				}
+
+				break;
+
 			// Check if a (named) index exists on the table. Currently only supported on MySQL.
 			case 'index':
 				$indexName = (string) $value;

@@ -237,6 +237,22 @@ class Mysql extends Base
 	{
 		$result = @mysql_real_escape_string($text, $this->getConnection());
 
+		if ($result === false)
+		{
+			// Attempt to reconnect.
+			try
+			{
+				$this->connection = null;
+				$this->open();
+
+				$result = @mysql_real_escape_string($text, $this->getConnection());
+			}
+			catch (RuntimeException $e)
+			{
+				$result = $this->unsafe_escape($text);
+			}
+		}
+
 		if ($extra)
 		{
 			$result = addcslashes($result, '%_');
@@ -1016,5 +1032,14 @@ class Mysql extends Base
 		{
 			return version_compare($client_version, '5.5.3', '>=');
 		}
+	}
+
+	protected function unsafe_escape($string)
+	{
+		if (function_exists('mb_ereg_replace')) {
+			return mb_ereg_replace('[\x00\x0A\x0D\x1A\x22\x27\x5C]', '\\\0', $string);
+		}
+
+		return preg_replace('~[\x00\x0A\x0D\x1A\x22\x27\x5C]~u', '\\\$0', $string);
 	}
 }

@@ -121,6 +121,8 @@ class FileFilters extends Model
 				$result             = $filters->isFilteredExtended($test, $root, 'dir', 'children', $byFilter);
 				$status['skipdirs'] = (!$result) ? 0 : (($byFilter == 'skipdirs') ? 1 : 2);
 
+				$status['link']  = @is_link($directory . '/' . $folder);
+
 				// Add to output array
 				$folders_out[ $folder ] = $status;
 			}
@@ -155,6 +157,7 @@ class FileFilters extends Model
 				$result          = $filters->isFilteredExtended($test, $root, 'file', 'all', $byFilter);
 				$status['files'] = (!$result) ? 0 : (($byFilter == 'files') ? 1 : 2);
 				$status['size']  = $this->formatSize(@filesize($directory . '/' . $file), 1);
+				$status['link']  = @is_link($directory . '/' . $file);
 
 				// Add to output array
 				$files_out[$file] = $status;

@@ -5,9 +5,13 @@
  * @license   GNU General Public License version 3, or later
  */
 
-// Protect from unauthorized access
-defined('_JEXEC') or die();
+namespace Akeeba\Backup\Site\Model;
 
-define('AKEEBA_PRO', '1');
-define('AKEEBA_VERSION', '7.4.0.1');
-define('AKEEBA_DATE', '2020-11-18');
+// Protect from unauthorized access
+defined('_JEXEC') || die();
+
+use Akeeba\Backup\Admin\Model\Configuration as AdminModel;
+
+class Configuration extends AdminModel
+{
+}

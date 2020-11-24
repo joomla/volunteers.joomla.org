@@ -237,6 +237,49 @@ class FileSystem
 	}
 
 	/**
+	 * Rebase a path to the platform filesystem variables (most to least specific).
+	 *
+	 * This is the inverse procedure of translateStockDirs().
+	 *
+	 * @param   string  $path
+	 *
+	 * @return  string
+	 * @since   7.3.0
+	 */
+	public function rebaseFolderToStockDirs(string $path): string
+	{
+		// Normalize the path
+		$path = $this->TrimTrailingSlash($path);
+		$path = $this->TranslateWinPath($path);
+
+		// Get the stock directories, normalize them and sort them by longest to shortest
+		$stock_directories = Platform::getInstance()->get_stock_directories();
+
+		$stock_directories = array_map(function ($path) {
+			$path = $this->TrimTrailingSlash($path);
+
+			return $this->TranslateWinPath($path);
+		}, $stock_directories);
+
+		uasort($stock_directories, function ($a, $b) {
+			return -($a <=> $b);
+		});
+
+		// Start replacing paths with variables
+		foreach ($stock_directories as $var => $stockPath)
+		{
+			if (strpos($path, $stockPath) !== 0)
+			{
+				continue;
+			}
+
+			$path = $var . substr($path, strlen($stockPath));
+		}
+
+		return $path;
+	}
+
+	/**
 	 * Generates a set of files which prevent direct web access or at least web listing of the folder contents.
 	 *
 	 * This method generates a .htaccess for Apache, Lighttpd and Litespeed; a web.config file for IIS 7 or later; an

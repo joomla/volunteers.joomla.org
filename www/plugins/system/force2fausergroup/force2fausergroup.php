@@ -160,8 +160,8 @@ class PlgSystemForce2faUsergroup extends CMSPlugin
 
 		$user = Factory::getUser();
 
-		// With 4.0.0 you can configure the 2FA options from your com_admin profile
-		if (version_compare(JVERSION, '4.0.0', 'ge'))
+		// With 3.9.22 (https://github.com/joomla/joomla-cms/pull/30751) and 4.0.0 you can configure the 2FA options from your com_admin profile
+		if (version_compare(JVERSION, '3.9.22', 'ge'))
 		{
 			// Redirect to com_admin profile edit
 			$this->app->enqueueMessage(Text::_('PLG_SYSTEM_FORCE2FAUSERGROUP_2FA_REDIRECT_MESSAGE'), 'notice');

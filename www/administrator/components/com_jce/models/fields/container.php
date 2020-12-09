@@ -50,8 +50,13 @@ class JFormFieldContainer extends JFormField
     protected function getInput()
     {
         $group = $this->group;
+
+        // subfields require JCE Pro
+        if ($this->element['pro'] && !WF_EDITOR_PRO) {
+            return "";
+        }
         
-        $subForm    = new JForm('', array('control' => $this->formControl . '[' . $group . ']'));
+        $subForm    = new JForm('', array('control' => $this->formControl . '[' . str_replace('.', '][', $group) . ']'));
         $children   = $this->element->children();
 
         $subForm->load($children);
@@ -59,9 +64,14 @@ class JFormFieldContainer extends JFormField
 
         $data = $this->form->getData()->toObject();
 
-        if (isset($data->$group)) {
-            $subForm->bind($data->$group);
+        // extract relevant data level using group
+        foreach (explode('.', $group) as $key) {
+            if (isset($data->$key)) {
+                $data = $data->$key;
+            }
         }
+
+        $subForm->bind($data);
 
         // And finaly build a main container
         $str = array();
@@ -69,7 +79,7 @@ class JFormFieldContainer extends JFormField
         $fields = $subForm->getFieldset();
 
         if ($this->class === 'inset') {
-            $this->class .= ' well well-small well-light p-4 bg-white';
+            $this->class .= ' well well-small well-light p-4 bg-light';
         }
 
         $str[] = '<div class="form-field-container ' . $this->class . '">';
@@ -82,8 +92,18 @@ class JFormFieldContainer extends JFormField
             $str[] = '<legend>' . $text . '</legend>';
         }
 
+        if ($this->element['description']) {
+            $text = $this->element['description'];
+            $text = $this->translateLabel ? JText::_($text) : $text;
+            
+            $str[] = '<small class="description">' . $text . '</small>';
+
+            // reset description
+            $this->description = '';
+        }
+
         foreach ($fields as $field) {
-            $str[] = $field->renderField();
+            $str[] = $field->renderField(array('description' => $field->description));
         }
 
         $str[] = '  </fieldset>';

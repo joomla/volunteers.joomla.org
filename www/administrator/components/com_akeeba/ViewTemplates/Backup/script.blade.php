@@ -1,7 +1,7 @@
 <?php
 /**
  * @package   akeebabackup
- * @copyright Copyright (c)2006-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -24,8 +24,7 @@ $platform       = $this->container->platform;
 $platform->addScriptOptions('akeeba.Backup.defaultDescription', addslashes($this->defaultDescription));
 $platform->addScriptOptions('akeeba.Backup.currentDescription', addslashes(empty($this->description) ? $this->defaultDescription : $this->description));
 $platform->addScriptOptions('akeeba.Backup.currentComment', addslashes($this->comment));
-$platform->addScriptOptions('akeeba.Backup.config_angiekey', addslashes($this->ANGIEPassword));
-$platform->addScriptOptions('akeeba.Backup.jpsKey', $this->showJPSPassword ? addslashes($this->jpsPassword) : '');
+$platform->addScriptOptions('akeeba.Backup.hasAngieKey', $this->hasANGIEPassword);
 
 // Auto-resume setup
 $platform->addScriptOptions('akeeba.Backup.resume.enabled', (bool) $this->autoResume);

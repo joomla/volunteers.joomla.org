@@ -1,7 +1,7 @@
 <?php
 /**
  * @package   akeebabackup
- * @copyright Copyright (c)2006-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -28,7 +28,7 @@ class RemoteFiles extends Model
 	/**
 	 * The fragment size for chunked downloads. Default: 1MB
 	 */
-	const DOWNLOAD_FRAGMENT_SIZE = 1048576;
+	public const DOWNLOAD_FRAGMENT_SIZE = 1048576;
 
 	/**
 	 * Returns information about the capabilities of the post-processing engine used with a specific backup record.

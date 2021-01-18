@@ -368,7 +368,7 @@ class CategoriesModelCategory extends JModelAdmin
 	 */
 	public function validate($form, $data, $group = null)
 	{
-		if (!JFactory::getUser()->authorise('core.admin', 'com_categories'))
+		if (!JFactory::getUser()->authorise('core.admin', $data['extension']))
 		{
 			if (isset($data['rules']))
 			{

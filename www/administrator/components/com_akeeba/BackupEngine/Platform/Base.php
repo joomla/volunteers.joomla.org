@@ -3,7 +3,7 @@
  * Akeeba Engine
  *
  * @package   akeebaengine
- * @copyright Copyright (c)2006-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -791,7 +791,7 @@ abstract class Base implements PlatformInterface
 		$db->setQuery($query);
 		$array = $db->loadColumn();
 
-		Factory::getLog()->debug(count($array) . " records found");
+		Factory::getLog()->debug((is_array($array) || $array instanceof \Countable ? count($array) : 0) . " records found");
 
 		// No records?! Quit.
 		if (empty($array))
@@ -799,7 +799,7 @@ abstract class Base implements PlatformInterface
 			return;
 		}
 		// Only one record. Quit.
-		if (count($array) == 1)
+		if ((is_array($array) || $array instanceof \Countable ? count($array) : 0) == 1)
 		{
 			return;
 		}

@@ -3,7 +3,7 @@
  * Akeeba Engine
  *
  * @package   akeebaengine
- * @copyright Copyright (c)2006-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -88,7 +88,7 @@ class Amazons3 extends Base
 		$this->supportsDownloadToFile    = true;
 	}
 
-	final public function processPart($localFilepath, $remoteBaseName = null)
+	final public function processPart($localFilepath, $remoteBaseName = null): bool
 	{
 		// Retrieve engine configuration data
 		$akeebaConfig = Factory::getConfiguration();
@@ -98,36 +98,24 @@ class Amazons3 extends Base
 
 		// Get the configuration parameters
 		$engineConfig     = $this->getEngineConfiguration();
-		$bucket           = $engineConfig['bucket'];
-		$disableMultipart = $engineConfig['disableMultipart'];
-		$storageType      = $engineConfig['rrs'];
+		$bucket           = $engineConfig['bucket'] ?? '';
+		$disableMultipart = $engineConfig['disableMultipart'] ?? false;
+		$storageType      = $engineConfig['rrs'] ?? self::STORAGE_STANDARD;
 
 		// The directory is a special case. First try getting a cached directory
 		$directory        = $akeebaConfig->get('volatile.postproc.directory', null);
-		$processDirectory = false;
 
 		// If there is no cached directory, fetch it from the engine configuration
 		if (is_null($directory))
 		{
-			$directory        = $engineConfig['directory'];
-			$processDirectory = true;
-		}
+			$directory        = $engineConfig['directory'] ?? '';
 
-		// The very first time we deal with the directory we need to process it.
-		if ($processDirectory)
-		{
-			if (!empty($directory))
-			{
-				$directory = str_replace('\\', '/', $directory);
-				$directory = rtrim($directory, '/');
-				$directory = trim($directory);
-				$directory = ltrim(Factory::getFilesystemTools()->TranslateWinPath($directory), '/');
-				$directory = Factory::getFilesystemTools()->replace_archive_name_variables($directory);
-			}
-			else
-			{
-				$directory = '';
-			}
+			// The very first time we deal with the directory we need to process it.
+			$directory = str_replace('\\', '/', $directory);
+			$directory = rtrim($directory, '/');
+			$directory = trim($directory);
+			$directory = ltrim(Factory::getFilesystemTools()->TranslateWinPath($directory), '/');
+			$directory = Factory::getFilesystemTools()->replace_archive_name_variables($directory);
 
 			// Store the parsed directory in temporary storage
 			$akeebaConfig->set('volatile.postproc.directory', $directory);
@@ -231,7 +219,7 @@ class Amazons3 extends Base
 	 *
 	 * @return  array
 	 */
-	protected function getEngineConfiguration()
+	protected function getEngineConfiguration(): array
 	{
 		$akeebaConfig = Factory::getConfiguration();
 
@@ -239,15 +227,16 @@ class Amazons3 extends Base
 			'accessKey'           => $akeebaConfig->get('engine.postproc.amazons3.accesskey', ''),
 			'secretKey'           => $akeebaConfig->get('engine.postproc.amazons3.secretkey', ''),
 			'token'               => '',
-			'useSSL'              => $akeebaConfig->get('engine.postproc.amazons3.usessl', 0),
+			'useSSL'              => $akeebaConfig->get('engine.postproc.amazons3.usessl', 0) == 1,
+			'dualStack'           => $akeebaConfig->get('engine.postproc.amazons3.dualstack', 0) == 1,
 			'customEndpoint'      => $akeebaConfig->get('engine.postproc.amazons3.customendpoint', ''),
 			'signatureMethod'     => $akeebaConfig->get('engine.postproc.amazons3.signature', 'v2'),
 			'useLegacyPathAccess' => $akeebaConfig->get('engine.postproc.amazons3.pathaccess', '0') == 1,
 			'region'              => $akeebaConfig->get('engine.postproc.amazons3.region', ''),
-			'disableMultipart'    => $akeebaConfig->get('engine.postproc.amazons3.legacy', 0),
+			'disableMultipart'    => $akeebaConfig->get('engine.postproc.amazons3.legacy', 0) == 1,
 			'bucket'              => $akeebaConfig->get('engine.postproc.amazons3.bucket', null),
 			'directory'           => $akeebaConfig->get('engine.postproc.amazons3.directory', null),
-			'rrs'                 => $akeebaConfig->get('engine.postproc.amazons3.rrs', null),
+			'rrs'                 => (int) $akeebaConfig->get('engine.postproc.amazons3.rrs', self::STORAGE_STANDARD),
 		];
 
 		// No access and secret key? Try to fetch from the EC2 configuration
@@ -260,7 +249,7 @@ class Amazons3 extends Base
 		return $config;
 	}
 
-	final protected function makeConnector()
+	final protected function makeConnector(): Connector
 	{
 		// Retrieve engine configuration data
 		$config = $this->getEngineConfiguration();
@@ -269,12 +258,13 @@ class Amazons3 extends Base
 		$accessKey           = $config['accessKey'];
 		$secretKey           = $config['secretKey'];
 		$useSSL              = $config['useSSL'];
+		$dualStack           = $config['dualStack'];
 		$customEndpoint      = $config['customEndpoint'];
 		$signatureMethod     = $config['signatureMethod'];
 		$region              = $config['region'];
 		$useLegacyPathAccess = $config['useLegacyPathAccess'];
 		$disableMultipart    = $config['disableMultipart'];
-		$bucket              = $config['bucket'];
+		$bucket              = $config['bucket'] ?? '';
 
 		if ($signatureMethod == 's3')
 		{
@@ -330,8 +320,9 @@ class Amazons3 extends Base
 		}
 
 		// Prepare the configuration
-		$configuration = new Configuration($accessKey, $secretKey, $signatureMethod, $region);
-		$configuration->setSSL($useSSL);
+		$configuration = new Configuration($accessKey ?? '', $secretKey ?? '', $signatureMethod ?? 'v2', $region ?? '');
+		$configuration->setSSL($useSSL ?? true);
+		$configuration->setUseDualstackUrl($dualStack ?? true);
 
 		if (!empty($config['token']))
 		{
@@ -368,7 +359,7 @@ class Amazons3 extends Base
 	 *
 	 * @return  array
 	 */
-	final private function provisionCredentials(array $config)
+	final private function provisionCredentials(array $config): array
 	{
 		// First, try to fetch credentials from the volatile engine configuration
 		$akeebaConfig                 = Factory::getConfiguration();
@@ -431,7 +422,7 @@ class Amazons3 extends Base
 	 *
 	 * @throws  RuntimeException
 	 */
-	final private function getEC2RoleCredentials()
+	final private function getEC2RoleCredentials(): array
 	{
 		$hasCurl = function_exists('curl_init') && function_exists('curl_exec') && function_exists('curl_close');
 
@@ -500,9 +491,9 @@ class Amazons3 extends Base
 	 *
 	 * @return  string  The contents of the URL
 	 *
-	 * @throws  RuntimeException
+	 * @throws RuntimeException
 	 */
-	final private function getURL($url)
+	final private function getURL(string $url): string
 	{
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, $url);
@@ -561,9 +552,9 @@ class Amazons3 extends Base
 	 *
 	 * @return  bool  True when we're done uploading, false if we have more parts.
 	 *
-	 * @throws  Exception  When something goes wrong.
+	 * @throws Exception When something goes wrong.
 	 */
-	final private function multipartUpload($bucket, $remoteKey, $sourceFile, Connector $connector, $acl = 'bucket-owner-full-control', $storageType = 0)
+	final private function multipartUpload(string $bucket, string $remoteKey, string $sourceFile, Connector $connector, string $acl = 'bucket-owner-full-control', int $storageType = 0): bool
 	{
 		$endpoint                       = $connector->getConfiguration()->getEndpoint();
 		$headers                        = $this->getStorageTypeHeaders($storageType, $endpoint);
@@ -740,9 +731,9 @@ class Amazons3 extends Base
 	 *
 	 * @return  bool  True when we're done uploading, false if we have more parts
 	 *
-	 * @throws  Exception  When something goes wrong.
+	 * @throws Exception When something goes wrong.
 	 */
-	final private function simpleUpload($bucket, $remoteKey, $sourceFile, Connector $s3Client, $acl = 'bucket-owner-full-control', $storageType = 0)
+	final private function simpleUpload(string $bucket, string $remoteKey, string $sourceFile, Connector $s3Client, string $acl = 'bucket-owner-full-control', int $storageType = 0): bool
 	{
 		Factory::getLog()->debug(sprintf(
 			"%s -- Legacy (single part) upload of %s", $this->engineLogName, basename($sourceFile)
@@ -766,7 +757,7 @@ class Amazons3 extends Base
 	 *
 	 * @return  int  The length of the $data string
 	 */
-	final private function reponseHeaderCallback(&$ch, &$data)
+	final private function reponseHeaderCallback($ch, $data)
 	{
 		$strlen = strlen($data);
 

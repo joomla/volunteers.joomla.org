@@ -3,12 +3,13 @@
  * Akeeba Engine
  *
  * @package   akeebaengine
- * @copyright Copyright (c)2006-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
 namespace Akeeba\Engine\Postproc\Connector\S3v4\Signature;
 
+// Protection against direct access
 defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Postproc\Connector\S3v4\Signature;
@@ -29,7 +30,7 @@ class V2 extends Signature
 	 *
 	 * @return  void
 	 */
-	public function preProcessHeaders(&$headers, &$amzHeaders)
+	public function preProcessHeaders(array &$headers, array &$amzHeaders): void
 	{
 		// No pre-processing required for V2 signatures
 	}
@@ -38,12 +39,12 @@ class V2 extends Signature
 	 * Get a pre-signed URL for the request. Typically used to pre-sign GET requests to objects, i.e. give shareable
 	 * pre-authorized URLs for downloading files from S3.
 	 *
-	 * @param   integer  $lifetime  Lifetime in seconds
-	 * @param   boolean  $https     Use HTTPS ($hostBucket should be false for SSL verification)?
+	 * @param   integer|null  $lifetime  Lifetime in seconds. NULL for default lifetime.
+	 * @param   bool          $https     Use HTTPS ($hostBucket should be false for SSL verification)?
 	 *
 	 * @return  string  The presigned URL
 	 */
-	public function getAuthenticatedURL($lifetime = null, $https = false)
+	public function getAuthenticatedURL(?int $lifetime = null, bool $https = false): string
 	{
 		// Set the Expires header
 		if (is_null($lifetime))
@@ -99,7 +100,7 @@ class V2 extends Signature
 	 *
 	 * @return  string
 	 */
-	public function getAuthorizationHeader()
+	public function getAuthorizationHeader(): string
 	{
 		$verb           = strtoupper($this->request->getVerb());
 		$resourcePath   = $this->request->getResource();
@@ -178,17 +179,17 @@ class V2 extends Signature
 	/**
 	 * Creates a HMAC-SHA1 hash. Uses the hash extension if present, otherwise falls back to slower, manual calculation.
 	 *
-	 * @param   string  $string  String to sign
+	 * @param   string  $stringToSign  String to sign
 	 *
 	 * @return  string
 	 */
-	private function amazonV2Hash($string)
+	private function amazonV2Hash(string $stringToSign): string
 	{
 		$secret = $this->request->getConfiguration()->getSecret();
 
 		if (extension_loaded('hash'))
 		{
-			$raw = hash_hmac('sha1', $string, $secret, true);
+			$raw = hash_hmac('sha1', $stringToSign, $secret, true);
 
 			return base64_encode($raw);
 		}
@@ -196,7 +197,7 @@ class V2 extends Signature
 		$raw = pack('H*', sha1(
 				(str_pad($secret, 64, chr(0x00)) ^ (str_repeat(chr(0x5c), 64))) .
 				pack('H*', sha1(
-						(str_pad($secret, 64, chr(0x00)) ^ (str_repeat(chr(0x36), 64))) . $string
+						(str_pad($secret, 64, chr(0x00)) ^ (str_repeat(chr(0x36), 64))) . $stringToSign
 					)
 				)
 			)

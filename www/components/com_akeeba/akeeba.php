@@ -1,7 +1,7 @@
 <?php
 /**
  * @package   akeebabackup
- * @copyright Copyright (c)2006-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -11,8 +11,8 @@ defined('AKEEBA_COMMON_WRONGPHP') || define('AKEEBA_COMMON_WRONGPHP', 1);
 
 JDEBUG ? (defined('AKEEBADEBUG') || define('AKEEBADEBUG', 1)) : null;
 
-$minPHPVersion         = '7.1.0';
-$recommendedPHPVersion = '7.3';
+$minPHPVersion         = '7.2.0';
+$recommendedPHPVersion = '7.4';
 $softwareName          = 'Akeeba Backup';
 $silentResults         = true;
 

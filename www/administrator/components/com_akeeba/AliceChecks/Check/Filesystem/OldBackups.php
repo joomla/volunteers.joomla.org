@@ -1,7 +1,7 @@
 <?php
 /**
  * @package   akeebabackup
- * @copyright Copyright (c)2006-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -37,7 +37,7 @@ class OldBackups extends Base
 			}
 
 			// Record valid matches only
-			for ($i = 0; $i < count($tmp_matches[1]); $i++)
+			for ($i = 0; $i < (is_array($tmp_matches[1]) || $tmp_matches[1] instanceof \Countable ? count($tmp_matches[1]) : 0); $i++)
 			{
 				// Get flagged files only once
 				$key = md5($tmp_matches[1][$i] . $tmp_matches[2][$i]);

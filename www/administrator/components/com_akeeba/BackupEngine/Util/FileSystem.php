@@ -3,7 +3,7 @@
  * Akeeba Engine
  *
  * @package   akeebaengine
- * @copyright Copyright (c)2006-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -136,14 +136,7 @@ class FileSystem
 			$version      = defined('AKEEBABACKUP_VERSION') ? AKEEBABACKUP_VERSION : $version;
 			$platformVars = Platform::getInstance()->getPlatformVersion();
 
-			$siteName = Platform::getInstance()->get_site_name();
-			$siteName = htmlentities(utf8_decode($siteName));
-			$siteName = preg_replace(
-				['/&szlig;/', '/&(..)lig;/', '/&([aouAOU])uml;/', '/&(.)[^;]*;/'],
-				['ss', "$1", "$1" . 'e', "$1"],
-				$siteName);
-			$siteName = trim(strtolower($siteName));
-			$siteName = preg_replace(['/\s+/', '/[^A-Za-z0-9\-]/'], ['-', ''], $siteName);
+			$siteName = $this->stringUrlUnicodeSlug(Platform::getInstance()->get_site_name());
 
 			if (strlen($siteName) > 50)
 			{
@@ -429,4 +422,37 @@ TEXT;
 			@file_put_contents($dir . '/index.php', $deadPHP);
 		}
 	}
+
+	/**
+	 * Convert a string to a (Unicode) slug
+	 *
+	 * @param   string  $string  String to process
+	 *
+	 * @return  string  Processed string
+	 *
+	 * @since   7.5.0
+	 */
+	public function stringUrlUnicodeSlug(string $string): string
+	{
+		// Replace double byte whitespaces by single byte (East Asian languages)
+		$str = preg_replace('/\xE3\x80\x80/', ' ', $string);
+
+		// Remove any '-' from the string as they will be used as concatenator.
+		$str = str_replace('-', ' ', $str);
+
+		// Replace forbidden characters by whitespaces
+		$str = preg_replace('#[:\?\#\*"@+=;!><&\.%()\]\/\'\\\\|\[]#', "\x20", $str);
+
+		// Delete all '?'
+		$str = str_replace('?', '', $str);
+
+		// Trim white spaces at beginning and end of alias and make lowercase
+		$str = trim(strtolower($str));
+
+		// Remove any duplicate whitespace and replace whitespaces by hyphens
+		$str = preg_replace('#\x20+#', '-', $str);
+
+		return $str;
+	}
+
 }

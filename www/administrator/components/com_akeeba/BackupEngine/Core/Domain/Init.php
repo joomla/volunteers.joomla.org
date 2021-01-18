@@ -3,7 +3,7 @@
  * Akeeba Engine
  *
  * @package   akeebaengine
- * @copyright Copyright (c)2006-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -320,9 +320,9 @@ class Init extends Part
 
 		$phpVersion = PHP_VERSION;
 
-		if (version_compare($phpVersion, '7.2.0', 'lt'))
+		if (version_compare($phpVersion, '7.3.0', 'lt'))
 		{
-			Factory::getLog()->warning("You are using PHP $phpVersion which is officially End of Life. We recommend using PHP 7.3 or later for best results. Your version of PHP, $phpVersion, will stop being supported by this backup software in the future.");
+			Factory::getLog()->warning("You are using PHP $phpVersion which is officially End of Life. We recommend using PHP 7.4 or later for best results. Your version of PHP, $phpVersion, will stop being supported by this backup software in the future.");
 		}
 
 		// Report profile ID

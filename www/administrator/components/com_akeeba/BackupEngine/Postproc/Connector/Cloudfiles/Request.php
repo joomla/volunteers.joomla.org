@@ -3,7 +3,7 @@
  * Akeeba Engine
  *
  * @package   akeebaengine
- * @copyright Copyright (c)2006-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -142,8 +142,8 @@ class Request
 		curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
 		curl_setopt($curl, CURLOPT_HEADER, false);
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, false);
-		curl_setopt($curl, CURLOPT_WRITEFUNCTION, [&$this, '__responseWriteCallback']);
-		curl_setopt($curl, CURLOPT_HEADERFUNCTION, [&$this, '__responseHeaderCallback']);
+		curl_setopt($curl, CURLOPT_WRITEFUNCTION, [$this, '__responseWriteCallback']);
+		curl_setopt($curl, CURLOPT_HEADERFUNCTION, [$this, '__responseHeaderCallback']);
 		curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
 
 		// Request types
@@ -272,7 +272,7 @@ class Request
 	 *
 	 * @return integer
 	 */
-	protected function __responseWriteCallback(&$curl, &$data)
+	protected function __responseWriteCallback($curl, $data)
 	{
 		if (in_array($this->response->code, [200, 206]) && $this->fp !== false)
 		{
@@ -300,7 +300,7 @@ class Request
 	 *
 	 * @return integer
 	 */
-	protected function __responseHeaderCallback(&$curl, &$data)
+	protected function __responseHeaderCallback($curl, $data)
 	{
 		$strlen = strlen($data);
 

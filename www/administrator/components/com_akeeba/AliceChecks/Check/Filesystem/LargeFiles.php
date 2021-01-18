@@ -1,7 +1,7 @@
 <?php
 /**
  * @package   akeebabackup
- * @copyright Copyright (c)2006-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -36,7 +36,7 @@ class LargeFiles extends Base
 				return;
 			}
 
-			for ($i = 0; $i < count($tmp_matches[2]); $i++)
+			for ($i = 0; $i < (is_array($tmp_matches[2]) || $tmp_matches[2] instanceof \Countable ? count($tmp_matches[2]) : 0); $i++)
 			{
 				// Get flagged files only once; I could have a breaking step after, before or BOTH a large file
 				$key = md5($tmp_matches[2][$i]);

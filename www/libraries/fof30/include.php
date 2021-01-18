@@ -17,7 +17,7 @@ if (!class_exists('FOF30\\Autoloader\\Autoloader'))
 
 if (!defined('FOF30_INCLUDED'))
 {
-	define('FOF30_INCLUDED', '3.7.0');
+	define('FOF30_INCLUDED', '3.7.1');
 
 	JFactory::getLanguage()->load('lib_fof30', JPATH_SITE, 'en-GB', true);
 	JFactory::getLanguage()->load('lib_fof30', JPATH_SITE, null, true);

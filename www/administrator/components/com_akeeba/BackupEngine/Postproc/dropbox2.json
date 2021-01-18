@@ -54,5 +54,11 @@
         "type": "string",
         "title": "COM_AKEEBA_CONFIG_DROPBOXTOKEN_TITLE",
         "description": "COM_AKEEBA_CONFIG_DROPBOXTOKEN_DESCRIPTION"
+    },
+    "engine.postproc.dropbox2.refresh_token": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_DROPBOXREFRESHTOKEN_TITLE",
+        "description": "COM_AKEEBA_CONFIG_DROPBOXREFRESHTOKEN_DESCRIPTION"
     }
 }

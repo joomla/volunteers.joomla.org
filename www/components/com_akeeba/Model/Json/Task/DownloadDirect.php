@@ -1,7 +1,7 @@
 <?php
 /**
  * @package   akeebabackup
- * @copyright Copyright (c)2006-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -54,7 +54,7 @@ class DownloadDirect extends AbstractTask
 
 		$files = Factory::getStatistics()->get_all_filenames($backup_stats);
 
-		if ((count($files) < $part_id) || ($part_id <= 0))
+		if ((($files === null ? 0 : count($files)) < $part_id) || ($part_id <= 0))
 		{
 			// Invalid part
 			@ob_end_clean();

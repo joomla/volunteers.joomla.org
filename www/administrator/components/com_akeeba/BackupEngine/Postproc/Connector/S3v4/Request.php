@@ -3,15 +3,17 @@
  * Akeeba Engine
  *
  * @package   akeebaengine
- * @copyright Copyright (c)2006-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
 namespace Akeeba\Engine\Postproc\Connector\S3v4;
 
+use Akeeba\Engine\Postproc\Connector\S3v4\Response\Error;
+
+// Protection against direct access
 defined('AKEEBAENGINE') || die();
 
-use Akeeba\Engine\Postproc\Connector\S3v4\Response\Error;
 
 class Request
 {
@@ -79,9 +81,9 @@ class Request
 	/**
 	 * The file resource we are writing data to
 	 *
-	 * @var  bool|resource
+	 * @var  resource|null
 	 */
-	private $fp = false;
+	private $fp = null;
 
 	/**
 	 * The Amazon S3 configuration object
@@ -115,7 +117,7 @@ class Request
 	 *
 	 * @return  void
 	 */
-	function __construct($verb, $bucket, $uri, Configuration $configuration)
+	function __construct(string $verb, string $bucket, string $uri, Configuration $configuration)
 	{
 		$this->verb          = $verb;
 		$this->bucket        = $bucket;
@@ -155,9 +157,9 @@ class Request
 	/**
 	 * Get the input object
 	 *
-	 * @return  Input
+	 * @return  Input|null
 	 */
-	public function getInput()
+	public function getInput(): ?Input
 	{
 		return $this->input;
 	}
@@ -169,7 +171,7 @@ class Request
 	 *
 	 * @return  void
 	 */
-	public function setInput(Input $input)
+	public function setInput(Input $input): void
 	{
 		$this->input = $input;
 	}
@@ -177,12 +179,12 @@ class Request
 	/**
 	 * Set a request parameter
 	 *
-	 * @param   string  $key    The parameter name
-	 * @param   string  $value  The parameter value
+	 * @param   string       $key    The parameter name
+	 * @param   string|null  $value  The parameter value
 	 *
 	 * @return  void
 	 */
-	public function setParameter($key, $value)
+	public function setParameter(string $key, ?string $value): void
 	{
 		$this->parameters[$key] = $value;
 	}
@@ -195,7 +197,7 @@ class Request
 	 *
 	 * @return  void
 	 */
-	public function setHeader($key, $value)
+	public function setHeader(string $key, string $value): void
 	{
 		$this->headers[$key] = $value;
 	}
@@ -208,7 +210,7 @@ class Request
 	 *
 	 * @return  void
 	 */
-	public function setAmzHeader($key, $value)
+	public function setAmzHeader(string $key, string $value): void
 	{
 		$this->amzHeaders[$key] = $value;
 	}
@@ -218,7 +220,7 @@ class Request
 	 *
 	 * @return  string
 	 */
-	public function getVerb()
+	public function getVerb(): string
 	{
 		return $this->verb;
 	}
@@ -228,7 +230,7 @@ class Request
 	 *
 	 * @return  string
 	 */
-	public function getBucket()
+	public function getBucket(): string
 	{
 		return $this->bucket;
 	}
@@ -238,7 +240,7 @@ class Request
 	 *
 	 * @return  string
 	 */
-	public function getResource()
+	public function getResource(): string
 	{
 		return $this->resource;
 	}
@@ -248,7 +250,7 @@ class Request
 	 *
 	 * @return  array
 	 */
-	public function getParameters()
+	public function getParameters(): array
 	{
 		return $this->parameters;
 	}
@@ -258,7 +260,7 @@ class Request
 	 *
 	 * @return  array
 	 */
-	public function getAmzHeaders()
+	public function getAmzHeaders(): array
 	{
 		return $this->amzHeaders;
 	}
@@ -268,7 +270,7 @@ class Request
 	 *
 	 * @return  array
 	 */
-	public function getHeaders()
+	public function getHeaders(): array
 	{
 		return $this->headers;
 	}
@@ -278,7 +280,7 @@ class Request
 	 *
 	 * @return  Configuration
 	 */
-	public function getConfiguration()
+	public function getConfiguration(): Configuration
 	{
 		return $this->configuration;
 	}
@@ -286,7 +288,7 @@ class Request
 	/**
 	 * Get the file pointer resource (for PUT and POST requests)
 	 *
-	 * @return  bool|resource
+	 * @return  resource|null
 	 */
 	public function &getFp()
 	{
@@ -298,7 +300,7 @@ class Request
 	 *
 	 * @param   resource  $fp
 	 */
-	public function setFp($fp)
+	public function setFp($fp): void
 	{
 		$this->fp = $fp;
 	}
@@ -306,9 +308,9 @@ class Request
 	/**
 	 * Get the certificate authority location
 	 *
-	 * @return  string
+	 * @return  string|null
 	 */
-	public function getCaCertLocation()
+	public function getCaCertLocation(): ?string
 	{
 		if (!empty($this->caCertLocation))
 		{
@@ -326,7 +328,7 @@ class Request
 	/**
 	 * @param   null|string  $caCertLocation
 	 */
-	public function setCaCertLocation($caCertLocation)
+	public function setCaCertLocation(?string $caCertLocation): void
 	{
 		if (empty($caCertLocation))
 		{
@@ -342,15 +344,17 @@ class Request
 	}
 
 	/**
-	 * Get a pre-signed URL for the request. Typically used to pre-sign GET requests to objects, i.e. give shareable
-	 * pre-authorized URLs for downloading files from S3.
+	 * Get a pre-signed URL for the request.
 	 *
-	 * @param   integer  $lifetime  Lifetime in seconds
-	 * @param   boolean  $https     Use HTTPS ($hostBucket should be false for SSL verification)?
+	 * Typically used to pre-sign GET requests to objects, i.e. give shareable pre-authorized URLs for downloading
+	 * private or otherwise inaccessible files from S3.
 	 *
-	 * @return  string  The presigned URL
+	 * @param   int|null  $lifetime  Lifetime in seconds
+	 * @param   bool      $https     Use HTTPS ($hostBucket should be false for SSL verification)?
+	 *
+	 * @return  string  The authenticated URL, complete with signature
 	 */
-	public function getAuthenticatedURL($lifetime = null, $https = false)
+	public function getAuthenticatedURL(?int $lifetime = null, bool $https = false): string
 	{
 		$this->processParametersIntoResource();
 		$signer = Signature::getSignatureObject($this, $this->configuration->getSignatureMethod());
@@ -363,7 +367,7 @@ class Request
 	 *
 	 * @return  Response
 	 */
-	public function getResponse()
+	public function getResponse(): Response
 	{
 		$this->processParametersIntoResource();
 
@@ -415,7 +419,7 @@ class Request
 			 */
 			$isAmazonS3  = (substr($this->headers['Host'], -14) == '.amazonaws.com') ||
 				substr($this->headers['Host'], -16) == 'amazonaws.com.cn';
-			$tooManyDots = substr_count($this->headers['Host'], '.') > 3;
+			$tooManyDots = substr_count($this->headers['Host'], '.') > 4;
 
 			$verifyHost = ($isAmazonS3 && $tooManyDots) ? 0 : 2;
 
@@ -554,7 +558,7 @@ class Request
 	 *
 	 * @return  int  Length in bytes
 	 */
-	protected function __responseWriteCallback(&$curl, &$data)
+	protected function __responseWriteCallback($curl, string $data): int
 	{
 		if (in_array($this->response->code, [200, 206]) && !is_null($this->fp) && is_resource($this->fp))
 		{
@@ -569,12 +573,12 @@ class Request
 	/**
 	 * cURL header callback
 	 *
-	 * @param   resource  &$curl  cURL resource
+	 * @param   resource  $curl  cURL resource
 	 * @param   string    &$data  Data
 	 *
 	 * @return  int  Length in bytes
 	 */
-	protected function __responseHeaderCallback(&$curl, &$data)
+	protected function __responseHeaderCallback($curl, string $data): int
 	{
 		if (($strlen = strlen($data)) <= 2)
 		{
@@ -624,7 +628,7 @@ class Request
 	 *
 	 * @return  void
 	 */
-	private function processParametersIntoResource()
+	private function processParametersIntoResource(): void
 	{
 		if (count($this->parameters))
 		{
@@ -678,7 +682,7 @@ class Request
 	 *
 	 * @return  string
 	 */
-	private function getHostName(Configuration $configuration, $bucket)
+	private function getHostName(Configuration $configuration, string $bucket): string
 	{
 		// http://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region
 		$endpoint = $configuration->getEndpoint();
@@ -717,28 +721,31 @@ class Request
 
 		/**
 		 * When using the Amazon S3 with the v4 signature API we have to use a different hostname per region. The
-		 * mapping can be found in http://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region
+		 * mapping can be found in https://docs.aws.amazon.com/general/latest/gr/s3.html#s3_region
 		 *
-		 * This means changing the endpoint to s3-REGION.amazonaws.com with the following exceptions:
-		 * For us-east-1: s3-external-1.amazonaws.com
+		 * This means changing the endpoint to s3.REGION.amazonaws.com with the following exceptions:
 		 * For China: s3.REGION.amazonaws.com.cn
 		 *
 		 * v4 signing does NOT support non-Amazon endpoints.
 		 */
 		// Most endpoints: s3-REGION.amazonaws.com
-		$endpoint = 's3-' . $region . '.amazonaws.com';
-
-		// Exception: US East 1 endpoint is s3-external-1.amazonaws.com, NOT s3-us-east-1.amazonaws.com
-		if ($region == 'us-east-1')
-		{
-			$endpoint = 's3-external-1.amazonaws.com';
-		}
+		$regionalEndpoint = $region . '.amazonaws.com';
 
 		// Exception: China
 		if (substr($region, 0, 3) == 'cn-')
 		{
 			// Chinese endpoint, e.g.: s3.cn-north-1.amazonaws.com.cn
-			$endpoint = 's3.' . $region . '.amazonaws.com.cn';
+			$regionalEndpoint = $regionalEndpoint . '.cn';
+		}
+
+		// If dual-stack URLs are enabled then prepend the endpoint
+		if ($configuration->getDualstackUrl())
+		{
+			$endpoint = 's3.dualstack.' . $regionalEndpoint;
+		}
+		else
+		{
+			$endpoint = 's3.' . $regionalEndpoint;
 		}
 
 		// Legacy path style access: return just the endpoint

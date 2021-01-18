@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @version    CVS: 1.12.1
+ * @version    CVS: 1.14.0
  * @package    com_yoursites
  * @author     Geraint Edwards <via website>
  * @copyright  2016-2020 GWE Systems Ltd
@@ -198,7 +198,7 @@ class YstsSiteChecks
 		}
 
 		// Make sure the plugin is enabled!
-		$plugin = JPluginHelper::getPlugin('captcha', 'recaptcha_invisible');
+		$plugin = JPluginHelper::getPlugin('captcha', $captcha);
 		if (!$plugin) {
 			$returnData->warning = 1;
 			$returnData->checkinfo['key']  = "COM_YOURSITES_ADVCHECK_USERCAPTCHA_PLUGIN_NOT_ENABLED";

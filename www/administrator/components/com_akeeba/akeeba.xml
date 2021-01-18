@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
   ~ @package   akeebabackup
-  ~ @copyright Copyright (c)2006-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
+  ~ @copyright Copyright (c)2006-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
   ~ @license   GNU General Public License version 3, or later
   -->
 
 <extension version="3.9.0" type="component" method="upgrade">
 	<name>Akeeba</name>
-	<creationDate>2020-11-18</creationDate>
+	<creationDate>2021-01-07</creationDate>
 	<author>Nicholas K. Dionysopoulos</author>
 	<authorEmail>nicholas@dionysopoulos.me</authorEmail>
 	<authorUrl>https://www.akeeba.com</authorUrl>
 	<copyright>Copyright (c)2006-2019 Akeeba Ltd / Nicholas K. Dionysopoulos</copyright>
 	<license>GNU GPL v3 or later</license>
-	<version>7.4.0.1</version>
+	<version>7.5.1</version>
 	<description>Akeeba Backup Pro - Full Joomla! site backup solution, Professional Edition</description>
 
 	<!-- Public front end files -->
@@ -47,6 +47,7 @@
 			<folder>AliceChecks</folder>
 			<folder>backup</folder>
 			<folder>BackupEngine</folder>
+			<folder>CliCommands</folder>
 			<folder>Controller</folder>
 			<folder>BackupPlatform</folder>
 			<folder>Dispatcher</folder>

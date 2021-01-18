@@ -3,7 +3,7 @@
  * Akeeba Engine
  *
  * @package   akeebaengine
- * @copyright Copyright (c)2006-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -245,7 +245,7 @@ class Kettenrad extends Part
 		$array['Warnings'] = Factory::getLog()->getWarnings();
 
 		// Did we have warnings?
-		if (count($array['Warnings']))
+		if (is_array($array['Warnings']) || $array['Warnings'] instanceof \Countable ? count($array['Warnings']) : 0)
 		{
 			$this->warnings_issued = true;
 		}

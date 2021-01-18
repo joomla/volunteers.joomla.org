@@ -5,8 +5,6 @@
   ~ @package   fef
   ~ @copyright (c) 2017-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
   ~ @license   GNU General Public License version 3, or later
-  ~
-  ~ Created by Crystal Dionysopoulou for Akeeba Ltd, https://www.akeeba.com
   -->
 
 <extension type="file" version="3.3" method="upgrade">
@@ -17,8 +15,8 @@
     <authorUrl>https://www.akeeba.com</authorUrl>
     <copyright>(C) 2017-2018 Akeeba Ltd.</copyright>
     <license>GNU GPL v3 or later</license>
-    <version>1.1.0</version>
-    <creationDate>2020-09-02</creationDate>
+    <version>1.1.1</version>
+    <creationDate>2020-12-14</creationDate>
     <description>Akeeba Frontend Framework - The CSS framework for Akeeba Ltd extensions.</description>
 
     <!-- Fileset definition -->

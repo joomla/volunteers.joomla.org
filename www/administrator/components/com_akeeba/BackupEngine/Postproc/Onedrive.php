@@ -3,7 +3,7 @@
  * Akeeba Engine
  *
  * @package   akeebaengine
- * @copyright Copyright (c)2006-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -113,6 +113,7 @@ class Onedrive extends Base
 
 			try
 			{
+				$connector->ping();
 				$connector->makeDirectory($directory);
 			}
 			catch (Exception $e)
@@ -151,6 +152,7 @@ class Onedrive extends Base
 
 		/** @var ConnectorOneDrive $connector */
 		$connector = $this->getConnector();
+		$connector->ping();
 
 		// Download the file
 		$connector->download($remotePath, $localFile);
@@ -160,6 +162,7 @@ class Onedrive extends Base
 	{
 		/** @var ConnectorOneDrive $connector */
 		$connector = $this->getConnector();
+		$connector->ping();
 
 		return $connector->getSignedUrl($remotePath);
 	}
@@ -168,6 +171,7 @@ class Onedrive extends Base
 	{
 		/** @var ConnectorOneDrive $connector */
 		$connector = $this->getConnector();
+		$connector->ping();
 
 		$connector->delete($path);
 	}

@@ -3,12 +3,13 @@
  * Akeeba Engine
  *
  * @package   akeebaengine
- * @copyright Copyright (c)2006-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
 namespace Akeeba\Engine\Postproc\Connector\S3v4;
 
+// Protection against direct access
 defined('AKEEBAENGINE') || die();
 
 /**
@@ -59,6 +60,13 @@ class Configuration
 	protected $useSSL = true;
 
 	/**
+	 * Should I use SSL (HTTPS) to communicate to Amazon S3?
+	 *
+	 * @var  bool
+	 */
+	protected $useDualstackUrl = false;
+
+	/**
 	 * Should I use legacy, path-style access to the bucket? When it's turned off (default) we use virtual hosting style
 	 * paths which are RECOMMENDED BY AMAZON per http://docs.aws.amazon.com/AmazonS3/latest/API/APIRest.html
 	 *
@@ -79,14 +87,14 @@ class Configuration
 	 *
 	 * @param   string  $access           Amazon S3 Access Key
 	 * @param   string  $secret           Amazon S3 Secret Key
-	 * @param   string  $singatureMethod  Signature method (v2 or v4)
+	 * @param   string  $signatureMethod  Signature method (v2 or v4)
 	 * @param   string  $region           Region, only required for v4 signatures
 	 */
-	function __construct($access, $secret, $singatureMethod = 'v2', $region = '')
+	function __construct(string $access, string $secret, string $signatureMethod = 'v2', string $region = '')
 	{
 		$this->setAccess($access);
 		$this->setSecret($secret);
-		$this->setSignatureMethod($singatureMethod);
+		$this->setSignatureMethod($signatureMethod);
 		$this->setRegion($region);
 	}
 
@@ -95,7 +103,7 @@ class Configuration
 	 *
 	 * @return  string
 	 */
-	public function getAccess()
+	public function getAccess(): string
 	{
 		return $this->access;
 	}
@@ -107,7 +115,7 @@ class Configuration
 	 *
 	 * @throws  Exception\InvalidAccessKey
 	 */
-	public function setAccess($access)
+	public function setAccess(string $access): void
 	{
 		if (empty($access))
 		{
@@ -122,7 +130,7 @@ class Configuration
 	 *
 	 * @return string
 	 */
-	public function getSecret()
+	public function getSecret(): string
 	{
 		return $this->secret;
 	}
@@ -134,7 +142,7 @@ class Configuration
 	 *
 	 * @throws  Exception\InvalidSecretKey
 	 */
-	public function setSecret($secret)
+	public function setSecret(string $secret): void
 	{
 		if (empty($secret))
 		{
@@ -149,7 +157,7 @@ class Configuration
 	 *
 	 * @return  string
 	 */
-	public function getToken()
+	public function getToken(): string
 	{
 		return $this->token;
 	}
@@ -159,7 +167,7 @@ class Configuration
 	 *
 	 * @param   string  $token
 	 */
-	public function setToken($token)
+	public function setToken(string $token): void
 	{
 		$this->token = $token;
 	}
@@ -169,7 +177,7 @@ class Configuration
 	 *
 	 * @return  string
 	 */
-	public function getSignatureMethod()
+	public function getSignatureMethod(): string
 	{
 		return $this->signatureMethod;
 	}
@@ -181,7 +189,7 @@ class Configuration
 	 *
 	 * @throws  Exception\InvalidSignatureMethod
 	 */
-	public function setSignatureMethod($signatureMethod)
+	public function setSignatureMethod(string $signatureMethod): void
 	{
 		$signatureMethod = strtolower($signatureMethod);
 		$signatureMethod = trim($signatureMethod);
@@ -216,7 +224,7 @@ class Configuration
 	 *
 	 * @return  string
 	 */
-	public function getRegion()
+	public function getRegion(): string
 	{
 		return $this->region;
 	}
@@ -226,7 +234,7 @@ class Configuration
 	 *
 	 * @param   string  $region
 	 */
-	public function setRegion($region)
+	public function setRegion(string $region): void
 	{
 		/**
 		 * You can only leave the region empty if you're using v2 signatures. Anything else gets you an exception.
@@ -252,9 +260,9 @@ class Configuration
 	/**
 	 * Is the connection to be made over HTTPS?
 	 *
-	 * @return  boolean
+	 * @return  bool
 	 */
-	public function isSSL()
+	public function isSSL(): bool
 	{
 		return $this->useSSL;
 	}
@@ -262,9 +270,9 @@ class Configuration
 	/**
 	 * Set the connection SSL preference
 	 *
-	 * @param   boolean  $useSSL  True to use HTTPS
+	 * @param   bool  $useSSL  True to use HTTPS
 	 */
-	public function setSSL($useSSL)
+	public function setSSL(bool $useSSL): void
 	{
 		$this->useSSL = $useSSL ? true : false;
 	}
@@ -274,7 +282,7 @@ class Configuration
 	 *
 	 * @return  string
 	 */
-	public function getEndpoint()
+	public function getEndpoint(): string
 	{
 		return $this->endpoint;
 	}
@@ -284,7 +292,7 @@ class Configuration
 	 *
 	 * @param   string  $endpoint  Custom endpoint, e.g. 's3.example.com' or 'www.example.com/s3api'
 	 */
-	public function setEndpoint($endpoint)
+	public function setEndpoint(string $endpoint): void
 	{
 		if (stristr($endpoint, '://'))
 		{
@@ -305,11 +313,12 @@ class Configuration
 
 	/**
 	 * Should I use legacy, path-style access to the bucket? You should only use it with custom endpoints. Amazon itself
-	 * does not support path-style access since September 2020.
+	 * is currently deprecating support for path-style access but has extended the migration date to an unknown
+	 * time https://aws.amazon.com/blogs/aws/amazon-s3-path-deprecation-plan-the-rest-of-the-story/
 	 *
-	 * @return  boolean
+	 * @return  bool
 	 */
-	public function getUseLegacyPathStyle()
+	public function getUseLegacyPathStyle(): bool
 	{
 		return $this->useLegacyPathStyle;
 	}
@@ -317,9 +326,9 @@ class Configuration
 	/**
 	 * Set the flag for using legacy, path-style access to the bucket
 	 *
-	 * @param   boolean  $useLegacyPathStyle
+	 * @param   bool  $useLegacyPathStyle
 	 */
-	public function setUseLegacyPathStyle($useLegacyPathStyle)
+	public function setUseLegacyPathStyle(bool $useLegacyPathStyle): void
 	{
 		$this->useLegacyPathStyle = $useLegacyPathStyle;
 
@@ -332,5 +341,26 @@ class Configuration
 		{
 			$this->useLegacyPathStyle = false;
 		}
+	}
+
+	/**
+	 * Should we use the dualstack URL (which will ship traffic over ipv6 in most cases). For more information on these
+	 * endpoints please read https://docs.aws.amazon.com/AmazonS3/latest/dev/dual-stack-endpoints.html
+	 *
+	 * @return  bool
+	 */
+	public function getDualstackUrl(): bool
+	{
+		return $this->useDualstackUrl;
+	}
+
+	/**
+	 * Set the flag for using legacy, path-style access to the bucket
+	 *
+	 * @param   bool  $useDualstackUrl
+	 */
+	public function setUseDualstackUrl(bool $useDualstackUrl): void
+	{
+		$this->useDualstackUrl = $useDualstackUrl;
 	}
 }

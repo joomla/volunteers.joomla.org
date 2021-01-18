@@ -1,7 +1,7 @@
 <?php
 /**
  * @package   akeebabackup
- * @copyright Copyright (c)2006-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -81,7 +81,7 @@ class Raw extends Base
 
 		if (isset($body['challenge']) && (strpos($body['challenge'], ':') >= 2) && (strlen($body['challenge']) >= 3))
 		{
-			list ($challengeData, $providedHash) = explode(':', $body['challenge']);
+			[$challengeData, $providedHash] = explode(':', $body['challenge']);
 			$computedHash = strtolower(md5($challengeData . $serverKey));
 			$authenticated = ($computedHash == $providedHash);
 		}

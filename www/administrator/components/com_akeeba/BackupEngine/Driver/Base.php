@@ -3,7 +3,7 @@
  * Akeeba Engine
  *
  * @package   akeebaengine
- * @copyright Copyright (c)2006-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -1027,7 +1027,7 @@ abstract class Base
 					$fin[] = $this->quoteName($str);
 				}
 			}
-			elseif (is_array($name) && (count($name) == count($as)))
+			elseif (is_array($name) && (count($name) == (is_array($as) || $as instanceof \Countable ? count($as) : 0)))
 			{
 				$count = count($name);
 				for ($i = 0; $i < $count; $i++)

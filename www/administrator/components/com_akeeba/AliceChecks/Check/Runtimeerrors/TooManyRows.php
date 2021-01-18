@@ -1,7 +1,7 @@
 <?php
 /**
  * @package   akeebabackup
- * @copyright Copyright (c)2006-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -39,7 +39,7 @@ class TooManyRows extends Base
 				return;
 			}
 
-			for ($i = 0; $i < count($matches[1]); $i++)
+			for ($i = 0; $i < (is_array($matches[1]) || $matches[1] instanceof \Countable ? count($matches[1]) : 0); $i++)
 			{
 				if ($matches[2][$i] >= $row_limit)
 				{

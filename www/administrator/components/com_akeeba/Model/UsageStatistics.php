@@ -1,7 +1,7 @@
 <?php
 /**
  * @package   akeebabackup
- * @copyright Copyright (c)2006-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -121,14 +121,14 @@ class UsageStatistics extends Model
 		// I can't use list since dev release don't have any dots
 		$at_parts    = explode('.', AKEEBA_VERSION);
 		$at_major    = $at_parts[0];
-		$at_minor    = isset($at_parts[1]) ? $at_parts[1] : '';
-		$at_revision = isset($at_parts[2]) ? $at_parts[2] : '';
+		$at_minor    = $at_parts[1] ?? '';
+		$at_revision = $at_parts[2] ?? '';
 
-		list($php_major, $php_minor, $php_revision) = explode('.', phpversion());
+		[$php_major, $php_minor, $php_revision] = explode('.', phpversion());
 		$php_qualifier = strpos($php_revision, '~') !== false ? substr($php_revision, strpos($php_revision, '~')) : '';
 
-		list($cms_major, $cms_minor, $cms_revision) = explode('.', JVERSION);
-		list($db_major, $db_minor, $db_revision) = explode('.', $db->getVersion());
+		[$cms_major, $cms_minor, $cms_revision] = explode('.', JVERSION);
+		[$db_major, $db_minor, $db_revision] = explode('.', $db->getVersion());
 		$db_qualifier = strpos($db_revision, '~') !== false ? substr($db_revision, strpos($db_revision, '~')) : '';
 
 		$db_driver = get_class($db);

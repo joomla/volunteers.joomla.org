@@ -3,7 +3,7 @@
  * Akeeba Engine
  *
  * @package   akeebaengine
- * @copyright Copyright (c)2006-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -63,6 +63,7 @@ class Dropbox2 extends Base
 		$input = $params['input'];
 		$data  = (object) [
 			'access_token' => $input['access_token'],
+			'refresh_token' => $input['refresh_token'],
 		];
 
 		$serialisedData = json_encode($data);
@@ -92,6 +93,7 @@ HTML;
 		{
 			try
 			{
+				$connector->ping();
 				$connector->makeDirectory($directory);
 				$config->set('volatile.engine.postproc.dropbox2.check_directory', 1);
 			}
@@ -130,6 +132,7 @@ HTML;
 		}
 
 		// Download the file
+		$connector->ping();
 		$connector->download($remotePath, $localFile);
 
 		return true;
@@ -139,6 +142,7 @@ HTML;
 	{
 		/** @var ConnectorDropboxV2 $connector */
 		$connector = $this->getConnector();
+		$connector->ping();
 
 		return $connector->getAuthenticatedUrl($remotePath);
 	}
@@ -147,6 +151,7 @@ HTML;
 	{
 		/** @var ConnectorDropboxV2 $connector */
 		$connector = $this->getConnector();
+		$connector->ping();
 
 		$connector->delete($path);
 	}
@@ -166,6 +171,7 @@ HTML;
 		// Retrieve engine configuration data
 		$config           = Factory::getConfiguration();
 		$accessToken      = trim($config->get('engine.postproc.dropbox2.access_token', ''));
+		$refreshToken     = trim($config->get('engine.postproc.dropbox2.refresh_token', ''));
 		$this->chunked    = $config->get('engine.postproc.dropbox2.chunk_upload', true);
 		$this->chunk_size = $config->get('engine.postproc.dropbox2.chunk_upload_size', 10) * 1024 * 1024;
 		$defaultDirectory = $config->get('engine.postproc.dropbox2.directory', '');
@@ -179,7 +185,7 @@ HTML;
 			throw new BadConfiguration('You must enter your Download ID in the application configuration before using the “Upload to Dropbox” feature.');
 		}
 
-		if (empty($accessToken))
+		if (empty($accessToken) && empty($refreshToken))
 		{
 			throw new BadConfiguration('You have not linked Akeeba Backup with your Dropbox account');
 		}
@@ -205,8 +211,9 @@ HTML;
 		$config->set('volatile.postproc.directory', $this->directory);
 
 		return [
-			'token' => $accessToken,
-			'dlid'  => $dlid,
+			'token'         => $accessToken,
+			'refresh_token' => $refreshToken,
+			'dlid'          => $dlid,
 		];
 	}
 
@@ -224,7 +231,7 @@ HTML;
 		}
 
 		$config    = $this->getSettings();
-		$connector = new ConnectorDropboxV2($config['token'], $config['dlid']);
+		$connector = new ConnectorDropboxV2($config['token'], $config['refresh_token'], $config['dlid']);
 
 		$connector->setNamespaceId($namespaceId);
 
@@ -254,7 +261,7 @@ HTML;
 		try
 		{
 			$config         = $this->getSettings();
-			$connector      = new ConnectorDropboxV2($config['token'], $config['dlid']);
+			$connector      = new ConnectorDropboxV2($config['token'], $config['refresh_token'], $config['dlid']);
 			$currentAccount = $connector->getCurrentAccount();
 		}
 		catch (Exception $e)
@@ -312,7 +319,33 @@ HTML;
 			}
 			catch (Exception $e)
 			{
-				throw new RuntimeException("Cannot create upload session", 500, $e);
+				// Fail immediately if there is no refresh token
+				$config = $this->getSettings();
+				if (empty($config['refresh_token']))
+				{
+					throw new RuntimeException("Cannot create upload session", 500, $e);
+				}
+
+				Factory::getLog()->debug(sprintf(
+					"%s - Failed to create a new upload session; will try to refresh the tokens first",
+					__METHOD__
+				));
+
+				$upload_id = null;
+			}
+
+			if (is_null($upload_id))
+			{
+				try
+				{
+					$this->forceRefreshTokens();
+
+					$upload_id = $connector->createUploadSession();
+				}
+				catch (Exception $e)
+				{
+					throw new RuntimeException("Cannot create upload session", 500, $e);
+				}
 			}
 
 			Factory::getLog()->debug(sprintf(
@@ -362,6 +395,19 @@ HTML;
 					"%s - Maximum number of retries exceeded. The upload has failed.",
 					__METHOD__
 				), 500, $exception);
+			}
+
+			// Retry to refresh the Access Token if a Refresh Token is provided.
+			$config = $this->getSettings();
+
+			if (!empty($config['refresh_token']))
+			{
+				Factory::getLog()->debug(sprintf(
+					"%s - Error detected, trying to force-refresh the tokens",
+					__METHOD__
+				));
+
+				$this->forceRefreshTokens();
 			}
 
 			Factory::getLog()->debug(sprintf("%s - Retrying chunk upload", __METHOD__));
@@ -455,6 +501,19 @@ HTML;
 				), 500, $exception);
 			}
 
+			// Retry to refresh the Access Token if a Refresh Token is provided.
+			$config = $this->getSettings();
+
+			if (!empty($config['refresh_token']))
+			{
+				Factory::getLog()->debug(sprintf(
+					"%s - Error detected, trying to force-refresh the tokens",
+					__METHOD__
+				));
+
+				$this->forceRefreshTokens();
+			}
+
 			Factory::getLog()->debug(sprintf("%s - Retrying upload", __METHOD__));
 
 			return false;
@@ -465,4 +524,29 @@ HTML;
 
 		return true;
 	}
+
+	/**
+	 * Forcibly refresh the Dropbox tokens
+	 *
+	 * @return  void
+	 *
+	 * @throws  Exception
+	 */
+	protected function forceRefreshTokens()
+	{
+		// Retrieve engine configuration data
+		$config = Factory::getConfiguration();
+
+		/** @var ConnectorDropboxV2 $connector */
+		$connector  = $this->getConnector();
+		$pingResult = $connector->ping(true);
+
+		Factory::getLog()->debug(__METHOD__ . " - Dropbox tokens were forcibly refreshed");
+		$config->set('engine.postproc.dropbox2.access_token', $pingResult['access_token'], false);
+		$config->set('engine.postproc.dropbox2.refresh_token', $pingResult['refresh_token'], false);
+
+		$profile_id = Platform::getInstance()->get_active_profile();
+		Platform::getInstance()->save_configuration($profile_id);
+	}
+
 }

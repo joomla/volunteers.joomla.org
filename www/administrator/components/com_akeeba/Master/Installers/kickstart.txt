@@ -26,11 +26,11 @@
 define('KICKSTART', 1);
 
 define('KICKSTART_MIN_PHP', '5.6.0');
-define('KICKSTART_RECOMMENDED_PHP', '7.3.0');
+define('KICKSTART_RECOMMENDED_PHP', '7.4.0');
 
 if (!defined('VERSION'))
 {
-	define('VERSION', 'revCA70D25');
+	define('VERSION', '7.0.3');
 }
 
 if (!defined('KICKSTARTPRO'))
@@ -1097,6 +1097,7 @@ abstract class AKAbstractUnarchiver extends AKAbstractPart
 		if ($this->currentPartNumber >= 0)
 		{
 			$this->fp = @fopen($this->archiveList[$this->currentPartNumber], 'rb');
+
 			if ((is_resource($this->fp)) && ($this->currentPartOffset > 0))
 			{
 				@fseek($this->fp, $this->currentPartOffset);
@@ -1449,11 +1450,16 @@ abstract class AKAbstractUnarchiver extends AKAbstractPart
 		}
 
 		$error = $this->getError();
+
 		if (!$status && ($this->runState == AK_STATE_NOFILE) && empty($error))
 		{
 			debugMsg(__CLASS__ . '::_run() - Just finished');
 			// We just finished
 			$this->setState('postrun');
+
+			// Reset internal state, prevents __wakeup from trying to open a non-existent file
+			$this->currentPartNumber = -1;
+			$this->archiveList = [];
 		}
 		elseif (!empty($error))
 		{
@@ -7160,6 +7166,7 @@ class AKText extends AKAbstractObject
 		'BTN_TESTFTPCON'                  => 'Test FTP connection',
 		'BTN_TESTSFTPCON'                 => 'Test SFTP connection',
 		'BTN_GOTOSTART'                   => 'Start over',
+		'BTN_RETRY'                       => 'Retry',
 		'FINE_TUNE'                       => 'Fine tune',
 		'MIN_EXEC_TIME'                   => 'Minimum execution time:',
 		'MAX_EXEC_TIME'                   => 'Maximum execution time:',
@@ -13232,6 +13239,7 @@ akeeba.System.documentReady(function () {
 	akeeba.System.addEventListener(document.getElementById("runCleanup"), "click", onRunCleanupClick);
 	akeeba.System.addEventListener(document.getElementById("runInstaller"), "click", onRunInstallerClick);
 	akeeba.System.addEventListener(document.getElementById("gotoStart"), "click", onGotoStartClick);
+	akeeba.System.addEventListener(document.getElementById("retry"), "click", onRetryClick);
 
 	akeeba.System.addEventListener(document.getElementById("gotoSite"), "click", function (event)
 	{
@@ -13489,6 +13497,13 @@ function errorHandler(msg)
 	document.getElementById("error").style.display    = "block";
 }
 
+function onRetryClick(){
+	document.getElementById("errorMessage").innerHTML = "";
+	document.getElementById("error").style.display    = "none";
+
+	setTimeout(runNextExtractionStep, 10);
+}
+
 /**
  * Initialize the archive extraction
  */
@@ -13558,10 +13573,13 @@ function onStartExtraction()
  */
 function runNextExtractionStep()
 {
-	akeeba.System.doAjax(akeeba_next_step_post, function (ret)
-	{
-		processRestorationStep(ret);
-	});
+	akeeba.System.doAjax(akeeba_next_step_post,
+		function (ret){
+			processRestorationStep(ret);
+		},
+		function (){
+			errorHandler("An unexpected error occurred");
+		});
 }
 
 /**
@@ -13795,7 +13813,7 @@ function echoPage()
 		<div id="header">
 			<div class="title">
 				<span id="logo" alt="Akeeba Kickstart logo"></span>
-				Akeeba Kickstart <?php echo $edition ?> revCA70D25
+				Akeeba Kickstart <?php echo $edition ?> <?php echo defined('VERSION') ? VERSION : '7.0.3' ?>
 			</div>
 		</div>
 
@@ -13803,7 +13821,7 @@ function echoPage()
 			<?php
 			akeeba_common_phpversion_warning(array(
 				'minPHPVersion'          => defined('KICKSTART_MIN_PHP') ? KICKSTART_MIN_PHP : "5.6.0",
-				'recommendedPHPVersion'  => defined('KICKSTART_RECOMMENDED_PHP') ? KICKSTART_RECOMMENDED_PHP : '7.3',
+				'recommendedPHPVersion'  => defined('KICKSTART_RECOMMENDED_PHP') ? KICKSTART_RECOMMENDED_PHP : '7.4',
 				'softwareName'           => "Akeeba Kickstart",
 				'class_priority_high'    => 'error',
 				'class_priority_medium'  => 'warning',
@@ -14014,6 +14032,7 @@ function echoPage()
 				<h3>ERROR_OCCURED</h3>
 				<p id="errorMessage"></p>
 				<div id="gotoStart" class="button">BTN_GOTOSTART</div>
+				<div id="retry" class="button bluebutton">BTN_RETRY</div>
 				<div>
 					<a href="https://www.akeeba.com/documentation/akeeba-kickstart-documentation/kscantextract.html"
 					   target="_blank">CANTGETITTOWORK</a>
@@ -14103,12 +14122,13 @@ if (!function_exists('akeeba_common_phpversion_warning'))
 			'7.2' => array('2019-11-30 00:00:00', '2020-11-30 00:00:00'),
 			'7.3' => array('2020-12-06 00:00:00', '2021-12-06 00:00:00'),
 			'7.4' => array('2021-11-28 00:00:00', '2022-11-28 00:00:00'),
+			'8.0' => array('2022-11-26 00:00:00', '2023-11-26 00:00:00'),
 		);
 
 		// Make sure I have all necessary configuration variables
 		$config = array_merge(array(
 			'minPHPVersion'          => '7.2.0',
-			'recommendedPHPVersion'  => '7.3',
+			'recommendedPHPVersion'  => '7.4',
 			'softwareName'           => 'This software',
 			'class_priority_low'     => 'akeeba-block--info',
 			'class_priority_medium'  => 'akeeba-block--warning',
@@ -14347,6 +14367,7 @@ if (!function_exists('akeeba_common_wrongphp'))
 			'7.2' => array('2019-11-30 00:00:00', '2020-11-30 00:00:00'),
 			'7.3' => array('2020-12-06 00:00:00', '2021-12-06 00:00:00'),
 			'7.4' => array('2021-11-28 00:00:00', '2022-11-28 00:00:00'),
+			'8.0' => array('2022-11-26 00:00:00', '2023-11-26 00:00:00'),
 		);
 
 		// Make sure I have all necessary configuration variables
@@ -14972,8 +14993,9 @@ function kickstart_application_cli()
 
 	if (!$silent)
 	{
+		$version = defined('VERSION') ? VERSION : '7.0.3';
 		echo <<< BANNER
-Akeeba Kickstart CLI revCA70D25
+Akeeba Kickstart CLI $version
 Copyright (c) 2008-$year Akeeba Ltd / Nicholas K. Dionysopoulos
 -------------------------------------------------------------------------------
 Akeeba Kickstart is Free Software, distributed under the terms of the GNU General
@@ -14988,7 +15010,7 @@ BANNER;
 
 	$phpCheckConfig = array(
 		'minPHPVersion'         => defined('KICKSTART_MIN_PHP') ? KICKSTART_MIN_PHP : "5.6.0",
-		'recommendedPHPVersion' => defined('KICKSTART_RECOMMENDED_PHP') ? KICKSTART_RECOMMENDED_PHP : '7.3',
+		'recommendedPHPVersion' => defined('KICKSTART_RECOMMENDED_PHP') ? KICKSTART_RECOMMENDED_PHP : '7.4',
 		'softwareName'          => "Akeeba Kickstart",
 		'silentResults'         => true
 	);
@@ -15199,7 +15221,7 @@ function kickstart_application_web()
 {
 	if (!akeeba_common_wrongphp(array(
 		'minPHPVersion'         => defined('KICKSTART_MIN_PHP') ? KICKSTART_MIN_PHP : "5.6.0",
-		'recommendedPHPVersion' => defined('KICKSTART_RECOMMENDED_PHP') ? KICKSTART_RECOMMENDED_PHP : '7.3',
+		'recommendedPHPVersion' => defined('KICKSTART_RECOMMENDED_PHP') ? KICKSTART_RECOMMENDED_PHP : '7.4',
 		'softwareName'          => "Akeeba Kickstart",
 	))) {
 		die;

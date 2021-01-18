@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
   ~ @package   akeebabackup
-  ~ @copyright Copyright (c)2006-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
+  ~ @copyright Copyright (c)2006-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
   ~ @license   GNU General Public License version 3, or later
   -->
 
@@ -9,15 +9,15 @@
     <dlid prefix="dlid=" suffix=""/>
     <name>Akeeba Backup package</name>
     <author>Nicholas K. Dionysopoulos</author>
-    <creationDate>2020-11-18</creationDate>
+    <creationDate>2021-01-07</creationDate>
     <packagename>akeeba</packagename>
-    <version>7.4.0.1</version>
+    <version>7.5.1</version>
     <url>https://www.akeeba.com</url>
     <packager>Akeeba Ltd</packager>
     <packagerurl>https://www.akeeba.com</packagerurl>
     <copyright>Copyright (c)2006-2019 Akeeba Ltd / Nicholas K. Dionysopoulos</copyright>
     <license>GNU GPL v3 or later</license>
-    <description>Akeeba Backup installation package v.7.4.0.1</description>
+    <description>Akeeba Backup installation package v.7.5.1</description>
 
     <!-- List of extensions to install -->
     <files>
@@ -29,6 +29,9 @@
 
         <!-- Modules -->
         <!--<file type="module" client="site" id="mod_example">mod_example.zip</file>-->
+
+        <!-- Plugins: console (Joomla 4 only) -->
+        <file type="plugin" group="console" id="akeebabackup">plg_console_akeebabackup.zip</file>
 
         <!-- Plugins: quickicon -->
         <file type="plugin" group="quickicon" id="akeebabackup">plg_quickicon_akeebabackup.zip</file>

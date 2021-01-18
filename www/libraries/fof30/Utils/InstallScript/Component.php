@@ -487,7 +487,7 @@ class Component extends BaseInstaller
 		}
 
 
-		if (count($ids) > 1)
+		if ((is_array($ids) || $ids instanceof \Countable ? count($ids) : 0) > 1)
 		{
 			asort($ids);
 			$extension_id = array_shift($ids); // Keep the oldest id
@@ -518,7 +518,7 @@ class Component extends BaseInstaller
 		$db->setQuery($query);
 		$ids = $db->loadObjectList();
 
-		if (count($ids) > 1)
+		if ((is_array($ids) || $ids instanceof \Countable ? count($ids) : 0) > 1)
 		{
 			asort($ids);
 			$asset_id = array_shift($ids); // Keep the oldest id
@@ -672,7 +672,7 @@ class Component extends BaseInstaller
 		{
 			foreach ($this->uninstallation_queue['modules'] as $folder => $modules)
 			{
-				if (count($modules))
+				if (is_array($modules) || $modules instanceof \Countable ? count($modules) : 0)
 				{
 					foreach ($modules as $module)
 					{
@@ -705,7 +705,7 @@ class Component extends BaseInstaller
 		{
 			foreach ($this->uninstallation_queue['plugins'] as $folder => $plugins)
 			{
-				if (count($plugins))
+				if (is_array($plugins) || $plugins instanceof \Countable ? count($plugins) : 0)
 				{
 					foreach ($plugins as $plugin)
 					{

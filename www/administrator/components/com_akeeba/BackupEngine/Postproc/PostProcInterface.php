@@ -3,7 +3,7 @@
  * Akeeba Engine
  *
  * @package   akeebaengine
- * @copyright Copyright (c)2006-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -29,8 +29,8 @@ interface PostProcInterface
 	 *
 	 * It the process has failed an Exception is thrown.
 	 *
-	 * @param   string  $localFilepath   Absolute path to the part we'll have to process
-	 * @param   string  $remoteBaseName  Base name of the uploaded file, skip to use $absolute_filename's
+	 * @param   string       $localFilepath   Absolute path to the part we'll have to process
+	 * @param   string|null  $remoteBaseName  Base name of the uploaded file, skip to use $absolute_filename's
 	 *
 	 * @return  bool  True on success, false if more work is required
 	 *

@@ -1,7 +1,7 @@
 <?php
 /**
  * @package   akeebabackup
- * @copyright Copyright (c)2006-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -37,7 +37,7 @@ class Com_AkeebaInstallerScript extends \FOF30\Utils\InstallScript
 	 *
 	 * @var   string
 	 */
-	protected $minimumPHPVersion = '7.1.0';
+	protected $minimumPHPVersion = '7.2.0';
 
 	/**
 	 * The minimum Joomla! version required to install this extension
@@ -232,6 +232,13 @@ class Com_AkeebaInstallerScript extends \FOF30\Utils\InstallScript
 			'media/com_akeeba/js/RegExFileFilters.js',
 			'media/com_akeeba/js/RegExFileFilters.min.js',
 			'media/com_akeeba/js/RegExFileFilters.js',
+
+            // Pro features of the Console plugin
+			'administrator/components/com_akeeba/CliCommands/BackupFetch.php',
+			'administrator/components/com_akeeba/CliCommands/BackupTake.php',
+			'administrator/components/com_akeeba/CliCommands/BackupUpload.php',
+			'administrator/components/com_akeeba/CliCommands/FilterIncludeDatabase.php',
+			'administrator/components/com_akeeba/CliCommands/FilterIncludeDirectory.php',
 
 		],
 		'folders' => [
@@ -459,6 +466,9 @@ class Com_AkeebaInstallerScript extends \FOF30\Utils\InstallScript
 
 			// Update notification
 			"administrator/components/com_akeeba/ViewTemplates/ControlPanel/updateinfo.blade.php",
+
+			// Temporary console plugin installation workaround until Joomla 4 fixes its installer bug for modern plugins
+			"plugins/console/akeebabackup/akeebabackup.php"
 		],
 		'folders' => [
 			// Directories used up to version 4.1 (inclusive)

@@ -310,7 +310,7 @@ class Joomla extends RenderBase implements RenderInterface
 					{
 						$class = $link['active'] ? 'active' : '';
 
-						$href = $link['link'] ? $link['link'] : '#';
+						$href = $link['link'] ?: '#';
 
 						echo "<a href=\"$href\" class=\"nav-link $class\">{$link['name']}</a>";
 					}

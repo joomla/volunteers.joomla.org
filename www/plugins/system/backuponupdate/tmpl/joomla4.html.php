@@ -1,7 +1,7 @@
 <?php
 /**
  * @package   akeebabackup
- * @copyright Copyright (c)2006-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -11,13 +11,6 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 
 /**
- * @package    AkeebaBackup
- * @subpackage backuponupdate
- * @copyright  Copyright (c)2006-2019 Nicholas K. Dionysopoulos / Akeeba Ltd
- * @license    GNU General Public License version 3, or later
- *
- * @since      6.4.1
- *
  * This file contains the CSS for rendering the status (footer) icon for the Backup on Update plugin. The icon is only
  * rendered in the administrator backend of the site.
  *
@@ -27,6 +20,8 @@ use Joomla\CMS\Language\Text;
  *
  * where YOUR_TEMPLATE is the folder of the administrator template you are using. Modify that copy. It will be loaded
  * instead of the file in plugins/system/backuponupdate.
+ *
+ * @since      6.4.1
  */
 
 $document = Factory::getApplication()->getDocument();

@@ -3,7 +3,7 @@
  * Akeeba Engine
  *
  * @package   akeebaengine
- * @copyright Copyright (c)2006-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -188,7 +188,7 @@ class GoogleStorage
 				$return['folders'] = $result['prefixes'];
 			}
 
-			if (!isset($result['items']) && !count($result['items']))
+			if (!isset($result['items']) && !(is_array($result['items']) || $result['items'] instanceof \Countable ? count($result['items']) : 0))
 			{
 				return $return;
 			}

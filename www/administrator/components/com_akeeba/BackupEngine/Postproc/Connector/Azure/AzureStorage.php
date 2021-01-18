@@ -3,7 +3,7 @@
  * Akeeba Engine
  *
  * @package   akeebaengine
- * @copyright Copyright (c)2006-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -218,7 +218,7 @@ class AzureStorage
 	 */
 	public static function createQueryStringFromArray($queryString)
 	{
-		return count($queryString) > 0 ? '?' . implode('&', $queryString) : '';
+		return (is_array($queryString) || $queryString instanceof \Countable ? count($queryString) : 0) > 0 ? '?' . implode('&', $queryString) : '';
 	}
 
 	/**

@@ -3474,7 +3474,7 @@ class DataModel extends Model implements TableInterface
 					break;
 				}
 
-				if (is_array($value) && (count($value) > 1))
+				if (is_array($value) && ((is_array($value) || $value instanceof \Countable ? count($value) : 0) > 1))
 				{
 					// Get the operator and value from the $value array
 					if (isset($value['operator']) && isset($value['value']))

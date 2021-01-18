@@ -1,7 +1,7 @@
 <?php
 /**
  * @package   akeebabackup
- * @copyright Copyright (c)2006-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -101,7 +101,7 @@ class Log extends Model
 
 				if (strstr($item, '.') !== false)
 				{
-					list($origin, $backupId) = explode('.', $item, 2);
+					[$origin, $backupId] = explode('.', $item, 2);
 
 					$text = Text::_('COM_AKEEBA_BUADMIN_LABEL_ORIGIN_' . $origin) . ' (' . $backupId . ')';
 				}

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @version    CVS: 1.12.1
+ * @version    CVS: 1.14.0
  * @package    com_yoursites
  * @author     Geraint Edwards
  * @copyright  2017-2020 GWE Systems Ltd
@@ -66,9 +66,11 @@ class pkg_YoursitesclientInstallerScript
 	 */
 	function postflight($type, $parent)
 	{
+
 		JLog::addLogger(array('text_file' => 'yoursites.php'), JLog::ALL, array('yoursites'));
 
 		//JLog::add("Starting postflight", JLog::INFO, 'yoursites');
+		$this->diagnose("Starting postflight !", 'warning');
 
 		// $parent is the class calling this method
 		// $type is the type of change (install, update or discover_install)
@@ -92,7 +94,7 @@ class pkg_YoursitesclientInstallerScript
 		$specifictoken = '$2y$10$yG1vnR/TrUlr2qg9HmVW1eNyh.YCKGCIMsu7HzrykYyFAVMxbDGPW';
 
 		// Generic Token
-		$generictoken = '$2y$10$YbMDAXy4HGE.vac5reaXw.gE72tXV30ZfmKfm1bRFGtaVPYvktHxS';
+		$generictoken = '$2y$10$vBn7NGoQsWi5Lo5ZaevWK.1ePudXMLWRdVsDU08alpCxz9VvM8stG';
 
 		$tokenToUse = empty($specifictoken) ? $generictoken : $specifictoken;
 
@@ -100,7 +102,7 @@ class pkg_YoursitesclientInstallerScript
 		{
 			$eparams = json_decode('{"checkserverdomain":"0","serverdomain":"","allowdirectlogin":"0","checkserverip":"0","serverip":"","checkservertoken":"1","servertoken":"' . $tokenToUse . '"}');
 
-			//JFactory::getApplication()->enqueueMessage("Setting up the authentication 1 !", 'warning');
+			$this->diagnose("Setting up the authentication 1 !", 'warning');
 			// Set up generic parameters
 			$db    = JFactory::getDbo();
 			$query = "UPDATE #__extensions "
@@ -163,7 +165,7 @@ class pkg_YoursitesclientInstallerScript
 
 			if (empty($extension->params))
 			{
-				//JFactory::getApplication()->enqueueMessage("Extension params empty!", 'warning');
+				$this->diagnose("Extension params empty!", 'warning');
 
 				$eparams = json_decode('{"checkserverdomain":"0","serverdomain":"","allowdirectlogin":"0","checkserverip":"0","serverip":"","checkservertoken":"1","servertoken":"' . $tokenToUse . '"}');
 
@@ -240,13 +242,14 @@ class pkg_YoursitesclientInstallerScript
 		}
 
 		JLog::add("Should we connect to server? connect to server && ". ($secureTheConnection ? 'true' : 'false') , JLog::INFO, 'yoursites');
+		$this->diagnose("Should we connect to server? connect to server && ". ($secureTheConnection ? 'true' : 'false'), 'warning');
 
 		// This process is secured using Generic Token only - but doing so created a specific connection!
 		if ("connect to server" === "connect to server" && $secureTheConnection)
 		{
 
 			$debug = "&XDEBUG_SESSION_START=PHPSTORM";
-			//$debug = "";
+			$debug = "";
 
 			// Use JHttpFactory that allows using CURL and Sockets as alternative method when available
 			// Adding a valid user agent string etc.
@@ -304,11 +307,13 @@ class pkg_YoursitesclientInstallerScript
 			// $base needs to be frontend and not have /administrator at the end but does need the trailing /
 			$base        = JURI::base(false);
 			//JLog::add("base url is " . $base , JLog::INFO, 'yoursites');
+			$this->diagnose("base url is " . $base, 'warning');
 			if (strpos($base, "/administrator"))
 			{
 				$pos  = strrpos($base, "/administrator");
 				$base = substr($base, 0, $pos) . "/";
 				//JLog::add("modified base url is " . $base , JLog::INFO, 'yoursites');
+				$this->diagnose("modified base url is " . $base, 'warning');
 			}
 			$data["url"] = $base;
 
@@ -327,32 +332,35 @@ class pkg_YoursitesclientInstallerScript
 			{
 				$data["coreversion"] = JVERSION;
 			}
-			$data["pluginversion"] = "1.12.1";
+			$data["pluginversion"] = "1.14.0";
 
 			$yoursitesUrl = "https://manage.joomla.org/";
 
 			JLog::add("Connecting to https://manage.joomla.org/ YourSites server " . $yoursitesUrl . $path, JLog::INFO, 'yoursites');
+			$this->diagnose("Connecting to https://manage.joomla.org/ YourSites server " . $yoursitesUrl . $path, 'warning');
 
 			// This doesn't work if yoursites server is not in DNS
 			try
 			{
 				$webpage = $http->post($yoursitesUrl . $path, $data); //, $headers);
                 JLog::add("Got response from https://manage.joomla.org/ YourSites server " . $webpage->code , JLog::INFO, 'yoursites');
+				$this->diagnose("Got response from https://manage.joomla.org/ YourSites server " . $webpage->code, 'warning');
 			}
 			catch (Exception $e)
 			{
 				$webpage       = new stdClass();
 				$webpage->body = "ERROR";
 				JFactory::getApplication()->enqueueMessage(JText::sprintf("PKG_YOURSITESCLIENT_UNABLE_TO_LINK_THIS_SITE_TO_THE_YOURSITES_SERVER_AT", $yoursitesUrl), 'error');
+				JFactory::getApplication()->enqueueMessage($e->getMessage(), 'error');
 				JLog::add("Unable to post to https://manage.joomla.org/ YourSites server ", JLog::INFO, 'yoursites');
 			}
 
 			JLog::add($webpage->body , JLog::INFO, 'yoursites');
 
 			// ToDo - add meaningful completion message based on json return data
-			//JFactory::getApplication()->enqueueMessage(" url  = " . $yoursitesUrl . $path);
-			//JFactory::getApplication()->enqueueMessage(" code = " . $webpage->code);
-			//JFactory::getApplication()->enqueueMessage(" page = " . $webpage->body);
+			//$this->diagnose(" url  = " . $yoursitesUrl . $path);
+			//$this->diagnose(" code = " . $webpage->code);
+			//$this->diagnose(" page = " . $webpage->body);
 
 			if (strpos($webpage->body, "{") !== false)
 			{
@@ -365,7 +373,7 @@ class pkg_YoursitesclientInstallerScript
 					$returnToken = isset($updatedata->returnToken) ? $updatedata->returnToken : false;
 					$returnHash = isset($updatedata->returnHash) ? $updatedata->returnHash: false;
 
-					// JFactory::getApplication()->enqueueMessage($returnToken  . " " . $returnHash);
+					// $this->diagnose($returnToken  . " " . $returnHash);
 
 					if (!$updatedata || $updatedata->error)
 					{
@@ -382,7 +390,7 @@ class pkg_YoursitesclientInstallerScript
 					{
 
 						// JLog::add("Have private key from YourSites server", JLog::INFO, 'yoursites');
-						// JFactory::getApplication()->enqueueMessage($returnToken  . " " . $returnHash);
+						// $this->diagnose($returnToken  . " " . $returnHash);
 
 						// Replace generic headers
 						$params              = json_decode($extension->params);
@@ -408,6 +416,7 @@ class pkg_YoursitesclientInstallerScript
 			else
 				{
 					JFactory::getApplication()->enqueueMessage(JText::sprintf("PKG_YOURSITESCLIENT_UNABLE_TO_LINK_THIS_SITE_TO_THE_YOURSITES_SERVER_AT", $yoursitesUrl), 'error');
+					$this->diagnose($webpage->body, 'error');
 				}
 
 		}
@@ -562,6 +571,11 @@ class pkg_YoursitesclientInstallerScript
 		<?php
 
 
+	}
+
+	function diagnose($message, $type)
+	{
+//		JFactory::getApplication()->enqueueMessage($message, $type);
 	}
 
 }

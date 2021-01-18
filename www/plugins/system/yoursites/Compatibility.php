@@ -13,10 +13,8 @@ defined('JPATH_PLATFORM') or die;
 /*
  * Joomla 3.7.x and earlier don't support these - leave them out until we MUST have them for Joomla 4.x
  */
-/*
-use Joomla\CMS\Factory;
-*/
 // These are needed for compatibility tests which won't work in Joomla 3.7 in any case
+use Joomla\CMS\Factory;
 use Joomla\CMS\Version;
 use Joomla\Registry\Registry;
 use Joomla\CMS\Http\HttpFactory;
@@ -401,7 +399,7 @@ class Compatibility extends \JObject
 					// Check if DB & version is supported via <supported_databases> tag, assume supported if tag isn't present
 					if (isset($this->currentUpdate->supported_databases))
 					{
-						$db           = JFactory::getDbo();
+						$db           = Factory::getDbo();
 						$dbType       = strtolower($db->getServerType());
 						$dbVersion    = $db->getVersion();
 						$supportedDbs = $this->currentUpdate->supported_databases;

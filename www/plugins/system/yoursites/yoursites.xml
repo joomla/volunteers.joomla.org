@@ -2,12 +2,12 @@
 <extension version="3.1" type="plugin" group="system" method="upgrade">
     <name>PLG_YOURSITES_HANDLER</name>
     <author>GWE Systems Ltd</author>
-    <creationDate>July 2020</creationDate>
+    <creationDate>November 2020</creationDate>
     <copyright>(C) 2017-2020 GWE Systems Ltd. All rights reserved.</copyright>
     <license>GNU General Public License version 2 or later; see	LICENSE.txt</license>
     <authorEmail>via website</authorEmail>
     <authorUrl>www.gwesystems.com</authorUrl>
-    <version>1.12.1</version>
+    <version>1.14.0</version>
     <description>PLG_YOURSITES_HANDLER_DESC</description>
     <scriptfile>install.php</scriptfile>
     <files>
@@ -17,6 +17,7 @@
         <folder>assets</folder>
         <folder>customchecks</folder>
         <folder>customactions</folder>
+        <folder>fields</folder>
         <filename>yoursites_getupdatedata.php</filename>
     </files>
     <languages>
@@ -24,7 +25,7 @@
         <language tag="en-GB">language/en-GB/en-GB.plg_system_yoursites.sys.ini</language>
     </languages>
     <config>
-        <fields name="params">
+        <fields name="params"  addfieldpath="plugins/system/yoursites/fields">
             <fieldset
                 name="basic"
             >
@@ -133,6 +134,13 @@
                        label="PLG_YOURSITES_DIRECT_LOGIN_ALLOWED_USER"
                        description="PLG_YOURSITES_DIRECT_LOGIN_ALLOWED_USER_DESC"
                        showon="allowdirectlogin:1"
+                />
+
+                <field name="clonealiases"
+                       class="clonealiases"
+                       type="clonealiases"
+                       label="PLG_YOURSITES_CLONE_SITE_ALIASES"
+                       description="PLG_YOURSITES_CLONE_SITE_ALIASES_DESC"
                 />
 
             </fieldset>

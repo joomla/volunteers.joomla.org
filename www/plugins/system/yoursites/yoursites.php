@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @version    CVS: 1.12.1.1
+ * @version    CVS: 1.14.0.1
  * @package    com_yoursites
  * @author     Geraint Edwards
  * @copyright  2017-2020 GWE Systems Ltd
@@ -110,6 +110,55 @@ class plgSystemYourSites extends JPlugin
 	{
 
 		$input = JFactory::getApplication()->input;
+
+		try
+		{
+			$aliases = $this->params->get('clonealiases', array());
+			if (!is_array($aliases))
+			{
+				$aliases = (array) $aliases;
+			}
+			if (count($aliases))
+			{
+				$current   = JUri::current();
+				$parts     = \Joomla\Uri\UriHelper::parse_url($current);
+				$path      = trim($parts['path'], "/");
+				$extrapath = "";
+				if (strpos($path, "/") > 0)
+				{
+					$extrapath = substr($path, strpos($path, "/"));
+					$path      = substr($path, 0, strpos($path, "/"));
+				}
+				if (is_array($parts) && isset($parts['path']) && in_array($path, $aliases))
+				{
+					$path = array_search($path, $aliases);
+					JFactory::getApplication()->redirect($path . $extrapath);
+				}
+
+				// Alternative is clone is clone of a sub-folder
+				$pathParts = explode("/", $parts['path']);
+				$changed = false;
+				foreach ($aliases as $key => $alias)
+				{
+					if (in_array($alias, $pathParts))
+					{
+						$pathParts[array_search($alias, $pathParts)] = $key;
+						$changed = true;
+					}
+				}
+				if ($changed)
+				{
+					$parts['path'] = implode ("/", $pathParts);
+					JFactory::getApplication()->redirect($parts['path']);
+				}
+
+			}
+		}
+		catch (Exception $e)
+		{
+
+		}
+
 		if (isset($this->uploadedFile))
 		{
 			$_FILES["install_package"] = $this->uploadedFile;

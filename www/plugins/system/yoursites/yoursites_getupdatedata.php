@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @version    CVS: 1.12.1
+ * @version    CVS: 1.14.0
  * @package    com_yoursites
  * @author     Geraint Edwards <via website>
  * @copyright  2016-2020 GWE Systems Ltd
@@ -65,6 +65,18 @@ function ProcessJsonRequest(&$requestObject, $returnData)
 		$returnData->error = 1;
 		$returnData->errormessages[] = 'COM_YOURSITES_SECURITY_CHECK_FAILURE';
 		return $returnData;
+	}
+
+	if ($requestObject->task != "setupsecuritytoken" && isset($requestObject->base) && strpos($requestObject->base, '/._ysts_') > 0)
+	{
+		// This site may be the root/parent site of a clone that has been deleted and .htaccess may have pushed us here - so check this
+		$parts     = explode("/", trim($requestObject->base, " /"));
+		if (strpos(JPATH_SITE, "._ysts_") === false || strpos(JPATH_SITE, $parts[count($parts)-1]) === false)
+		{
+			$returnData->error = 1;
+			$returnData->errormessages[] = 'COM_YOURSITES_CLONED_SITE_APPEARS_TO_HAVE_BEEN_DELETED';
+			return $returnData;
+		}
 	}
 
 	$plugin = JPluginHelper::getPlugin("system" , "yoursites");
@@ -1152,7 +1164,7 @@ function upgradeJoomla($requestObject, & $returnData)
 		if (isset($requestObject->blockedversion) && $requestObject->blockedversion && version_compare($updateInfo["latest"], $requestObject->blockedversion, "ge"))
 		{
 			$returnData->error = 1;
-			$returnData->errormessages[] = 'COM_1.12.1_UPGRADE_HAS_BEEN_BLOCKED';
+			$returnData->errormessages[] = 'COM_1.14.0_UPGRADE_HAS_BEEN_BLOCKED';
 			return;
 		}
 
@@ -1251,6 +1263,7 @@ function upgradeJoomla($requestObject, & $returnData)
 	$restoreURL = JUri::base() . "administrator/components/com_joomlaupdate/restore.php";
 
 	$webpage = $http->post($restoreURL . $debug, $data, $headers);
+	//$webpage = $http->get($restoreURL ."?task=" . $data["task"] . "&json=" . $data["json"], $headers);
 
 	// catch the output
 	// TODO need method to parse the output from KickStart
@@ -2086,6 +2099,8 @@ function clearTmp($requestObject, & $returnData)
 
 function cloneSite($requestObject, & $returnData)
 {
+	$diagnostics = true;
+
 	// make sure we have enough time to handle slow tasks
 	@ini_set("max_execution_time", 600);
 
@@ -2094,6 +2109,12 @@ function cloneSite($requestObject, & $returnData)
 	clearTmp($requestObject, $returnData);
 
 	$returnData->messages[]  = "I am copying the site into " .$requestObject->prefix;
+
+	if ($diagnostics)
+	{
+		$returnData->log['diagnostics'] = array();
+		$returnData->log['diagnostics'][]  = "I am copying the site into " .$requestObject->prefix;
+	}
 
 	$returnData->cloned = 1;
 
@@ -2104,14 +2125,39 @@ function cloneSite($requestObject, & $returnData)
 
 		try
 		{
+			if ($diagnostics)
+			{
+				$returnData->log['diagnostics'][]  = "Starting to copy files";
+			}
+
 			// hidden in unix
 			$success = copyr2(JPATH_SITE, JPATH_SITE . "/._" . $requestObject->prefix, "._" . $requestObject->prefix, $returnData, $requestObject->exclusions);
+
+			if ($diagnostics)
+			{
+				$returnData->log['diagnostics'][]  = "Files copied successfully";
+			}
+
 		}
 		catch (Exception $e)
 		{
+
 			$returnData->error  = 1;
 			$returnData->cloned = 0;
+			$returnData->errormessages[]  = "Files coping failed - threw exception";
 			$returnData->errormessages[]  = $e->getMessage();
+
+			if (count($returnData->messages))
+			{
+				$returnData->errormessages = array_merge($returnData->messages, $returnData->errormessages);
+			}
+			cleanUpClone($requestObject, $returnData);
+			$returnData->errormessages[] = "Partial Clone site and data cleaned up";
+
+			if ($diagnostics)
+			{
+				$returnData->log['diagnostics'][]  = "Files coping failed - threw exception";
+			}
 			return $returnData;
 		}
 		if (!$success)
@@ -2119,6 +2165,10 @@ function cloneSite($requestObject, & $returnData)
 			$returnData->error  = 1;
 			$returnData->cloned = 0;
 			$returnData->errormessages[]  = 'COM_YOURSITES_UNABLE_TO_CLONE_FILES';
+			if ($diagnostics)
+			{
+				$returnData->log['diagnostics'][]  = "Files coping failed";
+			}
 			return $returnData;
 		}
 	}
@@ -2142,6 +2192,10 @@ function cloneSite($requestObject, & $returnData)
 		if (!$ftp['enabled'] && JPath::isOwner($configfile) && !JPath::setPermissions($configfile, '0644'))
 		{
 			$returnData->errormessages[]  = JText::_('COM_CONFIG_ERROR_CONFIGURATION_PHP_NOTWRITABLE');
+			if ($diagnostics)
+			{
+				$returnData->log['diagnostics'][]  = JText::_('COM_CONFIG_ERROR_CONFIGURATION_PHP_NOTWRITABLE');
+			}
 		}
 
 		// Attempt to write the configuration file as a PHP class named JConfig.
@@ -2159,12 +2213,20 @@ function cloneSite($requestObject, & $returnData)
 		if (!JFile::write($configfile, $configuration))
 		{
 			$returnData->errormessages[]  = JText::_('COM_CONFIG_ERROR_WRITE_FAILED');
+			if ($diagnostics)
+			{
+				$returnData->log['diagnostics'][]  = JText::_('COM_CONFIG_ERROR_WRITE_FAILED');
+			}
 		}
 
 		// Attempt to make the file unwriteable if using FTP.
 		if (!$ftp['enabled'] && JPath::isOwner($configfile) && !JPath::setPermissions($configfile, '0444'))
 		{
 			$returnData->messages[]  = JText::_('COM_CONFIG_ERROR_CONFIGURATION_PHP_NOTUNWRITABLE');
+			if ($diagnostics)
+			{
+				$returnData->log['diagnostics'][]  = JText::_('COM_CONFIG_ERROR_CONFIGURATION_PHP_NOTUNWRITABLE');
+			}
 		}
 
 		// Now copy the database tables
@@ -2172,6 +2234,39 @@ function cloneSite($requestObject, & $returnData)
 
 		$config = JFactory::getConfig();
 		$dbname = $config->get('db', '');
+
+		// MyISAM
+		// $db->setQuery("SET FOREIGN_KEY_CHECKS = 0")
+
+		// InnoDb
+		try
+		{
+			$db->setQuery("SET unique_checks=0");
+			$db->execute();
+			$db->setQuery("SET foreign_key_checks=0");
+			$db->execute();
+		}
+		catch (Exception $e)
+		{
+
+			$returnData->error = 1;
+			$returnData->cloned = 0;
+			$returnData->errormessages[] = "Unable to release DB table locks";
+
+			if (count($returnData->messages))
+			{
+				$returnData->errormessages = array_merge($returnData->messages, $returnData->errormessages);
+			}
+			cleanUpClone($requestObject, $returnData);
+			$returnData->errormessages[] = "Partial Clone site and data cleaned up";
+
+			if ($diagnostics)
+			{
+				$returnData->log['diagnostics'][]  = "Unable to release DB table locks";
+			}
+
+			return $returnData;
+		}
 
 		$db->setQuery("SHOW FULL TABLES from `$dbname` WHERE `Tables_in_" .  $dbname ."` like '". $oldPrefix . "%' AND TABLE_TYPE LIKE 'VIEW'");
 		// Make sure we can count on the order of the columns!
@@ -2195,7 +2290,7 @@ function cloneSite($requestObject, & $returnData)
 
 			// Get the create statement - if not using FULL
 			// $tablefield = "Tables_in_" . $dbname;
-			// $retrieve = "SHOW CREATE TABLE `" . $table->$tablefield ."`";
+			// $retrieve = "ccccccfcnkihftdrdSHOW CREATE TABLE `" . $table->$tablefield ."`";
 			if (in_array($table, $tables)) {
 				$retrieve = "SHOW CREATE TABLE `" . $table . "`";
 			}
@@ -2227,8 +2322,45 @@ function cloneSite($requestObject, & $returnData)
 			$create = preg_replace("/" . $oldPrefix . "/m", $requestObject->prefix . "_", $create);
 
 			// You may need to rename foreign keys to prevent name re-use error.
-			// See http://stackoverflow.com/questions/12623651/
-			$create = preg_replace("/FK_/", "FK_" .$requestObject->prefix ."_" , $create);
+			$fkcheck = "SELECT * FROM information_schema.key_column_usage WHERE REFERENCED_TABLE_NAME <> '' AND  TABLE_SCHEMA = '$dbname' AND TABLE_NAME = '$table'";
+			$db->setQuery($fkcheck);
+			//$db->setQuery($create);
+			try
+			{
+				$fkeys = $db->loadObjectList();
+
+				if ($fkeys && count($fkeys))
+				{
+					$returnData->log['diagnostics'][]  = "Foreign keys found " . count($fkeys);
+					foreach ($fkeys as $fkey)
+					{
+						$create = preg_replace("#\b" . $fkey->CONSTRAINT_NAME . "\b#", $fkey->CONSTRAINT_NAME . "_" . $requestObject->prefix, $create);
+						$returnData->log['diagnostics'][]  = "Replaced  " . $fkey->CONSTRAINT_NAME . " with " . $fkey->CONSTRAINT_NAME . "_" . $requestObject->prefix;
+					}
+				}
+			}
+			catch (Exception $e)
+			{
+
+				$returnData->error = 1;
+				$returnData->cloned = 0;
+				$returnData->errormessages[] = "Unable to check for foreign keys on table " . $table;
+
+				if (count($returnData->messages))
+				{
+					$returnData->errormessages = array_merge($returnData->messages, $returnData->errormessages);
+				}
+				cleanUpClone($requestObject, $returnData);
+				$returnData->errormessages[] = "Partial Clone site and data cleaned up";
+				if ($diagnostics)
+				{
+					$returnData->log['diagnostics'][]  = "Unable to check for foreign keys on table " . $table;
+					$returnData->log['diagnostics'][]  = $fkcheck;
+				}
+
+				return $returnData;
+			}
+
 
 			// Create the new table
 			$db->setQuery($create);
@@ -2238,6 +2370,26 @@ function cloneSite($requestObject, & $returnData)
 			catch (Exception $e)
 			{
 				$x = 1;
+
+				$returnData->error = 1;
+				$returnData->cloned = 0;
+				$returnData->errormessages[]  = "Create table/view failed :";
+				$returnData->errormessages[]  = $create;
+				$returnData->errormessages[]  = $e->getMessage();
+
+				if (count($returnData->messages))
+				{
+					$returnData->errormessages = array_merge($returnData->messages, $returnData->errormessages);
+				}
+				cleanUpClone($requestObject, $returnData);
+				$returnData->errormessages[] = "Partial Clone site and data cleaned up";
+				if ($diagnostics)
+				{
+					$returnData->log['diagnostics'][]  = "Create table/view failed " . $create;
+				}
+
+				return $returnData;
+
 			}
 		}
 		/*
@@ -2254,25 +2406,6 @@ function cloneSite($requestObject, & $returnData)
 
 		// Now copy the data with dropping foreign key checks and then reinstating them
 
-		// MyISAM
-		// $db->setQuery("SET FOREIGN_KEY_CHECKS = 0")
-
-		// InnoDb
-		try
-		{
-			$db->setQuery("SET unique_checks=0");
-			$db->execute();
-			$db->setQuery("SET foreign_key_checks=0");
-			$db->execute();
-		}
-		catch (Exception $e)
-		{
-			$returnData->error = 1;
-			$returnData->cloned = 0;
-			$returnData->errormessages[] = "Unable to release DB table locks";
-			return $returnData;
-		}
-
 		foreach ($tables as $table)
 		{
 
@@ -2284,34 +2417,15 @@ function cloneSite($requestObject, & $returnData)
 					. " SELECT * FROM " . $table);
 
 				$db->execute();
-
-				// After the insert we re-implement the triggers
-				// Like is based on table name not the name of the trigger! See https://dev.mysql.com/doc/refman/5.7/en/show-triggers.html
-				$db->setQuery("SHOW TRIGGERS FROM `$dbname` LIKE '" . $table . "'");
-				try {
-					$triggers = $db->loadObjectList();
-					if (count($triggers))
-					{
-						foreach ($triggers as $trigger) {
-							$sql = 'CREATE TRIGGER '
-								. $trigger->Trigger . ' '
-								. $trigger->Timing . ' '
-								. $trigger->Event . ' '
-								. ' ON ' . $trigger->Table . ' FOR EACH ROW '
-								. $trigger->Statement;
-							$sql = str_replace($oldPrefix , $requestObject->prefix ."_", $sql);
-							$db->setQuery($sql);
-							$db->execute();
-						}
-					}
-				}
-				catch (Exception $e)
-				{
-					$x = 1;
-				}
 			}
 			catch (Exception $e)
 			{
+				if ($diagnostics)
+				{
+					$returnData->log['diagnostics'][]  = "Insert INTO/SELECT FROM failed : " . (string) $db->getQuery();
+					$returnData->log['diagnostics'][]  = "Exception was  : " . $e->getMessage();
+				}
+
 				// I need to look at the columns names to exclude generated columns
 				//$sql = "SHOW COLUMNS FROM " . str_replace($oldPrefix , $requestObject->prefix ."_", $table->$tablefield);
 				$sql = "SHOW COLUMNS FROM " . str_replace($oldPrefix , $requestObject->prefix ."_", $table);
@@ -2334,11 +2448,71 @@ function cloneSite($requestObject, & $returnData)
 				$db->setQuery("INSERT INTO " . str_replace($oldPrefix , $requestObject->prefix ."_", $table)
 					. " (" . implode($insertcols, ",") . ")"
 					. " SELECT " . implode($insertcols, ",") . " FROM " . $table);
-				$db->execute();
+				try {
+					if ($db->execute())
+					{
+						if ($diagnostics)
+						{
+							$returnData->log['diagnostics'][] = "Fall back to Insert Into with specific columns succeeded ";
+						}
+					}
+				}
+				catch (Exception $e)
+				{
+
+					$x = 1;
+
+					if ($diagnostics)
+					{
+						$returnData->log['diagnostics'][] = "Insert Into with columns Failed " . (string) $db->getQuery();
+					}
+					$returnData->error = 1;
+					$returnData->cloned = 0;
+					$returnData->errormessages[] = "Failed to insert data for table " . $table;
+					$returnData->errormessages[] = $e->getMessage();
+
+					if (count($returnData->messages))
+					{
+						$returnData->errormessages = array_merge($returnData->messages, $returnData->errormessages);
+					}
+
+					cleanUpClone($requestObject, $returnData);
+					$returnData->errormessages[] = "Partial Clone site and data cleaned up";
+
+					return $returnData;
+
+				}
+			}
+
+			// After the insert we re-implement the triggers
+			// Like is based on table name not the name of the trigger! See https://dev.mysql.com/doc/refman/5.7/en/show-triggers.html
+			$db->setQuery("SHOW TRIGGERS FROM `$dbname` LIKE '" . $table . "'");
+			try {
+				$triggers = $db->loadObjectList();
+				if (count($triggers))
+				{
+					foreach ($triggers as $trigger) {
+						$sql = 'CREATE TRIGGER '
+							. $trigger->Trigger . ' '
+							. $trigger->Timing . ' '
+							. $trigger->Event . ' '
+							. ' ON ' . $trigger->Table . ' FOR EACH ROW '
+							. $trigger->Statement;
+						$sql = str_replace($oldPrefix , $requestObject->prefix ."_", $sql);
+						$db->setQuery($sql);
+						$db->execute();
+					}
+				}
+			}
+			catch (Exception $e)
+			{
+				if ($diagnostics)
+				{
+					$returnData->log['diagnostics'][]  = "Create database triggers failed  : " . $create;
+				}
 
 				$x = 1;
 			}
-
 		}
 
 		$db->setQuery("SHOW FUNCTION STATUS WHERE Name LIKE '" . $oldPrefix. "%' AND dB='" . $dbname . "'");
@@ -2352,6 +2526,10 @@ function cloneSite($requestObject, & $returnData)
 			catch (Exception $e)
 			{
 				$x = 1;
+				if ($diagnostics)
+				{
+					$returnData->log['diagnostics'][]  = "Failed to get create function declaration : " . $create;
+				}
 			}
 
 			// Isolate the "Create Function" index
@@ -2371,7 +2549,11 @@ function cloneSite($requestObject, & $returnData)
 			}
 			catch (Exception $e)
 			{
-				$x = 1;
+				if ($diagnostics)
+				{
+					$returnData->log['diagnostics'][]  = "Failed to create functions : " . $create;
+				}
+
 			}
 		}
 
@@ -2386,6 +2568,10 @@ function cloneSite($requestObject, & $returnData)
 			catch (Exception $e)
 			{
 				$x = 1;
+				if ($diagnostics)
+				{
+					$returnData->log['diagnostics'][]  = "Failed to get create procedure declaration : " . $create;
+				}
 			}
 
 			// Isolate the "Create Function" index
@@ -2406,6 +2592,10 @@ function cloneSite($requestObject, & $returnData)
 			catch (Exception $e)
 			{
 				$x = 1;
+				if ($diagnostics)
+				{
+					$returnData->log['diagnostics'][]  = "Failed to create procedure : " . $create;
+				}
 			}
 		}
 
@@ -2424,6 +2614,11 @@ function cloneSite($requestObject, & $returnData)
 			$returnData->error = 1;
 			$returnData->cloned = 0;
 			$returnData->errormessages[] = "Unable to reset DB table locks";
+			if ($diagnostics)
+			{
+				$returnData->log['diagnostics'][]  = "Unable to reset DB table locks";
+			}
+
 			return $returnData;
 		}
 
@@ -2437,23 +2632,42 @@ function cloneSite($requestObject, & $returnData)
 		$returnData->cloned = 0;
 		$returnData->error = 1;
 		$returnData->errormessages[]  = JText::_('COM_YOURSITES_COULD_NOT_CLONE_SITE_CONFIGURATION_FILE_MISSING');
+		if ($diagnostics)
+		{
+			$returnData->log['diagnostics'][]  = JText::_('COM_YOURSITES_COULD_NOT_CLONE_SITE_CONFIGURATION_FILE_MISSING');
+		}
 		return $returnData;
 	}
 	return $returnData;
 }
 
-function deleteSite($requestObject, & $returnData)
+function cleanUpClone($requestObject, & $returnData)
+{
+	return deleteSite($requestObject, $returnData, true);
+}
+
+function deleteSite($requestObject, & $returnData, $specificClone = false)
 {
 	// Only delete cloned sites
 	$config = new JConfig();
 	$db_prefix = trim($config->dbprefix, "_");
+	if ($specificClone)
+	{
+		$db_prefix = $requestObject->prefix;
+	}
 
-	if (strpos($db_prefix, 'ysts_') !== 0 || strpos(JPATH_SITE, '._' . $db_prefix) === false) {
+	$basepath = JPATH_SITE;
+	if ($specificClone)
+	{
+		$basepath .= '/._' . $db_prefix;
+	}
+
+	if (strpos($db_prefix, 'ysts_') !== 0 || strpos($basepath, '._' . $db_prefix) === false) {
 		$returnData->error = 1;
 		$returnData->errormessages[] = "COM_YOURSITES_DELETE_SITE_SITE_NOT_A_CLONE";
 		$returnData->errormessages[] = $db_prefix;
-		$returnData->errormessages[] = JPATH_SITE;
-		$returnData->errormessages[] = strpos(JPATH_SITE, '._' . $db_prefix);
+		$returnData->errormessages[] = $basepath;
+		$returnData->errormessages[] = strpos($basepath, '._' . $db_prefix);
 
 		return $returnData;
 	}
@@ -2464,6 +2678,10 @@ function deleteSite($requestObject, & $returnData)
 	// ToDo disable emails using code from com_config application model ConfigModelApplication and ::writeconfigfile method adapted to our needs here
 	$db = JFactory::getDbo();
 	$oldPrefix = $db->getPrefix();
+	if ($specificClone)
+	{
+		$oldPrefix = $requestObject->prefix;
+	}
 
 	$config = JFactory::getConfig();
 	$dbname = $config->get('db', '');
@@ -2489,16 +2707,6 @@ function deleteSite($requestObject, & $returnData)
 		$returnData->errormessages[] = "Unable to release DB table locks";
 		$returnData->log[] = $e->getMessage();
 		return $returnData;
-	}
-
-	foreach ($tables as $table)
-	{
-
-		// Drop the tables
-		$dropSql = "DROP TABLE IF EXISTS `" . $table ."`";
-		$db->setQuery($dropSql);
-
-		$deleted = $db->execute();
 	}
 
 	$db->setQuery("SHOW FULL TABLES from `$dbname` WHERE `Tables_in_" .  $dbname ."` like '". $oldPrefix . "%' AND TABLE_TYPE LIKE 'VIEW'");
@@ -2531,6 +2739,16 @@ function deleteSite($requestObject, & $returnData)
 		$db->execute();
 	}
 
+	foreach ($tables as $table)
+	{
+
+		// Drop the tables
+		$dropSql = "DROP TABLE IF EXISTS `" . $table ."`";
+		$db->setQuery($dropSql);
+
+		$deleted = $db->execute();
+	}
+
 	// MyISAM
 	// $db->setQuery("SET FOREIGN_KEY_CHECKS = 1");
 	// InnoDb
@@ -2550,8 +2768,9 @@ function deleteSite($requestObject, & $returnData)
 
 	try
 	{
+
 		// hidden in unix
-		$success = deleter2(JPATH_SITE, $returnData);
+		$success = deleter2($basepath, $returnData);
 		// finally remove the root folder
 		$FTPOptions = JClientHelper::getCredentials('ftp');
 
@@ -2560,13 +2779,13 @@ function deleteSite($requestObject, & $returnData)
 			// Connect the FTP client
 			$ftp = JFtpClient::getInstance($FTPOptions['host'], $FTPOptions['port'], array(), $FTPOptions['user'], $FTPOptions['pass']);
 			// Now delete the folder
-			if (!$ftp->delete(JPATH_SITE))
+			if (!$ftp->delete($basepath))
 			{
-				throw new \RuntimeException('Delete folder failed ' . JPATH_SITE, -1);
+				throw new \RuntimeException('Delete folder failed ' . $basepath, -1);
 			}
 		}
 		else {
-			@rmdir(JPATH_SITE);
+			@rmdir($basepath);
 		}
 
 	}
@@ -4672,7 +4891,7 @@ function getJoomlaUpdateSitesIds($column = 0)
  *
  * @return  boolean  True on success.
  *
- * @since   1.12.1
+ * @since   1.14.0
  * @throws  \RuntimeException
  */
 function copyr2($src, $dest, $prefix = "", & $returnData, $exclusions = array())
@@ -4739,7 +4958,7 @@ function copyr2($src, $dest, $prefix = "", & $returnData, $exclusions = array())
 					if (in_array($file, $exclusions))
 					{
 						// should make directory
-						continue;
+						continue 2;
 					}
 
 					if ($file != '.' && $file != '..')
@@ -4798,7 +5017,7 @@ function copyr2($src, $dest, $prefix = "", & $returnData, $exclusions = array())
 					if (in_array($file, $exclusions))
 					{
 						mkdir($sfid);
-						continue;
+						continue 2;
 					}
 
 					if ($file != '.' && $file != '..')
@@ -4833,7 +5052,7 @@ function copyr2($src, $dest, $prefix = "", & $returnData, $exclusions = array())
  *
  * @return  boolean  True on success.
  *
- * @since   1.12.1
+ * @since   1.14.0
  * @throws  \RuntimeException
  */
 function deleter2($src, & $returnData)

@@ -5,8 +5,6 @@
  * @package       fef
  * @copyright (c) 2017-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license       GNU General Public License version 3, or later
- *
- * Created by Crystal Dionysopoulou for Akeeba Ltd, https://www.akeeba.com
  */
 
 defined('_JEXEC') or die();
@@ -31,7 +29,7 @@ class file_fefInstallerScript
 	 *
 	 * @var   string
 	 */
-	protected $minimumPHPVersion = '7.1.0';
+	protected $minimumPHPVersion = '7.2.0';
 
 	/**
 	 * The minimum Joomla! version required to install this extension

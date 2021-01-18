@@ -1,7 +1,7 @@
 <?php
 /**
  * @package   akeebabackup
- * @copyright Copyright (c)2006-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -17,7 +17,6 @@ use Akeeba\Backup\Admin\Model\ControlPanel;
 use Akeeba\Backup\Admin\View\ViewTraits\ProfileIdAndName;
 use Akeeba\Backup\Admin\View\ViewTraits\ProfileList;
 use Akeeba\Engine\Factory;
-use FOF30\Date\Date;
 use FOF30\View\DataView\Html as BaseView;
 use Joomla\CMS\Language\Text;
 
@@ -106,32 +105,11 @@ class Html extends BaseView
 	public $unwriteableOutput = false;
 
 	/**
-	 * Should I show the JPS password field? 0/1.
-	 *
-	 * @var  int
-	 */
-	public $showJPSPassword = 0;
-
-	/**
-	 * JPS password
+	 * has the user configured an ANGIE password?
 	 *
 	 * @var  string
 	 */
-	public $jpsPassword = '';
-
-	/**
-	 * Should I show the ANGIE password field? 0/1.
-	 *
-	 * @var  int
-	 */
-	public $showANGIEPassword = 0;
-
-	/**
-	 * ANGIE password
-	 *
-	 * @var  string
-	 */
-	public $ANGIEPassword = '';
+	public $hasANGIEPassword = '';
 
 	/**
 	 * Should I autostart the backup?
@@ -231,16 +209,7 @@ class Html extends BaseView
 		$this->autoResumeTimeout            = $engineConfiguration->get('akeeba.advanced.autoresume_timeout', 10);
 		$this->autoResumeRetries            = $engineConfiguration->get('akeeba.advanced.autoresume_maxretries', 3);
 		$this->promptForConfigurationWizard = $engineConfiguration->get('akeeba.flag.confwiz', 0) == 0;
-
-		if ($engineConfiguration->get('akeeba.advanced.archiver_engine', 'jpa') == 'jps')
-		{
-			$this->showJPSPassword = 1;
-			$this->jpsPassword     = $engineConfiguration->get('engine.archiver.jps.key', '');
-		}
-
-		// Always show ANGIE password: we add that feature to the Core version as well
-		$this->showANGIEPassword = 1;
-		$this->ANGIEPassword     = $engineConfiguration->get('engine.installer.angie.key', '');
+		$this->hasANGIEPassword = !empty(trim($engineConfiguration->get('engine.installer.angie.key', '')));
 	}
 
 	/**

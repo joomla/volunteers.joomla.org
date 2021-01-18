@@ -33,6 +33,12 @@
         "title": "COM_AKEEBA_CONFIG_S3USESSL_TITLE",
         "description": "COM_AKEEBA_CONFIG_S3USESSL_DESCRIPTION"
     },
+    "engine.postproc.amazons3.dualstack": {
+        "default": "1",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_S3_DUALSTACK_TITLE",
+        "description": "COM_AKEEBA_CONFIG_S3_DUALSTACK_DESCRIPTION"
+    },
     "engine.postproc.amazons3.bucket": {
         "default": "",
         "type": "string",

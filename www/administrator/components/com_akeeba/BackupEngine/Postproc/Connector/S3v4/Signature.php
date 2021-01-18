@@ -3,12 +3,13 @@
  * Akeeba Engine
  *
  * @package   akeebaengine
- * @copyright Copyright (c)2006-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
 namespace Akeeba\Engine\Postproc\Connector\S3v4;
 
+// Protection against direct access
 defined('AKEEBAENGINE') || die();
 
 /**
@@ -41,7 +42,7 @@ abstract class Signature
 	 *
 	 * @return  Signature
 	 */
-	public static function getSignatureObject(Request $request, $method = 'v2')
+	public static function getSignatureObject(Request $request, string $method = 'v2'): self
 	{
 		$className = '\\Akeeba\\Engine\\Postproc\\Connector\\S3v4\\Signature\\' . ucfirst($method);
 
@@ -53,7 +54,7 @@ abstract class Signature
 	 *
 	 * @return  string
 	 */
-	abstract public function getAuthorizationHeader();
+	abstract public function getAuthorizationHeader(): string;
 
 	/**
 	 * Pre-process the request headers before we convert them to cURL-compatible format. Used by signature engines to
@@ -64,16 +65,16 @@ abstract class Signature
 	 *
 	 * @return  void
 	 */
-	abstract public function preProcessHeaders(&$headers, &$amzHeaders);
+	abstract public function preProcessHeaders(array &$headers, array &$amzHeaders): void;
 
 	/**
 	 * Get a pre-signed URL for the request. Typically used to pre-sign GET requests to objects, i.e. give shareable
 	 * pre-authorized URLs for downloading files from S3.
 	 *
-	 * @param   integer  $lifetime  Lifetime in seconds
-	 * @param   boolean  $https     Use HTTPS ($hostBucket should be false for SSL verification)?
+	 * @param   integer|null  $lifetime  Lifetime in seconds. NULL for default lifetime.
+	 * @param   bool          $https     Use HTTPS ($hostBucket should be false for SSL verification)?
 	 *
-	 * @return  string  The presigned URL
+	 * @return  string  The authenticated URL, complete with signature
 	 */
-	abstract public function getAuthenticatedURL($lifetime = null, $https = false);
+	abstract public function getAuthenticatedURL(?int $lifetime = null, bool $https = false): string;
 }

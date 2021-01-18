@@ -1,7 +1,7 @@
 <?php
 /**
  * @package   akeebabackup
- * @copyright Copyright (c)2006-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -48,9 +48,9 @@ class LargeDirectories extends Base
 			{
 				preg_match_all('#Adding ' . $dir . '/([^\/]*) to#', $data, $tmp_matches);
 
-				if (count($tmp_matches[0]) > 250)
+				if ((is_array($tmp_matches[0]) || $tmp_matches[0] instanceof \Countable ? count($tmp_matches[0]) : 0) > 250)
 				{
-					$large_dir[] = ['position' => $dir, 'elements' => count($tmp_matches[0])];
+					$large_dir[] = ['position' => $dir, 'elements' => is_array($tmp_matches[0]) || $tmp_matches[0] instanceof \Countable ? count($tmp_matches[0]) : 0];
 				}
 			}
 

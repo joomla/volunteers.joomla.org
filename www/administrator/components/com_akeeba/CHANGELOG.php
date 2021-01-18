@@ -1,4 +1,30 @@
 <?php die();?>
+Akeeba Backup 7.5.1
+================================================================================
++ Post-backup emails can now display the total backup size and the approximate size of each part file
+# [HIGH] The Joomla 4 console plugin could not install due to a bug in Joomla 4's plugins installer code
+# [HIGH] Backup failure to S3 with a PHP Type Error when the Dual Stack option has no value
+# [HIGH] Uploading to Dropbox would fail if you linked your Dropbox account after December 2020
+# [LOW] No list of backup files in the post-backup email when using a post-processing engine
+# [LOW] Manage Remotely Stored Files actions could fail on Box, Dropbox, OneDrive and Google Drive if the access token had expired in the meantime.
+
+Akeeba Backup 7.5.0.1
+================================================================================
+! [HIGH] The Backup on Update plugin can cause the site to fail to load
+
+Akeeba Backup 7.5.0
+================================================================================
+- Dropped support for PHP 7.1.0
++ Dropbox is now using the scoped API access.
++ Amazon S3: Added support for Dual Stack option (use of IPv6 when available)
++ Joomla 4 CLI (joomla.php) support – full CLI client to Akeeba Backup
+~ Add PHP 8.0 in the list of known PHP versions, recommend PHP 7.4 or later
+~ Remove the JPS and ANGIE password fields from the Backup Now page. You can still configure these features in the backup profile's Configuration page.
+# [MEDIUM] PHP 8: fatal error uploading to Amazon S3, CloudFiles
+# [LOW] Using [SITENAME] in a backup archive name resulted in a single dash being output.
+# [LOW] UI elements in the the Files and Folders Exclusion pages would still show native tooltips with HTML tags in them.
+# [HIGH] Joomla 4 beta 6 changes how the session works, breaking everything.
+
 Akeeba Backup 7.4.0.1
 ================================================================================
 ! Akeeba Backup Core: cannot access the plugin or take a backup because of a PHP error due to an incorrect reference to a Pro-only class.

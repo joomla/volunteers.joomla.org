@@ -3,7 +3,7 @@
  * Akeeba Engine
  *
  * @package   akeebaengine
- * @copyright Copyright (c)2006-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -583,7 +583,7 @@ ENDVCONTENT;
 		$this->excluded_subdirectories = false;
 		$this->excluded_files          = false;
 
-		if (count($this->directory_list) == 0)
+		if ((is_array($this->directory_list) || $this->directory_list instanceof \Countable ? count($this->directory_list) : 0) == 0)
 		{
 			// No directories left to scan
 			return false;
@@ -705,7 +705,7 @@ ENDVCONTENT;
 		}
 
 		// Normal file backup loop; we keep on processing the file list, packing files as we go.
-		if (count($this->file_list) == 0)
+		if ((is_array($this->file_list) || $this->file_list instanceof \Countable ? count($this->file_list) : 0) == 0)
 		{
 			// No files left to pack. Return true and let the engine loop
 			$this->progressMarkFolderDone();
@@ -723,7 +723,7 @@ ENDVCONTENT;
 
 			$largeFileThreshold = Factory::getConfiguration()->get('engine.scan.common.largefile', 10485760);
 
-			while ((count($this->file_list) > 0))
+			while (((is_array($this->file_list) || $this->file_list instanceof \Countable ? count($this->file_list) : 0) > 0))
 			{
 				$file = @array_shift($this->file_list);
 				$size = 0;
@@ -813,7 +813,7 @@ ENDVCONTENT;
 			}
 
 			// True if we have more files, false if we're done packing
-			return (count($this->file_list) > 0);
+			return ((is_array($this->file_list) || $this->file_list instanceof \Countable ? count($this->file_list) : 0) > 0);
 		}
 	}
 

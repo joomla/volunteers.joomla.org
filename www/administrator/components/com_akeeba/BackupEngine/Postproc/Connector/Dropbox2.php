@@ -3,7 +3,7 @@
  * Akeeba Engine
  *
  * @package   akeebaengine
- * @copyright Copyright (c)2006-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -38,7 +38,7 @@ class Dropbox2
 	/**
 	 * The URL of the helper script which is used to authenticate you with Dropbox
 	 */
-	public const helperUrl = 'https://www.akeeba.com/oauth2/dropbox.php';
+	public const helperUrl = 'https://www.akeeba.com/oauth2/dropbox2.php';
 
 	/**
 	 * The access token for connecting to Dropbox
@@ -46,6 +46,13 @@ class Dropbox2
 	 * @var   string
 	 */
 	private $accessToken = '';
+
+	/**
+	 * The refresh token used to get a new access token for OneDrive
+	 *
+	 * @var string
+	 */
+	protected $refreshToken = '';
 
 	/**
 	 * Download ID to use with the helper URL
@@ -77,9 +84,10 @@ class Dropbox2
 	 * @param   string  $accessToken  The access token for accessing Dropbox
 	 * @param   string  $dlid         The akeeba.com Download ID, used whenever you try to refresh the token
 	 */
-	public function __construct($accessToken, $dlid)
+	public function __construct($accessToken, $refreshToken, $dlid)
 	{
 		$this->accessToken = $accessToken;
+		$this->refreshToken = $refreshToken;
 		$this->dlid        = $dlid;
 	}
 
@@ -1042,6 +1050,76 @@ class Dropbox2
 		}
 
 		return $ret;
+	}
+
+	/**
+	 * Try to ping Dropbox, refresh the token if it's expired and return the refresh results.
+	 *
+	 * If no refresh was required 'needs_refresh' will be false.
+	 *
+	 * If refresh was required 'needs_refresh' will be true and the rest of the keys will be as returned by Dropbox.
+	 *
+	 * If the refresh failed you'll get a RuntimeException.
+	 *
+	 * @param   bool  $forceRefresh  Set to true to forcibly refresh the tokens
+	 *
+	 * @return  array
+	 *
+	 * @throws  RuntimeException
+	 */
+	public function ping($forceRefresh = false)
+	{
+		// Initialization
+		$response = [
+			'needs_refresh' => false,
+		];
+
+		// If we're not force refreshing the tokens try to get the drive information. It's our test to see if the token
+		// works.
+		if (!$forceRefresh)
+		{
+			try
+			{
+				$dummy = $this->getCurrentAccount();
+			}
+			catch (RuntimeException $e)
+			{
+				// If it failed we need to refresh the token
+				$response['needs_refresh'] = true;
+			}
+		}
+
+		// If there is no need to refresh the tokens, return
+		if (!$response['needs_refresh'] && !$forceRefresh)
+		{
+			return $response;
+		}
+
+		$refreshResponse = $this->refreshToken();
+
+		return array_merge($response, $refreshResponse);
+	}
+
+	/**
+	 * Refresh the access token.
+	 *
+	 * @return array|string  The result coming from OneDrive
+	 */
+	public function refreshToken()
+	{
+		$refreshUrl = $this->getRefreshUrl();
+
+		$refreshResponse = $this->fetch('GET', '', $refreshUrl);
+
+		$this->refreshToken = $refreshResponse['refresh_token'];
+		$this->accessToken  = $refreshResponse['access_token'];
+
+		return $refreshResponse;
+	}
+
+	protected function getRefreshUrl()
+	{
+		return static::helperUrl . '?refresh_token=' . urlencode($this->refreshToken) . '&dlid=' . $this->dlid;
 	}
 
 }

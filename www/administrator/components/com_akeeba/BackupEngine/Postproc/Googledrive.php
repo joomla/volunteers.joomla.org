@@ -3,7 +3,7 @@
  * Akeeba Engine
  *
  * @package   akeebaengine
- * @copyright Copyright (c)2006-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -112,6 +112,7 @@ HTML;
 			$this->configOverrides = $params;
 			/** @var ConnectorGoogleDrive $connector */
 			$connector = $this->getConnector(true);
+			$connector->ping();
 
 			$items = array_merge($items, $connector->getTeamDrives());
 		}
@@ -170,6 +171,8 @@ HTML;
 					__METHOD__, $this->remotePath
 				));
 
+				$connector->ping();
+
 				[$fileName, $folderId] = $connector->preprocessUploadPath($this->remotePath, $teamDriveID);
 
 				Factory::getLog()->debug(sprintf(
@@ -218,6 +221,8 @@ HTML;
 				"%s - Trying to create possibly missing directories and remove existing file by the same name (%s)",
 				__METHOD__, $remotePath
 			));
+
+			$connector->ping();
 
 			[$fileName, $folderId] = $connector->preprocessUploadPath($remotePath, $teamDriveID);
 
@@ -339,6 +344,7 @@ HTML;
 
 		/** @var ConnectorGoogleDrive $connector */
 		$connector = $this->getConnector(true);
+		$connector->ping();
 
 		// Download the file
 		$engineConfig = Factory::getConfiguration();
@@ -352,6 +358,7 @@ HTML;
 	{
 		/** @var ConnectorGoogleDrive $connector */
 		$connector = $this->getConnector(true);
+		$connector->ping();
 
 		$engineConfig = Factory::getConfiguration();
 		$teamDriveID  = $engineConfig->get('engine.postproc.googledrive.team_drive', '');

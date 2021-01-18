@@ -1,7 +1,7 @@
 <?php
 /**
  * @package   akeebabackup
- * @copyright Copyright (c)2006-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -133,9 +133,9 @@ defined('_JEXEC') || die();
                 @foreach($this->items as $record)
 					<?php
 					$id = 1 - $id;
-					list($originDescription, $originIcon) = $this->getOriginInformation($record);
-					list($startTime, $duration, $timeZoneText) = $this->getTimeInformation($record);
-					list($statusClass, $statusIcon) = $this->getStatusInformation($record);
+					[$originDescription, $originIcon] = $this->getOriginInformation($record);
+					[$startTime, $duration, $timeZoneText] = $this->getTimeInformation($record);
+					[$statusClass, $statusIcon] = $this->getStatusInformation($record);
 					$profileName = $this->getProfileName($record);
 
 					$frozenIcon  = 'akion-waterdrop';

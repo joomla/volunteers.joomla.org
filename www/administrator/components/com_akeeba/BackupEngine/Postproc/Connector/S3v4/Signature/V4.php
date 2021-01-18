@@ -3,17 +3,17 @@
  * Akeeba Engine
  *
  * @package   akeebaengine
- * @copyright Copyright (c)2006-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
 namespace Akeeba\Engine\Postproc\Connector\S3v4\Signature;
 
+// Protection against direct access
 defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Postproc\Connector\S3v4\Signature;
 use DateTime;
-use DateTimeZone;
 
 /**
  * Implements the Amazon AWS v4 signatures
@@ -31,7 +31,7 @@ class V4 extends Signature
 	 *
 	 * @return  void
 	 */
-	public function preProcessHeaders(&$headers, &$amzHeaders)
+	public function preProcessHeaders(array &$headers, array &$amzHeaders): void
 	{
 		// Do we already have an SHA-256 payload hash?
 		if (isset($amzHeaders['x-amz-content-sha256']))
@@ -58,12 +58,12 @@ class V4 extends Signature
 	 * Get a pre-signed URL for the request. Typically used to pre-sign GET requests to objects, i.e. give shareable
 	 * pre-authorized URLs for downloading files from S3.
 	 *
-	 * @param   integer  $lifetime  Lifetime in seconds
-	 * @param   boolean  $https     Use HTTPS ($hostBucket should be false for SSL verification)?
+	 * @param   integer|null  $lifetime  Lifetime in seconds. NULL for default lifetime.
+	 * @param   bool          $https     Use HTTPS ($hostBucket should be false for SSL verification)?
 	 *
 	 * @return  string  The presigned URL
 	 */
-	public function getAuthenticatedURL($lifetime = null, $https = false)
+	public function getAuthenticatedURL(?int $lifetime = null, bool $https = false): string
 	{
 		// Set the Expires header
 		if (is_null($lifetime))
@@ -107,7 +107,7 @@ class V4 extends Signature
 	 *
 	 * @return  string
 	 */
-	public function getAuthorizationHeader()
+	public function getAuthorizationHeader(): string
 	{
 		$verb           = strtoupper($this->request->getVerb());
 		$resourcePath   = $this->request->getResource();
@@ -141,7 +141,7 @@ class V4 extends Signature
 		if (isset($headers['Expires']))
 		{
 			$gmtDate = clone $signatureDate;
-			$gmtDate->setTimezone(new DateTimeZone('GMT'));
+			$gmtDate->setTimezone(new \DateTimeZone('GMT'));
 
 			$parameters['X-Amz-Algorithm']  = "AWS4-HMAC-SHA256";
 			$parameters['X-Amz-Credential'] = $this->request->getConfiguration()->getAccess() . '/' . $credentialScope;
@@ -239,7 +239,7 @@ class V4 extends Signature
 			$queryString  = @substr($canonicalURI, $questionMarkPos + 1);
 			@parse_str($queryString, $extraQuery);
 
-			if (count($extraQuery))
+			if (is_array($extraQuery) || $extraQuery instanceof \Countable ? count($extraQuery) : 0)
 			{
 				$parameters = array_merge($parameters, $extraQuery);
 			}
@@ -336,7 +336,7 @@ class V4 extends Signature
 	 *
 	 * @return  string
 	 */
-	private function getSigningKey(DateTime $signatureDate)
+	private function getSigningKey(DateTime $signatureDate): string
 	{
 		$kSecret  = $this->request->getConfiguration()->getSecret();
 		$kDate    = hash_hmac('sha256', $signatureDate->format('Ymd'), 'AWS4' . $kSecret, true);
@@ -347,9 +347,14 @@ class V4 extends Signature
 		return $kSigning;
 	}
 
-	private function urlencode($string)
+	private function urlencode(?string $toEncode): string
 	{
-		return str_replace('+', '%20', urlencode($string));
+		if (empty($toEncode))
+		{
+			return '';
+		}
+
+		return str_replace('+', '%20', urlencode($toEncode));
 	}
 
 	/**
@@ -359,22 +364,22 @@ class V4 extends Signature
 	 *
 	 * @return  string
 	 */
-	private function getPresignedHostnameForRegion($region)
+	private function getPresignedHostnameForRegion(string $region): string
 	{
-		$endpoint = 's3.amazonaws.com';
+		$endpoint         = 's3.' . $region . '.amazonaws.com';
+		$dualstackEnabled = $this->request->getConfiguration()->getDualstackUrl();
 
-		if ($region == 'us-east-1')
+		// If dual-stack URLs are enabled then prepend the endpoint
+		if ($dualstackEnabled)
 		{
-			$region = 'external-1';
-		}
-		elseif (substr($region, 0, 3) == 'cn-')
-		{
-			$endpoint = 'amazonaws.com.cn';
-
-			return 's3.' . $region . '.' . $endpoint;
+			$endpoint = 's3.dualstack.' . $region . '.amazonaws.com';
 		}
 
-		return str_replace('s3', 's3-' . $region, $endpoint);
+		if ($region == 'cn-north-1')
+		{
+			return $endpoint . '.cn';
+		}
+
+		return $endpoint;
 	}
-
 }

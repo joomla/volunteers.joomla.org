@@ -25,7 +25,7 @@ class BaseInstaller
 	 *
 	 * @var   string
 	 */
-	protected $minimumPHPVersion = '7.1.0';
+	protected $minimumPHPVersion = '7.2.0';
 
 	/**
 	 * The minimum Joomla! version required to install this extension

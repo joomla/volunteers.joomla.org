@@ -3,7 +3,7 @@
  * Akeeba Engine
  *
  * @package   akeebaengine
- * @copyright Copyright (c)2006-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -385,7 +385,7 @@ class Logger implements LoggerInterface, LogInterface, WarningsLoggerInterface
 			return;
 		}
 
-		if (fseek($this->fp, -$written, SEEK_CUR) === -1)
+		if (ftruncate($this->fp, ftell($this->fp) - $written) === false)
 		{
 			@fclose($this->fp);
 			@unlink($this->logName);

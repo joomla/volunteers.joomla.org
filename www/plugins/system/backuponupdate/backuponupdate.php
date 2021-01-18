@@ -1,10 +1,14 @@
 <?php
 /**
  * @package   akeebabackup
- * @copyright Copyright (c)2006-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
+defined('_JEXEC') || die();
+
+use FOF30\Container\Container;
+use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Factory;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Language\Text;
@@ -12,7 +16,50 @@ use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\CMS\Uri\Uri;
 
-defined('_JEXEC') || die();
+// Old PHP version detected. EJECT! EJECT! EJECT!
+if (!version_compare(PHP_VERSION, '7.2.0', '>='))
+{
+	return;
+}
+
+// Make sure Akeeba Backup is installed
+if (!file_exists(JPATH_ADMINISTRATOR . '/components/com_akeeba'))
+{
+	return;
+}
+
+// Joomla! version check
+if (version_compare(JVERSION, '2.5', 'lt'))
+{
+	// Joomla! earlier than 2.5. Nope.
+	return;
+}
+
+// Load FOF if not already loaded
+if (!defined('FOF30_INCLUDED') && !@include_once(JPATH_LIBRARIES . '/fof30/include.php'))
+{
+	return;
+}
+
+/*
+ * Hopefully, if we are still here, the site is running on at least PHP5. This means that
+ * including the Akeeba Backup factory class will not throw a White Screen of Death, locking
+ * the administrator out of the back-end.
+ */
+
+// Make sure Akeeba Backup is installed, or quit
+$akeeba_installed = @file_exists(JPATH_ADMINISTRATOR . '/components/com_akeeba/BackupEngine/Factory.php');
+
+if (!$akeeba_installed)
+{
+	return;
+}
+
+// Make sure Akeeba Backup is enabled
+if (!ComponentHelper::isEnabled('com_akeeba'))
+{
+	return;
+}
 
 class plgSystemBackuponupdate extends CMSPlugin
 {
@@ -296,7 +343,9 @@ class plgSystemBackuponupdate extends CMSPlugin
 	 */
 	private function getBoUFlag()
 	{
-		return Factory::getSession()->get('active', 1, 'plg_system_backuponupdate');
+		$container = Container::getInstance('com_akeeba', ['tempInstance' => 1]);
+
+		return $container->platform->getSessionVar('active', 1, 'plg_system_backuponupdate');
 	}
 
 	/**
@@ -307,9 +356,10 @@ class plgSystemBackuponupdate extends CMSPlugin
 	 */
 	private function toggleBoUFlag()
 	{
-		$status = 1 - $this->getBoUFlag();
+		$container = Container::getInstance('com_akeeba', ['tempInstance' => 1]);
+		$status    = 1 - $this->getBoUFlag();
 
-		Factory::getSession()->set('active', $status, 'plg_system_backuponupdate');
+		$container->platform->setSessionVar('active', $status, 'plg_system_backuponupdate');
 	}
 
 	/**
@@ -327,7 +377,7 @@ class plgSystemBackuponupdate extends CMSPlugin
 
 		$this->isEnabled = false;
 
-		if (!version_compare(PHP_VERSION, '7.1.0', '>='))
+		if (!version_compare(PHP_VERSION, '7.2.0', '>='))
 		{
 			return false;
 		}

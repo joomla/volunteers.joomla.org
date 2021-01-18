@@ -1,7 +1,7 @@
 <?php
 /**
  * @package   akeebabackup
- * @copyright Copyright (c)2006-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -175,7 +175,7 @@ class Json extends Model
 
 		// Store the client-specified key, or use the server key if none specified and the request
 		// came encrypted.
-		$this->password = isset($request['body']['key']) ? $request['body']['key'] : $this->serverKey();
+		$this->password = $request['body']['key'] ?? $this->serverKey();
 
 		// Run the method
 		$params = [];

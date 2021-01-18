@@ -3,7 +3,7 @@
  * Akeeba Engine
  *
  * @package   akeebaengine
- * @copyright Copyright (c)2006-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -356,7 +356,7 @@ class Mysql extends Base
 				}
 
 				$numRows++;
-				$numOfFields = count($myRow);
+				$numOfFields = is_array($myRow) || $myRow instanceof \Countable ? count($myRow) : 0;
 
 				// On MS SQL Server there's always a RowNumber pseudocolumn added at the end, screwing up the backup (GRRRR!)
 				if ($db->getDriverType() == 'mssql')
@@ -616,7 +616,7 @@ class Mysql extends Base
 				}
 			}
 
-			if (count($this->tables) == 0)
+			if ((is_array($this->tables) || $this->tables instanceof \Countable ? count($this->tables) : 0) == 0)
 			{
 				// We have finished dumping the database!
 				Factory::getLog()->info("End of database detected; flushing the dump buffers...");
@@ -640,7 +640,7 @@ class Mysql extends Base
 					$archive->addFileVirtual('large_tables_detected', $this->installerSettings->installerroot, $this->largest_query);
 				}
 			}
-			elseif (count($this->tables) != 0)
+			elseif ((is_array($this->tables) || $this->tables instanceof \Countable ? count($this->tables) : 0) != 0)
 			{
 				// Switch tables
 				$this->nextTable = array_shift($this->tables);
@@ -1681,7 +1681,7 @@ class Mysql extends Base
 	 */
 	protected function process_dependencies()
 	{
-		if (count($this->table_name_map) > 0)
+		if ((is_array($this->table_name_map) || $this->table_name_map instanceof \Countable ? count($this->table_name_map) : 0) > 0)
 		{
 			foreach ($this->table_name_map as $table_name => $table_abstract)
 			{
@@ -1722,11 +1722,11 @@ class Mysql extends Base
 		// Try to find the minimum insert position, so as to appear after the last referenced table
 		$insertpos = false;
 
-		if (count($referenced))
+		if (is_array($referenced) || $referenced instanceof \Countable ? count($referenced) : 0)
 		{
 			foreach ($referenced as $referenced_table)
 			{
-				if (count($this->tables))
+				if (is_array($this->tables) || $this->tables instanceof \Countable ? count($this->tables) : 0)
 				{
 					$newpos = array_search($referenced_table, $this->tables);
 
@@ -1746,7 +1746,7 @@ class Mysql extends Base
 		}
 
 		// Add to the _tables array
-		if (count($this->tables) && ($insertpos !== false))
+		if ((is_array($this->tables) || $this->tables instanceof \Countable ? count($this->tables) : 0) && ($insertpos !== false))
 		{
 			array_splice($this->tables, $insertpos + 1, 0, $table_name);
 		}
@@ -1758,7 +1758,7 @@ class Mysql extends Base
 		// Here's what... Some other table/view might depend on us, so we must appear
 		// before it (actually, it must appear after us). So, we scan for such
 		// tables/views and relocate them
-		if (count($this->dependencies))
+		if (is_array($this->dependencies) || $this->dependencies instanceof \Countable ? count($this->dependencies) : 0)
 		{
 			if (array_key_exists($table_name, $this->dependencies))
 			{
@@ -1794,7 +1794,7 @@ class Mysql extends Base
 						{
 							// We're hitting a circular dependency. We'll add the removed $depended_table
 							// in the penultimate position of the table and cross our virtual fingers...
-							array_splice($this->tables, count($this->tables) - 1, 0, $depended_table);
+							array_splice($this->tables, (is_array($this->tables) || $this->tables instanceof \Countable ? count($this->tables) : 0) - 1, 0, $depended_table);
 						}
 					}
 				}
@@ -2075,7 +2075,7 @@ class Mysql extends Base
 			return $columnList;
 		}
 
-		$totalColumns = count($tableCols);
+		$totalColumns = is_array($tableCols) || $tableCols instanceof \Countable ? count($tableCols) : 0;
 		$columnList   = [];
 
 		foreach ($tableCols as $col)

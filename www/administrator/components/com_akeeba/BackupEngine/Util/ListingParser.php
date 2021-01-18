@@ -3,7 +3,7 @@
  * Akeeba Engine
  *
  * @package   akeebaengine
- * @copyright Copyright (c)2006-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -96,7 +96,7 @@ class ListingParser
 		{
 			$vInfo = preg_split("/[\s]+/", $v, 9);
 
-			if (count($vInfo) != 9)
+			if ((is_array($vInfo) || $vInfo instanceof \Countable ? count($vInfo) : 0) != 9)
 			{
 				continue;
 			}
@@ -249,7 +249,7 @@ class ListingParser
 		{
 			$vInfo = preg_split("/[\s]+/", $v, 5);
 
-			if (count($vInfo) < 4)
+			if ((is_array($vInfo) || $vInfo instanceof \Countable ? count($vInfo) : 0) < 4)
 			{
 				continue;
 			}

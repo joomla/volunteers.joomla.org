@@ -3,7 +3,7 @@
  * Akeeba Engine
  *
  * @package   akeebaengine
- * @copyright Copyright (c)2006-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -326,7 +326,7 @@ class Complexify
 		$complexity = ($complexity / self::$MAX_COMPLEXITY) * 100;
 		$complexity = ($complexity > 100) ? 100 : $complexity;
 
-		return (object) ['valid' => count($error) === 0, 'complexity' => $complexity, 'errors' => $error];
+		return (object) ['valid' => (is_array($error) || $error instanceof \Countable ? count($error) : 0) === 0, 'complexity' => $complexity, 'errors' => $error];
 	}
 
 	/**

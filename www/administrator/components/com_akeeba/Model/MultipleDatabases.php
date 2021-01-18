@@ -1,7 +1,7 @@
 <?php
 /**
  * @package   akeebabackup
- * @copyright Copyright (c)2006-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -35,6 +35,40 @@ class MultipleDatabases extends Model
 		$filter = Factory::getFilterObject('multidb');
 
 		return $filter->getInclusions('db');
+	}
+
+	/**
+	 * Checks if a filter is already applied
+	 *
+	 * @param   array  $newFilter  Indexed array containing the filter data
+	 *
+	 * @return  bool    True if the filter already exists
+	 * @since   7.5.0
+	 */
+	public function filterExists(array $newFilter): bool
+	{
+		// Sanity checks
+		if (!isset($newFilter['host']) || !isset($newFilter['database']) || !isset($newFilter['prefix']))
+		{
+			return false;
+		}
+
+		$filters = $this->get_databases();
+
+		foreach ($filters as $filter)
+		{
+			// If I have a filter with the same host, db name and table prefix, it means that they're the same
+			if (
+				($newFilter['host'] == $filter['host']) &&
+				($newFilter['database'] == $filter['database']) &&
+				($newFilter['prefix'] == $filter['prefix'])
+			)
+			{
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**

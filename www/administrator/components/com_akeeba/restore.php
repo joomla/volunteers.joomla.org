@@ -1,19 +1,7 @@
 <?php
 /**
- * Akeeba Kickstart
- * An AJAX-powered archive extraction tool
- *
- * @package   kickstart
- * @copyright Copyright (c)2008-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
- * @license   GNU General Public License version 3, or later
- */
-
-/**
- * Akeeba Restore
- * An AJAX-powered archive extraction library for JPA, JPS and ZIP archives
- *
- * @package   restore
- * @copyright Copyright (c)2008-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @package   akeebabackup
+ * @copyright Copyright (c)2006-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -872,6 +860,7 @@ abstract class AKAbstractUnarchiver extends AKAbstractPart
 		if ($this->currentPartNumber >= 0)
 		{
 			$this->fp = @fopen($this->archiveList[$this->currentPartNumber], 'rb');
+
 			if ((is_resource($this->fp)) && ($this->currentPartOffset > 0))
 			{
 				@fseek($this->fp, $this->currentPartOffset);
@@ -1224,11 +1213,16 @@ abstract class AKAbstractUnarchiver extends AKAbstractPart
 		}
 
 		$error = $this->getError();
+
 		if (!$status && ($this->runState == AK_STATE_NOFILE) && empty($error))
 		{
 			debugMsg(__CLASS__ . '::_run() - Just finished');
 			// We just finished
 			$this->setState('postrun');
+
+			// Reset internal state, prevents __wakeup from trying to open a non-existent file
+			$this->currentPartNumber = -1;
+			$this->archiveList = [];
 		}
 		elseif (!empty($error))
 		{
@@ -6935,6 +6929,7 @@ class AKText extends AKAbstractObject
 		'BTN_TESTFTPCON'                  => 'Test FTP connection',
 		'BTN_TESTSFTPCON'                 => 'Test SFTP connection',
 		'BTN_GOTOSTART'                   => 'Start over',
+		'BTN_RETRY'                       => 'Retry',
 		'FINE_TUNE'                       => 'Fine tune',
 		'MIN_EXEC_TIME'                   => 'Minimum execution time:',
 		'MAX_EXEC_TIME'                   => 'Maximum execution time:',

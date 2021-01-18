@@ -1,7 +1,7 @@
 <?php
 /**
  * @package   akeebabackup
- * @copyright Copyright (c)2006-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -9,5 +9,5 @@
 defined('_JEXEC') or die();
 
 define('AKEEBA_PRO', '1');
-define('AKEEBA_VERSION', '7.4.0.1');
-define('AKEEBA_DATE', '2020-11-18');
+define('AKEEBA_VERSION', '7.5.1');
+define('AKEEBA_DATE', '2021-01-07');

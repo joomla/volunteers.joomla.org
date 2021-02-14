@@ -56,7 +56,7 @@ class Html extends BaseView
 		parent::onBeforeEdit();
 
 		// Include tooltip support
-		if (version_compare(JVERSION, '3.9999.9999', 'lt'))
+		if (version_compare(JVERSION, '3.999.999', 'lt'))
 		{
 			JHtml::_('behavior.tooltip');
 		}

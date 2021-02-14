@@ -96,15 +96,6 @@ class Kettenrad extends Part
 	private $warnings_issued = false;
 
 	/**
-	 * Are we running under PHP 7 or later?
-	 *
-	 * Used in tikc() to decide whether to catch Exception or Throwable in the try-catch.
-	 *
-	 * @var bool
-	 */
-	private $isPHPSeven = false;
-
-	/**
 	 * Kettenrad constructor.
 	 *
 	 * Overrides the Part constructor to initialize Kettenrad-specific properties.
@@ -114,9 +105,6 @@ class Kettenrad extends Part
 	public function __construct()
 	{
 		parent::__construct();
-
-		// Is this PHP 7.x or later?
-		$this->isPHPSeven = version_compare(PHP_VERSION, '7.0.0', 'ge');
 
 		// Register the error handler
 		if (!static::$registeredErrorHandler)
@@ -181,31 +169,15 @@ class Kettenrad extends Part
 		$ret = null;
 		$e   = null;
 
-		if ($this->isPHPSeven)
+		// PHP 7.x -- catch any unhandled Throwable, including PHP fatal errors
+		try
 		{
-			// PHP 7.x -- catch any unhandled Throwable, including PHP fatal errors
-			try
-			{
-				$ret = parent::tick($nesting);
-			}
-			catch (Throwable $e)
-			{
-				$this->setState(self::STATE_ERROR);
-				$this->lastException = $e;
-			}
+			$ret = parent::tick($nesting);
 		}
-		else
+		catch (Throwable $e)
 		{
-			// PHP 5.x -- catch unhandled exceptions but not PHP fatal errors
-			try
-			{
-				$ret = parent::tick($nesting);
-			}
-			catch (Exception $e)
-			{
-				$this->setState(self::STATE_ERROR);
-				$this->lastException = $e;
-			}
+			$this->setState(self::STATE_ERROR);
+			$this->lastException = $e;
 		}
 
 		// If an error occurred we don't have a return table. If that's the case create one and do log our errors.

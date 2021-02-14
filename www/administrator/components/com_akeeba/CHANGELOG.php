@@ -1,4 +1,31 @@
 <?php die();?>
+Akeeba Backup 7.5.3
+================================================================================
++ Rewritten Backup on Update plugin for improved UX (gh-685)
++ Joomla 4: backup profile selection uses Choices.js for easier navigation among many backup profiles
+~ Releasing the previous version without changes, due to server and CDN issues which resulted in inconsistent updates
+~ Internals: normalised use JVERSION conditionals
+~ Document Microsoft Edge “sleeping tabs” and workarounds for long-running backups in background browser tabs
+~ Improved CHANGELOG layout in the Control Panel page
+# [HIGH] Import from S3: you cannot select .jps files
+# [MEDIUM] Frozen backups toggle wouldn't work on Joomla 4
+# [LOW] Import from S3: invisible breadcrumbs in Dark Mode
+# [LOW] Recommended PHP version was shown as 7.3 instead of 7.4
+# [LOW] Unable to access the component on Joomla 4 when using the PDOMySQL database driver with Site Debug enabled, see https://github.com/joomla/joomla-cms/issues/32019
+
+Akeeba Backup 7.5.2
+================================================================================
++ Rewritten Backup on Update plugin for improved UX (gh-685)
++ Joomla 4: backup profile selection uses Choices.js for easier navigation among many backup profiles
+~ Internals: normalised use JVERSION conditionals
+~ Document Microsoft Edge “sleeping tabs” and workarounds for long-running backups in background browser tabs
+~ Improved CHANGELOG layout in the Control Panel page
+# [HIGH] Import from S3: you cannot select .jps files
+# [MEDIUM] Frozen backups toggle wouldn't work on Joomla 4
+# [LOW] Import from S3: invisible breadcrumbs in Dark Mode
+# [LOW] Recommended PHP version was shown as 7.3 instead of 7.4
+# [LOW] Unable to access the component on Joomla 4 when using the PDOMySQL database driver with Site Debug enabled, see https://github.com/joomla/joomla-cms/issues/32019
+
 Akeeba Backup 7.5.1
 ================================================================================
 + Post-backup emails can now display the total backup size and the approximate size of each part file

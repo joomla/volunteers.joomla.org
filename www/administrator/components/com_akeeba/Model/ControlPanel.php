@@ -267,7 +267,6 @@ class ControlPanel extends Model
 		$this->container->params->set('confwiz_upgrade', 1);
 		$this->container->params->set('siteurl', str_replace('/administrator', '', Uri::base()));
 		$this->container->params->set('jlibrariesdir', Factory::getFilesystemTools()->TranslateWinPath(JPATH_LIBRARIES));
-		$this->container->params->set('jversion', '1.6');
 		$this->container->params->save();
 	}
 

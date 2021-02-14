@@ -114,5 +114,8 @@ class Ntimes extends Retrypolicy
 				usleep($this->_retryInterval * 1000);
 			}
 		}
+
+		// This statement is unreachable. Only added to make static analysis happy.
+		throw new RetrypolicyException("Exceeded retry count of " . $this->_retryCount . ".");
 	}
 }

@@ -101,14 +101,6 @@ class Transfer extends Model
 
 		$unit = ['b', 'KB', 'MB', 'GB', 'TB', 'PB'];
 
-		if (version_compare(PHP_VERSION, '5.6.0', 'lt'))
-		{
-			return [
-				'size'   => $approximateSize,
-				'string' => @round($approximateSize / 1024 ** ($i = floor(log($approximateSize, 1024))), 2) . ' ' . $unit[$i],
-			];
-		}
-
 		return [
 			'size'   => $approximateSize,
 			'string' => @round($approximateSize / (1024 ** ($i = floor(log($approximateSize, 1024)))), 2) . ' ' . $unit[$i],

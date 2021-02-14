@@ -175,7 +175,7 @@ class Pkg_AkeebaInstallerScript
 		}
 
 		// Joomla 3: Always uninstall plg_console_akeebabackup (it's J4 only)
-		if (version_compare(JVERSION, '3.99999.99999', 'le'))
+		if (version_compare(JVERSION, '3.999.999', 'le'))
 		{
 			$this->uninstallPlugin('console', 'akeebabackup');
 		}
@@ -187,7 +187,7 @@ class Pkg_AkeebaInstallerScript
 		}
 
 		// Joomla 4: Always enable the plg_console_akeebabackup plugin
-		if (version_compare(JVERSION, '3.99999.99999', 'gt'))
+		if (version_compare(JVERSION, '3.999.999', 'gt'))
 		{
 			$this->enableExtensions([
 				['plugin', 'akeebabackup', 1, 'console'],

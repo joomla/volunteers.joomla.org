@@ -209,14 +209,7 @@ class Connector
 		$response         = $this->_curlRequest(self::URL_UPLOAD_REQUEST, 'GET', $data);
 		$data['file_url'] = $response->file_url;
 
-		if (version_compare(PHP_VERSION, '5.5.0', '>='))
-		{
-			$response->data->file = new CURLFile($fullFilePath);
-		}
-		else
-		{
-			$response->data->file = '@' . $fullFilePath;
-		}
+		$response->data->file = new CURLFile($fullFilePath);
 
 		// Upload the file
 		$this->_curlRequest($response->upload_url, 'POST', $response->data, false, false);

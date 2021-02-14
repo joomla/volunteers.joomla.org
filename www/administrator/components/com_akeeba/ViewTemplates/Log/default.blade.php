@@ -10,17 +10,15 @@ defined('_JEXEC') || die();
 /** @var  \Akeeba\Backup\Admin\View\Log\Html  $this */
 
 ?>
+@jhtml('formbehavior.chosen')
+
 @if(isset($this->logs) && count($this->logs))
 <form name="adminForm" id="adminForm" action="index.php" method="post" class="akeeba-form--inline">
     <div class="akeeba-form-group">
         <label for="tag">@lang('COM_AKEEBA_LOG_CHOOSE_FILE_TITLE')</label>
 
         {{-- Joomla 3.x: Chosen does not work with attached event handlers, only with inline event scripts (e.g. onchange) --}}
-        @if (version_compare(JVERSION, '3.999.999', 'lt'))
-            @jhtml('select.genericlist', $this->logs, 'tag', ['list.select' => $this->tag, 'list.attr' => ['class' => 'advancedSelect', 'onchange' => 'document.forms.adminForm.submit();'], 'id' => 'comAkeebaLogTagSelector'])
-        @else
-            @jhtml('select.genericlist', $this->logs, 'tag', ['list.select' => $this->tag, 'list.attr' => ['class' => 'advancedSelect'], 'id' => 'comAkeebaLogTagSelector'])
-        @endif
+        @jhtml('select.genericlist', $this->logs, 'tag', ['list.select' => $this->tag, 'list.attr' => ['class' => 'advancedSelect', 'onchange' => 'document.forms.adminForm.submit();'], 'id' => 'comAkeebaLogTagSelector'])
     </div>
 
 	@if(!empty($this->tag))

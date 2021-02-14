@@ -142,7 +142,7 @@ class S3Import extends Model
 						{
 							$extension = substr($name, -4);
 
-							if (!in_array($extension, ['.zip', '.jpa']))
+							if (!in_array($extension, ['.zip', '.jpa', '.jps']))
 							{
 								continue;
 							}

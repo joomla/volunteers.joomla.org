@@ -155,7 +155,7 @@ abstract class Base
 	{
 		if (empty($args))
 		{
-			return;
+			return null;
 		}
 
 		switch ($method)
@@ -172,6 +172,8 @@ abstract class Base
 				return $this->escape($args[0], $args[1] ?? false);
 				break;
 		}
+
+		return null;
 	}
 
 	/**

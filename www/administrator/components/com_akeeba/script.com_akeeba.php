@@ -561,6 +561,12 @@ class Com_AkeebaInstallerScript extends \FOF30\Utils\InstallScript
 
 			// 7.0.0 alpha base plugin
 			'administrator/components/com_akeeba/Master/AkeebaPlugin',
+
+			// Backup on Update view templates
+			'plugins/system/backuponupdate/tmpl',
+
+			// Changelog PNG images
+			'media/com_akeeba/icons/changelog.png',
 		],
 	];
 

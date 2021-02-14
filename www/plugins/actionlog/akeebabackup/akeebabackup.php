@@ -12,12 +12,6 @@ use Joomla\CMS\Plugin\CMSPlugin;
 
 defined('_JEXEC') || die();
 
-// PHP version check
-if (!version_compare(PHP_VERSION, '7.2.0', '>='))
-{
-	return;
-}
-
 class plgActionlogAkeebabackup extends CMSPlugin
 {
 	/** @var Container */

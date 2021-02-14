@@ -19,14 +19,6 @@ if (!file_exists(JPATH_ADMINISTRATOR . '/components/com_akeeba'))
 	return;
 }
 
-// Joomla! version check
-if (version_compare(JVERSION, '2.5', 'lt'))
-{
-	// Joomla! earlier than 2.5. Nope.
-	return;
-}
-
-
 use Akeeba\Backup\Admin\Model\Statistics;
 use Akeeba\Engine\Factory;
 use Akeeba\Engine\Platform;
@@ -269,7 +261,7 @@ class plgQuickiconAkeebabackup extends CMSPlugin
 			$profileId = 1;
 		}
 
-		$isJoomla4 = version_compare(JVERSION, '3.999999.999999', 'gt');
+		$isJoomla4 = version_compare(JVERSION, '3.999.999', 'gt');
 
 		$ret = [
 			'link'  => 'index.php?option=com_akeeba&view=Backup&autostart=1&returnurl=' . base64_encode($url) . '&profileid=' . $profileId . "&$token=1",
@@ -278,11 +270,6 @@ class plgQuickiconAkeebabackup extends CMSPlugin
 			'id'    => 'plg_quickicon_akeebabackup',
 			'group' => 'MOD_QUICKICON_MAINTENANCE',
 		];
-
-		if (version_compare(JVERSION, '3.0', 'lt'))
-		{
-			$ret['image'] = $url . '/../media/com_akeeba/icons/akeeba-48.png';
-		}
 
 		if ($isJoomla4)
 		{
@@ -365,10 +352,6 @@ class plgQuickiconAkeebabackup extends CMSPlugin
 					$j4WarningJavascript = true;
 					$ret['image']        = 'fa fa-akeeba-red';
 				}
-				elseif (version_compare(JVERSION, '3.0', 'lt'))
-				{
-					$ret['image'] = $url . '/../media/com_akeeba/icons/akeeba-warning-48.png';
-				}
 				else
 				{
 					$ret['text'] = '<span class="badge badge-important">' . $ret['text'] . '</span>';
@@ -376,9 +359,7 @@ class plgQuickiconAkeebabackup extends CMSPlugin
 			}
 		}
 
-		if (version_compare(JVERSION, '3.0', 'gt'))
-		{
-			$inlineCSS = <<< CSS
+		$inlineCSS = <<< CSS
 @font-face
 {
 	font-family: "Akeeba Products for Quickicons";
@@ -440,8 +421,7 @@ div[class*=fa-akeeba]:before
 }
 CSS;
 
-			JFactory::getApplication()->getDocument()->addStyleDeclaration($inlineCSS);
-		}
+		JFactory::getApplication()->getDocument()->addStyleDeclaration($inlineCSS);
 
 		if ($isJoomla4)
 		{

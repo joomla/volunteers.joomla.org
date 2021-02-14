@@ -521,13 +521,13 @@ class ConfigurationCheck
 	/**
 	 * Q201 - MEDIUM - Outdated PHP version.
 	 *
-	 * We currently check for PHP lower than 7.3.
+	 * We currently check for PHP lower than 7.4.
 	 *
 	 * @return  bool
 	 */
 	private function q201()
 	{
-		return version_compare(PHP_VERSION, '7.3.0', 'lt');
+		return version_compare(PHP_VERSION, '7.4.0', 'lt');
 	}
 
 	/**

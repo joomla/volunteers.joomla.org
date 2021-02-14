@@ -1,7 +1,7 @@
 <?php
 /**
  * @package   FOF
- * @copyright Copyright (c)2010-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2010-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 2, or later
  */
 
@@ -66,6 +66,103 @@ abstract class FEFHelperSelect
 	}
 
 	/**
+	 * Generates a searchable HTML selection list (Chosen on J3, Choices.js on J4).
+	 *
+	 * @param   array    $data       An array of objects, arrays, or scalars.
+	 * @param   string   $name       The value of the HTML name attribute.
+	 * @param   mixed    $attribs    Additional HTML attributes for the `<select>` tag. This
+	 *                               can be an array of attributes, or an array of options. Treated as options
+	 *                               if it is the last argument passed. Valid options are:
+	 *                               Format options, see {@see JHtml::$formatOptions}.
+	 *                               Selection options, see {@see JHtmlSelect::options()}.
+	 *                               list.attr, string|array: Additional attributes for the select
+	 *                               element.
+	 *                               id, string: Value to use as the select element id attribute.
+	 *                               Defaults to the same as the name.
+	 *                               list.select, string|array: Identifies one or more option elements
+	 *                               to be selected, based on the option key values.
+	 * @param   string   $optKey     The name of the object variable for the option value. If
+	 *                               set to null, the index of the value array is used.
+	 * @param   string   $optText    The name of the object variable for the option text.
+	 * @param   mixed    $selected   The key that is selected (accepts an array or a string).
+	 * @param   mixed    $idtag      Value of the field id or null by default
+	 * @param   boolean  $translate  True to translate
+	 *
+	 * @return  string  HTML for the select list.
+	 *
+	 * @since   3.7.2
+	 */
+	public static function smartlist($data, $name, $attribs = null, $optKey = 'value', $optText = 'text', $selected = null, $idtag = false, $translate = false)
+	{
+		$innerList = self::genericlist($data, $name, $attribs, $optKey, $optText, $selected, $idtag, $translate);
+
+		// Joomla 3: Use Chosen
+		if (version_compare(JVERSION, '3.999.999', 'le'))
+		{
+			HTMLHelper::_('formbehavior.chosen');
+
+			return $innerList;
+		}
+
+		// Joomla 4: Use the joomla-field-fancy-select using choices.js
+		try
+		{
+			\Joomla\CMS\Factory::getApplication()->getDocument()->getWebAssetManager()
+				->usePreset('choicesjs')
+				->useScript('webcomponent.field-fancy-select');
+		}
+		catch (Exception $e)
+		{
+			return $innerList;
+		}
+
+		$j4Attr = array_filter([
+			'class'       => $attribs['class'] ?? null,
+			'placeholder' => $attribs['placeholder'] ?? null,
+		], function ($x) {
+			return !empty($x);
+		});
+
+		$dataAttribute = '';
+
+		if (isset($attribs['dataAttribute']))
+		{
+			$dataAttribute = is_string($attribs['dataAttribute']) ? $attribs['dataAttribute'] : '';
+		}
+
+		if ((bool) ($attribs['allowCustom'] ?? false))
+		{
+			$dataAttribute .= ' allow-custom new-item-prefix="#new#"';
+		}
+
+		$remoteSearchUrl = $attribs['remoteSearchURL'] ?? null;
+		$remoteSearch    = ((bool) ($attribs['remoteSearch'] ?? false)) && !empty($remoteSearchUrl);
+		$termKey         = $attribs['termKey'] ?? 'like';
+		$minTermLength   = $attribs['minTermLength'] ?? 3;
+
+		if ($remoteSearch)
+		{
+			$dataAttribute             .= ' remote-search';
+			$j4Attr['url']             = $remoteSearchUrl;
+			$j4Attr['term-key']        = $termKey;
+			$j4Attr['min-term-length'] = $minTermLength;
+		}
+
+		if (isset($attribs['required']))
+		{
+			$j4Attr['class'] = ($j4Attr['class'] ?? '') . ' required';
+			$dataAttribute .= ' required';
+		}
+
+		if (isset($attribs['readonly']))
+		{
+			return $innerList;
+		}
+
+		return sprintf("<joomla-field-fancy-select %s %s>%s</joomla-field-fancy-select>", ArrayHelper::toString($j4Attr), $dataAttribute, $innerList);
+	}
+
+	/**
 	 * Generates an HTML selection list.
 	 *
 	 * @param   array    $data       An array of objects, arrays, or scalars.
@@ -92,8 +189,7 @@ abstract class FEFHelperSelect
 	 *
 	 * @since   1.5
 	 */
-	public static function genericlist($data, $name, $attribs = null, $optKey = 'value', $optText = 'text', $selected = null, $idtag = false,
-	                                   $translate = false)
+	public static function genericlist($data, $name, $attribs = null, $optKey = 'value', $optText = 'text', $selected = null, $idtag = false, $translate = false)
 	{
 		// Set default options
 		$options = array_merge(HTMLHelper::$formatOptions, ['format.depth' => 0, 'id' => false]);

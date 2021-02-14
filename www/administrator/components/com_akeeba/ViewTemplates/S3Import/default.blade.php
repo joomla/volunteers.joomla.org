@@ -57,7 +57,7 @@ defined('_JEXEC') || die();
 
     <div class="akeeba-panel--information">
         <div id="ak_crumbs_container">
-            <ul class="breadcrumb">
+            <ul class="akeeba-breadcrumb" style="margin-bottom: 0">
                 <li>
                     <a data-s3prefix="{{ base64_encode('') }}" class="akeebaS3ImportChangeDirectory">&lt; root &gt;</a>
                     <span class="divider">/</span>

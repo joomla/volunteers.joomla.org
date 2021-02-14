@@ -16,7 +16,7 @@ use Joomla\CMS\Uri\Uri;
  * Use this by extending it (I'm using -at- instead of the actual at-sign)
  * -at-include('any:lib_fof30/Common/user_select', $params)
  *
- * This is the generic variant used in Joomla 3 (when NOT using the FEF renderer)
+ * This is the variant used when using the FEF renderer under Joomla 3.
  *
  * $params is an array defining the following keys (they are expanded into local scope vars automatically):
  *
@@ -50,21 +50,24 @@ $uri->setVar('required', (isset($required) ? ($required ? 1 : 0) : 0));
 $uri->setVar('field', $field);
 $url = 'index.php' . $uri->toString(['query']);
 ?>
+
 @unless($readonly)
 	@jhtml('behavior.modal', 'a.userSelectModal_' . $this->escape($field))
 	@jhtml('script', 'jui/fielduser.min.js', ['version' => 'auto', 'relative' => true])
 @endunless
 
-<div class="input-append">
+<div class="akeeba-input-group">
 	<input readonly type="text"
 		   id="{{{ $field }}}" value="{{{ $user->username }}}"
 		   placeholder="{{{ $placeholder }}}"/>
+	<span class="akeeba-input-group-btn">
 	<a href="@route($url)"
 	   class="akeeba-btn--grey userSelectModal_{{{ $field }}}" title="{{{ $placeholder }}}"
 	   rel="{handler: 'iframe', size: {x: {{$width}}, y: {{$height}} }}">
 		<span class="akion-person"></span>
 	</a>
+</span>
 </div>
 @unless($readonly)
-<input type="hidden" id="{{{ $field }}}_id" name="{{{ $field }}}" value="{{ (int) $userID }}"/>
+	<input type="hidden" id="{{{ $field }}}_id" name="{{{ $field }}}" value="{{ (int) $userID }}"/>
 @endunless

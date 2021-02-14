@@ -342,11 +342,6 @@ class Html extends BaseView
 			$decimals = 0;
 		}
 
-		if (version_compare(PHP_VERSION, '5.6.0', 'lt'))
-		{
-			return number_format($sizeInBytes / 1024 ** $unit, $decimals, $decSeparator, $thousandsSeparator) . ' ' . $units[$unit];
-		}
-
 		return number_format($sizeInBytes / (1024 ** $unit), $decimals, $decSeparator, $thousandsSeparator) . ' ' . $units[$unit];
 	}
 

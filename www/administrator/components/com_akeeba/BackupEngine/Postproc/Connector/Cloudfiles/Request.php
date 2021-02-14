@@ -42,7 +42,7 @@ class Request
 	 * @param   string  $verb  Verb
 	 * @param   string  $url   Object URI
 	 *
-	 * @return Request
+	 * @return  void
 	 */
 	function __construct($verb, $url = '')
 	{

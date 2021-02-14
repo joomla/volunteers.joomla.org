@@ -55,7 +55,7 @@
                    type="password"
                    label="COM_SSO_CERTIFICATE_PASSWORD_LABEL"
                    description="COM_SSO_CERTIFICATE_PASSWORD_DESC"
-                   required="true"
+                   required="false"
                    class="input-xxlarge"/>
 
             <field name="privateKey"

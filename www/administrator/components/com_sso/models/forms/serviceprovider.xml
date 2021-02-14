@@ -15,7 +15,7 @@
                    label="COM_SSO_CONFIG_USERGROUP_MAPPING_LABEL"
                    description="COM_SSO_CONFIG_USERGROUP_MAPPING_DESC"
                    multiple="true"
-                   required="true"
+                   required="false"
                    emptylabel="true"
                    buttons="add,remove"
                    layout="joomla.form.field.subform.repeatable-table">
@@ -66,18 +66,29 @@
                    class="input-xxlarge"/>
 
             <field name="privatekey"
-                   type="text"
+                   type="filelist"
                    label="COM_SSO_CONFIG_PRIVATEKEY_LABEL"
                    description="COM_SSO_CONFIG_PRIVATEKEY_DESC"
                    required="true"
+                   directory="libraries/simplesamlphp/cert"
+                   hide_default="true"
+                   class="input-medium advancedSelect"/>
+
+            <field name="privatekey_pass"
+                   type="text"
+                   label="COM_SSO_CONFIG_PRIVATEKEY_PASS_LABEL"
+                   description="COM_SSO_CONFIG_PRIVATEKEY_PASS_DESC"
+                   required="false"
                    class="input-medium"/>
 
             <field name="certificate"
-                   type="text"
+                   type="filelist"
                    label="COM_SSO_CONFIG_CERTIFICATE_LABEL"
                    description="COM_SSO_CONFIG_CERTIFICATE_DESC"
                    required="true"
-                   class="input-medium"/>
+                   directory="libraries/simplesamlphp/cert"
+                   hide_default="true"
+                   class="input-medium advancedSelect"/>
         </fields>
     </fieldset>
 

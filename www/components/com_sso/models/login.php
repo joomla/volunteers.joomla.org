@@ -3,7 +3,7 @@
  * @package     SSO.Component
  *
  * @author      RolandD Cyber Produksi <contact@rolandd.com>
- * @copyright   Copyright (C) 2017 - 2020 RolandD Cyber Produksi. All rights reserved.
+ * @copyright   Copyright (C) 2017 - 2021 RolandD Cyber Produksi. All rights reserved.
  * @license     GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  * @link        https://rolandd.com
  */
@@ -85,7 +85,7 @@ class SsoModelLogin extends BaseDatabaseModel
 		$this->loadSimpleSaml();
 
 		// Validate authorization with SAML
-		$this->instance->requireAuth(array('model' => 'from model'));
+		$this->instance->requireAuth(['model' => 'from model']);
 
 		if (!$this->instance->isAuthenticated())
 		{
@@ -141,17 +141,14 @@ class SsoModelLogin extends BaseDatabaseModel
 		$username = $userFields['username'];
 		$email    = $userFields['email'] ?? '';
 
-		// We must have an email address
 		if (trim($email) === '')
 		{
 			$email = $username;
 		}
 
-		// Load the dispatcher
 		PluginHelper::importPlugin('sso');
 		$dispatcher = JEventDispatcher::getInstance();
 
-		// Check if user exists
 		if (!$this->doesUserExist($email, $username))
 		{
 			// Load the profile name
@@ -194,10 +191,10 @@ class SsoModelLogin extends BaseDatabaseModel
 		}
 
 		// Trigger any plugins that want to do something with the logged-in user
-		$dispatcher->trigger('onAfterProcessUser', array($userFields));
+		$dispatcher->trigger('onAfterProcessUser', [$userFields]);
 
 		// Gather the response details
-		$options                 = array();
+		$options                 = [];
 		$options['responseType'] = 'saml';
 
 		return $options;

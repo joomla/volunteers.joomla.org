@@ -14,6 +14,7 @@ class Negotiate extends \SimpleSAML\Auth\Source
 {
     // Constants used in the module
     const STAGEID = '\SimpleSAML\Module\negotiate\Auth\Source\Negotiate.StageId';
+    const AUTHID = '\SimpleSAML\Module\negotiate\Auth\Source\Negotiate.AuthId';
 
     /** @var \SimpleSAML\Module\ldap\Auth\Ldap|null */
     protected $ldap = null;
@@ -63,6 +64,9 @@ class Negotiate extends \SimpleSAML\Auth\Source
     /** @var array|null */
     protected $attributes = null;
 
+    /** @var array */
+    protected $binaryAttributes = [];
+
 
     /**
      * Constructor for this authentication source.
@@ -83,23 +87,24 @@ class Negotiate extends \SimpleSAML\Auth\Source
         // call the parent constructor first, as required by the interface
         parent::__construct($info, $config);
 
-        $config = \SimpleSAML\Configuration::loadFromArray($config);
+        $cfg = \SimpleSAML\Configuration::loadFromArray($config);
 
-        $this->backend = $config->getString('fallback');
-        $this->hostname = $config->getString('hostname');
-        $this->port = $config->getInteger('port', 389);
-        $this->referrals = $config->getBoolean('referrals', true);
-        $this->enableTLS = $config->getBoolean('enable_tls', false);
-        $this->debugLDAP = $config->getBoolean('debugLDAP', false);
-        $this->timeout = $config->getInteger('timeout', 30);
-        $this->keytab = \SimpleSAML\Utils\Config::getCertPath($config->getString('keytab'));
-        $this->base = $config->getArrayizeString('base');
-        $this->attr = $config->getArrayizeString('attr', 'uid');
-        $this->subnet = $config->getArray('subnet', null);
-        $this->admin_user = $config->getString('adminUser', null);
-        $this->admin_pw = $config->getString('adminPassword', null);
-        $this->attributes = $config->getArray('attributes', null);
-        $this->spn = $config->getString('spn', null);
+        $this->backend = $cfg->getString('fallback');
+        $this->hostname = $cfg->getString('hostname');
+        $this->port = $cfg->getInteger('port', 389);
+        $this->referrals = $cfg->getBoolean('referrals', true);
+        $this->enableTLS = $cfg->getBoolean('enable_tls', false);
+        $this->debugLDAP = $cfg->getBoolean('debugLDAP', false);
+        $this->timeout = $cfg->getInteger('timeout', 30);
+        $this->keytab = \SimpleSAML\Utils\Config::getCertPath($cfg->getString('keytab'));
+        $this->base = $cfg->getArrayizeString('base');
+        $this->attr = $cfg->getArrayizeString('attr', 'uid');
+        $this->subnet = $cfg->getArray('subnet', null);
+        $this->admin_user = $cfg->getString('adminUser', null);
+        $this->admin_pw = $cfg->getString('adminPassword', null);
+        $this->attributes = $cfg->getArray('attributes', null);
+        $this->binaryAttributes = $cfg->getArray('attributes.binary', []);
+        $this->spn = $cfg->getString('spn', null);
     }
 
 
@@ -138,7 +143,7 @@ class Negotiate extends \SimpleSAML\Auth\Source
         if (
             $disabled
             || (!empty($_COOKIE['NEGOTIATE_AUTOLOGIN_DISABLE_PERMANENT'])
-                && $_COOKIE['NEGOTIATE_AUTOLOGIN_DISABLE_PERMANENT'] == 'True')
+                && $_COOKIE['NEGOTIATE_AUTOLOGIN_DISABLE_PERMANENT'] === 'true')
         ) {
             Logger::debug('Negotiate - session disabled. falling back');
             $this->fallBack($state);
@@ -291,13 +296,12 @@ class Negotiate extends \SimpleSAML\Auth\Source
 
         $url = htmlspecialchars(\SimpleSAML\Module::getModuleURL('negotiate/backend.php', $params));
 
-        header('HTTP/1.1 401 Unauthorized');
-        header('WWW-Authenticate: Negotiate', false);
-
         $t = new \SimpleSAML\XHTML\Template($config, 'negotiate:redirect.php');
+        $t->setStatusCode(401);
+        $t->headers->set('WWW-Authenticate', 'Negotiate');
         $t->data['baseurlpath'] = \SimpleSAML\Module::getModuleURL('negotiate');
         $t->data['url'] = $url;
-        $t->show();
+        $t->send();
     }
 
 
@@ -318,6 +322,7 @@ class Negotiate extends \SimpleSAML\Auth\Source
         if ($authId === null) {
             throw new \SimpleSAML\Error\Error([500, "Unable to determine auth source."]);
         }
+        /** @var \SimpleSAML\Auth\Source $source */
         $source = \SimpleSAML\Auth\Source::getById($authId);
 
         try {
@@ -354,7 +359,7 @@ class Negotiate extends \SimpleSAML\Auth\Source
         $this->adminBind();
         try {
             $dn = $this->ldap->searchfordn($this->base, $this->attr, $uid);
-            return $this->ldap->getAttributes($dn, $this->attributes);
+            return $this->ldap->getAttributes($dn, $this->attributes, $this->binaryAttributes);
         } catch (\SimpleSAML\Error\Exception $e) {
             Logger::debug('Negotiate - ldap lookup failed: ' . $e);
             return null;
@@ -407,6 +412,7 @@ class Negotiate extends \SimpleSAML\Auth\Source
             $session->setData('negotiate:disable', 'session', true, 24 * 60 * 60);
             parent::logout($state);
         } else {
+            /** @var \SimpleSAML\Auth\Source $source */
             $source = \SimpleSAML\Auth\Source::getById($authId);
             $source->logout($state);
         }

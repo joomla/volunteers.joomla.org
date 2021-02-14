@@ -3,7 +3,7 @@
  * @package     SSO.Component
  *
  * @author     RolandD Cyber Produksi <contact@rolandd.com>
- * @copyright  Copyright (C) 2017 - 2020 RolandD Cyber Produksi. All rights reserved.
+ * @copyright  Copyright (C) 2017 - 2021 RolandD Cyber Produksi. All rights reserved.
  * @license    GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  * @link       https://rolandd.com
  */
@@ -33,7 +33,7 @@ class SsoControllerLogin extends BaseController
 	 *
 	 * @since   1.0.0
 	 */
-	public function login()
+	public function login(): void
 	{
 		try
 		{
@@ -44,8 +44,16 @@ class SsoControllerLogin extends BaseController
 			$model->processLogin();
 
 			// Check if we need to redirect the user anywhere
+			$app    = Factory::getApplication();
 			$return = $this->input->getBase64('return');
 			$link   = base64_decode($return);
+
+			if (empty($link))
+			{
+				$data = $app->getUserState('users.login.form.data', []);
+				$link = $data['return'] ?? '';
+			}
+
 			$helper     = new SsoHelper;
 			$parameters = $helper->getParams($model->setState('authorizationSource', 'default-sp'));
 			$redirect   = $parameters->get('joomla.redirect');
@@ -53,9 +61,9 @@ class SsoControllerLogin extends BaseController
 			if ($redirect !== 'active')
 			{
 				/** @var AbstractMenu $menu */
-				$menu = Factory::getApplication()->getMenu();
+				$menu = $app->getMenu();
 				$menu = $menu->getItem($redirect);
-				$link = $menu->link;
+				$link = $menu->link . '&Itemid=' . $menu->id;
 
 				if (Multilanguage::isEnabled())
 				{

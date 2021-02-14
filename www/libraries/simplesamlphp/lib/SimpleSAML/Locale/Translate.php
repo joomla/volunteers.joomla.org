@@ -8,6 +8,8 @@
  * @package SimpleSAMLphp
  */
 
+declare(strict_types=1);
+
 namespace SimpleSAML\Locale;
 
 use Gettext\BaseTranslator;
@@ -97,10 +99,8 @@ class Translate
      *
      * @return array An associative array with the dictionary.
      */
-    private function getDictionary($name)
+    private function getDictionary(string $name): array
     {
-        assert(is_string($name));
-
         if (!array_key_exists($name, $this->dictionaries)) {
             $sepPos = strpos($name, ':');
             if ($sepPos !== false) {
@@ -261,7 +261,7 @@ class Translate
      * @param bool $striptags
      * @deprecated Not used in twig, gettext
      *
-     * @return string|null  The translated tag, or a placeholder value if the tag wasn't found.
+     * @return string  The translated tag, or a placeholder value if the tag wasn't found.
      */
     public function t(
         $tag,
@@ -281,26 +281,6 @@ class Translate
                 '. This parameter will go away, the fallback will become' .
                 ' identical to the $tag in 2.0.'
             );
-        }
-        if (!is_array($replacements)) {
-            // TODO: remove this entire if for 2.0
-
-            // old style call to t(...). Print warning to log
-            Logger::warning(
-                'Deprecated use of SimpleSAML\Locale\Translate::t(...) at ' . $where .
-                '. Please update the code to use the new style of parameters.'
-            );
-
-            // for backwards compatibility
-            /** @psalm-suppress PossiblyInvalidArgument */
-            if (!$replacements && ($this->getTag($tag) === null)) {
-                Logger::warning(
-                    'Code which uses $fallbackdefault === FALSE should be updated to use the getTag() method instead.'
-                );
-                return null;
-            }
-
-            $replacements = $oldreplacements;
         }
 
         if (is_array($tag)) {
@@ -339,7 +319,7 @@ class Translate
      *
      * @return string The string that should be used, or the tag name if $fallbacktag is set to false.
      */
-    private function getStringNotTranslated($tag, $fallbacktag)
+    private function getStringNotTranslated(string $tag, bool $fallbacktag): string
     {
         if ($fallbacktag) {
             return 'not translated (' . $tag . ')';
@@ -404,7 +384,7 @@ class Translate
      *
      * @return array An array holding all the translations in the file.
      */
-    private function readDictionaryJSON($filename)
+    private function readDictionaryJSON(string $filename): array
     {
         $definitionFile = $filename . '.definition.json';
         assert(file_exists($definitionFile));
@@ -436,7 +416,7 @@ class Translate
      *
      * @return array An array holding all the translations in the file.
      */
-    private function readDictionaryPHP($filename)
+    private function readDictionaryPHP(string $filename): array
     {
         $phpFile = $filename . '.php';
         assert(file_exists($phpFile));
@@ -457,10 +437,8 @@ class Translate
      *
      * @return array An array holding all the translations in the file.
      */
-    private function readDictionaryFile($filename)
+    private function readDictionaryFile(string $filename): array
     {
-        assert(is_string($filename));
-
         Logger::debug('Translate: Reading dictionary [' . $filename . ']');
 
         $jsonFile = $filename . '.definition.json';
@@ -490,7 +468,7 @@ class Translate
     {
         $text = BaseTranslator::$current->gettext($original);
 
-        if (func_num_args() === 1) {
+        if (func_num_args() === 1 || $original === null) {
             return $text;
         }
 
@@ -548,6 +526,7 @@ class Translate
 
         // we don't have a translation for the current language, load alternative priorities
         $sspcfg = Configuration::getInstance();
+        /** @psalm-var \SimpleSAML\Configuration $langcfg */
         $langcfg = $sspcfg->getConfigItem('language');
         $priorities = $langcfg->getArray('priorities', []);
 

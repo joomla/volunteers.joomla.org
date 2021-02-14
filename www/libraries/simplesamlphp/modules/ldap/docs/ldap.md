@@ -43,6 +43,11 @@ authentication source:
 		'attributes' => NULL,
 
 		/*
+		 * Which attributes should be base64 encoded after retrieval from the LDAP server.
+		 */
+		'attributes.binary' => ['jpegPhoto', 'objectGUID', 'objectSid', 'mS-DS-ConsistencyGuid'],
+
+		/*
 		 * The pattern which should be used to create the user's DN given the username.
 		 * %username% in this pattern will be replaced with the user's username.
 		 *

@@ -55,7 +55,7 @@ class Joomla extends UserPassBase
 				$db->quoteName(
 					array(
 						'id',
-						'password'
+						'password',
 					)
 				)
 			)
@@ -69,7 +69,8 @@ class Joomla extends UserPassBase
 		if ($result === null)
 		{
 			// No rows returned - invalid username/password.
-			Logger::error('Joomla:' .
+			Logger::error(
+				'Joomla:' .
 				': No rows in result set. Probably wrong username/password.'
 			);
 
@@ -89,7 +90,8 @@ class Joomla extends UserPassBase
 			$attributes['upn'][]          = $user->username;
 		}
 
-		Logger::info('Joomla:' . $this->authId . ': Attributes: ' .
+		Logger::info(
+			'Joomla:' . $this->authId . ': Attributes: ' .
 			implode(',', array_keys($attributes))
 		);
 
@@ -112,7 +114,7 @@ class Joomla extends UserPassBase
 		}
 
 		// Set the base folder
-		$base = dirname(dirname(dirname(dirname(dirname(dirname(dirname(__FILE__)))))));
+		$base = dirname(__FILE__, 7);
 
 		// Load the Joomla Framework
 		require_once $base . '/import.php';

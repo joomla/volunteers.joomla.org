@@ -80,5 +80,35 @@
             <option value="1">JPUBLISHED</option>
             <option value="0">JUNPUBLISHED</option>
         </field>
+
+        <field name="attributeMap"
+               type="subform"
+               label="COM_SSO_CONFIG_ATTRIBUTE_MAPPING_LABEL"
+               description="COM_SSO_CONFIG_ATTRIBUTE_MAPPING_DESC"
+               multiple="true"
+               required="false"
+               emptylabel="true"
+               buttons="add,remove"
+               layout="joomla.form.field.subform.repeatable-table">
+            <form>
+                <fieldset>
+                    <field
+                            name="attributeName"
+                            type="text"
+                            label="COM_SSO_CONFIG_ATTRIBUTENAME_LABEL"
+                            description="COM_SSO_CONFIG_ATTRIBUTENAME_DESC"/>
+
+                    <field
+                            name="attributeField"
+                            type="list"
+                            label="COM_SSO_CONFIG_ATTRIBUTE_FIELD_LABEL"
+                            description="COM_SSO_CONFIG_ATTRIBUTE_FIELD_DESC">
+                        <option value="emailaddress">COM_SSO_ATTRIBUTE_EMAIL</option>
+                        <option value="name">COM_SSO_ATTRIBUTE_NAME</option>
+                        <option value="username">COM_SSO_ATTRIBUTE_USERNAME</option>
+                    </field>
+                </fieldset>
+            </form>
+        </field>
     </fieldset>
 </form>

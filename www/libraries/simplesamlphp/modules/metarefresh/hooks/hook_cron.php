@@ -56,9 +56,10 @@ function metarefresh_hook_cron(&$croninfo)
 
             $metaloader = new \SimpleSAML\Module\metarefresh\MetaLoader($expire, $stateFile, $oldMetadataSrc);
 
-            // Get global blacklist, whitelist and caching info
+            // Get global blacklist, whitelist, attributewhitelist and caching info
             $blacklist = $mconfig->getArray('blacklist', []);
             $whitelist = $mconfig->getArray('whitelist', []);
+            $attributewhitelist = $mconfig->getArray('attributewhitelist', []);
             $conditionalGET = $mconfig->getBoolean('conditionalGET', false);
 
             // get global type filters
@@ -91,6 +92,13 @@ function metarefresh_hook_cron(&$croninfo)
                     $source['whitelist'] = array_unique(array_merge($source['whitelist'], $whitelist));
                 } else {
                     $source['whitelist'] = $whitelist;
+                }
+
+                # Merge global and src specific attributewhitelists: cannot use array_unique for multi-dim.
+                if (isset($source['attributewhitelist'])) {
+                    $source['attributewhitelist'] = array_merge($source['attributewhitelist'], $attributewhitelist);
+                } else {
+                    $source['attributewhitelist'] = $attributewhitelist;
                 }
 
                 // Let src specific conditionalGET override global one

@@ -39,6 +39,17 @@ class MetaLoaderTest extends TestCase
             ],
         ],
         'scope' => ['example.com',],
+        'RegistrationInfo' => [
+            'registrationAuthority' => 'http://www.surfconext.nl/',
+        ],
+        'EntityAttributes' => [
+            'urn:oasis:names:tc:SAML:attribute:assurance-certification' => [
+                0 => 'https://refeds.org/sirtfi',
+            ],
+            'http://macedir.org/entity-category-support' => [
+                0 => 'http://refeds.org/category/research-and-scholarship',
+            ],
+        ],
         'UIInfo' => [
             'DisplayName' => ['en' => 'DisplayName',],
             'Description' => ['en' => 'Description',],
@@ -140,6 +151,108 @@ class MetaLoaderTest extends TestCase
         $this->assertArraySubset(
             $this->expected,
             $metadata['https://idp.example.com/idp/shibboleth']
+        );
+    }
+
+    /*
+     * Test two matching EntityAttributes (R&S + Sirtfi)
+     */
+    public function testAttributewhitelist1()
+    {
+        $this->source['attributewhitelist'] = [
+            [
+                '#EntityAttributes#' => [
+                    '#urn:oasis:names:tc:SAML:attribute:assurance-certification#'
+                    => ['#https://refeds.org/sirtfi#'],
+                    '#http://macedir.org/entity-category-support#'
+                    => ['#http://refeds.org/category/research-and-scholarship#'],
+                ],
+            ],
+        ];
+        $this->metaloader->loadSource($this->source);
+        $this->metaloader->dumpMetadataStdOut();
+        /* match a line from the cert before we attempt to parse */
+        $this->expectOutputRegex('/UTEbMBkGA1UECgwSRXhhbXBsZSBVbml2ZXJzaXR5MRgwFgYDVQQDDA9pZHAuZXhh/');
+
+        $output = $this->getActualOutput();
+        try {
+            eval($output);
+        } catch (\Exception $e) {
+            $this->fail('Metarefresh does not produce syntactially valid code');
+        }
+        /* Check we matched the IdP */
+        $this->assertArrayHasKey('https://idp.example.com/idp/shibboleth', $metadata);
+
+        $this->assertTrue(
+            empty(array_diff_key($this->expected, $metadata['https://idp.example.com/idp/shibboleth']))
+        );
+    }
+
+    /*
+     * Test non-matching of the whitelist: result should be empty set
+     */
+    public function testAttributewhitelist2()
+    {
+        $this->source['attributewhitelist'] = [
+            [
+                '#EntityAttributes#' => [
+                    '#urn:oasis:names:tc:SAML:attribute:assurance-certification#'
+                    => ['#https://refeds.org/sirtfi#'],
+                    '#http://macedir.org/entity-category-support#'
+                    => ['#http://clarin.eu/category/clarin-member#'],
+                ],
+            ],
+        ];
+        $this->metaloader->loadSource($this->source);
+        $this->metaloader->dumpMetadataStdOut();
+
+        /* Expected output is empty */
+        $output = $this->getActualOutput();
+        $this->assertEmpty($output);
+    }
+
+    /*
+     * Test non-matching of first entry, but matching of second, using both
+     * RegistrationInfo and EntityAttributes
+     */
+    public function testAttributewhitelist3()
+    {
+        $this->source['attributewhitelist'] = [
+            [
+                '#EntityAttributes#' => [
+                    '#urn:oasis:names:tc:SAML:attribute:assurance-certification#'
+                    => ['#https://refeds.org/sirtfi#'],
+                    '#http://macedir.org/entity-category-support#'
+                    => ['#http://clarin.eu/category/clarin-member#'],
+                ],
+            ],
+            [
+                '#RegistrationInfo#' => [
+                    '#registrationAuthority#'
+                    => '#http://www.surfconext.nl/#',
+                ],
+                '#EntityAttributes#' => [
+                    '#urn:oasis:names:tc:SAML:attribute:assurance-certification#'
+                    => ['#https://refeds.org/sirtfi#'],
+                ],
+            ],
+        ];
+        $this->metaloader->loadSource($this->source);
+        $this->metaloader->dumpMetadataStdOut();
+        /* match a line from the cert before we attempt to parse */
+        $this->expectOutputRegex('/UTEbMBkGA1UECgwSRXhhbXBsZSBVbml2ZXJzaXR5MRgwFgYDVQQDDA9pZHAuZXhh/');
+
+        $output = $this->getActualOutput();
+        try {
+            eval($output);
+        } catch (\Exception $e) {
+            $this->fail('Metarefresh does not produce syntactially valid code');
+        }
+        /* Check we matched the IdP */
+        $this->assertArrayHasKey('https://idp.example.com/idp/shibboleth', $metadata);
+
+        $this->assertTrue(
+            empty(array_diff_key($this->expected, $metadata['https://idp.example.com/idp/shibboleth']))
         );
     }
 }

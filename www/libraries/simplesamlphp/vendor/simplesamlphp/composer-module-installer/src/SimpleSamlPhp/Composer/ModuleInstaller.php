@@ -1,4 +1,5 @@
 <?php
+
 namespace SimpleSamlPhp\Composer;
 
 use Composer\Package\PackageInterface;
@@ -6,7 +7,6 @@ use Composer\Installer\LibraryInstaller;
 
 class ModuleInstaller extends LibraryInstaller
 {
-
     /**
      * {@inheritDoc}
      */

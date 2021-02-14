@@ -3,7 +3,7 @@
     "description": "This module provides authentication against password hashes or .htpasswd files",
     "type": "simplesamlphp-module",
     "keywords": ["simplesamlphp", "authcrypt"],
-    "license": "LGPL-3.0-or-later",
+    "license": "LGPL-2.1-or-later",
     "authors": [
         {
             "name": "Olav Morken",
@@ -29,7 +29,8 @@
     "require": {
         "php": ">=5.6",
         "simplesamlphp/composer-module-installer": "~1.1",
-        "webmozart/assert": "~1.4"
+        "webmozart/assert": "~1.4",
+        "whitehat101/apr1-md5": "~1.0"
     },
     "require-dev": {
         "simplesamlphp/simplesamlphp": "^1.17",

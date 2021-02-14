@@ -1,5 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <config>
+	<fieldset name="sso">
+		<field
+				name="backendLogin"
+				type="radio"
+				label="COM_SSO_CONFIG_BACKEND_LOGIN_LABEL"
+				description="COM_SSO_CONFIG_BACKEND_LOGIN_DESC"
+				default="1"
+				class="btn-group btn-group-yesno"
+		>
+			<option value="1">JYES</option>
+			<option value="0">JNO</option>
+		</field>
+	</fieldset>
+
 	<fieldset name="permissions" label="JCONFIG_PERMISSIONS_LABEL" description="JCONFIG_PERMISSIONS_DESC">
 		<field name="rules"
 			   type="rules"

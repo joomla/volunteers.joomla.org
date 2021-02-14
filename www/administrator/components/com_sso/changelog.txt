@@ -1,8 +1,8 @@
 RO Single Sign On
 Author: RolandD Cyber Produksi (contact@rolandd.com)
 Website: https://rolandd.com/
-Version: 1.2.1
-Date: 16 May 2020
+Version: 1.3.0
+Date: 14 February 2021
 
 Legenda:
 + Added
@@ -11,8 +11,16 @@ Legenda:
 / Changed
 
 Changelog
-Version 1.2.1 [ 2020-05-16 ]
-+ Updated to SimpleSAMLphp 1.18.7
+Version 1.3.0 [ 2021-02- ]
++ Updated to SimpleSAMLphp 1.19.0
+/ Improved intercepting com_users URLs
++ Added Item ID to redirect link to ensure menu is used
++ Added support for password protected key files
+* Fixed the links on the tips page
++ Patched SimpleSAMLphp to support Service Providers that do not send a SAML Logout Request
++ Added attribute field mapping for Service Provider
+/ Changed set the ownership of certificates to 0400
++ Added backend login option
 
 Version 1.2.0 [ 2020-04-09 ]
 + Updated to SimpleSAMLphp 1.18.5

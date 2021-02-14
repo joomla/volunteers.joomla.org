@@ -48,6 +48,39 @@ class Com_SsoInstallerScript extends InstallerScript
 	 */
 	public function postflight($route, JAdapterInstance $adapter)
 	{
+		$this->copySimpleSamlPhp($adapter);
+		$this->copyModLogin($adapter);
+
+		return true;
+	}
+
+	/**
+	 * Copy the mod_login override.
+	 *
+	 * @param   JAdapterInstance  $adapter  The object responsible for running this script
+	 *
+	 * @return  void
+	 *
+	 * @since   1.3.0
+	 */
+	private function copyModLogin(JAdapterInstance $adapter): void
+	{
+		$src = $adapter->getParent()->getPath('source');
+
+		Folder::copy($src . '/administrator/templates', JPATH_ADMINISTRATOR . '/templates', '', true);
+	}
+
+	/**
+	 * Copy the SimpleSAMLphp files.
+	 *
+	 * @param   JAdapterInstance  $adapter  The object responsible for running this script
+	 *
+	 * @return  void
+	 *
+	 * @since   1.3.0
+	 */
+	private function copySimpleSamlPhp(JAdapterInstance $adapter): void
+	{
 		// Copy the SimpleSAMLphp library to it's location
 		$src = $adapter->getParent()->getPath('source');
 
@@ -80,8 +113,6 @@ class Com_SsoInstallerScript extends InstallerScript
 
 		// Enable the cron module to be able to load the metadata
 		touch(JPATH_LIBRARIES . '/simplesamlphp/modules/cron/enable');
-
-		return true;
 	}
 
 	/**

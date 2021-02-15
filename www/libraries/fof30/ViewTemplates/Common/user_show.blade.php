@@ -1,7 +1,7 @@
 <?php
 /**
  * @package     FOF
- * @copyright   Copyright (c)2010-2019 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright   Copyright (c)2010-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license     GNU GPL version 3 or later
  */
 
@@ -34,7 +34,9 @@ defined('_JEXEC') || die;
  * @var \FOF30\View\DataView\Raw $this
  */
 
-use FOF30\Html\FEFHelper\BrowseView;global $akeebaSubsShowUserCache;
+use FOF30\Utils\FEFHelper\BrowseView;
+
+global $akeebaSubsShowUserCache;
 
 if (!isset($akeebaSubsShowUserCache))
 {

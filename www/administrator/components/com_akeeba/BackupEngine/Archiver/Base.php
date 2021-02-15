@@ -291,8 +291,8 @@ abstract class Base
 
 			if (array_key_exists($embedded_installer, $installerDescriptors))
 			{
-				$packages  = $installerDescriptors[$embedded_installer]['package'];
-				$langPacks = $installerDescriptors[$embedded_installer]['language'];
+				$packages  = $installerDescriptors[$embedded_installer]['package'] ?? '';
+				$langPacks = $installerDescriptors[$embedded_installer]['language'] ?? '';
 
 				if (empty($packages))
 				{

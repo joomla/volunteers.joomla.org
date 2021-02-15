@@ -47,6 +47,13 @@ class AttributeAddFromLDAP extends BaseFilter
 
 
     /**
+     * LDAP attributes to base64 encode
+     *
+     * @var array
+     */
+    protected $binary_attributes;
+
+    /**
      * LDAP search filter to use in the LDAP query
      *
      * @var string
@@ -122,6 +129,7 @@ class AttributeAddFromLDAP extends BaseFilter
         parent::__construct($config, $reserved);
 
         // Get filter specific config options
+        $this->binary_attributes = $this->config->getArray('attributes.binary', []);
         $this->search_attributes = $this->config->getArrayize('attributes', []);
         if (empty($this->search_attributes)) {
             $new_attribute = $this->config->getString('attribute.new', '');
@@ -190,6 +198,7 @@ class AttributeAddFromLDAP extends BaseFilter
                 $this->base_dn,
                 $filter,
                 array_values($this->search_attributes),
+                $this->binary_attributes,
                 true,
                 false
             );

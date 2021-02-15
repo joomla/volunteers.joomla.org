@@ -3,7 +3,7 @@
  * @package     SSO.Plugin
  * @subpackage  Authentication.sso
  *
- * @copyright   Copyright (C) 2017 - 2020 RolandD Cyber Produksi. All rights reserved.
+ * @copyright   Copyright (C) 2017 - 2021 RolandD Cyber Produksi. All rights reserved.
  * @license     GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  */
 
@@ -103,7 +103,7 @@ class PlgAuthenticationSso extends CMSPlugin
 	 */
 	public function onUserAuthenticate($credentials, $options, &$response)
 	{
-		if ($this->app->isClient('administrator'))
+		if ($this->app->input->getCmd('option') !== 'com_sso')
 		{
 			return;
 		}
@@ -132,7 +132,7 @@ class PlgAuthenticationSso extends CMSPlugin
 		}
 
 		// Clean up the attributes
-		require_once JPATH_ADMINISTRATOR . '/components/com_sso/helpers/sso.php';
+		JLoader::register('SsoHelper', JPATH_ADMINISTRATOR . '/components/com_sso/helpers/sso.php');
 		$helper     = new SsoHelper;
 		$userFields = $helper->processAttributes($authorizationSource, $this->instance->getAttributes());
 
@@ -165,9 +165,9 @@ class PlgAuthenticationSso extends CMSPlugin
 	 *
 	 * @return  void
 	 *
-	 * @since   1.0
+	 * @since   1.0.0
 	 */
-	private function checkLibrary()
+	private function checkLibrary(): void
 	{
 		if (!class_exists('SimpleSAML_Configuration'))
 		{

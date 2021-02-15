@@ -9,8 +9,8 @@
 
 use Joomla\CMS\Application\CMSApplication;
 use Joomla\CMS\Factory;
+use Joomla\CMS\MVC\Model\BaseDatabaseModel;
 use Joomla\CMS\Plugin\CMSPlugin;
-use Joomla\CMS\Router\Route;
 use Joomla\CMS\Uri\Uri;
 
 defined('_JEXEC') or die;
@@ -41,6 +41,9 @@ class PlgSystemSso extends CMSPlugin
 	/**
 	 * Check if a user needs to be logged-in via SSO.
 	 *
+	 * @todo Make specific URLs configurable instead of hardcoding
+	 *       /component/users/login
+	 *
 	 * @return  void
 	 *
 	 * @since   1.0.0
@@ -70,8 +73,12 @@ class PlgSystemSso extends CMSPlugin
 				$uri      = Uri::getInstance();
 
 				if (($input->getCmd('option') === 'com_users' && $uri->getVar('view', '') === '')
-					|| ($input->getCmd('option') === 'com_users' || $uri->getPath() === '/component/users/') && $uri->getVar('view') === 'login')
+					|| (stripos($uri->getPath(), '/component/users/login') !== false)
+					|| (($input->getCmd('option') === 'com_users' || $uri->getPath() === '/component/users/') && $uri->getVar('view') === 'login')
+				)
 				{
+					$session = $this->app->getSession();
+					$session->set('application.queue', null);
 					$redirect = true;
 				}
 
@@ -99,7 +106,7 @@ class PlgSystemSso extends CMSPlugin
 
 					if ($menuLink !== null)
 					{
-						$url = Route::_($menuLink);
+						$url = $menuLink;
 					}
 
 					$this->app->redirect($url);
@@ -109,11 +116,11 @@ class PlgSystemSso extends CMSPlugin
 	}
 
 	/**
-	 * Find the item ID for a given view.
+	 * Find the path for a given menu item ID.
 	 *
 	 * @param   integer  $id  The id of the menu to load
 	 *
-	 * @return  string  The menu link.
+	 * @return  string  The menu path.
 	 *
 	 * @since   1.0.0
 	 */
@@ -121,11 +128,52 @@ class PlgSystemSso extends CMSPlugin
 	{
 		$db    = $this->db;
 		$query = $db->getQuery(true)
-			->select($db->quoteName('link'))
+			->select($db->quoteName('path'))
 			->from($db->quoteName('#__menu'))
-			->where($db->quoteName('id') . ' = ' . (int) $id);
+			->where($db->quoteName('id') . ' = ' . $id);
 		$db->setQuery($query);
 
 		return $db->loadResult();
+	}
+
+	/**
+	 * Hook into the onAfterRoute to facilitate the Single Sign On routine.
+	 *
+	 * @return  void
+	 *
+	 * @since   2.0.0
+	 */
+	public function onAfterRoute(): void
+	{
+		if ($this->app->isClient('site'))
+		{
+			return;
+		}
+
+		$input = $this->app->input;
+
+		if ($input->getCmd('option') !== 'com_sso' || $input->getCmd('task') !== 'login.login')
+		{
+			return;
+		}
+
+		try
+		{
+			JLoader::register('SsoHelper', JPATH_ADMINISTRATOR . '/components/com_sso/helpers/sso.php');
+			BaseDatabaseModel::addIncludePath(JPATH_SITE . '/components/com_sso/models');
+			/** @var SsoModelLogin $model */
+			$model = BaseDatabaseModel::getInstance('Login', 'SsoModel');
+			$model->setState('authorizationSource', $input->getCmd('profile', 'default-sp'));
+
+			$model->processLogin();
+
+			$this->app->input->set('option', 'com_cpanel');
+			$this->app->input->set('task', '');
+			$this->app->input->set('profile', '');
+		}
+		catch (Exception $exception)
+		{
+			$this->app->enqueueMessage($exception->getMessage());
+		}
 	}
 }

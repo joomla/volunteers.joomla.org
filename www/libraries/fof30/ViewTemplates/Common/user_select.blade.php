@@ -1,7 +1,7 @@
 <?php
 /**
  * @package     FOF
- * @copyright   Copyright (c)2010-2019 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright   Copyright (c)2010-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license     GNU GPL version 3 or later
  */
 
@@ -15,6 +15,8 @@ use Joomla\CMS\Uri\Uri;
  *
  * Use this by extending it (I'm using -at- instead of the actual at-sign)
  * -at-include('any:lib_fof30/Common/user_select', $params)
+ *
+ * This is the generic variant used in Joomla 3 (when NOT using the FEF renderer)
  *
  * $params is an array defining the following keys (they are expanded into local scope vars automatically):
  *
@@ -48,42 +50,21 @@ $uri->setVar('required', (isset($required) ? ($required ? 1 : 0) : 0));
 $uri->setVar('field', $field);
 $url = 'index.php' . $uri->toString(['query']);
 ?>
-@if (version_compare(JVERSION, '3.999999.999999', 'le'))
+@unless($readonly)
+	@jhtml('behavior.modal', 'a.userSelectModal_' . $this->escape($field))
+	@jhtml('script', 'jui/fielduser.min.js', ['version' => 'auto', 'relative' => true])
+@endunless
 
-	@unless($readonly)
-		@jhtml('behavior.modal', 'a.userSelectModal_' . $this->escape($field))
-		@jhtml('script', 'jui/fielduser.min.js', ['version' => 'auto', 'relative' => true])
-	@endunless
-
-	<div class="akeeba-input-group">
-		<input readonly type="text"
-			   id="{{{ $field }}}" value="{{{ $user->username }}}"
-			   placeholder="{{{ $placeholder }}}"/>
-		<span class="akeeba-input-group-btn">
-		<a href="@route($url)"
-		   class="akeeba-btn--grey userSelectModal_{{{ $field }}}" title="{{{ $placeholder }}}"
-		   rel="{handler: 'iframe', size: {x: {{$width}}, y: {{$height}} }}">
-			<span class="akion-person"></span>
-		</a>
-	</span>
-	</div>
-	@unless($readonly)
-		<input type="hidden" id="{{{ $field }}}_id" name="{{{ $field }}}" value="{{ (int) $userID }}"/>
-	@endunless
-
-@else
-
-	@jlayout('joomla/form/field/user', [
-	'name' => $field,
-	'id' => $id,
-	'class' => $class,
-	'size' => $size,
-	'value' => $userID,
-	'userName' => $user->name,
-	'hint' => $placeholder,
-	'readonly' => $readonly,
-	'required' => $required,
-	'onchange' => $onchange,
-	])
-
-@endif
+<div class="input-append">
+	<input readonly type="text"
+		   id="{{{ $field }}}" value="{{{ $user->username }}}"
+		   placeholder="{{{ $placeholder }}}"/>
+	<a href="@route($url)"
+	   class="akeeba-btn--grey userSelectModal_{{{ $field }}}" title="{{{ $placeholder }}}"
+	   rel="{handler: 'iframe', size: {x: {{$width}}, y: {{$height}} }}">
+		<span class="akion-person"></span>
+	</a>
+</div>
+@unless($readonly)
+<input type="hidden" id="{{{ $field }}}_id" name="{{{ $field }}}" value="{{ (int) $userID }}"/>
+@endunless

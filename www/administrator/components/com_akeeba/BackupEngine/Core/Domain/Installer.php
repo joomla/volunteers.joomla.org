@@ -55,19 +55,19 @@ class Installer extends Part
 
 		// Add the backup description and comment in a README.html file in the
 		// installation directory. This makes it the first file in the archive.
-		if ($this->installerSettings->readme)
+		if (!empty($this->installerSettings->readme ?? ''))
 		{
 			$data = $this->createReadme();
 			$archive->addFileVirtual('README.html', $this->installerSettings->installerroot, $data);
 		}
 
-		if ($this->installerSettings->extrainfo)
+		if (!empty($this->installerSettings->extrainfo ?? ''))
 		{
 			$data = $this->createExtrainfo();
 			$archive->addFileVirtual('extrainfo.json', $this->installerSettings->installerroot, $data);
 		}
 
-		if ($this->installerSettings->password)
+		if (!empty($this->installerSettings->password ?? ''))
 		{
 			$data = $this->createPasswordFile();
 
@@ -118,7 +118,7 @@ class Installer extends Part
 		}
 
 		// Calculate percentage
-		$this->runningSize += $ret['chunkProcessed'];
+		$this->runningSize += $ret['chunkProcessed'] ?? 0;
 
 		if ($ret['filesize'] > 0)
 		{

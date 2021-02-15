@@ -439,6 +439,8 @@ class Jps extends BaseArchiver
 				$free_space = $this->getPartFreeSize();
 			}
 		}
+
+		return true;
 	}
 
 	/**

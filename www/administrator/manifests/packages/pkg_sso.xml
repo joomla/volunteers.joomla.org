@@ -2,22 +2,22 @@
 <extension version="3.8" type="package" method="upgrade">
 	<name>RO Single Sign On - Package</name>
 	<packagename>sso</packagename>
-	<creationDate>16 May 2020</creationDate>
+	<creationDate>14 February 2021</creationDate>
 	<author>RolandD Cyber Produksi</author>
 	<authorEmail>contact@rolandd.com</authorEmail>
 	<authorUrl>https://rolandd.com/</authorUrl>
-	<copyright>Copyright (C) 2017 - 2020 RolandD Cyber Produksi. All rights reserved.</copyright>
+	<copyright>Copyright (C) 2017 - 2021 RolandD Cyber Produksi. All rights reserved.</copyright>
 	<license>GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html</license>
-	<version>1.2.1</version>
+	<version>1.3.0</version>
 	<description>RO Single Sign On Package</description>
 
 	<scriptfile>script.php</scriptfile>
 
 	<files folder="packages">
-		<file type="component" id="com_sso">com_ro_sso_1.2.1.zip</file>
-		<file type="plugin" group="authentication" id="sso">plg_authentication_ro_sso_1.2.1.zip</file>
-		<file type="plugin" group="system" id="sso">plg_system_ro_sso_1.2.1.zip</file>
-		<file type="module" id="mod_sso" client="site">mod_ro_sso_1.2.1.zip</file>
+		<file type="component" id="com_sso">com_ro_sso_1.3.0.zip</file>
+		<file type="plugin" group="authentication" id="sso">plg_authentication_ro_sso_1.3.0.zip</file>
+		<file type="plugin" group="system" id="sso">plg_system_ro_sso_1.3.0.zip</file>
+		<file type="module" id="mod_sso" client="site">mod_ro_sso_1.3.0.zip</file>
 	</files>
 
 	<blockChildUninstall>true</blockChildUninstall>

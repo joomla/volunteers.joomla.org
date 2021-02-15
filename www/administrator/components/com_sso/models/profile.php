@@ -3,7 +3,7 @@
  * @package    SSO.Component
  *
  * @author     RolandD Cyber Produksi <contact@rolandd.com>
- * @copyright  Copyright (C) 2017 - 2020 RolandD Cyber Produksi. All rights reserved.
+ * @copyright  Copyright (C) 2017 - 2021 RolandD Cyber Produksi. All rights reserved.
  * @license    GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  * @link       https://rolandd.com
  */
@@ -195,9 +195,10 @@ class SsoModelProfile extends AdminModel
 			$config[$alias] = [];
 		}
 
-		$data->authorization->idp         = array_key_exists('idp', $config[$alias]) ? $config[$alias]['idp'] : '';
-		$data->authorization->privatekey  = array_key_exists('privatekey', $config[$alias]) ? $config[$alias]['privatekey'] : '';
-		$data->authorization->certificate = array_key_exists('certificate', $config[$alias]) ? $config[$alias]['certificate'] : '';
+		$data->authorization->idp             = $config[$alias]['idp'] ?? '';
+		$data->authorization->privatekey      = $config[$alias]['metadata.sign.privatekey'] ?? '';
+		$data->authorization->privatekey_pass = $config[$alias]['metadata.sign.privatekey_pass'] ?? '';
+		$data->authorization->certificate     = $config[$alias]['metadata.sign.certificate'] ?? '';
 
 		// Load the Joomla config
 		$data->joomla = [];
@@ -279,36 +280,60 @@ class SsoModelProfile extends AdminModel
 		{
 			$config[$alias] = [
 				'saml:SP',
-				'idp'                        => '',
-				'discoURL'                   => null,
-				'NameIDPolicy'               => 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified',
-				'privatekey'                 => '',
-				'certificate'                => '',
-				'sign.logout'                => true,
-				'signature.algorithm'        => 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256',
-				'SingleLogoutServiceBinding' => [
+				'idp'                           => '',
+				'discoURL'                      => null,
+				'NameIDPolicy'                  => 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified',
+				'privatekey'                    => '',
+				'privatekey_pass'               => '',
+				'certificate'                   => '',
+				'metadata.sign.enable'          => false,
+				'metadata.sign.privatekey'      => '',
+				'metadata.sign.privatekey_pass' => '',
+				'metadata.sign.certificate'     => '',
+				'sign.logout'                   => false,
+				'signature.algorithm'           => 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256',
+				'SingleLogoutServiceBinding'    => [
 					'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST',
 					'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect',
 					'urn:oasis:names:tc:SAML:2.0:bindings:SOAP',
 				],
-				'attributes'                 => [
+				'attributes'                    => [
 					'Name'           => 'name',
 					'E-Mail Address' => 'emailaddress',
 					'Username'       => 'upn',
 				],
-				'attributes.NameFormat'      => 'urn:oasis:names:tc:SAML:2.0:attrname-format:basic',
-				'attributes.required'        => [
+				'attributes.NameFormat'         => 'urn:oasis:names:tc:SAML:2.0:attrname-format:basic',
+				'attributes.required'           => [
 					'name',
 					'emailaddress',
-					'upn'
+					'upn',
 				],
 			];
 		}
 
 		// Set the user settings
-		$config[$alias]['idp']         = $data['idp'];
-		$config[$alias]['privatekey']  = $data['privatekey'];
-		$config[$alias]['certificate'] = $data['certificate'];
+		$config[$alias]['idp'] = $data['idp'];
+
+		$config[$alias]['sign.logout']                   = false;
+		$config[$alias]['metadata.sign.enable']          = false;
+		$config[$alias]['metadata.sign.privatekey']      = '';
+		$config[$alias]['metadata.sign.privatekey_pass'] = '';
+		$config[$alias]['metadata.sign.certificate']     = '';
+		$config[$alias]['privatekey']                    = '';
+		$config[$alias]['privatekey_pass']               = '';
+		$config[$alias]['certificate']                   = '';
+
+		if ((bool) $data['idp'] === true && (string) $data['privatekey'] !== '-1')
+		{
+			$config[$alias]['sign.logout']                   = $data['privatekey'] ? true : false;
+			$config[$alias]['metadata.sign.enable']          = $data['privatekey'] ? true : false;
+			$config[$alias]['metadata.sign.privatekey']      = $data['privatekey'];
+			$config[$alias]['metadata.sign.privatekey_pass'] = $data['privatekey_pass'];
+			$config[$alias]['metadata.sign.certificate']     = $data['certificate'];
+			$config[$alias]['privatekey']                    = $data['privatekey'];
+			$config[$alias]['privatekey_pass']               = $data['privatekey_pass'];
+			$config[$alias]['certificate']                   = $data['certificate'];
+		}
 
 		// Write the data to the configuration file
 		$config   = var_export($config, true);
@@ -372,7 +397,7 @@ class SsoModelProfile extends AdminModel
 			// Check if the output directory already exists
 			$metadataSources[] = [
 				'type'      => 'flatfile',
-				'directory' => 'metadata-generated'
+				'directory' => 'metadata-generated',
 			];
 		}
 
@@ -434,6 +459,13 @@ class SsoModelProfile extends AdminModel
 
 		$item->params         = $this->loadServiceProviderSettings($item->alias);
 		$item->params->fields = json_decode($item->fieldmap, false);
+
+		if ((int) $item->id === 0)
+		{
+			$fieldmap
+				                  = '{"fieldMap":{"fieldMap0":{"fields":{"idpName":"upn","localName":"username"}},"fieldMap1":{"fields":{"idpName":"name","localName":"name"}},"fieldMap2":{"fields":{"idpName":"emailaddress","localName":"email"}}}}';
+			$item->params->fields = json_decode($fieldmap, false);
+		}
 
 		return $item;
 	}

@@ -10,9 +10,7 @@ defined('_JEXEC') || die();
 
 /** @var  \Akeeba\Backup\Admin\View\Manage\Html $this */
 ?>
-@if (version_compare(JVERSION, '3.999.999', 'lt'))
 @jhtml('formbehavior.chosen')
-@endif
 
 @if($this->promptForBackupRestoration)
     @include('admin:com_akeeba/Manage/howtorestore_modal')
@@ -59,20 +57,12 @@ defined('_JEXEC') || die();
 
                 <div class="akeeba-filter-element akeeba-form-group">
                     {{-- Joomla 3.x: Chosen does not work with attached event handlers, only with inline event scripts (e.g. onchange) --}}
-                    @if (version_compare(JVERSION, '3.999.999', 'lt'))
-                        @jhtml('select.genericlist', $this->profilesList, 'profile', ['list.select' => $this->fltProfile, 'list.attr' => ['class' => 'advancedSelect', 'onchange' => 'document.forms.adminForm.submit();'], 'id' => 'comAkeebaManageProfileSelector'])
-                    @else
-                        @jhtml('select.genericlist', $this->profilesList, 'profile', ['list.select' => $this->fltProfile, 'list.attr' => ['class' => 'advancedSelect'], 'id' => 'comAkeebaManageProfileSelector'])
-                    @endif
+                    @jhtml('select.genericlist', $this->profilesList, 'profile', ['list.select' => $this->fltProfile, 'list.attr' => ['class' => 'advancedSelect', 'onchange' => 'document.forms.adminForm.submit();'], 'id' => 'comAkeebaManageProfileSelector'])
                 </div>
 
                 <div class="akeeba-filter-element akeeba-form-group">
                     {{-- Joomla 3.x: Chosen does not work with attached event handlers, only with inline event scripts (e.g. onchange) --}}
-                    @if (version_compare(JVERSION, '3.999.999', 'lt'))
-                        @jhtml('select.genericlist', $this->frozenList, 'frozen', ['list.select' => $this->fltFrozen, 'list.attr' => ['class' => 'advancedSelect', 'onchange' => 'document.forms.adminForm.submit();'], 'id' => 'comAkeebaManageFrozenSelector'])
-                    @else
-                        @jhtml('select.genericlist', $this->frozenList, 'frozen', ['list.select' => $this->fltFrozen, 'list.attr' => ['class' => 'advancedSelect'], 'id' => 'comAkeebaManageFrozenSelector'])
-                    @endif
+                    @jhtml('select.genericlist', $this->frozenList, 'frozen', ['list.select' => $this->fltFrozen, 'list.attr' => ['class' => 'advancedSelect', 'onchange' => 'document.forms.adminForm.submit();'], 'id' => 'comAkeebaManageFrozenSelector'])
                 </div>
             </div>
 
@@ -155,7 +145,7 @@ defined('_JEXEC') || die();
                             {{{ $record['id'] }}}
                         </td>
                         <td>
-                            <a href="#" onclick="return listItemTask('cb{{ $i }}', '{{$frozenTask}}')" title="{{$frozenTitle}}">
+                            <a href="#" onclick="return Joomla.listItemTask('cb{{ $i }}', '{{$frozenTask}}')" title="{{$frozenTitle}}">
                                 <span class="{{ $frozenIcon }}"></span>
                             </a>
                         </td>

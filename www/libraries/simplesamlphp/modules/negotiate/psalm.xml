@@ -6,7 +6,7 @@
 >
     <projectFiles>
         <directory name="lib" />
-        <directory name="www" />
+        <directory name="tests" />
     </projectFiles>
 
     <issueHandlers>
@@ -27,5 +27,16 @@
         <MissingParamType errorLevel="info" />
         <UnusedClass errorLevel="info" />
         <PossiblyUnusedMethod errorLevel="info" />
+
+        <!-- Ignore UnresolvableInclude on CLI-scripts -->
+        <UnresolvableInclude>
+            <errorLevel type="suppress">
+                <file name="tests/bootstrap.php" />
+            </errorLevel>
+        </UnresolvableInclude>
     </issueHandlers>
+
+    <stubs>
+        <file name="vendor/simplesamlphp/simplesamlphp-test-framework/stubs/krb5.php" />
+    </stubs>
 </psalm>

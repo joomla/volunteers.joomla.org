@@ -3,7 +3,7 @@
  * @package    SSO.Component
  *
  * @author     RolandD Cyber Produksi <contact@rolandd.com>
- * @copyright  Copyright (C) 2017 - 2020 RolandD Cyber Produksi. All rights reserved.
+ * @copyright  Copyright (C) 2017 - 2021 RolandD Cyber Produksi. All rights reserved.
  * @license    GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  * @link       https://rolandd.com
  */
@@ -56,7 +56,6 @@ class SsoModelCertificate extends FormModel
 	 */
 	public function getForm($data = [], $loadData = true)
 	{
-		// Get the form.
 		$form = $this->loadForm($this->context, 'certificate', ['control' => 'jform', 'load_data' => $loadData]);
 
 		if (!is_object($form))
@@ -75,8 +74,9 @@ class SsoModelCertificate extends FormModel
 	 * @return  boolean  True on success, False on error.
 	 *
 	 * @since   1.0.0
-	 *
 	 * @throws  Exception
+	 * @todo    Find out how SimpleSAMLphp works with password protected certificates
+	 *
 	 */
 	public function save($data): bool
 	{
@@ -100,20 +100,19 @@ class SsoModelCertificate extends FormModel
 		unset($dn['password']);
 
 		// Set the rest of the options
-		$privateKeyPass = $data['certificate']['password'];
-		$numberOfDays   = 3652;
-		$folder         = JPATH_LIBRARIES . '/simplesamlphp/cert';
-		$privateKey     = $folder . '/' . basename($data['certificate']['privateKey']);
-		$certificateKey = $folder . '/' . basename($data['certificate']['certificateKey']);
+		$privateKeyPass     = $data['certificate']['password'];
+		$numberOfDays       = 3652;
+		$folder             = JPATH_LIBRARIES . '/simplesamlphp/cert';
+		$privateKeyFile     = $folder . '/' . basename($data['certificate']['privateKey']);
+		$certificateKeyFile = $folder . '/' . basename($data['certificate']['certificateKey']);
 
-		// We only generate SEPA keys
-		$attribs                     = array();
+		$attribs                     = [];
 		$attribs['digest_alg']       = 'sha256';
 		$attribs['private_key_bits'] = 4096;
 
-		$privkey = openssl_pkey_new($attribs);
+		$privateKey = openssl_pkey_new($attribs);
 
-		if (!$privkey)
+		if (!$privateKey)
 		{
 			while ($err = openssl_error_string())
 			{
@@ -121,17 +120,20 @@ class SsoModelCertificate extends FormModel
 			}
 		}
 
-		$csr = openssl_csr_new($dn, $privkey, $attribs);
+		$csr = openssl_csr_new($dn, $privateKey, $attribs);
 
 		if (!$csr)
 		{
 			throw new RuntimeException(Text::_('COM_SSO_CANNOT_CREATE_CERTIFICATE'));
 		}
 
-		$sscert = openssl_csr_sign($csr, null, $privkey, $numberOfDays, $attribs);
+		$signedCertificate = openssl_csr_sign($csr, null, $privateKey, $numberOfDays, $attribs);
 
-		openssl_x509_export_to_file($sscert, $certificateKey);
-		openssl_pkey_export_to_file($privkey, $privateKey, $privateKeyPass);
+		openssl_x509_export_to_file($signedCertificate, $certificateKeyFile);
+		openssl_pkey_export_to_file($privateKey, $privateKeyFile, $privateKeyPass);
+
+		chmod($certificateKeyFile, 0400);
+		chmod($privateKeyFile, 0400);
 
 		return true;
 	}

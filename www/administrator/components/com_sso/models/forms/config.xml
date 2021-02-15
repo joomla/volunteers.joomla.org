@@ -51,20 +51,32 @@
             </field>
 
             <field name="privatekey"
-                   type="text"
+                   type="filelist"
                    label="COM_SSO_CONFIG_PRIVATEKEY_LABEL"
                    description="COM_SSO_CONFIG_PRIVATEKEY_DESC"
+                   required="false"
+                   directory="libraries/simplesamlphp/cert"
+                   hide_default="true"
+                   showon="idp:1"
+                   class="input-medium advancedSelect"/>
+
+            <field name="privatekey_pass"
+                   type="text"
+                   label="COM_SSO_CONFIG_PRIVATEKEY_PASS_LABEL"
+                   description="COM_SSO_CONFIG_PRIVATEKEY_PASS_DESC"
                    required="false"
                    showon="idp:1"
                    class="input-medium"/>
 
             <field name="certificate"
-                   type="text"
+                   type="filelist"
                    label="COM_SSO_CONFIG_CERTIFICATE_LABEL"
                    description="COM_SSO_CONFIG_CERTIFICATE_DESC"
                    required="false"
+                   directory="libraries/simplesamlphp/cert"
+                   hide_default="true"
                    showon="idp:1"
-                   class="input-medium"/>
+                   class="input-medium advancedSelect"/>
 
             <field name="login"
                    type="text"

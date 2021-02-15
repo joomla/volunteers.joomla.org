@@ -3,7 +3,7 @@
     "description": "The metarefresh module will download and parse metadata documents and store them locally",
     "type": "simplesamlphp-module",
     "keywords": ["simplesamlphp", "metarefresh"],
-    "license": "LGPL-3.0-or-later",
+    "license": "LGPL-2.1-or-later",
     "authors": [
         {
             "name": "Andreas Åkre Solberg",

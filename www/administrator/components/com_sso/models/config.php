@@ -3,7 +3,7 @@
  * @package     SSO.Component
  *
  * @author      RolandD Cyber Produksi <contact@rolandd.com>
- * @copyright   Copyright (C) 2017 - 2020 RolandD Cyber Produksi. All rights reserved.
+ * @copyright   Copyright (C) 2017 - 2021 RolandD Cyber Produksi. All rights reserved.
  * @license     GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  * @link        https://rolandd.com
  */
@@ -81,7 +81,10 @@ class SsoModelConfig extends AdminModel
 
 			try
 			{
-				$this->setupIdentityProvider($data['sso']['privatekey'], $data['sso']['certificate'],
+				$this->setupIdentityProvider(
+					$data['sso']['privatekey'],
+					$data['sso']['certificate'],
+					$data['sso']['privatekey_pass'],
 					$data['sso']['login']
 				);
 			}
@@ -142,11 +145,17 @@ class SsoModelConfig extends AdminModel
 		// Set the IDP setting
 		$config->set('enable.saml20-idp', (bool) $data['idp']);
 
-		// Set the private key
-		$config->set('privatekey', $data['privatekey']);
-
-		// Set the certificate
-		$config->set('certificate', $data['certificate']);
+		// Set the key settings
+		if ((bool) $data['idp'] === true && (string) $data['privatekey'] !== '-1')
+		{
+			$config->set('privatekey', $data['privatekey']);
+			$config->set('privatekey_pass', $data['privatekey_pass']);
+			$config->set('certificate', $data['certificate']);
+			$config->set('metadata.sign.enable', $data['privatekey'] ? true : false);
+			$config->set('metadata.sign.privatekey', $data['privatekey']);
+			$config->set('metadata.sign.privatekey_pass', $data['privatekey_pass']);
+			$config->set('metadata.sign.certificate', $data['certificate']);
+		}
 
 		// Set the theme settings
 		$folder = '';
@@ -207,9 +216,10 @@ class SsoModelConfig extends AdminModel
 	/**
 	 * Setup the identity provider settings.
 	 *
-	 * @param   string  $privateKey   The private key to use
-	 * @param   string  $certificate  The certificate file to use
-	 * @param   string  $loginModule  The name of the login module
+	 * @param   string  $privateKey          The private key to use
+	 * @param   string  $certificate         The certificate file to use
+	 * @param   string  $privateKeyPassword  The password for the certificate file
+	 * @param   string  $loginModule         The name of the login module
 	 *
 	 * @return  void
 	 *
@@ -218,6 +228,7 @@ class SsoModelConfig extends AdminModel
 	private function setupIdentityProvider(
 		string $privateKey,
 		string $certificate,
+		string $privateKeyPassword = '',
 		string $loginModule = 'joomla:Joomla'
 	): void {
 		// Check if the privateKey and certificate exist
@@ -244,12 +255,13 @@ class SsoModelConfig extends AdminModel
 		$config->write();
 
 		// Update the libraries\simplesamlphp\metadata\saml20-idp-hosted.php
-		$default = array(
-			'host'        => '__DEFAULT__',
-			'privatekey'  => $privateKey,
-			'certificate' => $certificate,
-			'auth'        => 'joomla-idp'
-		);
+		$default = [
+			'host'            => '__DEFAULT__',
+			'privatekey'      => $privateKey,
+			'privatekey_pass' => $privateKeyPassword,
+			'certificate'     => $certificate,
+			'auth'            => 'joomla-idp'
+		];
 
 		// Write the data to the configuration file
 		$config   = var_export($default, true);

@@ -385,7 +385,10 @@ class Logger implements LoggerInterface, LogInterface, WarningsLoggerInterface
 			return;
 		}
 
-		if (ftruncate($this->fp, ftell($this->fp) - $written) === false)
+		// Store truncate offset, we will have to rewind the internal pointer to it
+		$truncate_point = ftell($this->fp) - $written;
+
+		if (ftruncate($this->fp, $truncate_point) === false)
 		{
 			@fclose($this->fp);
 			@unlink($this->logName);
@@ -396,6 +399,11 @@ class Logger implements LoggerInterface, LogInterface, WarningsLoggerInterface
 
 			return;
 		}
+
+		// Finally, move the file pointer at the truncation point. Otherwise PHP will append NULL bytes to the string
+		// to "pad" the file length to the internal file pointer. No need to check if the operation was successful,
+		// worst case scenario we will have some extra NULL bytes, there's no need to kill the log operation
+		@fseek($this->fp, $truncate_point);
 	}
 
 	/**

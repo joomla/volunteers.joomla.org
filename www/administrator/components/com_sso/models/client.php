@@ -3,13 +3,14 @@
  * @package    SSO.Component
  *
  * @author     RolandD Cyber Produksi <contact@rolandd.com>
- * @copyright  Copyright (C) 2017 - 2020 RolandD Cyber Produksi. All rights reserved.
+ * @copyright  Copyright (C) 2017 - 2021 RolandD Cyber Produksi. All rights reserved.
  * @license    GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  * @link       https://rolandd.com
  */
 
 defined('_JEXEC') or die;
 
+use Joomla\CMS\Application\ApplicationHelper;
 use Joomla\CMS\Factory;
 use Joomla\CMS\MVC\Model\AdminModel;
 use Joomla\CMS\MVC\Model\BaseDatabaseModel;
@@ -78,20 +79,24 @@ class SsoModelClient extends AdminModel
 			->select(
 				$db->quoteName(
 					[
+						'name',
 						'source',
 						'validateFingerprint',
 						'expireAfter',
 						'outputDir',
 						'outputFormat',
-						'certificates'
+						'certificates',
+						'attributeMap',
 					],
 					[
+						'name',
 						'src',
 						'validateFingerprint',
 						'expireAfter',
 						'outputDir',
 						'outputFormat',
-						'certificates'
+						'certificates',
+						'attributeMap',
 					]
 				)
 			)
@@ -107,24 +112,36 @@ class SsoModelClient extends AdminModel
 			return;
 		}
 
-		// Set the output dir
 		$outputDir = JPATH_LIBRARIES . '/simplesamlphp/metadata-generated/';
 
-		// Update the config
 		$config          = new SsoConfig;
 		$metadataSources = $config->get('metadata.sources');
 
 		foreach ($clients as $source)
 		{
-			// Set the expiration
 			$expire = $source['expireAfter'] ? time() + (60 * 60 * 24 * $source['expireAfter']) : null;
 
 			// The metadata global variable will be filled with the metadata we extract
 			$metaLoader = new MetaLoader($expire);
 
 			// Convert certificates to array
-			$source['certificates']        = $source['certificates'] ? json_decode($source['certificates'], false) : null;
+			$source['certificates']        = $source['certificates'] ? json_decode($source['certificates'], false)
+				: null;
 			$source['validateFingerprint'] = $source['validateFingerprint'] ?: null;
+
+			$attributeMap = $source['attributeMap'] ? json_decode($source['attributeMap'], true) : null;
+
+			if ($attributeMap)
+			{
+				$attributeFile                      = ApplicationHelper::stringURLSafe($source['name']);
+				$source['template']['authproc'][50] = [
+					'class' => 'core:attributeMap',
+					$attributeFile,
+				];
+				$this->createAttributeMap($source['name'], $attributeMap);
+			}
+
+			unset($source['name'], $source['attributeMap']);
 
 			// Load the source
 			$metaLoader->loadSource($source);
@@ -142,7 +159,7 @@ class SsoModelClient extends AdminModel
 			// Check if the output directory already exists
 			$metadataSources[] = [
 				'type'      => $source['outputFormat'],
-				'directory' => 'metadata-generated/' . $source['outputDir']
+				'directory' => 'metadata-generated/' . $source['outputDir'],
 			];
 		}
 
@@ -151,6 +168,31 @@ class SsoModelClient extends AdminModel
 
 		$config->set('metadata.sources', $metadataSources);
 		$config->write();
+	}
+
+	/**
+	 * Write a new attribute map.
+	 *
+	 * @param   string  $name          The name of the client
+	 * @param   array   $attributeMap  The attribute mappings
+	 *
+	 * @return  void
+	 *
+	 * @since   1.3.0
+	 */
+	private function createAttributeMap(string $name, array $attributeMap): void
+	{
+		$attributeDir  = JPATH_LIBRARIES . '/simplesamlphp/attributemap/';
+		$attribute     = new SsoAttribute;
+		$attributeFile = ApplicationHelper::stringURLSafe($name);
+
+		foreach ($attributeMap as $map)
+		{
+			$attribute->set($map['attributeField'], $map['attributeName']);
+		}
+
+		$attribute->setFilename($attributeDir . $attributeFile . '.php')
+			->write();
 	}
 
 	/**
@@ -164,16 +206,50 @@ class SsoModelClient extends AdminModel
 	 */
 	public function save($data): bool
 	{
-		// Save the data
+		if ($data['attributeMap'])
+		{
+			$this->createAttributeMap($data['name'], $data['attributeMap']);
+		}
+
+		$data['attributeMap'] = json_encode($data['attributeMap']);
+
 		if (!parent::save($data))
 		{
 			return false;
 		}
 
-		// Generate the metarefresh config file
 		$this->createMetarefreshConfig();
 
 		return true;
+	}
+
+	/**
+	 * Generate the metarefresh config file from the clients.
+	 *
+	 * @return  void
+	 *
+	 * @since   1.0.0
+	 */
+	private function createMetarefreshConfig(): void
+	{
+		/** @var SsoModelClients $clientsModel */
+		$clientsModel = BaseDatabaseModel::getInstance('Clients', 'SsoModel');
+		$clients      = $clientsModel->getItems();
+		$metaRefresh  = new SsoMetarefresh;
+
+		array_walk(
+			$clients,
+			static function ($client) use (&$metaRefresh) {
+				$base = 'sets~' . $client->outputDir;
+				$metaRefresh->set($base . '~cron', ['hourly']);
+				$metaRefresh->set($base . '~sources', [['src' => $client->source]]);
+				$metaRefresh->set($base . '~expireAfter', 60 * 60 * 24 * (int) $client->expireAfter);
+				$metaRefresh->set($base . '~outputDir', 'metadata-generated/' . $client->outputDir);
+				$metaRefresh->set($base . '~outputFormat', $client->outputFormat);
+			}
+		);
+
+		$metaRefresh->write();
 	}
 
 	/**
@@ -205,33 +281,22 @@ class SsoModelClient extends AdminModel
 	}
 
 	/**
-	 * Generate the metarefresh config file from the clients.
+	 * Method to get a single record.
 	 *
-	 * @return  void
+	 * @param   integer  $pk  The id of the primary key.
 	 *
-	 * @since   1.0.0
+	 * @return  \JObject|boolean  Object on success, false on failure.
+	 *
+	 * @since   1.3.0
+	 *
+	 * @throws  Exception
 	 */
-	private function createMetarefreshConfig(): void
+	public function getItem($pk = null)
 	{
-		// Get all clients
-		/** @var SsoModelClients $clientsModel */
-		$clientsModel = BaseDatabaseModel::getInstance('Clients', 'SsoModel');
-		$clients = $clientsModel->getItems();
-		$metaRefresh = new SsoMetarefresh;
+		$item = parent::getItem($pk);
 
-		array_walk($clients,
-			static function ($client) use (&$metaRefresh)
-			{
-				$base = 'sets~' . $client->outputDir;
-				$metaRefresh->set($base . '~cron', ['hourly']);
-				$metaRefresh->set($base . '~sources', [['src' => $client->source]]);
-				$metaRefresh->set($base . '~expireAfter', 60 * 60 * 24 * (int) $client->expireAfter);
-				$metaRefresh->set($base . '~outputDir', 'metadata-generated/' . $client->outputDir);
-				$metaRefresh->set($base . '~outputFormat', $client->outputFormat);
-			}
-		);
+		$item->attributeMap = json_decode($item->attributeMap);
 
-		// Write out the metarefresh file
-		$metaRefresh->write();
+		return $item;
 	}
 }

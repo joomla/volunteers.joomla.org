@@ -25,7 +25,7 @@
                     {% for key, value in post_rule %}
                     <input type="hidden" name="{{ key|escape('html') }}" value="{{ value|escape('html') }}">
                     {% endfor %}
-                    <select onchange="submit();" name="rule">
+                    <select name="rule">
                     {% for key, rule in available_rules %}
                         {% if key == selected_rule %}
                         <option selected="selected" value="{{ key }}">{{ rule.name }}</option>
@@ -42,7 +42,7 @@
                     <input type="hidden" name="{{ key|escape('html') }}" value="{{ value|escape('html') }}">
                     {% endfor %}
                     {% if availdelimiters %}
-                    <select onchange="submit();" name="d">
+                    <select name="d">
                     {% for key, delim in availdelimiters %}
                         {% set delimName = delim %}
 
@@ -81,7 +81,7 @@
                     <input type="hidden" name="{{ key|escape('html') }}" value="{{ value|escape('html') }}">
                     {% endfor %}
                     {% if available_timeres %}
-                    <select onchange="submit();" name="res">
+                    <select name="res">
                     {% for key, timeresname in available_timeres %}
                         {% if key == selected_timeres %}
                         <option selected="selected" value="{{ key }}">{{ timeresname }}</option>
@@ -99,7 +99,7 @@
                     <input type="hidden" name="{{ key|escape('html') }}" value="{{ value|escape('html') }}">
                     {% endfor %}
                     {% if available_times %}
-                    <select onchange="submit();" name=time>
+                    <select name="time">
                     {% for key, timedescr in available_times %}
                         {% if key == selected_time %}
                         <option selected="selected" value="{{ key }}">{{ timedescr }}</option>
@@ -131,7 +131,7 @@
             <img src="{{ imgurl }}" alt="Graph" />
             <form action="#">
                 <p class="p_right">Compare with total from this dataset
-                <select onchange="submit();" name="rule2">
+                <select name="rule2">
                     <option value="_">None</option>
                     {% for key, rule in available_rules %}
                     {% if key == selected_rule2 %}

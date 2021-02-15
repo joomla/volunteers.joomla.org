@@ -236,14 +236,12 @@ class UsageStatistics extends Model
 			}
 			else
 			{
-				$keyName = version_compare(JVERSION, '1.7.0', 'lt') ? $db->qn('key') : 'key';
-
 				$insertObject = (object) [
-					$keyName => $key,
-					'value'  => $value,
+					'key'   => $key,
+					'value' => $value,
 				];
 
-				$db->updateObject('#__akeeba_common', $insertObject, $keyName);
+				$db->updateObject('#__akeeba_common', $insertObject, 'key');
 			}
 		}
 		catch (\Exception $e)

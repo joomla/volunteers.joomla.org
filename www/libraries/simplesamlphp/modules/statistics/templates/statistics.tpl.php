@@ -32,7 +32,7 @@ foreach ($this->data['post_rule'] as $k => $v) {
 }
 
 if (!empty($this->data['available_rules'])) {
-    echo '<select onchange="submit();" name="rule">';
+    echo '<select name="rule">';
     foreach ($this->data['available_rules'] as $key => $rule) {
         if ($key === $this->data['selected_rule']) {
             echo '<option selected="selected" value="'.$key.'">'.$rule['name'].'</option>';
@@ -53,7 +53,7 @@ foreach ($this->data['post_d'] as $k => $v) {
 }
 
 if (!empty($this->data['availdelimiters'])) {
-    echo '<select onchange="submit();" name="d">';
+    echo '<select name="d">';
     foreach ($this->data['availdelimiters'] as $key => $delim) {
         $delimName = $delim;
         if (array_key_exists($delim, $this->data['delimiterPresentation'])) {
@@ -97,7 +97,7 @@ foreach ($this->data['post_res'] as $k => $v) {
 }
 
 if (!empty($this->data['available_timeres'])) {
-    echo '<select onchange="submit();" name="res">';
+    echo '<select name="res">';
     foreach ($this->data['available_timeres'] as $key => $timeresname) {
         if ($key == $this->data['selected_timeres']) {
             echo '<option selected="selected" value="'.$key.'">'.$timeresname.'</option>';
@@ -117,7 +117,7 @@ foreach ($this->data['post_time'] as $k => $v) {
 }
 
 if (!empty($this->data['available_times'])) {
-    echo '<select onchange="submit();" name="time">';
+    echo '<select name="time">';
     foreach ($this->data['available_times'] as $key => $timedescr) {
         if ($key == $this->data['selected_time']) {
             echo '<option selected="selected" value="'.$key.'">'.$timedescr.'</option>';
@@ -156,7 +156,7 @@ if (!empty($this->data['results'])) {
         echo '<input type="hidden" name="'.$k.'" value="'.htmlspecialchars($v).'" />'."\n";
     }
 
-    echo '<select onchange="submit();" name="rule2">';
+    echo '<select name="rule2">';
     echo '	<option value="_">None</option>';
     foreach ($this->data['available_rules'] as $key => $rule) {
         if ($key === $this->data['selected_rule2']) {

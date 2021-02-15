@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SimpleSAML\Module\cron\Controller;
 
 use SimpleSAML\Auth;
@@ -40,7 +42,6 @@ class Cron
      * It initializes the global configuration and auth source configuration for the controllers implemented here.
      *
      * @param \SimpleSAML\Configuration              $config The configuration to use by the controllers.
-     * @param \SimpleSAML\Configuration              $moduleConfig The module-configuration to use by the controllers.
      * @param \SimpleSAML\Session                    $session The session to use by the controllers.
      *
      * @throws \Exception
@@ -76,13 +77,25 @@ class Cron
         ];
 
         $urls = [];
-        foreach ($tags as $tag) {
-            $urls[] = [
-                'exec_href' => Module::getModuleURL('cron') . '/run/' . $tag . '/' . $key,
-                'href' => Module::getModuleURL('cron') . '/run/' . $tag . '/' . $key . '/xhtml',
-                'tag' => $tag,
-                'int' => (array_key_exists($tag, $def) ? $def[$tag] : $def['default']),
-            ];
+        if ($this->config->getBoolean('usenewui', false)) {
+            foreach ($tags as $tag) {
+                $urls[] = [
+                    'exec_href' => Module::getModuleURL('cron') . '/run/' . $tag . '/' . $key,
+                    'href' => Module::getModuleURL('cron') . '/run/' . $tag . '/' . $key . '/xhtml',
+                    'tag' => $tag,
+                    'int' => (array_key_exists($tag, $def) ? $def[$tag] : $def['default']),
+                ];
+            }
+        } else {
+            // cron.php?key=secret&tag=hourly&output=xhtml
+            foreach ($tags as $tag) {
+                $urls[] = [
+                    'exec_href' => Module::getModuleURL('cron/cron.php', ['key' => $key, 'tag' => $tag]),
+                    'href' => Module::getModuleURL('cron/cron.php', ['key' => $key, 'tag' => $tag, 'output' => 'xhtml']),
+                    'tag' => $tag,
+                    'int' => (array_key_exists($tag, $def) ? $def[$tag] : $def['default']),
+                ];
+            }
         }
 
         $t = new Template($this->config, 'cron:croninfo.tpl.php', 'cron:cron');
@@ -131,7 +144,7 @@ class Cron
             try {
                 $mail->send();
             } catch (\PHPMailer\PHPMailer\Exception $e) {
-                Logger::warning("Unable to send cron report");
+                Logger::warning("Unable to send cron report; " . $e->getMessage());
             }
         }
 

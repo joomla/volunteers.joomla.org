@@ -66,6 +66,7 @@ defined('_JEXEC') || die();
 		        @lang('COM_AKEEBA_CPANEL_PROFILE_TITLE'): #{{ $this->profileId }}
 
             </label>
+            @jhtml('formbehavior.chosen')
 	        @jhtml('select.genericlist', $this->profileList, 'profileid', ['list.select' => $this->profileId, 'id' => 'comAkeebaBackupProfileDropdown', 'list.attr' => ['class' => 'advancedSelect']])
         </div>
 
@@ -273,7 +274,7 @@ defined('_JEXEC') || die();
 					@lang('COM_AKEEBA_BACKUP_TEXT_RTFMTOSOLVEPRO')
 					@endif
 
-					@sprintf('COM_AKEEBA_BACKUP_TEXT_RTFMTOSOLVE', 'https://www.akeeba.com/documentation/akeeba-backup-documentation/troubleshoot-backup.html?utm_source=akeeba_backup&utm_campaign=backuperrorlink')
+					@sprintf('COM_AKEEBA_BACKUP_TEXT_RTFMTOSOLVE', 'https://www.akeeba.com/documentation/akeeba-backup-documentation/backup-now.html?utm_source=akeeba_backup&utm_campaign=backuperrorlink#troubleshoot-backup')
 				</p>
 				<p>
 					@if(AKEEBA_PRO)

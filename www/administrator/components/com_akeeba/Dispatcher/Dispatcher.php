@@ -147,19 +147,7 @@ class Dispatcher extends BaseDispatcher
 		}
 
 		// Prevents the "SQLSTATE[HY000]: General error: 2014" due to resource sharing with Akeeba Engine
-		// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		// !!!!! WARNING: ALWAYS GO THROUGH JFactory; DO NOT GO THROUGH $this->container->db !!!!!
-		// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-		if (version_compare(PHP_VERSION, '7.999.999', 'le'))
-		{
-			$jDbo = JFactory::getDbo();
-
-			if ($jDbo->name == 'pdomysql')
-			{
-				@JFactory::getDbo()->disconnect();
-			}
-		}
+		$this->fixPDOMySQLResourceSharing();
 
 		// Load the utils helper library
 		Platform::getInstance()->load_version_defines();
@@ -226,6 +214,62 @@ class Dispatcher extends BaseDispatcher
 		$akeebaEngineConfig = Factory::getConfiguration();
 		Platform::getInstance()->load_configuration();
 		unset($akeebaEngineConfig);
+	}
+
+	/**
+	 * Prevents the "SQLSTATE[HY000]: General error: 2014" due to resource sharing with Akeeba Engine.
+	 *
+	 * @since 7.5.2
+	 */
+	protected function fixPDOMySQLResourceSharing(): void
+	{
+		// This fix only applies to PHP 7.x, not 8.x
+		if (version_compare(PHP_VERSION, '8.0', 'ge'))
+		{
+			return;
+		}
+
+		// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		// !!!!! WARNING: ALWAYS GO THROUGH JFactory; DO NOT GO THROUGH $this->container->db !!!!!
+		// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		$jDbo     = JFactory::getDbo();
+		$dbDriver = method_exists($jDbo, 'getName') ? ($jDbo->getName() ?? $jDbo->name ?? 'mysql') : 'mysql';
+
+		if ($dbDriver !== 'pdomysql')
+		{
+			return;
+		}
+
+		/**
+		 * If this Joomla 3 with Site Debug enabled I need to disable database debug. If it's enabled, Joomla sends
+		 * `SET query_cache_type = 0`. However, the query_cache_type MySQL server variable has been deprecated in MySQL
+		 * 5.7 abd removed in MySQL 8. The PDO driver receives the error from the MySQL database and turns it into an
+		 * untrappable Fatal Error, meaning that a try/catch won't be able to catch it. Since the connection code that
+		 * triggers the fatal error will be called AT THE LATEST when the request terminates and at the earliest within
+		 * the Dispatcher's loading of common JavaScript (which goes through the Joomla API) this causes the Akeeba
+		 * Backup component to not load. Because of the weird way PDO error handling works we don't even get a Fatal
+		 * Error which would at least clue us in as to what the heck is going on! Instead we have the main Dispatcher's
+		 * dispatch() method handle the fatal error exception (LOLWUT?! WHY ONLY THERE?! WHAT THE HELL PHP?!) being
+		 * thrown by the PDO driver, converting the result of onBeforeDispatch to false which is interpreted as the user
+		 * not having access to the component, which is the error that gets reported.
+		 *
+		 * Talking about running into edge cases, am I right?!
+		 */
+		$isJoomla3         = version_compare(JVERSION, '3.999.999', 'le');
+		$isSiteDebug       = (bool) JFactory::getApplication()->get('debug', 0);
+		$isMySQL8OrGreated = version_compare($jDbo->getVersion() ?? '8.0', '8', 'ge');
+
+		if ($isJoomla3 && $isSiteDebug && $isMySQL8OrGreated)
+		{
+			if (!method_exists($jDbo, 'setDebug'))
+			{
+				return;
+			}
+
+			$jDbo->setDebug(false);
+		}
+
+		@JFactory::getDbo()->disconnect();
 	}
 
 	/**

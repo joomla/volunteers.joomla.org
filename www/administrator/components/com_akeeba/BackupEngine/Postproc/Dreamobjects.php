@@ -53,7 +53,7 @@ class Dreamobjects extends Amazons3
 	 *
 	 * @return  array
 	 */
-	protected function getEngineConfiguration()
+	protected function getEngineConfiguration(): array
 	{
 		$config   = Factory::getConfiguration();
 		$endpoint = "objects-us-east-1.dream.io";

@@ -8,6 +8,7 @@
 
 defined('_JEXEC') or die;
 
+use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Http\HttpFactory;
 use Joomla\CMS\Language\Text;
@@ -391,9 +392,9 @@ class JoomlaTemplateHelper
 	public static function getLoginRoute()
 	{
 		// Check for SSO component
-		$sso = JComponentHelper::getComponent('com_sso');
+		$sso = ComponentHelper::getComponent('com_sso');
 
-		if ($sso->enabled)
+		if ($sso->id)
 		{
 			$itemid = self::getSsoRoute($sso->id);
 
@@ -559,6 +560,4 @@ class JoomlaTemplateHelper
 
 		return null;
 	}
-
-
 }

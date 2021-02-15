@@ -161,7 +161,8 @@ class PlgSystemJoomlaIdentityVolunteers extends CMSPlugin
 			'joomlaforum'         => $data->joomlaforum,
 			'joomladocs'          => $data->joomladocs,
 			'crowdin'             => $data->crowdin,
-			'osmAddress'          => $data->osmAddress
+			'osmAddress'          => $data->osmAddress,
+			'nda'                 => $data->nda
 		);
 
 		JLog::add(json_encode($volunteer), JLog::INFO, 'idpjvp');

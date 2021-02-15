@@ -130,6 +130,7 @@ defined('_JEXEC') or die;
 							<th width="12%"><?php echo JText::_('COM_VOLUNTEERS_FIELD_DATE_STARTED') ?></th>
 							<?php if ($this->acl->edit): ?>
 								<th width="10%" class="center"><?php echo JText::_('COM_VOLUNTEERS_FIELD_ADDRESS') ?></th>
+								<th width="10%" class="center"><?php echo JText::_('COM_VOLUNTEERS_FIELD_NDA') ?></th>
 								<th width="10%"></th>
 							<?php endif; ?>
 							</thead>
@@ -159,6 +160,13 @@ defined('_JEXEC') or die;
 									<?php if ($this->acl->edit): ?>
 										<td class="center">
 											<?php if ($volunteer->address): ?>
+												<span class="icon-checkbox-checked"></span>
+											<?php else: ?>
+												<span class="icon-checkbox-unchecked"></span>
+											<?php endif; ?>
+										</td>
+										<td class="center">
+											<?php if ($volunteer->nda): ?>
 												<span class="icon-checkbox-checked"></span>
 											<?php else: ?>
 												<span class="icon-checkbox-unchecked"></span>

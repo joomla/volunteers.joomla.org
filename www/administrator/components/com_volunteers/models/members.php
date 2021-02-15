@@ -120,7 +120,7 @@ class VolunteersModelMembers extends JModelList
 			->from($db->quoteName('#__volunteers_members') . ' AS a');
 
 		// Join over the volunteers.
-		$query->select('volunteer.image AS volunteer_image, volunteer.osmAddress AS osmAddress, volunteer.city AS volunteer_city, volunteer.country AS volunteer_country')
+		$query->select('volunteer.image AS volunteer_image, volunteer.osmAddress AS osmAddress, volunteer.nda AS nda, volunteer.city AS volunteer_city, volunteer.country AS volunteer_country')
 			->join('LEFT', '#__volunteers_volunteers AS ' . $db->quoteName('volunteer') . ' ON volunteer.id = a.volunteer');
 
 		// Join over the departments.

@@ -20,7 +20,7 @@ use Joomla\Registry\Registry;
 HTMLHelper::_('behavior.keepalive');
 HTMLHelper::_('bootstrap.tooltip');
 
-$db = Factory::getDbo();
+$db    = Factory::getDbo();
 $query = $db->getQuery(true)
 	->select($db->quoteName('params'))
 	->from($db->quoteName('#__extensions'))
@@ -28,12 +28,12 @@ $query = $db->getQuery(true)
 	->where($db->quoteName('folder') . ' = ' . $db->quote('authentication'))
 	->where($db->quoteName('element') . ' = ' . $db->quote('sso'));
 $db->setQuery($query);
-$params = new Registry($db->loadResult());
-$profile = $params->get('profile');
+$params   = new Registry($db->loadResult());
+$profile  = $params->get('profile');
 $language = Factory::getLanguage();
 $language->load('com_sso', JPATH_ADMINISTRATOR . '/components/com_sso/');
 $componentParams = ComponentHelper::getParams('com_sso');
-$backendLogin = $componentParams->get('backendLogin', true);
+$backendLogin    = $componentParams->get('backendLogin', true);
 
 // Load chosen if we have language selector, ie, more than one administrator language installed and enabled.
 if ($langs)
@@ -52,7 +52,7 @@ if ($langs)
 							<?php echo Text::_('JGLOBAL_USERNAME'); ?>
 						</label>
 					</span>
-					<input name="username" tabindex="1" id="mod-login-username" type="text" class="input-medium" placeholder="<?php echo Text::_('JGLOBAL_USERNAME'); ?>" size="15" autofocus="true" />
+					<input name="username" tabindex="1" id="mod-login-username" type="text" class="input-medium" placeholder="<?php echo Text::_('JGLOBAL_USERNAME'); ?>" size="15" autofocus="true"/>
 					<a href="<?php echo Uri::root(); ?>index.php?option=com_users&view=remind" class="btn width-auto hasTooltip" title="<?php echo Text::_('MOD_LOGIN_REMIND'); ?>">
 						<span class="icon-help"></span>
 					</a>
@@ -76,22 +76,22 @@ if ($langs)
 			</div>
 		</div>
 		<?php if (count($twofactormethods) > 1): ?>
-		<div class="control-group">
-			<div class="controls">
-				<div class="input-prepend input-append">
+			<div class="control-group">
+				<div class="controls">
+					<div class="input-prepend input-append">
 					<span class="add-on">
 						<span class="icon-star hasTooltip" title="<?php echo Text::_('JGLOBAL_SECRETKEY'); ?>"></span>
 						<label for="mod-login-secretkey" class="element-invisible">
 							<?php echo Text::_('JGLOBAL_SECRETKEY'); ?>
 						</label>
 					</span>
-					<input name="secretkey" autocomplete="off" tabindex="3" id="mod-login-secretkey" type="text" class="input-medium" placeholder="<?php echo Text::_('JGLOBAL_SECRETKEY'); ?>" size="15"/>
-					<span class="btn width-auto hasTooltip" title="<?php echo Text::_('JGLOBAL_SECRETKEY_HELP'); ?>">
+						<input name="secretkey" autocomplete="off" tabindex="3" id="mod-login-secretkey" type="text" class="input-medium" placeholder="<?php echo Text::_('JGLOBAL_SECRETKEY'); ?>" size="15"/>
+						<span class="btn width-auto hasTooltip" title="<?php echo Text::_('JGLOBAL_SECRETKEY_HELP'); ?>">
 						<span class="icon-help"></span>
 					</span>
+					</div>
 				</div>
 			</div>
-		</div>
 		<?php endif; ?>
 		<?php if (!empty($langs)) : ?>
 			<div class="control-group">
@@ -121,16 +121,15 @@ if ($langs)
 		<input type="hidden" name="task" value="login"/>
 		<input type="hidden" name="return" value="<?php echo $return; ?>"/>
 		<?php echo HTMLHelper::_('form.token'); ?>
+
+		<?php if ($backendLogin && $profile) : ?>
+			<div class="control-group">
+				<div class="controls">
+					<a href="<?php echo Route::_('index.php?option=com_sso&task=login.login&profile=' . $profile); ?>" class="btn btn-info btn-large login-button btn-block">
+						<span class="icon-lock icon-white"></span> <?php echo Text::_('COM_SSO_BACKEND_LOGIN_BUTTON'); ?>
+					</a>
+				</div>
+			</div>
+		<?php endif; ?>
 	</fieldset>
 </form>
-<?php if ($backendLogin && $profile) : ?>
-	<div class="control-group">
-		<div class="controls">
-			<div class="btn-group">
-				<a href="<?php echo Route::_('index.php?option=com_sso&task=login.login&profile=' . $profile); ?>" class="btn btn-info btn-large login-button">
-					<span class="icon-lock icon-white"></span> <?php echo Text::_('COM_SSO_BACKEND_LOGIN_BUTTON'); ?>
-				</a>
-			</div>
-		</div>
-	</div>
-<?php endif; ?>

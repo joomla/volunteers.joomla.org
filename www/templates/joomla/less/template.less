@@ -65,8 +65,6 @@
 // Joomla
 @import "../../joomla-cms/media/jui/less/modals.joomla.less";
 @import "../../joomla-cms/media/jui/less/responsive-767px-max.joomla.less";
-// Cookiecontrol
-@import "cookiecontrol.less";
 
 // Override border-radius
 .nav-tabs.nav-stacked > li:first-child > a {
@@ -106,6 +104,9 @@
 }
 
 /* Site Body Styles */
+  html { 
+    scroll-padding-top: 100px; /* height of sticky header on Joomla template */ 
+  }
 body {
   &.site {
     padding-top: 37px;

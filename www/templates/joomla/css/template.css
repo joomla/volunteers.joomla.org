@@ -1,7 +1,7 @@
 /*
  * Joomla.org site template
  *
- * @copyright  Copyright (C) 2005 - 2020 Open Source Matters, Inc. All rights reserved.
+ * @copyright  Copyright (C) 2005 - 2021 Open Source Matters, Inc. All rights reserved.
  * @license    GNU General Public License version 2 or later
  */
 /* >>> JUI >>> */
@@ -9073,88 +9073,6 @@ div.modal.jviewport-width100 {
   }
 }
 
-/* CIVIC Cookie Control */
-
-#ccc-notify-dismiss {
-  display: none !important;
-}
-
-#ccc h3 {
-  font-family: 'Open Sans', sans-serif;
-}
-
-#ccc p {
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-}
-
-#ccc #ccc-notify p {
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-}
-
-#ccc .ccc-notify-buttons {
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-}
-
-#ccc button#ccc-recommended-settings {
-  background: #62c462;
-}
-
-#ccc button#ccc-recommended-settings:hover {
-  background: #51a351;
-}
-
-#ccc #ccc-content hr {
-  opacity: 0.75;
-}
-
-#ccc[light] button#ccc-icon {
-  fill: #152845;
-}
-
-#ccc[light] button.ccc-notify-button {
-  font-size: 0.95em;
-  color: #fff;
-  border: 1px solid #62c462;
-  border-radius: 0;
-}
-
-#ccc[light] button.ccc-notify-button:hover {
-  border-color: #51a351;
-}
-
-#ccc[light] button.ccc-notify-button:focus {
-  border-color: #ccc;
-}
-
-#ccc[light] button.ccc-notify-button:active {
-  border-color: #ccc;
-}
-
-#ccc[light] #ccc-notify-accept.ccc-button-solid {
-  background: #62c462;
-}
-
-#ccc[light] #ccc-notify-accept.ccc-button-solid:hover {
-  background: #51a351;
-}
-
-#ccc-optional-categories .optional-cookie:last-child .checkbox-toggle {
-  display: none;
-}
-
-#ccc-optional-categories .optional-cookie:last-child p {
-  text-align: center;
-}
-
-#ccc-optional-categories .optional-cookie:last-child p a {
-  font-size: 15px;
-  font-weight: 700;
-}
-
-#ccc-optional-categories .optional-cookie:last-child p a:hover {
-  text-decoration: none;
-}
-
 .nav-tabs.nav-stacked > li:first-child > a {
   -webkit-border-top-right-radius: 0;
           border-top-right-radius: 0;
@@ -9221,6 +9139,12 @@ div.modal.jviewport-width100 {
 }
 
 /* Site Body Styles */
+
+html {
+  scroll-padding-top: 100px;
+  /* height of sticky header on Joomla template */
+
+}
 
 body.site {
   padding-top: 37px;

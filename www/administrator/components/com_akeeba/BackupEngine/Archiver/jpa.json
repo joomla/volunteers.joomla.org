@@ -20,6 +20,14 @@
         "title": "COM_AKEEBA_CONFIG_PARTSIZE_TITLE",
         "description": "COM_AKEEBA_CONFIG_PARTSIZE_DESCRIPTION"
     },
+    "engine.archiver.common.permissions": {
+        "default": "0666",
+        "type": "enum",
+        "enumkeys": "COM_AKEEBA_CONFIG_PERMISSIONS_0600|COM_AKEEBA_CONFIG_PERMISSIONS_0644|COM_AKEEBA_CONFIG_PERMISSIONS_0666",
+        "enumvalues": "0600|0644|0666",
+        "title": "COM_AKEEBA_CONFIG_PERMISSIONS_TITLE",
+        "description": "COM_AKEEBA_CONFIG_PERMISSIONS_DESCRIPTION"
+    },
     "engine.archiver.common.chunk_size": {
         "default": "1048576",
         "type": "integer",

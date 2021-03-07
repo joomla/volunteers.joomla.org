@@ -2,5 +2,13 @@
     "_information": {
         "title": "COM_AKEEBA_CONFIG_ENGINE_ARCHIVER_ZIPNATIVE_TITLE",
         "description": "COM_AKEEBA_CONFIG_ENGINE_ARCHIVER_ZIPNATIVE_DESCRIPTION"
+    },
+    "engine.archiver.common.permissions": {
+        "default": "0666",
+        "type": "enum",
+        "enumkeys": "COM_AKEEBA_CONFIG_PERMISSIONS_0600|COM_AKEEBA_CONFIG_PERMISSIONS_0644|COM_AKEEBA_CONFIG_PERMISSIONS_0666",
+        "enumvalues": "0600|0644|0666",
+        "title": "COM_AKEEBA_CONFIG_PERMISSIONS_TITLE",
+        "description": "COM_AKEEBA_CONFIG_PERMISSIONS_DESCRIPTION"
     }
 }

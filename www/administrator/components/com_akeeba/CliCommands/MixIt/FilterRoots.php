@@ -11,7 +11,7 @@ defined('_JEXEC') || die;
 
 use Akeeba\Backup\Admin\Model\DatabaseFilters;
 use Akeeba\Engine\Factory;
-use FOF30\Container\Container;
+use FOF40\Container\Container;
 
 trait FilterRoots
 {

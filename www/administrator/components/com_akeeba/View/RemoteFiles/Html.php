@@ -11,7 +11,7 @@ namespace Akeeba\Backup\Admin\View\RemoteFiles;
 defined('_JEXEC') || die();
 
 use Akeeba\Backup\Admin\Model\RemoteFiles;
-use FOF30\View\DataView\Html as BaseView;
+use FOF40\View\DataView\Html as BaseView;
 
 class Html extends BaseView
 {

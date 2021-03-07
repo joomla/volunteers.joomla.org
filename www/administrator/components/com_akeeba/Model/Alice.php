@@ -13,10 +13,10 @@ defined('_JEXEC') || die();
 use Akeeba\Alice\Check\Base;
 use Akeeba\Engine\Factory;
 use DirectoryIterator;
-use FOF30\Autoloader\Autoloader;
-use FOF30\Container\Container;
-use FOF30\Model\Model;
-use FOF30\Timer\Timer;
+use FOF40\Autoloader\Autoloader;
+use FOF40\Container\Container;
+use FOF40\Model\Model;
+use FOF40\Timer\Timer;
 use Joomla\CMS\Language\Text;
 
 /**

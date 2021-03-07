@@ -12,7 +12,7 @@ use Akeeba\Engine\Platform;
 use Akeeba\Engine\Util\Complexify;
 use DateInterval;
 use Exception;
-use FOF30\Date\Date;
+use FOF40\Date\Date;
 use Joomla\CMS\Language\Text;
 
 defined('_JEXEC') || die();

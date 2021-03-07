@@ -16,9 +16,9 @@ use Akeeba\Engine\Factory;
 use Akeeba\Engine\Platform;
 use Akeeba\Engine\Util\Complexify;
 use Akeeba\Engine\Util\RandomValue;
-use FOF30\Database\Installer;
-use FOF30\Download\Download;
-use FOF30\Model\Model;
+use FOF40\Database\Installer;
+use FOF40\Download\Download;
+use FOF40\Model\Model;
 use JLoader;
 use Joomla\CMS\Filesystem\File;
 use Joomla\CMS\Filesystem\Folder;
@@ -706,7 +706,7 @@ class ControlPanel extends Model
 
 		@unlink($checkFilePath);
 
-		if (($folderListing !== false) && (strpos($folderListing, basename($checkFile, '.txt')) !== false))
+		if (!is_null($folderListing) && (strpos($folderListing, basename($checkFile, '.txt')) !== false))
 		{
 			$ret['listFolder'] = true;
 		}

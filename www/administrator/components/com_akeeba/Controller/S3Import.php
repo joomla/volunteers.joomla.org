@@ -13,8 +13,8 @@ defined('_JEXEC') || die();
 use Akeeba\Backup\Admin\Controller\Mixin\CustomACL;
 use Akeeba\Backup\Admin\Controller\Mixin\PredefinedTaskList;
 use Akeeba\Backup\Admin\Model\S3Import as S3ImportModel;
-use FOF30\Container\Container;
-use FOF30\Controller\Controller;
+use FOF40\Container\Container;
+use FOF40\Controller\Controller;
 use Joomla\CMS\Language\Text;
 
 class S3Import extends Controller
@@ -43,7 +43,7 @@ class S3Import extends Controller
 		$model->getS3Credentials();
 		$model->setS3Credentials($model->getState('s3access'), $model->getState('s3secret'));
 
-		$this->display(false, false);
+		$this->display(false);
 	}
 
 	/**
@@ -103,7 +103,7 @@ class S3Import extends Controller
 		if ($result === true)
 		{
 			// Part(s) downloaded successfully. Render the view.
-			$this->display(false, false);
+			$this->display(false);
 		}
 		elseif ($result === false)
 		{

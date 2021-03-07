@@ -581,8 +581,11 @@ class OneDrive
 
 		$refreshResponse = $this->fetch('GET', $refreshUrl);
 
-		$this->refreshToken = $refreshResponse['refresh_token'];
-		$this->accessToken  = $refreshResponse['access_token'];
+		$this->refreshToken = $refreshResponse['refresh_token'] ?? $this->refreshToken;
+		$this->accessToken  = $refreshResponse['access_token'] ?? $this->accessToken;
+
+		$refreshResponse['refresh_token'] = $this->refreshToken;
+		$refreshResponse['access_token']  = $this->accessToken;
 
 		return $refreshResponse;
 	}

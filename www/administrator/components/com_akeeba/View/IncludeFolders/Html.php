@@ -12,7 +12,7 @@ defined('_JEXEC') || die();
 
 use Akeeba\Backup\Admin\Model\IncludeFolders;
 use Akeeba\Backup\Admin\View\ViewTraits\ProfileIdAndName;
-use FOF30\View\DataView\Html as BaseView;
+use FOF40\View\DataView\Html as BaseView;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Uri\Uri;
 

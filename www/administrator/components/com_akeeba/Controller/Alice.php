@@ -13,9 +13,9 @@ defined('_JEXEC') || die();
 use Akeeba\Backup\Admin\Controller\Mixin\CustomACL;
 use Akeeba\Backup\Admin\Controller\Mixin\PredefinedTaskList;
 use Exception;
-use FOF30\Container\Container;
-use FOF30\Controller\Controller;
-use FOF30\Timer\Timer;
+use FOF40\Container\Container;
+use FOF40\Controller\Controller;
+use FOF40\Timer\Timer;
 use Joomla\CMS\Language\Text;
 use RuntimeException;
 
@@ -85,19 +85,19 @@ class Alice extends Controller
 		{
 			$this->getView()->setLayout('result');
 			$this->doTask = 'result';
-			$this->display(false, false);
+			$this->display(false);
 
 			return;
 		}
 
 		$this->getView()->setLayout('step');
-		$this->display(false, false);
+		$this->display(false);
 	}
 
 	public function result()
 	{
 		$this->getView()->setLayout('result');
-		$this->display(false, false);
+		$this->display(false);
 	}
 
 	public function error()
@@ -111,6 +111,6 @@ class Alice extends Controller
 		}
 
 		$this->getView()->setLayout('error');
-		$this->display(false, false);
+		$this->display(false);
 	}
 }

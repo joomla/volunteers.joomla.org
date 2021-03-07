@@ -10,7 +10,7 @@ namespace Akeeba\Backup\Admin\CliCommands;
 defined('_JEXEC') || die;
 
 use Akeeba\Backup\Admin\Model\MultipleDatabases;
-use FOF30\Container\Container;
+use FOF40\Container\Container;
 use Joomla\Console\Command\AbstractCommand;
 use Akeeba\Backup\Admin\CliCommands\MixIt\ArgumentUtilities;
 use Akeeba\Backup\Admin\CliCommands\MixIt\ConfigureIO;

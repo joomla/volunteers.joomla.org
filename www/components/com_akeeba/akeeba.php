@@ -16,16 +16,16 @@ $recommendedPHPVersion = '7.4';
 $softwareName          = 'Akeeba Backup';
 $silentResults         = true;
 
-if (!require_once(JPATH_COMPONENT_ADMINISTRATOR . '/View/wrongphp.php'))
+if (!require_once(JPATH_COMPONENT_ADMINISTRATOR . '/tmpl/CommonTemplates/wrongphp.php'))
 {
 	die;
 }
 
-if (!defined('FOF30_INCLUDED') && !@include_once(JPATH_LIBRARIES . '/fof30/include.php'))
+if (!defined('FOF40_INCLUDED') && !@include_once(JPATH_LIBRARIES . '/fof40/include.php'))
 {
-	throw new RuntimeException('FOF 3.0 is not installed', 500);
+	throw new RuntimeException('This extension requires FOF 4.', 500);
 }
 
 define('AKEEBA_CACERT_PEM', JPATH_LIBRARIES . '/src/Http/Transport/cacert.pem');
 
-FOF30\Container\Container::getInstance('com_akeeba')->dispatcher->dispatch();
+FOF40\Container\Container::getInstance('com_akeeba')->dispatcher->dispatch();

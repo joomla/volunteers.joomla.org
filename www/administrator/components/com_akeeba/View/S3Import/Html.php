@@ -8,7 +8,7 @@
 namespace Akeeba\Backup\Admin\View\S3Import;
 
 use Akeeba\Backup\Admin\Model\S3Import;
-use FOF30\View\DataView\Html as BaseView;
+use FOF40\View\DataView\Html as BaseView;
 
 // Protect from unauthorized access
 defined('_JEXEC') || die();

@@ -22,9 +22,9 @@ if (!file_exists(JPATH_ADMINISTRATOR . '/components/com_akeeba'))
 use Akeeba\Backup\Admin\Model\Statistics;
 use Akeeba\Engine\Factory;
 use Akeeba\Engine\Platform;
-use FOF30\Container\Container;
-use FOF30\Date\Date;
-use FOF30\Utils\CacheCleaner;
+use FOF40\Container\Container;
+use FOF40\Date\Date;
+use FOF40\JoomlaAbstraction\CacheCleaner;
 use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Factory as JFactory;
 use Joomla\CMS\Language\Text;
@@ -42,7 +42,7 @@ $db->setQuery($query);
 $db->execute();
 
 // Load FOF if not already loaded
-if (!defined('FOF30_INCLUDED') && !@include_once(JPATH_LIBRARIES . '/fof30/include.php'))
+if (!defined('FOF40_INCLUDED') && !@include_once(JPATH_LIBRARIES . '/fof40/include.php'))
 {
 	return;
 }
@@ -176,7 +176,7 @@ class plgQuickiconAkeebabackup extends CMSPlugin
 	 *
 	 * @param   string  $context  The calling context
 	 *
-	 * @return  array A list of icon definition associative arrays, consisting of the
+	 * @return  array|null A list of icon definition associative arrays, consisting of the
 	 *                 keys link, image, text and access.
 	 *
 	 * @throws  Exception
@@ -189,7 +189,7 @@ class plgQuickiconAkeebabackup extends CMSPlugin
 
 		if (!$user->authorise('akeeba.backup', 'com_akeeba'))
 		{
-			return;
+			return null;
 		}
 
 		/**
@@ -225,7 +225,7 @@ class plgQuickiconAkeebabackup extends CMSPlugin
 			|| !JFactory::getUser()->authorise('core.manage', 'com_installer')
 		)
 		{
-			return;
+			return null;
 		}
 		/**/
 

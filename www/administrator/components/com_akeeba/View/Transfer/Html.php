@@ -11,7 +11,7 @@ namespace Akeeba\Backup\Admin\View\Transfer;
 defined('_JEXEC') || die();
 
 use Akeeba\Backup\Admin\Model\Transfer;
-use FOF30\View\DataView\Html as BaseView;
+use FOF40\View\DataView\Html as BaseView;
 use Joomla\CMS\HTML\HTMLHelper as JHtml;
 use Joomla\CMS\Language\Text as JText;
 

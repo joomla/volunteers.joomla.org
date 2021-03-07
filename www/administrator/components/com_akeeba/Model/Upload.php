@@ -13,7 +13,7 @@ defined('_JEXEC') || die();
 use Akeeba\Engine\Factory;
 use Akeeba\Engine\Platform;
 use Exception;
-use FOF30\Model\Model;
+use FOF40\Model\Model;
 use LogicException;
 
 /**

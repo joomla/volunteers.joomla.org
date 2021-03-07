@@ -10,5 +10,5 @@
 // Protect from unauthorized access
 defined('_JEXEC') or die;
 
-define('AKEEBAFEF_VERSION', '1.1.3');
-define('AKEEBAFEF_DATE', '2021-02-05');
+define('AKEEBAFEF_VERSION', '2.0.1');
+define('AKEEBAFEF_DATE', '2021-03-03');

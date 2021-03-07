@@ -14,8 +14,8 @@ use Akeeba\Backup\Admin\Dispatcher\Dispatcher as AdminDispatcher;
 use Akeeba\Backup\Admin\Helper\SecretWord;
 use Akeeba\Engine\Factory;
 use Akeeba\Engine\Platform;
-use FOF30\Container\Container;
-use FOF30\Dispatcher\Exception\AccessForbidden;
+use FOF40\Container\Container;
+use FOF40\Dispatcher\Exception\AccessForbidden;
 use Joomla\CMS\Document\Document;
 use Joomla\CMS\Document\JsonDocument as JDocumentJSON;
 use Joomla\CMS\Factory as JFactory;
@@ -76,8 +76,8 @@ class Dispatcher extends AdminDispatcher
 
 		// Load the FOF language
 		$lang = $this->container->platform->getLanguage();
-		$lang->load('lib_fof30', JPATH_SITE, 'en-GB', true, true);
-		$lang->load('lib_fof30', JPATH_SITE, null, true, false);
+		$lang->load('lib_fof40', JPATH_SITE, 'en-GB', true, true);
+		$lang->load('lib_fof40', JPATH_SITE, null, true, false);
 
 		// Necessary defines for Akeeba Engine
 		if (!defined('AKEEBAENGINE'))

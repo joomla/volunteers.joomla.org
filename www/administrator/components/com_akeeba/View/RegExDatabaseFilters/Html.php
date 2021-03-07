@@ -17,7 +17,7 @@ use Joomla\CMS\Uri\Uri as JUri;
 
 defined('_JEXEC') || die();
 
-class Html extends \FOF30\View\DataView\Html
+class Html extends \FOF40\View\DataView\Html
 {
 	use ProfileIdAndName;
 

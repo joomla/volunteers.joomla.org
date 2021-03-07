@@ -7,13 +7,13 @@
 
 <extension version="3.9.0" type="component" method="upgrade">
 	<name>Akeeba</name>
-	<creationDate>2021-02-05</creationDate>
+	<creationDate>2021-03-03</creationDate>
 	<author>Nicholas K. Dionysopoulos</author>
 	<authorEmail>nicholas@dionysopoulos.me</authorEmail>
 	<authorUrl>https://www.akeeba.com</authorUrl>
 	<copyright>Copyright (c)2006-2019 Akeeba Ltd / Nicholas K. Dionysopoulos</copyright>
 	<license>GNU GPL v3 or later</license>
-	<version>7.5.3</version>
+	<version>8.0.2</version>
 	<description>Akeeba Backup Pro - Full Joomla! site backup solution, Professional Edition</description>
 
 	<!-- Public front end files -->
@@ -58,8 +58,7 @@
 			<folder>sql</folder>
 			<folder>Toolbar</folder>
 			<folder>View</folder>
-			<folder>views</folder>
-			<folder>ViewTemplates</folder>
+			<folder>tmpl</folder>
 
 			<filename>akeeba.php</filename>
 			<filename>fof.xml</filename>

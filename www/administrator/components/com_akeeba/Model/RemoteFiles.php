@@ -16,7 +16,7 @@ use Akeeba\Engine\Factory;
 use Akeeba\Engine\Platform;
 use Akeeba\Engine\Postproc\Exception\RangeDownloadNotSupported;
 use Exception;
-use FOF30\Model\Model;
+use FOF40\Model\Model;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Language\Text as JText;
 use RuntimeException;

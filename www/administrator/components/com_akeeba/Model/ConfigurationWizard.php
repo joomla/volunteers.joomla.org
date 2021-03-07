@@ -13,7 +13,7 @@ defined('_JEXEC') || die();
 use Akeeba\Backup\Admin\Model\Mixin\Chmod;
 use Akeeba\Engine\Factory;
 use Akeeba\Engine\Platform;
-use FOF30\Model\Model;
+use FOF40\Model\Model;
 
 /**
  * ConfigurationWizard model. Contains the business logic for the configuration wizard.

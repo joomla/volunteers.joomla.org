@@ -40,6 +40,9 @@ class Zipnative extends Base
 	/** @var int Running sum of bytes added to the archive */
 	private $runningSum = 0;
 
+	/** @var int Permissions for the backup archive part files */
+	protected $permissions = null;
+
 	/**
 	 * Class constructor - initializes internal operating parameters
 	 *
@@ -175,7 +178,7 @@ class Zipnative extends Base
 	{
 		$this->zip->close();
 
-		@chmod($this->_dataFileName, 0666);
+		@chmod($this->_dataFileName, $this->getPermissions());
 	}
 
 	/**
@@ -240,5 +243,25 @@ class Zipnative extends Base
 		$this->__bootstrap_code();
 
 		return true;
+	}
+
+	/**
+	 * Return the requested permissions for the backup archive file.
+	 *
+	 * @return  int
+	 * @since   8.0.0
+	 */
+	protected function getPermissions(): int
+	{
+		if (!is_null($this->permissions))
+		{
+			return $this->permissions;
+		}
+
+		$configuration     = Factory::getConfiguration();
+		$permissions       = $configuration->get('engine.archiver.common.permissions', '0666') ?: '0666';
+		$this->permissions = octdec($permissions);
+
+		return $this->permissions;
 	}
 }

@@ -133,7 +133,7 @@ trait ExclusionFilter
 	 *
 	 * @param   string  $root  Root directory
 	 *
-	 * @return  array
+	 * @return  void
 	 */
 	protected function resetAllFilters($root)
 	{

@@ -13,8 +13,8 @@ defined('_JEXEC') || die();
 use Akeeba\Backup\Admin\Controller\Mixin\CustomACL;
 use Akeeba\Backup\Admin\Controller\Mixin\PredefinedTaskList;
 use Akeeba\Backup\Admin\Model\Restore as RestoreModel;
-use FOF30\Container\Container;
-use FOF30\Controller\Controller;
+use FOF40\Container\Container;
+use FOF40\Controller\Controller;
 use Joomla\CMS\Language\Text;
 
 /**
@@ -57,7 +57,7 @@ class Restore extends Controller
 
 		$model->setState('restorationstep', 0);
 
-		$this->display(false, false);
+		$this->display(false);
 	}
 
 	/**
@@ -105,7 +105,7 @@ class Restore extends Controller
 			return;
 		}
 
-		$this->display(false, false);
+		$this->display(false);
 	}
 
 	/**

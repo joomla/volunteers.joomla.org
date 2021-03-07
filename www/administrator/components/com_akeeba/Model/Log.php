@@ -11,7 +11,7 @@ namespace Akeeba\Backup\Admin\Model;
 defined('_JEXEC') || die();
 
 use Akeeba\Engine\Factory;
-use FOF30\Model\Model;
+use FOF40\Model\Model;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Language\Text;
 

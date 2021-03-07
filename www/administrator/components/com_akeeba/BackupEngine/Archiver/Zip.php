@@ -276,7 +276,7 @@ class Zip extends BaseArchiver
 			}
 		}
 
-		@chmod($this->_dataFileName, 0644);
+		@chmod($this->_dataFileName, $this->getPermissions());
 	}
 
 	/**
@@ -809,7 +809,7 @@ class Zip extends BaseArchiver
 		// Touch the new file
 		$result = @touch($this->_dataFileName);
 
-		@chmod($this->_dataFileName, 0666);
+		@chmod($this->_dataFileName, $this->getPermissions());
 
 		return $result;
 	}
@@ -908,6 +908,6 @@ class Zip extends BaseArchiver
 			throw new ErrorException("Could not open temporary file for ZIP archiver. Please check your temporary directory's permissions!");
 		}
 
-		@chmod($this->centralDirectoryFilename, 0666);
+		@chmod($this->centralDirectoryFilename, $this->getPermissions());
 	}
 }

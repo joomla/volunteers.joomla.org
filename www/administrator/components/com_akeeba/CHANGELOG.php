@@ -1,17 +1,23 @@
 <?php die();?>
-Akeeba Backup 7.5.3
+Akeeba Backup 8.0.2
 ================================================================================
-+ Rewritten Backup on Update plugin for improved UX (gh-685)
-+ Joomla 4: backup profile selection uses Choices.js for easier navigation among many backup profiles
-~ Releasing the previous version without changes, due to server and CDN issues which resulted in inconsistent updates
-~ Internals: normalised use JVERSION conditionals
-~ Document Microsoft Edge “sleeping tabs” and workarounds for long-running backups in background browser tabs
-~ Improved CHANGELOG layout in the Control Panel page
-# [HIGH] Import from S3: you cannot select .jps files
-# [MEDIUM] Frozen backups toggle wouldn't work on Joomla 4
-# [LOW] Import from S3: invisible breadcrumbs in Dark Mode
-# [LOW] Recommended PHP version was shown as 7.3 instead of 7.4
-# [LOW] Unable to access the component on Joomla 4 when using the PDOMySQL database driver with Site Debug enabled, see https://github.com/joomla/joomla-cms/issues/32019
+! Update fails on some hosts which use opcache if the any of our software's installer plugin is enabled, you have gone through the Joomla Control Panel (with the extension updates quickicon plugin enabled) or the Extensions Update page before installing the new version, either as an automatic update or by manual installation (upload & install or install from URL).
+~ Will no longer uninstall FOF 3 even if it's no longer needed due to broken THIRD PARTY extensions using it.
+~ Workaround for Joomla bug which may not install the included FEF version 2 framework completely, leading to the component being broken after the update.
+~ Servers with opcache may report that FOF 4 classes are missing even though they are actually there.
+
+Akeeba Backup 8.0.1
+================================================================================
+! Update could fail on sites with old plugins we have removed years ago still installed
+
+Akeeba Backup 8.0.0
+================================================================================
++ Rewritten with FOF 4
++ Now using FEF 2 with a common JavaScript library across all Akeeba extensions
++ Renamed ViewTemplates to tmpl (Joomla 4 convention, with fallback code for Joomla 3)
++ Yes/No options in the component and plugin options now work correctly under Joomla 4.0 beta 7 and later
+# [HIGH] Dropbox for Business wouldn't work with the new scoped access tokens
+# [HIGH] Dropbox refresh token would disappear after the first refresh, making it impossible to use Dropbox reliably
 
 Akeeba Backup 7.5.2
 ================================================================================
@@ -20,6 +26,7 @@ Akeeba Backup 7.5.2
 ~ Internals: normalised use JVERSION conditionals
 ~ Document Microsoft Edge “sleeping tabs” and workarounds for long-running backups in background browser tabs
 ~ Improved CHANGELOG layout in the Control Panel page
+~ Code modernisation: using built-in random_bytes() instead of OpenSSL or mcrypt for random number generation
 # [HIGH] Import from S3: you cannot select .jps files
 # [MEDIUM] Frozen backups toggle wouldn't work on Joomla 4
 # [LOW] Import from S3: invisible breadcrumbs in Dark Mode

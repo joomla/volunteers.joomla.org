@@ -10,7 +10,7 @@ namespace Akeeba\Backup\Admin\View\Profiles;
 // Protect from unauthorized access
 defined('_JEXEC') || die();
 
-use FOF30\View\DataView\Json as BaseView;
+use FOF40\View\DataView\Json as BaseView;
 
 class Json extends BaseView
 {

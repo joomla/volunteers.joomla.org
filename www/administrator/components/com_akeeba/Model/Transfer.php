@@ -16,8 +16,8 @@ use Akeeba\Engine\Factory;
 use Akeeba\Engine\Util\RandomValue;
 use Akeeba\Engine\Util\Transfer as EngineTransfer;
 use Exception;
-use FOF30\Download\Download;
-use FOF30\Model\Model;
+use FOF40\Download\Download;
+use FOF40\Model\Model;
 use Joomla\CMS\Filesystem\File;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Uri\Uri;
@@ -178,7 +178,7 @@ class Transfer extends Model
 			$download = new Download($this->container);
 			$dummy    = $download->getFromURL($uri->toString());
 
-			$isValid = $dummy !== false;
+			$isValid = !is_null($dummy);
 		}
 
 		if (!$isValid)
@@ -846,7 +846,7 @@ class Transfer extends Model
 		 * The download of the test file failed. This can mean that the (S)FTP directory does not match the site URL we
 		 * were given, DNS resolution does not work or we have an SSL issue. We are going to determine which one is it.
 		 */
-		if ($data === false)
+		if (is_null($data))
 		{
 			$uri      = new Uri($url);
 			$hostname = $uri->getHost();
@@ -966,7 +966,7 @@ class Transfer extends Model
 		$downloader = new Download($this->container);
 		$rawData    = $downloader->getFromURL($baseUrl . '/kickstart.php?task=serverinfo');
 
-		if ($rawData == false)
+		if (is_null($rawData))
 		{
 			// Cannot access Kickstart on the remote server
 			throw new RuntimeException(Text::_('COM_AKEEBA_TRANSFER_ERR_CANNOTRUNKICKSTART'));
@@ -1198,7 +1198,7 @@ class Transfer extends Model
 		]);
 		$dataLength = strlen($data);
 		unset($data);
-		$rawData = $downloader->getFromURL($uri->toString());
+		$rawData = $downloader->getFromURL($uri->toString()) ?? '';
 
 		// Try to get the raw JSON data
 		$pos = strpos($rawData, '###');
@@ -1313,7 +1313,7 @@ class Transfer extends Model
 		$downloader = new Download($this->container);
 		$dataLength = strlen($data);
 		unset($data);
-		$rawData = $downloader->getFromURL($uri->toString());
+		$rawData = $downloader->getFromURL($uri->toString()) ?? '';
 
 		// ==== Delete the temporary files
 		if (!@unlink($localTempFile))

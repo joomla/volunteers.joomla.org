@@ -15,7 +15,7 @@ use Akeeba\Backup\Admin\Controller\Mixin\PredefinedTaskList;
 use Akeeba\Backup\Admin\Model\Log as LogModel;
 use Akeeba\Engine\Factory;
 use Akeeba\Engine\Platform;
-use FOF30\Controller\Controller;
+use FOF40\Controller\Controller;
 
 class Log extends Controller
 {

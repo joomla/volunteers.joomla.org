@@ -13,8 +13,8 @@ defined('_JEXEC') || die();
 use Akeeba\Backup\Admin\Model\Mixin\ExclusionFilter;
 use Akeeba\Engine\Factory;
 use Akeeba\Engine\Platform;
-use FOF30\Container\Container;
-use FOF30\Model\Model;
+use FOF40\Container\Container;
+use FOF40\Model\Model;
 
 /**
  * File Filters model

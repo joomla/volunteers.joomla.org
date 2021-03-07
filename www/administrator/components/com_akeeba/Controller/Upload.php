@@ -15,7 +15,7 @@ use Akeeba\Backup\Admin\Model\Mixin\GetErrorsFromExceptions;
 use Akeeba\Backup\Admin\View\Upload\Html as UploadView;
 use Akeeba\Engine\Platform;
 use Exception;
-use FOF30\Controller\Controller;
+use FOF40\Controller\Controller;
 use Joomla\CMS\Language\Text;
 
 class Upload extends Controller
@@ -71,7 +71,7 @@ class Upload extends Controller
 			// Also reset the saved post-processing engine
 			$this->container->platform->setSessionVar('upload_factory', null, 'akeeba');
 
-			$this->display(false, false);
+			$this->display(false);
 
 			return;
 		}
@@ -100,22 +100,21 @@ class Upload extends Controller
 			$this->container->platform->setSessionVar('upload_factory', null, 'akeeba');
 		}
 
-		$this->display(false, false);
+		$this->display(false);
 	}
 
 	/**
 	 * This task is called when we have to cancel the upload
 	 *
 	 * @param   bool  $cachable
-	 * @param   bool  $urlparams
 	 */
-	public function cancelled($cachable = false, $urlparams = false)
+	public function cancelled($cachable = false)
 	{
 		/** @var UploadView $view */
 		$view = $this->getView();
 		$view->setLayout('error');
 
-		$this->display(false, false);
+		$this->display(false);
 	}
 
 	/**
@@ -123,7 +122,7 @@ class Upload extends Controller
 	 *
 	 * @return  void
 	 */
-	public function start($cachable = false, $urlparams = false)
+	public function start($cachable = false)
 	{
 		$id = $this->getAndCheckId();
 
@@ -149,7 +148,7 @@ class Upload extends Controller
 		$view->id = $id;
 		$view->setLayout('default');
 
-		$this->display(false, false);
+		$this->display(false);
 	}
 
 	/**

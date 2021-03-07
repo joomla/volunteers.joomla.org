@@ -10,7 +10,7 @@ namespace Akeeba\Backup\Admin\View\Upload;
 // Protect from unauthorized access
 defined('_JEXEC') || die();
 
-use FOF30\View\DataView\Html as BaseView;
+use FOF40\View\DataView\Html as BaseView;
 use JHtml;
 use Joomla\CMS\HTML\HTMLHelper;
 

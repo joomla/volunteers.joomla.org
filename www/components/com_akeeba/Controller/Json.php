@@ -10,9 +10,9 @@ namespace Akeeba\Backup\Site\Controller;
 // Protect from unauthorized access
 defined('_JEXEC') || die();
 
-use FOF30\Container\Container;
-use FOF30\Controller\Controller;
-use FOF30\Controller\Mixin\PredefinedTaskList;
+use FOF40\Container\Container;
+use FOF40\Controller\Controller;
+use FOF40\Controller\Mixin\PredefinedTaskList;
 
 /**
  * Controller for the JSON API

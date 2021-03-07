@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright     Copyright (c) 2009-2020 Ryan Demmer. All rights reserved
+ * @copyright     Copyright (c) 2009-2021 Ryan Demmer. All rights reserved
  * @license       GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  * JCE is free software. This version may have been modified pursuant
  * to the GNU General Public License, and as distributed it includes or
@@ -108,7 +108,7 @@ class WFEditorPlugin extends JObject
             ));
         }
 
-        $view->assign('plugin', $this);
+        $view->plugin = $this;
 
         return $view;
     }
@@ -140,6 +140,17 @@ class WFEditorPlugin extends JObject
         return $version;
     }
 
+    protected function isRtl()
+    {
+        $language = JFactory::getLanguage();
+
+        if ($language->getTag() === WFLanguage::getTag()) {
+            return $language->isRTL();
+        }
+        
+        return false;
+    }
+
     protected function initialize()
     {
         $app = JFactory::getApplication();
@@ -162,7 +173,7 @@ class WFEditorPlugin extends JObject
             'title' => JText::_('WF_' . strtoupper($this->getName() . '_TITLE')),
             'name' => $name,
             'language' => WFLanguage::getTag(),
-            'direction' => WFLanguage::getDir(),
+            'direction' => $this->isRtl() ? 'rtl' : 'ltr',
             'compress_javascript' => $this->getParam('editor.compress_javascript', 0),
             'compress_css' => $this->getParam('editor.compress_css', 0),
         ));

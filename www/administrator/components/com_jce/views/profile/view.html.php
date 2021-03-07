@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright     Copyright (c) 2009-2020 Ryan Demmer. All rights reserved
+ * @copyright     Copyright (c) 2009-2021 Ryan Demmer. All rights reserved
  * @license       GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  * JCE is free software. This version may have been modified pursuant
  * to the GNU General Public License, and as distributed it includes or
@@ -26,6 +26,12 @@ class JceViewProfile extends JViewLegacy
         $this->form = $this->get('Form');
 
         $this->formclass = 'form-horizontal options-grid-form options-grid-form-full';
+
+        $params = JComponentHelper::getParams('com_jce');
+
+        if ($params->get('inline_help', 1)) {
+            $this->formclass .= ' form-help-inline';
+        }
 
         $this->plugins = $this->get('Plugins');
         $this->rows = $this->get('Rows');

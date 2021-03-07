@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright     Copyright (c) 2009-2020 Ryan Demmer. All rights reserved
+ * @copyright     Copyright (c) 2009-2021 Ryan Demmer. All rights reserved
  * @license       GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  * JCE is free software. This version may have been modified pursuant
  * to the GNU General Public License, and as distributed it includes or
@@ -69,11 +69,7 @@ class plgEditorJCE extends JPlugin
         $app->triggerEvent('onBeforeWfEditorLoad');
 
         $editor = self::getEditorInstance();
-        $settings = $editor->getSettings();
-
-        $app->triggerEvent('onBeforeWfEditorRender', array(&$settings));
-
-        $editor->render($settings);
+        $editor->init();
 
         foreach ($editor->getScripts() as $script) {
             $document->addScript($script);
@@ -172,11 +168,15 @@ class plgEditorJCE extends JPlugin
         if (!$editor->hasPlugin('joomla')) {
             $html .= $this->displayButtons($id, $buttons, $asset, $author);
         } else {
-            $options = array(
-                'joomla_xtd_buttons' => $this->getXtdButtonsList($id, $buttons, $asset, $author),
-            );
+            $list = $this->getXtdButtonsList($id, $buttons, $asset, $author);
 
-            JFactory::getDocument()->addScriptOptions('plg_editor_jce', $options, true);
+            if (!empty($list)) {
+                $options = array(
+                    'joomla_xtd_buttons' => $list
+                );
+
+                JFactory::getDocument()->addScriptOptions('plg_editor_jce', $options, true);
+            }
 
             // render empty container for dynamic buttons
             $html .= JLayoutHelper::render('joomla.editors.buttons', array());

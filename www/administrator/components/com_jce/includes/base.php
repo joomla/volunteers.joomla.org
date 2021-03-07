@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright     Copyright (c) 2009-2020 Ryan Demmer. All rights reserved
+ * @copyright     Copyright (c) 2009-2021 Ryan Demmer. All rights reserved
  * @license       GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  * JCE is free software. This version may have been modified pursuant
  * to the GNU General Public License, and as distributed it includes or
@@ -43,6 +43,7 @@ JLoader::register('WFSearchExtension', WF_EDITOR_CLASSES . '/extensions/search.p
 JLoader::register('WFMediaManagerBase', WF_EDITOR_CLASSES . '/manager/base.php');
 JLoader::register('WFMediaManager', WF_EDITOR_CLASSES . '/manager.php');
 JLoader::register('WFFileBrowser', WF_EDITOR_CLASSES . '/browser.php');
+JLoader::register('Wf_Mobile_Detect', WF_EDITOR_CLASSES . '/mobile.php');
 
 JLoader::register('JcePluginsHelper', WF_ADMINISTRATOR . '/helpers/plugins.php');
 JLoader::register('JceEncryptHelper', WF_ADMINISTRATOR . '/helpers/encrypt.php');

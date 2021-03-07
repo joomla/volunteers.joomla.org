@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright 	Copyright (c) 2009-2020 Ryan Demmer. All rights reserved
+ * @copyright 	Copyright (c) 2009-2021 Ryan Demmer. All rights reserved
  * @license   	GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  * JCE is free software. This version may have been modified pursuant
  * to the GNU General Public License, and as distributed it includes or
@@ -50,5 +50,42 @@ class WFAggregatorExtension_Youtube extends WFAggregatorExtension
             'modestbranding' => (int) $plugin->getParam('aggregator.youtube.modestbranding', 0),
             'privacy' => (int) $plugin->getParam('aggregator.youtube.privacy', 0),
         );
+    }
+
+    public function getEmbedData($data)
+    {
+        $params = $this->getParams();
+
+        $default = array(
+            'width'     => 560,
+            'height'    => 315,
+            'controls'  => 1,
+            'loop'      => 0,
+            'autoplay'  => 0,
+            'rel'       => 1,
+            'modestbranding' => 0,
+            'privacy'   => 0
+        );
+
+        $options = array();
+
+        foreach($params as $name => $value) {
+            if (isset($default[$name]) && $value === $default[$name]) {
+                continue;
+            }
+            
+            if ($name === 'width' || $name == 'height') {
+                $data[$name] = $value;
+                continue;
+            }
+
+            $options[$name] = $value; 
+        }
+
+        if (!empty($options)) {
+            $data['query'] = http_build_query($options);
+        }
+
+        return $data;
     }
 }

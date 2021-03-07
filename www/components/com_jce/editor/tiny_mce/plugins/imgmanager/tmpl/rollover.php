@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright 	Copyright (c) 2009-2020 Ryan Demmer. All rights reserved
+ * @copyright 	Copyright (c) 2009-2021 Ryan Demmer. All rights reserved
  * @license   	GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  * JCE is free software. This version may have been modified pursuant
  * to the GNU General Public License, and as distributed it includes or
@@ -23,6 +23,6 @@ defined('JPATH_PLATFORM') or die;
 		<?php echo JText::_('WF_LABEL_MOUSEOUT'); ?>
 	</label>
 	<div class="uk-form-controls uk-width-1-1 uk-width-small-7-10">
-		<input id="onmouseout" type="text" value="" />
+		<input id="onmouseout" type="text" value="" autofocus />
 	</div>
 </div>

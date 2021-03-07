@@ -19,6 +19,59 @@ class PlgSystemJce extends JPlugin
         return $this->onContentPrepareForm($form, $data);
     }
 
+    private function redirectMedia()
+    {
+        $app = JFactory::getApplication();
+
+        require_once JPATH_ADMINISTRATOR . '/components/com_jce/helpers/browser.php';
+
+        $id = $app->input->get('fieldid');
+        $mediatpye = $app->input->get('view', 'images');
+
+        $options = WFBrowserHelper::getMediaFieldOptions(array(
+            'element' => $id,
+            'converted' => true,
+            'mediatype' => $mediatype,
+        ));
+
+        $app->redirect($options['url']);
+    }
+
+    private function isEditorEnabled()
+    {
+        $config = JFactory::getConfig();
+        $user = JFactory::getUser();
+
+        if (!JPluginHelper::getPlugin('editors', 'jce')) {
+            return false;
+        }
+
+        if ($user->getParam('editor', $config->get('editor')) !== 'jce') {
+            return false;
+        }
+
+        return true;
+    }
+
+    public function onAfterRoute()
+    {
+        $app = JFactory::getApplication();
+
+        if ($app->input->getCmd('option') == 'com_media') {
+            if ($app->input->getWord('asset') && $app->input->getWord('tmpl') == 'component') {
+
+                if ($this->isEditorEnabled()) {
+                    $params = JComponentHelper::getParams('com_jce');
+
+                    if ((bool) $params->get('replace_media_manager', 1) == true) {
+                        // redirect to file browser
+                        $this->redirectMedia();
+                    }
+                }
+            }
+        }
+    }
+
     public function onAfterDispatch()
     {
         $app = JFactory::getApplication();
@@ -89,14 +142,7 @@ class PlgSystemJce extends JPlugin
             }
         }
 
-        $config = JFactory::getConfig();
-        $user = JFactory::getUser();
-
-        if ($user->getParam('editor', $config->get('editor')) !== 'jce') {
-            return true;
-        }
-
-        if (!JPluginHelper::getPlugin('editors', 'jce')) {
+        if (!$this->isEditorEnabled()) {
             return true;
         }
 
@@ -118,7 +164,7 @@ class PlgSystemJce extends JPlugin
             $type = $field->getAttribute('type');
 
             if (strtolower($type) === 'media') {
-                
+
                 if ((bool) $params->get('replace_media_manager', 1) === false) {
                     continue;
                 }
@@ -133,7 +179,7 @@ class PlgSystemJce extends JPlugin
                 $hasMedia = true;
             }
         }
-        
+
         // form has a converted media field
         if ($hasMedia) {
             $form->addFieldPath(JPATH_PLUGINS . '/system/jce/fields');

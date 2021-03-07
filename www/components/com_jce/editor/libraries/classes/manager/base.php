@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright     Copyright (c) 2009-2020 Ryan Demmer. All rights reserved
+ * @copyright     Copyright (c) 2009-2021 Ryan Demmer. All rights reserved
  * @license       GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  * JCE is free software. This version may have been modified pursuant
  * to the GNU General Public License, and as distributed it includes or
@@ -97,7 +97,7 @@ class WFMediaManagerBase extends WFEditorPlugin
         $browser = $this->getFileBrowser();
 
         $browser->display();
-        $view->assign('filebrowser', $browser);
+        $view->filebrowser = $browser;
 
         $options = $browser->getProperties();
 
@@ -212,8 +212,8 @@ class WFMediaManagerBase extends WFEditorPlugin
 
         $data = array();
 
-        // images
-        if (preg_match('#\.(jpg|jpeg|png|gif|bmp|wbmp|tif|tiff|psd|ico)$#i', $file)) {
+        // images and flash
+        if (preg_match('#\.(jpg|jpeg|png|apng|gif|bmp|wbmp|tif|tiff|psd|ico|webp)$#i', $file)) {
             list($data['width'], $data['height']) = getimagesize($path);
 
             return $data;

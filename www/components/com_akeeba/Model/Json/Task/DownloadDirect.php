@@ -157,5 +157,7 @@ class DownloadDirect extends AbstractTask
 
 		$this->container->platform->closeApplication();
 
+		// Totally ignored, only added to make static analysis happy
+		return null;
 	}
 }

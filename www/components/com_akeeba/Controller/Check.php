@@ -12,9 +12,9 @@ defined('_JEXEC') || die();
 
 use Akeeba\Backup\Site\Controller\Mixin\FrontEndPermissions;
 use Akeeba\Backup\Site\Model\Statistics;
-use FOF30\Container\Container;
-use FOF30\Controller\Controller;
-use FOF30\Controller\Mixin\PredefinedTaskList;
+use FOF40\Container\Container;
+use FOF40\Controller\Controller;
+use FOF40\Controller\Mixin\PredefinedTaskList;
 
 /**
  * Controller for the front-end Check Backups features

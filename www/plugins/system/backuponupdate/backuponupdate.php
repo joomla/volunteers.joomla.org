@@ -7,7 +7,7 @@
 
 defined('_JEXEC') || die();
 
-use FOF30\Container\Container;
+use FOF40\Container\Container;
 use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
@@ -28,7 +28,7 @@ if (!file_exists(JPATH_ADMINISTRATOR . '/components/com_akeeba'))
 }
 
 // Load FOF if not already loaded
-if (!defined('FOF30_INCLUDED') && !@include_once(JPATH_LIBRARIES . '/fof30/include.php'))
+if (!defined('FOF40_INCLUDED') && !@include_once(JPATH_LIBRARIES . '/fof40/include.php'))
 {
 	return;
 }

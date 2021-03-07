@@ -11,7 +11,7 @@ namespace Akeeba\Backup\Admin\Controller;
 defined('_JEXEC') || die();
 
 use Akeeba\Backup\Admin\Controller\Mixin\CustomACL;
-use FOF30\Controller\DataController;
+use FOF40\Controller\DataController;
 use Joomla\CMS\Language\Text;
 use RuntimeException;
 

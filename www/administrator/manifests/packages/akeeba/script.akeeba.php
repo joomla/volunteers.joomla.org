@@ -6,6 +6,9 @@
  */
 
 // Protect from unauthorized access
+use Joomla\CMS\Factory;
+use Joomla\CMS\Filesystem\Folder;
+
 defined('_JEXEC') or die();
 
 class Pkg_AkeebaInstallerScript
@@ -76,7 +79,30 @@ class Pkg_AkeebaInstallerScript
 	protected $uninstallPlugins = [
 		['jsonapi', 'akeebabackup'],
 		['legacyapi', 'akeebabackup'],
-		['system', 'akeebaupdatecheck'],
+		['akeebaactionlog', 'system'],
+		['akeebaupdatecheck', 'system'],
+		['aklazy', 'system'],
+		['srp', 'system'],
+	];
+
+	/**
+	 * We remove some plugins' files. If Joomla fails to update them correctly you'd end up with an inaccessible site.
+	 * These will be updated / installed right after the preflight event so you don't ever lose their functionality.
+	 *
+	 * @var string[]
+	 */
+	protected $preRemoveFolders = [
+		// Current plugins
+		'plugins/actionlog/akeebabackup',
+		'plugins/console/akeebabackup',
+		'plugins/installer/akeebabackup',
+		'plugins/quickicon/akeebabackup',
+		'plugins/system/backuponupdate',
+		// Obsolete plugins
+		'plugins/system/akeebaactionlog',
+		'plugins/system/akeebaupdatecheck',
+		'plugins/system/aklazy',
+		'plugins/system/srp',
 	];
 
 	/**
@@ -145,6 +171,19 @@ class Pkg_AkeebaInstallerScript
 		 */
 		$this->installOrUpdateFOF($parent);
 
+		// Remove plugins' files which load outside of the component. If any is not fully updated your site won't crash.
+		foreach ($this->preRemoveFolders as $folder)
+		{
+			$f = JPATH_ROOT . '/' . $folder;
+
+			if (!@file_exists($f) || !is_dir($f) || is_link($f))
+			{
+				continue;
+			}
+
+			Folder::delete($f);
+		}
+
 		return true;
 	}
 
@@ -178,6 +217,9 @@ class Pkg_AkeebaInstallerScript
 		if (version_compare(JVERSION, '3.999.999', 'le'))
 		{
 			$this->uninstallPlugin('console', 'akeebabackup');
+			// These dependencies are not removed when uninstalling a plugin while installing a package (thanks, Joomla)
+			$this->removeDependency('fof30', 'plg_console_akeebabackup');
+			$this->removeDependency('fof40', 'plg_console_akeebabackup');
 		}
 
 		// Always enable these extensions
@@ -271,20 +313,20 @@ class Pkg_AkeebaInstallerScript
 	{
 		// Preload FOF classes required for the InstallScript. This is required since we'll be trying to uninstall FOF
 		// before uninstalling the component itself. The component has an uninstallation script which uses FOF, so...
-		@include_once(JPATH_LIBRARIES . '/fof30/include.php');
-		class_exists('FOF30\\Utils\\InstallScript\\BaseInstaller', true);
-		class_exists('FOF30\\Utils\\InstallScript\\Component', true);
-		class_exists('FOF30\\Utils\\InstallScript\\Module', true);
-		class_exists('FOF30\\Utils\\InstallScript\\Plugin', true);
-		class_exists('FOF30\\Utils\\InstallScript', true);
-		class_exists('FOF30\\Database\\Installer', true);
+		@include_once(JPATH_LIBRARIES . '/fof40/include.php');
+		class_exists('FOF40\\Utils\\InstallScript\\BaseInstaller', true);
+		class_exists('FOF40\\Utils\\InstallScript\\Component', true);
+		class_exists('FOF40\\Utils\\InstallScript\\Module', true);
+		class_exists('FOF40\\Utils\\InstallScript\\Plugin', true);
+		class_exists('FOF40\\Utils\\InstallScript', true);
+		class_exists('FOF40\\Database\\Installer', true);
 
 		/**
-		 * uninstall() is called before the component is uninstalled. Therefore there is a dependency to FOF 3 which
-		 * prevents FOF 3 from being removed at this point. Therefore we have to remove the dependency before removing
+		 * uninstall() is called before the component is uninstalled. Therefore there is a dependency to FOF 4 which
+		 * prevents FOF 4 from being removed at this point. Therefore we have to remove the dependency before removing
 		 * the component and hope nothing goes wrong.
 		 */
-		$this->removeDependency('fof30', $this->componentName);
+		$this->removeDependency('fof40', $this->componentName);
 
 		/**
 		 * uninstall() is called before the component is uninstalled. Therefore there is a dependency to FEF which
@@ -316,7 +358,7 @@ class Pkg_AkeebaInstallerScript
 	{
 		// Get the path to the FOF package
 		$sourcePath = $parent->getParent()->getPath('source');
-		$sourcePackage = $sourcePath . '/lib_fof30.zip';
+		$sourcePackage = $sourcePath . '/lib_fof40.zip';
 
 		// Extract and install the package
 		$package = JInstallerHelper::unpack($sourcePackage);
@@ -336,7 +378,7 @@ class Pkg_AkeebaInstallerScript
 		// Try to include FOF. If that fails then the FOF package isn't installed because its installation failed, not
 		// because we had a newer version already installed. As a result we have to abort the entire package's
 		// installation.
-		if (!defined('FOF30_INCLUDED') && !@include_once(JPATH_LIBRARIES . '/fof30/include.php'))
+		if (!defined('FOF40_INCLUDED') && !@include_once(JPATH_LIBRARIES . '/fof40/include.php'))
 		{
 			if (empty($error))
 			{
@@ -360,7 +402,7 @@ class Pkg_AkeebaInstallerScript
 	private function uninstallFOF($parent)
 	{
 		// Check dependencies on FOF
-		$dependencyCount = count($this->getDependencies('fof30'));
+		$dependencyCount = count($this->getDependencies('fof40'));
 
 		if ($dependencyCount)
 		{
@@ -379,7 +421,7 @@ class Pkg_AkeebaInstallerScript
 		            ->select('extension_id')
 		            ->from('#__extensions')
 		            ->where('type = ' . $db->quote('library'))
-		            ->where('element = ' . $db->quote('lib_fof30'));
+		            ->where('element = ' . $db->quote('lib_fof40'));
 
 		$db->setQuery($query);
 		$id = $db->loadResult();
@@ -677,7 +719,7 @@ class Pkg_AkeebaInstallerScript
 
 	private function uninstallPlugin($folder, $element)
 	{
-		$db = \Joomla\CMS\Factory::getDbo();
+		$db = Factory::getDbo();
 
 		// Does the plugin exist?
 		$query = $db->getQuery(true)

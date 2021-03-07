@@ -11,7 +11,7 @@ namespace Akeeba\Backup\Admin\Model;
 defined('_JEXEC') || die();
 
 use Akeeba\Engine\Platform;
-use FOF30\Model\Model;
+use FOF40\Model\Model;
 
 class Schedule extends Model
 {

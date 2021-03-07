@@ -17,7 +17,7 @@ use Akeeba\Backup\Admin\Model\ControlPanel;
 use Akeeba\Backup\Admin\View\ViewTraits\ProfileIdAndName;
 use Akeeba\Backup\Admin\View\ViewTraits\ProfileList;
 use Akeeba\Engine\Factory;
-use FOF30\View\DataView\Html as BaseView;
+use FOF40\View\DataView\Html as BaseView;
 use Joomla\CMS\Language\Text;
 
 /**

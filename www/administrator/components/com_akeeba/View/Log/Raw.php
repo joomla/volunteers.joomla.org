@@ -12,7 +12,7 @@ defined('_JEXEC') || die();
 
 use Akeeba\Backup\Admin\Model\Log;
 use Akeeba\Engine\Platform;
-use FOF30\View\DataView\Html as BaseView;
+use FOF40\View\DataView\Html as BaseView;
 
 /**
  * View controller for the Log Viewer page

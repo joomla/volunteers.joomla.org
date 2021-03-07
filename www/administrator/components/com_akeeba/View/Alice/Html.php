@@ -13,7 +13,7 @@ defined('_JEXEC') || die();
 use Akeeba\Backup\Admin\Model\Alice;
 use Akeeba\Backup\Admin\Model\Log;
 use Exception;
-use FOF30\View\DataView\Html as BaseView;
+use FOF40\View\DataView\Html as BaseView;
 
 /**
  * View controller for the Backup Now page

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright 	Copyright (c) 2009-2020 Ryan Demmer. All rights reserved
+ * @copyright 	Copyright (c) 2009-2021 Ryan Demmer. All rights reserved
  * @license   	GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  * JCE is free software. This version may have been modified pursuant
  * to the GNU General Public License, and as distributed it includes or
@@ -130,9 +130,35 @@ class WFLinkSearchExtension extends WFSearchExtension
 
         $view = $this->getView(array('name' => 'search', 'layout' => 'search'));
 
-        $view->assign('searchareas', self::getAreas());
-        $view->assign('lists', $lists);
+        $view->searchareas = self::getAreas();
+        $view->lists = $lists;
+        
         $view->display();
+    }
+
+    private static function getSearchAreaFromUrl($url)
+    {
+        $query = parse_url($url, PHP_URL_QUERY);
+
+        if (empty($query)) {
+            return "";
+        }
+
+        parse_str($query, $values);
+
+        if (!array_key_exists('option', $values)) {
+            return "";
+        }
+
+        $language = JFactory::getLanguage();
+
+        $option = $values['option'];
+        
+        // load system language file
+        $language->load($option.'.sys', JPATH_ADMINISTRATOR);
+        $language->load($option, JPATH_ADMINISTRATOR);
+
+        return JText::_($option);
     }
 
     /**
@@ -206,6 +232,8 @@ class WFLinkSearchExtension extends WFSearchExtension
             $searchphrase = 'exact';
         }
 
+        $searchphrase = $app->input->post->getWord('searchphrase', $searchphrase);
+
         // get passed through ordering
         $ordering = $app->input->post->getWord('ordering', $ordering);
 
@@ -233,8 +261,20 @@ class WFLinkSearchExtension extends WFSearchExtension
         // get first 10
         $rows = array_slice($rows, 0, $limit);
 
+        $areas = array();
+
         for ($i = 0, $count = count($rows); $i < $count; ++$i) {
             $row = &$rows[$i];
+
+            if (empty($row->href) || empty($row->text)) {
+                continue;
+            }
+
+            $area = self::getSearchAreaFromUrl($row->href);
+
+            if (!isset($areas[$area])) {
+                $areas[$area] = array();
+            }
 
             $result = new StdClass;
 
@@ -282,7 +322,11 @@ class WFLinkSearchExtension extends WFSearchExtension
                 $result->anchors = $row->anchors;
             }
 
-            $results[] = $result;
+            $areas[$area][] = $result;
+        }
+
+        if (!empty($areas)) {
+            $results[] = $areas;
         }
 
         return $results;

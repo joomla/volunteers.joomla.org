@@ -17,7 +17,7 @@ use Akeeba\Engine\Platform;
 use Akeeba\Engine\Util\Transfer\FtpCurl;
 use Akeeba\Engine\Util\Transfer\SftpCurl;
 use Exception;
-use FOF30\Model\Model;
+use FOF40\Model\Model;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Uri\Uri;
 use RuntimeException;

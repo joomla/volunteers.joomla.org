@@ -11,7 +11,7 @@ use Akeeba\Alice\Check\Base;
 use Akeeba\Alice\Exception\StopScanningEarly;
 use Akeeba\Engine\Factory;
 use Exception;
-use FOF30\Container\Container;
+use FOF40\Container\Container;
 use JDatabaseDriver;
 use Joomla\CMS\Language\Text as JText;
 

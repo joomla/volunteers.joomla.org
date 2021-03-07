@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright 	Copyright (c) 2009-2020 Ryan Demmer. All rights reserved
+ * @copyright 	Copyright (c) 2009-2021 Ryan Demmer. All rights reserved
  * @license   	GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  * JCE is free software. This version may have been modified pursuant
  * to the GNU General Public License, and as distributed it includes or
@@ -44,5 +44,28 @@ class WFAggregatorExtension_Dailymotion extends WFAggregatorExtension
             'width' => $plugin->getParam('aggregator.dailymotion.width', 480),
             'height' => $plugin->getParam('aggregator.dailymotion.height', 270),
         );
+    }
+
+    public function getEmbedData($data, $url)
+    {
+        $params = $this->getParams();
+
+        $default = array(
+            'width'     => 480,
+            'height'    => 270
+        );
+
+        foreach($params as $name => $value) {
+            if (isset($default[$name]) && $value === $default[$name]) {
+                continue;
+            }
+            
+            if ($name === 'width' || $name == 'height') {
+                $data[$name] = $value;
+                continue;
+            }
+        }
+        
+        return $data;
     }
 }

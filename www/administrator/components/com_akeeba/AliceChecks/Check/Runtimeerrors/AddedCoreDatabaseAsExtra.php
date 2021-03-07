@@ -10,7 +10,7 @@ namespace Akeeba\Alice\Check\Runtimeerrors;
 use Akeeba\Alice\Check\Base;
 use Akeeba\Alice\Exception\StopScanningEarly;
 use Akeeba\Engine\Factory;
-use FOF30\Container\Container;
+use FOF40\Container\Container;
 use Joomla\CMS\Language\Text as JText;
 
 /**

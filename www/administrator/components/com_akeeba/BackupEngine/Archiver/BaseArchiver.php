@@ -69,6 +69,9 @@ abstract class BaseArchiver extends BaseFileManagement
 	/** @var bool Should I use Split ZIP? */
 	protected $useSplitArchive = false;
 
+	/** @var int Permissions for the backup archive part files */
+	protected $permissions = null;
+
 	/**
 	 * Release file pointers when the object is being serialized
 	 *
@@ -602,6 +605,26 @@ abstract class BaseArchiver extends BaseFileManagement
 		@fclose($sourceFilePointer);
 
 		return $mustBreak;
+	}
+
+	/**
+	 * Return the requested permissions for the backup archive file.
+	 *
+	 * @return  int
+	 * @since   8.0.0
+	 */
+	protected function getPermissions(): int
+	{
+		if (!is_null($this->permissions))
+		{
+			return $this->permissions;
+		}
+
+		$configuration     = Factory::getConfiguration();
+		$permissions       = $configuration->get('engine.archiver.common.permissions', '0666') ?: '0666';
+		$this->permissions = octdec($permissions);
+
+		return $this->permissions;
 	}
 
 	/**

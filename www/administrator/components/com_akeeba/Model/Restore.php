@@ -15,7 +15,7 @@ use Akeeba\Engine\Archiver\Directftp;
 use Akeeba\Engine\Factory;
 use Akeeba\Engine\Platform;
 use Exception;
-use FOF30\Model\Model;
+use FOF40\Model\Model;
 use Joomla\CMS\Filesystem\File;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\User\UserHelper;

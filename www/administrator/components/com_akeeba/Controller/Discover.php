@@ -11,7 +11,7 @@ namespace Akeeba\Backup\Admin\Controller;
 defined('_JEXEC') || die();
 
 use Akeeba\Backup\Admin\Model\Discover as DiscoverModel;
-use FOF30\Controller\Controller;
+use FOF40\Controller\Controller;
 use Joomla\CMS\Language\Text;
 
 class Discover extends Controller
@@ -40,7 +40,7 @@ class Discover extends Controller
 		$model = $this->getModel();
 		$model->setState('directory', $directory);
 
-		$this->display(false, false);
+		$this->display(false);
 	}
 
 	/**

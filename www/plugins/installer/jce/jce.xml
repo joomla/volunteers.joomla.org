@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <extension version="3.8" type="plugin" group="installer" method="upgrade">
 	<name>plg_installer_jce</name>
-	<version>2.9.1</version>
-  <creationDate>29-10-2020</creationDate>
+	<version>2.9.3</version>
+  <creationDate>25-02-2021</creationDate>
   <author>Ryan Demmer</author>
   <authorEmail>info@joomlacontenteditor.net</authorEmail>
   <authorUrl>http://www.joomlacontenteditor.net</authorUrl>
-  <copyright>Copyright (C) 2006 - 2020 Ryan Demmer. All rights reserved</copyright>
+  <copyright>Copyright (C) 2006 - 2021 Ryan Demmer. All rights reserved</copyright>
   <license>GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html</license>
 	<description>PLG_INSTALLER_JCE_XML_DESCRIPTION</description>
 	<files folder="plugins/installer/jce">

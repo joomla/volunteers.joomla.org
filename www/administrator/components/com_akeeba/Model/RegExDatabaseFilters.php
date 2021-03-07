@@ -12,7 +12,7 @@ defined('_JEXEC') || die();
 
 use Akeeba\Backup\Admin\Model\Mixin\ExclusionFilter;
 use Akeeba\Engine\Factory;
-use FOF30\Model\Model;
+use FOF40\Model\Model;
 
 /**
  * RegEx Database Filters model

@@ -7,7 +7,7 @@
 
 defined('_JEXEC') || die;
 
-use FOF30\Container\Container;
+use FOF40\Container\Container;
 use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\CMS\Uri\Uri;
@@ -100,7 +100,7 @@ class plgInstallerAkeebabackup extends CMSPlugin
 		}
 
 		// Make sure FOF is loaded. We need it to determine the Download ID below. If it's not available then bail out.
-		if (!defined('FOF30_INCLUDED') && !@include_once(JPATH_LIBRARIES . '/fof30/include.php'))
+		if (!defined('FOF40_INCLUDED') && !@include_once(JPATH_LIBRARIES . '/fof40/include.php'))
 		{
 			return;
 		}

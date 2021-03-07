@@ -1,0 +1,11 @@
+{
+	"Ajax": [],
+	"Darkmode": ["System"],
+	"Dropdown": ["System"],
+	"Loader": [],
+	"Menu": [],
+	"Modal": [],
+	"System": ["Loader", "Ajax", "Modal"],
+	"Tabs": ["System"],
+	"Tooltip": ["System"]
+}

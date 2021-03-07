@@ -30,7 +30,7 @@ define('KICKSTART_RECOMMENDED_PHP', '7.4.0');
 
 if (!defined('VERSION'))
 {
-	define('VERSION', 'revF0FFAD1');
+	define('VERSION', '7.0.3');
 }
 
 if (!defined('KICKSTARTPRO'))
@@ -13813,7 +13813,7 @@ function echoPage()
 		<div id="header">
 			<div class="title">
 				<span id="logo" alt="Akeeba Kickstart logo"></span>
-				Akeeba Kickstart <?php echo $edition ?> <?php echo defined('VERSION') ? VERSION : 'revF0FFAD1' ?>
+				Akeeba Kickstart <?php echo $edition ?> <?php echo defined('VERSION') ? VERSION : '7.0.3' ?>
 			</div>
 		</div>
 
@@ -14075,8 +14075,6 @@ if (!function_exists('akeeba_common_phpversion_warning'))
 	 *
 	 * Configuration array:
 	 *
-	 * * minPHPVersion: minimum PHP version supported by this software, e.g. "7.2.0"
-	 * * recommendedPHPVersion: recommended PHP version to use with this software, e.g. "7.3"
 	 * * softwareName: human-readable software name, e.g. "Akeeba Example"
 	 * * class_priority_low: CSS class for low priority notices
 	 * * class_priority_medium: CSS class for medium priority warnings
@@ -14087,9 +14085,9 @@ if (!function_exists('akeeba_common_phpversion_warning'))
 	 * * shortVersion: current PHP version, short format, e.g. "7.3". Skip to automatically determine.
 	 * * currentTimestamp: current UNIX timestamp. Skip to automatically determine.
 	 *
-	 * You need to provide at the very least the minPHPVersion, recommendedPHPVersion and softwareName. The default CSS
-	 * classes are compatible with Akeeba FEF. PHP versions in maintenance will be warned about and the period after
-	 * which an EOL version of PHP is dangerous is considered to be 3 months.
+	 * You need to provide at the very least the softwareName. The default CSS classes are compatible with Akeeba FEF.
+	 * PHP versions in maintenance will be warned about and the period after which an EOL version of PHP is dangerous is
+	 * considered to be 3 months.
 	 *
 	 * @param   array  $config  See above
 	 *
@@ -14127,8 +14125,6 @@ if (!function_exists('akeeba_common_phpversion_warning'))
 
 		// Make sure I have all necessary configuration variables
 		$config = array_merge(array(
-			'minPHPVersion'          => '7.2.0',
-			'recommendedPHPVersion'  => '7.4',
 			'softwareName'           => 'This software',
 			'class_priority_low'     => 'akeeba-block--info',
 			'class_priority_medium'  => 'akeeba-block--warning',
@@ -14141,8 +14137,6 @@ if (!function_exists('akeeba_common_phpversion_warning'))
 		), $config);
 
 		// Selectively extract configuration variables. Do not use extract(), it's potentially dangerous.
-		$minPHPVersion          = $config['minPHPVersion'];
-		$recommendedPHPVersion  = $config['recommendedPHPVersion'];
 		$softwareName           = $config['softwareName'];
 		$class_priority_low     = $config['class_priority_low'];
 		$class_priority_medium  = $config['class_priority_medium'];
@@ -14213,10 +14207,7 @@ if (!function_exists('akeeba_common_phpversion_warning'))
 					<?php echo $softwareName ?> will work correctly on your site.
 				</p>
 				<p>
-					Please check our site for an updated version of <?php echo $softwareName ?> which supports PHP
-					<?php echo $shortVersion ?>. If none is available yet you will need to wait 1-3 months. Meanwhile,
-					you can still use PHP <?php echo $recommendedPHPVersion ?> which is fully supported by
-					<?php echo $softwareName ?>. You can ask your host or your system administrator for instructions.
+					You can check <a href="https://www.akeeba.com/compatiblity.html">our Compatibility page</a> to see which versions of <?php echo $softwareName ?> are supported on PHP <?php echo $shortVersion ?>. If none is available yet you will need to wait 1-3 months, using an earlier and supported version of PHP in the meantime. You can ask your host or your system administrator for instructions on downgrading PHP.
 				</p>
 			</div>
 		<?php elseif ($isAncient): ?>
@@ -14225,15 +14216,10 @@ if (!function_exists('akeeba_common_phpversion_warning'))
 				<h3>Severely outdated PHP version <?php echo $shortVersion ?></h3>
 
 				<p>
-					Your site is currently using PHP <?php echo $longVersion ?>. This version of PHP has become <a
-						href="https://php.net/eol.php" target="_blank">End-of-Life since <?php echo $eolDateFormatted ?></a>. It has
-					not received security updates for a <em>very long time</em>. You MUST NOT use it for a live site!
+					Your site is currently using PHP <?php echo $longVersion ?>. This version of PHP has become <a href="https://php.net/eol.php" target="_blank">End-of-Life since <?php echo $eolDateFormatted ?></a>. It has not received security updates for a <em>very long time</em>. You MUST NOT use it for a live site!
 				</p>
 				<p>
-					<?php echo $softwareName ?> will stop supporting your version of PHP very soon. You must <strong>very
-						urgently</strong> upgrade to a newer version of PHP. We recommend PHP <?php echo $recommendedPHPVersion ?>
-					or later. You can ask your host or your system administrator for instructions. It's easy and it will make
-					your site faster and more secure.
+					<?php echo $softwareName ?> will stop supporting your version of PHP very soon. You must <strong>very urgently</strong> upgrade to a newer version of PHP. You can check <a href="https://www.akeeba.com/compatiblity.html">our Compatibility page</a> to see which versions of PHP are supported by each version of our software, select the newest one that fits your site's needs and upgrade your site to it. You can ask your host or your system administrator for instructions on upgrading PHP. It's easy and it will make your site faster and more secure.
 				</p>
 			</div>
 		<?php
@@ -14244,15 +14230,10 @@ if (!function_exists('akeeba_common_phpversion_warning'))
 				<h3>Outdated PHP version <?php echo $shortVersion ?></h3>
 
 				<p>
-					Your site is currently using PHP <?php echo $longVersion ?>. This version of PHP has recently become <a
-						href="https://php.net/eol.php" target="_blank">End-of-Life since <?php echo $eolDateFormatted ?></a>. It has
-					stopped receiving security updates. You should not use it for a live site.
+					Your site is currently using PHP <?php echo $longVersion ?>. This version of PHP has recently become <a href="https://php.net/eol.php" target="_blank">End-of-Life since <?php echo $eolDateFormatted ?></a>. It has stopped receiving security updates. You should not use it for a live site.
 				</p>
 				<p>
-					<?php echo $softwareName ?> will stop supporting your version of PHP in the near future. You should
-					upgrade to a newer version of PHP at your earliest convenience. We recommend PHP <?php echo
-					$recommendedPHPVersion ?> or later. You can ask your host or your system administrator for instructions.
-					It's easy and it will make your site faster and more secure.
+					<?php echo $softwareName ?> will stop supporting your version of PHP in the near future. You should upgrade to a newer version of PHP at your earliest convenience. You can check <a href="https://www.akeeba.com/compatiblity.html">our Compatibility page</a> to see which versions of PHP are supported by each version of our software, select the newest one that fits your site's needs and upgrade your site to it. You can ask your host or your system administrator for instructions on upgrading PHP. It's easy and it will make your site faster and more secure.
 				</p>
 			</div>
 		<?php
@@ -14263,16 +14244,10 @@ if (!function_exists('akeeba_common_phpversion_warning'))
 				<h3>Older PHP version <?php echo $shortVersion ?></h3>
 
 				<p>
-					Your site is currently using PHP <?php echo $longVersion ?>. This version of PHP has entered its
-					“Security maintenance” phase since <?php echo $securityDateFormatted ?> and has stopped receiving bug fixes. It
-					will stop receiving security updates on <?php echo $eolDateFormatted ?> at which point it will be unsuitable for
-					use on a live site.
+					Your site is currently using PHP <?php echo $longVersion ?>. This version of PHP has entered its “Security maintenance” phase since <?php echo $securityDateFormatted ?> and has stopped receiving bug fixes. It will stop receiving security updates on <?php echo $eolDateFormatted ?> at which point it will be unsuitable for use on a live site.
 				</p>
 				<p>
-					<?php echo $softwareName ?> will stop supporting your version of PHP soon after it becomes End-of-Life on
-					<?php echo $eolDateFormatted ?>. We recommend that you plan your migration to a newer version of PHP before that
-					date. We recommend PHP <?php echo $recommendedPHPVersion ?> or later. You can ask your host or your system
-					administrator for instructions. It's easy and it will make your site faster and more secure.
+					<?php echo $softwareName ?> will stop supporting your version of PHP soon after it becomes End-of-Life on <?php echo $eolDateFormatted ?>. We recommend that you plan your migration to a newer version of PHP before that date. You can check <a href="https://www.akeeba.com/compatiblity.html">our Compatibility page</a> to see which versions of PHP are supported by each version of our software, select the newest one that fits your site's needs and upgrade your site to it. You can ask your host or your system administrator for instructions on upgrading PHP. It's easy and it will make your site faster and more secure.
 				</p>
 			</div>
 		<?php
@@ -14289,8 +14264,6 @@ if (!defined('KICKSTART'))
 	{
 		akeeba_common_phpversion_warning(array(
 			// Configuration -- Override before calling this script
-			'minPHPVersion'          => isset($minPHPVersion) ? $minPHPVersion : '7.2.0',
-			'recommendedPHPVersion'  => isset($recommendedPHPVersion) ? $recommendedPHPVersion : '7.4',
 			'softwareName'           => isset($softwareName) ? $softwareName : 'This software',
 			'class_priority_low'     => isset($class_priority_low) ? $class_priority_low : 'akeeba-block--info',
 			'class_priority_medium'  => isset($class_priority_medium) ? $class_priority_medium : 'akeeba-block--warning',
@@ -14326,14 +14299,13 @@ if (!function_exists('akeeba_common_wrongphp'))
 	 * prints an error page if your PHP version is, indeed, too old.
 	 *
 	 * * minPHPVersion: minimum PHP version supported by this software, e.g. "7.2.0"
-	 * * recommendedPHPVersion: recommended PHP version to use with this software, e.g. "7.3"
 	 * * softwareName: human-readable software name, e.g. "Akeeba Example"
 	 * * silentResutls: suppress error messages on old PHP version, just return false (default: TRUE)
 	 * * longVersion: current PHP version, long format, e.g. "7.3.1-12ubuntu3.2". Skip to automatically determine.
 	 * * shortVersion: current PHP version, short format, e.g. "7.3". Skip to automatically determine.
 	 * * currentTimestamp: current UNIX timestamp. Skip to automatically determine.
 	 *
-	 * You need to provide at the very least the minPHPVersion, recommendedPHPVersion and softwareName.
+	 * You need to provide at the very least the minPHPVersion and softwareName.
 	 *
 	 * @param  array  $config
 	 *
@@ -14373,7 +14345,6 @@ if (!function_exists('akeeba_common_wrongphp'))
 		// Make sure I have all necessary configuration variables
 		$config = array_merge(array(
 			'minPHPVersion'         => '7.2.0',
-			'recommendedPHPVersion' => '7.4',
 			'softwareName'          => 'This software',
 			'silentResults'         => false,
 			'longVersion'           => PHP_VERSION,
@@ -14383,7 +14354,6 @@ if (!function_exists('akeeba_common_wrongphp'))
 
 		// Selectively extract configuration variables. Do not use extract(), it's potentially dangerous.
 		$minPHPVersion         = $config['minPHPVersion'];
-		$recommendedPHPVersion = $config['recommendedPHPVersion'];
 		$softwareName          = $config['softwareName'];
 		$silentResults         = $config['silentResults'];
 		$longVersion           = $config['longVersion'];
@@ -14392,7 +14362,7 @@ if (!function_exists('akeeba_common_wrongphp'))
 
 		if (!version_compare($longVersion, $minPHPVersion, 'lt'))
 		{
-			unset($minPHPVersion, $recommendedPHPVersion, $softwareName, $longVersion, $shortVersion, $phpDates,
+			unset($minPHPVersion, $softwareName, $longVersion, $shortVersion, $phpDates,
 				$silentResults, $currentTimestamp);
 
 			return true;
@@ -14456,12 +14426,10 @@ if (!function_exists('akeeba_common_wrongphp'))
 			<h2><?php echo ucfirst($characterization) ?> PHP version <?php echo $longVersion ?> detected</h2>
 			<hr />
 			<p>
-				We recommend that you upgrade your site to PHP <?php echo $recommendedPHPVersion ?> or later. If you are
-				unsure how to do this, please ask your host.
+				You can check <a href="https://www.akeeba.com/compatiblity.html">our Compatibility page</a> to see which versions of PHP are supported by each version of our software, select the newest one that fits your site's needs and upgrade your site to it. If you are unsure how to do this, please ask your host.
 			</p>
 			<p>
-				<a href="https://www.akeeba.com/how-do-version-numbers-work.html">Version numbers don't make
-					sense?</a>
+				<a href="https://www.akeeba.com/how-do-version-numbers-work.html">Version numbers don't make sense?</a>
 			</p>
 
 			<hr />
@@ -14470,44 +14438,20 @@ if (!function_exists('akeeba_common_wrongphp'))
 				<h3>Urgent security advice</h3>
 
 				<p>
-					Your version of PHP, <?php echo $longVersion ?>, <a href="http://php.net/eol.php">has reached the end
-						of its life</a> a <strong>very</strong> long time ago, namely on
-					<?php echo $eolDateFormatted ?>. It has known security vulnerabilities which are used to
-					compromise (“hack”) web servers. It is no longer safe using it in production. You are <strong>VERY
-						STRONGLY</strong> advised to upgrade your server to a <a
-							href="https://www.php.net/supported-versions.php">supported PHP version</a> as soon as possible.
+					Your version of PHP, <?php echo $longVersion ?>, <a href="http://php.net/eol.php">has reached the end of its life</a> a <strong>very</strong> long time ago, namely on <?php echo $eolDateFormatted ?>. It has known security vulnerabilities which can be used to compromise (“hack”) web servers. It is no longer safe using it in production. You are <strong>VERY STRONGLY</strong> advised to upgrade your server to a <a href="https://www.php.net/supported-versions.php">supported PHP version</a> as soon as possible.
 				</p>
 			<?php elseif ($isEol): ?>
 				<h3>Security advice</h3>
 
 				<p>
-					Your version of PHP, <?php echo $longVersion ?>, <a href="http://php.net/eol.php">has reached the end
-						of its life</a> on <?php echo $eolDateFormatted ?>. End-of-life PHP versions may have
-					as-yet-undiscovered security vulnerabilities which can be used to compromise (“hack”) your site. It is
-					no
-					longer safe using it in production, even if your host or your Linux distribution claim otherwise – the
-					PHP
-					developers themselves have said time over time that not all security vulnerabilities fixes can be
-					backported
-					to End-of-Life versions of PHP since they may require architectural changes in PHP itself. You are
-					<strong>strongly</strong> advised to upgrade your server to a <a
-							href="https://www.php.net/supported-versions.php">supported PHP version</a> as soon as possible.
+					Your version of PHP, <?php echo $longVersion ?>, <a href="http://php.net/eol.php">has reached the end of its life</a> on <?php echo $eolDateFormatted ?>. End-of-life PHP versions may have security vulnerabilities — which may or may not have been known before they became End of Life — which can be used to compromise (“hack”) your site. It is no longer safe using it in production, even if your host or your Linux distribution claim otherwise. The PHP language developers themselves have said time over time that not all security vulnerabilities fixes can be backported to End-of-Life versions of PHP since they may require architectural changes in PHP itself. You are <strong>strongly</strong> advised to upgrade your server to a <a href="https://www.php.net/supported-versions.php">supported PHP version</a> as soon as possible.
 				</p>
 
 			<?php elseif ($isSecurity): ?>
 				<h3>Security reminder</h3>
 
 				<p>
-					Your version of PHP, <?php echo $longVersion ?>, has entered the “Security Support” phase of its life on
-					<?php echo $securityDateFormatted ?>. As such, only security issues will be addressed but not
-					any of its known functional issues (“bugs”). Unfixed functional issues in PHP can lead to your site not
-					working
-					properly. It is advisable to plan migrating your site to a
-					<a href="https://www.php.net/supported-versions.php">supported PHP version</a> no later than
-					<?php echo $eolDateFormatted ?> – that's when PHP
-					<?php echo $shortVersion ?> will become End-of-Life, therefore
-					completely
-					unsuitable for use on a live server.
+					Your version of PHP, <?php echo $longVersion ?>, has entered the “Security Support” phase of its life on <?php echo $securityDateFormatted ?>. As such, only security issues will be addressed but not any of its known functional issues (“bugs”). Unfixed functional issues in PHP can lead to your site not working properly. It is advisable to plan migrating your site to a <a href="https://www.php.net/supported-versions.php">supported PHP version</a> no later than <?php echo $eolDateFormatted ?> – that's when PHP <?php echo $shortVersion ?> will become End-of-Life, therefore completely unsuitable for use on a live server.
 				</p>
 			<?php endif; ?>
 
@@ -14515,26 +14459,10 @@ if (!function_exists('akeeba_common_wrongphp'))
 				<h3>Why is my PHP version not supported?</h3>
 
 				<p>
-					Even though PHP <?php echo $shortVersion ?> will be supported by the PHP
-					project until <?php echo $eolDateFormatted ?> we are unfortunately unable to provide
-					support for it in our software. This has to do either with missing features or third party libraries.
-					Older
-					PHP versions are missing features we require for our software to work efficiently and be written in a
-					way
-					that makes it possible for us to provide a plethora of relevant features while maintaining good quality
-					control. Moreover, third party libraries we use to provide some of the software's features do not
-					support
-					older PHP versions for the same reason – so even if we don't absolutely need to use at least PHP
-					<?php echo $minPHPVersion ?> the third party libraries do, making it impossible for our software to run on
-					your
-					older version <?php echo $shortVersion ?>. We apologize for the inconvenience.
+					Even though PHP <?php echo $shortVersion ?> will be supported by the PHP project until <?php echo $eolDateFormatted ?> we are unfortunately unable to provide support for it in our software. This has to do either with missing features or third party libraries. Older PHP versions are missing features we require for our software to work efficiently and be written in a way that makes it possible for us to provide a plethora of relevant features while maintaining good quality control. Moreover, third party libraries we use to provide some of the software's features do not support older PHP versions for the same reason – so even if we don't absolutely need to use at least PHP <?php echo $minPHPVersion ?> the third party libraries do, making it impossible for our software to run on your older version <?php echo $shortVersion ?>. We apologize for the inconvenience.
 				</p>
 				<p>
-					We'd like to remind you, however, that newer PHP versions are always faster and more well-tested than
-					their
-					predecessors. Upgrading your site to a newer PHP version will not only let our software run but will
-					also
-					make your site faster, more stable and help it perform better in search engine results.
+					We'd like to remind you, however, that newer PHP versions are always faster and more well-tested than their predecessors. Upgrading your site to a newer PHP version will not only let our software run but will also make your site faster, more stable and help it perform better in search engine results.
 				</p>
 			<?php endif; ?>
 		</div>
@@ -14553,7 +14481,6 @@ if (!defined('KICKSTART'))
 		return akeeba_common_wrongphp(array(
 			// Configuration -- Override before calling this script
 			'minPHPVersion'         => isset($minPHPVersion) ? $minPHPVersion : '7.2.0',
-			'recommendedPHPVersion' => isset($recommendedPHPVersion) ? $recommendedPHPVersion : '7.4',
 			'softwareName'          => isset($softwareName) ? $softwareName : 'This software',
 			'silentResults'         => isset($silentResults) ? $silentResults : false,
 			// Override these to test the script
@@ -14993,7 +14920,7 @@ function kickstart_application_cli()
 
 	if (!$silent)
 	{
-		$version = defined('VERSION') ? VERSION : 'revF0FFAD1';
+		$version = defined('VERSION') ? VERSION : '7.0.3';
 		echo <<< BANNER
 Akeeba Kickstart CLI $version
 Copyright (c) 2008-$year Akeeba Ltd / Nicholas K. Dionysopoulos

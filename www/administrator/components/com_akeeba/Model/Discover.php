@@ -12,7 +12,7 @@ defined('_JEXEC') || die();
 
 use Akeeba\Engine\Factory;
 use Akeeba\Engine\Platform;
-use FOF30\Model\Model;
+use FOF40\Model\Model;
 use Joomla\CMS\Language\Text;
 
 /**

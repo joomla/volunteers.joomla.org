@@ -12,8 +12,8 @@ defined('_JEXEC') || die();
 
 use Akeeba\Backup\Admin\Controller\Mixin\CustomACL;
 use Akeeba\Backup\Admin\Controller\Mixin\PredefinedTaskList;
-use FOF30\Container\Container;
-use FOF30\Controller\Controller;
+use FOF40\Container\Container;
+use FOF40\Controller\Controller;
 
 /**
  * Database Filters controller
@@ -49,7 +49,7 @@ class DatabaseFilters extends Controller
 		$model = $this->getModel();
 		$model->setState('browse_task', $task);
 
-		$this->display(false, false);
+		$this->display(false);
 	}
 
 	/**

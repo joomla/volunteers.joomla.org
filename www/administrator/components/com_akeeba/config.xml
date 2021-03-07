@@ -24,10 +24,9 @@
 	<fieldset name="backend" label="COM_AKEEBA_CONFIG_BACKEND_HEADER_LABEL"
 			  description="COM_AKEEBA_CONFIG_BACKEND_HEADER_DESC">
 
-		<field name="dark_mode" type="radio" default="-1"
+		<field name="dark_mode" type="list" default="-1"
 			   label="COM_AKEEBA_CONFIG_BACKEND_DARKMODE_LABEL"
-			   description="COM_AKEEBA_CONFIG_BACKEND_DARKMODE_DESC"
-			   class="btn-group">
+			   description="COM_AKEEBA_CONFIG_BACKEND_DARKMODE_DESC">
 			<option value="-1">COM_AKEEBA_CONFIG_BACKEND_DARKMODE_AUTO</option>
 			<option value="0">COM_AKEEBA_CONFIG_BACKEND_DARKMODE_NEVER</option>
 			<option value="1">COM_AKEEBA_CONFIG_BACKEND_DARKMODE_ALWAYS</option>
@@ -37,7 +36,7 @@
 			   label="COM_AKEEBA_CONFIG_DATEFORMAT_LABEL"
 			   description="COM_AKEEBA_CONFIG_DATEFORMAT_DESC"/>
 
-		<field name="localtime" type="radio" default="1"
+		<field name="localtime" type="fancyradio" default="1"
 			   label="COM_AKEEBA_CONFIG_BACKEND_LOCALTIME_LABEL"
 			   description="COM_AKEEBA_CONFIG_BACKEND_LOCALTIME_DESC"
 			   class="btn-group btn-group-yesno">
@@ -45,16 +44,15 @@
 			<option value="1">JYes</option>
 		</field>
 
-		<field name="timezonetext" type="radio" default="T"
+		<field name="timezonetext" type="list" default="T"
 			   label="COM_AKEEBA_CONFIG_BACKEND_TIMEZONETEXT_LABEL"
-			   description="COM_AKEEBA_CONFIG_BACKEND_TIMEZONETEXT_DESC"
-			   class="btn-group">
+			   description="COM_AKEEBA_CONFIG_BACKEND_TIMEZONETEXT_DESC">
 			<option value="">COM_AKEEBA_CONFIG_BACKEND_TIMEZONETEXT_NONE</option>
 			<option value="T">COM_AKEEBA_CONFIG_BACKEND_TIMEZONETEXT_ABBREVIATION</option>
 			<option value="\G\M\TP">COM_AKEEBA_CONFIG_BACKEND_TIMEZONETEXT_GMTOFFSET</option>
 		</field>
 
-		<field name="showDeleteOnRestore" type="radio" default="0"
+		<field name="showDeleteOnRestore" type="fancyradio" default="0"
 			   label="COM_AKEEBA_CONFIG_BACKEND_SHOWDELETEONRESTORE_LABEL"
 			   description="COM_AKEEBA_CONFIG_BACKEND_SHOWDELETEONRESTORE_DESC"
 			   class="btn-group btn-group-yesno">
@@ -66,7 +64,7 @@
 	<fieldset name="frontend" label="COM_AKEEBA_CONFIG_FRONTEND_HEADER_LABEL"
 			  description="COM_AKEEBA_CONFIG_FRONTEND_HEADER_DESC">
 
-		<field name="legacyapi_enabled" type="radio" default="0"
+		<field name="legacyapi_enabled" type="fancyradio" default="0"
 			   label="COM_AKEEBA_CONFIG_LEGACYAPI_ENABLED_LABEL"
 			   description="COM_AKEEBA_CONFIG_LEGACYAPI_ENABLED_DESC"
 			   class="btn-group btn-group-yesno">
@@ -74,7 +72,7 @@
 			<option value="1">JYes</option>
 		</field>
 
-		<field name="jsonapi_enabled" type="radio" default="0"
+		<field name="jsonapi_enabled" type="fancyradio" default="0"
 			   label="COM_AKEEBA_CONFIG_JSONAPI_ENABLED_LABEL"
 			   description="COM_AKEEBA_CONFIG_JSONAPI_ENABLED_DESC"
 			   class="btn-group btn-group-yesno">
@@ -86,7 +84,9 @@
 			   default="" size="30"
 			   label="COM_AKEEBA_CONFIG_SECRETWORD_LABEL"
 			   description="COM_AKEEBA_CONFIG_SECRETWORD_DESC"
-			   class="input-xxlarge"/>
+			   class="input-xxlarge"
+			   showon="legacyapi_enabled:1[OR]jsonapi_enabled:1"
+		/>
 
 		<field name="forced_backup_timezone" type="timezone" default="AKEEBA/DEFAULT"
 			   size="1"
@@ -97,7 +97,7 @@
 			<option value="GMT">GMT</option>
 		</field>
 
-		<field name="frontend_email_on_finish" type="radio" default="0"
+		<field name="frontend_email_on_finish" type="fancyradio" default="0"
 			   label="COM_AKEEBA_CONFIG_FRONTENDEMAIL_LABEL"
 			   description="COM_AKEEBA_CONFIG_FRONTENDEMAIL_DESC"
 			   class="btn-group btn-group-yesno">
@@ -105,10 +105,11 @@
 			<option value="1">JYes</option>
 		</field>
 
-		<field name="frontend_email_when" type="radio" default="always"
+		<field name="frontend_email_when" type="list" default="always"
 			   label="COM_AKEEBA_CONFIG_FRONTEND_EMAIL_WHEN_LABEL"
 			   description="COM_AKEEBA_CONFIG_FRONTEND_EMAIL_WHEN_DESC"
-			   class="btn-group">
+			   showon="frontend_email_on_finish:1"
+		>
 			<option value="always">COM_AKEEBA_CONFIG_FRONTEND_EMAIL_WHEN_ALWAYS</option>
 			<option value="failedupload">COM_AKEEBA_CONFIG_FRONTEND_EMAIL_WHEN_FAILEDUPLOAD</option>
 		</field>
@@ -116,16 +117,22 @@
 		<field name="frontend_email_address" type="text" default="" size="50"
 			   label="COM_AKEEBA_CONFIG_ARBITRARYFEEMAIL_LABEL"
 			   description="COM_AKEEBA_CONFIG_ARBITRARYFEEMAIL_DESC"
-			   class="input-xxlarge"/>
+			   class="input-xxlarge"
+			   showon="frontend_email_on_finish:1"
+		/>
 
 		<field name="frontend_email_subject" type="text" default="" size="50"
 			   label="COM_AKEEBA_CONFIG_FEEMAILSUBJECT_LABEL"
 			   description="COM_AKEEBA_CONFIG_FEEMAILSUBJECT_DESC"
-			   class="input-xxlarge"/>
+			   class="input-xxlarge"
+			   showon="frontend_email_on_finish:1"
+		/>
 
 		<field name="frontend_email_body" type="textarea" default="" rows="10" cols="55"
 			   label="COM_AKEEBA_CONFIG_FEEMAILBODY_LABEL"
-			   description="COM_AKEEBA_CONFIG_FEEMAILBODY_DESC"/>
+			   description="COM_AKEEBA_CONFIG_FEEMAILBODY_DESC"
+			   showon="frontend_email_on_finish:1"
+		/>
 
 		<!-- FAILURE CHECK SETTINGS -->
 		<field type="spacer" label="COM_AKEEBA_CONFIG_FAILURE_SEPARATOR"/>
@@ -164,7 +171,7 @@
 			   description="COM_AKEEBA_CONFIG_DOWNLOADID_DESC"/>
 
 		<field name="stats_enabled"
-			   type="radio"
+			   type="fancyradio"
 			   default="1"
 			   label="COM_AKEEBA_CONFIG_USAGESTATS_LABEL"
 			   description="COM_AKEEBA_CONFIG_USAGESTATS_DESC"
@@ -176,7 +183,7 @@
 
 	<fieldset name="security" label="COM_AKEEBA_CONFIG_SECURITY_HEADER_LABEL"
 			  description="COM_AKEEBA_CONFIG_SECURITY_HEADER_DESC">
-		<field name="useencryption" type="radio" default="1"
+		<field name="useencryption" type="fancyradio" default="1"
 			   label="COM_AKEEBA_CONFIG_SECURITY_USEENCRYPTION_LABEL"
 			   description="COM_AKEEBA_CONFIG_SECURITY_USEENCRYPTION_DESCRIPTION"
 			   class="btn-group btn-group-yesno">
@@ -187,7 +194,7 @@
 	</fieldset>
 
 	<fieldset name="push" label="COM_AKEEBA_CONFIG_PUSH_HEADER_LABEL" description="COM_AKEEBA_CONFIG_PUSH_HEADER_DESC">
-		<field name="desktop_notifications" type="radio" default="0"
+		<field name="desktop_notifications" type="fancyradio" default="0"
 			   label="COM_AKEEBA_CONFIG_DESKTOP_NOTIFICATIONS_LABEL"
 			   description="COM_AKEEBA_CONFIG_DESKTOP_NOTIFICATIONS_DESC"
 			   class="btn-group btn-group-yesno">
@@ -204,7 +211,9 @@
 
 		<field name="push_apikey" type="text" default="" size="30"
 			   label="COM_AKEEBA_CONFIG_PUSH_APIKEY_LABEL"
-			   description="COM_AKEEBA_CONFIG_PUSH_APIKEY_DESC"/>
+			   description="COM_AKEEBA_CONFIG_PUSH_APIKEY_DESC"
+			   showon="push_preference:1"
+		/>
 	</fieldset>
 
 </config>

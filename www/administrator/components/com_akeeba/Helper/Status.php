@@ -12,8 +12,8 @@ defined('_JEXEC') || die();
 
 use Akeeba\Engine\Factory;
 use Akeeba\Engine\Platform;
-use FOF30\Container\Container;
-use FOF30\Date\Date;
+use FOF40\Container\Container;
+use FOF40\Date\Date;
 use Joomla\CMS\Language\Text;
 
 /**

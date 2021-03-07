@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright     Copyright (c) 2009-2020 Ryan Demmer. All rights reserved
+ * @copyright     Copyright (c) 2009-2021 Ryan Demmer. All rights reserved
  * @license       GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  * JCE is free software. This version may have been modified pursuant
  * to the GNU General Public License, and as distributed it includes or
@@ -82,7 +82,8 @@ class WFPopupsExtension extends WFExtension
         // Add popup tab and assign popups reference to document
         if (count($this->getPopups())) {
             $tabs->addTab('popups');
-            $tabs->getPanel('popups')->assign('popups', $this);
+            $panel = $tabs->getPanel('popups');
+            $panel->popups = $this;
         }
     }
 
@@ -150,7 +151,7 @@ class WFPopupsExtension extends WFExtension
             ));
 
             $instance = $this->getPopupExtension($popup->name);
-            $view->assign('popup', $instance);
+            $view->popup = $instance;
 
             if (file_exists($popup->path . '/tmpl/default.php')) {
                 ob_start();

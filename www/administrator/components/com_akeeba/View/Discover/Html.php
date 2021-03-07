@@ -12,7 +12,7 @@ defined('_JEXEC') || die();
 
 use Akeeba\Backup\Admin\Model\Discover;
 use Akeeba\Engine\Factory;
-use FOF30\View\DataView\Html as BaseView;
+use FOF40\View\DataView\Html as BaseView;
 use Joomla\CMS\Language\Text as JText;
 
 class Html extends BaseView

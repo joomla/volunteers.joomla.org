@@ -15,8 +15,8 @@ use Akeeba\Backup\Admin\Model\Statistics;
 use Akeeba\Engine\Factory;
 use Akeeba\Engine\Platform;
 use Exception;
-use FOF30\Container\Container;
-use FOF30\Controller\Controller;
+use FOF40\Container\Container;
+use FOF40\Controller\Controller;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Uri\Uri;
 

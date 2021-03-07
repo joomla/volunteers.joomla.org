@@ -12,7 +12,7 @@ defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Factory;
 use Akeeba\Engine\Platform;
-use FOF30\Container\Container;
+use FOF40\Container\Container;
 
 /**
  * Subdirectories exclusion filter. Excludes temporary, cache and backup output

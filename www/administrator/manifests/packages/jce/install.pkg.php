@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright     Copyright (c) 2009-2020 Ryan Demmer. All rights reserved
+ * @copyright     Copyright (c) 2009-2021 Ryan Demmer. All rights reserved
  * @license       GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  * JCE is free software. This version may have been modified pursuant
  * to the GNU General Public License, and as distributed it includes or
@@ -481,6 +481,11 @@ class pkg_jceInstallerScript
         // remove mediaplayer
         $folders['2.8.11'] = array(
             $site . '/editor/libraries/mediaplayer'
+        );
+
+        // delete img folder in Image Manager Extended
+        $folders['2.9.1'] = array(
+            $site . '/editor/tiny_mce/plugins/imgmanager_ext/img'
         );
 
         $files['2.6.38'] = array(

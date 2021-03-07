@@ -231,7 +231,7 @@ class Jps extends BaseArchiver
 		$this->writeKeyExpansionArchiveExtraHeader();
 
 		// Change the permissions of the file
-		@chmod($this->_dataFileName, 0644);
+		@chmod($this->_dataFileName, $this->getPermissions());
 	}
 
 	/**
@@ -503,7 +503,7 @@ class Jps extends BaseArchiver
 		// Touch the new file
 		$result = @touch($this->_dataFileName);
 
-		@chmod($this->_dataFileName, 0666);
+		@chmod($this->_dataFileName, $this->getPermissions());
 
 		return $result;
 	}

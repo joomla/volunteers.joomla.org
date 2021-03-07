@@ -1,12 +1,12 @@
 <?xml version="1.0" ?>
 <extension version="3.4" type="plugin" group="jce" method="upgrade">
 	<name>WF_SOURCE_TITLE</name>
-	<version>2.9.1</version>
-	<creationDate>29-10-2020</creationDate>
+	<version>2.9.3</version>
+	<creationDate>25-02-2021</creationDate>
 	<author>Ryan Demmer</author>
 	<authorEmail>info@joomlacontenteditor.net</authorEmail>
 	<authorUrl>https://www.joomlacontenteditor.net/</authorUrl>
-	<copyright>Copyright (C) 2006 - 2020 Ryan Demmer. All rights reserved</copyright>
+	<copyright>Copyright (C) 2006 - 2021 Ryan Demmer. All rights reserved</copyright>
 	<license>GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html</license>
 	<description>WF_SOURCE_DESC</description>
 	<languages></languages>

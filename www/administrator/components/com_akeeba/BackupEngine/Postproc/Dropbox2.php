@@ -62,7 +62,7 @@ class Dropbox2 extends Base
 	{
 		$input = $params['input'];
 		$data  = (object) [
-			'access_token' => $input['access_token'],
+			'access_token'  => $input['access_token'],
 			'refresh_token' => $input['refresh_token'],
 		];
 
@@ -239,13 +239,46 @@ HTML;
 	}
 
 	/**
+	 * Forcibly refresh the Dropbox tokens
+	 *
+	 * @param   ConnectorDropboxV2|null  $connector  The connector to use
+	 *
+	 * @return  void
+	 *
+	 * @throws Exception
+	 */
+	protected function forceRefreshTokens($connector = null)
+	{
+		// Retrieve engine configuration data
+		$config = Factory::getConfiguration();
+
+		/** @var ConnectorDropboxV2 $connector */
+		if (empty($connector))
+		{
+			$connector = $this->getConnector();
+		}
+
+		$pingResult = $connector->ping(true);
+
+		Factory::getLog()->debug(__METHOD__ . " - Dropbox tokens were forcibly refreshed");
+		$config->set('engine.postproc.dropbox2.access_token', $pingResult['access_token'], false);
+		$config->set('engine.postproc.dropbox2.refresh_token', $pingResult['refresh_token'], false);
+
+		$profile_id = Platform::getInstance()->get_active_profile();
+		Platform::getInstance()->save_configuration($profile_id);
+	}
+
+	/**
 	 * Returns the root namespace for the Dropbox for Business team space
 	 *
 	 * @see     https://www.dropbox.com/developers/reference/namespace-guide
 	 *
+	 * @param   bool  $refreshTokensOnFailure  Should I try to forcibly update the token on connection failure?
+	 *
 	 * @return  string
+	 * @throws  Exception
 	 */
-	private function getDropboxForBusinessRootNamespaceId()
+	private function getDropboxForBusinessRootNamespaceId($refreshTokensOnFailure = true)
 	{
 		// Do I need to use a folder under a team space?
 		$configuration = Factory::getConfiguration();
@@ -266,6 +299,13 @@ HTML;
 		}
 		catch (Exception $e)
 		{
+			if ($refreshTokensOnFailure)
+			{
+				$this->forceRefreshTokens($connector);
+
+				return $this->getDropboxForBusinessRootNamespaceId(false);
+			}
+
 			throw new ErrorException("Cannot connect to Dropbox for Business", 0, $e);
 		}
 
@@ -523,30 +563,6 @@ HTML;
 		$this->tryCount = 0;
 
 		return true;
-	}
-
-	/**
-	 * Forcibly refresh the Dropbox tokens
-	 *
-	 * @return  void
-	 *
-	 * @throws  Exception
-	 */
-	protected function forceRefreshTokens()
-	{
-		// Retrieve engine configuration data
-		$config = Factory::getConfiguration();
-
-		/** @var ConnectorDropboxV2 $connector */
-		$connector  = $this->getConnector();
-		$pingResult = $connector->ping(true);
-
-		Factory::getLog()->debug(__METHOD__ . " - Dropbox tokens were forcibly refreshed");
-		$config->set('engine.postproc.dropbox2.access_token', $pingResult['access_token'], false);
-		$config->set('engine.postproc.dropbox2.refresh_token', $pingResult['refresh_token'], false);
-
-		$profile_id = Platform::getInstance()->get_active_profile();
-		Platform::getInstance()->save_configuration($profile_id);
 	}
 
 }

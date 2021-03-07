@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright 	Copyright (c) 2009-2020 Ryan Demmer. All rights reserved
+ * @copyright 	Copyright (c) 2009-2021 Ryan Demmer. All rights reserved
  * @license   	GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  * JCE is free software. This version may have been modified pursuant
  * to the GNU General Public License, and as distributed it includes or
@@ -13,7 +13,7 @@ $plugins = array_values(array_filter($this->plugins, function($plugin) {
 }));
 
 ?>
-<div class="form-horizontal tabbable tabs-left flex-column">
+<div class="<?php echo $this->formclass;?> tabbable tabs-left flex-column">
     <?php //echo JHtml::_('bootstrap.startTabSet', 'profile-plugins', array('active' => 'profile-plugins-' . $plugins[0]->name));?>
 
     <ul class="nav nav-tabs" id="profile-plugins-tabs">

@@ -15,8 +15,8 @@ use Akeeba\Backup\Admin\Controller\Mixin\PredefinedTaskList;
 use Akeeba\Backup\Admin\Model\Exceptions\TransferFatalError;
 use Akeeba\Backup\Admin\Model\Exceptions\TransferIgnorableError;
 use Exception;
-use FOF30\Container\Container;
-use FOF30\Controller\Controller;
+use FOF40\Container\Container;
+use FOF40\Controller\Controller;
 
 /**
  * Controller for the Site Transfer Wizard

@@ -12,7 +12,7 @@ defined('_JEXEC') || die();
 
 // Protect from unauthorized access
 use Akeeba\Backup\Site\Model\Json\TaskInterface;
-use FOF30\Container\Container;
+use FOF40\Container\Container;
 
 class AbstractTask implements TaskInterface
 {

@@ -9,13 +9,14 @@ namespace Akeeba\Backup\Admin;
 
 defined('_JEXEC') || die;
 
-use FOF30\Container\Container as FOFContainer;
+use FOF40\Container\Container as TheFOF4BaseContainer;
 
 /**
  * Akeeba Backup backend component Container
  *
  * @since  7.1.0
  */
-class Container extends FOFContainer
+class Container extends TheFOF4BaseContainer
 {
+
 }

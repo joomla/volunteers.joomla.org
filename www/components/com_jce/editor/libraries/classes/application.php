@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright     Copyright (c) 2009-2020 Ryan Demmer. All rights reserved
+ * @copyright     Copyright (c) 2009-2021 Ryan Demmer. All rights reserved
  * @license       GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  * JCE is free software. This version may have been modified pursuant
  * to the GNU General Public License, and as distributed it includes or
@@ -92,15 +92,6 @@ class WFApplication extends JObject
 
     public function getContext()
     {
-        /*if ($this->profile) {
-        // get token
-        $token = JSession::getFormToken();
-        // create context hash
-        $this->context = md5($token . serialize($this->profile));
-        // assign profile id to user session
-        $app->setUserState($this->context, $this->profile->id);
-        }*/
-
         $option = JFactory::getApplication()->input->getCmd('option');
         $extension = $this->getComponent(null, $option);
 
@@ -123,46 +114,51 @@ class WFApplication extends JObject
         $user = JFactory::getUser();
         $option = $this->getComponentOption();
 
+        $settings = array(
+            'option' => $option,
+            'area'   => 2,
+            'device' => 'desktop',
+            'groups' => array()
+        );
+
         // find the component if this is called from within the JCE component
         if ($option == 'com_jce') {
             $context = $app->input->getInt('context');
 
             if ($context) {
-                $component = $this->getComponent($context);
-                $option = $component->element;
+                
+                if ($context === 'mediafield') {
+                    $settings['option'] = 'mediafield';
+                } else {
+                    $component = $this->getComponent($context);
+                    $settings['option'] = $component->element;
+                }
+            }
+
+            $profile_id = $app->input->getInt('profile_id');
+
+            if ($profile_id) {
+                $settings['profile_id'] = $profile_id;
             }
         }
 
         // get the Joomla! area, default to "site"
-        $area = $app->getClientId() === 0 ? 1 : 2;
-
-        if (!class_exists('Wf_Mobile_Detect')) {
-            // load mobile detect class
-            require_once __DIR__ . '/mobile.php';
-        }
+        $settings['area'] = $app->getClientId() === 0 ? 1 : 2;
 
         $mobile = new Wf_Mobile_Detect();
 
-        // desktop - default
-        $device = 'desktop';
-
         // phone
         if ($mobile->isMobile()) {
-            $device = 'phone';
+            $settings['device'] = 'phone';
         }
 
         if ($mobile->isTablet()) {
-            $device = 'tablet';
+            $settings['device'] = 'tablet';
         }
 
-        $groups = $user->getAuthorisedGroups();
+        $settings['groups'] = $user->getAuthorisedGroups();
 
-        return array(
-            'option' => $option,
-            'area' => $area,
-            'device' => $device,
-            'groups' => $groups
-        );
+        return $settings;
     }
 
     private function isCorePlugin($plugin)
@@ -182,6 +178,10 @@ class WFApplication extends JObject
 
         // get the profile variables for the current context
         $options = $this->getProfileVars();
+
+        if (isset($options['profile_id'])) {
+            $id = (int) $options['profile_id'];
+        }
 
         // create a signature to store
         $signature = md5(serialize($options));

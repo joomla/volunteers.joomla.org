@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright     Copyright (c) 2009-2020 Ryan Demmer. All rights reserved
+ * @copyright     Copyright (c) 2009-2021 Ryan Demmer. All rights reserved
  * @license       GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  * JCE is free software. This version may have been modified pursuant
  * to the GNU General Public License, and as distributed it includes or
@@ -79,9 +79,58 @@ class JceModelProfiles extends JModelList
     {
         // Compile the store id.
         $id .= ':' . $this->getState('filter.search');
+        $id .= ':' . $this->getState('filter.published');
+		$id .= ':' . $this->getState('filter.components');
 
         return parent::getStoreId($id);
     }
+
+    /**
+	 * Method to get an array of data items.
+	 *
+	 * @return  mixed  An array of data items on success, false on failure.
+	 *
+	 * @since   1.6
+	 */
+	public function getItems()
+	{
+        $items = parent::getItems();
+
+        // Filter by device
+        $device = $this->getState('filter.device');
+        
+        // Filter by component
+        $components = $this->getState('filter.components');
+        
+        // Filter by user groups
+		$usergroups = $this->getState('filter.usergroups');
+
+        $items = array_filter($items, function($item) use ($device, $components, $usergroups) {
+            $state = true;
+
+            if ($device) {
+                $state = in_array($device, explode(',', $item->device));
+            }
+
+            if ($components) {
+                $state = in_array($components, explode(',', $item->components));
+            }
+
+            if ($usergroups) {
+                $state = in_array($usergroups, explode(',', $item->types));
+            }
+
+            return $state;
+        });
+
+        // Get a storage key.
+        $store = $this->getStoreId();
+        
+        // update cache store
+        $this->cache[$store] = $items;
+
+        return $items;
+	}
 
     /**
      * Build an SQL query to load the list data.
@@ -101,12 +150,31 @@ class JceModelProfiles extends JModelList
         $query->select(
             $this->getState(
                 'list.select',
-                'id, name, description, ordering, published, checked_out, checked_out_time'
+                '*'
             )
         );
 
         $query->from($db->quoteName('#__wf_profiles'));
-        $query->where('(' . $db->quoteName('published') . ' IN (0, 1))');
+
+        // Filter by published state
+		$published = $this->getState('filter.published');
+
+		if (is_numeric($published))
+		{
+			$query->where($db->quoteName('published') . ' = ' . (int) $published);
+		}
+		elseif ($published === '')
+		{
+			$query->where('(' . $db->quoteName('published') . ' = 0 OR ' . $db->quoteName('published') . ' = 1)');
+        }
+
+        // Filter by area
+		$area = (int) $this->getState('filter.area');
+
+		if ($area)
+		{
+			$query->where($db->quoteName('area') . ' = ' . (int) $area);
+        }
 
         // Filter by search in title
         $search = $this->getState('filter.search');

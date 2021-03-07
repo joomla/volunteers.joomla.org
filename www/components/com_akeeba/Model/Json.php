@@ -15,8 +15,8 @@ use Akeeba\Backup\Site\Model\Json\Encapsulation;
 use Akeeba\Backup\Site\Model\Json\Task;
 use Akeeba\Engine\Platform;
 use Akeeba\Engine\Util\Complexify;
-use FOF30\Container\Container;
-use FOF30\Model\Model;
+use FOF40\Container\Container;
+use FOF40\Model\Model;
 
 // JSON API version number
 define('AKEEBA_JSON_API_VERSION', '400');

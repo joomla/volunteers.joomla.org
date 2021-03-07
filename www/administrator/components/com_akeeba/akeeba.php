@@ -15,7 +15,7 @@ $minPHPVersion         = '7.2.0';
 $recommendedPHPVersion = '7.4';
 $softwareName          = 'Akeeba Backup';
 
-if (!require_once(__DIR__ . '/View/wrongphp.php'))
+if (!require_once(__DIR__ . '/tmpl/CommonTemplates/wrongphp.php'))
 {
 	return;
 }
@@ -23,7 +23,7 @@ if (!require_once(__DIR__ . '/View/wrongphp.php'))
 // HHVM made sense in 2013, now PHP 7 is a way better solution than a hybrid PHP interpreter
 if (defined('HHVM_VERSION'))
 {
-	(include_once __DIR__ . '/View/hhvm.php') || die('We have detected that you are running HHVM instead of PHP. This software WILL NOT WORK properly on HHVM. Please switch to PHP 7 instead.');
+	(include_once __DIR__ . '/tmpl/CommonTemplates/hhvm.php') || die('We have detected that you are running HHVM instead of PHP. This software WILL NOT WORK properly on HHVM. Please switch to PHP 7 instead.');
 
 	return;
 }
@@ -31,7 +31,7 @@ if (defined('HHVM_VERSION'))
 // So, FEF is not installed?
 if (!@file_exists(JPATH_SITE . '/media/fef/fef.php'))
 {
-	(include_once __DIR__ . '/View/fef.php') || die('You need to have the Akeeba Frontend Framework (FEF) package installed on your site to display this component. Please visit https://www.akeeba.com/download/official/fef.html to download it and install it on your site.');
+	(include_once __DIR__ . '/tmpl/CommonTemplates/fef.php') || die('You need to have the Akeeba Frontend Framework (FEF) package installed on your site to display this component. Please visit https://www.akeeba.com/download/official/fef.html to download it and install it on your site.');
 
 	return;
 }
@@ -43,23 +43,23 @@ if (!@file_exists(JPATH_SITE . '/media/fef/fef.php'))
  */
 try
 {
-	if (!defined('FOF30_INCLUDED') && !@include_once(JPATH_LIBRARIES . '/fof30/include.php'))
+	if (!defined('FOF40_INCLUDED') && !@include_once(JPATH_LIBRARIES . '/fof40/include.php'))
 	{
-		(include_once __DIR__ . '/View/fof.php') || die('You need to have the Akeeba Framework-on-Framework (FOF) 3 package installed on your site to use this component. Please visit https://www.akeeba.com/download/fof3.html to download it and install it on your site.');
+		(include_once __DIR__ . '/tmpl/CommonTemplates/fof.php') || die('You need to have the Akeeba Framework-on-Framework (FOF) 3 package installed on your site to use this component. Please visit https://www.akeeba.com/download/fof3.html to download it and install it on your site.');
 
 		return;
 	}
 
 	define('AKEEBA_CACERT_PEM', JPATH_LIBRARIES . '/src/Http/Transport/cacert.pem');
 
-	FOF30\Container\Container::getInstance('com_akeeba')->dispatcher->dispatch();
+	FOF40\Container\Container::getInstance('com_akeeba')->dispatcher->dispatch();
 }
 catch (Throwable $e)
 {
 	$title = 'Akeeba Backup';
-	$isPro = defined(AKEEBA_PRO) ? AKEEBA_PRO : file_exists(__DIR__ . '/View/RegExDatabaseFilters/Html.php');
+	$isPro = defined(AKEEBA_PRO) ? AKEEBA_PRO : file_exists(__DIR__ . '/tmpl/CommonTemplates/RegExDatabaseFilters/Html.php');
 
-	if (!(include_once __DIR__ . '/View/errorhandler.php'))
+	if (!(include_once __DIR__ . '/tmpl/CommonTemplates/errorhandler.php'))
 	{
 		throw $e;
 	}

@@ -13,7 +13,7 @@ defined('_JEXEC') || die();
 use Akeeba\Backup\Admin\Model\Log;
 use Akeeba\Backup\Admin\View\ViewTraits\ProfileIdAndName;
 use Akeeba\Engine\Factory;
-use FOF30\View\DataView\Html as BaseView;
+use FOF40\View\DataView\Html as BaseView;
 use Joomla\CMS\HTML\HTMLHelper;
 
 /**

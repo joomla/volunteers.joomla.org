@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @version    CVS: 1.14.0
+ * @version    CVS: 1.15.0
  * @package    com_yoursites
  * @author     Geraint Edwards <via website>
  * @copyright  2016-2020 GWE Systems Ltd
@@ -32,7 +32,7 @@ function yoursites_skiptoken()
 	return true;
 }
 
-function ProcessJsonRequest(&$requestObject, $returnData)
+function ProcessYstsJsonRequest(&$requestObject, $returnData)
 {
 	if (!defined('_SC_START'))
 	{
@@ -294,6 +294,11 @@ function ProcessJsonRequest(&$requestObject, $returnData)
 			case "joomlaupdatesites":
 				include_once "sitechecks.php";
 				YstsSiteChecks::joomlaupdatesites($returnData);
+				break;
+
+			case "extensionupdatesites":
+				include_once "sitechecks.php";
+				YstsSiteChecks::extensionupdatesites($returnData);
 				break;
 
 			case "usercaptcha":
@@ -1152,9 +1157,9 @@ function upgradeJoomla($requestObject, & $returnData)
 			// Did we find an update?!?! - Client site may have been updated manually prior to Joomla! Version check
 			if (!$updateInfo2["hasUpdate"]) {
 
-				$returnData->error           = 1;
+				$returnData->error           = 0;
 				$returnData->result          = "No Joomla Update Available";
-				$returnData->errormessages[] = 'COM_YOURSITES_NO_UPDATE_AVAILABLE';
+				$returnData->messages[] = 'COM_YOURSITES_NO_UPDATE_AVAILABLE';
 				$returnData->updateInfo      = $updateInfo2;
 
 				return;
@@ -1164,7 +1169,7 @@ function upgradeJoomla($requestObject, & $returnData)
 		if (isset($requestObject->blockedversion) && $requestObject->blockedversion && version_compare($updateInfo["latest"], $requestObject->blockedversion, "ge"))
 		{
 			$returnData->error = 1;
-			$returnData->errormessages[] = 'COM_1.14.0_UPGRADE_HAS_BEEN_BLOCKED';
+			$returnData->errormessages[] = 'COM_1.15.0_UPGRADE_HAS_BEEN_BLOCKED';
 			return;
 		}
 
@@ -4838,7 +4843,7 @@ function onYstsDie(){
 		define('CLEAN_YSTS_EXIT', 1);
 
 		$last_error = error_get_last();
-		if(isset($last_error['type']) && $last_error['type'] === E_ERROR)
+		if(isset($last_error['type']) && ($last_error['type'] === E_ERROR || $last_error['type'] === E_COMPILE_ERROR))
 		{
 			$message = ob_get_clean(); // Capture output buffer and clean it
 
@@ -4853,6 +4858,10 @@ function onYstsDie(){
 			$returnData->log['error'] = $last_error;
 			$returnData->errormessages[] = "COM_YOURSITES_HELP_WE_DIED";
 			$returnData->errormessages[] = $last_error['message'];
+			if (isset($last_error['file']) && !empty($last_error['file']))
+			{
+				$returnData->errormessages[] = " @ " . $last_error['file'] . " : " . $last_error['line'];
+			}
 
 			echo encodeResults($returnData);
 			exit(0);
@@ -4891,7 +4900,7 @@ function getJoomlaUpdateSitesIds($column = 0)
  *
  * @return  boolean  True on success.
  *
- * @since   1.14.0
+ * @since   1.15.0
  * @throws  \RuntimeException
  */
 function copyr2($src, $dest, $prefix = "", & $returnData, $exclusions = array())
@@ -5052,7 +5061,7 @@ function copyr2($src, $dest, $prefix = "", & $returnData, $exclusions = array())
  *
  * @return  boolean  True on success.
  *
- * @since   1.14.0
+ * @since   1.15.0
  * @throws  \RuntimeException
  */
 function deleter2($src, & $returnData)
@@ -5370,7 +5379,7 @@ function frontfatal($returnData)
 	if (!$jversion->isCompatible('4.0'))
 	{
 		//set_error_handler(array("YourSitesDiagnosis",'captureError'));
-		set_exception_handler(array("YourSitesDiagnosis",'captureException'));
+		$oldHandler = set_exception_handler(array("YourSitesDiagnosis",'captureException'));
 		//register_shutdown_function(array("YourSitesDiagnosis",'captureShutdown'));
 
 		$data = $input->getArray();
@@ -5389,120 +5398,151 @@ function frontfatal($returnData)
 	$session->set('ysts_debug', 1);
 }
 
-class YourSitesDiagnosis
+if (!class_exists('YourSitesDiagnosis', false))
 {
-
-	public static function captureError($errorCode, $message, $file, $line)
+	class YourSitesDiagnosis
 	{
-		if (!(error_reporting() & $errorCode)) {
-			// This error code is not included in error_reporting, so let it fall
-			// through to the standard PHP error handler
-			//		YourSitesDiagnosis::throwerror('We have an unknown error = Code:' . $errorCode . " (" .$message . ') in file '. $file . ' at line: '. $line);
-		}
 
-		$errorCodes = array(
-			E_ERROR => "Fatal run-time error",
-			E_WARNING => "Run-time warning",
-			E_PARSE => "Compile-time parse error",
-			E_NOTICE => "Run-time notice",
-			E_CORE_ERROR => "PHP Core error",
-			E_CORE_WARNING => "PHP Core warning",
-			E_COMPILE_ERROR => "PHP Compile error",
-			E_COMPILE_WARNING => "PHP Compile warning",
-			E_USER_ERROR => "Fatal Error",
-			E_USER_WARNING => "PHP Warning" ,
-			E_USER_NOTICE => "PHP Notice",
-			E_STRICT => "Strict PHP warning",
-			E_RECOVERABLE_ERROR => "Recoverable Error",
-			E_DEPRECATED => "Run time deprecation notice",
-			E_USER_DEPRECATED => "Deprecated Warning");
-
-		$msg =  'We have an error = Code:' . $errorCode ;
-		$messages = array();
-		foreach ($errorCodes as $code => $errorCodeMessage)
+		public static function captureError($errorCode, $message, $file, $line)
 		{
-			if ( $errorCode &  $code)
+			if (!(error_reporting() & $errorCode))
 			{
-				$messages[] = $errorCodeMessage;
+				// This error code is not included in error_reporting, so let it fall
+				// through to the standard PHP error handler
+				//		YourSitesDiagnosis::throwerror('We have an unknown error = Code:' . $errorCode . " (" .$message . ') in file '. $file . ' at line: '. $line);
+			}
+
+			$errorCodes = array(
+				E_ERROR             => "Fatal run-time error",
+				E_WARNING           => "Run-time warning",
+				E_PARSE             => "Compile-time parse error",
+				E_NOTICE            => "Run-time notice",
+				E_CORE_ERROR        => "PHP Core error",
+				E_CORE_WARNING      => "PHP Core warning",
+				E_COMPILE_ERROR     => "PHP Compile error",
+				E_COMPILE_WARNING   => "PHP Compile warning",
+				E_USER_ERROR        => "Fatal Error",
+				E_USER_WARNING      => "PHP Warning",
+				E_USER_NOTICE       => "PHP Notice",
+				E_STRICT            => "Strict PHP warning",
+				E_RECOVERABLE_ERROR => "Recoverable Error",
+				E_DEPRECATED        => "Run time deprecation notice",
+				E_USER_DEPRECATED   => "Deprecated Warning");
+
+			$msg      = 'We have an error = Code:' . $errorCode;
+			$messages = array();
+			foreach ($errorCodes as $code => $errorCodeMessage)
+			{
+				if ($errorCode & $code)
+				{
+					$messages[] = $errorCodeMessage;
+				}
+			}
+			if (count($messages))
+			{
+				$msg .= " [" . implode(", ", $messages) . "] ";
+			}
+			$msg .= ' : "' . $message . '", in file ' . $file . ' at line: ' . $line . "<br>";
+			if (E_DEPRECATED & $errorCode || E_USER_DEPRECATED & $errorCode)
+			{
+				return;
+			}
+			if (E_ERROR & $errorCode || E_USER_ERROR & $errorCode)
+			{
+				YourSitesDiagnosis::throwerror($msg);
 			}
 		}
-		if (count($messages))
-		{
-			$msg .= " [". implode(", ", $messages) . "] ";
-		}
-		$msg .= ' : "' . $message . '", in file ' . $file . ' at line: ' . $line . "<br>";
-		if (E_DEPRECATED & $errorCode || E_USER_DEPRECATED  & $errorCode )
-		{
-			return;
-		}
-		if (E_ERROR & $errorCode || E_USER_ERROR  & $errorCode )
-		{
-			YourSitesDiagnosis::throwerror( $msg);
-		}
-	}
 
-	// Attempt to catch the warning prior to the fatal error
-	public static function captureFatalError($errorCode, $message, $file, $line)
-	{
-		if (!(error_reporting() & $errorCode)) {
-			// This error code is not included in error_reporting, so let it fall
-			// through to the standard PHP error handler
-			//		YourSitesDiagnosis::throwerror('We have an unknown error = Code:' . $errorCode . " (" .$message . ') in file '. $file . ' at line: '. $line);
-		}
-
-		if (E_DEPRECATED & $errorCode || E_USER_DEPRECATED  & $errorCode)
+		// Attempt to catch the warning prior to the fatal error
+		public static function captureFatalError($errorCode, $message, $file, $line)
 		{
-			return;
-		}
-
-		$errorCodes = array(
-			E_ERROR => "Fatal run-time error",
-			E_WARNING => "Run-time warning",
-			E_PARSE => "Compile-time parse error",
-			E_NOTICE => "Run-time notice",
-			E_CORE_ERROR => "PHP Core error",
-			E_CORE_WARNING => "PHP Core warning",
-			E_COMPILE_ERROR => "PHP Compile error",
-			E_COMPILE_WARNING => "PHP Compile warning",
-			E_USER_ERROR => "Fatal Error",
-			E_USER_WARNING => "PHP Warning" ,
-			E_USER_NOTICE => "PHP Notice",
-			E_STRICT => "Strict PHP warning",
-			E_RECOVERABLE_ERROR => "Recoverable Error",
-			E_DEPRECATED => "Run time deprecation notice",
-			E_USER_DEPRECATED => "Deprecated Warning");
-
-		$messages = array();
-		foreach ($errorCodes as $code => $errorCodeMessage)
-		{
-			if ( $errorCode &  $code)
+			if (!(error_reporting() & $errorCode))
 			{
-				$messages[] = $errorCodeMessage;
+				// This error code is not included in error_reporting, so let it fall
+				// through to the standard PHP error handler
+				//		YourSitesDiagnosis::throwerror('We have an unknown error = Code:' . $errorCode . " (" .$message . ') in file '. $file . ' at line: '. $line);
+			}
+
+			if (E_DEPRECATED & $errorCode || E_USER_DEPRECATED & $errorCode)
+			{
+				return;
+			}
+
+			$errorCodes = array(
+				E_ERROR             => "Fatal run-time error",
+				E_WARNING           => "Run-time warning",
+				E_PARSE             => "Compile-time parse error",
+				E_NOTICE            => "Run-time notice",
+				E_CORE_ERROR        => "PHP Core error",
+				E_CORE_WARNING      => "PHP Core warning",
+				E_COMPILE_ERROR     => "PHP Compile error",
+				E_COMPILE_WARNING   => "PHP Compile warning",
+				E_USER_ERROR        => "Fatal Error",
+				E_USER_WARNING      => "PHP Warning",
+				E_USER_NOTICE       => "PHP Notice",
+				E_STRICT            => "Strict PHP warning",
+				E_RECOVERABLE_ERROR => "Recoverable Error",
+				E_DEPRECATED        => "Run time deprecation notice",
+				E_USER_DEPRECATED   => "Deprecated Warning");
+
+			$messages = array();
+			foreach ($errorCodes as $code => $errorCodeMessage)
+			{
+				if ($errorCode & $code)
+				{
+					$messages[] = $errorCodeMessage;
+				}
+			}
+			$messages[] = $message;
+			$messages[] = "File $file at line $line";
+			$msg        = implode("<br>", $messages);
+
+			if (E_ERROR & $errorCode || E_USER_ERROR & $errorCode || E_WARNING & $errorCode || E_USER_WARNING & $errorCode)
+			{
+				YourSitesDiagnosis::throwerror($msg);
 			}
 		}
-		$messages[] =  $message ;
-		$messages[] =  "File $file at line $line" ;
-		$msg = implode("<br>", $messages);
 
-		if (E_ERROR & $errorCode || E_USER_ERROR  & $errorCode   || E_WARNING  & $errorCode  || E_USER_WARNING  & $errorCode )
+		public static function captureException(Throwable $exception)
 		{
-			YourSitesDiagnosis::throwerror( $msg);
+			if ($exception->getCode() === 0 || $exception->getCode() >= 500)
+			{
+				$data               = new stdClass();
+				$data->messages     = array('COM_YOURSITES_FATAL_ERROR_INFORMATION');
+				$data->messages[]   = $exception->getMessage();
+				$data->messages[]   = $exception->getFile() . " : " . $exception->getLine();
+				$data->log['trace'] = $exception->getTrace();
+				$data->log['file']  = $exception->getFile();
+				$data->log['line']  = $exception->getLine();
+
+				$data->warning = 1;
+
+				header("Content-Type: application/javascript");
+				// Must suppress any error messages
+				@ob_end_clean();
+				echo json_encode($data);
+				exit(0);
+			}
+			else
+			{
+				restore_exception_handler();
+
+				$newException = new Exception('Chained Exception From YourSites', $exception->getCode(), $exception);
+
+				throw $newException;
+			}
 		}
-	}
 
-	public static function captureException(Throwable $exception)
-	{
-		if ($exception->getCode() === 0 || $exception->getCode() >= 500)
+		public static function captureShutdown()
 		{
-			$data               = new stdClass();
-			$data->messages     = array('COM_YOURSITES_FATAL_ERROR_INFORMATION');
-			$data->messages[]   = $exception->getMessage();
-			$data->messages[]   = $exception->getFile() . " : " . $exception->getLine();
-			$data->log['trace'] = $exception->getTrace();
-			$data->log['file']  = $exception->getFile();
-			$data->log['line']  = $exception->getLine();
+			//YourSitesDiagnosis::throwerror( "Script is finishing now");
+		}
 
-			$data->warning      = 1;
+		public static function throwerror($msg)
+		{
+			$data                = new stdClass();
+			$data->errormessages = array($msg);
+			$data->error         = 1;
 
 			header("Content-Type: application/javascript");
 			// Must suppress any error messages
@@ -5510,31 +5550,6 @@ class YourSitesDiagnosis
 			echo json_encode($data);
 			exit(0);
 		}
-		else
-		{
-			restore_exception_handler();
 
-			$newException = new Exception('Chained Exception From YourSites', $exception->getCode(), $exception);
-
-			throw $newException;
-		}
 	}
-
-	public static function captureShutdown()
-	{
-		//YourSitesDiagnosis::throwerror( "Script is finishing now");
-	}
-
-	public static function throwerror ($msg){
-		$data = new stdClass();
-		$data->errormessages = array($msg);
-		$data->error = 1;
-
-		header("Content-Type: application/javascript");
-		// Must suppress any error messages
-		@ob_end_clean();
-		echo json_encode($data);
-		exit(0);
-	}
-
 }

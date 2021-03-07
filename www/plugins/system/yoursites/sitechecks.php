@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @version    CVS: 1.14.0
+ * @version    CVS: 1.15.0
  * @package    com_yoursites
  * @author     Geraint Edwards <via website>
  * @copyright  2016-2020 GWE Systems Ltd
@@ -267,9 +267,7 @@ class YstsSiteChecks
 		$db->setQuery($query);
 		$results = $db->loadObjectList();
 
-		$live_site = JFactory::getConfig()->get('live_site', '');
-
-		if (!empty($results) && count($results) >= 2 && $results[0]->enabled && $results[1]->enabled  )
+		if (!empty($results) && count($results) >= 2 && $results[0]->enabled && $results[1]->enabled )
 		{
 			$returnData->checkinfo['key']  = "COM_YOURSITES_ADVCHECK_JOOMLAUPDATESITES_CORRECT";
 			$returnData->checkinfo['data'] = array();
@@ -283,6 +281,46 @@ class YstsSiteChecks
 			foreach ($results as $result)
 			{
 				$names[] = $result->name;
+			}
+			$returnData->checkinfo['data'] = $names;
+			$returnData->checkinfo['status'] = -1;
+		}
+
+	}
+
+	public static function extensionupdatesites( & $returnData, $requestObject)
+	{
+		$db = JFactory::getDbo();
+		$query = $db->getQuery(true);
+		$query->select('us.name, us.enabled, ex.type, ex.folder, ex.client_id, us.update_site_id')
+			->from('#__update_sites AS us')
+			->join('inner', '#__update_sites_extensions AS usx ON usx.update_site_id = us.update_site_id')
+			->join('inner', '#__extensions AS ex ON ex.extension_id = usx.extension_id')
+			->where('NOT((ex.type="component" AND ex.element="com_joomlaupdate") OR (ex.type="file" AND ex.element="joomla")) AND us.enabled = 0');
+
+		if (isset($requestObject->checkdata->extensionupdatesites) && count($requestObject->checkdata->extensionupdatesites) > 0)
+		{
+			$query->where('ex.extension_id NOT IN (' . implode(',' , $requestObject->checkdata->extensionupdatesites) . ')');
+		}
+		$db->setQuery($query);
+		$results = $db->loadObjectList();
+
+
+		if (empty($results))
+		{
+			$returnData->checkinfo['key']  = "COM_YOURSITES_ADVCHECK_EXTENSIONUPDATESITES_CORRECT";
+			$returnData->checkinfo['data'] = array();
+			$returnData->checkinfo['status'] = 1;
+		}
+		else
+		{
+			$returnData->warning = 1;
+			$returnData->messages[] = "COM_YOURSITES_ADVCHECK_EXTENSIONUPDATESITES_INCORRECT";
+			$returnData->checkinfo['key']  = "COM_YOURSITES_ADVCHECK_EXTENSIONUPDATESITES_INCORRECT_R";
+			$names = array();
+			foreach ($results as $result)
+			{
+				$names[] = $result->name . " (" .  ($result->client_id ? 'Administrator' : 'Site') . ") : " .  $result->type. " - " .  $result->folder . " - " .  $result->update_site_id;
 			}
 			$returnData->checkinfo['data'] = $names;
 			$returnData->checkinfo['status'] = -1;

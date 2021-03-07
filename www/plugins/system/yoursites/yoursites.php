@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @version    CVS: 1.14.0.1
+ * @version    CVS: 1.15.0.1
  * @package    com_yoursites
  * @author     Geraint Edwards
  * @copyright  2017-2020 GWE Systems Ltd
@@ -265,7 +265,7 @@ class plgSystemYourSites extends JPlugin
 				$requestObject            = new stdClass();
 				$requestObject->typeahead = $input->get('typeahead', '', 'string');
 				$data                     = null;
-				$data                     = ProcessJsonRequest($requestObject, $data);
+				$data                     = ProcessYstsJsonRequest($requestObject, $data);
 			}
 			catch (Exception $e)
 			{
@@ -322,7 +322,7 @@ class plgSystemYourSites extends JPlugin
 				{
 					try
 					{
-						$data = ProcessJsonRequest($requestObject, $data);
+						$data = ProcessYstsJsonRequest($requestObject, $data);
 					}
 					catch (Exception $e)
 					{
@@ -421,7 +421,7 @@ class plgSystemYourSites extends JPlugin
 				{
 					try
 					{
-						$data = ProcessJsonRequest($requestObject, $data);
+						$data = ProcessYstsJsonRequest($requestObject, $data);
 					}
 					catch (Exception $e)
 					{

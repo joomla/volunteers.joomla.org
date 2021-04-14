@@ -326,21 +326,27 @@ class Raw extends View implements DataViewInterface
 		$model = $this->getModel();
 
 		// It seems that I can't edit records, maybe I can edit only this one due asset tracking?
-		if ((!$this->permissions->edit || !$this->permissions->editown) && $model)
+		if ((!$this->permissions->edit || !$this->permissions->editown) && is_object($model) && ($model instanceof DataModel))
 		{
+			// Make sure the model is really asset tracked
+			$assetName       = $model->getAssetName();
+			$assetName       = is_string($assetName) ? $assetName : null;
+			$isAssetsTracked = $model->isAssetsTracked() && !empty($assetName);
+
 			// Ok, record is tracked, let's see if I can this record
-			if ($model->isAssetsTracked())
+			if ($isAssetsTracked)
 			{
 				$platform = $this->container->platform;
 
-				if (!$this->permissions->edit)
+
+				if (!$this->permissions->edit && !is_null($assetName))
 				{
-					$this->permissions->edit = $platform->authorise('core.edit', $model->getAssetName());
+					$this->permissions->edit = $platform->authorise('core.edit', $assetName);
 				}
 
-				if (!$this->permissions->editown)
+				if (!$this->permissions->editown && !is_null($assetName))
 				{
-					$this->permissions->editown = $platform->authorise('core.edit.own', $model->getAssetName());
+					$this->permissions->editown = $platform->authorise('core.edit.own', $assetName);
 				}
 			}
 		}

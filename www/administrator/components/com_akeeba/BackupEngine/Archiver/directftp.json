@@ -31,9 +31,7 @@
         "default": "",
         "type": "string",
         "title": "COM_AKEEBA_CONFIG_DIRECTFTP_INITDIR_TITLE",
-        "description": "COM_AKEEBA_CONFIG_DIRECTFTP_INITDIR_DESCRIPTION",
-        "hook": "akeeba_directftp_init_browser",
-        "buttontitle": "UI-BROWSE"
+        "description": "COM_AKEEBA_CONFIG_DIRECTFTP_INITDIR_DESCRIPTION"
     },
     "engine.archiver.directftp.ftps": {
         "default": "0",

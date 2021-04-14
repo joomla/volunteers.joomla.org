@@ -11,6 +11,7 @@ defined('_JEXEC') || die;
 
 use Exception;
 use FOF40\Container\Container;
+use FOF40\JoomlaAbstraction\CacheCleaner;
 use FOF40\Model\Model;
 use Joomla\CMS\Component\ComponentHelper as JComponentHelper;
 use Joomla\CMS\Updater\Updater as JUpdater;
@@ -501,14 +502,38 @@ class Update extends Model
 			return;
 		}
 
-		// Create the update site definition we want to store to the database
+		/**
+		 * Record whether I have made any changes to the update sites or the updates themselves so I can clear Joomla's
+		 * undocumented cache.
+		 */
+		$madeChanges = [
+			'updateSites' => false,
+			'updates'     => false,
+		];
+
+		/**
+		 * Create the update site definition we want to see in (or store into) the database.
+		 *
+		 * Since this is called primarily by our own software I am taking the liberty of setting up an extra_query if
+		 * none is provided. The code here will prefer a manually set up extra_query. If none is present we will create
+		 * one. There are two parts handled by $this->getExtraQueryString($this->getLicenseKey()).
+		 *
+		 * **License key**. On Joomla 3 we read it from the component's Options. On Joomla 4 we try to first read it
+		 * from the #__update_sites table and the extra_query format in the XML manifest. If either is not present we
+		 * will fall back to the component itself.
+		 *
+		 * **Extra query format**. We try to read the format from the XML manifest of the extension. If it's not set up
+		 * we fall back to the Akeeba-comaptible format dlid=YOUR_DOWNLOAD_ID_HERE.
+		 *
+		 * This provides maximum flexibility and works with both Joomla 4 and Joomla 3 equally.
+		 */
 		$update_site = [
 			'name'                 => $this->updateSiteName,
 			'type'                 => 'extension',
 			'location'             => $this->updateSite,
 			'enabled'              => 1,
 			'last_check_timestamp' => 0,
-			'extra_query'          => $this->extraQuery,
+			'extra_query'          => $this->extraQuery ?? $this->getExtraQueryString($this->getLicenseKey()),
 		];
 
 		// Get a reference to the db driver
@@ -548,7 +573,7 @@ class Update extends Model
 
 			if (empty($aSite))
 			{
-				// Update site is now up-to-date, don't need to refresh it anymore.
+				// Update site does not exist?!
 				continue;
 			}
 
@@ -576,13 +601,18 @@ class Update extends Model
 				// Update the update site if necessary
 				if ($mustUpdate)
 				{
+					$madeChanges['updateSites'] = true;
+
 					$db->updateObject('#__update_sites', $aSite, 'update_site_id', true);
 				}
+
+				// Make changes to any #__updates records linked to this update site ID
+				$madeChanges['updates'] = $this->fixUpdates((int) $id, $aSite->extra_query);
 
 				continue;
 			}
 
-			// In any other case we need to delete this update site, it's obsolete
+			// In any other case we need to delete this update site, it's obsolete.
 			$deleteOldSites[] = $aSite->update_site_id;
 		}
 
@@ -607,9 +637,23 @@ class Update extends Model
 			catch (\Exception $e)
 			{
 				// Do nothing on failure
-				return;
+			}
+			finally
+			{
+				$madeChanges['updateSites'] = true;
 			}
 
+			// Clear the caches for #__update_sites and #__updates if necessary
+			if ($madeChanges['updateSites'] || $madeChanges['updates'])
+			{
+				CacheCleaner::clearCacheGroups([
+					'_system',
+					'com_installer',
+					'com_modules',
+					'com_plugins',
+					'mod_menu',
+				]);
+			}
 		}
 
 		// Do we still need to create a new update site?
@@ -931,5 +975,101 @@ class Update extends Model
 		}
 
 		return simplexml_load_file($path);
+	}
+
+	/**
+	 * Fix updates Joomla has already found.
+	 *
+	 * Joomla sometimes has a stroke and clears the extra_query column of the #__update_sites. This means that it copies
+	 * over an empty extra_query to the #__updates table. Even though we have fixed the #__update_sites already, the
+	 * fact that it was previously broken means that Joomla STILL doesn't see the extra query for the udpates it has
+	 * already found, therefore trying to install them will fail with a 403 error.
+	 *
+	 * This method addresses this madness. It trawls the #__updates table for any updates already found with the given
+	 * update site ID and makes sure that their extra_query matches the one it should have been using. If not, it is
+	 * updated.
+	 *
+	 * If at least one update record has been updated it returns true so that refresh_update_site() can then clear the
+	 * undocumented query caches of Joomla. If we don't do that then EVEN THOUGH we have fixed BOTH the #__update_sites
+	 * AND the #__updates records for our extension Joomla would STILL fail to download the updates with a 403, since it
+	 * would be using the cached updates from the undocumented query cache.
+	 *
+	 * The fact that Joomla was trying to tell me that somehow it's my problem that it does all these stupid things is
+	 * unconscionable. Still, I am proving ONCE AGAIN that I can work around Joomla's major bugs, even the ones that are
+	 * left unfixed after a decade of me reporting them privately to the project. What's worse is that my public report
+	 * on March 6th, 2021 was met with open hostility and threats instead of the project writing the total of 10 lines
+	 * of code to address it. This is absolutely insane. No problem, though, here I am working around Joomla's bugs, as
+	 * I have been doing since 2006...
+	 *
+	 * @param   int          $updateSiteId
+	 * @param   string|null  $extraQuery
+	 *
+	 * @return bool
+	 */
+	private function fixUpdates(int $updateSiteId, ?string $extraQuery): bool
+	{
+		// Make sure the update site ID is valid.
+		if ($updateSiteId <= 0)
+		{
+			return false;
+		}
+
+		// If the extra query is empty there's no reason for me to do anything. Bye!
+		if (empty($extraQuery))
+		{
+			return false;
+		}
+
+		// Try to get the update records.
+		try
+		{
+			$db = $this->container->db;
+			$query = $db->getQuery(true)
+				->select([
+					$db->qn('update_id'),
+					$db->qn('extra_query'),
+				])
+				->from($db->qn('#__updates'))
+				->where($db->qn('update_site_id') . ' = ' . $db->q($updateSiteId));
+			$updates = $db->setQuery($query)->loadObjectList();
+		}
+		catch (Exception $e)
+		{
+			return false;
+		}
+
+		// Do I even have any udpates found...?
+		if (empty($updates))
+		{
+			return false;
+		}
+
+		// Process each udpate record.
+		$madeChanges = false;
+
+		foreach ($updates as $update)
+		{
+			// The extra query matches. Nothing to do here.
+			if ($update->extra_query == $extraQuery)
+			{
+				continue;
+			}
+
+			try
+			{
+				$query = $db->getQuery(true)
+					->update($db->qn('#__updates'))
+					->set($db->qn('extra_query') . ' = ' . $db->q($extraQuery))
+					->where($db->qn('update_id') . ' = ' . $db->q($update->update_id));
+				$db->setQuery($query)->execute();
+			}
+			catch (Exception $e)
+			{
+				// Well, sometimes Joomla bites the bullet...
+				continue;
+			}
+		}
+
+		return $madeChanges;
 	}
 }

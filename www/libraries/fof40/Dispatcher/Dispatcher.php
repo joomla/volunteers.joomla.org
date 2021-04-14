@@ -246,30 +246,7 @@ class Dispatcher
 		// If there is an object method for this event, call it
 		if (method_exists($this, $event))
 		{
-			switch (count($arguments))
-			{
-				case 0:
-					$result = $this->{$event}();
-					break;
-				case 1:
-					$result = $this->{$event}($arguments[0]);
-					break;
-				case 2:
-					$result = $this->{$event}($arguments[0], $arguments[1]);
-					break;
-				case 3:
-					$result = $this->{$event}($arguments[0], $arguments[1], $arguments[2]);
-					break;
-				case 4:
-					$result = $this->{$event}($arguments[0], $arguments[1], $arguments[2], $arguments[3]);
-					break;
-				case 5:
-					$result = $this->{$event}($arguments[0], $arguments[1], $arguments[2], $arguments[3], $arguments[4]);
-					break;
-				default:
-					$result = call_user_func_array([$this, $event], $arguments);
-					break;
-			}
+			$result = $this->{$event}(...$arguments);
 		}
 
 		if ($result === false)

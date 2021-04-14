@@ -7,7 +7,7 @@
         "bold": "1"
     },
     "core.filters.dateconditional.start": {
-        "default": "1981-02-20 12:15 GMT+2",
+        "default": "1970-01-01 00:00 GMT",
         "type": "string",
         "title": "COM_AKEEBA_CONFIG_OPTIONALFILTERS_DATECONDITIONAL_START_TITLE",
         "description": "COM_AKEEBA_CONFIG_OPTIONALFILTERS_DATECONDITIONAL_START_DESCRIPTION"

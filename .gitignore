@@ -40,3 +40,7 @@ Desktop.ini
 /www/libraries/simplesamlphp/cert/*
 /www/libraries/simplesamlphp/config/*
 /www/libraries/simplesamlphp/metadata-generated/*
+
+# Akeeba
+/public_html/administrator/components/com_akeeba/backup/*
+!/public_html/administrator/components/com_akeeba/backup/index.html

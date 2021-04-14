@@ -1,5 +1,5 @@
 /**
- * @version    CVS: 1.15.0
+ * @version    CVS: 1.16.0
  * @package    com_yoursites
  * @author     Geraint Edwards <yoursites@gwesystems.com>
  * @copyright  2016-2020 GWE Systems Ltd

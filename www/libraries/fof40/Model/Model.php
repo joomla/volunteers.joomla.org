@@ -496,30 +496,7 @@ class Model
 		// If there is an object method for this event, call it
 		if (method_exists($this, $event))
 		{
-			switch (count($arguments))
-			{
-				case 0:
-					$this->{$event}();
-					break;
-				case 1:
-					$this->{$event}($arguments[0]);
-					break;
-				case 2:
-					$this->{$event}($arguments[0], $arguments[1]);
-					break;
-				case 3:
-					$this->{$event}($arguments[0], $arguments[1], $arguments[2]);
-					break;
-				case 4:
-					$this->{$event}($arguments[0], $arguments[1], $arguments[2], $arguments[3]);
-					break;
-				case 5:
-					$this->{$event}($arguments[0], $arguments[1], $arguments[2], $arguments[3], $arguments[4]);
-					break;
-				default:
-					call_user_func_array([$this, $event], $arguments);
-					break;
-			}
+			$this->{$event}(...$arguments);
 		}
 
 		// All other event handlers live outside this object, therefore they need to be passed a reference to this

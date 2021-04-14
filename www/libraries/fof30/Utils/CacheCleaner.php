@@ -10,13 +10,17 @@ namespace FOF30\Utils;
 defined('_JEXEC') || die;
 
 use Exception;
-use Joomla\CMS\Application\CMSApplication;
+use FOF30\Container\Container;
+use Joomla\Application\AbstractApplication;
+use Joomla\Application\ConfigurationAwareApplicationInterface;
 use Joomla\CMS\Cache\Cache;
 use Joomla\CMS\Cache\CacheControllerFactoryInterface;
 use Joomla\CMS\Cache\Controller\CallbackController;
 use Joomla\CMS\Cache\Exception\CacheExceptionInterface;
 use Joomla\CMS\Factory;
 use Joomla\CMS\MVC\Model\BaseDatabaseModel;
+use Joomla\Registry\Registry;
+use Throwable;
 
 /**
  * A utility class to help you quickly clean the Joomla! cache
@@ -80,12 +84,18 @@ class CacheCleaner
 			return;
 		}
 
-		// Make sure I have a valid CMS application
+		// Make sure I have an application object
 		try
 		{
 			$app = Factory::getApplication();
 		}
 		catch (Exception $e)
+		{
+			return;
+		}
+
+		// If there's no application object things will break; let's get outta here.
+		if (!is_object($app))
 		{
 			return;
 		}
@@ -134,7 +144,8 @@ class CacheCleaner
 					continue;
 				}
 
-				$app->triggerEvent($cacheCleaningEvent, $options);
+				$fakeContainer = Container::getInstance('com_FOOBAR');
+				$fakeContainer->platform->runPlugins($cacheCleaningEvent, $options);
 			}
 		}
 	}
@@ -142,18 +153,18 @@ class CacheCleaner
 	/**
 	 * Clean a cache group on Joomla 3
 	 *
-	 * @param   string          $group      The cache to clean, e.g. com_content
-	 * @param   int             $client_id  The application ID for which the cache will be cleaned
-	 * @param   CMSApplication  $app        The current CMS application
+	 * @param   string  $group      The cache to clean, e.g. com_content
+	 * @param   int     $client_id  The application ID for which the cache will be cleaned
+	 * @param   object  $app        The current CMS application. DO NOT TYPEHINT MORE SPECIFICALLY!
 	 *
 	 * @return  array Cache controller options, including cleaning result
 	 * @throws  Exception
 	 */
-	private static function clearCacheGroupJoomla3(string $group, int $client_id, CMSApplication $app): array
+	private static function clearCacheGroupJoomla3(string $group, int $client_id, object $app): array
 	{
 		$options = [
 			'defaultgroup' => $group,
-			'cachebase'    => ($client_id) ? JPATH_ADMINISTRATOR . '/cache' : $app->get('cache_path', JPATH_SITE . '/cache'),
+			'cachebase'    => ($client_id) ? self::getAppConfigParam($app, 'cache_path', JPATH_SITE . '/cache') : JPATH_ADMINISTRATOR . '/cache',
 			'result'       => true,
 		];
 
@@ -163,7 +174,7 @@ class CacheCleaner
 			/** @noinspection PhpUndefinedMethodInspection Available via __call(), not tagged in Joomla core */
 			$cache->clean();
 		}
-		catch (Exception $e)
+		catch (Throwable $e)
 		{
 			$options['result'] = false;
 		}
@@ -174,42 +185,166 @@ class CacheCleaner
 	/**
 	 * Clean a cache group on Joomla 4
 	 *
-	 * @param   string          $group      The cache to clean, e.g. com_content
-	 * @param   int             $client_id  The application ID for which the cache will be cleaned
-	 * @param   CMSApplication  $app        The current CMS application
+	 * @param   string  $group      The cache to clean, e.g. com_content
+	 * @param   int     $client_id  The application ID for which the cache will be cleaned
+	 * @param   object  $app        The current CMS application. DO NOT TYPEHINT MORE SPECIFICALLY!
 	 *
 	 * @return  array Cache controller options, including cleaning result
 	 * @throws  Exception
 	 */
-	private static function clearCacheGroupJoomla4(string $group, int $client_id, CMSApplication $app): array
+	private static function clearCacheGroupJoomla4(string $group, int $client_id, object $app): array
 	{
 		// Get the default cache folder. Start by using the JPATH_CACHE constant.
 		$cacheBaseDefault = JPATH_CACHE;
+		$appClientId      = 0;
+
+		if (method_exists($app, 'getClientId'))
+		{
+			$appClientId = $app->getClientId();
+		}
 
 		// -- If we are asked to clean cache on the other side of the application we need to find a new cache base
-		if ($client_id != $app->getClientId())
+		if ($client_id != $appClientId)
 		{
-			$cacheBaseDefault = (($client_id) ? JPATH_ADMINISTRATOR : JPATH_SITE) . '/cache';
+			$cacheBaseDefault = (($client_id) ? JPATH_SITE : JPATH_ADMINISTRATOR) . '/cache';
 		}
 
 		// Get the cache controller's options
 		$options = [
 			'defaultgroup' => $group,
-			'cachebase'    => $app->get('cache_path', $cacheBaseDefault),
+			'cachebase'    => self::getAppConfigParam($app, 'cache_path', $cacheBaseDefault),
 			'result'       => true,
 		];
 
 		try
 		{
+			$container = Factory::getContainer();
+
+			if (empty($container))
+			{
+				throw new \RuntimeException('Cannot get Joomla 4 application container');
+			}
+
+			/** @var CacheControllerFactoryInterface $cacheControllerFactory */
+			$cacheControllerFactory   = $container->get(CacheControllerFactoryInterface::class);
+
+			if (empty($cacheControllerFactory))
+			{
+				throw new \RuntimeException('Cannot get Joomla 4 cache controller factory');
+			}
+
 			/** @var CallbackController $cache */
-			$cache = Factory::getContainer()->get(CacheControllerFactoryInterface::class)->createCacheController('callback', $options);
+			$cache = $cacheControllerFactory->createCacheController('callback', $options);
+
+			if (empty($cache) || !method_exists($cache, 'clean'))
+			{
+				throw new \RuntimeException('Cannot get Joomla 4 cache controller');
+			}
+
 			$cache->clean();
 		}
 		catch (CacheExceptionInterface $exception)
 		{
 			$options['result'] = false;
 		}
+		catch (Throwable $e)
+		{
+			$options['result'] = false;
+		}
 
 		return $options;
+	}
+
+	private static function getAppConfigParam(?object $app, string $key, $default = null)
+	{
+		/**
+		 * Any kind of Joomla CMS, Web, API or CLI application extends from AbstractApplication and has the get()
+		 * method to return application configuration parameters.
+		 */
+		if (is_object($app) && ($app instanceof AbstractApplication))
+		{
+			return $app->get($key, $default);
+		}
+
+		/**
+		 * A custom application may instead implement the Joomla\Application\ConfigurationAwareApplicationInterface
+		 * interface (Joomla 4+), in whihc case it has the get() method to return application configuration parameters.
+		 */
+		if (is_object($app)
+			&& interface_exists('Joomla\Application\ConfigurationAwareApplicationInterface', true)
+			&& ($app instanceof ConfigurationAwareApplicationInterface))
+		{
+			return $app->get($key, $default);
+		}
+
+		/**
+		 * A Joomla 3 custom application may simply implement the get() method without implementing an interface.
+		 */
+		if (is_object($app) && method_exists($app, 'get'))
+		{
+			return $app->get($key, $default);
+		}
+
+		/**
+		 * At this point the $app variable is not an object or is something I can't use. Does the Joomla Factory still
+		 * has the legacy static method getConfig() to get the application configuration? If so, use it.
+		 */
+		if (method_exists(Factory::class, 'getConfig'))
+		{
+			try
+			{
+				$jConfig = Factory::getConfig();
+
+				if (is_object($jConfig) && ($jConfig instanceof Registry))
+				{
+					$jConfig->get($key, $default);
+				}
+			}
+			catch (Throwable $e)
+			{
+				/**
+				 * Factory tries to go through the application object. It might fail if there is a custom application
+				 * which doesn't implement the interfaces Factory expects. In this case we get a Fatal Error whcih we
+				 * can trap and fall through to the next if-block.
+				 */
+			}
+		}
+
+		/**
+		 * When we are here all hope is nearly lost. We have to do a crude approximation of Joomla Factory's code to
+		 * create an application configuration Registry object and retrieve the configuration values. This will work as
+		 * long as the JConfig class (defined in configuration.php) has been loaded.
+		 */
+		$configPath = defined('JPATH_CONFIGURATION') ? JPATH_CONFIGURATION :
+			(defined('JPATH_ROOT') ? JPATH_ROOT : null);
+		$configPath = $configPath ?? (__DIR__ . '/../../..');
+		$configFile = $configPath . '/configuration.php';
+
+		if (!class_exists('JConfig') && @file_exists($configFile) && @is_file($configFile) && @is_readable($configFile))
+		{
+			require_once $configFile;
+		}
+
+		if (class_exists('JConfig'))
+		{
+			try
+			{
+				$jConfig      = new Registry();
+				$configObject = new \JConfig();
+				$jConfig->loadObject($configObject);
+
+				return $jConfig->get($key, $default);
+			}
+			catch (Throwable $e)
+			{
+				return $default;
+			}
+		}
+
+		/**
+		 * All hope is lost. I can't find the application configuration. I am returning the default value and hope stuff
+		 * won't break spectacularly...
+		 */
+		return $default;
 	}
 }

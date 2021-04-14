@@ -132,16 +132,11 @@ class Dispatcher extends AdminDispatcher
 			}
 
 			$app     = JFactory::getApplication();
-			$content = $app->getDocument()->getBuffer();
-
-			var_dump($content);
-			die;
 
 			// Disable caching, disable offline, force use of index.php
 			$app->set('caching', 0);
 			$app->set('offline', 0);
 			$app->set('themeFile', 'index.php');
-
 
 			/** @var \Joomla\CMS\Document\JsonDocument $doc */
 			$doc = Document::getInstance('json');
@@ -152,7 +147,6 @@ class Dispatcher extends AdminDispatcher
 			{
 				JFactory::$document = $doc;
 			}
-
 
 			// Set a custom document name
 			/** @var JDocumentJSON $document */

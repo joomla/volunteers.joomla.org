@@ -24,9 +24,7 @@ use JEventDispatcher;
 use Joomla\CMS\Application\ApplicationHelper;
 use Joomla\CMS\Application\CliApplication;
 use Joomla\CMS\Application\CliApplication as JApplicationCli;
-use Joomla\CMS\Application\CMSApplication;
 use Joomla\CMS\Application\ConsoleApplication;
-use Joomla\CMS\Application\WebApplication;
 use Joomla\CMS\Authentication\Authentication;
 use Joomla\CMS\Authentication\AuthenticationResponse;
 use Joomla\CMS\Cache\Cache;
@@ -1132,29 +1130,37 @@ class Platform extends BasePlatform
 			die(sprintf('Please go to <a href="%s">%1$s</a>', $url));
 		}
 
-		if (class_exists('\Joomla\CMS\Application\CMSApplication') && class_exists('\Joomla\CMS\Application\WebApplication')
-			&& ($app instanceof CMSApplication)
-			&& ($app instanceof WebApplication))
+		if (!empty($msg))
 		{
-			// In modern Joomla! versions we have versatility on setting the message and the redirection HTTP code
-			if (!empty($msg))
+			if (empty($type))
 			{
-				if (empty($type))
-				{
-					$type = 'message';
-				}
-
-				$app->enqueueMessage($msg, $type);
+				$type = 'message';
 			}
 
-			$app->redirect($url, $status);
+			$app->enqueueMessage($msg, $type);
 		}
 
-		/**
-		 * If you're here, you have an ancient Joomla version and we have to use the legacy four parameter method...
-		 * Note that we can't set a custom HTTP code, we can only tell it if it's a permanent redirection or not.
-		 */
-		$app->redirect($url, $msg, $type, $status == 301);
+		// Joomla 4: redirecting to index.php in the backend takes you to the frontend. I need to address that.
+		$isJoomla4   = version_compare(JVERSION, '3.999.999', 'gt');
+		$isBareIndex = substr($url, 0, 9) === 'index.php';
+
+		if ($isJoomla4 && $isBareIndex && $this->isBackend())
+		{
+			$givenUri = new Uri($url);
+			$newUri   = new Uri(Uri::base());
+
+			$newUri->setQuery($givenUri->getQuery());
+
+			if ($givenUri->getFragment())
+			{
+				$newUri->setFragment($givenUri->getFragment());
+			}
+
+			$url = $newUri->toString();
+		}
+
+		// Finally, do the redirection
+		$app->redirect($url, $status);
 	}
 
 	/**

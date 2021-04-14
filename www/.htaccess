@@ -63,6 +63,8 @@ RewriteRule .* index.php [F]
 RewriteRule ^reports/([^-]*) /index.php?option=com_volunteers&view=report&id=$1 [R=301,L]
 RewriteRule ^working-groups/(.*)$ /teams/$1 [R=301,L]
 RewriteRule ^working-groups(.*)$ /teams$1 [R=301,L]
+# Redirect Governance too groups
+RewriteRule ^governance(.*)$ /groups$1 [R=301,L]
 
 ## Begin - Joomla! core SEF Section.
 #

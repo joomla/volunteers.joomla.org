@@ -12,8 +12,8 @@
     <authorUrl>https://www.akeeba.com</authorUrl>
     <copyright>Copyright (c)2006-2021 Nicholas K. Dionysopoulos</copyright>
     <license>GNU General Public License version 3, or later</license>
-    <creationDate>2021-03-03</creationDate>
-    <version>8.0.2</version>
+    <creationDate>2021-04-14</creationDate>
+    <version>8.0.4</version>
     <description>PLG_QUICKICON_AKEEBABACKUP_XML_DESCRIPTION</description>
     <files>
         <filename plugin="akeebabackup">akeebabackup.php</filename>
@@ -34,8 +34,8 @@
                        description="PLG_QUICKICON_AKEEBABACKUP_DESC_WARNINGS"
 					   default="1"
 				>
-                    <option value="0">JYES</option>
-                    <option value="1">JNO</option>
+                    <option value="0">JNO</option>
+                    <option value="1">JYES</option>
                 </field>
 
                 <field name="warnfailed"
@@ -45,8 +45,8 @@
 					   default="1"
                        showon="enablewarning:1"
                 >
-                    <option value="0">JYES</option>
-                    <option value="1">JNO</option>
+                    <option value="0">JNO</option>
+                    <option value="1">JYES</option>
                 </field>
 
                 <field name="maxbackupperiod"

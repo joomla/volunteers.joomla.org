@@ -417,9 +417,36 @@ class AkeebaFEFHelper
 		static $baseUri;
 		static $basePath;
 
-		$baseUri  = $baseUri ?? Uri::base();
-		$basePath = $basePath ?? Uri::base(true);
-		$basePath = empty($basePath) ? '' : trim($basePath, '/');
+		// Get the base URI, e.g. 'https://localhost/test'
+		if (empty($baseUri))
+		{
+			$baseUri  = $baseUri ?? Uri::base();
+
+			if (substr($baseUri, -15) === '/administrator/')
+			{
+				$baseUri = substr($baseUri, 0, -15);
+			}
+			elseif (substr($baseUri, -14) === '/administrator')
+			{
+				$baseUri = substr($baseUri, 0, -14);
+			}
+		}
+
+		// Get the base path, e.g. 'test'
+		if (empty($basePath))
+		{
+			$basePath = $basePath ?? Uri::base(true);
+			$basePath = empty($basePath) ? '' : trim($basePath, '/');
+
+			if ($basePath === 'administrator')
+			{
+				$basePath = '';
+			}
+			elseif (substr($basePath, -14) == '/administrator')
+			{
+				$basePath = trim(substr($basePath, 0, -14), '/');
+			}
+		}
 
 		if ((substr($url, 0, 2) == '//') ||
 			(substr($url, 0, 7) == 'http://') ||
@@ -437,9 +464,7 @@ class AkeebaFEFHelper
 			$url = ltrim($url, '/');
 		}
 
-		$relativeBasePath = empty($basePath) ? '/' : ('/' . $basePath . '/');
-
-		return rtrim($baseUri, '/') . $relativeBasePath . $url;
+		return rtrim($baseUri, '/') . '/' . $url;
 	}
 
 	/**

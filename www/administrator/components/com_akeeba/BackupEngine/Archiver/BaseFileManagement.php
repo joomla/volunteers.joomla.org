@@ -116,9 +116,14 @@ abstract class BaseFileManagement extends Base
 	 */
 	protected function fclose(&$fp)
 	{
+		$result = true;
+
 		$offset = array_search($fp, $this->filePointers, true);
 
-		$result = @fclose($fp);
+		if (!is_null($fp))
+		{
+			$result = @fclose($fp);
+		}
 
 		if ($offset !== false)
 		{

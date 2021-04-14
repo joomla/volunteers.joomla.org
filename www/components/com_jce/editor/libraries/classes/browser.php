@@ -786,6 +786,7 @@ class WFFileBrowser extends JObject
 
         if ($init) {
             $treedir = $dir;
+
             if ($root) {
                 $result = '<ul>'
                 . '<li data-id="/" class="uk-tree-open uk-tree-root uk-padding-remove">'
@@ -795,42 +796,45 @@ class WFFileBrowser extends JObject
                 . '       <i class="uk-icon uk-icon-home"></i>'
                 . '     </span>'
                 . '     <span class="uk-tree-text">' . JText::_('WF_LABEL_HOME', 'Home') . '</span>'
-                    . '   </a>'
-                    . ' </div>';
+                . '   </a>'
+                . ' </div>';
 
                 $dir = '/';
             }
         }
+
         $folders = $this->getFolders($dir);
 
         if ($folders) {
             $result .= '<ul class="uk-tree-node">';
+
             foreach ($folders as $folder) {
                 $name = ltrim($folder['id'], '/');
 
                 $open = preg_match('#' . $name . '\b#', $treedir);
 
                 $result .= '<li data-id="' . $this->escape($name) . '" class="' . ($open ? 'uk-tree-open' : '') . '">'
-                    . ' <div class="uk-tree-row">'
-                    . '   <a href="#">'
-                    . '     <span class="uk-tree-icon" role="presentation"></span>'
-                    . '     <span class="uk-tree-text uk-text-truncate" title="' . $folder['name'] . '">' . $folder['name'] . '</span>'
-                    . '   </a>'
-                    . ' </div>';
-
-                if ($open) {
-                    if ($h = $this->getTreeItems($folder['id'], false, false)) {
-                        $result .= $h;
-                    }
-                }
+                . ' <div class="uk-tree-row">'
+                . '   <a href="#">'
+                . '     <span class="uk-tree-icon" role="presentation"></span>'
+                . '     <span class="uk-tree-text uk-text-truncate" title="' . $folder['name'] . '">' . $folder['name'] . '</span>'
+                . '   </a>'
+                . ' </div>';
+                
+                /*if ($open) {                    
+                    $result .= $this->getTreeItems($folder['id'], false, false);
+                }*/
 
                 $result .= '</li>';
             }
+
             $result .= '</ul>';
         }
+
         if ($init && $root) {
             $result .= '</li></ul>';
         }
+
         $init = false;
 
         return $result;
@@ -1182,7 +1186,7 @@ class WFFileBrowser extends JObject
     public function upload()
     {
         // Check for request forgeries
-        JSession::checkToken() or jexit(JText::_('JINVALID_TOKEN'));
+        JSession::checkToken('request') or jexit(JText::_('JINVALID_TOKEN'));
 
         // check for feature access
         if (!$this->checkFeature('upload')) {

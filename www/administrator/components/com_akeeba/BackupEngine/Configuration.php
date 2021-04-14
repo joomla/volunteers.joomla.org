@@ -483,7 +483,7 @@ class Configuration
 		$rawData  = file_get_contents($jsonPath);
 		$jsonData = empty($rawData) ? [] : json_decode($rawData, true);
 
-		foreach ($jsonData as $section => $nodes)
+		foreach ($jsonData ?? [] as $section => $nodes)
 		{
 			if (is_array($nodes))
 			{

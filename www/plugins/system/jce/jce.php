@@ -26,7 +26,7 @@ class PlgSystemJce extends JPlugin
         require_once JPATH_ADMINISTRATOR . '/components/com_jce/helpers/browser.php';
 
         $id = $app->input->get('fieldid');
-        $mediatpye = $app->input->get('view', 'images');
+        $mediatype = $app->input->get('view', 'images');
 
         $options = WFBrowserHelper::getMediaFieldOptions(array(
             'element' => $id,
@@ -34,7 +34,9 @@ class PlgSystemJce extends JPlugin
             'mediatype' => $mediatype,
         ));
 
-        $app->redirect($options['url']);
+        if (!empty($options['url'])) {
+            $app->redirect($options['url']);
+        }
     }
 
     private function isEditorEnabled()
@@ -57,16 +59,14 @@ class PlgSystemJce extends JPlugin
     {
         $app = JFactory::getApplication();
 
-        if ($app->input->getCmd('option') == 'com_media') {
-            if ($app->input->getWord('asset') && $app->input->getWord('tmpl') == 'component') {
+        if ($app->input->getCmd('option') == 'com_jce' && $app->input->getCmd('task') == 'mediafield.display' && $app->input->get('fieldid')) {
+            
+            if ($this->isEditorEnabled()) {
+                $params = JComponentHelper::getParams('com_jce');
 
-                if ($this->isEditorEnabled()) {
-                    $params = JComponentHelper::getParams('com_jce');
-
-                    if ((bool) $params->get('replace_media_manager', 1) == true) {
-                        // redirect to file browser
-                        $this->redirectMedia();
-                    }
+                if ((bool) $params->get('replace_media_manager', 1) == true) {
+                    // redirect to file browser
+                    $this->redirectMedia();
                 }
             }
         }
@@ -142,7 +142,13 @@ class PlgSystemJce extends JPlugin
             }
         }
 
+        // editor not enabled
         if (!$this->isEditorEnabled()) {
+            return true;
+        }
+
+        // media replacement disabled
+        if ((bool) $params->get('replace_media_manager', 1) === false) {
             return true;
         }
 
@@ -164,10 +170,6 @@ class PlgSystemJce extends JPlugin
             $type = $field->getAttribute('type');
 
             if (strtolower($type) === 'media') {
-
-                if ((bool) $params->get('replace_media_manager', 1) === false) {
-                    continue;
-                }
 
                 $group = (string) $field->group;
                 $form->setFieldAttribute($name, 'type', 'mediajce', $group);

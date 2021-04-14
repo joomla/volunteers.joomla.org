@@ -90,21 +90,18 @@ if (!$isFrontend)
 			<strong>Would you like us to help you faster?</strong>
 		</p>
 		<p>
-			Save this page as PDF or HTML. When filing a support ticket please attach that PDF or HTML file.
+			Save this page as PDF or HTML. Make a ZIP file containing this PDF or HTML file. When filing a support ticket please attach the ZIP file (<em>not</em> the PDF or HTML file itself).
 		</p>
 	</div>
 	<p>
 		<strong>Why do we need all that information?</strong> This information is an x-ray of your site at the time the
-															  error
-															  occurred. It lets us reproduce the issue or, if it's not a bug in our software, help you pinpoint the external
-															  reason which
-															  led to it.
+		error occurred. It lets us reproduce the issue or, if it's not a bug in our software, help you pinpoint the
+		external reason which led to it.
 	</p>
 	<p>
 		<strong>What about privacy?</strong>
 		Attachments are private in our ticket system: only you and us can see them, <em>even if you file a public
-																						ticket</em>, and
-		they are automatically deleted after a month.
+		ticket</em>, and they are automatically deleted after a month.
 	</p>
 <?php endif; ?>
 

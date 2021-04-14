@@ -857,7 +857,7 @@ class EngineParameters
 		$rawData  = file_get_contents($jsonPath);
 		$jsonData = empty($rawData) ? [] : json_decode($rawData, true);
 
-		foreach ($jsonData as $section => $data)
+		foreach ($jsonData ?? [] as $section => $data)
 		{
 			if (is_array($data))
 			{

@@ -259,10 +259,9 @@ class Installer
 						$query = $hasUtf8mb4Support ? $this->convertUtf8QueryToUtf8mb4($query) : $this->convertUtf8mb4QueryToUtf8($query);
 					}
 
-					$this->db->setQuery($query);
-
 					try
 					{
+						$this->db->setQuery($query);
 						$this->db->execute();
 					}
 					catch (Exception $e)
@@ -658,10 +657,13 @@ class Installer
 			// Check if the result of a query matches our expectation
 			case 'equals':
 				$query = (string) $node;
-				$this->db->setQuery($query);
 
 				try
 				{
+					// DO NOT use $this->db->replacePrefix. It does not replace the prefix in strings, only entity names
+					$query = str_replace('#__', $this->db->getPrefix(), $query);
+					$this->db->setQuery($query);
+
 					$result    = $this->db->loadResult();
 					$condition = ($result == $value);
 				}

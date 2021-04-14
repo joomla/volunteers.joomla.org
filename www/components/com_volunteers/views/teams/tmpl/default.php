@@ -43,8 +43,8 @@ $active = $this->state->get('filter.active', 1);
             </fieldset>
         </div>
         <div class="page-header">
-			<?php if ($this->state->get('filter.governance')): ?>
-                <h1><?php echo JText::_('COM_VOLUNTEERS_TITLE_GOVERNANCE') ?></h1>
+			<?php if ($this->state->get('filter.groups')): ?>
+                <h1><?php echo JText::_('COM_VOLUNTEERS_TITLE_GROUPS') ?></h1>
 			<?php else: ?>
                 <h1><?php echo JText::_('COM_VOLUNTEERS_TITLE_TEAMS') ?></h1>
 			<?php endif; ?>

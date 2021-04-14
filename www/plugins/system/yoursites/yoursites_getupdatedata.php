@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @version    CVS: 1.15.0
+ * @version    CVS: 1.16.0
  * @package    com_yoursites
  * @author     Geraint Edwards <via website>
  * @copyright  2016-2020 GWE Systems Ltd
@@ -1169,7 +1169,7 @@ function upgradeJoomla($requestObject, & $returnData)
 		if (isset($requestObject->blockedversion) && $requestObject->blockedversion && version_compare($updateInfo["latest"], $requestObject->blockedversion, "ge"))
 		{
 			$returnData->error = 1;
-			$returnData->errormessages[] = 'COM_1.15.0_UPGRADE_HAS_BEEN_BLOCKED';
+			$returnData->errormessages[] = 'COM_YOURSITES_VERSION_UPGRADE_HAS_BEEN_BLOCKED';
 			return;
 		}
 
@@ -3557,15 +3557,27 @@ function getBackupToken($requestObject, $returnData)
 			// If the Factory is not already loaded we have to load the
 			if (!class_exists('Akeeba\Engine\Factory'))
 			{
-				if (!defined('FOF30_INCLUDED') && !@include_once(JPATH_LIBRARIES . '/fof30/include.php'))
+				if (!defined('FOF40_INCLUDED') && !@include_once(JPATH_LIBRARIES . '/fof40/include.php'))
 				{
-					$returnData->error = 1;
-					$returnData->errormessages[] = "missing FOF30 libraries";
-					$returnData->akeebatoken = $akeebaParams->get("frontend_secret_word", "");
-					return $returnData;
+					if (!defined('FOF30_INCLUDED') && !@include_once(JPATH_LIBRARIES . '/fof30/include.php'))
+					{
+
+						$returnData->error           = 1;
+						$returnData->errormessages[] = "missing FOF30 and FOF40 libraries";
+						$returnData->akeebatoken     = $akeebaParams->get("frontend_secret_word", "");
+
+						return $returnData;
+					}
 				}
 
-				$container = \FOF30\Container\Container::getInstance('com_akeeba', array(), 'admin');
+				if (defined('FOF40_INCLUDED'))
+				{
+					$container = \FOF40\Container\Container::getInstance('com_akeeba', array(), 'admin');
+				}
+				else
+				{
+					$container = \FOF30\Container\Container::getInstance('com_akeeba', array(), 'admin');
+				}
 
 				/** @var \Akeeba\Backup\Admin\Dispatcher\Dispatcher $dispatcher */
 				$dispatcher = $container->dispatcher;
@@ -3580,7 +3592,7 @@ function getBackupToken($requestObject, $returnData)
 					else
 					{
 						$returnData->error = 0;
-						$returnData->errormessages[] = "Could not decrypt secret work - this is an Akeeba Pro feature?";
+						$returnData->errormessages[] = "Could not decrypt secret work - this is an Akeeba Pro feature";
 						$returnData->akeebatoken = $akeebaParams->get("frontend_secret_word", "");
 						return $returnData;
 					}
@@ -3588,13 +3600,21 @@ function getBackupToken($requestObject, $returnData)
 				catch (Exception $e)
 				{
 					$returnData->error = 1;
-					$returnData->errormessages[] = "Problems with FOF30 libraries";
+					$returnData->errormessages[] = "Problems with FOF libraries";
 					$returnData->akeebatoken = $akeebaParams->get("frontend_secret_word", "");
 					return $returnData;
 				}
 			}
 
 			$secureSettings = \Akeeba\Engine\Factory::getSecureSettings();
+
+			$returnData->jsonapi_enabled = (int) $akeebaParams->get("jsonapi_enabled", -1);
+			if ($returnData->jsonapi_enabled !== 1)
+			{
+				$returnData->error = 1;
+				$returnData->errormessages[] = "You must Enable JSON API (remote backup) in your Akeeba Backup Professional Settings";
+				return $returnData;
+			}
 
 			$returnData->akeebatoken = $secureSettings->decryptSettings($akeebaParams->get("frontend_secret_word", ""));
 			return $returnData;
@@ -4900,7 +4920,7 @@ function getJoomlaUpdateSitesIds($column = 0)
  *
  * @return  boolean  True on success.
  *
- * @since   1.15.0
+ * @since   1.16.0
  * @throws  \RuntimeException
  */
 function copyr2($src, $dest, $prefix = "", & $returnData, $exclusions = array())
@@ -5061,7 +5081,7 @@ function copyr2($src, $dest, $prefix = "", & $returnData, $exclusions = array())
  *
  * @return  boolean  True on success.
  *
- * @since   1.15.0
+ * @since   1.16.0
  * @throws  \RuntimeException
  */
 function deleter2($src, & $returnData)

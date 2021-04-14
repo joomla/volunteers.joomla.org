@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @version    CVS: 1.15.0
+ * @version    CVS: 1.16.0
  * @package    com_yoursites
  * @author     Geraint Edwards
  * @copyright  2017-2020 GWE Systems Ltd
@@ -94,7 +94,7 @@ class pkg_YoursitesclientInstallerScript
 		$specifictoken = '$2y$10$yG1vnR/TrUlr2qg9HmVW1eNyh.YCKGCIMsu7HzrykYyFAVMxbDGPW';
 
 		// Generic Token
-		$generictoken = '$2y$10$h4F0Bo1v1VE7GbvgHe/5zerVsbO5w2FlJB.mW3fhAaHu65XE/lm6y';
+		$generictoken = '$2y$10$XWvkVckGKIK5KCRN11eD7OrQOj1Arhgy90Zc8CdRyMhkenfrLw1mm';
 
 		$tokenToUse = empty($specifictoken) ? $generictoken : $specifictoken;
 
@@ -332,7 +332,7 @@ class pkg_YoursitesclientInstallerScript
 			{
 				$data["coreversion"] = JVERSION;
 			}
-			$data["pluginversion"] = "1.15.0";
+			$data["pluginversion"] = "1.16.0";
 
 			$yoursitesUrl = "https://manage.joomla.org/";
 

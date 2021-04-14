@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @version    CVS: 1.15.0.1
+ * @version    CVS: 1.16.0.1
  * @package    com_yoursites
  * @author     Geraint Edwards
  * @copyright  2017-2020 GWE Systems Ltd

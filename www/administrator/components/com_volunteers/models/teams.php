@@ -56,7 +56,7 @@ class VolunteersModelTeams extends JModelList
 		$this->setState('filter.department', $this->getUserStateFromRequest($this->context . '.filter.department', 'filter_department'));
 		$this->setState('filter.active', $this->getUserStateFromRequest($this->context . '.filter.active', 'filter_active'));
 		$this->setState('filter.parent', $this->getUserStateFromRequest($this->context . '.filter.parent', 'filter_parent'));
-		$this->setState('filter.governance', JFactory::getApplication('site')->input->getInt('id'));
+		$this->setState('filter.groups', JFactory::getApplication('site')->input->getInt('id'));
 
 		// Load the parameters.
 		$params = JComponentHelper::getParams('com_volunteers');
@@ -84,7 +84,7 @@ class VolunteersModelTeams extends JModelList
 		$id .= ':' . $this->getState('filter.state');
 		$id .= ':' . $this->getState('filter.department');
 		$id .= ':' . $this->getState('filter.active');
-		$id .= ':' . $this->getState('filter.governance');
+		$id .= ':' . $this->getState('filter.groups');
 
 		return parent::getStoreId($id);
 	}
@@ -144,12 +144,12 @@ class VolunteersModelTeams extends JModelList
 			}
 		}
 
-		// Filter by governance
-		$governance = $this->getState('filter.governance');
+		// Filter by groups
+		$groups = $this->getState('filter.groups');
 
-		if (is_numeric($governance) && ($governance > 0))
+		if (is_numeric($groups) && ($groups > 0))
 		{
-			$query->where('a.department = ' . (int) $governance);
+			$query->where('a.department = ' . (int) $groups);
 		}
 		else
 		{

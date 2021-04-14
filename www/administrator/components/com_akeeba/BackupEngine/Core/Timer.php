@@ -19,7 +19,7 @@ use Akeeba\Engine\Factory;
 class Timer
 {
 
-	/** @var int Maximum execution time allowance per step */
+	/** @var float Maximum execution time allowance per step */
 	private $max_exec_time = null;
 
 	/** @var int Timestamp of execution start */
@@ -28,19 +28,24 @@ class Timer
 	/**
 	 * Public constructor, creates the timer object and calculates the execution time limits
 	 *
-	 * @return  void
+	 * @param   int|null  $maxExecTime  Maximum execution time, in seconds (minimum 1 second)
+	 * @param   int|null  $bias         Execution time bias, in percentage points (10-100)
 	 */
-	public function __construct()
+	public function __construct(?int $maxExecTime = null, ?int $bias = null)
 	{
 		// Initialize start time
 		$this->start_time = $this->microtime_float();
 
-		// Get configured max time per step and bias
-		$configuration        = Factory::getConfiguration();
-		$config_max_exec_time = $configuration->get('akeeba.tuning.max_exec_time', 14);
-		$bias                 = $configuration->get('akeeba.tuning.run_time_bias', 75) / 100;
+		// Make sure we have max execution time and execution time bias or use the ones configured in the backup profile
+		$configuration = Factory::getConfiguration();
+		$maxExecTime   = $maxExecTime ?? (int) $configuration->get('akeeba.tuning.max_exec_time', 14);
+		$bias          = $bias ?? (int) $configuration->get('akeeba.tuning.run_time_bias', 75);
 
-		$this->max_exec_time = $config_max_exec_time * $bias;
+		// Make sure both max exec time and bias are positive integers within the allowed range of values
+		$maxExecTime = max(1, $maxExecTime);
+		$bias        = min(100, max(10, $bias));
+
+		$this->max_exec_time = $maxExecTime * $bias / 100;
 	}
 
 	/**
@@ -55,7 +60,7 @@ class Timer
 	/**
 	 * Gets the number of seconds left, before we hit the "must break" threshold
 	 *
-	 * @return float
+	 * @return  float
 	 */
 	public function getTimeLeft()
 	{
@@ -77,7 +82,8 @@ class Timer
 	 * Enforce the minimum execution time
 	 *
 	 * @param   bool  $log              Should I log what I'm doing? Default is true.
-	 * @param   bool  $serverSideSleep  Should I sleep on the server side? If false we return the amount of time to wait in msec
+	 * @param   bool  $serverSideSleep  Should I sleep on the server side? If false we return the amount of time to
+	 *                                  wait in msec
 	 *
 	 * @return  int Wait time to reach min_execution_time in msec
 	 */

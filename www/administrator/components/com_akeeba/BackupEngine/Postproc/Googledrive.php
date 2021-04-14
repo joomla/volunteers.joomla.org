@@ -95,11 +95,21 @@ HTML;
 		if (class_exists('\Joomla\CMS\Language\Text'))
 		{
 			$baseItem = JText::_('COM_AKEEBA_CONFIG_GOOGLEDRIVE_TEAMDRIVE_OPT_PERSONAL');
+
+			if ($baseItem === 'COM_AKEEBA_CONFIG_GOOGLEDRIVE_TEAMDRIVE_OPT_PERSONAL')
+			{
+				$baseItem = JText::_('COM_AKEEBABACKUP_CONFIG_GOOGLEDRIVE_TEAMDRIVE_OPT_PERSONAL');
+			}
 		}
 
 		if (class_exists('\Awf\Text\Text'))
 		{
 			$baseItem = Text::_('COM_AKEEBA_CONFIG_GOOGLEDRIVE_TEAMDRIVE_OPT_PERSONAL');
+
+			if ($baseItem === 'COM_AKEEBA_CONFIG_GOOGLEDRIVE_TEAMDRIVE_OPT_PERSONAL')
+			{
+				$baseItem = Text::_('COM_AKEEBABACKUP_CONFIG_GOOGLEDRIVE_TEAMDRIVE_OPT_PERSONAL');
+			}
 		}
 
 		$items = [

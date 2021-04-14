@@ -115,6 +115,20 @@ class plgSystemBackuponupdate extends CMSPlugin
 			return;
 		}
 
+		// Make sure a user is logged in
+		$user = JFactory::getUser();
+
+		if (!is_object($user) || $user->guest)
+		{
+			return;
+		}
+
+		// Make sure the user is a Super User
+		if (!$user->authorise('core.admin'))
+		{
+			return;
+		}
+
 		// Handle the flag toggle through AJAX
 		$ji          = Factory::getApplication()->input;
 		$toggleParam = $ji->getCmd('_akeeba_backup_on_update_toggle');

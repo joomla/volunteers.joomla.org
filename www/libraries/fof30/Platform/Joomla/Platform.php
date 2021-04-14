@@ -41,6 +41,7 @@ use Joomla\CMS\User\User;
 use Joomla\CMS\User\UserHelper;
 use Joomla\CMS\Version;
 use Joomla\Component\Actionlogs\Administrator\Model\ActionlogModel;
+use Joomla\Event\Event;
 use Joomla\Registry\Registry;
 
 /**
@@ -542,7 +543,44 @@ class Platform extends BasePlatform
 				return [];
 			}
 
-			return $app->triggerEvent($event, $data);
+			// Joomla 3 and 4 have triggerEvent
+			if (method_exists($app, 'triggerEvent'))
+			{
+				return $app->triggerEvent($event, $data);
+			}
+
+			// Joomla 5 (and possibly some 4.x versions) don't have triggerEvent. Go through the Events dispatcher.
+			if (method_exists($app, 'getDispatcher') && class_exists('Joomla\Event\Event'))
+			{
+				try
+				{
+					$dispatcher = $app->getDispatcher();
+				}
+				catch (\UnexpectedValueException $exception)
+				{
+					return [];
+				}
+
+				if ($data instanceof Event)
+				{
+					$eventObject = $data;
+				}
+				elseif (\is_array($data))
+				{
+					$eventObject = new Event($event, $data);
+				}
+				else
+				{
+					throw new \InvalidArgumentException('The plugin data must either be an event or an array');
+				}
+
+				$result = $dispatcher->dispatch($event, $eventObject);
+
+				return !isset($result['result']) || \is_null($result['result']) ? [] : $result['result'];
+			}
+
+			// No viable way to run the plugins :(
+			return [];
 		}
 		else
 		{

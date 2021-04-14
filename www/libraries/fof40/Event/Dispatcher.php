@@ -208,32 +208,7 @@ class Dispatcher implements Observable
 				continue;
 			}
 
-			// Call the event handler and add its output to the return value. The switch allows for execution up to 2x
-			// faster than using call_user_func_array
-			switch (count($args))
-			{
-				case 0:
-					$result[] = $observer->{$event}();
-					break;
-				case 1:
-					$result[] = $observer->{$event}($args[0]);
-					break;
-				case 2:
-					$result[] = $observer->{$event}($args[0], $args[1]);
-					break;
-				case 3:
-					$result[] = $observer->{$event}($args[0], $args[1], $args[2]);
-					break;
-				case 4:
-					$result[] = $observer->{$event}($args[0], $args[1], $args[2], $args[3]);
-					break;
-				case 5:
-					$result[] = $observer->{$event}($args[0], $args[1], $args[2], $args[3], $args[4]);
-					break;
-				default:
-					$result[] = call_user_func_array([$observer, $event], $args);
-					break;
-			}
+			$result[] = $observer->{$event}(...$args);
 		}
 
 		// Return the observers' result in an array

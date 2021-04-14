@@ -7,10 +7,10 @@
 
 defined('_JEXEC') || die;
 
-use FOF40\Container\Container;
 use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\CMS\Uri\Uri;
+use Joomla\Registry\Registry;
 
 /**
  * Akeeba Backup installer helper
@@ -39,7 +39,6 @@ class plgInstallerAkeebabackup extends CMSPlugin
 	 * @since 6.6.1
 	 */
 	private $allowedURLPrefixes = [
-		'https://www.akeeba.com',
 		'https://www.akeeba.com',
 	];
 
@@ -87,35 +86,14 @@ class plgInstallerAkeebabackup extends CMSPlugin
 			return;
 		}
 
-		// Make sure the URL is one we're supposed to handle
+		// Make sure the URL belongs to one of our domain names
 		if (!$this->hasAllowedPrefix($url))
 		{
 			return;
 		}
 
-		// Make sure this URL does not already have a download ID
-		if ($this->hasDownloadID($url))
-		{
-			return;
-		}
-
-		// Make sure FOF is loaded. We need it to determine the Download ID below. If it's not available then bail out.
-		if (!defined('FOF40_INCLUDED') && !@include_once(JPATH_LIBRARIES . '/fof40/include.php'))
-		{
-			return;
-		}
-
-		// Get the Download ID and make sure it's not empty
-		$dlid = $this->getDownloadID();
-
-		if (empty($dlid))
-		{
-			return;
-		}
-
-		// Apply the download ID to the download URL
-		$uri = Uri::getInstance($url);
-
+		// Make sure the URL seems to be for a package are meant to handle
+		$uri      = Uri::getInstance($url);
 		$path     = $uri->getPath();
 		$baseName = basename($path);
 		$pattern  = $this->packageMatch . '-*-pro*.zip';
@@ -125,6 +103,28 @@ class plgInstallerAkeebabackup extends CMSPlugin
 			return;
 		}
 
+		// Make sure this URL does not already have a download ID
+		if ($this->hasDownloadID($uri))
+		{
+			return;
+		}
+
+		// Get the Download ID and make sure it's not empty
+		try
+		{
+			$dlid = $this->getDownloadID();
+		}
+		catch (Exception $e)
+		{
+			$dlid = '';
+		}
+
+		if (empty($dlid))
+		{
+			return;
+		}
+
+		// Apply the download ID to the download URL
 		$uri->setVar('dlid', $dlid);
 
 		$url = $uri->toString();
@@ -154,14 +154,13 @@ class plgInstallerAkeebabackup extends CMSPlugin
 	/**
 	 * Does the download URL already have a non-empty Download ID query parameter?
 	 *
-	 * @param   string  $url  The download URL to check
+	 * @param   Uri  $uri  The download URL to check
 	 *
 	 * @return  bool
 	 * @since   6.6.1
 	 */
-	private function hasDownloadID($url)
+	private function hasDownloadID($uri)
 	{
-		$uri  = Uri::getInstance($url);
 		$dlid = $uri->getVar('dlid', null);
 
 		return !empty($dlid);
@@ -178,7 +177,7 @@ class plgInstallerAkeebabackup extends CMSPlugin
 	 *
 	 * The reason we have prioritization by extension is that it's possible that the same site has Download IDs from
 	 * multiple Akeeba clients. For example, the site integrator uses their own Download ID for Akeeba Backup
-	 * Professional, the site security auditor uses their Downlaod ID for Admin Tools Professional and the site owner
+	 * Professional, the site security auditor uses their Download ID for Admin Tools Professional and the site owner
 	 * uses their own Download ID for Akeeba Ticket System Professional. In this case each package needs a different
 	 * Download ID to be downloaded since each one of these Download IDs is valid for a specific extension only.
 	 *
@@ -191,17 +190,24 @@ class plgInstallerAkeebabackup extends CMSPlugin
 
 		foreach ($this->akeebaExtensions as $extension)
 		{
-			// Make sure the extension is actually installed
-			if (!ComponentHelper::isInstalled($extension))
+			// Make sure the component is installed and enabled
+			if (!ComponentHelper::isInstalled($extension) || !ComponentHelper::isEnabled($extension))
+			{
+				return null;
+			}
+
+			// Get the component's parameters
+			$params = ComponentHelper::getParams($extension);
+
+			// Make sure the parameters object is valid
+			if (is_null($params) || !is_object($params) || !($params instanceof Registry))
 			{
 				continue;
 			}
 
-			$container = Container::getInstance($extension);
-
 			foreach ($this->possibleDownloadIDKeys as $key)
 			{
-				$value = $container->params->get($key, null);
+				$value = $params->get($key, null);
 
 				if (empty($value))
 				{

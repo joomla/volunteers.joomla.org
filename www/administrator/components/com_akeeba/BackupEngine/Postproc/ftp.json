@@ -43,9 +43,7 @@
         "default": "",
         "type": "string",
         "title": "COM_AKEEBA_CONFIG_POSTPROCFTP_INITDIR_TITLE",
-        "description": "COM_AKEEBA_CONFIG_POSTPROCFTP_INITDIR_DESCRIPTION",
-        "hook": "akeeba_postprocftp_init_browser",
-        "buttontitle": "UI-BROWSE"
+        "description": "COM_AKEEBA_CONFIG_POSTPROCFTP_INITDIR_DESCRIPTION"
     },
     "engine.postproc.ftp.subdirectory": {
         "default": "",

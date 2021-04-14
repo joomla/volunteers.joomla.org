@@ -69,6 +69,8 @@ class Restore extends Model
 			try
 			{
 				$id = $this->getLatestBackupForProfile($profileID);
+
+				$this->setState('id', $id);
 			}
 			catch (RuntimeException $e)
 			{

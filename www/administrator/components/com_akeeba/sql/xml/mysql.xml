@@ -161,11 +161,39 @@ ALTER TABLE `#__ak_stats` ADD COLUMN `instep` tinyint(1) DEFAULT '0';
         <!-- Nuke any old record inside the ak_storage table -->
         <action table="#__ak_storage" canfail="1">
             <condition type="equals" operator="not" value="0"><![CDATA[
-SELECT COUNT(*) FROM `#__ak_storage`;
+SELECT COUNT(*) FROM `#__ak_storage` WHERE `tag` != "lastupdate";
             ]]></condition>
 
             <query><![CDATA[
-TRUNCATE TABLE `#__ak_storage`;
+DELETE FROM `#__ak_storage` WHERE `tag` != "lastupdate";
+            ]]></query>
+        </action>
+
+        <!-- 8.0.4 :: Convert tables to InnoDB -->
+        <action table="#__ak_profiles" canfail="1">
+            <condition type="equals" operator="not" value="1"><![CDATA[
+SELECT COUNT(*) FROM `INFORMATION_SCHEMA`.`TABLES` WHERE (`TABLE_NAME` = '#__ak_profiles') AND (`TABLE_SCHEMA` = DATABASE()) AND (`ENGINE` = 'InnoDB');
+            ]]></condition>
+            <query><![CDATA[
+ALTER TABLE `#__ak_profiles` ENGINE InnoDB;
+            ]]></query>
+        </action>
+
+        <action table="#__ak_stats" canfail="1">
+            <condition type="equals" operator="not" value="1"><![CDATA[
+SELECT COUNT(*) FROM `INFORMATION_SCHEMA`.`TABLES` WHERE (`TABLE_NAME` = '#__ak_stats') AND (`TABLE_SCHEMA` = DATABASE()) AND (`ENGINE` = 'InnoDB');
+            ]]></condition>
+            <query><![CDATA[
+ALTER TABLE `#__ak_stats` ENGINE InnoDB;
+            ]]></query>
+        </action>
+
+        <action table="#__ak_storage" canfail="1">
+            <condition type="equals" operator="not" value="1"><![CDATA[
+SELECT COUNT(*) FROM `INFORMATION_SCHEMA`.`TABLES` WHERE (`TABLE_NAME` = '#__ak_storage') AND (`TABLE_SCHEMA` = DATABASE()) AND (`ENGINE` = 'InnoDB');
+            ]]></condition>
+            <query><![CDATA[
+ALTER TABLE `#__ak_storage` ENGINE InnoDB;
             ]]></query>
         </action>
     </sql>

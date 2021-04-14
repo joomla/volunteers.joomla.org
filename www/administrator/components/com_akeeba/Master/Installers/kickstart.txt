@@ -30,7 +30,7 @@ define('KICKSTART_RECOMMENDED_PHP', '7.4.0');
 
 if (!defined('VERSION'))
 {
-	define('VERSION', '7.0.3');
+	define('VERSION', 'rev97FF89E');
 }
 
 if (!defined('KICKSTARTPRO'))
@@ -1459,7 +1459,6 @@ abstract class AKAbstractUnarchiver extends AKAbstractPart
 
 			// Reset internal state, prevents __wakeup from trying to open a non-existent file
 			$this->currentPartNumber = -1;
-			$this->archiveList = [];
 		}
 		elseif (!empty($error))
 		{
@@ -3654,7 +3653,7 @@ class AKPostprocHybrid extends AKAbstractPostproc
 	/**
 	 * Called after unserialisation, tries to reconnect to FTP
 	 */
-	function __wakeup()
+	public function __wakeup()
 	{
 		if ($this->useFTP)
 		{
@@ -3662,11 +3661,14 @@ class AKPostprocHybrid extends AKAbstractPostproc
 		}
 	}
 
-	function __destruct()
+	public function __destruct()
 	{
-		if (!$this->useFTP)
+		if ($this->useFTP)
 		{
-			@ftp_close($this->handle);
+			if (!is_null($this->handle) && is_resource($this->handle))
+			{
+				@ftp_close($this->handle);
+			}
 		}
 	}
 
@@ -6923,6 +6925,7 @@ class AKUtilsZapper extends AKAbstractPart
 			$skippedFiles = array_merge(array(
 				// Akeeba Backup for Joomla!
 				'administrator/components/com_akeeba/restoration.php',
+				'administrator/components/com_akeebabackup/restoration.php',
 				// Joomla! Update
 				'administrator/components/com_joomlaupdate/restoration.php',
 				// Akeeba Backup for WordPress
@@ -7797,6 +7800,7 @@ class AKFactory
 				$moreSkippedFiles     = array(
 					// Akeeba Backup for Joomla!
 					'administrator/components/com_akeeba/restoration.php',
+					'administrator/components/com_akeebabackup/restoration.php',
 					// Joomla! Update
 					'administrator/components/com_joomlaupdate/restoration.php',
 					// Akeeba Backup for WordPress
@@ -9625,6 +9629,7 @@ class AKKickstartUtils
 			$basePath . '/kicktemp',
 			// Akeeba Backup for Joomla!, default output directory
 			$basePathSlash . 'administrator/components/com_akeeba/backup',
+			$basePathSlash . 'administrator/components/com_akeebabackup/backup',
 			// Akeeba Solo, default output directory
 			$basePathSlash . 'backups',
 			// Akeeba Backup for WordPress, default output directory
@@ -13813,7 +13818,7 @@ function echoPage()
 		<div id="header">
 			<div class="title">
 				<span id="logo" alt="Akeeba Kickstart logo"></span>
-				Akeeba Kickstart <?php echo $edition ?> <?php echo defined('VERSION') ? VERSION : '7.0.3' ?>
+				Akeeba Kickstart <?php echo $edition ?> <?php echo defined('VERSION') ? VERSION : 'rev97FF89E' ?>
 			</div>
 		</div>
 
@@ -14219,7 +14224,7 @@ if (!function_exists('akeeba_common_phpversion_warning'))
 					Your site is currently using PHP <?php echo $longVersion ?>. This version of PHP has become <a href="https://php.net/eol.php" target="_blank">End-of-Life since <?php echo $eolDateFormatted ?></a>. It has not received security updates for a <em>very long time</em>. You MUST NOT use it for a live site!
 				</p>
 				<p>
-					<?php echo $softwareName ?> will stop supporting your version of PHP very soon. You must <strong>very urgently</strong> upgrade to a newer version of PHP. You can check <a href="https://www.akeeba.com/compatiblity.html">our Compatibility page</a> to see which versions of PHP are supported by each version of our software, select the newest one that fits your site's needs and upgrade your site to it. You can ask your host or your system administrator for instructions on upgrading PHP. It's easy and it will make your site faster and more secure.
+					<?php echo $softwareName ?> will stop supporting your version of PHP very soon. You must <strong>very urgently</strong> upgrade to a newer version of PHP. You can check <a href="https://www.akeeba.com/compatibility.html">our Compatibility page</a> to see which versions of PHP are supported by each version of our software, select the newest one that fits your site's needs and upgrade your site to it. You can ask your host or your system administrator for instructions on upgrading PHP. It's easy and it will make your site faster and more secure.
 				</p>
 			</div>
 		<?php
@@ -14920,7 +14925,7 @@ function kickstart_application_cli()
 
 	if (!$silent)
 	{
-		$version = defined('VERSION') ? VERSION : '7.0.3';
+		$version = defined('VERSION') ? VERSION : 'rev97FF89E';
 		echo <<< BANNER
 Akeeba Kickstart CLI $version
 Copyright (c) 2008-$year Akeeba Ltd / Nicholas K. Dionysopoulos

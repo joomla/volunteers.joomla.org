@@ -1234,7 +1234,6 @@ abstract class AKAbstractUnarchiver extends AKAbstractPart
 
 			// Reset internal state, prevents __wakeup from trying to open a non-existent file
 			$this->currentPartNumber = -1;
-			$this->archiveList = [];
 		}
 		elseif (!empty($error))
 		{
@@ -3429,7 +3428,7 @@ class AKPostprocHybrid extends AKAbstractPostproc
 	/**
 	 * Called after unserialisation, tries to reconnect to FTP
 	 */
-	function __wakeup()
+	public function __wakeup()
 	{
 		if ($this->useFTP)
 		{
@@ -3437,11 +3436,14 @@ class AKPostprocHybrid extends AKAbstractPostproc
 		}
 	}
 
-	function __destruct()
+	public function __destruct()
 	{
-		if (!$this->useFTP)
+		if ($this->useFTP)
 		{
-			@ftp_close($this->handle);
+			if (!is_null($this->handle) && is_resource($this->handle))
+			{
+				@ftp_close($this->handle);
+			}
 		}
 	}
 
@@ -6698,6 +6700,7 @@ class AKUtilsZapper extends AKAbstractPart
 			$skippedFiles = array_merge(array(
 				// Akeeba Backup for Joomla!
 				'administrator/components/com_akeeba/restoration.php',
+				'administrator/components/com_akeebabackup/restoration.php',
 				// Joomla! Update
 				'administrator/components/com_joomlaupdate/restoration.php',
 				// Akeeba Backup for WordPress
@@ -7572,6 +7575,7 @@ class AKFactory
 				$moreSkippedFiles     = array(
 					// Akeeba Backup for Joomla!
 					'administrator/components/com_akeeba/restoration.php',
+					'administrator/components/com_akeebabackup/restoration.php',
 					// Joomla! Update
 					'administrator/components/com_joomlaupdate/restoration.php',
 					// Akeeba Backup for WordPress

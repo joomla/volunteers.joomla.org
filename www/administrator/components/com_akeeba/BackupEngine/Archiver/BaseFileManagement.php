@@ -120,9 +120,9 @@ abstract class BaseFileManagement extends Base
 
 		$offset = array_search($fp, $this->filePointers, true);
 
-		if (!is_null($fp))
+		if (!is_null($fp) && is_resource($fp))
 		{
-			$result = @fclose($fp);
+			$result = $this->conditionalFileClose($fp);
 		}
 
 		if ($offset !== false)
@@ -222,7 +222,7 @@ abstract class BaseFileManagement extends Base
 		{
 			foreach ($this->filePointers as $file => $fp)
 			{
-				@fclose($fp);
+				$this->conditionalFileClose($fp);
 
 				unset($this->filePointers[$file]);
 			}

@@ -26,7 +26,7 @@ class PlgSystemJce extends JPlugin
         require_once JPATH_ADMINISTRATOR . '/components/com_jce/helpers/browser.php';
 
         $id = $app->input->get('fieldid');
-        $mediatype = $app->input->get('view', 'images');
+        $mediatype = $app->input->getVar('mediatype', $app->input->getVar('view', 'images'));
 
         $options = WFBrowserHelper::getMediaFieldOptions(array(
             'element' => $id,
@@ -195,5 +195,31 @@ class PlgSystemJce extends JPlugin
         }
 
         return true;
+    }
+
+    public function onBeforeWfEditorLoad()
+    {
+        $items = glob(__DIR__ . '/templates/*.php');
+
+        $app = JFactory::getApplication();
+
+        if (method_exists($app, 'getDispatcher')) {
+            $dispatcher = JFactory::getApplication()->getDispatcher();
+        } else {
+            $dispatcher = JEventDispatcher::getInstance();
+        }
+
+        foreach($items as $item) {
+            $name = basename($item, '.php');
+
+            $className = 'WfTemplate' . ucfirst($name);
+
+            require_once($item);
+
+			if (class_exists($className)) {
+                // Instantiate and register the event
+				new $className($dispatcher);
+            }
+        }
     }
 }

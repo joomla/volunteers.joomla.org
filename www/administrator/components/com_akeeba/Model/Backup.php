@@ -306,18 +306,7 @@ class Backup extends Model
 		}
 
 		// Get the profile from the session, the AKEEBA_PROFILE constant or the model state – in this order
-		if ($this->container->platform->isCli())
-		{
-			$profile = defined('AKEEBA_PROFILE') ? AKEEBA_PROFILE : 1;
-		}
-		else
-		{
-			$profile = $this->container->platform->getSessionVar('profile', null);
-			$profile = defined('AKEEBA_PROFILE') ? AKEEBA_PROFILE : $profile;
-			$profile = $this->getState('profile', $profile, 'int');
-		}
-
-		$profile = max(0, (int) $profile);
+		$profile = max(0, $this->getState('profile', 0, 'int'));
 
 		if (empty($profile))
 		{

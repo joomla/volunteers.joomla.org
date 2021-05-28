@@ -1,4 +1,19 @@
 <?php die();?>
+Akeeba Backup 8.0.6
+================================================================================
+! Encrypted settings could not be read
+
+Akeeba Backup 8.0.5
+================================================================================
+- Removed Upload to pCloud
++ Only show failed backups' log files in ALICE
++ Stealth Mode support in integrated restoration
+# [MEDIUM] Backend backup may fail when using multiple profiles with different output directories.
+# [LOW] MySQL spatial data might be impossible to restore if there is a collation mismatch between the origin and target server.
+# [LOW] PHP 8 could still throw an error while backing up under some rare circumstances
+# [LOW] Fixed fatal error while sending backup email notification under certain server configuration
+# [LOW] PHP warning when the site's root is in an absolute root subdirectory (e.g. /site instead)
+
 Akeeba Backup 8.0.4
 ================================================================================
 # [MEDIUM] Failed backups check would show old failed backups again after visiting Akeeba Backup's Control Panel page

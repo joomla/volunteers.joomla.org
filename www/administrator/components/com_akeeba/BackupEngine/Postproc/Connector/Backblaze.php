@@ -20,6 +20,7 @@ use Akeeba\Engine\Postproc\Connector\Backblaze\Exception\NotAllowed;
 use Akeeba\Engine\Postproc\Connector\Backblaze\Exception\UnexpectedHTTPStatus;
 use Akeeba\Engine\Postproc\Connector\Backblaze\FileInformation;
 use Akeeba\Engine\Postproc\Connector\Backblaze\UploadURL;
+use Akeeba\Engine\Util\FileCloseAware;
 use DomainException;
 use OutOfBoundsException;
 use RuntimeException;
@@ -29,14 +30,20 @@ use RuntimeException;
  */
 class Backblaze
 {
+	use FileCloseAware;
+
 	/** The API entry point URL, only used to retrieve the authorization token */
 	public const apiURL = "https://api.backblazeb2.com/b2api/v1/";
+
 	/** @var  string  The Backblaze B2 Account ID */
 	private $accountId;
+
 	/** @var  string  The Backblaze B2 Application Key */
 	private $applicationKey;
+
 	/** @var  AccountInformation  Account information returned from authorizeAccount */
 	private $accountInformation;
+
 	/**
 	 * Default cURL options
 	 *
@@ -51,6 +58,7 @@ class Backblaze
 		CURLOPT_RETURNTRANSFER => true,
 		CURLOPT_CAINFO         => AKEEBA_CACERT_PEM,
 	];
+
 	/** @var  BucketInformation[]  A list of the buckets in this account, used by getBucketId */
 	private $buckets;
 
@@ -359,7 +367,7 @@ class Backblaze
 
 		if (fseek($fp, $offset) == -1)
 		{
-			@fclose($fp);
+			$this->conditionalFileClose($fp);
 
 			throw new RuntimeException(sprintf('Failed to multipart upload file %s to BackBlaze: cannot seek to offset %d', $localFile, $offset));
 		}
@@ -368,12 +376,12 @@ class Backblaze
 
 		if ($data === false)
 		{
-			@fclose($fp);
+			$this->conditionalFileClose($fp);
 
 			throw new RuntimeException(sprintf('Failed to multipart upload file %s to BackBlaze: cannot read from file at offset %d, data length %d', $localFile, $offset, $partSize));
 		}
 
-		@fclose($fp);
+		$this->conditionalFileClose($fp);
 
 		$sha1          = sha1($data);
 		$contentLength = strlen($data);
@@ -1029,7 +1037,7 @@ class Backblaze
 		{
 			$hadFile = true;
 
-			@fclose($fp);
+			$this->conditionalFileClose($fp);
 		}
 
 		// Did we have a cURL error?

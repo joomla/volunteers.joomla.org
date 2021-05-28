@@ -43,7 +43,7 @@ class GetDBRoots extends AbstractTask
 			$profile = 1;
 		}
 
-		$this->container->platform->setSessionVar('profile', $profile);
+		$this->container->platform->setSessionVar('profile', $profile, 'akeeba');
 
 		// Load the configuration
 		Platform::getInstance()->load_configuration($profile);

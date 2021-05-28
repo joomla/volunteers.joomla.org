@@ -56,7 +56,7 @@ class StartBackup extends AbstractTask
 			$description = $this->container->factory->model('Backup')->getDefaultDescription() . ' (JSON API)';
 		}
 
-		$this->container->platform->setSessionVar('profile', $profile);
+		$this->container->platform->setSessionVar('profile', $profile, 'akeeba');
 		define('AKEEBA_PROFILE', $profile);
 
 		/**

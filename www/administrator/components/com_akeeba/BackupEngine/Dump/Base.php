@@ -16,29 +16,39 @@ use Akeeba\Engine\Core\Domain\Pack;
 use Akeeba\Engine\Driver\Base as DriverBase;
 use Akeeba\Engine\Factory;
 use Akeeba\Engine\Platform;
+use Akeeba\Engine\Util\FileCloseAware;
 use Exception;
 use RuntimeException;
 
 abstract class Base extends Part
 {
+	use FileCloseAware;
+
 	// **********************************************************************
 	// Configuration parameters
 	// **********************************************************************
 
 	/** @var int Current dump file part number */
 	public $partNumber = 0;
+
 	/** @var string Prefix to this database */
 	protected $prefix = '';
+
 	/** @var string MySQL database server host name or IP address */
 	protected $host = '';
+
 	/** @var string MySQL database server port (optional) */
 	protected $port = '';
+
 	/** @var string MySQL user name, for authentication */
 	protected $username = '';
+
 	/** @var string MySQL password, for authentication */
 	protected $password = '';
+
 	/** @var string MySQL database */
 	protected $database = '';
+
 	/** @var string The database driver to use */
 	protected $driver = '';
 
@@ -47,20 +57,28 @@ abstract class Base extends Part
 	// **********************************************************************
 	/** @var boolean Should I post process quoted values */
 	protected $postProcessValues = false;
+
 	/** @var string Absolute path to dump file; must be writable (optional; if left blank it is automatically calculated) */
 	protected $dumpFile = '';
+
 	/** @var string Data cache, used to cache data before being written to disk */
 	protected $data_cache = '';
+
 	/** @var int */
 	protected $largest_query = 0;
+
 	/** @var int Size of the data cache, default 128Kb */
 	protected $cache_size = 131072;
+
 	/** @var bool Should I process empty prefixes when creating abstracted names? */
 	protected $processEmptyPrefix = true;
+
 	/** @var string Absolute path to the temp file */
 	protected $tempFile = '';
+
 	/** @var string Relative path of how the file should be saved in the archive */
 	protected $saveAsName = '';
+
 	/** @var array Contains the sorted (by dependencies) list of tables/views to backup */
 	protected $tables = [];
 
@@ -69,24 +87,34 @@ abstract class Base extends Part
 	// **********************************************************************
 	/** @var array Contains the configuration data of the tables */
 	protected $tables_data = [];
+
 	/** @var array Maps database table names to their abstracted format */
 	protected $table_name_map = [];
+
 	/** @var array Contains the dependencies of tables and views (temporary) */
 	protected $dependencies = [];
+
 	/** @var string The next table to backup */
 	protected $nextTable;
+
 	/** @var integer The next row of the table to start backing up from */
 	protected $nextRange;
+
 	/** @var integer Current table's row count */
 	protected $maxRange;
+
 	/** @var bool Use extended INSERTs */
 	protected $extendedInserts = false;
+
 	/** @var integer Maximum packet size for extended INSERTs, in bytes */
 	protected $packetSize = 0;
+
 	/** @var string Extended INSERT query, while it's being constructed */
 	protected $query = '';
+
 	/** @var int Dump part's maximum size */
 	protected $partSize = 0;
+
 	/** @var resource Filepointer to the current dump part */
 	private $fp = null;
 
@@ -120,7 +148,7 @@ abstract class Base extends Part
 
 		Factory::getLog()->debug("Closing SQL dump file.");
 
-		@fclose($this->fp);
+		$this->conditionalFileClose($this->fp);
 		$this->fp = null;
 	}
 
@@ -388,8 +416,8 @@ abstract class Base extends Part
 		 */
 		if (Factory::getEngineParamsProvider()->getScriptingParameter('db.saveasname', 'normal') != 'output')
 		{
-			$archiver                     = Factory::getArchiverEngine();
-			$configuration                = Factory::getConfiguration();
+			$archiver      = Factory::getArchiverEngine();
+			$configuration = Factory::getConfiguration();
 
 			// Check whether we need to immediately post-processing a done part
 			if (Pack::postProcessDonePartFile($archiver, $configuration))
@@ -705,10 +733,7 @@ abstract class Base extends Part
 
 		if (is_null($fileData))
 		{
-			if (is_resource($this->fp))
-			{
-				@fclose($this->fp);
-			}
+			$this->conditionalFileClose($this->fp);
 
 			$this->fp = null;
 

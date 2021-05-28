@@ -43,7 +43,7 @@ class Restore extends Controller
 	public function main()
 	{
 		/** @var RestoreModel $model */
-		$model   = $this->getModel();
+		$model = $this->getModel();
 
 		$message = $model->validateRequest();
 
@@ -68,7 +68,7 @@ class Restore extends Controller
 		$this->csrfProtection();
 
 		/** @var RestoreModel $model */
-		$model   = $this->getModel();
+		$model = $this->getModel();
 
 		$model->setState('restorationstep', 1);
 		$message = $model->validateRequest();
@@ -81,18 +81,19 @@ class Restore extends Controller
 			return;
 		}
 
-		$model->setState('jps_key', $this->input->get('jps_key', '', 'none', 2));
-		$model->setState('procengine', $this->input->get('procengine', 'direct', 'cmd'));
-		$model->setState('zapbefore', $this->input->get('zapbefore', 0, 'int'));
-		$model->setState('min_exec', $this->input->get('min_exec', 0, 'int'));
-		$model->setState('max_exec', $this->input->get('max_exec', 5, 'int'));
-		$model->setState('ftp_host', $this->input->get('ftp_host', '', 'none', 2));
-		$model->setState('ftp_port', $this->input->get('ftp_port', 21, 'int'));
-		$model->setState('ftp_user', $this->input->get('ftp_user', '', 'none', 2));
-		$model->setState('ftp_pass', $this->input->get('ftp_pass', '', 'none', 2));
-		$model->setState('ftp_root', $this->input->get('ftp_root', '', 'none', 2));
-		$model->setState('tmp_path', $this->input->get('tmp_path', '', 'none', 2));
-		$model->setState('ftp_ssl', $this->input->get('usessl', 'false', 'cmd') == 'true');
+		$model->setState('jps_key',     $this->input->get('jps_key', '', 'none', 2));
+		$model->setState('procengine',  $this->input->get('procengine', 'direct', 'cmd'));
+		$model->setState('zapbefore',   $this->input->get('zapbefore', 0, 'int'));
+		$model->setState('stealthmode', $this->input->get('stealthmode', 0, 'int'));
+		$model->setState('min_exec',    $this->input->get('min_exec', 0, 'int'));
+		$model->setState('max_exec',    $this->input->get('max_exec', 5, 'int'));
+		$model->setState('ftp_host',    $this->input->get('ftp_host', '', 'none', 2));
+		$model->setState('ftp_port',    $this->input->get('ftp_port', 21, 'int'));
+		$model->setState('ftp_user',    $this->input->get('ftp_user', '', 'none', 2));
+		$model->setState('ftp_pass',    $this->input->get('ftp_pass', '', 'none', 2));
+		$model->setState('ftp_root',    $this->input->get('ftp_root', '', 'none', 2));
+		$model->setState('tmp_path',    $this->input->get('tmp_path', '', 'none', 2));
+		$model->setState('ftp_ssl',     $this->input->get('usessl', 'false', 'cmd') == 'true');
 		$model->setState('ftp_pasv', $this->input->get('passive', 'true', 'cmd') == 'true');
 
 		$status = $model->createRestorationINI();
@@ -114,9 +115,9 @@ class Restore extends Controller
 	public function ajax()
 	{
 		/** @var RestoreModel $model */
-		$model   = $this->getModel();
+		$model = $this->getModel();
 
-		$ajax  = $this->input->get('ajax', '', 'cmd');
+		$ajax = $this->input->get('ajax', '', 'cmd');
 		$model->setState('ajax', $ajax);
 
 		$ret = $model->doAjax();

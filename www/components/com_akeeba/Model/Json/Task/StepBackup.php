@@ -58,7 +58,7 @@ class StepBackup extends AbstractTask
 		if (!empty($profile))
 		{
 			$profile = max(1, $profile); // Make sure $profile is a positive integer >= 1
-			$this->container->platform->setSessionVar('profile', $profile);
+			$this->container->platform->setSessionVar('profile', $profile, 'akeeba');
 			define('AKEEBA_PROFILE', $profile);
 		}
 

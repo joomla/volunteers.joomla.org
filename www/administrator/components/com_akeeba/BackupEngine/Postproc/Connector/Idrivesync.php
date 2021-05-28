@@ -11,6 +11,7 @@ namespace Akeeba\Engine\Postproc\Connector;
 
 defined('AKEEBAENGINE') || die();
 
+use Akeeba\Engine\Util\FileCloseAware;
 use Exception;
 use SimpleXMLElement;
 
@@ -24,6 +25,8 @@ use SimpleXMLElement;
  */
 class Idrivesync
 {
+	use FileCloseAware;
+
 	/** @var array Holds the connection information data */
 	private $data = [];
 
@@ -257,7 +260,8 @@ class Idrivesync
 		curl_setopt($ch, CURLOPT_FILE, $fp);
 
 		$output = curl_exec($ch);
-		fclose($fp);
+
+		$this->conditionalFileClose($fp);
 	}
 
 

@@ -17,6 +17,7 @@ use Akeeba\Engine\Postproc\Exception\DeleteNotSupported;
 use Akeeba\Engine\Postproc\Exception\DownloadToBrowserNotSupported;
 use Akeeba\Engine\Postproc\Exception\DownloadToServerNotSupported;
 use Akeeba\Engine\Postproc\Exception\OAuthNotSupported;
+use Akeeba\Engine\Util\FileCloseAware;
 use Exception;
 
 /**
@@ -25,6 +26,8 @@ use Exception;
  */
 abstract class Base implements PostProcInterface
 {
+	use FileCloseAware;
+
 	/**
 	 * Should we break the step before post-processing?
 	 *

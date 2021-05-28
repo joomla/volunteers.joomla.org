@@ -109,7 +109,7 @@ class Ovh extends Base
 		}
 		finally
 		{
-			@fclose($fp);
+			$this->conditionalFileClose($fp);
 		}
 	}
 

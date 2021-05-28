@@ -1604,11 +1604,11 @@ class Finalization extends Part
 	/**
 	 * Formats a number of bytes in human readable format
 	 *
-	 * @param   int  $size  The size in bytes to format, e.g. 8254862
+	 * @param   int|float  $size  The size in bytes to format, e.g. 8254862
 	 *
 	 * @return  string  The human-readable representation of the byte size, e.g. "7.87 Mb"
 	 */
-	private function formatByteSize(int $size): string
+	private function formatByteSize($size): string
 	{
 		$unit = ['b', 'KB', 'MB', 'GB', 'TB', 'PB'];
 

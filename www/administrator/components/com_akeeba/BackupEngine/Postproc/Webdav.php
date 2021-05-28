@@ -136,7 +136,7 @@ class Webdav extends Base
 			}
 			finally
 			{
-				fclose($handle);
+				$this->conditionalFileClose($handle);
 			}
 		}
 

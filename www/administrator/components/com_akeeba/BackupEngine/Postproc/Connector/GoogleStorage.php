@@ -11,11 +11,14 @@ namespace Akeeba\Engine\Postproc\Connector;
 
 defined('AKEEBAENGINE') || die();
 
+use Akeeba\Engine\Util\FileCloseAware;
 use Exception;
 use RuntimeException;
 
 class GoogleStorage
 {
+	use FileCloseAware;
+
 	/**
 	 * The root URL for the Google Storage v1 JSON API
 	 *
@@ -25,22 +28,26 @@ class GoogleStorage
 	 * @see  https://cloud.google.com/storage/docs/json_api/v1/
 	 */
 	public const rootUrl = 'https://storage.googleapis.com/storage/v1/';
+
 	/**
 	 * The upload URL for the Google Storage v1 file storage API
 	 *
 	 * @see  https://cloud.google.com/storage/docs/json_api/v1/how-tos/simple-upload
 	 */
 	public const uploadUrl = 'https://www.googleapis.com/upload/storage/v1/';
+
 	/**
 	 * The URL of the OAuth2 token service
 	 */
 	public const tokenUrl = 'https://www.googleapis.com/oauth2/v4/token';
+
 	/**
 	 * The access token for connecting to Google Storage
 	 *
 	 * @var   string
 	 */
 	private $accessToken = '';
+
 	/**
 	 * The PEM-encoded private key for the Google Cloud Service Account we are going to use. This is given to you by
 	 * Google in a JSON file.
@@ -48,24 +55,28 @@ class GoogleStorage
 	 * @var   string
 	 */
 	private $privateKey = '';
+
 	/**
 	 * The Google Cloud Service Account (fake) email address. This is given to you by Google in a JSON file.
 	 *
 	 * @var   string
 	 */
 	private $clientEmail = '';
+
 	/**
 	 * When does the access token expire (in UNIX epoch)?
 	 *
 	 * @var   int
 	 */
 	private $expires = 0;
+
 	/**
 	 * A pre-calculated JWT assertion, used to make a request for an access token to Google's servers
 	 *
 	 * @var   string
 	 */
 	private $jwtAssertion = '';
+
 	/**
 	 * Default cURL options
 	 *
@@ -166,7 +177,8 @@ class GoogleStorage
 	 * @param   string  $bucket  The bucket containing the path to list
 	 * @param   string  $path    The relative path of the folder to list its contents
 	 *
-	 * @return  array  Two arrays under keys folders and files. Folders is a list of folders (prefixes). Files has the file name as key and size in bytes as value
+	 * @return  array  Two arrays under keys folders and files. Folders is a list of folders (prefixes). Files has the
+	 *                 file name as key and size in bytes as value
 	 */
 	public function listContents($bucket, $path = '/')
 	{
@@ -413,7 +425,7 @@ class GoogleStorage
 
 		fseek($fp, $from);
 		$data = fread($fp, $contentLength);
-		fclose($fp);
+		$this->conditionalFileClose($fp);
 
 		return $this->fetch('PUT', $sessionUrl, $additional, $data);
 	}
@@ -449,9 +461,9 @@ class GoogleStorage
 	}
 
 	/**
-	 * Automatically decides which upload method to use to upload a file to Google Storage. This method will return when the
-	 * entire file has been uploaded. If you want to implement staggered uploads use the createUploadSession and
-	 * uploadPart methods.
+	 * Automatically decides which upload method to use to upload a file to Google Storage. This method will return
+	 * when the entire file has been uploaded. If you want to implement staggered uploads use the createUploadSession
+	 * and uploadPart methods.
 	 *
 	 * @param   string  $bucket     The bucket containing the path
 	 * @param   string  $path       The remote path relative to Drive root
@@ -720,7 +732,7 @@ class GoogleStorage
 		// Close open file pointers
 		if ($fp)
 		{
-			@fclose($fp);
+			$this->conditionalFileClose($fp);
 
 			if (!empty($expectHttpStatus))
 			{

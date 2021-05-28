@@ -12,6 +12,7 @@ namespace Akeeba\Engine\Postproc\Connector\Cloudfiles;
 defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Postproc\Connector\Cloudfiles\Exception\Http;
+use Akeeba\Engine\Util\FileCloseAware;
 use stdClass;
 
 /**
@@ -19,6 +20,8 @@ use stdClass;
  */
 class Request
 {
+	use FileCloseAware;
+
 	/** @var bool|resource File pointer for GET and POST data */
 	public $fp = false;
 	/** @var int Size of the POST data */
@@ -257,7 +260,7 @@ class Request
 		// Clean up file resources
 		if (($this->fp !== false) && is_resource($this->fp))
 		{
-			fclose($this->fp);
+			$this->conditionalFileClose($this->fp);
 		}
 
 		return $this->response;

@@ -261,6 +261,11 @@ class FileSystem
 		// Start replacing paths with variables
 		foreach ($stock_directories as $var => $stockPath)
 		{
+			if (empty($stockPath))
+			{
+				continue;
+			}
+
 			if (strpos($path, $stockPath) !== 0)
 			{
 				continue;

@@ -102,7 +102,7 @@ class Cloudfiles extends Base
 
 		$connector->downloadObject($remotePath, $fp, $headers);
 
-		@fclose($fp);
+		$this->conditionalFileClose($fp);
 	}
 
 	/**

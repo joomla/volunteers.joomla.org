@@ -288,14 +288,14 @@ class Dispatcher extends BaseDispatcher
 		$model = $this->container->factory->model('ControlPanel')->tmpInstance();
 
 		// Update the db structure if necessary (once per session at most)
-		$lastVersion = $this->container->platform->getSessionVar('magicParamsUpdateVersion', null, 'com_akeeba');
+		$lastVersion = $this->container->platform->getSessionVar('magicParamsUpdateVersion', null, 'akeeba');
 
 		if ($lastVersion != AKEEBA_VERSION)
 		{
 			try
 			{
 				$model->checkAndFixDatabase();
-				$this->container->platform->setSessionVar('magicParamsUpdateVersion', AKEEBA_VERSION, 'com_akeeba');
+				$this->container->platform->setSessionVar('magicParamsUpdateVersion', AKEEBA_VERSION, 'akeeba');
 			}
 			catch (\RuntimeException $e)
 			{

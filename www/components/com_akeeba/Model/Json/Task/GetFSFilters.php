@@ -56,7 +56,7 @@ class GetFSFilters extends AbstractTask
 		}
 
 		// Set the active profile
-		$this->container->platform->setSessionVar('profile', $profile);
+		$this->container->platform->setSessionVar('profile', $profile, 'akeeba');
 
 		// Load the configuration
 		Platform::getInstance()->load_configuration($profile);

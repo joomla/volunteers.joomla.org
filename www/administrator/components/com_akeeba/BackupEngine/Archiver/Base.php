@@ -15,6 +15,7 @@ use Akeeba\Engine\Base\Exceptions\ErrorException;
 use Akeeba\Engine\Base\Exceptions\WarningException;
 use Akeeba\Engine\Factory;
 use Akeeba\Engine\Platform;
+use Akeeba\Engine\Util\FileCloseAware;
 use Akeeba\Engine\Util\FileSystem;
 use Exception;
 use RuntimeException;
@@ -24,6 +25,8 @@ use RuntimeException;
  */
 abstract class Base
 {
+	use FileCloseAware;
+
 	/** @var Filesystem Filesystem utilities object */
 	protected $fsUtils = null;
 
@@ -451,7 +454,7 @@ abstract class Base
 		if ($ret['done'])
 		{
 			// We are finished! Close the file
-			fclose($this->_xform_fp);
+			$this->conditionalFileClose($this->_xform_fp);
 			Factory::getLog()->debug('Initializing with JPA package has finished');
 		}
 

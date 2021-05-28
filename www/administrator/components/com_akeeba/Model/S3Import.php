@@ -215,8 +215,8 @@ class S3Import extends Model
 		}
 
 		// Gather the necessary information to perform the download
-		$part           = $this->container->platform->getSessionVar('s3import.part', -1, 'com_akeeba');
-		$frag           = $this->container->platform->getSessionVar('s3import.frag', -1, 'com_akeeba');
+		$part           = $this->container->platform->getSessionVar('s3import.part', -1, 'akeeba');
+		$frag           = $this->container->platform->getSessionVar('s3import.frag', -1, 'akeeba');
 		$remoteFilename = $this->getState('file', '');
 
 		$bucket = $this->getState('s3bucket');
@@ -227,8 +227,8 @@ class S3Import extends Model
 		$s3 = $this->getS3Connector();
 
 		// Get the number of parts and total size from the session, or –if not there– fetch it
-		$totalparts = $this->container->platform->getSessionVar('s3import.totalparts', -1, 'com_akeeba');
-		$totalsize  = $this->container->platform->getSessionVar('s3import.totalsize', -1, 'com_akeeba');
+		$totalparts = $this->container->platform->getSessionVar('s3import.totalparts', -1, 'akeeba');
+		$totalsize  = $this->container->platform->getSessionVar('s3import.totalsize', -1, 'akeeba');
 
 		if (($totalparts < 0) || (($part < 0) && ($frag < 0)))
 		{
@@ -244,11 +244,11 @@ class S3Import extends Model
 				}
 			}
 
-			$this->container->platform->setSessionVar('s3import.totalparts', count($allFiles), 'com_akeeba');
-			$this->container->platform->setSessionVar('s3import.totalsize', $totalsize, 'com_akeeba');
-			$this->container->platform->setSessionVar('s3import.donesize', 0, 'com_akeeba');
+			$this->container->platform->setSessionVar('s3import.totalparts', count($allFiles), 'akeeba');
+			$this->container->platform->setSessionVar('s3import.totalsize', $totalsize, 'akeeba');
+			$this->container->platform->setSessionVar('s3import.donesize', 0, 'akeeba');
 
-			$totalparts = $this->container->platform->getSessionVar('s3import.totalparts', -1, 'com_akeeba');
+			$totalparts = $this->container->platform->getSessionVar('s3import.totalparts', -1, 'akeeba');
 		}
 
 		// Start timing ourselves
@@ -279,7 +279,7 @@ class S3Import extends Model
 			if ($part == -1)
 			{
 				// Currently downloaded size
-				$this->container->platform->setSessionVar('s3import.donesize', 0, 'com_akeeba');
+				$this->container->platform->setSessionVar('s3import.donesize', 0, 'akeeba');
 
 				// Init
 				$part = 0;
@@ -382,9 +382,9 @@ class S3Import extends Model
 			{
 				clearstatcache();
 				$filesize = (int) @filesize($temp_file);
-				$total    = $this->container->platform->getSessionVar('s3import.donesize', 0, 'com_akeeba');
+				$total    = $this->container->platform->getSessionVar('s3import.donesize', 0, 'akeeba');
 				$total    += $filesize;
-				$this->container->platform->setSessionVar('s3import.donesize', $total, 'com_akeeba');
+				$this->container->platform->setSessionVar('s3import.donesize', $total, 'akeeba');
 			}
 
 			// Successful download, or have to move to the next part.
@@ -433,8 +433,8 @@ class S3Import extends Model
 		// Pass the id, part, frag in the request so that the view can grab it
 		$this->setState('part', $part);
 		$this->setState('frag', $frag);
-		$this->container->platform->setSessionVar('s3import.part', $part, 'com_akeeba');
-		$this->container->platform->setSessionVar('s3import.frag', $frag, 'com_akeeba');
+		$this->container->platform->setSessionVar('s3import.part', $part, 'akeeba');
+		$this->container->platform->setSessionVar('s3import.frag', $frag, 'akeeba');
 
 		if ($part >= $totalparts)
 		{

@@ -20,9 +20,11 @@ class Log extends Model
 	/**
 	 * Get an array with the names of all log files in this backup profile
 	 *
+	 * @param   bool  $onlyFailed  Should I only return the log files of backups marked as failed?
+	 *
 	 * @return  string[]
 	 */
-	public function getLogFiles()
+	public function getLogFiles(bool $onlyFailed = false): array
 	{
 		$configuration = Factory::getConfiguration();
 		$outdir        = $configuration->get('akeeba.basic.output_directory');
@@ -74,6 +76,11 @@ class Log extends Model
 			}
 		}
 
+		if ($onlyFailed)
+		{
+			$ret = $this->keepOnlyFailedLogs($ret);
+		}
+
 		krsort($ret);
 
 		return $ret;
@@ -82,14 +89,16 @@ class Log extends Model
 	/**
 	 * Gets the JHtml options list for selecting a log file
 	 *
+	 * @param   bool  $onlyFailed  Should I only return the log files of backups marked as failed?
+	 *
 	 * @return  array
 	 */
-	public function getLogList()
+	public function getLogList(bool $onlyFailed = false): array
 	{
 		$origin  = null;
 		$options = [];
 
-		$list = $this->getLogFiles();
+		$list = $this->getLogFiles($onlyFailed);
 
 		if (!empty($list))
 		{
@@ -177,5 +186,31 @@ class Log extends Model
 		{
 			echo "--- END OF RAW LOG ---\r\n";
 		}
+	}
+
+	protected function keepOnlyFailedLogs($logs)
+	{
+		$db            = $this->container->db;
+		$query         = $db->getQuery(true)
+			->select([
+				$db->quoteName('tag'),
+				$db->quoteName('backupid'),
+			])
+			->from($db->quoteName('#__ak_stats'))
+			->where($db->quoteName('status') . ' = ' . $db->quote('fail'));
+		$failedBackups = $db->setQuery($query)->loadObjectList() ?: [];
+
+		if (empty($failedBackups))
+		{
+			return [];
+		}
+
+		$failedBackups = array_map(function ($o) {
+			$tag = $o->tag ?? '';
+
+			return (empty($tag) ? '' : '.') . $o->backupid;
+		}, $failedBackups);
+
+		return array_intersect($logs, $failedBackups);
 	}
 }

@@ -12,6 +12,7 @@ namespace Akeeba\Engine\Postproc\Connector;
 defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Postproc\Connector\Sugarsync\Exception\Base as SugarsyncException;
+use Akeeba\Engine\Util\FileCloseAware;
 use DOMDocument;
 use DOMElement;
 
@@ -20,6 +21,8 @@ use DOMElement;
  */
 class Sugarsync
 {
+	use FileCloseAware;
+
 	/** @var string The URL to the SugarSync API endpoint */
 	private $apiURL = 'https://api.sugarsync.com';
 
@@ -753,7 +756,7 @@ class Sugarsync
 
 		if (!is_null($fp))
 		{
-			fclose($fp);
+			$this->conditionalFileClose($fp);
 		}
 
 		if (!$silenceErrors && ($errno != 0))

@@ -69,10 +69,10 @@ class Html extends BaseView
 		$model    = $this->getModel();
 		$platform = $this->container->platform;
 
-		$total = $platform->getSessionVar('s3import.totalsize', 0, 'com_akeeba');
-		$done  = $platform->getSessionVar('s3import.donesize', 0, 'com_akeeba');
-		$part  = $platform->getSessionVar('s3import.part', 0, 'com_akeeba') + 1;
-		$parts = $platform->getSessionVar('s3import.totalparts', 0, 'com_akeeba');
+		$total = $platform->getSessionVar('s3import.totalsize', 0, 'akeeba');
+		$done  = $platform->getSessionVar('s3import.donesize', 0, 'akeeba');
+		$part  = $platform->getSessionVar('s3import.part', 0, 'akeeba') + 1;
+		$parts = $platform->getSessionVar('s3import.totalparts', 0, 'akeeba');
 
 		$percent = 0;
 

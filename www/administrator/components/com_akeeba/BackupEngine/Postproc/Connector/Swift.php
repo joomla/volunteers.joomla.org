@@ -13,6 +13,7 @@ defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Postproc\Connector\Cloudfiles\Exception\Http;
 use Akeeba\Engine\Postproc\Connector\Cloudfiles\Request;
+use Akeeba\Engine\Util\FileCloseAware;
 use DateTime;
 use stdClass;
 
@@ -21,6 +22,8 @@ use stdClass;
  */
 class Swift
 {
+	use FileCloseAware;
+
 	/**
 	 * The authentication server (Keystone) endpoint, e.g. https://auth.cloud.ovh.net/v2.0
 	 *
@@ -505,7 +508,7 @@ class Swift
 
 		if (isset($input['file']))
 		{
-			@fclose($request->fp);
+			$this->conditionalFileClose($request->fp);
 		}
 	}
 

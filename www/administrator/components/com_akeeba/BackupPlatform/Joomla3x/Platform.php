@@ -1117,7 +1117,7 @@ class Joomla3x extends BasePlatform
 			return;
 		}
 
-		$this->container->platform->setSessionVar($name, $value, 'akeebabackup');
+		$this->container->platform->setSessionVar($name, $value, 'akeeba');
 	}
 
 	/**
@@ -1144,8 +1144,8 @@ class Joomla3x extends BasePlatform
 			return $ret;
 		}
 
-		$ret = $this->container->platform->getSessionVar($name, $default, 'akeebabackup');
-		$this->container->platform->setSessionVar($name, null, 'akeebabackup');
+		$ret = $this->container->platform->getSessionVar($name, $default, 'akeeba');
+		$this->container->platform->setSessionVar($name, null, 'akeeba');
 
 		return $ret;
 	}

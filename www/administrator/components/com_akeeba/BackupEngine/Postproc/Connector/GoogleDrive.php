@@ -11,6 +11,7 @@ namespace Akeeba\Engine\Postproc\Connector;
 
 defined('AKEEBAENGINE') || die();
 
+use Akeeba\Engine\Util\FileCloseAware;
 use Exception;
 use RuntimeException;
 
@@ -21,6 +22,8 @@ use RuntimeException;
  */
 class GoogleDrive
 {
+	use FileCloseAware;
+
 	/**
 	 * The root URL for the Google Drive v3 API
 	 */
@@ -650,7 +653,7 @@ JSON;
 
 		fseek($fp, $from);
 		$data = fread($fp, $contentLength);
-		fclose($fp);
+		$this->conditionalFileClose($fp);
 
 		return $this->fetch('PUT', $sessionUrl, $additional, $data);
 	}
@@ -955,7 +958,7 @@ JSON;
 		// Close open file pointers
 		if ($fp)
 		{
-			@fclose($fp);
+			$this->conditionalFileClose($fp);
 
 			if ($expectHttpStatus && ($expectHttpStatus != $lastHttpCode))
 			{

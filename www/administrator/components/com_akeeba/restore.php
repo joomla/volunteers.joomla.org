@@ -1804,6 +1804,7 @@ class AKPostprocFTP extends AKAbstractPostproc
 		$this->passive = AKFactory::get('kickstart.ftp.passive', true);
 		$this->host    = AKFactory::get('kickstart.ftp.host', '');
 		$this->port    = AKFactory::get('kickstart.ftp.port', 21);
+
 		if (trim($this->port) == '')
 		{
 			$this->port = 21;
@@ -1839,10 +1840,12 @@ class AKPostprocFTP extends AKAbstractPostproc
 				}
 				$absoluteDirToHere = $tempDir;
 				$tempDir           = rtrim(str_replace('\\', '/', $tempDir), '/');
+
 				if (!empty($tempDir))
 				{
 					$tempDir .= '/';
 				}
+
 				$this->tempDir = $tempDir;
 				// Is this directory writable?
 				$writable = $this->isDirWritable($tempDir);
@@ -1864,6 +1867,7 @@ class AKPostprocFTP extends AKAbstractPostproc
 			{
 				// Let's see if the user has specified one
 				$userdir = AKFactory::get('kickstart.ftp.tempdir', '');
+
 				if (!empty($userdir))
 				{
 					// Is it an absolute or a relative directory?
@@ -1871,6 +1875,7 @@ class AKPostprocFTP extends AKAbstractPostproc
 					$absolute = $absolute || (substr($userdir, 0, 1) == '/');
 					$absolute = $absolute || (substr($userdir, 1, 1) == ':');
 					$absolute = $absolute || (substr($userdir, 2, 1) == ':');
+
 					if (!$absolute)
 					{
 						// Make absolute
@@ -1889,6 +1894,7 @@ class AKPostprocFTP extends AKAbstractPostproc
 					}
 				}
 			}
+
 			$this->tempDir = $tempDir;
 
 			if (!$writable)
@@ -1915,6 +1921,7 @@ class AKPostprocFTP extends AKAbstractPostproc
 		{
 			$this->handle = @ftp_connect($this->host, $this->port);
 		}
+
 		if ($this->handle === false)
 		{
 			$this->setError(AKText::_('WRONG_FTP_HOST'));
@@ -1953,6 +1960,7 @@ class AKPostprocFTP extends AKAbstractPostproc
 		// Try to download ourselves
 		$testFilename = defined('KSSELFNAME') ? KSSELFNAME : basename(__FILE__);
 		$tempHandle   = fopen('php://temp', 'r+');
+
 		if (@ftp_fget($this->handle, $tempHandle, $testFilename, FTP_ASCII, 0) === false)
 		{
 			$this->setError(AKText::_('WRONG_FTP_PATH2'));
@@ -1961,6 +1969,7 @@ class AKPostprocFTP extends AKAbstractPostproc
 
 			return false;
 		}
+
 		fclose($tempHandle);
 
 		return true;
@@ -1969,6 +1978,7 @@ class AKPostprocFTP extends AKAbstractPostproc
 	private function isDirWritable($dir)
 	{
 		$fp = @fopen($dir . '/kickstart.dat', 'wb');
+
 		if ($fp === false)
 		{
 			return false;
@@ -1986,6 +1996,7 @@ class AKPostprocFTP extends AKAbstractPostproc
 	{
 		// Strip absolute filesystem path to website's root
 		$removePath = AKFactory::get('kickstart.setup.destdir', '');
+
 		if (!empty($removePath))
 		{
 			// UNIXize the paths
@@ -1996,17 +2007,20 @@ class AKPostprocFTP extends AKAbstractPostproc
 			$dirName    = rtrim($dirName, '/\\') . '/';
 			// Process the path removal
 			$left = substr($dirName, 0, strlen($removePath));
+
 			if ($left == $removePath)
 			{
 				$dirName = substr($dirName, strlen($removePath));
 			}
 		}
+
 		if (empty($dirName))
 		{
 			$dirName = '';
 		} // 'cause the substr() above may return FALSE.
 
 		$check = '/' . trim($this->dir, '/') . '/' . trim($dirName, '/');
+
 		if ($this->is_dir($check))
 		{
 			return true;
@@ -2014,9 +2028,11 @@ class AKPostprocFTP extends AKAbstractPostproc
 
 		$alldirs     = explode('/', $dirName);
 		$previousDir = '/' . trim($this->dir);
+
 		foreach ($alldirs as $curdir)
 		{
 			$check = $previousDir . '/' . $curdir;
+
 			if (!$this->is_dir($check))
 			{
 				// Proactively try to delete a file by the same name
@@ -2026,6 +2042,7 @@ class AKPostprocFTP extends AKAbstractPostproc
 				{
 					// If we couldn't create the directory, attempt to fix the permissions in the PHP level and retry!
 					$this->fixPermissions($removePath . $check);
+
 					if (@ftp_mkdir($this->handle, $check) === false)
 					{
 						// Can we fall back to pure PHP mode, sire?
@@ -2046,8 +2063,11 @@ class AKPostprocFTP extends AKAbstractPostproc
 						}
 					}
 				}
+
 				@ftp_chmod($this->handle, $perms, $check);
+
 			}
+
 			$previousDir = $check;
 		}
 
@@ -2071,17 +2091,21 @@ class AKPostprocFTP extends AKAbstractPostproc
 		$relPath  = str_replace('\\', '/', $path);
 		$basePath = rtrim(str_replace('\\', '/', KSROOTDIR), '/');
 		$basePath = rtrim($basePath, '/');
+
 		if (!empty($basePath))
 		{
 			$basePath .= '/';
 		}
+
 		// Remove the leading relative root
 		if (substr($relPath, 0, strlen($basePath)) == $basePath)
 		{
 			$relPath = substr($relPath, strlen($basePath));
 		}
+
 		$dirArray  = explode('/', $relPath);
 		$pathBuilt = rtrim($basePath, '/');
+
 		foreach ($dirArray as $dir)
 		{
 			if (empty($dir))
@@ -2090,6 +2114,7 @@ class AKPostprocFTP extends AKAbstractPostproc
 			}
 			$oldPath = $pathBuilt;
 			$pathBuilt .= '/' . $dir;
+
 			if (is_dir($oldPath . $dir))
 			{
 				$trustMeIKnowWhatImDoing = 500 + 10 + 1; // working around overzealous scanners written by bozos
@@ -2112,7 +2137,7 @@ class AKPostprocFTP extends AKAbstractPostproc
 		}
 	}
 
-	function __wakeup()
+	public function __wakeup()
 	{
 		$this->connect();
 	}
@@ -2128,11 +2153,13 @@ class AKPostprocFTP extends AKAbstractPostproc
 
 		$remotePath = dirname($this->filename);
 		$removePath = AKFactory::get('kickstart.setup.destdir', '');
+
 		if (!empty($removePath))
 		{
 			$removePath = ltrim($removePath, "/");
 			$remotePath = ltrim($remotePath, "/");
 			$left       = substr($remotePath, 0, strlen($removePath));
+
 			if ($left == $removePath)
 			{
 				$remotePath = substr($remotePath, strlen($removePath));
@@ -2147,16 +2174,20 @@ class AKPostprocFTP extends AKAbstractPostproc
 		$remoteName = $absoluteFTPPath . '/' . $onlyFilename;
 
 		$ret = @ftp_chdir($this->handle, $absoluteFTPPath);
+
 		if ($ret === false)
 		{
 			$ret = $this->createDirRecursive($absoluteFSPath, 0755);
+
 			if ($ret === false)
 			{
 				$this->setError(AKText::sprintf('FTP_COULDNT_UPLOAD', $this->filename));
 
 				return false;
 			}
+
 			$ret = @ftp_chdir($this->handle, $absoluteFTPPath);
+
 			if ($ret === false)
 			{
 				$this->setError(AKText::sprintf('FTP_COULDNT_UPLOAD', $this->filename));
@@ -2166,6 +2197,7 @@ class AKPostprocFTP extends AKAbstractPostproc
 		}
 
 		$ret = @ftp_put($this->handle, $remoteName, $this->tempFilename, FTP_BINARY);
+
 		if ($ret === false)
 		{
 			// If we couldn't create the file, attempt to fix the permissions in the PHP level and retry!
@@ -2173,6 +2205,7 @@ class AKPostprocFTP extends AKAbstractPostproc
 			$this->unlink($this->filename);
 
 			$fp = @fopen($this->tempFilename, 'rb');
+
 			if ($fp !== false)
 			{
 				$ret = @ftp_fput($this->handle, $remoteName, $fp, FTP_BINARY);
@@ -2183,6 +2216,7 @@ class AKPostprocFTP extends AKAbstractPostproc
 				$ret = false;
 			}
 		}
+
 		@unlink($this->tempFilename);
 
 		if ($ret === false)
@@ -2191,7 +2225,9 @@ class AKPostprocFTP extends AKAbstractPostproc
 
 			return false;
 		}
+
 		$restorePerms = AKFactory::get('kickstart.setup.restoreperms', false);
+
 		if ($restorePerms)
 		{
 			@ftp_chmod($this->_handle, $this->perms, $remoteName);
@@ -2213,9 +2249,11 @@ class AKPostprocFTP extends AKAbstractPostproc
 	public function unlink($file)
 	{
 		$removePath = AKFactory::get('kickstart.setup.destdir', '');
+
 		if (!empty($removePath))
 		{
 			$left = substr($file, 0, strlen($removePath));
+
 			if ($left == $removePath)
 			{
 				$file = substr($file, strlen($removePath));
@@ -2247,9 +2285,11 @@ class AKPostprocFTP extends AKAbstractPostproc
 
 		// Strip absolute filesystem path to website's root
 		$removePath = AKFactory::get('kickstart.setup.destdir', '');
+
 		if (!empty($removePath))
 		{
 			$left = substr($filename, 0, strlen($removePath));
+
 			if ($left == $removePath)
 			{
 				$filename = substr($filename, strlen($removePath));
@@ -2285,9 +2325,11 @@ class AKPostprocFTP extends AKAbstractPostproc
 	public function rmdir($directory)
 	{
 		$removePath = AKFactory::get('kickstart.setup.destdir', '');
+
 		if (!empty($removePath))
 		{
 			$left = substr($directory, 0, strlen($removePath));
+
 			if ($left == $removePath)
 			{
 				$directory = substr($directory, strlen($removePath));
@@ -2305,27 +2347,33 @@ class AKPostprocFTP extends AKAbstractPostproc
 		$originalTo   = $to;
 
 		$removePath = AKFactory::get('kickstart.setup.destdir', '');
+
 		if (!empty($removePath))
 		{
 			$left = substr($from, 0, strlen($removePath));
+
 			if ($left == $removePath)
 			{
 				$from = substr($from, strlen($removePath));
 			}
 		}
+
 		$from = '/' . trim($this->dir, '/') . '/' . trim($from, '/');
 
 		if (!empty($removePath))
 		{
 			$left = substr($to, 0, strlen($removePath));
+
 			if ($left == $removePath)
 			{
 				$to = substr($to, strlen($removePath));
 			}
 		}
+
 		$to = '/' . trim($this->dir, '/') . '/' . trim($to, '/');
 
 		$result = @ftp_rename($this->handle, $from, $to);
+
 		if ($result !== true)
 		{
 			return @rename($from, $to);
@@ -5961,6 +6009,135 @@ class AKCoreTimer extends AKAbstractObject
  * @license   GNU General Public License version 3, or later
  */
 
+
+class AKUtilsHtaccess extends AKAbstractObject
+{
+	/**
+	 * Extract the PHP handler configuration from a .htaccess file.
+	 *
+	 * This method supports AddHandler lines and SetHandler blocks.
+	 *
+	 * @param   string  $htaccess
+	 *
+	 * @return  string|null  NULL when not found
+	 */
+	public static function extractHandler($htaccess)
+	{
+		// Normalize the .htaccess
+		$htaccess = self::normalizeHtaccess($htaccess);
+
+		// Look for SetHandler and AddHandler in Files and FilesMatch containers
+		foreach (['Files', 'FilesMatch'] as $container)
+		{
+			$result = self::extractContainer($container, $htaccess);
+
+			if (!is_null($result))
+			{
+				return $result;
+			}
+		}
+
+		// Fallback: extract an AddHandler line
+		$found = preg_match('#^AddHandler\s?.*\.php.*$#mi', $htaccess, $matches);
+
+		if ($found >= 1)
+		{
+			return $matches[0];
+		}
+
+		return null;
+	}
+
+	/**
+	 * Extracts a Files or FilesMatch container with an AddHandler or SetHandler line
+	 *
+	 * @param   string  $container  "Files" or "FilesMatch"
+	 * @param   string  $htaccess   The .htaccess file content
+	 *
+	 * @return  string|null  NULL when not found
+	 */
+	protected static function extractContainer($container, $htaccess)
+	{
+		// Try to find the opening container tag e.g. <Files....>
+		$pattern = sprintf('#<%s\s*.*\.php.*>#m', $container);
+		$found   = preg_match($pattern, $htaccess, $matches, PREG_OFFSET_CAPTURE);
+
+		if (!$found)
+		{
+			return null;
+		}
+
+		// Get the rest of the .htaccess sample
+		$openContainer = $matches[0][0];
+		$htaccess      = trim(substr($htaccess, $matches[0][1] + strlen($matches[0][0])));
+
+		// Try to find the closing container tag
+		$pattern = sprintf('#</%s\s*>#m', $container);
+		$found   = preg_match($pattern, $htaccess, $matches, PREG_OFFSET_CAPTURE);
+
+		if (!$found)
+		{
+			return null;
+		}
+
+		// Get the rest of the .htaccess sample
+		$htaccess       = trim(substr($htaccess, 0, $matches[$found - 1][1]));
+		$closeContainer = $matches[$found - 1][0];
+
+		if (empty($htaccess))
+		{
+			return null;
+		}
+
+		// Now we'll explode remaining lines and find the first SetHandler or AddHandler line
+		$lines = array_map('trim', explode("\n", $htaccess));
+		$lines = array_filter($lines, function ($line) {
+			return preg_match('#(Add|Set)Handler\s?#i', $line) >= 1;
+		});
+
+		if (empty($lines))
+		{
+			return null;
+		}
+
+		return $openContainer . "\n" . array_shift($lines) . "\n" . $closeContainer;
+	}
+
+	/**
+	 * Normalize the .htaccess file content, making it suitable for handler extraction
+	 *
+	 * @param   string  $htaccess  The original file
+	 *
+	 * @return  string  The normalized file
+	 */
+	private static function normalizeHtaccess($htaccess)
+	{
+		// Convert all newlines into UNIX style
+		$htaccess = str_replace("\r\n", "\n", $htaccess);
+		$htaccess = str_replace("\r", "\n", $htaccess);
+
+		// Return only non-comment, non-empty lines
+		$isNonEmptyNonComment = function ($line) {
+			$line = trim($line);
+
+			return !empty($line) && (substr($line, 0, 1) !== '#');
+		};
+
+		$lines = array_map('trim', explode("\n", $htaccess));
+
+		return implode("\n", array_filter($lines, $isNonEmptyNonComment));
+	}
+}
+
+/**
+ * Akeeba Restore
+ * An AJAX-powered archive extraction library for JPA, JPS and ZIP archives
+ *
+ * @package   restore
+ * @copyright Copyright (c)2008-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @license   GNU General Public License version 3, or later
+ */
+
 /**
  * A filesystem scanner which uses opendir()
  */
@@ -9142,6 +9319,27 @@ if (!defined('KICKSTART'))
 			 */
 			case 'startRestore':
 			case 'stepRestore':
+				if ($task == 'startRestore')
+				{
+					// Fetch path to the site root from the restoration.php file, so we can tell the engine where it should operate
+					$siteRoot = AKFactory::get('kickstart.setup.destdir', '');
+
+					// Before starting, read and save any custom AddHandler directive
+					$phpHandlers = getPhpHandlers($siteRoot);
+					AKFactory::set('kickstart.setup.phphandlers', $phpHandlers);
+
+					// If the Stealth Mode is enabled, create the .htaccess file
+					if (AKFactory::get('kickstart.stealth.enable', false))
+					{
+						createStealthURL($siteRoot);
+					}
+					// No stealth mode, but we have custom handler directives, must write our own file
+					elseif ($phpHandlers)
+					{
+						writePhpHandlers($siteRoot);
+					}
+				}
+
 				/**
 				 * First try to run the filesystem zapper (remove all existing files and folders). If the Zapper is
 				 * disabled or has already finished running we will get a FALSE result. Otherwise it's a status array
@@ -9372,4 +9570,132 @@ function recursive_remove_directory($directory)
 		// return success
 		return true;
 	}
+}
+
+function createStealthURL($siteRoot = '')
+{
+	$filename = AKFactory::get('kickstart.stealth.url', '');
+
+	// We need an HTML file!
+	if (empty($filename))
+	{
+		return;
+	}
+
+	// Make sure it ends in .html or .htm
+	$filename = basename($filename);
+
+	if ((strtolower(substr($filename, -5)) != '.html') && (strtolower(substr($filename, -4)) != '.htm'))
+	{
+		return;
+	}
+
+	if ($siteRoot)
+	{
+		$siteRoot = rtrim($siteRoot, '/').'/';
+	}
+
+	$filename_quoted = str_replace('.', '\\.', $filename);
+	$rewrite_base    = trim(dirname(AKFactory::get('kickstart.stealth.url', '')), '/');
+
+	// Get the IP
+	$userIP = $_SERVER['REMOTE_ADDR'];
+	$userIP = str_replace('.', '\.', $userIP);
+
+	// Get the .htaccess contents
+	$stealthHtaccess = <<<ENDHTACCESS
+RewriteEngine On
+RewriteBase /$rewrite_base
+RewriteCond %{REMOTE_ADDR}		!$userIP
+RewriteCond %{REQUEST_URI}		!$filename_quoted
+RewriteCond %{REQUEST_URI}		!(\.png|\.jpg|\.gif|\.jpeg|\.bmp|\.swf|\.css|\.js)$
+RewriteRule (.*)				$filename	[R=307,L]
+
+ENDHTACCESS;
+
+	$customHandlers = portPhpHandlers();
+
+	// Port any custom handlers in the stealth file
+	if ($customHandlers)
+	{
+		$stealthHtaccess .= "\n".$customHandlers."\n";
+	}
+
+	// Write the new .htaccess, removing the old one first
+	$postproc = AKFactory::getpostProc();
+	$postproc->unlink($siteRoot.'.htaccess');
+	$tempfile = $postproc->processFilename($siteRoot.'.htaccess');
+	@file_put_contents($tempfile, $stealthHtaccess);
+	$postproc->process();
+}
+
+/**
+ * Checks if there is an .htaccess file and has any AddHandler directive in it.
+ * In that case, we return the affected lines so they could be stored for later use
+ *
+ * @return  array
+ */
+function getPhpHandlers($root = null)
+{
+	if (!$root)
+	{
+		$root = AKKickstartUtils::getPath();
+	}
+
+	$htaccess   = $root.'/.htaccess';
+	$directives = array();
+
+	if (!file_exists($htaccess))
+	{
+		return $directives;
+	}
+
+	$contents   = file_get_contents($htaccess);
+	$directives = AKUtilsHtaccess::extractHandler($contents);
+	$directives = explode("\n", $directives);
+
+	return $directives;
+}
+
+/**
+ * Fetches any stored php handler directive stored inside the factory and creates a string with the correct markers
+ *
+ * @return string
+ */
+function portPhpHandlers()
+{
+	$phpHandlers = AKFactory::get('kickstart.setup.phphandlers', array());
+
+	if (!$phpHandlers)
+	{
+		return '';
+	}
+
+	$customHandler  = "### AKEEBA_KICKSTART_PHP_HANDLER_BEGIN ###\n";
+	$customHandler .= implode("\n", $phpHandlers)."\n";
+	$customHandler .= "### AKEEBA_KICKSTART_PHP_HANDLER_END ###\n";
+
+	return $customHandler;
+}
+
+function writePhpHandlers($siteRoot = '')
+{
+	$contents = portPhpHandlers();
+
+	if (!$contents)
+	{
+		return;
+	}
+
+	if ($siteRoot)
+	{
+		$siteRoot = rtrim($siteRoot, '/').'/';
+	}
+
+	// Write the new .htaccess, removing the old one first
+	$postproc = AKFactory::getpostProc();
+	$postproc->unlink($siteRoot.'.htaccess');
+	$tempfile = $postproc->processFilename($siteRoot.'.htaccess');
+	@file_put_contents($tempfile, $contents);
+	$postproc->process();
 }

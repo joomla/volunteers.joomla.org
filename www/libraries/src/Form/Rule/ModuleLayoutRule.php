@@ -23,11 +23,11 @@ class ModuleLayoutRule extends FormRule
 	 * The regular expression to use in testing a module layout field value.
 	 *
 	 * A valid module layout field value consists of
-	 * - optionally a template name with only characters, numbers, hypens and
+	 * - optionally a template name with only characters, numbers, hyphens and
 	 *   underscores, which can also be just "_" for layouts provided by the
-	 *   module, followed by a colon
+	 *   module, followed by a colon.
 	 * - the base name of the layout file, not starting with a dot and with
-	 *   only characters, numbers, dots and hypens but no underscores (see
+	 *   only characters, numbers, dots and hyphens but no underscores (see
 	 *   method "getInput" of the "ModuleLayout" field).
 	 *
 	 * @var    string

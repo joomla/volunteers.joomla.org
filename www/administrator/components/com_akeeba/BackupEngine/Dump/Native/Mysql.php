@@ -270,6 +270,7 @@ class Mysql extends Base
 
 			// Get the number of rows left to dump from the current table
 			$columns         = $this->getSelectColumns($tableAbstract);
+			$columnTypes     = $this->getColumnTypes($tableAbstract);
 			$columnsForQuery = is_array($columns) ? array_map([$db, 'qn'], $columns) : $columns;
 			$sql             = $db->getQuery(true)
 				->select($columnsForQuery)
@@ -459,7 +460,25 @@ class Mysql extends Base
 								$value = @get_magic_quotes_runtime() ? stripslashes($value) : $value;
 							}
 
-							$value = $db->quote($value);
+							switch ($columnTypes[$fieldName] ?? '')
+							{
+								// Hex encode spatial data
+								case 'GEOMETRY':
+								case 'POINT':
+								case 'LINESTRING':
+								case 'POLYGON':
+								case 'MULTIPOINT':
+								case 'MULTILINESTRING':
+								case 'MULTIPOLYGON':
+								case 'GEOMETRYCOLLECTION':
+									$hexEncoded = bin2hex($value);
+									$value = "x'$hexEncoded'";
+									break;
+
+								default:
+									$value = $db->quote($value);
+									break;
+							}
 
 							if ($this->postProcessValues)
 							{
@@ -2094,6 +2113,47 @@ class Mysql extends Base
 		if ($totalColumns == count($columnList))
 		{
 			$columnList = '*';
+		}
+
+		return $columnList;
+	}
+
+	/**
+	 * Return a list of columns and their data types.
+	 *
+	 * @param   string  $tableAbstract
+	 *
+	 * @return  array  An array of table columns and their data types.
+	 */
+	protected function getColumnTypes($tableAbstract)
+	{
+		static $lastTable = null;
+		static $columnList = [];
+
+		if ($lastTable == $tableAbstract)
+		{
+			return $columnList;
+		}
+
+		$lastTable = $tableAbstract;
+
+		try
+		{
+			$db = $this->getDB();
+
+			$db->setQuery('SHOW COLUMNS FROM ' . $db->qn($tableAbstract));
+
+			$tableCols = $db->loadAssocList();
+		}
+		catch (Exception $e)
+		{
+			return $columnList;
+		}
+
+		foreach ($tableCols as $col)
+		{
+			$typeParts = explode('(', $col['Type'], 2);
+			$columnList[$col['Field']] = strtoupper($typeParts[0]);
 		}
 
 		return $columnList;

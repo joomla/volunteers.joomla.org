@@ -110,7 +110,7 @@ class Html extends BaseView
 		$logModel = $this->container->factory->model('Log')->tmpInstance();
 
 		// Get a list of log names
-		$this->logs = $logModel->getLogList();
+		$this->logs = $logModel->getLogList(true);
 		$this->log  = $this->input->getCmd('log', null);
 	}
 

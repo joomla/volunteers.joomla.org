@@ -226,7 +226,7 @@ class CacheCleaner
 			}
 
 			/** @var CacheControllerFactoryInterface $cacheControllerFactory */
-			$cacheControllerFactory   = $container->get(CacheControllerFactoryInterface::class);
+			$cacheControllerFactory   = $container->get('cache.controller.factory');
 
 			if (empty($cacheControllerFactory))
 			{
@@ -236,12 +236,12 @@ class CacheCleaner
 			/** @var CallbackController $cache */
 			$cache = $cacheControllerFactory->createCacheController('callback', $options);
 
-			if (empty($cache) || !method_exists($cache, 'clean'))
+			if (empty($cache) || !property_exists($cache, 'cache') || !method_exists($cache->cache, 'clean'))
 			{
 				throw new \RuntimeException('Cannot get Joomla 4 cache controller');
 			}
 
-			$cache->clean();
+			$cache->cache->clean();
 		}
 		catch (CacheExceptionInterface $exception)
 		{

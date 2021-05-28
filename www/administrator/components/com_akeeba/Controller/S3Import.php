@@ -71,21 +71,21 @@ class S3Import extends Controller
 
 		if ($part >= -1)
 		{
-			$this->container->platform->setSessionVar('s3import.part', $part, 'com_akeeba');
+			$this->container->platform->setSessionVar('s3import.part', $part, 'akeeba');
 		}
 
 		$frag = $this->input->getInt('frag', -999);
 
 		if ($frag >= -1)
 		{
-			$this->container->platform->setSessionVar('s3import.frag', $frag, 'com_akeeba');
+			$this->container->platform->setSessionVar('s3import.frag', $frag, 'akeeba');
 		}
 
 		$step = $this->input->getInt('step', -999);
 
 		if ($step >= -1)
 		{
-			$this->container->platform->setSessionVar('s3import.step', $step, 'com_akeeba');
+			$this->container->platform->setSessionVar('s3import.step', $step, 'akeeba');
 		}
 
 		$errorMessage = '';

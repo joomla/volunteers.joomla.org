@@ -10,13 +10,15 @@
 namespace Akeeba\Engine\Postproc\Connector\S3v4;
 
 use Akeeba\Engine\Postproc\Connector\S3v4\Response\Error;
+use Akeeba\Engine\Util\FileCloseAware;
 
 // Protection against direct access
 defined('AKEEBAENGINE') || die();
 
-
 class Request
 {
+	use FileCloseAware;
+
 	/**
 	 * The HTTP verb to use
 	 *
@@ -543,7 +545,7 @@ class Request
 		// Clean up file resources
 		if (!is_null($this->fp) && is_resource($this->fp))
 		{
-			fclose($this->fp);
+			$this->conditionalFileClose($this->fp);
 		}
 
 		return $this->response;

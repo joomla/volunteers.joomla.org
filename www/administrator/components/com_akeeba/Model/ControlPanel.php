@@ -422,7 +422,7 @@ class ControlPanel extends Model
 		catch (RuntimeException $e)
 		{
 			// Ah, the current Secret Word is bad. Create a new one if necessary.
-			$newSecret = $this->container->platform->getSessionVar('newSecretWord', null, 'akeeba.cpanel');
+			$newSecret = $this->container->platform->getSessionVar('newSecretWord', null, 'akeeba');
 
 			if (empty($newSecret))
 			{

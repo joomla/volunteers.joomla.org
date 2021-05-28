@@ -15,6 +15,7 @@ use Akeeba\Engine\Postproc\Connector\Box\Exception\APIError;
 use Akeeba\Engine\Postproc\Connector\Box\Exception\cURLError;
 use Akeeba\Engine\Postproc\Connector\Box\Exception\InvalidJSON;
 use Akeeba\Engine\Postproc\Connector\Box\Exception\UnexpectedHTTPStatus;
+use Akeeba\Engine\Util\FileCloseAware;
 use CURLFile;
 use RuntimeException;
 
@@ -33,6 +34,8 @@ use RuntimeException;
  */
 class Box
 {
+	use FileCloseAware;
+
 	/**
 	 * The root URL for the Box API
 	 */
@@ -757,7 +760,7 @@ class Box
 		{
 			$hadFile = true;
 
-			@fclose($fp);
+			$this->conditionalFileClose($fp);
 		}
 
 		// Did we have a cURL error?
@@ -850,5 +853,4 @@ class Box
 
 		return $fileId;
 	}
-
 }

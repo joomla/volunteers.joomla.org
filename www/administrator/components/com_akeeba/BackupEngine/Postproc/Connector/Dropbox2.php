@@ -15,6 +15,7 @@ use Akeeba\Engine\Postproc\Connector\Dropbox2\Exception\APIError;
 use Akeeba\Engine\Postproc\Connector\Dropbox2\Exception\cURLError;
 use Akeeba\Engine\Postproc\Connector\Dropbox2\Exception\InvalidJSON;
 use Akeeba\Engine\Postproc\Connector\Dropbox2\Exception\UnexpectedHTTPStatus;
+use Akeeba\Engine\Util\FileCloseAware;
 use Exception;
 use RuntimeException;
 
@@ -25,6 +26,8 @@ use RuntimeException;
  */
 class Dropbox2
 {
+	use FileCloseAware;
+
 	/**
 	 * The root URL for the Dropbox RPC API, ref https://www.dropbox.com/developers/documentation/http
 	 */
@@ -476,7 +479,7 @@ class Dropbox2
 
 		fseek($fp, $from);
 		$data = fread($fp, $contentLength);
-		fclose($fp);
+		$this->conditionalFileClose($fp);
 
 		$this->fetch('POST', self::contentRootUrl, $relativeUrl, $additional, $data);
 	}
@@ -912,7 +915,7 @@ class Dropbox2
 		// Close open file pointers
 		if ($fp)
 		{
-			@fclose($fp);
+			$this->conditionalFileClose($fp);
 
 			if ($expectHttpStatus && ($expectHttpStatus != $lastHttpCode))
 			{

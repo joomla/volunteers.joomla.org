@@ -16,7 +16,7 @@ use Akeeba\Backup\Admin\Helper\Utils;
 use Akeeba\Engine\Platform;
 use FOF40\Container\Container;
 use FOF40\Controller\Controller;
-use Joomla\CMS\Uri\Uri;
+use Joomla\CMS\Factory;
 
 /**
  * Backup page controller
@@ -31,8 +31,54 @@ class Backup extends Controller
 
 		$this->setPredefinedTaskList([
 			'main',
-			'ajax'
+			'ajax',
 		]);
+	}
+
+	/**
+	 * This task handles the AJAX requests
+	 */
+	public function ajax()
+	{
+		/** @var \Akeeba\Backup\Admin\Model\Backup $model */
+		$model = $this->getModel();
+
+		// Push all necessary information to the model's state
+		$model->setState('profile', $this->input->get('profileid', Platform::getInstance()->get_active_profile(), 'int'));
+		$model->setState('ajax', $this->input->get('ajax', '', 'cmd'));
+		$model->setState('description', $this->input->get('description', '', 'string'));
+		$model->setState('comment', $this->input->get('comment', '', 'html', 2));
+		$model->setState('jpskey', $this->input->get('jpskey', '', 'raw', 2));
+		$model->setState('angiekey', $this->input->get('angiekey', '', 'raw', 2));
+		$model->setState('backupid', $this->input->get('backupid', null, 'cmd'));
+		$model->setState('tag', $this->input->get('tag', 'backend', 'cmd'));
+		$model->setState('errorMessage', $this->input->getString('errorMessage', ''));
+
+		// System Restore Point backup state variables (obsolete)
+		$model->setState('type', strtolower($this->input->get('type', '', 'cmd')));
+		$model->setState('name', strtolower($this->input->get('name', '', 'cmd')));
+		$model->setState('group', strtolower($this->input->get('group', '', 'cmd')));
+		$model->setState('customdirs', $this->input->get('customdirs', [], 'array', 2));
+		$model->setState('customfiles', $this->input->get('customfiles', [], 'array', 2));
+		$model->setState('extraprefixes', $this->input->get('extraprefixes', [], 'array', 2));
+		$model->setState('customtables', $this->input->get('customtables', [], 'array', 2));
+		$model->setState('skiptables', $this->input->get('skiptables', [], 'array', 2));
+		$model->setState('langfiles', $this->input->get('langfiles', [], 'array', 2));
+		$model->setState('xmlname', $this->input->getString('xmlname', ''));
+
+		// Set up the tag
+		define('AKEEBA_BACKUP_ORIGIN', $this->input->get('tag', 'backend', 'cmd'));
+
+		// Run the backup step
+		$ret_array = $model->runBackup();
+
+		// We use this nasty trick to avoid broken 3PD plugins from barfing all over our output
+		@ob_end_clean();
+		header('Content-type: text/plain');
+		header('Connection: close');
+		echo '###' . json_encode($ret_array) . '###';
+		flush();
+		$this->container->platform->closeApplication();
 	}
 
 	/**
@@ -73,7 +119,7 @@ class Backup extends Controller
 		}
 
 		// Deactivate the menus
-		\Joomla\CMS\Factory::getApplication()->input->set('hidemainmenu', 1);
+		Factory::getApplication()->input->set('hidemainmenu', 1);
 
 		/** @var \Akeeba\Backup\Admin\Model\Backup $model */
 		$model = $this->getModel();
@@ -92,51 +138,5 @@ class Backup extends Controller
 		$model->setState('angiekey', $this->input->get('angiekey', '', 'raw', 2));
 		$model->setState('returnurl', $returnUrl);
 		$model->setState('backupid', $this->input->get('backupid', null, 'cmd'));
-	}
-
-	/**
-	 * This task handles the AJAX requests
-	 */
-	public function ajax()
-	{
-		/** @var \Akeeba\Backup\Admin\Model\Backup $model */
-		$model = $this->getModel();
-
-		// Push all necessary information to the model's state
-		$model->setState('profile', $this->input->get('profileid', -10, 'int'));
-		$model->setState('ajax', $this->input->get('ajax', '', 'cmd'));
-		$model->setState('description', $this->input->get('description', '', 'string'));
-		$model->setState('comment', $this->input->get('comment', '', 'html', 2));
-		$model->setState('jpskey', $this->input->get('jpskey', '', 'raw', 2));
-		$model->setState('angiekey', $this->input->get('angiekey', '', 'raw', 2));
-		$model->setState('backupid', $this->input->get('backupid', null, 'cmd'));
-		$model->setState('tag', $this->input->get('tag', 'backend', 'cmd'));
-		$model->setState('errorMessage', $this->input->getString('errorMessage', ''));
-
-		// System Restore Point backup state variables (obsolete)
-		$model->setState('type', strtolower($this->input->get('type', '', 'cmd')));
-		$model->setState('name', strtolower($this->input->get('name', '', 'cmd')));
-		$model->setState('group', strtolower($this->input->get('group', '', 'cmd')));
-		$model->setState('customdirs', $this->input->get('customdirs', array(), 'array', 2));
-		$model->setState('customfiles', $this->input->get('customfiles', array(), 'array', 2));
-		$model->setState('extraprefixes', $this->input->get('extraprefixes', array(), 'array', 2));
-		$model->setState('customtables', $this->input->get('customtables', array(), 'array', 2));
-		$model->setState('skiptables', $this->input->get('skiptables', array(), 'array', 2));
-		$model->setState('langfiles', $this->input->get('langfiles', array(), 'array', 2));
-		$model->setState('xmlname', $this->input->getString('xmlname', ''));
-
-		// Set up the tag
-		define('AKEEBA_BACKUP_ORIGIN', $this->input->get('tag', 'backend', 'cmd'));
-
-		// Run the backup step
-		$ret_array = $model->runBackup();
-
-		// We use this nasty trick to avoid broken 3PD plugins from barfing all over our output
-		@ob_end_clean();
-		header('Content-type: text/plain');
-		header('Connection: close');
-		echo '###' . json_encode($ret_array) . '###';
-		flush();
-		$this->container->platform->closeApplication();
 	}
 }

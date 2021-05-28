@@ -815,7 +815,7 @@ class Jps extends BaseArchiver
 			if ($seek_result === -1)
 			{
 				// What?! We can't resume!
-				@fclose($zdatafp);
+				$this->conditionalFileClose($zdatafp);
 
 				throw new ErrorException(sprintf('Could not resume packing of file %s. Your archive is damaged!', $sourceNameOrData));
 			}
@@ -837,7 +837,7 @@ class Jps extends BaseArchiver
 			}
 			catch (ErrorException $e)
 			{
-				@fclose($zdatafp);
+				$this->conditionalFileClose($zdatafp);
 
 				throw $e;
 			}
@@ -859,7 +859,7 @@ class Jps extends BaseArchiver
 		$configuration->set('volatile.engine.archiver.resume', $resume);
 		$configuration->set('volatile.engine.archiver.processingfile', $mustResume);
 
-		@fclose($zdatafp);
+		$this->conditionalFileClose($zdatafp);
 
 		return $mustResume;
 	}

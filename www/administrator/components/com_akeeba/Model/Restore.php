@@ -27,10 +27,13 @@ class Restore extends Model
 
 	/** @var   string  Random password, used to secure the restoration */
 	public $password;
+
 	/** @var   array  The backup record being restored */
 	private $data;
+
 	/** @var   string  The extension of the archive being restored */
 	private $extension;
+
 	/** @var   string  Absolute path to the archive being restored */
 	private $path;
 
@@ -195,6 +198,17 @@ class Restore extends Model
 	'kickstart.setup.dryrun' => '0',
 	'kickstart.jps.password' => '$password'
 ENDDATA;
+
+		/**
+		 * Tell the restoration script to enable stealth mode. This will have two side effects:
+		 *
+		 * 1. Regular visitors won't be redirected to the installation folder, potentially causing issues
+		 * 2. If direct access to the installation folder has been blocked (ie by the Htaccess Maker) it will be allowed
+		 */
+		if ($this->getState('stealthmode', 0, 'int') == 1)
+		{
+			$data .= ",\n\t	'kickstart.stealth.enable' => '1',\n\t'kickstart.stealth.url' => 'installation/offline.html'";
+		}
 
 		/**
 		 * Should I enable the “Delete everything before extraction” option?

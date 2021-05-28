@@ -11,11 +11,13 @@ namespace Akeeba\Engine\Postproc\Connector;
 
 defined('AKEEBAENGINE') || die();
 
+use Akeeba\Engine\Util\FileCloseAware;
 use Exception;
 use RuntimeException;
 
 class OneDrive
 {
+	use FileCloseAware;
 
 	/**
 	 * The URL of the helper script which is used to get fresh API tokens
@@ -425,7 +427,7 @@ class OneDrive
 
 		fseek($fp, $from);
 		$data = fread($fp, $contentLength);
-		fclose($fp);
+		$this->conditionalFileClose($fp);
 
 		return $this->fetch('PUT', $sessionUrl, $additional, $data);
 	}
@@ -767,7 +769,7 @@ class OneDrive
 		// Close open file pointers
 		if ($fp)
 		{
-			@fclose($fp);
+			$this->conditionalFileClose($fp);
 
 			if ($expectHttpStatus && ($expectHttpStatus != $lastHttpCode))
 			{

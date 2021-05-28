@@ -591,7 +591,7 @@ abstract class BaseArchiver extends BaseFileManagement
 			if ($seek_result === -1)
 			{
 				// What?! We can't resume!
-				@fclose($sourceFilePointer);
+				$this->conditionalFileClose($sourceFilePointer);
 
 				throw new ErrorException(sprintf('Could not resume packing of file %s. Your archive is damaged!', $sourceNameOrData));
 			}
@@ -602,7 +602,7 @@ abstract class BaseArchiver extends BaseFileManagement
 
 		$mustBreak = $this->putDataFromFileIntoArchive($sourceFilePointer, $fileLength);
 
-		@fclose($sourceFilePointer);
+		$this->conditionalFileClose($sourceFilePointer);
 
 		return $mustBreak;
 	}
@@ -665,7 +665,7 @@ abstract class BaseArchiver extends BaseFileManagement
 					if ($configuration->get('engine.postproc.common.after_part', 0))
 					{
 						$resumeOffset = @ftell($sourceFilePointer);
-						@fclose($sourceFilePointer);
+						$this->conditionalFileClose($sourceFilePointer);
 
 						$configuration->set('volatile.engine.archiver.resume', $resumeOffset);
 						$configuration->set('volatile.engine.archiver.processingfile', true);
@@ -708,7 +708,7 @@ abstract class BaseArchiver extends BaseFileManagement
 		{
 			// We have to break, or we'll time out!
 			$resumeOffset = @ftell($sourceFilePointer);
-			@fclose($sourceFilePointer);
+			$this->conditionalFileClose($sourceFilePointer);
 
 			$configuration->set('volatile.engine.archiver.resume', $resumeOffset);
 			$configuration->set('volatile.engine.archiver.processingfile', true);

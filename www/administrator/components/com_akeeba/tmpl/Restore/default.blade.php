@@ -51,6 +51,16 @@ defined('_JEXEC') || die();
         </div>
     @endif
 
+    <div class="akeeba-form-group">
+        <label for="stealthmode">
+            @lang('COM_AKEEBA_RESTORE_LABEL_STEALTHMODE')
+        </label>
+        @jhtml('FEFHelp.select.booleanswitch', 'stealthmode', 0)
+        <p class="akeeba-help-text">
+            @lang('COM_AKEEBA_RESTORE_LABEL_STEALTHMODE_HELP')
+        </p>
+    </div>
+
     @if($this->extension == 'jps')
         <h4>
             @lang('COM_AKEEBA_RESTORE_LABEL_JPSOPTIONS')

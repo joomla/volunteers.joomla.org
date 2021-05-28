@@ -156,7 +156,7 @@ class Zipnative extends Base
 		if (!($fp === false))
 		{
 			ftruncate($fp, 0);
-			fclose($fp);
+			$this->conditionalFileClose($fp);
 		}
 		else
 		{

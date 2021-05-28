@@ -12,11 +12,15 @@ namespace Akeeba\Engine\Postproc\Connector\S3v4;
 // Protection against direct access
 defined('AKEEBAENGINE') || die();
 
+use Akeeba\Engine\Util\FileCloseAware;
+
 /**
  * Defines an input source for PUT/POST requests to Amazon S3
  */
 class Input
 {
+	use FileCloseAware;
+
 	/**
 	 * Input type: resource
 	 */
@@ -177,7 +181,7 @@ class Input
 	{
 		if (is_resource($this->fp))
 		{
-			@fclose($this->fp);
+			$this->conditionalFileClose($this->fp);
 		}
 	}
 
@@ -258,7 +262,7 @@ class Input
 
 		if (is_resource($this->fp))
 		{
-			@fclose($this->fp);
+			$this->conditionalFileClose($this->fp);
 		}
 
 		$this->fp = @fopen($file, 'rb');
@@ -295,7 +299,7 @@ class Input
 
 		if (is_resource($this->fp))
 		{
-			@fclose($this->fp);
+			$this->conditionalFileClose($this->fp);
 		}
 
 		$this->file = null;
@@ -329,7 +333,7 @@ class Input
 
 		if (is_resource($this->fp))
 		{
-			@fclose($this->fp);
+			$this->conditionalFileClose($this->fp);
 		}
 
 		$this->file = null;

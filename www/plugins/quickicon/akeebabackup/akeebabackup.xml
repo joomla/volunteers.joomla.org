@@ -12,8 +12,8 @@
     <authorUrl>https://www.akeeba.com</authorUrl>
     <copyright>Copyright (c)2006-2021 Nicholas K. Dionysopoulos</copyright>
     <license>GNU General Public License version 3, or later</license>
-    <creationDate>2021-04-14</creationDate>
-    <version>8.0.4</version>
+    <creationDate>2021-05-24</creationDate>
+    <version>8.0.6</version>
     <description>PLG_QUICKICON_AKEEBABACKUP_XML_DESCRIPTION</description>
     <files>
         <filename plugin="akeebabackup">akeebabackup.php</filename>
@@ -33,6 +33,7 @@
 					   label="PLG_QUICKICON_AKEEBABACKUP_LBL_WARNINGS"
                        description="PLG_QUICKICON_AKEEBABACKUP_DESC_WARNINGS"
 					   default="1"
+                       class="btn-group btn-group-yesno"
 				>
                     <option value="0">JNO</option>
                     <option value="1">JYES</option>
@@ -43,6 +44,7 @@
                        label="PLG_QUICKICON_AKEEBABACKUP_LBL_WARNFAILED"
                        description="PLG_QUICKICON_AKEEBABACKUP_DESC_WARNFAILED"
 					   default="1"
+                       class="btn-group btn-group-yesno"
                        showon="enablewarning:1"
                 >
                     <option value="0">JNO</option>

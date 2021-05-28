@@ -557,6 +557,11 @@ class Com_AkeebaInstallerScript extends \FOF40\InstallScript\Component
 
 			// Rename ViewTemplates to tmpl
 			'administrator/components/com_akeeba/ViewTemplates',
+
+			// Remove pCloud
+			'administrator/components/com_akeeba/BackupEngine/Postproc/pcloud.json',
+			'administrator/components/com_akeeba/BackupEngine/Postproc/Pcloud.php',
+			'administrator/components/com_akeeba/BackupEngine/Postproc/Connector/Pcloud.php',
 		],
 	];
 

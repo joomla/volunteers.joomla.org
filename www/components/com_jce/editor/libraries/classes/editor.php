@@ -13,7 +13,7 @@ defined('JPATH_PLATFORM') or die;
 class WFEditor
 {
     // Editor instance
-    protected static $instance;
+    protected static $instances;
 
     /**
      * Profile object.
@@ -110,15 +110,15 @@ class WFEditor
             $config['plugin'] = '';
         }
 
-        if (!isset($config['id'])) {
-            $config['id'] = 0;
+        if (!isset($config['profile_id'])) {
+            $config['profile_id'] = 0;
         }
 
         // trigger event
         $app->triggerEvent('onBeforeWfEditorLoad');
 
         // set profile
-        $this->profile = $wf->getProfile($config['plugin'], $config['id']);
+        $this->profile = $wf->getProfile($config['plugin'], $config['profile_id']);
 
         // set context
         $this->context = $wf->getContext();
@@ -134,11 +134,13 @@ class WFEditor
      */
     public static function getInstance($config = array())
     {
-        if (!isset(self::$instance)) {
-            self::$instance = new self($config);
+        $signature = md5(serialize($config));
+
+        if (empty(self::$instances[$signature])) {
+            self::$instances[$signature] = new self($config);
         }
 
-        return self::$instance;
+        return self::$instances[$signature];
     }
 
     private function addAssetVersion($url)
@@ -175,7 +177,7 @@ class WFEditor
         $this->init()->getOutput();
     }
 
-     /**
+    /**
      * Legacy function to get the editor settings
      *
      * @return array
@@ -286,7 +288,7 @@ class WFEditor
         if ($language->getTag() === WFLanguage::getTag()) {
             return $language->isRTL();
         }
-        
+
         return false;
     }
 
@@ -1061,6 +1063,11 @@ class WFEditor
     {
         // check for editor.css file and return first one found
         $file = $path . '/editor.css';
+
+        // editor.css only contains basic styles...
+        if (preg_match('#\/cassiopeia\/#', $path)) {
+            return false;
+        }
 
         if (is_file($file) && filesize($file) > 0) {
             return $file;

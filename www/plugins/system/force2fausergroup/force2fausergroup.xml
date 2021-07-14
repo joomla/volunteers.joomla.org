@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <extension version="3.9" type="plugin" group="system" method="upgrade">
 	<name>plg_system_force2fausergroup</name>
-	<creationDate>31.08.2020</creationDate>
+	<creationDate>2021-07-10</creationDate>
 	<author>Tobias Zulauf</author>
 	<copyright>(C) 2020 Tobias Zulauf All rights reserved.</copyright>
 	<authorUrl>https://www.jah-tz.de</authorUrl>
-	<version>1.0.2</version>
+	<version>1.0.3</version>
 	<license>GNU/GPL Version 2 or later</license>
 	<description>PLG_SYSTEM_FORCE2FAUSERGROUP_XML_DESCRIPTION</description>
 	<scriptfile>script.php</scriptfile>

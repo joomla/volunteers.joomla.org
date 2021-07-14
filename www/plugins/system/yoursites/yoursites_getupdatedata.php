@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @version    CVS: 1.16.0
+ * @version    CVS: 1.18.0
  * @package    com_yoursites
  * @author     Geraint Edwards <via website>
  * @copyright  2016-2020 GWE Systems Ltd
@@ -21,6 +21,7 @@ use Joomla\CMS\Version;
 use Joomla\Registry\Registry;
 use Joomla\CMS\Http\HttpFactory;
 use Joomla\CMS\Component\ComponentHelper;
+use \Joomla\Uri\Uri;
 */
 
 use Joomla\CMS\Extension\ExtensionHelper;
@@ -2210,6 +2211,15 @@ function cloneSite($requestObject, & $returnData)
 		// ToDo - figure out how to deal with this if log, tmp and cache files are one level up e.g. in private folder
 		$configuration = str_replace(JPATH_SITE, JPATH_SITE . "/._" . $requestObject->prefix, $configuration);
 
+		// live_site fix
+		$base = JUri::base();
+		if (strrpos($base,"/") == strlen($base)-1)
+		{
+			$base = substr($base, 0, strlen($base)-1);
+		}
+		$configuration = str_replace('$live_site' . " = '$base';", '$live_site' . " = '{$base}/._" . $requestObject->prefix . "';", $configuration);
+		//$configuration = str_replace('$live_site' . " = '$base';", '$live_site' . " = '';", $configuration);
+
 		// ToDo disable emails using code from com_config application model ConfigModelApplication and ::writeconfigfile method adapted to our needs here
 		$db = JFactory::getDbo();
 		$oldPrefix = $db->getPrefix();
@@ -3399,7 +3409,24 @@ function directLogin($requestObject, & $returnData, $redirect = true)
 
 	if ($redirect)
 	{
+
 		$redirectURL = isset($requestObject->redirectURL) ? base64_decode($requestObject->redirectURL) : "index.php";
+
+		if (isset($requestObject->redirectquerystring) && !empty($requestObject->redirectquerystring))
+		{
+			//$queryStrings = explode("?",base64_decode($requestObject->redirectquerystring));
+			$queryStrings = array(base64_decode($requestObject->redirectquerystring));
+			foreach ($queryStrings as $queryString)
+			{
+				$queryStringParts = explode("=",$queryString);
+				if (count($queryStringParts) == 2)
+				{
+					// RSF Firewall etc requires- redirect after login based on query string
+					$redirectURL .= (strpos($redirectURL,"?") === false ? "?" : "&") . $queryString;
+				}
+			}
+		}
+
 		JFactory::getApplication()->redirect($redirectURL);
 		exit(0);
 	}
@@ -3785,13 +3812,16 @@ function securityCheck( & $requestObject, $returnData)
 
 			if ($securitytoken && password_verify(hash('sha256',$randomtoken  . " combined with " . $servertoken . $filehash), $securitytoken) )
 			{
+				$returnData->errormessages[]="Failed to match the hash";
 				return true;
 			}
 			// THIS SHOULD NOT BE RETURNED - ONLY FOR DEBUGGING
-			//$returnData->errormessages[]="source token = ".$requestObject->token;
-			//$returnData->errormessages[]="server token = ".$servertoken;
-			//$returnData->errormessages[]="requiredToken = ".$requiredToken;
-			//$returnData->errormessages[]="providedToken = ".$requestObject->securityToken;
+			/*
+			$returnData->errormessages[]="source token = ".$requestObject->token;
+			$returnData->errormessages[]="server token = ".$servertoken;
+			$returnData->errormessages[]="requiredToken = ".$requiredToken;
+			$returnData->errormessages[]="providedToken = ".$requestObject->securityToken;
+			*/
 		}
 		return false;
 	}
@@ -4920,7 +4950,7 @@ function getJoomlaUpdateSitesIds($column = 0)
  *
  * @return  boolean  True on success.
  *
- * @since   1.16.0
+ * @since   1.18.0
  * @throws  \RuntimeException
  */
 function copyr2($src, $dest, $prefix = "", & $returnData, $exclusions = array())
@@ -5081,7 +5111,7 @@ function copyr2($src, $dest, $prefix = "", & $returnData, $exclusions = array())
  *
  * @return  boolean  True on success.
  *
- * @since   1.16.0
+ * @since   1.18.0
  * @throws  \RuntimeException
  */
 function deleter2($src, & $returnData)

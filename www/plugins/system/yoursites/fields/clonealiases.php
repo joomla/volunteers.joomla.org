@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @version    CVS: 1.16.0
+ * @version    CVS: 1.18.0
  * @package    com_yoursites
  * @author     Geraint Edwards <yoursites@gwesystems.com>
  * @copyright  2016-2020 GWE Systems Ltd
@@ -35,7 +35,7 @@ class JFormFieldClonealiases extends JFormFieldList
 		$input = "";
 		foreach ($folders as $folder)
 		{
-			$value = isset($this->value[$folder]) ? $this->value[$folder] : "";
+			$value = isset($this->value[$folder]) && !empty(trim($this->value[$folder])) ? $this->value[$folder] : $folder;
 			$input .= "<input type='text' name='" . $this->name. "[$folder]' value='" . $value . "'/> => $folder <br>\n";
 		}
 		if (empty($input))

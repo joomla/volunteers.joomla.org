@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @version    CVS: 1.16.0.1
+ * @version    CVS: 1.18.0.1
  * @package    com_yoursites
  * @author     Geraint Edwards
  * @copyright  2017-2020 GWE Systems Ltd
@@ -58,6 +58,29 @@ class plgSystemYourSites extends JPlugin
 			$input->set('plugin', 'yoursites');
 		}
 
+		// special trap for Falang and extension updates causing table #__extensions not locked error !
+		try
+		{
+			$requestData = $input->get('json', '', 'raw');
+			if (empty($requestData))
+			{
+				$requestData = @base64_decode($input->get('json64', '', 'raw'));
+			}
+			$requestData = json_decode($requestData);
+			$jsontask = $requestData->task;
+			if ($jsontask === "updateextension")
+			{
+				$plugin = JPluginHelper::getPlugin("system" , "falangdriver");
+				if ($plugin)
+				{
+					$plugin->name .= "dummy";
+				}
+			}
+		}
+		catch (Exception $e)
+		{
+
+		}
 		// Do we have uploaded files?
 		if (isset($_FILES["install_package"]))
 		{
@@ -129,7 +152,7 @@ class plgSystemYourSites extends JPlugin
 					$extrapath = substr($path, strpos($path, "/"));
 					$path      = substr($path, 0, strpos($path, "/"));
 				}
-				if (is_array($parts) && isset($parts['path']) && in_array($path, $aliases))
+				if (is_array($parts) && isset($parts['path']) && !empty($path) && in_array($path, $aliases))
 				{
 					$path = array_search($path, $aliases);
 					JFactory::getApplication()->redirect($path . $extrapath);
@@ -140,7 +163,7 @@ class plgSystemYourSites extends JPlugin
 				$changed = false;
 				foreach ($aliases as $key => $alias)
 				{
-					if (in_array($alias, $pathParts))
+					if (!empty($alias) && in_array($alias, $pathParts))
 					{
 						$pathParts[array_search($alias, $pathParts)] = $key;
 						$changed = true;

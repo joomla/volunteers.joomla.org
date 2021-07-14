@@ -160,6 +160,14 @@ class PlgSystemForce2faUsergroup extends CMSPlugin
 
 		$user = Factory::getUser();
 
+		// With 4.0.0 (https://github.com/joomla/joomla-cms/pull/32771) you are allowed to edit your user via com_users.
+		if (version_compare(JVERSION, '4.0.0', 'ge'))
+		{
+			// Redirect to com_users user edit
+			$this->app->enqueueMessage(Text::_('PLG_SYSTEM_FORCE2FAUSERGROUP_2FA_REDIRECT_MESSAGE'), 'notice');
+			$this->app->redirect('index.php?option=com_users&task=user.edit&id=' . $user->id);
+		}
+
 		// With 3.9.22 (https://github.com/joomla/joomla-cms/pull/30751) and 4.0.0 you can configure the 2FA options from your com_admin profile
 		if (version_compare(JVERSION, '3.9.22', 'ge'))
 		{
@@ -179,7 +187,7 @@ class PlgSystemForce2faUsergroup extends CMSPlugin
 		}
 
 		// We are a user that is allowed to login to the backend but not to access com_users
-		// and we are not yet at a version that supports 2FA edit in com_admin. Redirect to the frontend.
+		// and we are not yet at a version that supports 2FA edit in com_admin or com_users. Redirect to the frontend.
 		$this->app->enqueueMessage(Text::_('PLG_SYSTEM_FORCE2FAUSERGROUP_2FA_REDIRECT_MESSAGE'), 'notice');
 		$this->app->redirect(JUri::root() . 'index.php?option=com_users&view=profile&layout=edit');
 	}

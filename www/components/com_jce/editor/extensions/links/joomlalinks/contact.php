@@ -114,7 +114,7 @@ class JoomlalinksContact extends JObject
                         $language = $contact->language;
                     }
 
-                    $id = $router->getRoute($args->id, 'com_contact.contact', '', $language, $contact->id);
+                    $id = $router->getRoute($contact->id, 'com_contact.contact', '', $language, $args->id);
                     $id = self::route($id);
 
                     $items[] = array(
@@ -133,8 +133,13 @@ class JoomlalinksContact extends JObject
     {
         $wf = WFEditorPlugin::getInstance();
         
-        if ($wf->getParam('links.joomlalinks.sef_url', 0)) {
+        if ((bool) $wf->getParam('links.joomlalinks.sef_url', 0)) {
             $url = WFLinkBrowser::route($url);
+        }
+
+        // remove Itemid
+        if ((bool) $wf->getParam('links.joomlalinks.itemid', 1) === false) {
+            $url = WFLinkBrowser::removeItemId($url);
         }
 
         return $url;

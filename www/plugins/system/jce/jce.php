@@ -85,7 +85,8 @@ class PlgSystemJce extends JPlugin
 
         // only if enabled
         if ((int) $this->params->get('column_styles', 1)) {
-            $document->addStyleSheet(JURI::root(true) . '/plugins/system/jce/css/content.css?' . $document->getMediaVersion());
+            $hash = md5_file(__DIR__ . '/css/content.css');
+            $document->addStyleSheet(JURI::root(true) . '/plugins/system/jce/css/content.css?' . $hash);
         }
     }
 
@@ -218,7 +219,11 @@ class PlgSystemJce extends JPlugin
 
 			if (class_exists($className)) {
                 // Instantiate and register the event
-				new $className($dispatcher);
+				$plugin = new $className($dispatcher);
+
+				if ($plugin instanceof \Joomla\CMS\Extension\PluginInterface) {
+                    $plugin->registerListeners();
+				}
             }
         }
     }

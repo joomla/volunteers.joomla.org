@@ -130,7 +130,7 @@ if (!$readonly)
                    input-name=".field-user-input-name"
                    button-select=".userSelectModal_{{{ $field }}}">
     <div class="akeeba-input-group">
-        <input {{ ArrayHelper::toString($inputAttributes) }} {{ $dataAttribute ?? '' }} readonly>
+        <input {{ \FOF40\Utils\ArrayHelper::toString($inputAttributes) }} {{ $dataAttribute ?? '' }} readonly>
 		@if (!$readonly)
 		<span class="akeeba-input-group-btn">
 			<button type="button"

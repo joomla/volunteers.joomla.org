@@ -92,6 +92,12 @@ class Plugin extends BaseInstaller
 	 */
 	public function preflight(string $type, PluginAdapter $parent): bool
 	{
+		// Do not run on uninstall.
+		if ($type === 'uninstall')
+		{
+			return true;
+		}
+
 		// Check the minimum PHP version
 		if (!$this->checkPHPVersion())
 		{
@@ -124,6 +130,12 @@ class Plugin extends BaseInstaller
 	 */
 	public function postflight(string $type, PluginAdapter $parent): void
 	{
+		// Do not run on uninstall.
+		if ($type === 'uninstall')
+		{
+			return;
+		}
+
 		// Add ourselves to the list of extensions depending on FOF40
 		$dependencyName = $this->getDependencyName();
 

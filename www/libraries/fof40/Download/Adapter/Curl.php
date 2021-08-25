@@ -71,6 +71,10 @@ class Curl extends AbstractAdapter implements DownloadInterface
 			unset($temp);
 		}
 
+		$caCertPath = class_exists('\\Composer\\CaBundle\\CaBundle')
+			? \Composer\CaBundle\CaBundle::getBundledCaBundlePath()
+			: JPATH_LIBRARIES . '/src/Http/Transport/cacert.pem';
+
 		curl_setopt($ch, CURLOPT_URL, $url);
 		curl_setopt($ch, CURLOPT_AUTOREFERER, 1);
 		curl_setopt($ch, CURLOPT_BINARYTRANSFER, 1);
@@ -79,7 +83,7 @@ class Curl extends AbstractAdapter implements DownloadInterface
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 1);
 		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
 		curl_setopt($ch, CURLOPT_SSLVERSION, 0);
-		curl_setopt($ch, CURLOPT_CAINFO, JPATH_LIBRARIES . '/src/Http/Transport/cacert.pem');
+		curl_setopt($ch, CURLOPT_CAINFO, $caCertPath);
 		curl_setopt($ch, CURLOPT_HEADERFUNCTION, [$this, 'reponseHeaderCallback']);
 
 		if (!(empty($from) && empty($to)))
@@ -184,12 +188,16 @@ class Curl extends AbstractAdapter implements DownloadInterface
 		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
 		curl_setopt($ch, CURLOPT_SSLVERSION, 0);
 
+		$caCertPath = class_exists('\\Composer\\CaBundle\\CaBundle')
+			? \Composer\CaBundle\CaBundle::getBundledCaBundlePath()
+			: JPATH_LIBRARIES . '/src/Http/Transport/cacert.pem';;
+
 		curl_setopt($ch, CURLOPT_URL, $url);
 		curl_setopt($ch, CURLOPT_NOBODY, true);
 		curl_setopt($ch, CURLOPT_HEADER, true);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		@curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-		curl_setopt($ch, CURLOPT_CAINFO, JPATH_LIBRARIES . '/src/Http/Transport/cacert.pem');
+		curl_setopt($ch, CURLOPT_CAINFO, $caCertPath);
 
 		$data = curl_exec($ch);
 		curl_close($ch);
@@ -242,7 +250,7 @@ class Curl extends AbstractAdapter implements DownloadInterface
 	 *
 	 * @return  int  The length of the $data string
 	 */
-	protected function reponseHeaderCallback(&$ch, string &$data): int
+	protected function reponseHeaderCallback($ch, string $data): int
 	{
 		$strlen = strlen($data);
 

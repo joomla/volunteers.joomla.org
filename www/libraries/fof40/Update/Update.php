@@ -47,6 +47,13 @@ class Update extends Model
 	protected $paramsKey = 'update_dlid';
 
 	/**
+	 * Caches the extension names to IDs so we don't query the database too many times.
+	 *
+	 * @var   array
+	 */
+	private $extensionIds = [];
+
+	/**
 	 * Public constructor. Initialises the protected members as well. Useful $config keys:
 	 * update_component        The component name, e.g. com_foobar
 	 * update_version        The default version if the manifest cache is unreadable
@@ -670,6 +677,9 @@ class Update extends Model
 			];
 			$db->insertObject('#__update_sites_extensions', $updateSiteExtension);
 		}
+
+		// Finally, adopt my extensions
+		$this->adoptMyExtensions();
 	}
 
 	/**
@@ -836,6 +846,92 @@ class Update extends Model
 	public function sanitizeLicenseKey(string $licenseKey): string
 	{
 		return strtolower(preg_replace("/[^a-zA-Z0-9:]/", "", $licenseKey));
+	}
+
+	/**
+	 * Adopt the extensions included in the package.
+	 *
+	 * This modifies the package_id column of the #__extensions table for the records of the extensions declared in the
+	 * new package's manifest. This allows you to use Discover to install new extensions without leaving them “orphan”
+	 * of a package in the #__extensions table, something which could cause problems when running Joomla! Update.
+	 *
+	 * @return  void
+	 */
+	public function adoptMyExtensions(): void
+	{
+		// Get the extension ID of the new package
+		$newPackageId = $this->extension_id;
+
+		if (empty($newPackageId))
+		{
+			return;
+		}
+
+		// Get the extension IDs
+		$extensionIDs = array_map([$this, 'getExtensionId'], $this->getExtensionsFromPackage($this->component));
+		$extensionIDs = array_filter($extensionIDs, function ($x) {
+			return !empty($x);
+		});
+
+		if (empty($extensionIDs))
+		{
+			return;
+		}
+
+		// Reassign all extensions
+		$db    = $this->container->db;
+		$query = $db->getQuery(true)
+			->update($db->quoteName('#__extensions'))
+			->set($db->qn('package_id') . ' = ' . $db->q($newPackageId))
+			->where($db->qn('extension_id') . 'IN(' . implode(', ', array_map([$db, 'q'], $extensionIDs)) . ')');
+		$db->setQuery($query)->execute();
+	}
+
+	/**
+	 * Returns the extension ID for a Joomla extension given its name.
+	 *
+	 * This is deliberately public so that custom handlers can use it without having to reimplement it.
+	 *
+	 * @param   string  $extension  The extension name, e.g. `plg_system_example`.
+	 *
+	 * @return  int|null  The extension ID or null if no such extension exists
+	 */
+	public function getExtensionId(string $extension): ?int
+	{
+		if (isset($this->extensionIds[$extension]))
+		{
+			return $this->extensionIds[$extension];
+		}
+
+		$this->extensionIds[$extension] = null;
+
+		$criteria = $this->extensionNameToCriteria($extension);
+
+		if (empty($criteria))
+		{
+			return $this->extensionIds[$extension];
+		}
+
+		$db    = $this->container->db;
+		$query = $db->getQuery(true)
+			->select($db->quoteName('extension_id'))
+			->from($db->quoteName('#__extensions'));
+
+		foreach ($criteria as $key => $value)
+		{
+			$query->where($db->qn($key) . ' = ' . $db->q($value));
+		}
+
+		try
+		{
+			$this->extensionIds[$extension] = $db->setQuery($query)->loadResult();
+		}
+		catch (\RuntimeException $e)
+		{
+			return null;
+		}
+
+		return $this->extensionIds[$extension];
 	}
 
 	/**
@@ -1023,8 +1119,8 @@ class Update extends Model
 		// Try to get the update records.
 		try
 		{
-			$db = $this->container->db;
-			$query = $db->getQuery(true)
+			$db      = $this->container->db;
+			$query   = $db->getQuery(true)
 				->select([
 					$db->qn('update_id'),
 					$db->qn('extra_query'),
@@ -1072,4 +1168,185 @@ class Update extends Model
 
 		return $madeChanges;
 	}
+
+	/**
+	 * Get the list of extensions included in a package
+	 *
+	 * @param   string  $package
+	 *
+	 * @return  array
+	 */
+	private function getExtensionsFromPackage(string $package): array
+	{
+		$extensions = [];
+		$xml        = $this->getPackageXMLManifest($package);
+
+		if (is_null($xml))
+		{
+			return $extensions;
+		}
+
+		foreach ($xml->xpath('//files/file') as $fileField)
+		{
+			$extension = $this->xmlNodeToExtensionName($fileField);
+
+			if (is_null($extension))
+			{
+				continue;
+			}
+
+			$extensions[] = $extension;
+		}
+
+		return $extensions;
+	}
+
+	/**
+	 * Gets a SimpleXMLElement representation of the cached manifest of the extension.
+	 *
+	 * @param   string  $package
+	 *
+	 * @return  SimpleXMLElement|null
+	 */
+	private function getPackageXMLManifest(string $package): ?SimpleXMLElement
+	{
+		$filePath = $this->getCachedManifestPath($package);
+
+		if (!@file_exists($filePath) || !@is_readable($filePath))
+		{
+			return null;
+		}
+
+		$xmlContent = @file_get_contents($filePath);
+
+		if (empty($xmlContent))
+		{
+			return null;
+		}
+
+		return new SimpleXMLElement($xmlContent);
+	}
+
+	/**
+	 * Get the absolute filesystem path
+	 *
+	 * @param   string  $package
+	 *
+	 * @return  string
+	 */
+	private function getCachedManifestPath(string $package): string
+	{
+		return JPATH_MANIFESTS . '/packages/' . $package . '.xml';
+	}
+
+	/**
+	 * Take a SimpleXMLElement `<file>` node of the package manifest and return the corresponding Joomla extension name
+	 *
+	 * @param   SimpleXMLElement  $fileField  The `<file>` node of the package manifest
+	 *
+	 * @return  string|null  The extension name, null if it cannot be determined.
+	 */
+	private function xmlNodeToExtensionName(SimpleXMLElement $fileField): ?string
+	{
+		$type = (string) $fileField->attributes()->type;
+		$id   = (string) $fileField->attributes()->id;
+
+		switch ($type)
+		{
+			case 'component':
+			case 'file':
+			case 'library':
+				$extension = $id;
+				break;
+
+			case 'plugin':
+				$group     = (string) $fileField->attributes()->group ?? 'system';
+				$extension = 'plg_' . $group . '_' . $id;
+				break;
+
+			case 'module':
+				$client    = (string) $fileField->attributes()->client ?? 'site';
+				$extension = (($client != 'site') ? 'a' : '') . $id;
+				break;
+
+			default:
+				$extension = null;
+				break;
+		}
+
+		return $extension;
+	}
+
+	/**
+	 * Convert a Joomla extension name to `#__extensions` table query criteria.
+	 *
+	 * The following kinds of extensions are supported:
+	 * * `pkg_something` Package type extension
+	 * * `com_something` Component
+	 * * `plg_folder_something` Plugins
+	 * * `mod_something` Site modules
+	 * * `amod_something` Administrator modules. THIS IS CUSTOM.
+	 * * `file_something` File type extension
+	 * * `lib_something` Library type extension
+	 *
+	 * @param   string  $extensionName
+	 *
+	 * @return  string[]
+	 */
+	private function extensionNameToCriteria(string $extensionName): array
+	{
+		$parts = explode('_', $extensionName, 3);
+
+		switch ($parts[0])
+		{
+			case 'pkg':
+				return [
+					'type'    => 'package',
+					'element' => $extensionName,
+				];
+
+			case 'com':
+				return [
+					'type'    => 'component',
+					'element' => $extensionName,
+				];
+
+			case 'plg':
+				return [
+					'type'    => 'plugin',
+					'folder'  => $parts[1],
+					'element' => $parts[2],
+				];
+
+			case 'mod':
+				return [
+					'type'      => 'module',
+					'element'   => $extensionName,
+					'client_id' => 0,
+				];
+
+			// That's how we note admin modules
+			case 'amod':
+				return [
+					'type'      => 'module',
+					'element'   => substr($extensionName, 1),
+					'client_id' => 1,
+				];
+
+			case 'file':
+				return [
+					'type'    => 'file',
+					'element' => $extensionName,
+				];
+
+			case 'lib':
+				return [
+					'type'    => 'library',
+					'element' => $parts[1],
+				];
+		}
+
+		return [];
+	}
+
 }

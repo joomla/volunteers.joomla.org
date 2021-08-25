@@ -84,6 +84,12 @@ class file_fof40InstallerScript
 	 */
 	public function preflight($type, $parent)
 	{
+		// Do not run on uninstall.
+		if ($type === 'uninstall')
+		{
+			return true;
+		}
+
 		// Check the minimum PHP version
 		if (!empty($this->minimumPHPVersion))
 		{
@@ -162,6 +168,12 @@ class file_fof40InstallerScript
 	 */
 	public function postflight($type, $parent)
 	{
+		// Do not run on uninstall.
+		if ($type === 'uninstall')
+		{
+			return;
+		}
+
 		// Remove obsolete files and folders
 		$this->removeFilesAndFolders($this->removeFiles);
 

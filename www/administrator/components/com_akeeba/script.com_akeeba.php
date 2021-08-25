@@ -596,6 +596,11 @@ class Com_AkeebaInstallerScript extends \FOF40\InstallScript\Component
 	 */
 	public function preflight(string $type, ComponentAdapter $parent): bool
 	{
+		if ($type === 'uninstall')
+		{
+			return true;
+		}
+
 		$this->isPaid                                     = is_dir($parent->getParent()->getPath('source') . '/backend/AliceEngine');
 		$this->currentlyBeingInstalledCustomContainerFile = $parent->getParent()->getPath('source') . '/backend/Container.php';
 
@@ -651,6 +656,11 @@ class Com_AkeebaInstallerScript extends \FOF40\InstallScript\Component
 	 */
 	public function postflight(string $type, ComponentAdapter $parent): void
 	{
+		if ($type === 'uninstall')
+		{
+			return;
+		}
+
 		// Let's make sure the custom container file is up to date.
 		$this->containerBroken = $this->figureOutIfContainerIsBroken();
 

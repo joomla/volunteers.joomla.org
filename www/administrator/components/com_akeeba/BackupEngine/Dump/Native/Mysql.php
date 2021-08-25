@@ -14,6 +14,7 @@ defined('AKEEBAENGINE') || die();
 use Akeeba\Engine\Driver\QueryException;
 use Akeeba\Engine\Dump\Base;
 use Akeeba\Engine\Factory;
+use Akeeba\Engine\Platform;
 use Exception;
 use RuntimeException;
 
@@ -339,6 +340,8 @@ class Mysql extends Base
 				$this->nextRange = $this->maxRange;
 			}
 
+			$statsTableAbstract = Platform::getInstance()->tableNameStats;
+
 			while (is_array($myRow = $db->fetchAssoc()) && ($numRows < ($this->maxRange - $this->nextRange)))
 			{
 				if ($this->createNewPartIfRequired() == false)
@@ -432,7 +435,7 @@ class Mysql extends Base
 						}
 
 						// Fix 2.0: Mark currently running backup as successful in the DB snapshot
-						if ($tableAbstract == '#__ak_stats')
+						if ($tableAbstract == $statsTableAbstract)
 						{
 							if ($fieldID == 1)
 							{
@@ -1483,6 +1486,10 @@ class Mysql extends Base
 
 				// Remove table options {DATA|INDEX} DIRECTORY
 				$regex     = "#(DATA|INDEX)\s{1,}DIRECTORY\s*=?\s*'.*'#i";
+				$table_sql = preg_replace($regex, '', $table_sql);
+
+				// Remove table options ROW_FORMAT=whatever
+				$regex     = "#ROW_FORMAT\s*=\s*[A-Z]{1,}#i";
 				$table_sql = preg_replace($regex, '', $table_sql);
 
 				// Abstract the names of table constraints and indices

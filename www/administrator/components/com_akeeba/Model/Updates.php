@@ -285,44 +285,40 @@ class Updates extends Update
 
 	private function createFakePackageExtension()
 	{
-		$db = $this->container->db;
+		$manifestCacheJson = json_encode([
+			'name'         => 'Akeeba Backup package',
+			'type'         => 'package',
+			'creationDate' => gmdate('Y-m-d'),
+			'author'       => 'Nicholas K. Dionysopoulos',
+			'copyright'    => sprintf('Copyright (c)2006-%d Akeeba Ltd / Nicholas K. Dionysopoulos', gmdate('Y')),
+			'authorEmail'  => '',
+			'authorUrl'    => 'https://www.akeeba.com',
+			'version'      => $this->version,
+			'description'  => sprintf('Akeeba Backup installation package v.%s', $this->version),
+			'group'        => '',
+			'filename'     => 'pkg_akeeba',
+		]);
 
-		$query = $db->getQuery(true)
-			->insert($db->qn('#__extensions'))
-			->columns([
-				$db->qn('name'), $db->qn('type'), $db->qn('element'), $db->qn('folder'), $db->qn('client_id'),
-				$db->qn('enabled'), $db->qn('access'), $db->qn('protected'), $db->qn('manifest_cache'),
-				$db->qn('params'), $db->qn('custom_data'), $db->qn('system_data'), $db->qn('checked_out'),
-				$db->qn('checked_out_time'), $db->qn('ordering'), $db->qn('state'),
-			])
-			->values([
-				$db->q('Akeeba Backup package') . ',' .
-				$db->q('package') . ',' .
-				$db->q('pkg_akeeba') . ',' .
-				$db->q('') . ',' .
-				$db->q(0) . ',' .
-				$db->q(1) . ',' .
-				$db->q(1) . ',' .
-				$db->q(0) . ',' .
-				$db->q('{"name":"Akeeba Backup package","type":"package","creationDate":"2016-04-21","author":"Nicholas K. Dionysopoulos","copyright":"Copyright (c)2006-2019 Akeeba Ltd \/ Nicholas K. Dionysopoulos","authorEmail":"","authorUrl":"","version":"' . $this->version . '","description":"Akeeba Backup installation package, for updating from version 4.x only","group":"","filename":"pkg_akeeba"}') . ',' .
-				$db->q('{}') . ',' .
-				$db->q('') . ',' .
-				$db->q('') . ',' .
-				$db->q(0) . ',' .
-				(version_compare(JVERSION, '3.999.999', 'le') ? $db->q($db->getNullDate()) : 'NULL') . ',' .
-				$db->q(0) . ',' .
-				$db->q(0),
-			]);
+		$extensionRecord = [
+			'name'             => 'Akeeba Backup package',
+			'type'             => 'package',
+			'element'          => 'pkg_akeeba',
+			'folder'           => '',
+			'client_id'        => 0,
+			'enabled'          => 1,
+			'access'           => 1,
+			'protected'        => 0,
+			'manifest_cache'   => $manifestCacheJson,
+			'params'           => '{}',
+			'checked_out'      => 0,
+			'checked_out_time' => null,
+			'state'            => 0,
+		];
 
-		try
-		{
-			$db->setQuery($query)->execute();
-		}
-		catch (Exception $e)
-		{
-			// Your database if FUBAR.
-			return;
-		}
+		$class = '\\Joomla\\CMS\\Table\\Extension';
+		$class = class_exists($class, true) ? $class : '\\JTableExtension';
+		$extension = new $class($this->container->db);
+		$extension->save($extensionRecord);
 
 		$this->createFakePackageManifest();
 	}
@@ -336,8 +332,17 @@ class Updates extends Update
 			return;
 		}
 
-		$isPro = defined('AKEEBA_PRO') ? AKEEBA_PRO : 0;
-		$dlid  = $isPro ? '<dlid prefix="dlid=" suffix=""/>' : '';
+		$isPro   = defined('AKEEBA_PRO') ? AKEEBA_PRO : 0;
+		$proCore = $isPro ? 'pro' : 'core';
+		$dlid    = $isPro ? '<dlid prefix="dlid=" suffix=""/>' : '';
+		$year    = gmdate('Y');
+		$date    = gmdate('Y-m-d');
+
+		$proPlugins = <<< END
+        <file type="file" id="file_akeeba">file_akeeba-pro.zip</file>
+		<file type="plugin" group="installer" id="akeebabackup">plg_installer_akeebabackup.zip</file>
+END;
+		$proPlugins = $isPro ? $proPlugins : '';
 
 		$content = <<< XML
 <?xml version="1.0" encoding="utf-8"?>
@@ -345,21 +350,23 @@ class Updates extends Update
 	$dlid
     <name>Akeeba Backup package</name>
     <author>Nicholas K. Dionysopoulos</author>
-    <creationDate>2016-04-20</creationDate>
+    <creationDate>$date</creationDate>
     <packagename>akeeba</packagename>
     <version>{$this->version}</version>
     <url>https://www.akeeba.com</url>
     <packager>Akeeba Ltd</packager>
     <packagerurl>https://www.akeeba.com</packagerurl>
-    <copyright>Copyright (c)2006-2019 Akeeba Ltd / Nicholas K. Dionysopoulos</copyright>
+    <copyright>Copyright (c)2006-$year Akeeba Ltd / Nicholas K. Dionysopoulos</copyright>
     <license>GNU GPL v3 or later</license>
-    <description>Akeeba Backup installation package v.revD5C5D46</description>
+    <description>Akeeba Backup installation package {$this->version}</description>
 
     <files>
-        <file type="component" id="com_akeeba">com_akeeba-pro.zip</file>
-        <file type="file" id="file_akeeba">file_akeeba-pro.zip</file>
+        <file type="component" id="com_akeebabackup">com_akeebabackup-{$proCore}.zip</file>
+        <file type="plugin" group="console" id="akeebabackup">plg_console_akeebabackup.zip</file>
         <file type="plugin" group="quickicon" id="akeebabackup">plg_quickicon_akeebabackup.zip</file>
         <file type="plugin" group="system" id="backuponupdate">plg_system_backuponupdate.zip</file>
+        <file type="plugin" group="actionlog" id="akeebabackup">plg_actionlog_akeebabackup.zip</file>
+        $proPlugins
     </files>
 
     <scriptfile>script.akeeba.php</scriptfile>

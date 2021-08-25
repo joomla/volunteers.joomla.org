@@ -54,4 +54,18 @@ class None extends Base
 	{
 		return '';
 	}
+
+	protected function _run()
+	{
+		Factory::getLog()->info("Reminder: database definitions using the 'None' driver result in no data being backed up.");
+
+		$this->setState(self::STATE_POSTRUN);
+	}
+
+	protected function _finalize()
+	{
+		Factory::getLog()->info("Reminder: database definitions using the 'None' driver result in no data being backed up.");
+
+		$this->setState(self::STATE_FINISHED);
+	}
 }

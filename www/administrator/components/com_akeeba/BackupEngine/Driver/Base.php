@@ -1003,7 +1003,7 @@ abstract class Base
 	 */
 	public function quoteName($name, $as = null)
 	{
-		if (is_string($name))
+		if (!is_array($name))
 		{
 			$quotedName = $this->quoteNameStr(explode('.', $name));
 

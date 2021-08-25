@@ -44,7 +44,11 @@ require_once JPATH_LIBRARIES . '/fof40/Cli/Application.php';
 require_once JPATH_ADMINISTRATOR . '/components/com_akeeba/version.php';
 
 // Set up the cacert.pem location
-define('AKEEBA_CACERT_PEM', JPATH_LIBRARIES . '/src/Http/Transport/cacert.pem');
+$caCertPath = class_exists('\\Composer\\CaBundle\\CaBundle')
+	? \Composer\CaBundle\CaBundle::getBundledCaBundlePath()
+	: JPATH_LIBRARIES . '/src/Http/Transport/cacert.pem';
+
+define('AKEEBA_CACERT_PEM', $caCertPath);
 
 /**
  * Akeeba Backup alternative check failed application
@@ -298,10 +302,13 @@ ENDTEXT;
 		{
 			case 'curl':
 				$ch         = curl_init($url);
-				$cacertPath = JPATH_LIBRARIES . '/src/Http/Transport/cacert.pem';
-				if (file_exists($cacertPath))
+				$caCertPath = class_exists('\\Composer\\CaBundle\\CaBundle')
+					? \Composer\CaBundle\CaBundle::getBundledCaBundlePath()
+					: JPATH_LIBRARIES . '/src/Http/Transport/cacert.pem';
+
+				if (file_exists($caCertPath))
 				{
-					@curl_setopt($ch, CURLOPT_CAINFO, $cacertPath);
+					@curl_setopt($ch, CURLOPT_CAINFO, $caCertPath);
 				}
 				@curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
 				@curl_setopt($ch, CURLOPT_FRESH_CONNECT, true);

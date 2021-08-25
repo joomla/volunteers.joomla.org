@@ -22,6 +22,8 @@ defined('_JEXEC') || die();
  */
 trait FrontEndPermissions
 {
+	private static $ENABLE_DATE_CHECKS = false;
+
 	/**
 	 * Check that the user has sufficient permissions to access the front-end backup feature.
 	 *
@@ -41,7 +43,7 @@ trait FrontEndPermissions
 			$febEnabled = false;
 		}
 
-		if (!$this->confirmDates())
+		if (static::$ENABLE_DATE_CHECKS && !$this->confirmDates())
 		{
 			@ob_end_clean();
 			echo '402 Your version of Akeeba Backup is too old. Please update it to re-enable the remote backup features';

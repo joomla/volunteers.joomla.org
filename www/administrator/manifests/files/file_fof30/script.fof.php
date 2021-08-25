@@ -98,6 +98,12 @@ class file_fof30InstallerScript
 	 */
 	public function preflight($type, $parent)
 	{
+		// Do not run on uninstall.
+		if ($type === 'uninstall')
+		{
+			return true;
+		}
+
 		// Check the minimum PHP version
 		if (!empty($this->minimumPHPVersion))
 		{
@@ -176,6 +182,12 @@ class file_fof30InstallerScript
 	 */
 	public function postflight($type, $parent)
 	{
+		// Do not run on uninstall.
+		if ($type === 'uninstall')
+		{
+			return;
+		}
+
 		// Remove obsolete files and folders
 		$this->removeFilesAndFolders($this->removeFiles);
 
@@ -268,6 +280,9 @@ class file_fof30InstallerScript
 	 */
 	public function uninstall($parent)
 	{
+		// Remove all dependencies for FOF 3 and Akeeba Strapper
+		$this->killDependencies();
+
 		// Check dependencies on FOF
 		$dependencyCount = count($this->getDependencies('fof30'));
 
@@ -779,6 +794,23 @@ class file_fof30InstallerScript
 
 				Folder::delete($f);
 			}
+		}
+	}
+
+	private function killDependencies()
+	{
+		$db = Factory::getDbo();
+		$killKeys = ['fof30', 'strapper30'];
+		$query = $db->getQuery(true)
+			->delete($db->quoteName('#__akeeba_common'))
+			->where($db->quoteName('key') . 'IN(' . implode(', ', array_map([$db, 'quote'], $killKeys)) . ')');
+		try
+		{
+			$db->setQuery($query)->execute();
+		}
+		catch (Exception $e)
+		{
+			// No problem if this fails.
 		}
 	}
 

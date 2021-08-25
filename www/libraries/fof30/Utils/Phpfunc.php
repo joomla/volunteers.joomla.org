@@ -16,6 +16,8 @@ defined('_JEXEC') || die;
  *
  * @method  function_exists(string $function)
  * @method  hash_algos()
+ *
+ * @deprecated 4.0
  */
 class Phpfunc
 {

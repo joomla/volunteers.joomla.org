@@ -216,6 +216,12 @@ class Component extends BaseInstaller
 	 */
 	public function preflight(string $type, ComponentAdapter $parent): bool
 	{
+		// Do not run on uninstall.
+		if ($type === 'uninstall')
+		{
+			return true;
+		}
+
 		// Check the minimum PHP version
 		if (!$this->checkPHPVersion())
 		{
@@ -260,6 +266,12 @@ class Component extends BaseInstaller
 	 */
 	public function postflight(string $type, ComponentAdapter $parent): void
 	{
+		// Do not run on uninstall.
+		if ($type === 'uninstall')
+		{
+			return;
+		}
+
 		// Add ourselves to the list of extensions depending on FOF40
 		$this->addDependency('fof40', $this->componentName);
 		$this->removeDependency('fof30', $this->componentName);

@@ -14,6 +14,51 @@ $cloudFlareTestFile = 'CLOUDFLARE::' . $this->getContainer()->template->parsePat
 $cloudFlareTestFile .= '?' . $this->getContainer()->mediaVersion;
 
 ?>
+{{-- Joomla 4 upgrade prompt --}}
+@if(version_compare(JVERSION, '3.999.999', 'gt'))
+    <div class="akeeba-block--warning--large">
+        <h1>🚨 🚨 🚨 Please upgrade to Akeeeba Backup 9 🚨 🚨 🚨</h1>
+        <p style="font-size: 1.5rem; margin: 1rem 0 0">
+            You are currently using Akeeba Backup 8. This version was only made minimally compatible with Joomla 4 to allow you to upgrade from Joomla 3 to Joomla 4 without losing your backup archives and settings. We will not provide support for Akeeba Backup 8 running on Joomla 4.0 and later.
+        </p>
+        <p style="font-size: 1.5rem; margin: 1rem 0 0">
+            You need to download and install Akeeba Backup 9, our Joomla 4 native version of Akeeba Backup. It is fully supported for use on Joomla 4.
+        </p>
+        <p style="font-size: 1.5rem; margin: 1rem 0 0">
+            After installing Akeeba Backup 9 please click on Components, Akeeba Backup for Joomla!, Control Panel from Joomla's sidebar and follow the instructions on your screen to migrate your settings and your backups from Akeeba Backup 8.
+        </p>
+        <p>
+            <a href="https://www.akeeba.com/download.html" class="akeeba-btn--green--big--block" style="font-size: 1.5rem; margin: 2rem 0">
+                <span class="akion akion-ios-download" aria-hidden="true"></span>
+                Download Akeeba Backup 9 now
+            </a>
+        </p>
+    </div>
+@endif
+
+{{-- Joomla 3 End of Life notice --}}
+@if(time() > 1660683600)
+    <div class="akeeba-block--warning">
+        <h1>Joomla 3 is approaching its End of Life</h1>
+        <p>
+            Joomla 3 will become End of Life on August 17th, 2023. We will no longer provide any support or software updates for Joomla 3 after it becomes End of Life.
+        </p>
+        <p>
+            Please upgrade your site to the latest Joomla version (Joomla 4 at the time of this writing) as soon as humanly possible. Afterwards, please update Akeeba Backup to the latest released version. The longer you delay the less likely is that there will be an upgrade path for your site.
+        </p>
+    </div>
+@elseif(time() > 1692219600)
+    <div class="akeeba-block--info">
+        <h1>Joomla 3 is End of Life</h1>
+        <p>
+            We no longer provide support for using our software on Joomla 3 after it became End of Life on August 17th, 2023. We will no longer provide any kind of updates for this software including but not limited to: security updates, bug fixes, new features, or addressing compatibility issues with third party services and new web server and web browser versions.
+        </p>
+        <p>
+            Please upgrade your site to the latest Joomla version (Joomla 4 at the time of this writing) as soon as humanly possible and update Akeeba Backup to the latest released version. The longer you delay the less likely is that there will be an upgrade path for your site.
+        </p>
+    </div>
+@endif
+
 {{-- Configuration Wizard pop-up --}}
 @if($this->promptForConfigurationWizard)
     @include('admin:com_akeeba/Configuration/confwiz_modal')

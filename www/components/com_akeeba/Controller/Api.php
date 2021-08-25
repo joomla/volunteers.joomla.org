@@ -67,6 +67,11 @@ class Api extends Controller
 
 	public function main()
 	{
+		if (!defined('AKEEBA_BACKUP_ORIGIN'))
+		{
+			define('AKEEBA_BACKUP_ORIGIN', 'json');
+		}
+
 		$outputBuffering = function_exists('ob_start') && function_exists('ob_end_clean');
 
 		// Use the model to parse the JSON message

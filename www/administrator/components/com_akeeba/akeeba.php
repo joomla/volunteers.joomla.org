@@ -50,7 +50,11 @@ try
 		return;
 	}
 
-	define('AKEEBA_CACERT_PEM', JPATH_LIBRARIES . '/src/Http/Transport/cacert.pem');
+	$caCertPath = class_exists('\\Composer\\CaBundle\\CaBundle')
+		? \Composer\CaBundle\CaBundle::getBundledCaBundlePath()
+		: JPATH_LIBRARIES . '/src/Http/Transport/cacert.pem';
+
+	define('AKEEBA_CACERT_PEM', $caCertPath);
 
 	FOF40\Container\Container::getInstance('com_akeeba')->dispatcher->dispatch();
 }

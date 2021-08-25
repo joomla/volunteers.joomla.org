@@ -262,7 +262,14 @@ class Joomla extends RenderBase implements RenderInterface
 
 		if ($isJoomla4)
 		{
-			HTMLHelper::_('bootstrap.tab');
+			try
+			{
+				HTMLHelper::_('bootstrap.tab');
+			}
+			catch (\Exception $e)
+			{
+				// Since RC1 this is no longer available.
+			}
 			HTMLHelper::_('bootstrap.dropdown');
 		}
 

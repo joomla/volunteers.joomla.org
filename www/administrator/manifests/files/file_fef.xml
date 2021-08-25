@@ -15,8 +15,8 @@
     <authorUrl>https://www.akeeba.com</authorUrl>
     <copyright>(C) 2017-2021 Akeeba Ltd.</copyright>
     <license>GNU GPL v3 or later</license>
-    <version>2.0.2</version>
-    <creationDate>2021-03-11</creationDate>
+    <version>2.0.3</version>
+    <creationDate>2021-08-12</creationDate>
     <description>Akeeba Frontend Framework - The CSS framework for Akeeba Ltd extensions.</description>
 
     <!-- Fileset definition -->

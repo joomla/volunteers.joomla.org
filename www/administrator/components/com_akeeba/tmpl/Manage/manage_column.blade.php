@@ -22,7 +22,8 @@ $archiveExists    = $record['meta'] == 'ok';
 $showManageRemote = in_array($record['meta'], array(
 		'ok', 'remote'
 	)) && !empty($record['remote_filename']) && (AKEEBA_PRO == 1);
-$showUploadRemote = $this->permissions['backup'] && $archiveExists && empty($record['remote_filename']) && ($this->enginesPerProfile[$record['profile_id']] != 'none') && ($record['meta'] != 'obsolete') && (AKEEBA_PRO == 1);
+$engineForProfile = array_key_exists($record['profile_id'], $this->enginesPerProfile) ? $this->enginesPerProfile[$record['profile_id']] : 'none';
+$showUploadRemote = $this->permissions['backup'] && $archiveExists && empty($record['remote_filename']) && ($engineForProfile != 'none') && ($record['meta'] != 'obsolete') && (AKEEBA_PRO == 1);
 $showDownload     = $this->permissions['download'] && $archiveExists;
 $showViewLog      = $this->permissions['backup'] && isset($record['backupid']) && !empty($record['backupid']);
 $postProcEngine   = '';
@@ -31,7 +32,7 @@ $thisID           = urlencode($record['id']);
 
 if ($showUploadRemote)
 {
-	$postProcEngine   = $this->enginesPerProfile[$record['profile_id']];
+	$postProcEngine   = $engineForProfile ?: 'none';
 	$showUploadRemote = !empty($postProcEngine);
 }
 

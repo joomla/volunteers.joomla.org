@@ -1,4 +1,26 @@
 <?php die();?>
+Akeeba Backup 8.0.10
+================================================================================
+# [HIGH] Uninstallation broken on Joomla 4 due to different installation script event handling (wow, they even broke components' uninstallation, not just the packages!).
+# [LOW] Warning in Manage Backups page if you have deleted the backup profile used to take a backup listed there
+
+Akeeba Backup 8.0.9
+================================================================================
+~ Changes in Joomla 4.0.0-RC5 broke the date and time input fields. Now using native HTML 5 controls.
+# [HIGH] Uninstallation broken on Joomla 4 due to different installation script event handling.
+
+Akeeba Backup 8.0.8
+================================================================================
+! Exception when you do not have the package extension installed on your site. Shouldn't happen unless you've messed with your database.
+
+Akeeba Backup 8.0.7
+================================================================================
++ Restoration: information about disabling the password protection.
+~ Remove ROW_FORMAT during backup and restoration, makes it easier restoring sites using InnoDB across different MySQL server versions
+~ Joomla changed the location of cacert.pem, breaking backup upload to remote storage on some servers
+# [HIGH] Remote JSON API v2 fails on PHP 8
+# [MEDIUM] Tables with only numbers in their names cause the backup to fail
+
 Akeeba Backup 8.0.6
 ================================================================================
 ! Encrypted settings could not be read

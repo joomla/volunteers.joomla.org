@@ -126,6 +126,12 @@ class Pkg_AkeebaInstallerScript
 	 */
 	public function preflight($type, $parent)
 	{
+		// Do not run on uninstall.
+		if ($type === 'uninstall')
+		{
+			return true;
+		}
+
 		// Check the minimum PHP version
 		if (!version_compare(PHP_VERSION, $this->minimumPHPVersion, 'ge'))
 		{
@@ -197,6 +203,12 @@ class Pkg_AkeebaInstallerScript
 	 */
 	public function postflight($type, $parent)
 	{
+		// Do not run on uninstall.
+		if ($type === 'uninstall')
+		{
+			return;
+		}
+
 		// Always uninstall these plugins
 		if (isset($this->uninstallPlugins) && !empty($this->uninstallPlugins))
 		{

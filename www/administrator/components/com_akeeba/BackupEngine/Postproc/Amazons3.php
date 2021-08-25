@@ -359,7 +359,7 @@ class Amazons3 extends Base
 	 *
 	 * @return  array
 	 */
-	final private function provisionCredentials(array $config): array
+	private function provisionCredentials(array $config): array
 	{
 		// First, try to fetch credentials from the volatile engine configuration
 		$akeebaConfig                 = Factory::getConfiguration();
@@ -422,7 +422,7 @@ class Amazons3 extends Base
 	 *
 	 * @throws  RuntimeException
 	 */
-	final private function getEC2RoleCredentials(): array
+	private function getEC2RoleCredentials(): array
 	{
 		$hasCurl = function_exists('curl_init') && function_exists('curl_exec') && function_exists('curl_close');
 
@@ -493,7 +493,7 @@ class Amazons3 extends Base
 	 *
 	 * @throws RuntimeException
 	 */
-	final private function getURL(string $url): string
+	private function getURL(string $url): string
 	{
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, $url);
@@ -554,7 +554,7 @@ class Amazons3 extends Base
 	 *
 	 * @throws Exception When something goes wrong.
 	 */
-	final private function multipartUpload(string $bucket, string $remoteKey, string $sourceFile, Connector $connector, string $acl = 'bucket-owner-full-control', int $storageType = 0): bool
+	private function multipartUpload(string $bucket, string $remoteKey, string $sourceFile, Connector $connector, string $acl = 'bucket-owner-full-control', int $storageType = 0): bool
 	{
 		$endpoint                       = $connector->getConfiguration()->getEndpoint();
 		$headers                        = $this->getStorageTypeHeaders($storageType, $endpoint);
@@ -676,7 +676,7 @@ class Amazons3 extends Base
 	 *
 	 * @return  array  The headers
 	 */
-	final private function getStorageTypeHeaders($storageType = self::STORAGE_STANDARD, $endpoint = 's3.amazonaws.com')
+	private function getStorageTypeHeaders($storageType = self::STORAGE_STANDARD, $endpoint = 's3.amazonaws.com')
 	{
 		$headers = [];
 
@@ -733,7 +733,7 @@ class Amazons3 extends Base
 	 *
 	 * @throws Exception When something goes wrong.
 	 */
-	final private function simpleUpload(string $bucket, string $remoteKey, string $sourceFile, Connector $s3Client, string $acl = 'bucket-owner-full-control', int $storageType = 0): bool
+	private function simpleUpload(string $bucket, string $remoteKey, string $sourceFile, Connector $s3Client, string $acl = 'bucket-owner-full-control', int $storageType = 0): bool
 	{
 		Factory::getLog()->debug(sprintf(
 			"%s -- Legacy (single part) upload of %s", $this->engineLogName, basename($sourceFile)
@@ -757,7 +757,7 @@ class Amazons3 extends Base
 	 *
 	 * @return  int  The length of the $data string
 	 */
-	final private function reponseHeaderCallback($ch, $data)
+	private function reponseHeaderCallback($ch, $data)
 	{
 		$strlen = strlen($data);
 

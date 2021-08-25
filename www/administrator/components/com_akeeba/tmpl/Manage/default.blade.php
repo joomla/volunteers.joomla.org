@@ -43,11 +43,31 @@ defined('_JEXEC') || die();
                 </div>
 
                 <div class="akeeba-filter-element akeeba-form-group akeeba-filter-joomlacalendarfix">
+                    @if (version_compare(JVERSION, '3.999.999', 'le'))
                     @jhtml('calendar', $this->fltFrom, 'from', 'from', '%Y-%m-%d', array('class' => 'input-small'))
+                    @else
+                    <input
+                            type="datetime-local"
+                            pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}"
+                            name="from"
+                            id="from"
+                            value="{{{ $this->fltFrom }}}"
+	                >
+                    @endif
                 </div>
 
                 <div class="akeeba-filter-element akeeba-form-group akeeba-filter-joomlacalendarfix">
+                    @if (version_compare(JVERSION, '3.999.999', 'le'))
                     @jhtml('calendar', $this->fltTo, 'to', 'to', '%Y-%m-%d', array('class' => 'input-small'))
+                    @else
+                    <input
+                            type="datetime-local"
+                            pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}"
+                            name="to"
+                            id="to"
+                            value="{{{ $this->fltTo }}}"
+                    >
+                    @endif
                 </div>
 
                 <div class="akeeba-filter-element akeeba-form-group">

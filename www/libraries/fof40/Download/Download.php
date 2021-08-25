@@ -54,7 +54,7 @@ class Download
 		$this->container = $c;
 
 		// Find the best fitting adapter
-		$allAdapters = self::getFiles(__DIR__ . '/Adapter', [], ['AbstractAdapter.php', 'cacert.pem']);
+		$allAdapters = self::getFiles(__DIR__ . '/Adapter', [], ['AbstractAdapter.php']);
 		$priority    = 0;
 
 		foreach ($allAdapters as $adapterInfo)

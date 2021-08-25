@@ -71,6 +71,10 @@ class Fopen extends AbstractAdapter implements DownloadInterface
 
 		if (!(empty($from) && empty($to)))
 		{
+			$caCertPath = class_exists('\\Composer\\CaBundle\\CaBundle')
+				? \Composer\CaBundle\CaBundle::getBundledCaBundlePath()
+				: JPATH_LIBRARIES . '/src/Http/Transport/cacert.pem';
+
 			$options = [
 				'http' => [
 					'method' => 'GET',
@@ -78,7 +82,7 @@ class Fopen extends AbstractAdapter implements DownloadInterface
 				],
 				'ssl'  => [
 					'verify_peer'  => true,
-					'cafile'       => JPATH_LIBRARIES . '/src/Http/Transport/cacert.pem',
+					'cafile'       => $caCertPath,
 					'verify_depth' => 5,
 				],
 			];
@@ -90,13 +94,17 @@ class Fopen extends AbstractAdapter implements DownloadInterface
 		}
 		else
 		{
+			$caCertPath = class_exists('\\Composer\\CaBundle\\CaBundle')
+				? \Composer\CaBundle\CaBundle::getBundledCaBundlePath()
+				: JPATH_LIBRARIES . '/src/Http/Transport/cacert.pem';
+
 			$options = [
 				'http' => [
 					'method' => 'GET',
 				],
 				'ssl'  => [
 					'verify_peer'  => true,
-					'cafile'       => JPATH_LIBRARIES . '/src/Http/Transport/cacert.pem',
+					'cafile'       => $caCertPath,
 					'verify_depth' => 5,
 				],
 			];

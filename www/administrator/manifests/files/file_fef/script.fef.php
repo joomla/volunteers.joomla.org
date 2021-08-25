@@ -56,6 +56,12 @@ class file_fefInstallerScript
 	 */
 	public function preflight($type, $parent)
 	{
+		// Do not run on uninstall.
+		if ($type === 'uninstall')
+		{
+			return true;
+		}
+
 		// Check the minimum PHP version
 		if (!empty($this->minimumPHPVersion))
 		{
@@ -177,6 +183,12 @@ class file_fefInstallerScript
 	 */
 	public function postflight($type, JInstallerAdapterFile $parent)
 	{
+		// Do not run on uninstall.
+		if ($type === 'uninstall')
+		{
+			return;
+		}
+
 		// Remove the obsolete dependency to FOF
 		$isFOFInstalled = @is_dir(JPATH_LIBRARIES . '/fof30');
 

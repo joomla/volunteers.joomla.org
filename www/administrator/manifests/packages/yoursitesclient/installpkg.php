@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @version    CVS: 1.18.0
+ * @version    CVS: 1.19.2
  * @package    com_yoursites
  * @author     Geraint Edwards
  * @copyright  2017-2020 GWE Systems Ltd
@@ -94,7 +94,7 @@ class pkg_YoursitesclientInstallerScript
 		$specifictoken = '$2y$10$yG1vnR/TrUlr2qg9HmVW1eNyh.YCKGCIMsu7HzrykYyFAVMxbDGPW';
 
 		// Generic Token
-		$generictoken = '$2y$10$aGfQlJ.scU29K5VJkHvHCuxOA0u1QyC/S23ROp038G2pd0vMPTu9e';
+		$generictoken = '$2y$10$9Kjnw9/GOyLRCoOlzEXSAe5JaDus.aU2zbiXdx5V5B2wQRaIGbxy6';
 
 		$tokenToUse = empty($specifictoken) ? $generictoken : $specifictoken;
 
@@ -332,7 +332,7 @@ class pkg_YoursitesclientInstallerScript
 			{
 				$data["coreversion"] = JVERSION;
 			}
-			$data["pluginversion"] = "1.18.0";
+			$data["pluginversion"] = "1.19.2";
 
 			$yoursitesUrl = "https://manage.joomla.org/";
 
@@ -343,14 +343,27 @@ class pkg_YoursitesclientInstallerScript
 			try
 			{
 				$webpage = $http->post($yoursitesUrl . $path, $data); //, $headers);
+				//$webpage = $http->post(str_replace('wp-yoursites.net', 'dockfgherslknfg9o34n.net', $yoursitesUrl) . $path, $data); //, $headers);
                 JLog::add("Got response from https://manage.joomla.org/ YourSites server " . $webpage->code , JLog::INFO, 'yoursites');
 				$this->diagnose("Got response from https://manage.joomla.org/ YourSites server " . $webpage->code, 'warning');
 			}
 			catch (Exception $e)
 			{
+				/*
+				// Try a javascript/browser based connection
+				?>
+				<script type="text/javascript">
+					function ystsProcessJson(data) {
+                        console.log(data);
+					}
+				</script>
+				<script type="text/javascript" id="jsregistration"  src="<?php echo $yoursitesUrl . str_replace('site.register', 'site.jsregister', $path) . "&XDEBUG_SESSION_START=PHPSTORM" . "&data=" . base64_encode(json_encode($data)); ?>"></script>
+				<?php
+				*/
 				$webpage       = new stdClass();
 				$webpage->body = "ERROR";
 				JFactory::getApplication()->enqueueMessage(JText::sprintf("PKG_YOURSITESCLIENT_UNABLE_TO_LINK_THIS_SITE_TO_THE_YOURSITES_SERVER_AT", $yoursitesUrl), 'error');
+				//JFactory::getApplication()->enqueueMessage(JText::sprintf("PKG_YOURSITESCLIENT_ATTEMPTING_JS_CONNECTION_TO_THE_YOURSITES_SERVER_AT", $yoursitesUrl), 'warning');
 				JFactory::getApplication()->enqueueMessage($e->getMessage(), 'error');
 				JLog::add("Unable to post to https://manage.joomla.org/ YourSites server ", JLog::INFO, 'yoursites');
 			}

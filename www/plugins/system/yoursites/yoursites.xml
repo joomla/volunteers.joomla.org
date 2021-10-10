@@ -2,16 +2,17 @@
 <extension version="3.1" type="plugin" group="system" method="upgrade">
     <name>PLG_YOURSITES_HANDLER</name>
     <author>GWE Systems Ltd</author>
-    <creationDate>June 2021</creationDate>
+    <creationDate>September 2021</creationDate>
     <copyright>(C) 2017-2020 GWE Systems Ltd. All rights reserved.</copyright>
     <license>GNU General Public License version 2 or later; see	LICENSE.txt</license>
     <authorEmail>via website</authorEmail>
     <authorUrl>www.gwesystems.com</authorUrl>
-    <version>1.18.0</version>
+    <version>1.19.2</version>
     <description>PLG_YOURSITES_HANDLER_DESC</description>
     <scriptfile>install.php</scriptfile>
     <files>
         <filename plugin="yoursites">yoursites.php</filename>
+        <filename>akeebaclasses.php</filename>
         <filename>sitechecks.php</filename>
         <filename>Compatibility.php</filename>
         <folder>assets</folder>

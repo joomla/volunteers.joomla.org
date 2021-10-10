@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @version    CVS: 1.18.0.1
+ * @version    CVS: 1.19.2.1
  * @package    com_yoursites
  * @author     Geraint Edwards
  * @copyright  2017-2020 GWE Systems Ltd
@@ -91,6 +91,42 @@ class plgSystemYourSites extends JPlugin
 
 	}
 
+	// override edit article page and menu item edit page
+	public function onContentPrepareForm($form, $data)
+	{
+
+		if (!($form instanceof JForm))
+		{
+			$this->_subject->setError('JERROR_NOT_A_FORM');
+
+			return false;
+		}
+
+		$name = $form->getName();
+
+		if ($name != 'com_plugins.plugin' || !isset($data->element) || $data->element != 'yoursites' || !isset($data->folder) || $data->folder != 'system')
+		{
+			return true;
+		}
+
+		if (JFactory::getApplication()->isClient('administrator'))
+		{
+
+			$configFiles = JFolder::files(JPATH_PLUGINS . "/system/yoursites/customactions/"  , 'config_*.xml');
+
+			foreach ($configFiles as $configFile)
+			{
+				if (file_exists(JPATH_PLUGINS . "/system/yoursites/customactions/"  . $configFile))
+				{
+					$lang = JFactory::getLanguage();
+					$lang->load("plg_yoursites_" . str_replace("_config.xml", "", $configFile) , JPATH_PLUGINS . "/system/yoursites/customactions", null, false, true);
+
+					$loaded = $form->loadFile(JPATH_PLUGINS . "/system/yoursites/customactions/"  . $configFile, false);
+				}
+			}
+		}
+	}
+
 	/**
 	 * Capture core Joomla error
 	 *
@@ -104,12 +140,21 @@ class plgSystemYourSites extends JPlugin
 
 			$data               = new stdClass();
 			$data->messages     = array('COM_YOURSITES_FATAL_ERROR_INFORMATION');
-			$error              = $event->getError();
+			if (method_exists($event, 'getError'))
+			{
+				$error              = $event->getError();
+			}
+			else
+			{
+				$error              = $event;
+			}
+
 			$data->messages[]   = $error->getMessage();
 			$data->messages[]   = $error->getFile() . " : " . $error->getLine();
 			$data->log['file']  = $error->getFile();
 			$data->log['line']  = $error->getLine();
 			$data->log['trace'] = $error->getTrace();
+
 			$data->warning      = 1;
 
 			header("Content-Type: application/javascript");

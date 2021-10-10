@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @version    CVS: 1.18.0
+ * @version    CVS: 1.19.2
  * @package    com_yoursites
  * @author     Geraint Edwards <via website>
  * @copyright  2016-2020 GWE Systems Ltd
@@ -328,13 +328,18 @@ function ProcessYstsJsonRequest(&$requestObject, $returnData)
 				$directory = __DIR__;
 				$directory = realpath($directory);
 
-				if (file_exists( $directory . "/customactions/" . basename($requestObject->task . ".php")))
+				if (strpos($requestObject->task, "plugin.") === 0)
 				{
-					include_once $directory . "/customactions/" . basename($requestObject->task . ".php");
+					$requestObject->task = str_replace("plugin.", "", $requestObject->task);
+				}
+				$customActionFile = strpos($requestObject->task, ".") > 0 ? substr($requestObject->task, 0,strpos($requestObject->task, ".") ) : $requestObject->task;
+				if (file_exists( $directory . "/customactions/" . basename($customActionFile . ".php")))
+				{
+					include_once $directory . "/customactions/" . basename($customActionFile . ".php");
 
 					try {
-						$className = "Ysts" . ucfirst($requestObject->task);
-						$className::executeAction($returnData);
+						$className = "Ysts" . ucfirst($customActionFile);
+						$className::executeAction($returnData, $requestObject);
 
 					}
 					Catch (Exception $e)
@@ -458,7 +463,7 @@ function versionCompatibility($requestObject, & $returnData)
 		->select('2*protected+(1-protected)*enabled AS status')
 		->from('#__extensions')
 		// TODO find what state = 0 means!
-		->where('state = 0')
+		// ->where('state = 0')
 		// leave out protected Joomla extensions?? Can't do this since it misses out on JoomlaUpdater Component
 		//->having('status <> 2')
 	;
@@ -763,7 +768,7 @@ function findExtensions($requestObject, & $returnData)
 		->select('2*protected+(1-protected)*enabled AS status')
 		->from('#__extensions')
 		// TODO find what state = 0 means!
-		->where('state = 0')
+		// ->where('state = 0')
 		// leave out protected Joomla extensions?? Can't do this since it misses out on JoomlaUpdater Component
 		//->having('status <> 2')
 	;
@@ -3574,69 +3579,90 @@ function getBackupToken($requestObject, $returnData)
 {
 	try
 	{
-		$akeebaParams = JComponentHelper::getParams("com_akeeba");
+		if (JComponentHelper::isEnabled("com_akeeba"))
+		{
+			$akeebaParams = JComponentHelper::getParams("com_akeeba");
+		}
+		else
+		{
+			$akeebaParams = JComponentHelper::getParams("com_akeebabackup");
+		}
 		if ($akeebaParams && $akeebaParams->get("frontend_secret_word", ""))
 		{
 			$returnData->error      = 0;
 			$returnData->result = 'COM_YOURSITES_AKEEBA_TOKEN_FOUND';
 			$returnData->messages[] = 'COM_YOURSITES_AKEEBA_TOKEN_FOUND';
 
-			// If the Factory is not already loaded we have to load the
-			if (!class_exists('Akeeba\Engine\Factory'))
+			// Joomla 4 version
+			if (file_exists(JPATH_ADMINISTRATOR . "/components/com_akeebabackup/src/Dispatcher/Mixin/AkeebaEngineAware.php"))
 			{
-				if (!defined('FOF40_INCLUDED') && !@include_once(JPATH_LIBRARIES . '/fof40/include.php'))
-				{
-					if (!defined('FOF30_INCLUDED') && !@include_once(JPATH_LIBRARIES . '/fof30/include.php'))
-					{
+				$db = JFactory::getDbo();
 
+				include_once "akeebaclasses.php";
+				$secureSettings = new YstsAkeeba();
+
+			}
+			else
+			{
+				// If the Factory is not already loaded we have to load the
+				if (!class_exists('Akeeba\Engine\Factory'))
+				{
+					if (!defined('FOF40_INCLUDED') && !@include_once(JPATH_LIBRARIES . '/fof40/include.php'))
+					{
+						if (!defined('FOF30_INCLUDED') && !@include_once(JPATH_LIBRARIES . '/fof30/include.php'))
+						{
+
+							$returnData->error           = 1;
+							$returnData->errormessages[] = "missing FOF30 and FOF40 libraries";
+							$returnData->akeebatoken     = $akeebaParams->get("frontend_secret_word", "");
+
+							return $returnData;
+						}
+					}
+
+					if (defined('FOF40_INCLUDED'))
+					{
+						$container = \FOF40\Container\Container::getInstance('com_akeeba', array(), 'admin');
+					}
+					else
+					{
+						$container = \FOF30\Container\Container::getInstance('com_akeeba', array(), 'admin');
+					}
+
+					/** @var \Akeeba\Backup\Admin\Dispatcher\Dispatcher $dispatcher */
+					$dispatcher = $container->dispatcher;
+
+					try
+					{
+						if (is_callable(array($dispatcher, "loadAkeebaEngine")))
+						{
+							$dispatcher->loadAkeebaEngine();
+							$dispatcher->loadAkeebaEngineConfiguration();
+						}
+						else
+						{
+							$returnData->error           = 0;
+							$returnData->errormessages[] = "Could not decrypt secret work - this is an Akeeba Pro feature";
+							$returnData->akeebatoken     = $akeebaParams->get("frontend_secret_word", "");
+
+							return $returnData;
+						}
+					}
+					catch (Exception $e)
+					{
 						$returnData->error           = 1;
-						$returnData->errormessages[] = "missing FOF30 and FOF40 libraries";
+						$returnData->errormessages[] = "Problems with FOF libraries";
 						$returnData->akeebatoken     = $akeebaParams->get("frontend_secret_word", "");
 
 						return $returnData;
 					}
 				}
 
-				if (defined('FOF40_INCLUDED'))
-				{
-					$container = \FOF40\Container\Container::getInstance('com_akeeba', array(), 'admin');
-				}
-				else
-				{
-					$container = \FOF30\Container\Container::getInstance('com_akeeba', array(), 'admin');
-				}
-
-				/** @var \Akeeba\Backup\Admin\Dispatcher\Dispatcher $dispatcher */
-				$dispatcher = $container->dispatcher;
-
-				try
-				{
-					if (is_callable(array($dispatcher, "loadAkeebaEngine")))
-					{
-						$dispatcher->loadAkeebaEngine();
-						$dispatcher->loadAkeebaEngineConfiguration();
-					}
-					else
-					{
-						$returnData->error = 0;
-						$returnData->errormessages[] = "Could not decrypt secret work - this is an Akeeba Pro feature";
-						$returnData->akeebatoken = $akeebaParams->get("frontend_secret_word", "");
-						return $returnData;
-					}
-				}
-				catch (Exception $e)
-				{
-					$returnData->error = 1;
-					$returnData->errormessages[] = "Problems with FOF libraries";
-					$returnData->akeebatoken = $akeebaParams->get("frontend_secret_word", "");
-					return $returnData;
-				}
+				$secureSettings = \Akeeba\Engine\Factory::getSecureSettings();
 			}
-
-			$secureSettings = \Akeeba\Engine\Factory::getSecureSettings();
-
 			$returnData->jsonapi_enabled = (int) $akeebaParams->get("jsonapi_enabled", -1);
-			if ($returnData->jsonapi_enabled !== 1)
+			$returnData->frontend_enable = (int) $akeebaParams->get("frontend_enable", -1);
+			if ($returnData->jsonapi_enabled !== 1 && $returnData->frontend_enable !== 1)
 			{
 				$returnData->error = 1;
 				$returnData->errormessages[] = "You must Enable JSON API (remote backup) in your Akeeba Backup Professional Settings";
@@ -3812,8 +3838,11 @@ function securityCheck( & $requestObject, $returnData)
 
 			if ($securitytoken && password_verify(hash('sha256',$randomtoken  . " combined with " . $servertoken . $filehash), $securitytoken) )
 			{
-				$returnData->errormessages[]="Failed to match the hash";
 				return true;
+			}
+			else
+			{
+				$returnData->errormessages[]="Failed to match the hash";
 			}
 			// THIS SHOULD NOT BE RETURNED - ONLY FOR DEBUGGING
 			/*
@@ -4950,7 +4979,7 @@ function getJoomlaUpdateSitesIds($column = 0)
  *
  * @return  boolean  True on success.
  *
- * @since   1.18.0
+ * @since   1.19.2
  * @throws  \RuntimeException
  */
 function copyr2($src, $dest, $prefix = "", & $returnData, $exclusions = array())
@@ -5111,7 +5140,7 @@ function copyr2($src, $dest, $prefix = "", & $returnData, $exclusions = array())
  *
  * @return  boolean  True on success.
  *
- * @since   1.18.0
+ * @since   1.19.2
  * @throws  \RuntimeException
  */
 function deleter2($src, & $returnData)

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @version    CVS: 1.18.0
+ * @version    CVS: 1.19.2
  * @package    com_yoursites
  * @author     Geraint Edwards <via website>
  * @copyright  2016-2020 GWE Systems Ltd
@@ -16,7 +16,7 @@ class YstsGlobalcheckin
 {
 	public static $actionname = "Global Checkin";
 
-	public static function executeAction( &$returnData )
+	public static function executeAction( &$returnData, $requestObject = null )
 	{
 		try
 		{

@@ -26,7 +26,7 @@ class Autoloader
 	 */
 	protected static $aliases = [
 		'FOF40\Utils\CacheCleaner'                => 'FOF40\JoomlaAbstraction\CacheCleaner',
-		'FOF40\Utils\ComponentVersion'            => 'FOF40\Utils\ComponentVersion',
+		'FOF40\Utils\ComponentVersion'            => 'FOF40\JoomlaAbstraction\ComponentVersion',
 		'FOF40\Utils\DynamicGroups'               => 'FOF40\JoomlaAbstraction\DynamicGroups',
 		'FOF40\Utils\FEFHelper\BrowseView'        => 'FOF40\Html\FEFHelper\BrowseView',
 		'FOF40\Utils\InstallScript\BaseInstaller' => 'FOF40\InstallScript\BaseInstaller',

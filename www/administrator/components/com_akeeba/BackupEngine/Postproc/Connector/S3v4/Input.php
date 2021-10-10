@@ -265,7 +265,7 @@ class Input
 			$this->conditionalFileClose($this->fp);
 		}
 
-		$this->fp = @fopen($file, 'rb');
+		$this->fp = @fopen($file, 'r');
 
 		if ($this->fp === false)
 		{

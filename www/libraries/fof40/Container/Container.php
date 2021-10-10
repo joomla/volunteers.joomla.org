@@ -386,11 +386,7 @@ class Container extends ContainerBase
 		}
 
 		// Input Access service
-		if (isset($this['input']) &&
-			(!(is_object($this['input'])) ||
-				!($this['input'] instanceof FOFInput) ||
-				!($this['input'] instanceof JoomlaInput))
-		)
+		if (isset($this['input']) && is_array($this['input']))
 		{
 			if (empty($this['input']))
 			{

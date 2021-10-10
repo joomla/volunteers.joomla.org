@@ -37,7 +37,7 @@ class WFLinkSearchExtension extends WFSearchExtension
         require_once $adapter;
 
         // create classname, eg: PlgSearchContent
-        $className = 'PlgSearch' . ucfirst($plugin);
+        $className = 'PlgWfSearch' . ucfirst($plugin);
 
         if (!class_exists($className)) {
             return;
@@ -82,17 +82,18 @@ class WFLinkSearchExtension extends WFSearchExtension
         // get plugins
         $plugins = $wf->getParam('search.link.plugins', array());
 
-        // default core search plugins
-        $default = array('categories', 'contacts', 'content', 'weblinks', 'tags');
-
+        // set defaults if empty
         if (empty($plugins)) {
-            $plugins = $default;
+            $plugins = array('categories', 'contacts', 'content', 'tags');
         }
+
+        // list core adapters
+        $adapters = array('categories', 'contacts', 'content', 'tags', 'weblinks');
 
         // check and load external search plugins
         foreach ($plugins as $plugin) {
             // process core search plugins
-            if (in_array($plugin, $default)) {
+            if (in_array($plugin, $adapters)) {
                 $this->loadDefaultAdapter($plugin);
                 continue;
             }
@@ -399,22 +400,8 @@ class WFLinkSearchExtension extends WFSearchExtension
                 $row->href = substr_replace($row->href, '', 0, strlen(JURI::base(true)) + 1);
             }
 
-            // remove the alias from a link
-            if ((int) $wf->getParam('search.link.remove_alias', 0) && strpos($row->href, ':') !== false) {
-                $row->href = preg_replace('#\:[\w-]+#ui', '', $row->href);
-            }
-
-            // convert to SEF
-            if ($router && $sef) {
-                $router->setMode(1);
-
-                $url = str_replace('&amp;', '&', $row->href);
-
-                $uri = $router->build($url);
-                $url = $uri->toString();
-
-                $row->href = str_replace('/administrator/', '/', $url);
-            }
+            // remove the alias or ItemId from a link
+            $row->href = self::route($row->href);
 
             $result->title = $row->title;
             $result->text = $row->text;
@@ -432,6 +419,25 @@ class WFLinkSearchExtension extends WFSearchExtension
         }
 
         return $results;
+    }
+
+    private static function route($url)
+    {
+        $wf = WFEditorPlugin::getInstance();
+
+        if ((bool) $wf->getParam('search.link.remove_alias', 0)) {
+            $url = WFLinkHelper::route($url);
+        }
+
+        // remove Itemid if "home"
+        $url = WFLinkHelper::removeHomeItemId($url);
+
+        // remove Itemid if set
+        if ((bool) $wf->getParam('search.link.itemid', 1) === false) {
+            $url = WFLinkHelper::removeItemId($url);
+        }
+
+        return $url;
     }
 
     private static function getAnchors($content)

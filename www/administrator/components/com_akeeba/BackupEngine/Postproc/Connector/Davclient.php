@@ -29,11 +29,13 @@ defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Factory;
 use Akeeba\Engine\Postproc\Connector\Davclient\Xml;
+use Akeeba\Engine\Postproc\ProxyAware;
 use Exception;
 use InvalidArgumentException;
 
 class Davclient
 {
+	use ProxyAware;
 
 	/**
 	 * Basic authentication
@@ -649,8 +651,9 @@ class Davclient
 	 */
 	protected function curlRequest($url, $settings)
 	{
-
 		$curl = curl_init($url);
+
+		$this->applyProxySettingsToCurl($curl);
 
 		$followLocation = false;
 		$maxRedirs      = 5;

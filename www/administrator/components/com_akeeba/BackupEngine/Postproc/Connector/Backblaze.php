@@ -20,6 +20,7 @@ use Akeeba\Engine\Postproc\Connector\Backblaze\Exception\NotAllowed;
 use Akeeba\Engine\Postproc\Connector\Backblaze\Exception\UnexpectedHTTPStatus;
 use Akeeba\Engine\Postproc\Connector\Backblaze\FileInformation;
 use Akeeba\Engine\Postproc\Connector\Backblaze\UploadURL;
+use Akeeba\Engine\Postproc\ProxyAware;
 use Akeeba\Engine\Util\FileCloseAware;
 use DomainException;
 use OutOfBoundsException;
@@ -31,6 +32,7 @@ use RuntimeException;
 class Backblaze
 {
 	use FileCloseAware;
+	use ProxyAware;
 
 	/** The API entry point URL, only used to retrieve the authorization token */
 	public const apiURL = "https://api.backblazeb2.com/b2api/v1/";
@@ -358,7 +360,7 @@ class Backblaze
 		}
 
 		// Read the part off the file and calculate the information required by Backblaze
-		$fp = @fopen($localFile, 'rb');
+		$fp = @fopen($localFile, 'r');
 
 		if ($fp === false)
 		{
@@ -881,6 +883,8 @@ class Backblaze
 		// Initialise and execute a cURL request
 		$ch = curl_init($url);
 
+		$this->applyProxySettingsToCurl($ch);
+
 		// Get the default options array
 		$options = $this->defaultOptions;
 
@@ -940,7 +944,7 @@ class Backblaze
 		{
 			if (is_null($fileMode))
 			{
-				$fileMode = ($method == 'GET') ? 'wb' : 'rb';
+				$fileMode = ($method == 'GET') ? 'w' : 'r';
 			}
 
 			$fp = @fopen($file, $fileMode);

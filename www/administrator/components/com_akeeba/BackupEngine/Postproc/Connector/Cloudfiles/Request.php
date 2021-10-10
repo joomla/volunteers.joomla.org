@@ -12,6 +12,7 @@ namespace Akeeba\Engine\Postproc\Connector\Cloudfiles;
 defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Postproc\Connector\Cloudfiles\Exception\Http;
+use Akeeba\Engine\Postproc\ProxyAware;
 use Akeeba\Engine\Util\FileCloseAware;
 use stdClass;
 
@@ -21,6 +22,7 @@ use stdClass;
 class Request
 {
 	use FileCloseAware;
+	use ProxyAware;
 
 	/** @var bool|resource File pointer for GET and POST data */
 	public $fp = false;
@@ -119,6 +121,8 @@ class Request
 
 		// Basic setup
 		$curl = curl_init();
+
+		$this->applyProxySettingsToCurl($curl);
 
 		@curl_setopt($curl, CURLOPT_CAINFO, AKEEBA_CACERT_PEM);
 

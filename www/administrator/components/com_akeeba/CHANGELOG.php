@@ -1,4 +1,12 @@
 <?php die();?>
+Akeeba Backup 8.0.11
+================================================================================
+~ Remove dash from automatically generated random values for archive naming
++ Increase the maximum Size Quota limit to 1Pb
++ Support for Joomla proxy configuration
+# [MEDIUM] Cannot restore on PHP 8 if Two Factor Authentication is enabled in any user account
+# [HIGH] Backing up to Box, Dropbox, Google Drive or OneDrive may not be possible if you are using an add-on Download ID
+
 Akeeba Backup 8.0.10
 ================================================================================
 # [HIGH] Uninstallation broken on Joomla 4 due to different installation script event handling (wow, they even broke components' uninstallation, not just the packages!).

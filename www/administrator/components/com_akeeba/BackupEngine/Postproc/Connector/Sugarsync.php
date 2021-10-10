@@ -12,6 +12,7 @@ namespace Akeeba\Engine\Postproc\Connector;
 defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Postproc\Connector\Sugarsync\Exception\Base as SugarsyncException;
+use Akeeba\Engine\Postproc\ProxyAware;
 use Akeeba\Engine\Util\FileCloseAware;
 use DOMDocument;
 use DOMElement;
@@ -22,6 +23,7 @@ use DOMElement;
 class Sugarsync
 {
 	use FileCloseAware;
+	use ProxyAware;
 
 	/** @var string The URL to the SugarSync API endpoint */
 	private $apiURL = 'https://api.sugarsync.com';
@@ -692,6 +694,9 @@ class Sugarsync
 		}
 
 		$ch = curl_init($url);
+
+		$this->applyProxySettingsToCurl($ch);
+
 		curl_setopt($ch, CURLOPT_USERAGENT, $this->userAgent);
 		@curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -715,7 +720,7 @@ class Sugarsync
 				if (is_file($data) && is_readable($data))
 				{
 					$headers[] = 'Content-Length: ' . filesize($data);
-					$fp        = fopen($data, 'rb');
+					$fp        = fopen($data, 'r');
 					curl_setopt($ch, CURLOPT_PUT, true);
 					curl_setopt($ch, CURLOPT_INFILE, $fp);
 					curl_setopt($ch, CURLOPT_INFILESIZE, filesize($data));
@@ -733,7 +738,7 @@ class Sugarsync
 			case 'GET':
 				if (!empty($data))
 				{
-					$fp = fopen($data, 'wb');
+					$fp = fopen($data, 'w');
 					curl_setopt($ch, CURLOPT_FILE, $fp);
 				}
 				curl_setopt($ch, CURLOPT_POST, false);

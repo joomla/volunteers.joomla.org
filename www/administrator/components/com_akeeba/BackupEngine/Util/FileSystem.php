@@ -170,7 +170,7 @@ class FileSystem
 				'[PLATFORM_NAME]'    => $platformVars['name'],
 				'[PLATFORM_VERSION]' => $platformVars['version'],
 				'[SITENAME]'         => $siteName,
-				'[RANDOM]'           => $randVal->generateString(16),
+				'[RANDOM]'           => $randVal->generateString(16, 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789'),
 			];
 		}
 

@@ -12,9 +12,9 @@
     <authorUrl>https://www.akeeba.com</authorUrl>
     <copyright>Copyright (c)2006-2019 Akeeba Ltd / Nicholas K. Dionysopoulos</copyright>
     <license>GNU GPL v3 or later</license>
-    <version>8.0.10</version>
-    <creationDate>2021-08-23</creationDate>
-    <description>Akeeba Backup CLI scripts v.8.0.10</description>
+    <version>8.0.11</version>
+    <creationDate>2021-09-28</creationDate>
+    <description>Akeeba Backup CLI scripts v.8.0.11</description>
 
     <fileset>
         <files target="cli">

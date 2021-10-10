@@ -66,11 +66,12 @@ class RandomValue
 	 * of 32 characters has an entropy of 192 bits whereas a random sequence of 32 bytes returned by generate()
 	 * has an entropy of 8 * 32 = 256 bits.
 	 *
-	 * @param   int  $characters
+	 * @param   int    $characters    Number of characters
+	 * @param   string $characterSet  Characters to pick from
 	 *
 	 * @return string
 	 */
-	public function generateString($characters = 32)
+	public function generateString($characters = 32, $characterSet = 'abcdefghijklmnopqrstuvwxyz-ABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789')
 	{
 		$sourceString = str_split('abcdefghijklmnopqrstuvwxyz-ABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789', 1);
 		$ret          = '';

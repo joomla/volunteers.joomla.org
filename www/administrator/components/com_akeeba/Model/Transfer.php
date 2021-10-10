@@ -13,18 +13,20 @@ defined('_JEXEC') || die();
 use Akeeba\Backup\Admin\Model\Exceptions\TransferFatalError;
 use Akeeba\Backup\Admin\Model\Exceptions\TransferIgnorableError;
 use Akeeba\Engine\Factory;
+use Akeeba\Engine\Postproc\ProxyAware;
 use Akeeba\Engine\Util\RandomValue;
 use Akeeba\Engine\Util\Transfer as EngineTransfer;
 use Exception;
-use FOF40\Download\Download;
 use FOF40\Model\Model;
 use Joomla\CMS\Filesystem\File;
+use Joomla\CMS\Http\HttpFactory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Uri\Uri;
 use RuntimeException;
 
 class Transfer extends Model
 {
+	use ProxyAware;
 
 	/**
 	 * Get the information for the latest backup
@@ -175,8 +177,8 @@ class Transfer extends Model
 		// file. We have to cater for that, just in case...
 		if (!$isValid)
 		{
-			$download = new Download($this->container);
-			$dummy    = $download->getFromURL($uri->toString());
+			$http  = HttpFactory::getHttp();
+			$dummy = $http->get($uri->toString(), [], 5);
 
 			$isValid = !is_null($dummy);
 		}
@@ -511,7 +513,7 @@ class Transfer extends Model
 		}
 
 		// Open the part
-		$fp = @fopen($fileName, 'rb');
+		$fp = @fopen($fileName, 'r');
 
 		if ($fp === false)
 		{
@@ -838,9 +840,10 @@ class Transfer extends Model
 		$url = $this->container->platform->getSessionVar('transfer.url', '', 'akeeba');
 		$url = rtrim($url, '/');
 
-		$downloader = new Download($this->container);
-		$wrongSSL   = false;
-		$data       = $downloader->getFromURL($url . '/' . basename($sourceFile));
+		$http     = HttpFactory::getHttp();
+		$wrongSSL = false;
+		$response = $http->get($url . '/' . basename($sourceFile), [], 10);
+		$data     = $response->body ?: null;
 
 		/**
 		 * The download of the test file failed. This can mean that the (S)FTP directory does not match the site URL we
@@ -873,25 +876,24 @@ class Transfer extends Model
 			 * self-signed. The best way to do that without having to go through the OpenSSL extensions (which might not
 			 * be installed or activated) is to do no SSL checking and retry the download. If that works we definitely
 			 * have an SSL issue.
+			 *
+			 * Since Joomla's HTTP factory doesn't allow security downgrading we have to do it the hard way, with direct
+			 * use of fopen() wrappers :(
 			 */
-			$options = [
-				CURLOPT_SSL_VERIFYPEER => 0,
-				CURLOPT_SSL_VERIFYHOST => 0,
-			];
+			$contextOptions = $this->getProxyStreamContext();
+			$contextOptions     = array_merge_recursive($contextOptions, [
+				'http' => [
+					'timeout'         => 10,
+					'follow_location' => 1,
+				],
+				'ssl'  => [
+					'verify_peer'      => false,
+					'verify_peer_name' => false,
+				],
+			]);
+			$context = stream_context_create($contextOptions);
 
-			if ($downloader->getAdapterName() == 'fopen')
-			{
-				$options = [
-					'ssl' => [
-						'verify_peer' => false,
-					],
-				];
-			}
-
-			$downloader->setAdapterOptions($options);
-
-			$wrongSSL = true;
-			$data     = $downloader->getFromURL($url . '/' . basename($sourceFile));
+			$data = @file_get_contents($url . '/' . basename($sourceFile), false, $context) ?: null;
 		}
 
 		// Delete the temporary file
@@ -963,8 +965,9 @@ class Transfer extends Model
 
 		$baseUrl = rtrim($baseUrl, '/');
 
-		$downloader = new Download($this->container);
-		$rawData    = $downloader->getFromURL($baseUrl . '/kickstart.php?task=serverinfo');
+		$http     = HttpFactory::getHttp();
+		$response = $http->get($baseUrl . '/kickstart.php?task=serverinfo', [], 10);
+		$rawData  = $response->body ?: null;
 
 		if (is_null($rawData))
 		{
@@ -1189,16 +1192,21 @@ class Transfer extends Model
 		$uri->setVar('frag', $frag);
 		$uri->setVar('fragSize', $fragSize);
 
-		$downloader = new Download($this->container);
-		$downloader->setAdapterOptions([
-			CURLOPT_CUSTOMREQUEST => 'POST',
-			CURLOPT_POSTFIELDS    => [
-				'data' => $data,
-			],
-		]);
-		$dataLength = strlen($data);
+		$phpTimeout = 10;
+
+		if (function_exists('ini_get'))
+		{
+			$phpTimeout = (int) ini_get('max_execution_time') ?: 3600;
+			$phpTimeout = min($phpTimeout, 3600);
+		}
+
+		$dataLength = function_exists('mb_strlen') ? mb_strlen($data, 'ASCII') : strlen($data);
+
+		$http    = HttpFactory::getHttp();
+		$result  = $http->post($uri->toString(), $data, [], $phpTimeout);
+		$rawData = $result->body ?: '';
+
 		unset($data);
-		$rawData = $downloader->getFromURL($uri->toString()) ?? '';
 
 		// Try to get the raw JSON data
 		$pos = strpos($rawData, '###');
@@ -1310,10 +1318,19 @@ class Transfer extends Model
 		$uri->setVar('fragSize', $fragSize);
 		$uri->setVar('dataFile', $tempFile);
 
-		$downloader = new Download($this->container);
-		$dataLength = strlen($data);
-		unset($data);
-		$rawData = $downloader->getFromURL($uri->toString()) ?? '';
+		$phpTimeout = 10;
+
+		if (function_exists('ini_get'))
+		{
+			$phpTimeout = (int) ini_get('max_execution_time') ?: 3600;
+			$phpTimeout = min($phpTimeout, 3600);
+		}
+
+		$dataLength = function_exists('mb_strlen') ? mb_strlen($data, 'ASCII') : strlen($data);
+
+		$http    = HttpFactory::getHttp();
+		$result  = $http->get($uri->toString(), [], $phpTimeout);
+		$rawData = $result->body ?: '';
 
 		// ==== Delete the temporary files
 		if (!@unlink($localTempFile))

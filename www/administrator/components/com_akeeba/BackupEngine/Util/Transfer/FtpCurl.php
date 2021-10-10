@@ -11,6 +11,7 @@ namespace Akeeba\Engine\Util\Transfer;
 
 defined('AKEEBAENGINE') || die();
 
+use Akeeba\Engine\Postproc\ProxyAware;
 use RuntimeException;
 
 /**
@@ -18,6 +19,8 @@ use RuntimeException;
  */
 class FtpCurl extends Ftp implements TransferInterface
 {
+	use ProxyAware;
+
 	/**
 	 * Timeout for transferring data to the FTP server, default: 10 minutes
 	 *
@@ -150,7 +153,7 @@ class FtpCurl extends Ftp implements TransferInterface
 	 */
 	public function upload($localFilename, $remoteFilename, $useExceptions = true)
 	{
-		$fp = @fopen($localFilename, 'rb');
+		$fp = @fopen($localFilename, 'r');
 
 		if ($fp === false)
 		{
@@ -205,7 +208,7 @@ class FtpCurl extends Ftp implements TransferInterface
 	 */
 	public function download($remoteFilename, $localFilename, $useExceptions = true)
 	{
-		$fp = @fopen($localFilename, 'wb');
+		$fp = @fopen($localFilename, 'w');
 
 		if ($fp === false)
 		{
@@ -579,6 +582,9 @@ class FtpCurl extends Ftp implements TransferInterface
 		$username = str_replace(':', '%3A', $this->username);
 
 		$ch = curl_init();
+
+		$this->applyProxySettingsToCurl($ch);
+
 		curl_setopt($ch, CURLOPT_URL, $ftpUri);
 		curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $this->password);
 		curl_setopt($ch, CURLOPT_PORT, $this->port);

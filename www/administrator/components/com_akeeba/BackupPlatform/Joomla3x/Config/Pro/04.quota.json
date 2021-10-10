@@ -53,17 +53,17 @@
         "title": "COM_AKEEBA_CONFIG_SIZEQUOTA_ENABLE_TITLE",
         "description": "COM_AKEEBA_CONFIG_SIZEQUOTA_ENABLE_DESCRIPTION"
     },
-    "akeeba.quota.size_quota": {
-        "default": "15728640",
-        "type": "integer",
-        "min": "1",
-        "max": "4604090368",
-        "shortcuts": "15728640|52428800|104857600|268435456|536870912|1073741824|2147483648",
-        "scale": "1048576",
-        "uom": "MB",
-        "title": "COM_AKEEBA_CONFIG_SIZEQUOTA_VALUE_TITLE",
-        "description": "COM_AKEEBA_CONFIG_SIZEQUOTA_VALUE_DESCRIPTION"
-    },
+	"akeeba.quota.size_quota": {
+		"default": "15728640",
+		"type": "integer",
+		"min": "1",
+		"max": "1125899906842624",
+		"shortcuts": "15728640|52428800|104857600|268435456|536870912|1073741824|2147483648|5368709120|10737418240|21474836480|1099511627776",
+		"scale": "1048576",
+		"uom": "Mb",
+		"title": "COM_AKEEBA_CONFIG_SIZEQUOTA_VALUE_TITLE",
+		"description": "COM_AKEEBA_CONFIG_SIZEQUOTA_VALUE_DESCRIPTION"
+	},
     "akeeba.quota.enable_count_quota": {
         "default": "1",
         "type": "bool",

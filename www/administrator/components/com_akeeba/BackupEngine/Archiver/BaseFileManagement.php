@@ -84,7 +84,7 @@ abstract class BaseFileManagement extends Base
 	 *
 	 * @return  resource
 	 */
-	protected function fopen($file, $mode = 'wb')
+	protected function fopen($file, $mode = 'w')
 	{
 		if (!array_key_exists($file, $this->filePointers))
 		{

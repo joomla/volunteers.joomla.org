@@ -1,8 +1,8 @@
 <?xml version="1.0" ?>
 <extension version="3.4" type="plugin" group="jce" method="upgrade">
     <name>WF_LINK_TITLE</name>
-    <version>2.9.11</version>
-    <creationDate>17-08-2021</creationDate>
+    <version>2.9.16</version>
+    <creationDate>20-09-2021</creationDate>
     <author>Ryan Demmer</author>
     <authorEmail>info@joomlacontenteditor.net</authorEmail>
     <authorUrl>https://www.joomlacontenteditor.net/</authorUrl>
@@ -169,10 +169,11 @@
         </fieldset>
 
         <fieldset name="plugin.links" />
-        <fieldset name="plugin.popups" />
         <fieldset name="plugin.search" />
+        <fieldset name="plugin.popups" />
+        
     </fields>
-    <extensions>links,popups,search</extensions>
+    <extensions>links,search,popups</extensions>
     <languages></languages>
     <help>
         <topic key="link.about" title="WF_LINK_HELP_ABOUT" />

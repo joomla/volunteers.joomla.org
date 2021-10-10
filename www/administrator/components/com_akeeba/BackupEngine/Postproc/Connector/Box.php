@@ -15,6 +15,7 @@ use Akeeba\Engine\Postproc\Connector\Box\Exception\APIError;
 use Akeeba\Engine\Postproc\Connector\Box\Exception\cURLError;
 use Akeeba\Engine\Postproc\Connector\Box\Exception\InvalidJSON;
 use Akeeba\Engine\Postproc\Connector\Box\Exception\UnexpectedHTTPStatus;
+use Akeeba\Engine\Postproc\ProxyAware;
 use Akeeba\Engine\Util\FileCloseAware;
 use CURLFile;
 use RuntimeException;
@@ -35,6 +36,7 @@ use RuntimeException;
 class Box
 {
 	use FileCloseAware;
+	use ProxyAware;
 
 	/**
 	 * The root URL for the Box API
@@ -156,7 +158,7 @@ class Box
 	 */
 	public function refreshToken()
 	{
-		$refreshQuery = '?refresh_token=' . $this->refreshToken . '&dlid=' . $this->dlid;
+		$refreshQuery = '?refresh_token=' . urlencode($this->refreshToken) . '&dlid=' . urlencode($this->dlid);
 
 		$refreshResponse = $this->fetch('GET', self::helperUrl, $refreshQuery);
 
@@ -530,7 +532,7 @@ class Box
 			throw new RuntimeException("The file $remoteFile does not exist in your Box.com account");
 		}
 
-		$fp = @fopen($localFile, 'wb');
+		$fp = @fopen($localFile, 'w');
 
 		if ($fp === false)
 		{
@@ -604,6 +606,8 @@ class Box
 		// Initialise and execute a cURL request
 		$ch = curl_init($url);
 
+		$this->applyProxySettingsToCurl($ch);
+
 		// Get the default options array
 		$options = $this->defaultOptions;
 
@@ -663,7 +667,7 @@ class Box
 		{
 			if (is_null($fileMode))
 			{
-				$fileMode = ($method == 'GET') ? 'wb' : 'rb';
+				$fileMode = ($method == 'GET') ? 'w' : 'r';
 			}
 
 			$fp = @fopen($file, $fileMode);

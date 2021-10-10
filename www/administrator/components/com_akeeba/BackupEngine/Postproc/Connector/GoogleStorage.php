@@ -11,6 +11,7 @@ namespace Akeeba\Engine\Postproc\Connector;
 
 defined('AKEEBAENGINE') || die();
 
+use Akeeba\Engine\Postproc\ProxyAware;
 use Akeeba\Engine\Util\FileCloseAware;
 use Exception;
 use RuntimeException;
@@ -18,6 +19,7 @@ use RuntimeException;
 class GoogleStorage
 {
 	use FileCloseAware;
+	use ProxyAware;
 
 	/**
 	 * The root URL for the Google Storage v1 JSON API
@@ -416,7 +418,7 @@ class GoogleStorage
 			'expect-status' => [308, 200, 201],
 		];
 
-		$fp = @fopen($localFile, 'rb');
+		$fp = @fopen($localFile, 'r');
 
 		if ($fp === false)
 		{
@@ -578,6 +580,8 @@ class GoogleStorage
 		// Initialise and execute a cURL request
 		$ch = curl_init($url);
 
+		$this->applyProxySettingsToCurl($ch);
+
 		// Get the default options array
 		$options = $this->defaultOptions;
 
@@ -629,7 +633,7 @@ class GoogleStorage
 
 		if (!isset($additional['fp']) && !empty($file))
 		{
-			$mode = ($method == 'GET') ? 'wb' : 'rb';
+			$mode = ($method == 'GET') ? 'w' : 'r';
 			$fp   = @fopen($file, $mode);
 		}
 		elseif (isset($additional['fp']))

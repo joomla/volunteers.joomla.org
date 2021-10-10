@@ -334,7 +334,7 @@ class Download
 					}
 
 					// Delete and touch the output file
-					$fp = @fopen($localFilename, 'wb');
+					$fp = @fopen($localFilename, 'w');
 
 					if ($fp !== false)
 					{
@@ -400,7 +400,7 @@ class Download
 					$doneSize += $fileSize;
 
 					// Append the file
-					$fp = @fopen($localFilename, 'ab');
+					$fp = @fopen($localFilename, 'a');
 
 					if ($fp === false)
 					{

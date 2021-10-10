@@ -91,7 +91,7 @@ class Swift extends Base
 			Factory::getLog()->debug(sprintf("Sending Range header «%s»", $headers['Range']));
 		}
 
-		$fp = @fopen($localFile, 'wb');
+		$fp = @fopen($localFile, 'w');
 
 		if ($fp === false)
 		{

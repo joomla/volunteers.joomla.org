@@ -471,7 +471,7 @@ class Swift
 		}
 		elseif (isset($input['file']))
 		{
-			$request->fp = @fopen($input['file'], 'rb');
+			$request->fp = @fopen($input['file'], 'r');
 		}
 		elseif (isset($input['data']))
 		{

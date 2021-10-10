@@ -11,6 +11,7 @@ namespace Akeeba\Engine\Util\Transfer;
 
 defined('AKEEBAENGINE') || die();
 
+use Akeeba\Engine\Postproc\ProxyAware;
 use RuntimeException;
 
 /**
@@ -18,6 +19,8 @@ use RuntimeException;
  */
 class SftpCurl extends Sftp implements TransferInterface
 {
+	use ProxyAware;
+
 	/**
 	 * SFTP server's hostname or IP address
 	 *
@@ -236,7 +239,7 @@ class SftpCurl extends Sftp implements TransferInterface
 	 */
 	public function upload($localFilename, $remoteFilename, $useExceptions = true)
 	{
-		$fp = @fopen($localFilename, 'rb');
+		$fp = @fopen($localFilename, 'r');
 
 		if ($fp === false)
 		{
@@ -291,7 +294,7 @@ class SftpCurl extends Sftp implements TransferInterface
 	 */
 	public function download($remoteFilename, $localFilename, $useExceptions = true)
 	{
-		$fp = @fopen($localFilename, 'wb');
+		$fp = @fopen($localFilename, 'w');
 
 		if ($fp === false)
 		{
@@ -687,6 +690,9 @@ class SftpCurl extends Sftp implements TransferInterface
 		}
 
 		$ch = curl_init();
+
+		$this->applyProxySettingsToCurl($ch);
+
 		curl_setopt($ch, CURLOPT_URL, $ftpUri);
 		curl_setopt($ch, CURLOPT_TIMEOUT, $this->timeout);
 

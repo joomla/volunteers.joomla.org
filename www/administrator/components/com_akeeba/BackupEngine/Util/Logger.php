@@ -250,7 +250,7 @@ class Logger implements LoggerInterface, LogInterface, WarningsLoggerInterface
 				break;
 		}
 
-		$string .= @strftime("%y%m%d %H:%M:%S") . "|$message\r\n";
+		$string .= gmdate('Ymd H:i:s') . "|$message\r\n";
 
 		@fwrite($this->fp, $string);
 	}
@@ -335,7 +335,7 @@ class Logger implements LoggerInterface, LogInterface, WarningsLoggerInterface
 		@touch($this->logName);
 
 		// Open the log file. DO NOT USE APPEND ('ab') MODE. I NEED TO SEEK INTO THE FILE. SEE FURTHER BELOW!
-		$this->fp = @fopen($this->logName, 'cb');
+		$this->fp = @fopen($this->logName, 'c');
 
 		// If we couldn't open the file set the file pointer to null
 		if ($this->fp === false)

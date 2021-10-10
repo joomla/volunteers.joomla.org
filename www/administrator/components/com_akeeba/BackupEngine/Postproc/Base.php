@@ -138,7 +138,7 @@ abstract class Base implements PostProcInterface
 		$url = $this->getOAuth2HelperUrl();
 		$url .= (strpos($url, '?') !== false) ? '&' : '?';
 		$url .= 'callback=' . urlencode($callback);
-		$url .= '&dlid=' . Platform::getInstance()->get_platform_configuration_option('update_dlid', '');
+		$url .= '&dlid=' . urlencode(Platform::getInstance()->get_platform_configuration_option('update_dlid', ''));
 
 		Platform::getInstance()->redirect($url);
 	}

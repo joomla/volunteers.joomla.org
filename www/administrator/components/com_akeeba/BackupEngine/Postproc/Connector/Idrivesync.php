@@ -11,6 +11,7 @@ namespace Akeeba\Engine\Postproc\Connector;
 
 defined('AKEEBAENGINE') || die();
 
+use Akeeba\Engine\Postproc\ProxyAware;
 use Akeeba\Engine\Util\FileCloseAware;
 use Exception;
 use SimpleXMLElement;
@@ -26,6 +27,7 @@ use SimpleXMLElement;
 class Idrivesync
 {
 	use FileCloseAware;
+	use ProxyAware;
 
 	/** @var array Holds the connection information data */
 	private $data = [];
@@ -61,6 +63,9 @@ class Idrivesync
 
 
 		$ch = curl_init();
+
+		$this->applyProxySettingsToCurl($ch);
+
 		curl_setopt($ch, CURLOPT_URL, $url . '/getServerAddress');
 
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -110,6 +115,9 @@ class Idrivesync
 	public function uploadFile($localFile, $remotePath = '/')
 	{
 		$ch = curl_init();
+
+		$this->applyProxySettingsToCurl($ch);
+
 		curl_setopt($ch, CURLOPT_URL, $this->data['weburl'] . '/evs/uploadFile');
 
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -175,6 +183,9 @@ class Idrivesync
 	public function isFileFolderExists($path = '/')
 	{
 		$ch = curl_init();
+
+		$this->applyProxySettingsToCurl($ch);
+
 		curl_setopt($ch, CURLOPT_URL, $this->data['weburl'] . '/evs/isFileFolderExists');
 
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -232,6 +243,9 @@ class Idrivesync
 	public function downloadFile($remoteFile, $localFile)
 	{
 		$ch = curl_init();
+
+		$this->applyProxySettingsToCurl($ch);
+
 		curl_setopt($ch, CURLOPT_URL, $this->data['weburl'] . '/evs/downloadFile');
 
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -252,7 +266,7 @@ class Idrivesync
 		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
 		curl_setopt($ch, CURLOPT_CAINFO, $this->data['crtpath']);
 
-		$fp = @fopen($localFile, 'wb');
+		$fp = @fopen($localFile, 'w');
 		if ($fp === false)
 		{
 			throw new Exception(sprintf("Cannot open %s for writing", $localFile), 500);
@@ -277,6 +291,9 @@ class Idrivesync
 	public function deleteFile($remoteFile)
 	{
 		$ch = curl_init();
+
+		$this->applyProxySettingsToCurl($ch);
+
 		curl_setopt($ch, CURLOPT_URL, $this->data['weburl'] . '/evs/deleteFile');
 
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -339,6 +356,9 @@ class Idrivesync
 	public function browseFolder($path)
 	{
 		$ch = curl_init();
+
+		$this->applyProxySettingsToCurl($ch);
+
 		curl_setopt($ch, CURLOPT_URL, $this->data['weburl'] . '/evs/browseFolder');
 
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);

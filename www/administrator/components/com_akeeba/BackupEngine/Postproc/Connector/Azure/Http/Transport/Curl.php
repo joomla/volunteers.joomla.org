@@ -47,6 +47,7 @@ use Akeeba\Engine\Postproc\Connector\Azure\Exception\Transport as TransportExcep
 use Akeeba\Engine\Postproc\Connector\Azure\Http\Response;
 use Akeeba\Engine\Postproc\Connector\Azure\Http\Transport;
 use Akeeba\Engine\Postproc\Connector\S3v4\Input;
+use Akeeba\Engine\Postproc\ProxyAware;
 
 /**
  * @category   Microsoft
@@ -57,6 +58,8 @@ use Akeeba\Engine\Postproc\Connector\S3v4\Input;
  */
 class Curl extends Transport
 {
+	use ProxyAware;
+
 	/**
 	 * Constructor
 	 */
@@ -83,6 +86,9 @@ class Curl extends Transport
 	{
 		// Create a new cURL instance
 		$curlHandle = curl_init();
+
+		$this->applyProxySettingsToCurl($curlHandle);
+
 		@curl_setopt($curlHandle, CURLOPT_CAINFO, AKEEBA_CACERT_PEM);
 		curl_setopt($curlHandle, CURLOPT_USERAGENT, $this->_userAgent);
 		curl_setopt($curlHandle, CURLOPT_FOLLOWLOCATION, true);

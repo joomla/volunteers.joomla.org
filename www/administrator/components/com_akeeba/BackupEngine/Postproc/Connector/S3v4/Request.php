@@ -10,6 +10,7 @@
 namespace Akeeba\Engine\Postproc\Connector\S3v4;
 
 use Akeeba\Engine\Postproc\Connector\S3v4\Response\Error;
+use Akeeba\Engine\Postproc\ProxyAware;
 use Akeeba\Engine\Util\FileCloseAware;
 
 // Protection against direct access
@@ -18,6 +19,7 @@ defined('AKEEBAENGINE') || die();
 class Request
 {
 	use FileCloseAware;
+	use ProxyAware;
 
 	/**
 	 * The HTTP verb to use
@@ -394,6 +396,9 @@ class Request
 
 		// Basic setup
 		$curl = curl_init();
+
+		$this->applyProxySettingsToCurl($curl);
+
 		curl_setopt($curl, CURLOPT_USERAGENT, 'AkeebaBackupProfessional/S3PostProcessor');
 
 		if ($this->configuration->isSSL())

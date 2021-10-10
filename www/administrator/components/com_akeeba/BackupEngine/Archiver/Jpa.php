@@ -146,7 +146,7 @@ class Jpa extends BaseArchiver
 			$this->fp = null;
 		}
 
-		$this->fp = $this->fopen($this->_dataFileName, 'cb');
+		$this->fp = $this->fopen($this->_dataFileName, 'c');
 
 		if ($this->fp === false)
 		{

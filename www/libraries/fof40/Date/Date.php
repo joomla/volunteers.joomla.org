@@ -286,6 +286,7 @@ class Date extends DateTime
 	 *
 	 * @return  string   The date string in the specified format format.
 	 */
+	#[ReturnTypeWillChange]
 	public function format($format, bool $local = false, bool $translate = true): string
 	{
 		if ($translate)

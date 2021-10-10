@@ -37,7 +37,7 @@ if (!@file_exists($logFile))
 else
 {
 	// Allright, let's load and render it
-	$fp = fopen($logFile, "rt");
+	$fp = fopen($logFile, "r");
 	if ($fp === FALSE)
 	{
 		// Oops! The log isn't readable?!

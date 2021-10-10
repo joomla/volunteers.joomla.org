@@ -146,7 +146,7 @@ abstract class BaseArchiver extends BaseFileManagement
 	{
 		Factory::getLog()->debug(__CLASS__ . " :: Killing old archive");
 
-		$this->fp = $this->fopen($this->_dataFileName, "wb");
+		$this->fp = $this->fopen($this->_dataFileName, "w");
 
 		if ($this->fp === false)
 		{
@@ -158,7 +158,7 @@ abstract class BaseArchiver extends BaseFileManagement
 			@touch($this->_dataFileName);
 			@chmod($this->_dataFileName, 0666);
 
-			$this->fp = $this->fopen($this->_dataFileName, "wb");
+			$this->fp = $this->fopen($this->_dataFileName, "w");
 
 			if ($this->fp !== false)
 			{
@@ -182,7 +182,7 @@ abstract class BaseArchiver extends BaseFileManagement
 	{
 		if (is_null($this->fp) || $force)
 		{
-			$this->fp = $this->fopen($this->_dataFileName, "ab");
+			$this->fp = $this->fopen($this->_dataFileName, "a");
 		}
 
 		if ($this->fp === false)
@@ -311,7 +311,7 @@ abstract class BaseArchiver extends BaseFileManagement
 		if (!is_readable($sourceNameOrData) && !$isDir)
 		{
 			// Really, REALLY check if it is readable (PHP sometimes lies, dammit!)
-			$myFP = @$this->fopen($sourceNameOrData, 'rb');
+			$myFP = @$this->fopen($sourceNameOrData, 'r');
 
 			if ($myFP === false)
 			{
@@ -574,7 +574,7 @@ abstract class BaseArchiver extends BaseFileManagement
 	protected function putUncompressedFileIntoArchive(&$sourceNameOrData, $fileLength = 0, $resumeOffset = null)
 	{
 		// Copy the file contents, ignore directories
-		$sourceFilePointer = @fopen($sourceNameOrData, "rb");
+		$sourceFilePointer = @fopen($sourceNameOrData, "r");
 
 		if ($sourceFilePointer === false)
 		{

@@ -11,6 +11,7 @@ namespace Akeeba\Engine\Postproc\Connector;
 
 defined('AKEEBAENGINE') || die();
 
+use Akeeba\Engine\Postproc\ProxyAware;
 use Akeeba\Engine\Util\FileCloseAware;
 use Exception;
 use RuntimeException;
@@ -23,6 +24,7 @@ use RuntimeException;
 class GoogleDrive
 {
 	use FileCloseAware;
+	use ProxyAware;
 
 	/**
 	 * The root URL for the Google Drive v3 API
@@ -126,7 +128,7 @@ class GoogleDrive
 			return $response;
 		}
 
-		$refreshUrl = self::helperUrl . '?refresh_token=' . urlencode($this->refreshToken) . '&dlid=' . $this->dlid;
+		$refreshUrl = self::helperUrl . '?refresh_token=' . urlencode($this->refreshToken) . '&dlid=' . urlencode($this->dlid);
 
 		$refreshResponse = $this->fetch('GET', $refreshUrl);
 
@@ -644,7 +646,7 @@ JSON;
 			'supportsAllDrives' => 'true',
 		];
 
-		$fp = @fopen($localFile, 'rb');
+		$fp = @fopen($localFile, 'r');
 
 		if ($fp === false)
 		{
@@ -822,6 +824,8 @@ JSON;
 		// Initialise and execute a cURL request
 		$ch = curl_init($url);
 
+		$this->applyProxySettingsToCurl($ch);
+
 		// Get the default options array
 		$options = $this->defaultOptions;
 
@@ -867,7 +871,7 @@ JSON;
 
 		if (!isset($additional['fp']) && !empty($file))
 		{
-			$mode = ($method == 'GET') ? 'wb' : 'rb';
+			$mode = ($method == 'GET') ? 'w' : 'r';
 			$fp   = @fopen($file, $mode);
 		}
 		elseif (isset($additional['fp']))

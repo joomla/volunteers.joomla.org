@@ -93,7 +93,7 @@ class Cloudfiles extends Base
 			$headers['Range'] = 'bytes=0-' . ($fromOffset + $length);
 		}
 
-		$fp = @fopen($localFile, 'wb');
+		$fp = @fopen($localFile, 'w');
 
 		if ($fp === false)
 		{

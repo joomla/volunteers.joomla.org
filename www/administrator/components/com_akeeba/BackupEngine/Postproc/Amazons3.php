@@ -12,6 +12,7 @@ namespace Akeeba\Engine\Postproc;
 defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Factory;
+use Akeeba\Engine\Platform;
 use Akeeba\Engine\Postproc\Connector\S3v4\Configuration;
 use Akeeba\Engine\Postproc\Connector\S3v4\Connector;
 use Akeeba\Engine\Postproc\Connector\S3v4\Input;
@@ -25,6 +26,8 @@ use RuntimeException;
  */
 class Amazons3 extends Base
 {
+	use ProxyAware;
+
 	public const STORAGE_STANDARD = 0;
 	public const STORAGE_REDUCED_REDUNDANCY = 1;
 	public const STORAGE_STANDARD_IA = 2;
@@ -496,6 +499,9 @@ class Amazons3 extends Base
 	private function getURL(string $url): string
 	{
 		$ch = curl_init();
+
+		$this->applyProxySettingsToCurl($ch);
+
 		curl_setopt($ch, CURLOPT_URL, $url);
 		curl_setopt($ch, CURLOPT_AUTOREFERER, 1);
 		curl_setopt($ch, CURLOPT_BINARYTRANSFER, 1);

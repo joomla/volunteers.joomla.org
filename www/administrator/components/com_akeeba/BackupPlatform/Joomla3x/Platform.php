@@ -1169,6 +1169,29 @@ class Joomla3x extends BasePlatform
 		]);
 	}
 
+	/** @inheritdoc  */
+	protected function detectProxySettings()
+	{
+		try
+		{
+			$app = \Joomla\CMS\Factory::getApplication();
+		}
+		catch (Exception $e)
+		{
+			$this->proxyEnabled                = false;
+			$this->hasInitialisedProxySettings = true;
+		}
+
+		$enabled = $app->get('proxy_enable', false);
+		$host    = $app->get('proxy_host', '');
+		$port    = (int) $app->get('proxy_port', 8080);
+		$user    = $app->get('proxy_user', '');
+		$pass    = $app->get('proxy_pass', '');
+
+		$this->setProxySettings($enabled, $host, $port, $user, $pass);
+	}
+
+
 	/**
 	 * Registers Akeeba Engine's core classes with JLoader
 	 *

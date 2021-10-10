@@ -69,7 +69,7 @@ class Platform
 	 *
 	 * @param   string  $platform  Optional; platform name. Autodetect if blank.
 	 *
-	 * @return PlatformInterface
+	 * @return  PlatformInterface
 	 */
 	public static function &getInstance($platform = null)
 	{

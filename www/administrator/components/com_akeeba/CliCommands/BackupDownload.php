@@ -142,7 +142,7 @@ class BackupDownload extends AbstractCommand
 			return 5;
 		}
 
-		$fp = @fopen($outFile, 'wb');
+		$fp = @fopen($outFile, 'w');
 
 		if ($fp === false)
 		{

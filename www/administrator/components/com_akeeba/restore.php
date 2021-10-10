@@ -1,9 +1,9 @@
 <?php
 /**
- * Akeeba Kickstart
- * An AJAX-powered archive extraction tool
+ * Akeeba Restore
  *
- * @package   kickstart
+ * An archive extraction engine for ZIP, JPA and JPS archives.
+ *
  * @copyright Copyright (c)2008-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
@@ -138,9 +138,9 @@ function debugMsg($msg)
 		return;
 	}
 
-	$fp = fopen('debug.txt', 'at');
+	$fp = fopen('debug.txt', 'a');
 
-	fwrite($fp, $msg . "\n");
+	fwrite($fp, $msg . PHP_EOL);
 	fclose($fp);
 
 	// Echo to stdout if KSDEBUGCLI is defined
@@ -148,6 +148,35 @@ function debugMsg($msg)
 	{
 		echo $msg . "\n";
 	}
+}
+
+/**
+ * Invalidate a file in OPcache.
+ *
+ * Only applies if the file has a .php extension.
+ *
+ * @param   string  $file  The filepath to clear from OPcache
+ *
+ * @return  boolean
+ * @since   7.1.0
+ */
+function clearFileInOPCache($file)
+{
+	static $hasOpCache = null;
+
+	if (is_null($hasOpCache))
+	{
+		$hasOpCache = ini_get('opcache.enable')
+			&& function_exists('opcache_invalidate')
+			&& (!ini_get('opcache.restrict_api') || stripos(realpath($_SERVER['SCRIPT_FILENAME']), ini_get('opcache.restrict_api')) === 0);
+	}
+
+	if ($hasOpCache && (strtolower(substr($file, -4)) === '.php'))
+	{
+		return opcache_invalidate($file, true);
+	}
+
+	return false;
 }
 
 /**
@@ -871,7 +900,7 @@ abstract class AKAbstractUnarchiver extends AKAbstractPart
 	{
 		if ($this->currentPartNumber >= 0)
 		{
-			$this->fp = @fopen($this->archiveList[$this->currentPartNumber], 'rb');
+			$this->fp = @fopen($this->archiveList[$this->currentPartNumber], 'r');
 
 			if ((is_resource($this->fp)) && ($this->currentPartOffset > 0))
 			{
@@ -1285,7 +1314,7 @@ abstract class AKAbstractUnarchiver extends AKAbstractPart
 				@fclose($this->fp);
 			}
 			debugMsg('Opening file ' . $this->archiveList[$this->currentPartNumber]);
-			$this->fp = @fopen($this->archiveList[$this->currentPartNumber], 'rb');
+			$this->fp = @fopen($this->archiveList[$this->currentPartNumber], 'r');
 			if ($this->fp === false)
 			{
 				debugMsg('Could not open file - crash imminent');
@@ -1667,6 +1696,11 @@ class AKPostprocDirect extends AKAbstractPostproc
 			@touch($this->filename, $this->timestamp);
 		}
 
+		if (@is_file($this->filename) || @is_link($this->filename))
+		{
+			clearFileInOPCache($this->filename);
+		}
+
 		return true;
 	}
 
@@ -1977,7 +2011,7 @@ class AKPostprocFTP extends AKAbstractPostproc
 
 	private function isDirWritable($dir)
 	{
-		$fp = @fopen($dir . '/kickstart.dat', 'wb');
+		$fp = @fopen($dir . '/kickstart.dat', 'w');
 
 		if ($fp === false)
 		{
@@ -2204,7 +2238,7 @@ class AKPostprocFTP extends AKAbstractPostproc
 			$this->fixPermissions($this->filename);
 			$this->unlink($this->filename);
 
-			$fp = @fopen($this->tempFilename, 'rb');
+			$fp = @fopen($this->tempFilename, 'r');
 
 			if ($fp !== false)
 			{
@@ -2235,6 +2269,11 @@ class AKPostprocFTP extends AKAbstractPostproc
 		else
 		{
 			@ftp_chmod($this->_handle, 0644, $remoteName);
+		}
+
+		if (@is_file($this->filename) || @is_link($this->filename))
+		{
+			clearFileInOPCache($this->filename);
 		}
 
 		return true;
@@ -2659,7 +2698,7 @@ class AKPostprocSFTP extends AKAbstractPostproc
 
 	private function isDirWritable($dir)
 	{
-		if (@fopen("ssh2.sftp://{$this->handle}$dir/kickstart.dat", 'wb') === false)
+		if (@fopen("ssh2.sftp://{$this->handle}$dir/kickstart.dat", 'w') === false)
 		{
 			return false;
 		}
@@ -2907,13 +2946,18 @@ class AKPostprocSFTP extends AKAbstractPostproc
 			$this->chmod($remoteName, 0644);
 		}
 
+		if (@is_file($this->filename) || @is_link($this->filename))
+		{
+			clearFileInOPCache($this->filename);
+		}
+
 		return true;
 	}
 
 	private function write($local, $remote)
 	{
 		$fp      = @fopen("ssh2.sftp://{$this->handle}$remote", 'w');
-		$localfp = @fopen($local, 'rb');
+		$localfp = @fopen($local, 'r');
 
 		if ($fp === false)
 		{
@@ -3285,7 +3329,7 @@ class AKPostprocHybrid extends AKAbstractPostproc
 	 */
 	private function isDirWritable($dir)
 	{
-		$fp = @fopen($dir . '/kickstart.dat', 'wb');
+		$fp = @fopen($dir . '/kickstart.dat', 'w');
 
 		if ($fp === false)
 		{
@@ -3576,7 +3620,7 @@ class AKPostprocHybrid extends AKAbstractPostproc
 				$this->fixPermissions($this->filename);
 				$this->unlink($this->filename);
 
-				$fp = @fopen($this->tempFilename, 'rb');
+				$fp = @fopen($this->tempFilename, 'r');
 				if ($fp !== false)
 				{
 					$ret = @ftp_fput($this->handle, $remoteName, $fp, FTP_BINARY);
@@ -3606,6 +3650,11 @@ class AKPostprocHybrid extends AKAbstractPostproc
 		if ($this->useFTP && ($ret === false))
 		{
 			@ftp_chmod($this->_handle, $perms, $remoteName);
+		}
+
+		if (@is_file($this->filename) || @is_link($this->filename))
+		{
+			clearFileInOPCache($this->filename);
 		}
 
 		return true;
@@ -4402,11 +4451,11 @@ class AKUnarchiverJPA extends AKAbstractUnarchiver
 
 			if ($this->dataReadLength == 0)
 			{
-				$outfp = @fopen($this->fileHeader->realFile, 'wb');
+				$outfp = @fopen($this->fileHeader->realFile, 'w');
 			}
 			else
 			{
-				$outfp = @fopen($this->fileHeader->realFile, 'ab');
+				$outfp = @fopen($this->fileHeader->realFile, 'a');
 			}
 
 			// Can we write to the file?
@@ -4508,7 +4557,7 @@ class AKUnarchiverJPA extends AKAbstractUnarchiver
 			$this->setCorrectPermissions($this->fileHeader->file);
 
 			// Open the output file
-			$outfp = @fopen($this->fileHeader->realFile, 'wb');
+			$outfp = @fopen($this->fileHeader->realFile, 'w');
 
 			// Can we write to the file?
 			$ignore =
@@ -5535,11 +5584,11 @@ class AKUnarchiverJPS extends AKUnarchiverJPA
 				AKFactory::get('kickstart.setup.ignoreerrors', false) || $this->isIgnoredDirectory($this->fileHeader->file);
 			if ($this->dataReadLength == 0)
 			{
-				$outfp = @fopen($this->fileHeader->realFile, 'wb');
+				$outfp = @fopen($this->fileHeader->realFile, 'w');
 			}
 			else
 			{
-				$outfp = @fopen($this->fileHeader->realFile, 'ab');
+				$outfp = @fopen($this->fileHeader->realFile, 'a');
 			}
 
 			// Can we write to the file?
@@ -5585,7 +5634,7 @@ class AKUnarchiverJPS extends AKUnarchiverJPA
 		if (!$this->mustSkip())
 		{
 			// Open the output file
-			$outfp = @fopen($this->fileHeader->realFile, 'wb');
+			$outfp = @fopen($this->fileHeader->realFile, 'w');
 
 			// Can we write to the file?
 			$ignore =
@@ -6505,6 +6554,7 @@ class AKUtilsZapper extends AKAbstractPart
             if (!$this->dryRun)
             {
                 $postProc->unlink($file);
+	            clearFileInOPCache($file);
             }
 
 			// Mark a done file
@@ -9437,6 +9487,7 @@ if (!defined('KICKSTART'))
 				}
 
 				$postproc->unlink($basepath . 'restoration.php');
+				clearFileInOPCache($basepath . 'restoration.php');
 
 				// Import a custom finalisation file
 				$filename = dirname(__FILE__) . '/restore_finalisation.php';
@@ -9553,6 +9604,7 @@ function recursive_remove_directory($directory)
 				{
 					// we remove the file
 					$postproc->unlink($path);
+					clearFileInOPCache($path);
 				}
 			}
 		}

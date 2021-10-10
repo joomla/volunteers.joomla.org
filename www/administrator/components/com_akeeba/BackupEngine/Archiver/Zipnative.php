@@ -151,7 +151,7 @@ class Zipnative extends Base
 		// Try to kill the archive if it exists
 		Factory::getLog()->debug(__CLASS__ . " :: Killing old archive");
 
-		$fp = fopen($this->_dataFileName, "wb");
+		$fp = fopen($this->_dataFileName, "w");
 
 		if (!($fp === false))
 		{

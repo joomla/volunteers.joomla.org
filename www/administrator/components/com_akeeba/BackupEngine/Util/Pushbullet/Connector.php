@@ -11,6 +11,7 @@ namespace Akeeba\Engine\Util\Pushbullet;
 
 defined('AKEEBAENGINE') || die();
 
+use Akeeba\Engine\Postproc\ProxyAware;
 use CURLFile;
 
 /**
@@ -45,6 +46,8 @@ use CURLFile;
  */
 class Connector
 {
+	use ProxyAware;
+
 	public const URL_PUSHES = 'https://api.pushbullet.com/v2/pushes';
 	public const URL_DEVICES = 'https://api.pushbullet.com/v2/devices';
 	public const URL_CONTACTS = 'https://api.pushbullet.com/v2/contacts';
@@ -355,6 +358,8 @@ class Connector
 	private function _curlRequest($url, $method, $data = null, $sendAsJSON = true, $auth = true)
 	{
 		$curl = curl_init();
+
+		$this->applyProxySettingsToCurl($curl);
 
 		if ($method == 'GET' && $data !== null)
 		{

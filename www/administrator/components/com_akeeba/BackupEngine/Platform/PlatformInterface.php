@@ -388,4 +388,26 @@ interface PlatformInterface
 	 * @return  void
 	 */
 	public function redirect($url);
+
+	/**
+	 * Get the proxy configuration for this platform.
+	 *
+	 * @return  array{enabled: bool, host: string, port: int, user: string, pass: string}
+	 * @since   9.0.7
+	 */
+	public function getProxySettings();
+
+	/**
+	 * Set the proxy configuration for this platform
+	 *
+	 * @param   false   $useProxy  Should I use a proxy at all?
+	 * @param   string  $host      Proxy hostname or IP address
+	 * @param   int     $port      Proxy port
+	 * @param   string  $username  Proxy username. Optional. Leavel blank to turn off authentication.
+	 * @param   string  $password  Proxy password.
+	 *
+	 * @return  void
+	 * @since   9.0.7
+	 */
+	public function setProxySettings($useProxy = false, $host = '', $port = 8080, $username = '', $password = '');
 }

@@ -11,6 +11,7 @@ namespace Akeeba\Engine\Postproc\Connector;
 
 defined('AKEEBAENGINE') || die();
 
+use Akeeba\Engine\Postproc\ProxyAware;
 use Akeeba\Engine\Util\FileCloseAware;
 use Exception;
 use RuntimeException;
@@ -18,6 +19,7 @@ use RuntimeException;
 class OneDrive
 {
 	use FileCloseAware;
+	use ProxyAware;
 
 	/**
 	 * The URL of the helper script which is used to get fresh API tokens
@@ -418,7 +420,7 @@ class OneDrive
 			],
 		];
 
-		$fp = @fopen($localFile, 'rb');
+		$fp = @fopen($localFile, 'r');
 
 		if ($fp === false)
 		{
@@ -644,6 +646,8 @@ class OneDrive
 		// Initialise and execute a cURL request
 		$ch = curl_init($url);
 
+		$this->applyProxySettingsToCurl($ch);
+
 		// Get the default options array
 		$options = $this->defaultOptions;
 
@@ -683,7 +687,7 @@ class OneDrive
 
 		if (!isset($additional['fp']) && !empty($file))
 		{
-			$mode = ($method == 'GET') ? 'wb' : 'rb';
+			$mode = ($method == 'GET') ? 'w' : 'r';
 			$fp   = @fopen($file, $mode);
 		}
 		elseif (isset($additional['fp']))
@@ -873,6 +877,6 @@ class OneDrive
 	 */
 	protected function getRefreshUrl()
 	{
-		return static::helperUrl . '?refresh_token=' . urlencode($this->refreshToken) . '&dlid=' . $this->dlid;
+		return static::helperUrl . '?refresh_token=' . urlencode($this->refreshToken) . '&dlid=' . urlencode($this->dlid);
 	}
 }

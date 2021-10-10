@@ -294,7 +294,7 @@ class Sftp implements TransferInterface, RemoteResourceInterface
 			return false;
 		}
 
-		$localFp = @fopen($localFilename, 'rb');
+		$localFp = @fopen($localFilename, 'r');
 
 		if ($localFp === false)
 		{

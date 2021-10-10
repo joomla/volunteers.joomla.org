@@ -71,7 +71,7 @@ class Download extends AbstractTask
 			throw new \RuntimeException('Invalid segment', 404);
 		}
 
-		$fp = fopen($file, 'rb');
+		$fp = fopen($file, 'r');
 
 		if ($fp === false)
 		{

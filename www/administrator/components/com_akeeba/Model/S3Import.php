@@ -290,7 +290,7 @@ class S3Import extends Model
 			{
 				// Delete and touch the output file
 				Platform::getInstance()->unlink($local_file);
-				$fp = @fopen($local_file, 'wb');
+				$fp = @fopen($local_file, 'w');
 
 				if ($fp !== false)
 				{
@@ -391,7 +391,7 @@ class S3Import extends Model
 			if ($result)
 			{
 				// Append the file
-				$fp = @fopen($local_file, 'ab');
+				$fp = @fopen($local_file, 'a');
 
 				if ($fp === false)
 				{
@@ -401,7 +401,7 @@ class S3Import extends Model
 					throw new RuntimeException(Text::_('COM_AKEEBA_S3IMPORT_ERR_CANTWRITE'));
 				}
 
-				$tf = fopen($temp_file, 'rb');
+				$tf = fopen($temp_file, 'r');
 
 				while (!feof($tf))
 				{

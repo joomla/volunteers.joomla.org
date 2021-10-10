@@ -15,6 +15,7 @@ use Akeeba\Engine\Postproc\Connector\Dropbox2\Exception\APIError;
 use Akeeba\Engine\Postproc\Connector\Dropbox2\Exception\cURLError;
 use Akeeba\Engine\Postproc\Connector\Dropbox2\Exception\InvalidJSON;
 use Akeeba\Engine\Postproc\Connector\Dropbox2\Exception\UnexpectedHTTPStatus;
+use Akeeba\Engine\Postproc\ProxyAware;
 use Akeeba\Engine\Util\FileCloseAware;
 use Exception;
 use RuntimeException;
@@ -27,6 +28,7 @@ use RuntimeException;
 class Dropbox2
 {
 	use FileCloseAware;
+	use ProxyAware;
 
 	/**
 	 * The root URL for the Dropbox RPC API, ref https://www.dropbox.com/developers/documentation/http
@@ -470,7 +472,7 @@ class Dropbox2
 			'no-parse' => true,
 		];
 
-		$fp = @fopen($localFile, 'rb');
+		$fp = @fopen($localFile, 'r');
 
 		if ($fp === false)
 		{
@@ -763,6 +765,8 @@ class Dropbox2
 		// Initialise and execute a cURL request
 		$ch = curl_init($url);
 
+		$this->applyProxySettingsToCurl($ch);
+
 		// Get the default options array
 		$options = $this->defaultOptions;
 
@@ -822,7 +826,7 @@ class Dropbox2
 		{
 			if (is_null($fileMode))
 			{
-				$fileMode = ($method == 'GET') ? 'wb' : 'rb';
+				$fileMode = ($method == 'GET') ? 'w' : 'r';
 			}
 
 			$fp = @fopen($file, $fileMode);
@@ -1125,7 +1129,7 @@ class Dropbox2
 
 	protected function getRefreshUrl()
 	{
-		return static::helperUrl . '?refresh_token=' . urlencode($this->refreshToken) . '&dlid=' . $this->dlid;
+		return static::helperUrl . '?refresh_token=' . urlencode($this->refreshToken) . '&dlid=' . urlencode($this->dlid);
 	}
 
 }

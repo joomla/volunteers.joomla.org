@@ -168,7 +168,7 @@ class RemoteFiles extends Model
 			{
 				Platform::getInstance()->unlink($localFilepath);
 
-				$fp = @fopen($localFilepath, 'wb');
+				$fp = @fopen($localFilepath, 'w');
 
 				if ($fp === false)
 				{
@@ -396,14 +396,14 @@ class RemoteFiles extends Model
 	{
 		try
 		{
-			$localFilePointer = @fopen($localFilepath, 'ab');
+			$localFilePointer = @fopen($localFilepath, 'a');
 
 			if ($localFilePointer === false)
 			{
 				throw new RuntimeException(JText::sprintf('COM_AKEEBA_REMOTEFILES_ERR_CANTOPENFILE', $localFilepath), 500);
 			}
 
-			$tempFilePointer = fopen($tempFilepath, 'rb');
+			$tempFilePointer = fopen($tempFilepath, 'r');
 
 			// Um, weird, I can't open the temp file.
 			if ($tempFilePointer === false)

@@ -292,7 +292,7 @@ class Ftp implements TransferInterface, RemoteResourceInterface
 	 */
 	public function upload($localFilename, $remoteFilename, $useExceptions = true)
 	{
-		$handle = @fopen($localFilename, 'rb');
+		$handle = @fopen($localFilename, 'r');
 
 		if ($handle === false)
 		{

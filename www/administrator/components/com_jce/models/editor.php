@@ -49,13 +49,15 @@ class WFModelEditor extends JObject
         $document = JFactory::getDocument();
 
         foreach (self::$editor->getScripts() as $script) {
-            $document->addScriptVersion($script);
+            $document->addScript($script, array('version' => 'auto'), array('defer' => 'defer'));
         }
 
         foreach (self::$editor->getStyleSheets() as $style) {
-            $document->addStylesheetVersion($style);
+            $document->addStylesheet($style, array('version' => 'auto'));
         }
 
-        $document->addScriptDeclaration(implode("\n", self::$editor->getScriptDeclaration()));
+        $script = "document.addEventListener('DOMContentLoaded',function handler(){" . implode("", self::$editor->getScriptDeclaration()) . ";this.removeEventListener('DOMContentLoaded',handler);});";
+
+        $document->addScriptDeclaration($script);
     }
 }

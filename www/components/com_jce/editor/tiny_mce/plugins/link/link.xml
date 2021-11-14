@@ -1,8 +1,8 @@
 <?xml version="1.0" ?>
 <extension version="3.4" type="plugin" group="jce" method="upgrade">
     <name>WF_LINK_TITLE</name>
-    <version>2.9.16</version>
-    <creationDate>20-09-2021</creationDate>
+    <version>2.9.17</version>
+    <creationDate>28-10-2021</creationDate>
     <author>Ryan Demmer</author>
     <authorEmail>info@joomlacontenteditor.net</authorEmail>
     <authorUrl>https://www.joomlacontenteditor.net/</authorUrl>

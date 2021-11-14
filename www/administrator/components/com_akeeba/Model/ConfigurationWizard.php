@@ -35,7 +35,21 @@ class ConfigurationWizard extends Model
 		// Get the output directory, translated
 		$engineConfig    = Factory::getConfiguration();
 		$outputDirectory = $engineConfig->get('akeeba.basic.output_directory', '');
-		$fixOut = true;
+		$fixOut          = true;
+
+		// If no output directory is specified set it the default output and retry.
+		if (empty($outputDirectory) && !$dontRecurse)
+		{
+			/** @var @var Configuration $model $model */
+			$model = $this->container->factory->model('Configuration')->tmpInstance();
+
+			$model->setState('engineconfig', [
+				'akeeba.basic.output_directory' => '[DEFAULT_OUTPUT]',
+			]);
+			$model->saveEngineConfig();
+
+			return $this->autofixDirectories(true);
+		}
 
 		// Is the folder writeable?
 		if (is_dir($outputDirectory))

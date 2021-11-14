@@ -1,4 +1,8 @@
 <?php die();?>
+Akeeba Backup 8.0.12
+================================================================================
+# [LOW] PHP 8 error if the output directory is empty
+
 Akeeba Backup 8.0.11
 ================================================================================
 ~ Remove dash from automatically generated random values for archive naming

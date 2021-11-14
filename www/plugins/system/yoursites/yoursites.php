@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @version    CVS: 1.19.2.1
+ * @version    CVS: 1.23.0.1
  * @package    com_yoursites
  * @author     Geraint Edwards
  * @copyright  2017-2020 GWE Systems Ltd
@@ -106,7 +106,20 @@ class plgSystemYourSites extends JPlugin
 
 		if ($name != 'com_plugins.plugin' || !isset($data->element) || $data->element != 'yoursites' || !isset($data->folder) || $data->folder != 'system')
 		{
-			return true;
+			// When saving in Joomla 4 data->element and folder are not yet set
+			$input = JFactory::getApplication()->input;
+			if (!$input->post->get('jform', false))
+			{
+				return true;
+			}
+			else
+			{
+				$jform = $input->post->get('jform', array(), 'array');
+				if(!isset($jform['element']) || $jform['element'] != 'yoursites' || !isset($jform['folder']) || $jform['folder'] != 'system')
+				{
+					return true;
+				}
+			}
 		}
 
 		if (JFactory::getApplication()->isClient('administrator'))

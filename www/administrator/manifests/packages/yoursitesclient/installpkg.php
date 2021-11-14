@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @version    CVS: 1.19.2
+ * @version    CVS: 1.23.0
  * @package    com_yoursites
  * @author     Geraint Edwards
  * @copyright  2017-2020 GWE Systems Ltd
@@ -66,6 +66,11 @@ class pkg_YoursitesclientInstallerScript
 	 */
 	function postflight($type, $parent)
 	{
+		// Needed for Joomla 4
+		if ($type !== 'install' && $type !== 'update')
+		{
+			return true;
+		}
 
 		JLog::addLogger(array('text_file' => 'yoursites.php'), JLog::ALL, array('yoursites'));
 
@@ -94,7 +99,7 @@ class pkg_YoursitesclientInstallerScript
 		$specifictoken = '$2y$10$yG1vnR/TrUlr2qg9HmVW1eNyh.YCKGCIMsu7HzrykYyFAVMxbDGPW';
 
 		// Generic Token
-		$generictoken = '$2y$10$9Kjnw9/GOyLRCoOlzEXSAe5JaDus.aU2zbiXdx5V5B2wQRaIGbxy6';
+		$generictoken = '$2y$10$t3V7vYdmGsU6bHYxYmP5z.roNuSFjbX1uYnFWjw8zJW3PKl8oZmVy';
 
 		$tokenToUse = empty($specifictoken) ? $generictoken : $specifictoken;
 
@@ -332,7 +337,7 @@ class pkg_YoursitesclientInstallerScript
 			{
 				$data["coreversion"] = JVERSION;
 			}
-			$data["pluginversion"] = "1.19.2";
+			$data["pluginversion"] = "1.23.0";
 
 			$yoursitesUrl = "https://manage.joomla.org/";
 

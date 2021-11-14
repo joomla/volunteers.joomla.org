@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @version    CVS: 1.19.2
+ * @version    CVS: 1.23.0
  * @package    com_yoursites
  * @author     Geraint Edwards <via website>
  * @copyright  2016-2020 GWE Systems Ltd
@@ -59,7 +59,7 @@ function ProcessYstsJsonRequest(&$requestObject, $returnData)
 	// Can we use full AES256 encryption?
 	$returnData->AES256 = isset($requestObject->AES256) ? $requestObject->AES256 : false;
 
-	// JLog::addLogger(array('text_file' => 'yoursites.php'), JLog::ALL, array('yoursites'));
+	//JLog::addLogger(array('text_file' => 'yoursites.php'), JLog::ALL, array('yoursites'));
 
 	if ($requestObject->task != "setupsecuritytoken" && !securityCheck($requestObject, $returnData))
 	{
@@ -193,8 +193,20 @@ function ProcessYstsJsonRequest(&$requestObject, $returnData)
 				purgeCache($requestObject, $returnData);
 				break;
 
+			case "toggledebug":
+				toggleDebug($requestObject, $returnData);
+				break;
+
+			case "errorreporting":
+				setErrorReporting($requestObject, $returnData);
+				break;
+
 			case "findjoomlaupdates":
 				findJoomlaUpdates($requestObject, $returnData);
+				break;
+
+			case "getsiteinfo":
+				getSiteInfo($returnData);
 				break;
 
 			case "purgejoomla":
@@ -267,6 +279,14 @@ function ProcessYstsJsonRequest(&$requestObject, $returnData)
 
 			case "deletesite":
 				deleteSite($requestObject, $returnData);
+				break;
+
+			case "cleanupclone":
+				cleanUpClone($requestObject, $returnData);
+				break;
+
+			case "deleteclone":
+				deleteClone($requestObject, $returnData);
 				break;
 
 			case "rebuildupdatesites" :
@@ -973,7 +993,114 @@ function purgeCache($requestObject, &$returnData)
 	return $returnData;
 }
 
-function findJoomlaUpdates($requestObject, $returnData)
+function toggleDebug($requestObject, &$returnData)
+{
+
+	if (JFile::exists(JPATH_SITE .  "/configuration.php"))
+	{
+		$configfile = JPATH_SITE . "/configuration.php";
+
+		// Get the new FTP credentials.
+		$ftp = JClientHelper::getCredentials('ftp', true);
+
+		// Attempt to make the file writeable if using FTP.
+		if (!$ftp['enabled'] && JPath::isOwner($configfile) && !JPath::setPermissions($configfile, '0644'))
+		{
+			$returnData->errormessages[]  = JText::_('COM_CONFIG_ERROR_CONFIGURATION_PHP_NOTWRITABLE');
+		}
+
+		// Attempt to write the configuration file as a PHP class named JConfig.
+		$configuration = file_get_contents($configfile);
+
+		// replace old paths with new
+		// ToDo - figure out how to deal with this if log, tmp and cache files are one level up e.g. in private folder
+		if ($requestObject->newmode)
+		{
+			$configuration = str_replace("public \$debug = '0';", "public \$debug = '1';" , $configuration);
+		}
+		else
+		{
+			$configuration = str_replace("public \$debug = '1';", "public \$debug = '0';" , $configuration);
+		}
+
+		if (!JFile::write($configfile, $configuration))
+		{
+			$returnData->errormessages[]  = JText::_('COM_CONFIG_ERROR_WRITE_FAILED');
+		}
+
+		// Attempt to make the file unwriteable if using FTP.
+		if (!$ftp['enabled'] && JPath::isOwner($configfile) && !JPath::setPermissions($configfile, '0444'))
+		{
+			$returnData->messages[]  = JText::_('COM_CONFIG_ERROR_CONFIGURATION_PHP_NOTUNWRITABLE');
+		}
+
+
+	}
+	else
+	{
+		$returnData->error = 1;
+		$returnData->errormessages[]  = JText::_('COM_YOURSITES_COULD_NOT_TOGGLE_DEBUG_MODE_CONFIGURATION_FILE_MISSING');
+		return $returnData;
+	}
+
+
+	return $returnData;
+}
+
+function setErrorReporting($requestObject, &$returnData)
+{
+
+	if (JFile::exists(JPATH_SITE .  "/configuration.php"))
+	{
+		$configfile = JPATH_SITE . "/configuration.php";
+
+		// Get the new FTP credentials.
+		$ftp = JClientHelper::getCredentials('ftp', true);
+
+		// Attempt to make the file writeable if using FTP.
+		if (!$ftp['enabled'] && JPath::isOwner($configfile) && !JPath::setPermissions($configfile, '0644'))
+		{
+			$returnData->errormessages[]  = JText::_('COM_CONFIG_ERROR_CONFIGURATION_PHP_NOTWRITABLE');
+		}
+
+		// Attempt to write the configuration file as a PHP class named JConfig.
+		$configuration = file_get_contents($configfile);
+
+		$jconfig = JFactory::getConfig();
+
+		$error_reporting  = $jconfig->get('error_reporting', 'none');
+		$newlevel = $requestObject->newlevel;
+
+		if (in_array($newlevel, array("default", "none", "simple", "maximum", "development")))
+		{
+			$configuration = str_replace("public \$error_reporting = '$error_reporting';", "public \$error_reporting = '$newlevel';", $configuration);
+		}
+
+		if (!JFile::write($configfile, $configuration))
+		{
+			$returnData->errormessages[]  = JText::_('COM_CONFIG_ERROR_WRITE_FAILED');
+		}
+
+		// Attempt to make the file unwriteable if using FTP.
+		if (!$ftp['enabled'] && JPath::isOwner($configfile) && !JPath::setPermissions($configfile, '0444'))
+		{
+			$returnData->messages[]  = JText::_('COM_CONFIG_ERROR_CONFIGURATION_PHP_NOTUNWRITABLE');
+		}
+
+
+	}
+	else
+	{
+		$returnData->error = 1;
+		$returnData->errormessages[]  = JText::_('COM_YOURSITES_COULD_NOT_TOGGLE_DEBUG_MODE_CONFIGURATION_FILE_MISSING');
+		return $returnData;
+	}
+
+
+	return $returnData;
+}
+
+function findJoomlaUpdates($requestObject, & $returnData)
 {
 	// clear the Joomla cache first
 	purgeJoomla($requestObject, $returnData);
@@ -2114,6 +2241,7 @@ function cloneSite($requestObject, & $returnData)
 
 	// make sure we have enough time to handle slow tasks
 	@ini_set("max_execution_time", 600);
+	@ini_set("default_socket_timeout", 600);
 
 	// Clean up first - removing temporary files and clearing cache
 	clearCache($requestObject, $returnData);
@@ -2228,6 +2356,7 @@ function cloneSite($requestObject, & $returnData)
 		// ToDo disable emails using code from com_config application model ConfigModelApplication and ::writeconfigfile method adapted to our needs here
 		$db = JFactory::getDbo();
 		$oldPrefix = $db->getPrefix();
+		$oldPrefixEscaped = str_replace("_", "\_", $oldPrefix);
 		$configuration = str_replace($oldPrefix, $requestObject->prefix . '_', $configuration);
 
 		if (!JFile::write($configfile, $configuration))
@@ -2288,17 +2417,67 @@ function cloneSite($requestObject, & $returnData)
 			return $returnData;
 		}
 
-		$db->setQuery("SHOW FULL TABLES from `$dbname` WHERE `Tables_in_" .  $dbname ."` like '". $oldPrefix . "%' AND TABLE_TYPE LIKE 'VIEW'");
+		$db->setQuery("SHOW FULL TABLES from `$dbname` WHERE `Tables_in_" .  $dbname ."` like '". $oldPrefixEscaped . "%' AND TABLE_TYPE LIKE 'VIEW'");
 		// Make sure we can count on the order of the columns!
 		$views = $db->loadColumn(0);
 
-		$db->setQuery("SHOW FULL TABLES from `$dbname` WHERE `Tables_in_" .  $dbname ."` like '". $oldPrefix . "%' AND TABLE_TYPE NOT LIKE 'VIEW'");
+		$db->setQuery("SHOW FULL TABLES from `$dbname` WHERE `Tables_in_" .  $dbname ."` like '". $oldPrefixEscaped . "%' AND TABLE_TYPE NOT LIKE 'VIEW'");
 		// Make sure we can count on the order of the columns!
 		$tables = $db->loadColumn(0);
 
 		// old version that needs $tablefield
-		//$db->setQuery("SHOW TABLES from `$dbname` WHERE `Tables_in_" .  $dbname ."` like '". $oldPrefix . "%'");
+		//$db->setQuery("SHOW TABLES from `$dbname` WHERE `Tables_in_" .  $dbname ."` like '". $oldPrefixEscaped . "%'");
 		//$tables = $db->loadObjectList();
+
+		// re-order the tables so that tables referred to as foreign keys are created first
+		$db->setQuery("SELECT * FROM information_schema.key_column_usage WHERE REFERENCED_TABLE_NAME <> '' AND  TABLE_SCHEMA = '$dbname' AND TABLE_NAME like '". $oldPrefixEscaped . "%'");
+		$foreignKeyTables = $db->loadObjectList();
+		if ($foreignKeyTables && count($foreignKeyTables))
+		{
+			$fktCount = count($foreignKeyTables);
+
+			$referencedTables = array();
+			for ($fkt = 0; $fkt < $fktCount; $fkt++)
+			{
+				if (!in_array($foreignKeyTables[$fkt]->REFERENCED_TABLE_NAME, $referencedTables))
+				{
+					$referencedTables[$foreignKeyTables[$fkt]->REFERENCED_TABLE_NAME] = $foreignKeyTables[$fkt]->REFERENCED_TABLE_NAME;
+				}
+			}
+
+			// Make sure $referencedTables are in the right order to avoid table => foreign_table1 => foreign_table2 problems
+			$newReferencedTables = array();
+			foreach ($referencedTables as $referencedTableName => $referencedTableData)
+			{
+				for ($fkt = 0; $fkt < $fktCount; $fkt++)
+				{
+					// The table itself has a reference so extract it
+					if ($foreignKeyTables[$fkt]->TABLE_NAME == $referencedTableName )
+					{
+						unset($referencedTables[$referencedTableName]);
+						$newReferencedTables[$referencedTableName] = $referencedTableName;
+					}
+				}
+			}
+			$referencedTables = array_merge($newReferencedTables, $referencedTables);
+
+			// we DONT need these in the reverse order since the unshift below reverses them already!
+			//$referencedTables = array_reverse($referencedTables);
+
+			foreach ($referencedTables as $referencedTableName => $referencedTableData)
+			{
+				$tableIndex = array_search($referencedTableName, $tables);
+				if ( $tableIndex !== false )
+				{
+					$tableToMove = $tables[$tableIndex];
+					unset($tables[$tableIndex]);
+					array_unshift($tables, $tableToMove);
+					//array_push($tables, $tableToMove);
+
+				}
+			}
+			$tables = array_values($tables);
+		}
 
 		// Copy the views last!
 		$tablesAndViews = array_merge($tables, $views);
@@ -2339,7 +2518,12 @@ function cloneSite($requestObject, & $returnData)
 			}
 
 			// Replace old table name with new table name everywhere
-			$create = preg_replace("/" . $oldPrefix . "/m", $requestObject->prefix . "_", $create);
+			$replaceCount = 0;
+			$create = preg_replace("/" . $oldPrefix . "/m", $requestObject->prefix . "_", $create, -1, $replaceCount);
+			if ($replaceCount < 1)
+			{
+				continue;
+			}
 
 			// You may need to rename foreign keys to prevent name re-use error.
 			$fkcheck = "SELECT * FROM information_schema.key_column_usage WHERE REFERENCED_TABLE_NAME <> '' AND  TABLE_SCHEMA = '$dbname' AND TABLE_NAME = '$table'";
@@ -2433,8 +2617,16 @@ function cloneSite($requestObject, & $returnData)
 			{
 				//$db->setQuery("INSERT INTO " . str_replace($oldPrefix , $requestObject->prefix ."_", $table->$tablefield)
 				//. " SELECT * FROM " . $table->$tablefield);
-				$db->setQuery("INSERT INTO " . str_replace($oldPrefix , $requestObject->prefix ."_", $table)
-					. " SELECT * FROM " . $table);
+
+				// Replace old table name with new table name everywhere
+				$replaceCount = 0;
+				$newtable = preg_replace("/" . $oldPrefix . "/m", $requestObject->prefix . "_", $table, -1, $replaceCount);
+				if ($replaceCount !== 1)
+				{
+					continue;
+				}
+
+				$db->setQuery("INSERT INTO " . $newtable . " SELECT * FROM " . $table);
 
 				$db->execute();
 			}
@@ -2447,8 +2639,14 @@ function cloneSite($requestObject, & $returnData)
 				}
 
 				// I need to look at the columns names to exclude generated columns
-				//$sql = "SHOW COLUMNS FROM " . str_replace($oldPrefix , $requestObject->prefix ."_", $table->$tablefield);
-				$sql = "SHOW COLUMNS FROM " . str_replace($oldPrefix , $requestObject->prefix ."_", $table);
+				$replaceCount = 0;
+				$newtable = preg_replace("/" . $oldPrefix . "/m", $requestObject->prefix . "_", $table, -1, $replaceCount);
+				if ($replaceCount !== 1)
+				{
+					continue;
+				}
+
+				$sql = "SHOW COLUMNS FROM " . $newtable;
 				$db->setQuery($sql);
 				$cols = @$db->loadObjectList("Field");
 
@@ -2462,13 +2660,10 @@ function cloneSite($requestObject, & $returnData)
 						$insertcols[] = $col->Field;
 					}
 				}
-				//$db->setQuery("INSERT INTO " . str_replace($oldPrefix , $requestObject->prefix ."_", $table->$tablefield)
-				//. " (" . implode($insertcols, ",") . ")"
-				//. " SELECT " . implode($insertcols, ",") . " FROM " . $table->$tablefield);
-				$db->setQuery("INSERT INTO " . str_replace($oldPrefix , $requestObject->prefix ."_", $table)
-					. " (" . implode($insertcols, ",") . ")"
-					. " SELECT " . implode($insertcols, ",") . " FROM " . $table);
+
 				try {
+					$db->setQuery("INSERT INTO " . $newtable . " (" . implode(",", $insertcols) . ")"
+						. " SELECT " . implode(",", $insertcols) . " FROM " . $table);
 					if ($db->execute())
 					{
 						if ($diagnostics)
@@ -2518,7 +2713,14 @@ function cloneSite($requestObject, & $returnData)
 							. $trigger->Event . ' '
 							. ' ON ' . $trigger->Table . ' FOR EACH ROW '
 							. $trigger->Statement;
-						$sql = str_replace($oldPrefix , $requestObject->prefix ."_", $sql);
+						// I need to look at the columns names to exclude generated columns
+						$replaceCount = 0;
+						$sql = preg_replace("/" . $oldPrefix . "/m", $requestObject->prefix . "_", $sql, -1, $replaceCount);
+						if ($replaceCount < 1)
+						{
+							continue;
+						}
+
 						$db->setQuery($sql);
 						$db->execute();
 					}
@@ -2535,7 +2737,7 @@ function cloneSite($requestObject, & $returnData)
 			}
 		}
 
-		$db->setQuery("SHOW FUNCTION STATUS WHERE Name LIKE '" . $oldPrefix. "%' AND dB='" . $dbname . "'");
+		$db->setQuery("SHOW FUNCTION STATUS WHERE Name LIKE '" . $oldPrefixEscaped. "%' AND dB='" . $dbname . "'");
 		$functions = $db->loadObjectList();
 
 		foreach ($functions as $function) {
@@ -2556,7 +2758,12 @@ function cloneSite($requestObject, & $returnData)
 			$create = $create['Create Function'];
 
 			// Replace old table name with new table name everywhere
-			$create = preg_replace("/" . $oldPrefix . "/m", $requestObject->prefix . "_", $create);
+			$replaceCount = 0;
+			$create = preg_replace("/" . $oldPrefix . "/m", $requestObject->prefix . "_", $create, -1, $replaceCount);
+			if ($replaceCount !== 1)
+			{
+				continue;
+			}
 
 			// You may need to rename foreign keys to prevent name re-use error.
 			// See http://stackoverflow.com/questions/12623651/
@@ -2577,7 +2784,7 @@ function cloneSite($requestObject, & $returnData)
 			}
 		}
 
-		$db->setQuery("SHOW PROCEDURE STATUS WHERE Name LIKE '" . $oldPrefix. "%' AND dB='" . $dbname . "'");
+		$db->setQuery("SHOW PROCEDURE STATUS WHERE Name LIKE '" . $oldPrefixEscaped. "%' AND dB='" . $dbname . "'");
 		$procedures = $db->loadObjectList();
 
 		foreach ($procedures as $procedure) {
@@ -2598,7 +2805,12 @@ function cloneSite($requestObject, & $returnData)
 			$create = $create['Create Procedure'];
 
 			// Replace old table name with new table name everywhere
-			$create = preg_replace("/" . $oldPrefix . "/m", $requestObject->prefix . "_", $create);
+			$replaceCount = 0;
+			$create = preg_replace("/" . $oldPrefix . "/m", $requestObject->prefix . "_", $create, -1, $replaceCount);
+			if ($replaceCount < 1)
+			{
+				continue;
+			}
 
 			// You may need to rename foreign keys to prevent name re-use error.
 			// See http://stackoverflow.com/questions/12623651/
@@ -2702,12 +2914,13 @@ function deleteSite($requestObject, & $returnData, $specificClone = false)
 	{
 		$oldPrefix = $requestObject->prefix;
 	}
+	$oldPrefixEscaped = str_replace("_", "\_", $oldPrefix);
 
 	$config = JFactory::getConfig();
 	$dbname = $config->get('db', '');
 
 	//$db->setQuery("SHOW TABLES from `$dbname` WHERE `Tables_in_" .  $dbname ."` like '". $oldPrefix . "%'");
-	$db->setQuery("SHOW FULL TABLES from `$dbname` WHERE `Tables_in_" .  $dbname ."` like '". $oldPrefix . "%' AND TABLE_TYPE NOT LIKE 'VIEW'");
+	$db->setQuery("SHOW FULL TABLES from `$dbname` WHERE `Tables_in_" .  $dbname ."` like '". $oldPrefixEscaped . "%' AND TABLE_TYPE NOT LIKE 'VIEW'");
 	// Make sure we can count on the order of the columns!
 	$tables = $db->loadColumn(0);
 
@@ -2729,7 +2942,7 @@ function deleteSite($requestObject, & $returnData, $specificClone = false)
 		return $returnData;
 	}
 
-	$db->setQuery("SHOW FULL TABLES from `$dbname` WHERE `Tables_in_" .  $dbname ."` like '". $oldPrefix . "%' AND TABLE_TYPE LIKE 'VIEW'");
+	$db->setQuery("SHOW FULL TABLES from `$dbname` WHERE `Tables_in_" .  $dbname ."` like '". $oldPrefixEscaped . "%' AND TABLE_TYPE LIKE 'VIEW'");
 	// Make sure we can count on the order of the columns!
 	$views = $db->loadColumn(0);
 
@@ -2743,7 +2956,7 @@ function deleteSite($requestObject, & $returnData, $specificClone = false)
 		$deleted = $db->execute();
 	}
 
-	$db->setQuery("SHOW FUNCTION STATUS WHERE Name LIKE '" . $oldPrefix. "%' AND dB='" . $dbname . "'");
+	$db->setQuery("SHOW FUNCTION STATUS WHERE Name LIKE '" . $oldPrefixEscaped. "%' AND dB='" . $dbname . "'");
 	$functions = $db->loadObjectList();
 
 	foreach ($functions as $function) {
@@ -2751,7 +2964,159 @@ function deleteSite($requestObject, & $returnData, $specificClone = false)
 		$db->execute();
 	}
 
-	$db->setQuery("SHOW PROCEDURE STATUS WHERE Name LIKE '" . $oldPrefix. "%' AND dB='" . $dbname . "'");
+	$db->setQuery("SHOW PROCEDURE STATUS WHERE Name LIKE '" . $oldPrefixEscaped. "%' AND dB='" . $dbname . "'");
+	$procedures = $db->loadObjectList();
+
+	foreach ($procedures as $procedure) {
+		$db->setQuery("DROP PROCEDURE $procedure->Name");
+		$db->execute();
+	}
+
+	foreach ($tables as $table)
+	{
+
+		// Drop the tables
+		$dropSql = "DROP TABLE IF EXISTS `" . $table ."`";
+		$db->setQuery($dropSql);
+
+		$deleted = $db->execute();
+	}
+
+	// MyISAM
+	// $db->setQuery("SET FOREIGN_KEY_CHECKS = 1");
+	// InnoDb
+	try {
+		$db->setQuery("SET unique_checks=1");
+		$db->execute();
+		$db->setQuery("SET foreign_key_checks=1");
+		$db->execute();
+	}
+	catch (Exception $e)
+	{
+		$returnData->error = 1;
+		$returnData->cloned = 0;
+		$returnData->errormessages[] = "Unable to reset DB table locks";
+		return $returnData;
+	}
+
+	try
+	{
+
+		// hidden in unix
+		$success = deleter2($basepath, $returnData);
+		// finally remove the root folder
+		$FTPOptions = JClientHelper::getCredentials('ftp');
+
+		// If we're using ftp
+		if ($FTPOptions['enabled'] == 1 ) {
+			// Connect the FTP client
+			$ftp = JFtpClient::getInstance($FTPOptions['host'], $FTPOptions['port'], array(), $FTPOptions['user'], $FTPOptions['pass']);
+			// Now delete the folder
+			if (!$ftp->delete($basepath))
+			{
+				throw new \RuntimeException('Delete folder failed ' . $basepath, -1);
+			}
+		}
+		else {
+			@rmdir($basepath);
+		}
+
+	}
+	catch (Exception $e)
+	{
+		$returnData->error  = 1;
+		$returnData->deleted = 0;
+		$returnData->errormessages[]  = $e->getMessage();
+		return $returnData;
+	}
+	if (!$success)
+	{
+		$returnData->error  = 1;
+		$returnData->deleted = 0;
+		$returnData->errormessages[]  = 'COM_YOURSITES_UNABLE_TO_DELETE_FILES';
+		return $returnData;
+	}
+
+	$returnData->deleted = 1;
+
+	return $returnData;
+}
+
+function deleteClone($requestObject, & $returnData)
+{
+	// Only delete cloned sites
+
+	$db_prefix = $requestObject->clone;
+
+	$basepath = JPATH_SITE;
+	$basepath .= '/._' . $db_prefix;
+
+	if (strpos($db_prefix, 'ysts_') !== 0 || strpos($basepath, '._' . $db_prefix) === false) {
+		$returnData->error = 1;
+		$returnData->errormessages[] = "COM_YOURSITES_DELETE_SITE_SITE_NOT_A_CLONE";
+		$returnData->errormessages[] = $db_prefix;
+		$returnData->errormessages[] = $basepath;
+		$returnData->errormessages[] = strpos($basepath, '._' . $db_prefix);
+
+		return $returnData;
+	}
+
+	JLoader::import('joomla.filesystem.file');
+	JLoader::import('joomla.filesystem.folder');
+
+	// ToDo disable emails using code from com_config application model ConfigModelApplication and ::writeconfigfile method adapted to our needs here
+	$db = JFactory::getDbo();
+	$oldPrefixEscaped = $db_prefix ;
+
+	$config = JFactory::getConfig();
+	$dbname = $config->get('db', '');
+
+	//$db->setQuery("SHOW TABLES from `$dbname` WHERE `Tables_in_" .  $dbname ."` like '". $oldPrefixEscaped . "%'");
+	$db->setQuery("SHOW FULL TABLES from `$dbname` WHERE `Tables_in_" .  $dbname ."` like '". $oldPrefixEscaped . "%' AND TABLE_TYPE NOT LIKE 'VIEW'");
+	// Make sure we can count on the order of the columns!
+	$tables = $db->loadColumn(0);
+
+	// InnoDb
+	try
+	{
+		$db->setQuery("SET unique_checks=0");
+		$db->execute();
+		$db->setQuery("SET foreign_key_checks=0");
+		$db->execute();
+	}
+
+	catch (Exception $e)
+	{
+		$returnData->error = 1;
+		$returnData->deleted = 0;
+		$returnData->errormessages[] = "Unable to release DB table locks";
+		$returnData->log[] = $e->getMessage();
+		return $returnData;
+	}
+
+	$db->setQuery("SHOW FULL TABLES from `$dbname` WHERE `Tables_in_" .  $dbname ."` like '". $oldPrefixEscaped . "%' AND TABLE_TYPE LIKE 'VIEW'");
+	// Make sure we can count on the order of the columns!
+	$views = $db->loadColumn(0);
+
+	foreach ($views as $view)
+	{
+
+		// Drop the views
+		$dropSql = "DROP VIEW IF EXISTS `" . $view ."`";
+		$db->setQuery($dropSql);
+
+		$deleted = $db->execute();
+	}
+
+	$db->setQuery("SHOW FUNCTION STATUS WHERE Name LIKE '" . $oldPrefixEscaped. "%' AND dB='" . $dbname . "'");
+	$functions = $db->loadObjectList();
+
+	foreach ($functions as $function) {
+		$db->setQuery("DROP FUNCTION $function->Name");
+		$db->execute();
+	}
+
+	$db->setQuery("SHOW PROCEDURE STATUS WHERE Name LIKE '" . $oldPrefixEscaped. "%' AND dB='" . $dbname . "'");
 	$procedures = $db->loadObjectList();
 
 	foreach ($procedures as $procedure) {
@@ -3575,7 +3940,7 @@ function doInstallExtension($update, &$returnData)
 	return $result;
 }
 
-function getBackupToken($requestObject, $returnData)
+function getBackupToken($requestObject, & $returnData)
 {
 	try
 	{
@@ -3762,7 +4127,7 @@ function getBackups($requestObject, $returnData)
 }
 */
 
-function securityCheck( & $requestObject, $returnData)
+function securityCheck( & $requestObject, & $returnData)
 {
 	$session = JFactory::getSession();
 
@@ -3795,10 +4160,14 @@ function securityCheck( & $requestObject, $returnData)
 			$db->setQuery($query);
 			$db->execute();
 
+			//JLog::add("Deleting security tokens <  " . $now , JLog::INFO, 'yoursites');
+
 			$query = $db->getQuery(true);
 			$query->select('tokenvalue')
 				->from("#__ysts_tokens")
 				->where ('tokenvalue = '. $db->quote($randomtoken));
+
+			//JLog::add("Checking for security tokens = " . $randomtoken , JLog::INFO, 'yoursites');
 
 			$db->setQuery($query);
 			$dbtoken = $db->loadResult();
@@ -3806,7 +4175,7 @@ function securityCheck( & $requestObject, $returnData)
 			{
 				// THIS SHOULD NOT BE RETURNED - ONLY FOR DEBUGGING
 				//$returnData->errormessages[]="source token not in database";
-				$returnData->errormessages[] = "Invalid token";
+				$returnData->errormessages[] = "Invalid token : 2";
 				return false;
 			}
 
@@ -3878,7 +4247,9 @@ function setupSecurityToken($requestObject, & $returnData)
 		->set($db->quoteName("expires") . " = " . $db->quote($now));
 
 	$db->setQuery($query);
-	$db->execute();
+	$success = $db->execute();
+
+	//JLog::add("Adding security token  " . $returnData->token . " which expires at " . $now . " " . ($success ? " succeeded" : " failed"), JLog::INFO, 'yoursites');
 }
 
 function cleanCache($group, $client_id = 0)
@@ -4979,7 +5350,7 @@ function getJoomlaUpdateSitesIds($column = 0)
  *
  * @return  boolean  True on success.
  *
- * @since   1.19.2
+ * @since   1.23.0
  * @throws  \RuntimeException
  */
 function copyr2($src, $dest, $prefix = "", & $returnData, $exclusions = array())
@@ -5032,7 +5403,7 @@ function copyr2($src, $dest, $prefix = "", & $returnData, $exclusions = array())
 			}
 
 			// Ingore any backups files
-			if (in_array(pathinfo($entry, PATHINFO_EXTENSION), array("jpa", "zip", "gz", "targz")))
+			if (in_array(pathinfo($entry, PATHINFO_EXTENSION), array("jpa", "zip", "gz", "targz")) && !in_array($entry, array('angie.jpa','angie-generic.jpa','angie-joomla.jpa')))
 			{
 				continue;
 			}
@@ -5104,7 +5475,7 @@ function copyr2($src, $dest, $prefix = "", & $returnData, $exclusions = array())
 				case 'dir':
 					if (in_array($file, $exclusions))
 					{
-						mkdir($sfid);
+						@mkdir($sfid);
 						continue 2;
 					}
 
@@ -5140,7 +5511,7 @@ function copyr2($src, $dest, $prefix = "", & $returnData, $exclusions = array())
  *
  * @return  boolean  True on success.
  *
- * @since   1.19.2
+ * @since   1.23.0
  * @throws  \RuntimeException
  */
 function deleter2($src, & $returnData)
@@ -5260,7 +5631,7 @@ function deleter2($src, & $returnData)
 	return true;
 }
 
-function getSiteInfo($returnData)
+function getSiteInfo(& $returnData)
 {
 	JLoader::import('models.sysinfo', JPATH_ADMINISTRATOR . '/components/com_admin');
 	if (class_exists('AdminModelSysInfo', true))
@@ -5274,7 +5645,9 @@ function getSiteInfo($returnData)
 	$returnData->siteInfo = $infoModel->getInfo();
 
 	// Other useful information
-	$jconfig = JFactory::getConfig();
+	$jconfig          = JFactory::getConfig();
+	$returnData->siteInfo["debug"]            = $jconfig->get('debug', '0');
+	$returnData->siteInfo["error_reporting"]  = $jconfig->get('error_reporting', 'none');
 
 	// DB size
 	$db = JFactory::getDbo();
@@ -5284,6 +5657,62 @@ WHERE TABLE_SCHEMA = "' . $jconfig->get("db"). '"
 AND TABLE_NAME LIKE "' . $jconfig->get("dbprefix") . '%"';
 	$db->setQuery($sql);
 	$returnData->siteInfo["dbsize"]  = $db->loadResult();
+
+	// DB timeout data
+	$sql = "SHOW VARIABLES LIKE '%timeout'";
+	$db->setQuery($sql);
+	$timeoutData = $db->loadAssocList();
+	$sql = "SHOW VARIABLES LIKE '%connections'";
+	$db->setQuery($sql);
+	$connectionData = $db->loadAssocList();
+
+	$returnData->siteInfo["dbtimeouts"]  = array();
+	if ($timeoutData)
+	{
+		foreach ($timeoutData as $k => $v)
+		{
+			list ($kn, $kv)  = array_values($v);
+			$returnData->siteInfo["dbtimeouts"][$kn] = $kv;
+		}
+	}
+	if ($connectionData)
+	{
+		foreach ($connectionData as $k => $v)
+		{
+			list ($kn, $kv)  = array_values($v);
+			$returnData->siteInfo["dbtimeouts"][$kn] = $kv;
+		}
+	}
+
+	// Clones Site Summary
+	$basedir = JPATH_SITE;
+	$clones = array();
+	try
+	{
+		if ($basedir !== false && $basedir != '' && file_exists($basedir))
+		{
+			// Go one level down only here - i.e. no subfolders
+			foreach (new DirectoryIterator($basedir) as $object)
+			{
+				if($object->isDot()) continue;
+
+				// ._ysts_
+				if ($object->isDir())
+				{
+					$path = $object->getPathname();
+					$path = str_replace($basedir, '', $path);
+					if (strpos($path, "/._ysts_") === 0)
+					{
+						$clones[] = $path;
+					}
+				}
+			}
+		}
+	}
+	catch (Exception $e)
+	{
+	}
+	$returnData->siteInfo["clones"] = $clones;
 
 	// single tables like this
 	/*
@@ -5343,6 +5772,7 @@ ORDER BY size DESC';
 	$returnData->siteInfo["inidata"]["post_max_size"]       = return_bytes(ini_get('post_max_size'));
 	$returnData->siteInfo["inidata"]["upload_max_filesize"] = return_bytes(ini_get('upload_max_filesize'));
 	$returnData->siteInfo["inidata"]["memory_limit"]        = ini_get('memory_limit');
+	$returnData->siteInfo["inidata"]["default_socket_timeout"]        = ini_get('default_socket_timeout');
 
 	$returnData->siteInfo["recommended"]["display_errors"]      = (bool) ini_get('display_errors');
 	$returnData->siteInfo["recommended"]["file_uploads"]        = (bool) ini_get('file_uploads');

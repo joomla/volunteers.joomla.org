@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @version    CVS: 1.23.0
+ * @version    CVS: 1.26.0
  * @package    com_yoursites
  * @author     Geraint Edwards <via website>
  * @copyright  2016-2020 GWE Systems Ltd
@@ -73,6 +73,18 @@ function ProcessYstsJsonRequest(&$requestObject, $returnData)
 		// This site may be the root/parent site of a clone that has been deleted and .htaccess may have pushed us here - so check this
 		$parts     = explode("/", trim($requestObject->base, " /"));
 		if (strpos(JPATH_SITE, "._ysts_") === false || strpos(JPATH_SITE, $parts[count($parts)-1]) === false)
+		{
+			$returnData->error = 1;
+			$returnData->errormessages[] = 'COM_YOURSITES_CLONED_SITE_APPEARS_TO_HAVE_BEEN_DELETED';
+			return $returnData;
+		}
+	}
+
+	if ($requestObject->task != "setupsecuritytoken" && isset($requestObject->base) && strpos($requestObject->base, '/clone_ysts_') > 0)
+	{
+		// This site may be the root/parent site of a clone that has been deleted and .htaccess may have pushed us here - so check this
+		$parts     = explode("/", trim($requestObject->base, " /"));
+		if (strpos(JPATH_SITE, "clone_ysts_") === false || strpos(JPATH_SITE, $parts[count($parts)-1]) === false)
 		{
 			$returnData->error = 1;
 			$returnData->errormessages[] = 'COM_YOURSITES_CLONED_SITE_APPEARS_TO_HAVE_BEEN_DELETED';
@@ -279,6 +291,10 @@ function ProcessYstsJsonRequest(&$requestObject, $returnData)
 
 			case "deletesite":
 				deleteSite($requestObject, $returnData);
+				break;
+
+			case "migrateclone":
+				migrateClone($requestObject, $returnData);
 				break;
 
 			case "cleanupclone":
@@ -663,7 +679,7 @@ function versionCompatibility($requestObject, & $returnData)
 			$downloadUrl = $update->get('downloadurl');
 
 			// This could be a collection not an extension xml file so find the relevant URL
-			if (!$downloadUrl && count($update->get('extensions', array())) > 0)
+			if (!$downloadUrl || count($update->get('extensions', array())) > 0)
 			{
 				$extensionUpdates = $update->get('extensions', array());
 
@@ -676,8 +692,14 @@ function versionCompatibility($requestObject, & $returnData)
 					)
 					{
 						$update = new Joomla\CMS\Updater\Compatibility();
+						$update->set('jversion.full', $joomlaTargetVersion);
 						$update->loadFromXML($extensionUpdate->detailsurl);
 						$downloadUrl = $update->get('downloadurl');
+						// JEvents has updates within an extensionset file so need to ignore this!
+						if (!empty($downloadUrl) && !empty($downloadUrl->_data))
+						{
+							$extension->update_location = $extensionUpdate->detailsurl;
+						}
 						break;
 					}
 				}
@@ -701,7 +723,7 @@ function versionCompatibility($requestObject, & $returnData)
 			$downloadUrl = $update->get('downloadurl');
 
 			// This could be a collection not an extension xml file so find the relevant URL
-			if (!$downloadUrl && count($update->get('extensions', array())) > 0)
+			if (!$downloadUrl || count($update->get('extensions', array())) > 0)
 			{
 				$extensionUpdates = $update->get('extensions', array());
 
@@ -714,6 +736,7 @@ function versionCompatibility($requestObject, & $returnData)
 					)
 					{
 						$update = new Joomla\CMS\Updater\Compatibility();
+						$update->set('jversion.full', $joomlaCurrentVersion);
 						$update->loadFromXML($extensionUpdate->detailsurl);
 						$downloadUrl = $update->get('downloadurl');
 						break;
@@ -1132,6 +1155,15 @@ function findJoomlaUpdates($requestObject, & $returnData)
 		$updateParams->set("updatesource", 'custom');
 		$updateParams->set("customurl", $requestObject->updateserver);
 	}
+	if (isset($requestObject->minimum_stability))
+	{
+		if (intval($requestObject->minimum_stability) !== intval($updateParams->get("minimum_stability", '4')))
+		{
+			$serverChanged = true;
+		}
+		$updateParams->set("minimum_stability", $requestObject->minimum_stability);
+	}
+
 	if ($serverChanged)
 	{
 		$joomlaUpdate = JComponentHelper::getComponent('com_joomlaupdate');
@@ -1148,6 +1180,12 @@ function findJoomlaUpdates($requestObject, & $returnData)
 	if (class_exists("JoomlaupdateModelDefault", true))
 	{
 		$joomlaModel = new JoomlaupdateModelDefault();
+	}
+	// Joomla 4.0.4 onwards?
+	else if (file_exists(JPATH_ADMINISTRATOR . '/components/com_joomlaupdate/src/Model/UpdateModel.php'))
+	{
+		//JLoader::import('Model.UpdateModel', JPATH_ADMINISTRATOR . '/components/com_joomlaupdatesrc/Model/UpdateModel.php');
+		$joomlaModel = new Joomla\Component\Joomlaupdate\Administrator\Model\UpdateModel();
 	}
 	else
 	{
@@ -1246,7 +1284,7 @@ function upgradeJoomla($requestObject, & $returnData)
 		$memory_limit = substr($memory_limit , 0, strlen($memory_limit) - 1 );
 		$memory_limit = $memory_limit*1024*1024 ;
 	}
-	if ($memory_limit < 64 * 1024 * 1024)
+	if ($memory_limit > 0 && $memory_limit < 64 * 1024 * 1024)
 	{
 		@ini_set('memory_limit', '64M');
 	}
@@ -1265,6 +1303,12 @@ function upgradeJoomla($requestObject, & $returnData)
 	if (class_exists("JoomlaupdateModelDefault", true))
 	{
 		$joomlaModel = new JoomlaupdateModelDefault();
+	}
+	// Joomla 4.0.4 onwards?
+	else if (file_exists(JPATH_ADMINISTRATOR . '/components/com_joomlaupdate/src/Model/UpdateModel.php'))
+	{
+		//JLoader::import('Model.UpdateModel', JPATH_ADMINISTRATOR . '/components/com_joomlaupdatesrc/Model/UpdateModel.php');
+		$joomlaModel = new Joomla\Component\Joomlaupdate\Administrator\Model\UpdateModel();
 	}
 	else
 	{
@@ -1362,10 +1406,6 @@ function upgradeJoomla($requestObject, & $returnData)
 	//$restorationFilecontent = preg_replace("#'kickstart\.security\.password'\ \=\> '.*?'#", "'kickstart.security.password' => ''", $restorationFilecontent);
 	//JFile::write($restorationFile, $restorationFilecontent);
 
-	// TODO Trap errors etc
-	$returnData->messages[] = "restore.php " . JUri::base() . "/administrator/components/com_joomlaupdate/restore.php";
-	$returnData->messages[] = JFile::exists(JPATH_SITE . "/administrator/components/com_joomlaupdate/restore.php");
-
 	// Use JHttpFactory that allows using CURL and Sockets as alternative method when available
 	// Adding a valid user agent string etc.
 	$goptions = new JRegistry;
@@ -1387,18 +1427,50 @@ function upgradeJoomla($requestObject, & $returnData)
 
 	$http = JHttpFactory::getHTTP($goptions);
 
+	$restoreFile = "extract.php";
+	if (file_exists(JPATH_ADMINISTRATOR . "/components/com_joomlaupdate/restore.php") && !file_exists(JPATH_ADMINISTRATOR . "/components/com_joomlaupdate/extract.php"))
+	{
+		$restoreFile = "restore.php";
+	}
+
 	// could pass session information and cookies via $headers argument etc.
 	$headers = array();
-
 	$data = array();
-	$updatejson = json_encode(array('task' => "startRestore"));
-	$data["task"] = "startRestore";
+
+	if ($restoreFile == "extract.php")
+	{
+		if (!defined('_JOOMLA_UPDATE'))
+		{
+			define('_JOOMLA_UPDATE', 1);
+		}
+		include JPATH_SITE . "/administrator/components/com_joomlaupdate/update.php";
+		if (isset($extractionSetup))
+		{
+			$data["password"] = $extractionSetup['security.password'];
+			$returnData->password = $extractionSetup['security.password'];
+		}
+		$updatejson = json_encode(array('task' => "startExtract"));
+		$data["task"] = "startExtract";
+	}
+	else
+	{
+		$updatejson = json_encode(array('task' => "startRestore"));
+		$data["task"] = "startRestore";
+	}
+
 	$data["json"] = AKEncryptionAES::AESEncryptCtr($updatejson, $password, 128);
 
 	$debug = "?XDEBUG_SESSION_START=PHPSTORM";
 	$debug = "";
 
-	$restoreURL = JUri::base() . "administrator/components/com_joomlaupdate/restore.php";
+	$restoreURL = JUri::base() . "administrator/components/com_joomlaupdate/" . $restoreFile;
+	$returnData->restoreFile = $restoreFile;
+
+	// TODO Trap errors etc
+	$returnData->messages[] = "$restoreFile " . $restoreURL;
+	$returnData->messages[] = JFile::exists(JPATH_SITE . "/administrator/components/com_joomlaupdate/" . $restoreFile);
+	$returnData->log[]      = "$restoreFile " . $restoreURL;
+	$returnData->log[]      = JFile::exists(JPATH_SITE . "/administrator/components/com_joomlaupdate/" . $restoreFile);
 
 	$webpage = $http->post($restoreURL . $debug, $data, $headers);
 	//$webpage = $http->get($restoreURL ."?task=" . $data["task"] . "&json=" . $data["json"], $headers);
@@ -1409,6 +1481,30 @@ function upgradeJoomla($requestObject, & $returnData)
 	$requestObject->restoreData = trim($returnData->joomlaUpdateOutput, "#");
 	$updatejsonraw = AKEncryptionAES::AESDecryptCtr($requestObject->restoreData, $password, 128);
 	$updatejson = json_decode($updatejsonraw);
+
+	// May not be encrypted after Joomla 4.0.4
+	if ((!isset($updatejson) || !$updatejson) && strpos($requestObject->restoreData, "{") === 0)
+	{
+		$updatejson = json_decode($requestObject->restoreData);
+	}
+
+	// May be a decoding problem
+	if ((!isset($updatejson) || !$updatejson))
+	{
+		$returnData->error = 1;
+		$returnData->password = $password;
+		$returnData->result = "Joomla Upgrade Failed";
+		$returnData->errormessages[] = 'Problem decoding response from Joomla - check the log';
+		$returnData->errormessages[] = 'Restoring from URL ' . $restoreURL;
+		$returnData->log['requestObject'] = $requestObject;
+		$returnData->log['webpage'] = $webpage;
+		return;
+	}
+
+	if ($restoreFile == "extract.php" && !isset($updatejson->status))
+	{
+		$updatejson->status = $updatejson->hasUpdate;
+	}
 
 	if (!$updatejson->status)
 	{
@@ -1461,19 +1557,39 @@ function finaliseJoomlaUpgrade($requestObject, & $returnData)
 		define('JPATH_COMPONENT_ADMINISTRATOR', JPATH_ADMINISTRATOR . '/components/com_joomlaupdate');
 	}
 
-	JLoader::import('models.default', JPATH_ADMINISTRATOR . '/components/com_joomlaupdate');
-	if (class_exists("JoomlaupdateModelDefault", true))
+	// Joomla 4.0.4 onwards?
+	if (file_exists(JPATH_ADMINISTRATOR . '/components/com_joomlaupdate/src/Model/UpdateModel.php'))
 	{
-		$joomlaModel = new JoomlaupdateModelDefault();
+		//JLoader::import('Model.UpdateModel', JPATH_ADMINISTRATOR . '/components/com_joomlaupdatesrc/Model/UpdateModel.php');
+		$joomlaModel = new Joomla\Component\Joomlaupdate\Administrator\Model\UpdateModel();
 	}
 	else
 	{
-		// \Joomla\Component\Joomlaupdate\Administrator\Model\UpdateModel
-		JLoader::import('Model.UpdateModel', JPATH_ADMINISTRATOR . '/components/com_joomlaupdate');
-		$joomlaModel = new Joomla\Component\Joomlaupdate\Administrator\Model\UpdateModel();
+		JLoader::import('models.default', JPATH_ADMINISTRATOR . '/components/com_joomlaupdate');
+		if (class_exists("JoomlaupdateModelDefault", true))
+		{
+			$joomlaModel = new JoomlaupdateModelDefault();
+		}
+		else
+		{
+			// \Joomla\Component\Joomlaupdate\Administrator\Model\UpdateModel
+			JLoader::import('Model.UpdateModel', JPATH_ADMINISTRATOR . '/components/com_joomlaupdate');
+			$joomlaModel = new Joomla\Component\Joomlaupdate\Administrator\Model\UpdateModel();
+		}
 	}
 
-	$joomlaModel->finaliseUpgrade();
+	$returnData->error = 0;
+	$returnData->result = "Joomla Upgrade Success";
+	$returnData->messages[] = 'COM_YOURSITES_JOOMLAUPDATE_FINISHED';
+
+	$result = $joomlaModel->finaliseUpgrade();
+	if (!$result)
+	{
+		$returnData->error = 1;
+		$returnData->result = "Joomla Upgrade Failed";
+		$returnData->errormessages[] = 'COM_YOURSITES_JOOMLAUPDATE_FINISHED';
+		$returnData->errormessages[] = 'COM_YOURSITES_JOOMLAUPDATE_SCHEMA_UPDATES_FAILED';
+	}
 
 	// prepare for clean up - need to find the package file in order to remove it
 	$config = JFactory::getConfig();
@@ -1488,10 +1604,6 @@ function finaliseJoomlaUpgrade($requestObject, & $returnData)
 
 	$joomlaModel->cleanUp();
 
-	$returnData->error = 0;
-	$returnData->result = "Joomla Upgrade Success";
-	$returnData->messages[] = 'COM_YOURSITES_JOOMLAUPDATE_FINISHED';
-
 	return;
 }
 
@@ -1505,6 +1617,12 @@ function purgeJoomla($requestObject, &$returnData)
 	if (class_exists("JoomlaupdateModelDefault", true))
 	{
 		$joomlaModel = new JoomlaupdateModelDefault();
+	}
+	// Joomla 4.0.4 onwards?
+	else if (file_exists(JPATH_ADMINISTRATOR . '/components/com_joomlaupdate/src/Model/UpdateModel.php'))
+	{
+		//JLoader::import('Model.UpdateModel', JPATH_ADMINISTRATOR . '/components/com_joomlaupdatesrc/Model/UpdateModel.php');
+		$joomlaModel = new Joomla\Component\Joomlaupdate\Administrator\Model\UpdateModel();
 	}
 	else
 	{
@@ -2152,8 +2270,8 @@ function clearCache($requestObject, & $returnData)
 		$totalCache += $cachefolder->size;
 	}
 
-	$returnData->siteInfo = array();
-	$returnData->siteInfo["cacheusage"]  = number_format($totalCache / 1024 / 1024, 2, '.', '');
+	$returnData->siteinfo = array();
+	$returnData->siteinfo["cacheusage"]  = number_format($totalCache / 1024 / 1024, 2, '.', '');
 
 	return $returnData;
 }
@@ -2229,8 +2347,8 @@ function clearTmp($requestObject, & $returnData)
 
 	$returnData->messages[]  = JText::_('COM_YOURSITES_TMP_PACKAGE_FILES_CLEANED');
 
-	$returnData->siteInfo = array();
-	$returnData->siteInfo["tmpusage"]  = number_format(0, 2, '.', '');
+	$returnData->siteinfo = array();
+	$returnData->siteinfo["tmpusage"]  = number_format(0, 2, '.', '');
 
 	return $returnData;
 }
@@ -2270,7 +2388,7 @@ function cloneSite($requestObject, & $returnData)
 			}
 
 			// hidden in unix
-			$success = copyr2(JPATH_SITE, JPATH_SITE . "/._" . $requestObject->prefix, "._" . $requestObject->prefix, $returnData, $requestObject->exclusions);
+			$success = copyr2(JPATH_SITE, JPATH_SITE . "/clone_" . $requestObject->prefix, "clone_" . $requestObject->prefix, $returnData, $requestObject->exclusions);
 
 			if ($diagnostics)
 			{
@@ -2320,9 +2438,9 @@ function cloneSite($requestObject, & $returnData)
 	}
 
 
-	if (JFile::exists(JPATH_SITE . "/._" . $requestObject->prefix . "/configuration.php"))
+	if (JFile::exists(JPATH_SITE . "/clone_" . $requestObject->prefix . "/configuration.php"))
 	{
-		$configfile = JPATH_SITE . "/._" . $requestObject->prefix . "/configuration.php";
+		$configfile = JPATH_SITE . "/clone_" . $requestObject->prefix . "/configuration.php";
 
 		// Get the new FTP credentials.
 		$ftp = JClientHelper::getCredentials('ftp', true);
@@ -2342,7 +2460,7 @@ function cloneSite($requestObject, & $returnData)
 
 		// replace old paths with new
 		// ToDo - figure out how to deal with this if log, tmp and cache files are one level up e.g. in private folder
-		$configuration = str_replace(JPATH_SITE, JPATH_SITE . "/._" . $requestObject->prefix, $configuration);
+		$configuration = str_replace(JPATH_SITE, JPATH_SITE . "/clone_" . $requestObject->prefix, $configuration);
 
 		// live_site fix
 		$base = JUri::base();
@@ -2352,6 +2470,15 @@ function cloneSite($requestObject, & $returnData)
 		}
 		$configuration = str_replace('$live_site' . " = '$base';", '$live_site' . " = '{$base}/._" . $requestObject->prefix . "';", $configuration);
 		//$configuration = str_replace('$live_site' . " = '$base';", '$live_site' . " = '';", $configuration);
+
+		// cookie path fix
+		$jconfig = new JConfig();
+		$cookiePath = isset($jconfig->cookie_path) ? $jconfig->cookie_path : '';
+		if (strrpos($cookiePath,"/") == strlen($cookiePath)-1)
+		{
+			$cookiePath = substr($cookiePath, 0, strlen($cookiePath)-1);
+		}
+		$configuration = str_replace('$cookie_path' . " = '$cookiePath';", '$cookie_path' . " = '{$cookiePath}/._" . $requestObject->prefix . "';", $configuration);
 
 		// ToDo disable emails using code from com_config application model ConfigModelApplication and ::writeconfigfile method adapted to our needs here
 		$db = JFactory::getDbo();
@@ -2891,15 +3018,21 @@ function deleteSite($requestObject, & $returnData, $specificClone = false)
 	$basepath = JPATH_SITE;
 	if ($specificClone)
 	{
-		$basepath .= '/._' . $db_prefix;
+		$basepath .= '/clone_' . $db_prefix;
 	}
 
-	if (strpos($db_prefix, 'ysts_') !== 0 || strpos($basepath, '._' . $db_prefix) === false) {
+	if (strpos($db_prefix, 'ysts_') !== 0 ||
+		(
+			strpos($basepath, '._' . $db_prefix) === false
+			&&
+			strpos($basepath, 'clone_' . $db_prefix) === false
+		)
+	) {
 		$returnData->error = 1;
 		$returnData->errormessages[] = "COM_YOURSITES_DELETE_SITE_SITE_NOT_A_CLONE";
 		$returnData->errormessages[] = $db_prefix;
 		$returnData->errormessages[] = $basepath;
-		$returnData->errormessages[] = strpos($basepath, '._' . $db_prefix);
+		$returnData->errormessages[] = strpos($basepath, '._' . $db_prefix) ? strpos($basepath, '._' . $db_prefix) : strpos($basepath, 'clone_' . $db_prefix);
 
 		return $returnData;
 	}
@@ -3042,6 +3175,122 @@ function deleteSite($requestObject, & $returnData, $specificClone = false)
 	return $returnData;
 }
 
+function migrateClone($requestObject, & $returnData, $specificClone = true)
+{
+	// Only migrate cloned sites
+	$config = new JConfig();
+	$db_prefix = trim($config->dbprefix, "_");
+	if ($specificClone)
+	{
+		$db_prefix = $requestObject->prefix;
+	}
+
+	$basepath = JPATH_SITE;
+	$newpath = JPATH_SITE;
+	if ($specificClone)
+	{
+		$basepath .= '/._' . $db_prefix;
+		$newpath .= '/clone_' . $db_prefix;
+	}
+
+	if (strpos($db_prefix, 'ysts_') !== 0 ||
+			strpos($basepath, '._' . $db_prefix) === false
+	) {
+		$returnData->error = 1;
+		$returnData->errormessages[] = "COM_YOURSITES_DELETE_SITE_SITE_NOT_A_CLONE";
+		$returnData->errormessages[] = $db_prefix;
+		$returnData->errormessages[] = $basepath;
+		$returnData->errormessages[] = strpos($basepath, '._' . $db_prefix) ? strpos($basepath, '._' . $db_prefix) : strpos($basepath, 'clone_' . $db_prefix);
+
+		return $returnData;
+	}
+
+	JLoader::import('joomla.filesystem.file');
+	JLoader::import('joomla.filesystem.folder');
+
+	try
+	{
+		// If we're using ftp
+		$FTPOptions = JClientHelper::getCredentials('ftp');
+		if ($FTPOptions['enabled'] == 1 ) {
+			// Connect the FTP client
+			$ftp = JFtpClient::getInstance($FTPOptions['host'], $FTPOptions['port'], array(), $FTPOptions['user'], $FTPOptions['pass']);
+			// Now delete the folder
+			if (!$ftp->rename($basepath, $newpath))
+			{
+				throw new \RuntimeException('Rename folder failed ' . $basepath, -1);
+			}
+		}
+		else {
+			$success = @rename($basepath, $newpath);
+		}
+
+	}
+	catch (Exception $e)
+	{
+		$returnData->error  = 1;
+		$returnData->migrated = 0;
+		$returnData->errormessages[]  = $e->getMessage();
+		return $returnData;
+	}
+	if (!$success)
+	{
+		$returnData->error  = 1;
+		$returnData->migrated = 0;
+		$returnData->errormessages[]  = 'COM_YOURSITES_UNABLE_TO_RENAME_FILES ' . $basepath . " to " . $newpath;
+		return $returnData;
+	}
+	else
+	{
+
+		$returnData->messages[]  = "New path config is " . $newpath. "/configuration.php";
+		if (JFile::exists($newpath. "/configuration.php"))
+		{
+			$configfile = $newpath . "/configuration.php";
+
+			$returnData->messages[]  = "New path config exists at " . $newpath. "/configuration.php";
+
+			// Get the new FTP credentials.
+			$ftp = JClientHelper::getCredentials('ftp', true);
+
+			// Attempt to make the file writeable if using FTP.
+			if (!$ftp['enabled'] && JPath::isOwner($configfile) && !JPath::setPermissions($configfile, '0644'))
+			{
+				$returnData->errormessages[]  = JText::_('COM_CONFIG_ERROR_CONFIGURATION_PHP_NOTWRITABLE');
+				$returnData->log['diagnostics'][]  = JText::_('COM_CONFIG_ERROR_CONFIGURATION_PHP_NOTWRITABLE');
+			}
+
+			// Attempt to write the configuration file as a PHP class named JConfig.
+			$configuration = file_get_contents($configfile);
+
+			// replace old paths with new
+			// ToDo - figure out how to deal with this if log, tmp and cache files are one level up e.g. in private folder
+			$configuration = str_replace('._' . $db_prefix, 'clone_' . $db_prefix, $configuration);
+
+			$returnData->messages[]  = "replacing  " . '._' . $db_prefix . "  with " . 'clone_' . $db_prefix;
+
+			if (!JFile::write($configfile, $configuration))
+			{
+				$returnData->errormessages[]  = JText::_('COM_CONFIG_ERROR_WRITE_FAILED');
+				$returnData->log['diagnostics'][]  = JText::_('COM_CONFIG_ERROR_WRITE_FAILED');
+			}
+
+			// Attempt to make the file unwriteable if using FTP.
+			if (!$ftp['enabled'] && JPath::isOwner($configfile) && !JPath::setPermissions($configfile, '0444'))
+			{
+				$returnData->messages[]  = JText::_('COM_CONFIG_ERROR_CONFIGURATION_PHP_NOTUNWRITABLE');
+				$returnData->log['diagnostics'][]  = JText::_('COM_CONFIG_ERROR_CONFIGURATION_PHP_NOTUNWRITABLE');
+			}
+
+		}
+
+	}
+
+	$returnData->migrated = 1;
+
+	return $returnData;
+}
+
 function deleteClone($requestObject, & $returnData)
 {
 	// Only delete cloned sites
@@ -3051,12 +3300,19 @@ function deleteClone($requestObject, & $returnData)
 	$basepath = JPATH_SITE;
 	$basepath .= '/._' . $db_prefix;
 
-	if (strpos($db_prefix, 'ysts_') !== 0 || strpos($basepath, '._' . $db_prefix) === false) {
-		$returnData->error = 1;
+	if (strpos($db_prefix, 'ysts_') !== 0 ||
+		(
+			strpos($basepath, '._' . $db_prefix) === false
+			&&
+			strpos($basepath, 'clone_' . $db_prefix) === false
+		)
+	)
+	{
+		$returnData->error           = 1;
 		$returnData->errormessages[] = "COM_YOURSITES_DELETE_SITE_SITE_NOT_A_CLONE";
 		$returnData->errormessages[] = $db_prefix;
 		$returnData->errormessages[] = $basepath;
-		$returnData->errormessages[] = strpos($basepath, '._' . $db_prefix);
+		$returnData->errormessages[] = strpos($basepath, '._' . $db_prefix) ? strpos($basepath, '._' . $db_prefix) : strpos($basepath, 'clone_' . $db_prefix);
 
 		return $returnData;
 	}
@@ -5350,10 +5606,10 @@ function getJoomlaUpdateSitesIds($column = 0)
  *
  * @return  boolean  True on success.
  *
- * @since   1.23.0
+ * @since   1.26.0
  * @throws  \RuntimeException
  */
-function copyr2($src, $dest, $prefix = "", & $returnData, $exclusions = array())
+function copyr2($src, $dest, $prefix, & $returnData, $exclusions = array())
 {
 
 	$FTPOptions = JClientHelper::getCredentials('ftp');
@@ -5397,7 +5653,7 @@ function copyr2($src, $dest, $prefix = "", & $returnData, $exclusions = array())
 			$entry = pathinfo($file, PATHINFO_BASENAME);
 
 			// Skip itself and other clones
-			if (strpos($entry, $prefix) !== false || (strpos($entry , "._ysts_")  === 0 && strlen($entry) == 12) )
+			if (strpos($entry, $prefix) !== false || (strpos($entry , "._ysts_")  === 0 && strlen($entry) == 12) || (strpos($entry , "clone_ysts_")  === 0 && strlen($entry) == 16) )
 			{
 				continue;
 			}
@@ -5456,13 +5712,13 @@ function copyr2($src, $dest, $prefix = "", & $returnData, $exclusions = array())
 			$entry = pathinfo($file, PATHINFO_BASENAME);
 
 			// Skip itself and other clones
-			if (strpos($entry, $prefix) !== false || (strpos($entry , "._")  === 0 && strlen($entry) == 12) )
+			if (strpos($entry, $prefix) !== false || (strpos($entry , "._")  === 0 && strlen($entry) == 12) || (strpos($entry , "clone_")  === 0 && strlen($entry) == 16) )
 			{
 				continue;
 			}
 
 			// Ingore any backups files
-			if (in_array(pathinfo($entry, PATHINFO_EXTENSION), array("jpa", "zip", "gz", "targz", "jps", "bz", "rar")))
+			if (in_array(pathinfo($entry, PATHINFO_EXTENSION), array("jpa", "zip", "gz", "targz", "jps", "bz", "rar"))  && !in_array($entry, array('angie.jpa','angie-generic.jpa','angie-joomla.jpa')))
 			{
 				continue;
 			}
@@ -5511,7 +5767,7 @@ function copyr2($src, $dest, $prefix = "", & $returnData, $exclusions = array())
  *
  * @return  boolean  True on success.
  *
- * @since   1.23.0
+ * @since   1.26.0
  * @throws  \RuntimeException
  */
 function deleter2($src, & $returnData)
@@ -5642,12 +5898,12 @@ function getSiteInfo(& $returnData)
 	{
 		$infoModel = new \Joomla\Component\Admin\Administrator\Model\SysinfoModel();
 	}
-	$returnData->siteInfo = $infoModel->getInfo();
+	$returnData->siteinfo = $infoModel->getInfo();
 
 	// Other useful information
 	$jconfig          = JFactory::getConfig();
-	$returnData->siteInfo["debug"]            = $jconfig->get('debug', '0');
-	$returnData->siteInfo["error_reporting"]  = $jconfig->get('error_reporting', 'none');
+	$returnData->siteinfo["debug"]            = $jconfig->get('debug', '0');
+	$returnData->siteinfo["error_reporting"]  = $jconfig->get('error_reporting', 'none');
 
 	// DB size
 	$db = JFactory::getDbo();
@@ -5656,7 +5912,7 @@ FROM INFORMATION_SCHEMA.TABLES
 WHERE TABLE_SCHEMA = "' . $jconfig->get("db"). '"
 AND TABLE_NAME LIKE "' . $jconfig->get("dbprefix") . '%"';
 	$db->setQuery($sql);
-	$returnData->siteInfo["dbsize"]  = $db->loadResult();
+	$returnData->siteinfo["dbsize"]  = $db->loadResult();
 
 	// DB timeout data
 	$sql = "SHOW VARIABLES LIKE '%timeout'";
@@ -5666,13 +5922,13 @@ AND TABLE_NAME LIKE "' . $jconfig->get("dbprefix") . '%"';
 	$db->setQuery($sql);
 	$connectionData = $db->loadAssocList();
 
-	$returnData->siteInfo["dbtimeouts"]  = array();
+	$returnData->siteinfo["dbtimeouts"]  = array();
 	if ($timeoutData)
 	{
 		foreach ($timeoutData as $k => $v)
 		{
 			list ($kn, $kv)  = array_values($v);
-			$returnData->siteInfo["dbtimeouts"][$kn] = $kv;
+			$returnData->siteinfo["dbtimeouts"][$kn] = $kv;
 		}
 	}
 	if ($connectionData)
@@ -5680,7 +5936,7 @@ AND TABLE_NAME LIKE "' . $jconfig->get("dbprefix") . '%"';
 		foreach ($connectionData as $k => $v)
 		{
 			list ($kn, $kv)  = array_values($v);
-			$returnData->siteInfo["dbtimeouts"][$kn] = $kv;
+			$returnData->siteinfo["dbtimeouts"][$kn] = $kv;
 		}
 	}
 
@@ -5696,11 +5952,15 @@ AND TABLE_NAME LIKE "' . $jconfig->get("dbprefix") . '%"';
 			{
 				if($object->isDot()) continue;
 
-				// ._ysts_
+				// ._ysts_ or clone_ysts_
 				if ($object->isDir())
 				{
 					$path = $object->getPathname();
 					$path = str_replace($basedir, '', $path);
+					if (strpos($path, "/clone_ysts_") === 0)
+					{
+						$clones[] = $path;
+					}
 					if (strpos($path, "/._ysts_") === 0)
 					{
 						$clones[] = $path;
@@ -5712,7 +5972,7 @@ AND TABLE_NAME LIKE "' . $jconfig->get("dbprefix") . '%"';
 	catch (Exception $e)
 	{
 	}
-	$returnData->siteInfo["clones"] = $clones;
+	$returnData->siteinfo["clones"] = $clones;
 
 	// single tables like this
 	/*
@@ -5722,7 +5982,7 @@ WHERE TABLE_SCHEMA = "' . $jconfig->get("db"). '"
 AND TABLE_NAME LIKE "' . $jconfig->get("dbprefix") . '%"
 ORDER BY size DESC';
 	$db->setQuery($sqlsingletables);
-	$returnData->siteInfo["dbsizetables"]  = $db->loadObjectList('TABLE_NAME');
+	$returnData->siteinfo["dbsizetables"]  = $db->loadObjectList('TABLE_NAME');
 	*/
 
 	// Cache usage
@@ -5740,11 +6000,32 @@ ORDER BY size DESC';
 	{
 		$totalCache += $cachefolder->size;
 	}
-	$returnData->siteInfo["cacheusage"]  = number_format($totalCache / 1024 / 1024, 2, '.', '');
+	$returnData->siteinfo["cacheusage"]  = number_format($totalCache / 1024 / 1024, 2, '.', '');
+
+	// db fix summary
+	/*
+	// Get the database model and retrieve the Joomla! database fixes
+	$dbmodel = JModelLegacy::getInstance("Database", "InstallerModel");
+	if (!$dbmodel)
+	{
+		JLoader::import('Model.DatabaseModel', JPATH_ADMINISTRATOR . '/components/com_installer');
+		$dbmodel = new Joomla\Component\Installer\Administrator\Model\DatabaseModel();
+	}
+	$dbFixChangeset = $dbmodel->getItems();
+	try
+	{
+		$dberrors = $dbFixChangeset->check();
+	}
+	catch (Exception $e)
+	{
+		$dbErrorCount = $dbFixChangeset->getErrorCount();
+	}
+	*/
 
 	// tmp file usage
 	$config = JFactory::getConfig();
 	$tempdir = $config->get('tmp_path');
+	$returnData->siteinfo["tmp_path"]  = $tempdir;
 
 	$bytestotal = 0;
 	$tempdir = realpath($tempdir);
@@ -5765,44 +6046,44 @@ ORDER BY size DESC';
 		$returnData->log      = $e->getMessage();
 	}
 
-	$returnData->siteInfo["tmpusage"]  = number_format($bytestotal / 1024 / 1024, 2, '.', '');
+	$returnData->siteinfo["tmpusage"]  = number_format($bytestotal / 1024 / 1024, 2, '.', '');
 
 	// key ini data
-	$returnData->siteInfo["inidata"] = array();
-	$returnData->siteInfo["inidata"]["post_max_size"]       = return_bytes(ini_get('post_max_size'));
-	$returnData->siteInfo["inidata"]["upload_max_filesize"] = return_bytes(ini_get('upload_max_filesize'));
-	$returnData->siteInfo["inidata"]["memory_limit"]        = ini_get('memory_limit');
-	$returnData->siteInfo["inidata"]["default_socket_timeout"]        = ini_get('default_socket_timeout');
+	$returnData->siteinfo["inidata"] = array();
+	$returnData->siteinfo["inidata"]["post_max_size"]       = return_bytes(ini_get('post_max_size'));
+	$returnData->siteinfo["inidata"]["upload_max_filesize"] = return_bytes(ini_get('upload_max_filesize'));
+	$returnData->siteinfo["inidata"]["memory_limit"]        = ini_get('memory_limit');
+	$returnData->siteinfo["inidata"]["default_socket_timeout"]        = ini_get('default_socket_timeout');
 
-	$returnData->siteInfo["recommended"]["display_errors"]      = (bool) ini_get('display_errors');
-	$returnData->siteInfo["recommended"]["file_uploads"]        = (bool) ini_get('file_uploads');
-	$returnData->siteInfo["recommended"]["output_buffering"]    = (int) ini_get('output_buffering');
-	$returnData->siteInfo["recommended"]["session_auto_start"]  = ini_get('session.auto_start');
+	$returnData->siteinfo["recommended"]["display_errors"]      = (bool) ini_get('display_errors');
+	$returnData->siteinfo["recommended"]["file_uploads"]        = (bool) ini_get('file_uploads');
+	$returnData->siteinfo["recommended"]["output_buffering"]    = (int) ini_get('output_buffering');
+	$returnData->siteinfo["recommended"]["session_auto_start"]  = ini_get('session.auto_start');
 
-	$returnData->siteInfo["recommended"]["zip_open"]            = function_exists('zip_open');
-	$returnData->siteInfo["recommended"]["zip_read"]            = function_exists('zip_read');
+	$returnData->siteinfo["recommended"]["zip_open"]            = function_exists('zip_open');
+	$returnData->siteinfo["recommended"]["zip_read"]            = function_exists('zip_read');
 
-	$returnData->siteInfo["required"]["zlib"]         = (bool) extension_loaded('zlib');
-	$returnData->siteInfo["required"]["xml"]          = (bool) extension_loaded('xml');
+	$returnData->siteinfo["required"]["zlib"]         = (bool) extension_loaded('zlib');
+	$returnData->siteinfo["required"]["xml"]          = (bool) extension_loaded('xml');
 	if (extension_loaded('mbstring'))
 	{
-		$returnData->siteInfo["required"]["mbstring_language_neutral"]  = strtolower(ini_get('mbstring.language')) === 'neutral';
-		$returnData->siteInfo["required"]["mbstring_func_overload"]  = ini_get('mbstring.func_overload') == 0;
+		$returnData->siteinfo["required"]["mbstring_language_neutral"]  = strtolower(ini_get('mbstring.language')) === 'neutral';
+		$returnData->siteinfo["required"]["mbstring_func_overload"]  = ini_get('mbstring.func_overload') == 0;
 	}
-	$returnData->siteInfo["required"]["json_encode"]  = function_exists('json_encode');
-	$returnData->siteInfo["required"]["json_decode"]  = function_exists('json_decode');
+	$returnData->siteinfo["required"]["json_encode"]  = function_exists('json_encode');
+	$returnData->siteinfo["required"]["json_decode"]  = function_exists('json_decode');
 
-	$returnData->siteInfo["required"]["parse_ini_string"]  =  function_exists('parse_ini_string') && !in_array('parse_ini_string', explode(',', ini_get('disable_functions')));
+	$returnData->siteinfo["required"]["parse_ini_string"]  =  function_exists('parse_ini_string') && !in_array('parse_ini_string', explode(',', ini_get('disable_functions')));
 
-	$returnData->siteInfo["required"]["phpversion"]   =  version_compare(PHP_VERSION, '7.2.5', '>=');
-	$returnData->siteInfo["required"]["dbsupported"]  =  !in_array(JFactory::getApplication()->get('dbtype'), array('sqlsrv', 'sqlazure'));
+	$returnData->siteinfo["required"]["phpversion"]   =  version_compare(PHP_VERSION, '7.2.5', '>=');
+	$returnData->siteinfo["required"]["dbsupported"]  =  !in_array(JFactory::getApplication()->get('dbtype'), array('sqlsrv', 'sqlazure'));
 
 	/*
-	$returnData->siteInfo["inidata"]["post_max_size (RAW)"] = ini_get('post_max_size');
-	$returnData->siteInfo["inidata"]["upload_max_filesize  (RAW)"] = ini_get('upload_max_filesize');
+	$returnData->siteinfo["inidata"]["post_max_size (RAW)"] = ini_get('post_max_size');
+	$returnData->siteinfo["inidata"]["upload_max_filesize  (RAW)"] = ini_get('upload_max_filesize');
 	ob_start();
 	phpinfo();
-	$returnData->siteInfo["inidata"]["phpinfo"] = ob_get_clean();
+	$returnData->siteinfo["inidata"]["phpinfo"] = ob_get_clean();
 	*/
 	$returnData->JVERSION = JVERSION;
 
@@ -5816,17 +6097,27 @@ function getFolderData($requestObject, & $returnData)
 	$returnData->error  = 0;
 	$returnData->warning  = 0;
 
+	$totalfileusage = 0;
 	$folderdata = array();
 	$outputdata = array();
 	try
 	{
+		// Go one level down only here - i.e. no subfolders
+		foreach (new RecursiveDirectoryIterator($basedir, FilesystemIterator::SKIP_DOTS) as $object3)
+		{
+			if ($object3->isFile())
+			{
+				$totalfileusage += $object3->getSize();
+			}
+		}
+
 		if ($basedir !== false && $basedir != '' && file_exists($basedir))
 		{
 			foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($basedir, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::CHILD_FIRST) as $object)
 			{
 				$path = $object->getPathname();
 				// no need to pick up embedded clone sites - we won't copy these!
-				if (strpos($path, '._ysts_') !== false)
+				if (strpos($path, '._ysts_') !== false || strpos($path, 'clone_ysts_') !== false)
 				{
 					continue;
 				}
@@ -5840,7 +6131,9 @@ function getFolderData($requestObject, & $returnData)
 						$path2 = str_replace($basedir, '', $path2);
 						if ($object2->isFile())
 						{
-							$bytestotal += $object2->getSize();
+							$filesize = $object2->getSize();
+							$bytestotal += $filesize;
+							$totalfileusage += $filesize;
 						}
 						else if ($object2->isDir() && isset($folderdata[$path2]))
 						{
@@ -5875,6 +6168,7 @@ function getFolderData($requestObject, & $returnData)
 	ksort($outputdata);
 	$returnData->basedir  = $basedir;
 	$returnData->folders  = $outputdata;
+	$returnData->totalfileusage  = $totalfileusage;
 }
 
 function frontfatal($returnData)

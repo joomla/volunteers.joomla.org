@@ -1,7 +1,7 @@
 <?php
 /**
  * @package   akeebabackup
- * @copyright Copyright (c)2006-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -272,9 +272,6 @@ class Dispatcher extends BaseDispatcher
 	{
 		// Do not move: everything depends on UserInterfaceCommon
 		$this->container->template->addJS('media://com_akeeba/js/UserInterfaceCommon.min.js', true, false, $this->container->mediaVersion);
-
-		// Always add last (it's the least important)
-		$this->container->template->addJS('media://com_akeeba/js/piecon.min.js', true, false, $this->container->mediaVersion);
 	}
 
 	/**

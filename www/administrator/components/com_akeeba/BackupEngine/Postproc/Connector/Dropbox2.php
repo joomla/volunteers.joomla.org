@@ -3,7 +3,7 @@
  * Akeeba Engine
  *
  * @package   akeebaengine
- * @copyright Copyright (c)2006-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -769,6 +769,12 @@ class Dropbox2
 
 		// Get the default options array
 		$options = $this->defaultOptions;
+
+		// Try to use at least TLS 1.2. Requires cURL 7.34.0 or later.
+		if (defined('CURLOPT_SSLVERSION') && defined('CURL_SSLVERSION_TLSv1_2'))
+		{
+			$options[CURLOPT_SSLVERSION] = CURL_SSLVERSION_TLSv1_2;
+		}
 
 		// Do I have explicit cURL options to add?
 		if (isset($additional['curl-options']) && is_array($additional['curl-options']))

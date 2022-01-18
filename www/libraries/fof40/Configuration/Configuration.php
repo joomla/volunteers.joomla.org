@@ -1,8 +1,8 @@
 <?php
 /**
  * @package   FOF
- * @copyright Copyright (c)2010-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
- * @license   GNU General Public License version 2, or later
+ * @copyright Copyright (c)2010-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @license   GNU General Public License version 3, or later
  */
 
 namespace FOF40\Configuration;
@@ -33,6 +33,8 @@ class Configuration
 	 */
 	protected $container;
 
+	private $domains = null;
+
 	function __construct(Container $c)
 	{
 		$this->container = $c;
@@ -52,12 +54,7 @@ class Configuration
 	 */
 	public function get(string $variable, $default = null)
 	{
-		static $domains = null;
-
-		if (is_null($domains))
-		{
-			$domains = $this->getDomains();
-		}
+		$domains = $this->getDomains();
 
 		[$domain, $var] = explode('.', $variable, 2);
 
@@ -71,6 +68,41 @@ class Configuration
 		$o = new $class;
 
 		return $o->get(self::$configurations[$this->container->componentName], $var, $default);
+	}
+
+	/**
+	 * Gets a list of the available configuration domain adapters
+	 *
+	 * @return  array  A list of the available domains
+	 */
+	protected function getDomains(): array
+	{
+		if (is_null($this->domains))
+		{
+			$filesystem = $this->container->filesystem;
+
+			$files = $filesystem->folderFiles(__DIR__ . '/Domain', '.php');
+
+			if (!empty($files))
+			{
+				foreach ($files as $file)
+				{
+					$domain = basename($file, '.php');
+
+					if ($domain == 'DomainInterface')
+					{
+						continue;
+					}
+
+					$domain          = preg_replace('/[^A-Za-z0-9]/', '', $domain);
+					$this->domains[] = $domain;
+				}
+
+				$this->domains = array_unique($this->domains);
+			}
+		}
+
+		return $this->domains;
 	}
 
 	/**
@@ -192,43 +224,6 @@ class Configuration
 
 		// Finally, return the result
 		return $ret;
-	}
-
-	/**
-	 * Gets a list of the available configuration domain adapters
-	 *
-	 * @return  array  A list of the available domains
-	 */
-	protected function getDomains(): array
-	{
-		static $domains = [];
-
-		if (empty($domains))
-		{
-			$filesystem = $this->container->filesystem;
-
-			$files = $filesystem->folderFiles(__DIR__ . '/Domain', '.php');
-
-			if (!empty($files))
-			{
-				foreach ($files as $file)
-				{
-					$domain = basename($file, '.php');
-
-					if ($domain == 'DomainInterface')
-					{
-						continue;
-					}
-
-					$domain    = preg_replace('/[^A-Za-z0-9]/', '', $domain);
-					$domains[] = $domain;
-				}
-
-				$domains = array_unique($domains);
-			}
-		}
-
-		return $domains;
 	}
 
 }

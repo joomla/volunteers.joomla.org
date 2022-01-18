@@ -39,12 +39,6 @@
         "title": "COM_AKEEBA_CONFIG_UPLOADKICKSTART_TITLE",
         "description": "COM_AKEEBA_CONFIG_UPLOADKICKSTART_DESCRIPTION"
     },
-    "akeeba.advanced.integritycheck": {
-        "default": "0",
-        "type": "bool",
-        "title": "COM_AKEEBA_ENGINE_TEXTEXTRACT_LBL",
-        "description": "COM_AKEEBA_ENGINE_TEXTEXTRACT_DESC"
-    },
     "akeeba.advanced.embedded_installer": {
         "default": "angie",
         "type": "installer",

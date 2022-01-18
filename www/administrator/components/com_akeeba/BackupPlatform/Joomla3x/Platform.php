@@ -1,7 +1,7 @@
 <?php
 /**
  * @package   akeebabackup
- * @copyright Copyright (c)2006-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -82,21 +82,6 @@ class Joomla3x extends BasePlatform
 	 */
 	function __construct()
 	{
-		$configOverrides = [];
-
-		if (class_exists('Akeeba\\Engine\\Finalization\\TestExtract'))
-		{
-			$configOverrides['volatile.core.finalization.action_handlers']     = [
-				new TestExtract(),
-			];
-			$configOverrides['volatile.core.finalization.action_queue_before'] = [
-				'test_extract',
-			];
-		}
-
-		// Apply the configuration overrides, please
-		$this->configOverrides = $configOverrides;
-
 		$this->container = Container::getInstance('com_akeeba');
 	}
 

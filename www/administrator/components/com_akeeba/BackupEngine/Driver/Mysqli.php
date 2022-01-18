@@ -3,7 +3,7 @@
  * Akeeba Engine
  *
  * @package   akeebaengine
- * @copyright Copyright (c)2006-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -30,14 +30,18 @@ class Mysqli extends Mysql
 	 */
 	public $name = 'mysqli';
 
-	protected $port;
-	protected $socket;
-
 	/** @var \mysqli|null The db connection resource */
 	protected $connection = '';
 
 	/** @var mysqli_result|null The database connection cursor from the last query. */
 	protected $cursor;
+
+	protected $port;
+
+	protected $socket;
+
+	/** @var bool Are we in the process of reconnecting to the database server? */
+	private $isReconnecting = false;
 
 	/**
 	 * Database object constructor
@@ -92,52 +96,6 @@ class Mysqli extends Mysql
 		return (function_exists('mysqli_connect'));
 	}
 
-	public function open()
-	{
-		if ($this->connected())
-		{
-			return;
-		}
-		else
-		{
-			$this->close();
-		}
-
-		// perform a number of fatality checks, then return gracefully
-		if (!function_exists('mysqli_connect'))
-		{
-			$this->errorNum = 1;
-			$this->errorMsg = 'The MySQL adapter "mysqli" is not available.';
-
-			return;
-		}
-
-		// connect to the server
-		if (!($this->connection = @mysqli_connect($this->host, $this->user, $this->password, null, $this->port, $this->socket)))
-		{
-			$this->errorNum = 2;
-			$this->errorMsg = 'Could not connect to MySQL';
-
-			return;
-		}
-
-		// Set sql_mode to non_strict mode
-		mysqli_query($this->connection, "SET @@SESSION.sql_mode = '';");
-
-		if ($this->selectDatabase && !empty($this->_database))
-		{
-			if (!$this->select($this->_database))
-			{
-				$this->errorNum = 3;
-				$this->errorMsg = "Cannot select database {$this->_database}";
-
-				return;
-			}
-		}
-
-		$this->setUTF();
-	}
-
 	public function close()
 	{
 		$return = false;
@@ -170,6 +128,21 @@ class Mysqli extends Mysql
 		$this->connection = null;
 
 		return $return;
+	}
+
+	/**
+	 * Determines if the connection to the server is active.
+	 *
+	 * @return  boolean  True if connected to the database engine.
+	 */
+	public function connected()
+	{
+		if (is_object($this->connection))
+		{
+			return @mysqli_ping($this->connection);
+		}
+
+		return false;
 	}
 
 	/**
@@ -209,18 +182,27 @@ class Mysqli extends Mysql
 	}
 
 	/**
-	 * Determines if the connection to the server is active.
+	 * Method to fetch a row from the result set cursor as an associative array.
 	 *
-	 * @return  boolean  True if connected to the database engine.
+	 * @param   mixed  $cursor  The optional result set cursor from which to fetch the row.
+	 *
+	 * @return  mixed  Either the next row from the result set or false if there are no more rows.
 	 */
-	public function connected()
+	public function fetchAssoc($cursor = null)
 	{
-		if (is_object($this->connection))
-		{
-			return @mysqli_ping($this->connection);
-		}
+		return mysqli_fetch_assoc($cursor ?: $this->cursor);
+	}
 
-		return false;
+	/**
+	 * Method to free up the memory used for the result set.
+	 *
+	 * @param   mixed  $cursor  The optional result set cursor from which to fetch the row.
+	 *
+	 * @return  void
+	 */
+	public function freeResult($cursor = null)
+	{
+		mysqli_free_result($cursor ?: $this->cursor);
 	}
 
 	/**
@@ -296,6 +278,52 @@ class Mysqli extends Mysql
 		return mysqli_insert_id($this->connection);
 	}
 
+	public function open()
+	{
+		if ($this->connected())
+		{
+			return;
+		}
+		else
+		{
+			$this->close();
+		}
+
+		// perform a number of fatality checks, then return gracefully
+		if (!function_exists('mysqli_connect'))
+		{
+			$this->errorNum = 1;
+			$this->errorMsg = 'The MySQL adapter "mysqli" is not available.';
+
+			return;
+		}
+
+		// connect to the server
+		if (!($this->connection = @mysqli_connect($this->host, $this->user, $this->password, null, $this->port, $this->socket)))
+		{
+			$this->errorNum = 2;
+			$this->errorMsg = 'Could not connect to MySQL';
+
+			return;
+		}
+
+		// Set sql_mode to non_strict mode
+		mysqli_query($this->connection, "SET @@SESSION.sql_mode = '';");
+
+		if ($this->selectDatabase && !empty($this->_database))
+		{
+			if (!$this->select($this->_database))
+			{
+				$this->errorNum = 3;
+				$this->errorMsg = "Cannot select database {$this->_database}";
+
+				return;
+			}
+		}
+
+		$this->setUTF();
+	}
+
 	/**
 	 * Execute the SQL statement.
 	 *
@@ -303,8 +331,6 @@ class Mysqli extends Mysql
 	 */
 	public function query()
 	{
-		static $isReconnecting = false;
-
 		$this->open();
 
 		if (!is_object($this->connection))
@@ -343,9 +369,9 @@ class Mysqli extends Mysql
 			$this->errorMsg = (string) mysqli_error($this->connection) . ' SQL=' . $query;
 
 			// Check if the server was disconnected.
-			if (!$this->connected() && !$isReconnecting)
+			if (!$this->connected() && !$this->isReconnecting)
 			{
-				$isReconnecting = true;
+				$this->isReconnecting = true;
 
 				try
 				{
@@ -360,8 +386,8 @@ class Mysqli extends Mysql
 				}
 
 				// Since we were able to reconnect, run the query again.
-				$result         = $this->query();
-				$isReconnecting = false;
+				$result               = $this->query();
+				$this->isReconnecting = false;
 
 				return $result;
 			}
@@ -418,30 +444,6 @@ class Mysqli extends Mysql
 
 		return $result;
 
-	}
-
-	/**
-	 * Method to fetch a row from the result set cursor as an associative array.
-	 *
-	 * @param   mixed  $cursor  The optional result set cursor from which to fetch the row.
-	 *
-	 * @return  mixed  Either the next row from the result set or false if there are no more rows.
-	 */
-	public function fetchAssoc($cursor = null)
-	{
-		return mysqli_fetch_assoc($cursor ?: $this->cursor);
-	}
-
-	/**
-	 * Method to free up the memory used for the result set.
-	 *
-	 * @param   mixed  $cursor  The optional result set cursor from which to fetch the row.
-	 *
-	 * @return  void
-	 */
-	public function freeResult($cursor = null)
-	{
-		mysqli_free_result($cursor ?: $this->cursor);
 	}
 
 	/**

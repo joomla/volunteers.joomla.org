@@ -1,7 +1,7 @@
 <?php
 /**
  * @package   akeebabackup
- * @copyright Copyright (c)2006-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -133,6 +133,13 @@ class Api extends Controller
 		{
 			$this->workaroundResponse($result);
 		}
+
+		// Force cache busting
+		$app = $this->container->platform;
+		$app->setHeader('Expires', 'Wed, 17 Aug 2005 00:00:00 GMT', true);
+		$app->setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0', true);
+		$app->setHeader('Pragma', 'no-cache', true);
+
 
 		$doc->setName('akeeba');
 

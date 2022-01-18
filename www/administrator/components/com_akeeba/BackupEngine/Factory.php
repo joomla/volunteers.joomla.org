@@ -3,7 +3,7 @@
  * Akeeba Engine
  *
  * @package   akeebaengine
- * @copyright Copyright (c)2006-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -158,18 +158,10 @@ abstract class Factory
 	public static function saveState($tag = null, $backupId = null)
 	{
 		$kettenrad = static::getKettenrad();
+		$tag = $tag ?: $kettenrad->getTag();
+		$backupId = $backupId ?: $kettenrad->getBackupId();
 
-		if (empty($tag))
-		{
-			$tag = $kettenrad->getTag();
-		}
-
-		if (empty($backupId))
-		{
-			$backupId = $kettenrad->getBackupId();
-		}
-
-		$saveTag = $tag . (empty($backupId) ? '' : ('.' . $backupId));
+		$saveTag = rtrim($tag . '.' . ($backupId ?: ''), '.');
 		$ret     = $kettenrad->getStatusArray();
 
 		if ($ret['HasRun'] == 1)
@@ -231,17 +223,8 @@ abstract class Factory
 	 */
 	public static function loadState($tag = null, $backupId = null, $failIfMissing = true)
 	{
-		if (is_null($tag) && defined('AKEEBA_BACKUP_ORIGIN'))
-		{
-			$tag = AKEEBA_BACKUP_ORIGIN;
-		}
-
-		if (is_null($backupId) && defined('AKEEBA_BACKUP_ID'))
-		{
-			$tag = AKEEBA_BACKUP_ID;
-		}
-
-		$loadTag = $tag . (empty($backupId) ? '' : ('.' . $backupId));
+		$tag     = $tag ?: (defined('AKEEBA_BACKUP_ORIGIN') ? AKEEBA_BACKUP_ORIGIN : 'backend');
+		$loadTag = rtrim($tag . '.' . ($backupId ?: ''), '.');
 
 		// In order to load anything, we need to have the correct profile loaded. Let's assume
 		// that the latest backup record in this tag has the correct profile number set.
@@ -254,10 +237,17 @@ abstract class Factory
 			if (empty($profile) || ($profile <= 1))
 			{
 				// Only bother loading a configuration if none has been already loaded
+				$filters      = [
+					['field' => 'tag', 'value' => $tag],
+				];
+
+				if (!empty($backupId))
+				{
+					$filters[] = ['field' => 'backupid', 'value' => $backupId];
+				}
+
 				$statList = Platform::getInstance()->get_statistics_list([
-						'filters'  => [
-							['field' => 'tag', 'value' => $tag],
-						], 'order' => [
+						'filters' => $filters, 'order' => [
 							'by' => 'id', 'order' => 'DESC',
 						],
 					]

@@ -1,7 +1,7 @@
 <?php
 /**
  * @package   akeebabackup
- * @copyright Copyright (c)2006-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -47,8 +47,6 @@ class StartBackup extends AbstractTask
 		$profile     = max(1, $profile); // Make sure $profile is a positive integer >= 1
 		$description = $filter->clean($defConfig['description'], 'string');
 		$comment     = $filter->clean($defConfig['comment'], 'string');
-		$backupid    = $filter->clean($defConfig['backupid'], 'cmd');
-		$backupid    = empty($backupid) ? null : $backupid; // Otherwise the Engine doesn't set a backup ID
 		$overrides   = $filter->clean($defConfig['overrides'], 'array');
 
 		if (empty($description))
@@ -71,10 +69,10 @@ class StartBackup extends AbstractTask
 
 		/** @var \Akeeba\Backup\Site\Model\Backup $model */
 		$model = $this->container->factory->model('Backup')->tmpInstance();
-		$model->setState('tag', AKEEBA_BACKUP_ORIGIN);
-		$model->setState('backupid', $backupid);
+		$model->setState('tag', 'json');
 		$model->setState('description', $description);
 		$model->setState('comment', $comment);
+		$model->setState('profile', $profile);
 
 		$array = $model->startBackup($overrides);
 
@@ -89,6 +87,7 @@ class StartBackup extends AbstractTask
 
 		// Remote clients expect a boolean, not an integer.
 		$array['HasRun'] = ($array['HasRun'] === 0);
+		$array['Profile'] = Platform::getInstance()->get_active_profile();
 
 		return $array;
 	}

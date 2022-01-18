@@ -1,7 +1,7 @@
 <?php
 /**
  * @package   FOF
- * @copyright Copyright (c)2010-2020 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2010-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -21,7 +21,7 @@ if (!class_exists('FOF40\\Autoloader\\Autoloader'))
 
 if (!defined('FOF40_INCLUDED'))
 {
-	define('FOF40_INCLUDED', '4.0.9');
+	define('FOF40_INCLUDED', '4.1.0');
 
 	JoomlaFactory::getLanguage()->load('lib_fof40', JPATH_SITE, 'en-GB', true);
 	JoomlaFactory::getLanguage()->load('lib_fof40', JPATH_SITE, null, true);

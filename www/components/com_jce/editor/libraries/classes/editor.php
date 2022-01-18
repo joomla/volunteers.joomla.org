@@ -64,6 +64,14 @@ class WFEditor
      */
     private static $plugins = array('core', 'help', 'autolink', 'effects', 'cleanup', 'code', 'format', 'importcss', 'colorpicker', 'blobupload', 'upload', 'figure', 'ui', 'noneditable', 'branding');
 
+    /**
+     * Initialization state
+     *
+     * @var boolean
+     */
+    public $initialized = false;
+    
+    
     private function addScript($url)
     {
         $url = $this->addAssetVersion($url);
@@ -158,6 +166,8 @@ class WFEditor
 
     public function init()
     {
+        $this->initialized = true;
+         
         $settings = $this->getSettings();
 
         JFactory::getApplication()->triggerEvent('onBeforeWfEditorRender', array(&$settings));
@@ -217,7 +227,7 @@ class WFEditor
         $wf = WFApplication::getInstance();
 
         // assign skin - new default is "modern"
-        $settings['skin'] = $wf->getParam('editor.toolbar_theme', 'default');
+        $settings['skin'] = $wf->getParam('editor.toolbar_theme', 'modern');
 
         if (empty($settings['skin'])) {
             $settings['skin'] = 'modern';
@@ -233,7 +243,7 @@ class WFEditor
         }
 
         if ($settings['skin'] == 'mobile') {
-            $settings['skin'] = 'default';
+            $settings['skin'] = 'modern';
             $settings['skin_variant'] = 'touch';
         }
     }
@@ -308,6 +318,16 @@ class WFEditor
         return $language->isRTL() ? 'rtl' : 'ltr';
     }
 
+    protected function getLanguageCode()
+    {
+        return WFLanguage::getCode();
+    }
+
+    protected function getLanguageTag()
+    {
+        return WFLanguage::getTag();
+    }
+
     public function getSettings()
     {
         // get an editor instance
@@ -325,7 +345,7 @@ class WFEditor
         $settings = array(
             'token' => JSession::getFormToken(),
             'base_url' => JURI::root(),
-            'language' => WFLanguage::getCode(),
+            'language' => $this->getLanguageCode(),
             'directionality' => $this->getLanguageDirection(),
             'theme' => 'none',
             'plugins' => '',
@@ -1418,9 +1438,9 @@ class WFEditor
 
                 break;
             case 'css':
-                $layout = $wf->input->getWord('layout', 'editor');
+                $slot = $wf->input->getCmd('slot', 'editor');
 
-                if ($layout == 'content') {
+                if ($slot == 'content') {
                     $files = array();
 
                     $files[] = WF_EDITOR_THEMES . '/' . $themes[0] . '/skins/' . $skin . '/content.css';
@@ -1450,7 +1470,7 @@ class WFEditor
                             $files[] = $content;
                         }
                     }
-                } elseif ($layout == 'preview') {
+                } elseif ($slot == 'preview') {
                     $files = array();
                     $files[] = WF_EDITOR_PLUGINS . '/preview/css/preview.css';
                     // get template stylesheets
@@ -1494,7 +1514,7 @@ class WFEditor
 
     public function loadlanguages()
     {
-        $parser = new WFLanguageParser(array('plugins' => $this->getPlugins()));
+        $parser = new WFLanguageParser(array('language' => $this->getLanguageTag(), 'plugins' => $this->getPlugins()));
         $data = $parser->load();
         $parser->output($data);
     }

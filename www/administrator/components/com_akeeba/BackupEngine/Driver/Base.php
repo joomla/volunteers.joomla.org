@@ -3,7 +3,7 @@
  * Akeeba Engine
  *
  * @package   akeebaengine
- * @copyright Copyright (c)2006-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -23,46 +23,65 @@ use RuntimeException;
  */
 abstract class Base
 {
-	/** @var    array  JDatabaseDriver instances container. */
-	protected static $instances = [];
 	/** @var    string  The minimum supported database version. */
 	protected static $dbMinimum;
+
+	/** @var    array  JDatabaseDriver instances container. */
+	protected static $instances = [];
+
 	/** @var string The name of the database driver. */
 	public $name;
+
 	/** @var string The name of the database. */
 	protected $_database;
+
 	/** @var resource The db connection resource */
 	protected $connection = '';
+
 	/** @var    integer  The number of SQL statements executed by the database driver. */
 	protected $count = 0;
+
 	/** @var resource The database connection cursor from the last query. */
 	protected $cursor;
+
 	/** @var    boolean  The database driver debugging state. */
 	protected $debug = false;
-	/** @var int Query's limit */
-	protected $limit = 0;
-	/** @var    array  The log of executed SQL statements by the database driver. */
-	protected $log = [];
-	/** @var string Quote for named objects */
-	protected $nameQuote = '';
-	/** @var string  The null or zero representation of a timestamp for the database driver. */
-	protected $nullDate;
-	/** @var int Query's offset */
-	protected $offset = 0;
-	/** @var    array  Passed in upon instantiation and saved. */
-	protected $options;
-	/** @var mixed The SQL query string */
-	protected $sql = '';
-	/** @var string The prefix used in the database, if any */
-	protected $tablePrefix = '';
-	/** @var bool Support for UTF-8 */
-	protected $utf = true;
-	/** @var int The db server's error number */
-	protected $errorNum = 0;
-	/** @var string The db server's error string */
-	protected $errorMsg = '';
+
 	/** @var string Driver type. This should always be mysql as we don't support anything else anymore. */
 	protected $driverType = '';
+
+	/** @var string The db server's error string */
+	protected $errorMsg = '';
+
+	/** @var int The db server's error number */
+	protected $errorNum = 0;
+
+	/** @var int Query's limit */
+	protected $limit = 0;
+
+	/** @var    array  The log of executed SQL statements by the database driver. */
+	protected $log = [];
+
+	/** @var string Quote for named objects */
+	protected $nameQuote = '';
+
+	/** @var string  The null or zero representation of a timestamp for the database driver. */
+	protected $nullDate;
+
+	/** @var int Query's offset */
+	protected $offset = 0;
+
+	/** @var    array  Passed in upon instantiation and saved. */
+	protected $options;
+
+	/** @var mixed The SQL query string */
+	protected $sql = '';
+
+	/** @var string The prefix used in the database, if any */
+	protected $tablePrefix = '';
+
+	/** @var bool Support for UTF-8 */
+	protected $utf = true;
 
 	/**
 	 * Database object constructor
@@ -82,6 +101,17 @@ abstract class Base
 		$this->count       = 0;
 		$this->log         = [];
 		$this->options     = $options;
+	}
+
+	/**
+	 * Is this driver class supported on this server? Child classes are supposed to override this and perform a
+	 * compatibility check.
+	 *
+	 * @return  bool  True if the driver class is supported on the server
+	 */
+	public static function isSupported()
+	{
+		return false;
 	}
 
 	/**
@@ -150,17 +180,6 @@ abstract class Base
 	}
 
 	/**
-	 * Is this driver class supported on this server? Child classes are supposed to override this and perform a
-	 * compatibility check.
-	 *
-	 * @return  bool  True if the driver class is supported on the server
-	 */
-	public static function isSupported()
-	{
-		return false;
-	}
-
-	/**
 	 * Magic method to provide method alias support for quote() and quoteName().
 	 *
 	 * @param   string  $method  The called method.
@@ -199,17 +218,17 @@ abstract class Base
 		return $this->close();
 	}
 
+	public function __wakeup()
+	{
+		$this->open();
+	}
+
 	/**
 	 * By default, when the object is shutting down, the connection is closed
 	 */
 	public function _onSerialize()
 	{
 		$this->close();
-	}
-
-	public function __wakeup()
-	{
-		$this->open();
 	}
 
 	/**
@@ -231,34 +250,6 @@ abstract class Base
 		$this->setQuery($this->getAlterDbCharacterSet($dbName));
 
 		return $this->execute();
-	}
-
-	/**
-	 * Opens a database connection. It MUST be overriden by children classes
-	 *
-	 * @return Base
-	 */
-	public function open()
-	{
-		// Don't try to reconnect if we're already connected
-		if (is_resource($this->connection) && !is_null($this->connection))
-		{
-			return $this;
-		}
-
-		// Determine utf-8 support
-		$this->utf = $this->hasUTF();
-
-		// Set charactersets (needed for MySQL 4.1.2+)
-		if ($this->utf)
-		{
-			$this->setUTF();
-		}
-
-		// Select the current database
-		$this->select($this->_database);
-
-		return $this;
 	}
 
 	/**
@@ -326,6 +317,16 @@ abstract class Base
 	abstract public function escape($text, $extra = false);
 
 	/**
+	 * An alias for query()
+	 *
+	 * @return  mixed  A database cursor resource on success, boolean false on failure.
+	 */
+	public function execute()
+	{
+		return $this->query();
+	}
+
+	/**
 	 * Method to fetch a row from the result set cursor as an associative array.
 	 *
 	 * @param   mixed  $cursor  The optional result set cursor from which to fetch the row.
@@ -342,6 +343,50 @@ abstract class Base
 	 * @return  void
 	 */
 	abstract public function freeResult($cursor = null);
+
+	/**
+	 * Returns the abstracted name of a database object
+	 *
+	 * @param   string  $tableName
+	 *
+	 * @return  string
+	 */
+	public function getAbstract($tableName)
+	{
+		$prefix = $this->getPrefix();
+
+		// Don't return abstract names for non-CMS tables
+		if (is_null($prefix))
+		{
+			return $tableName;
+		}
+
+		switch ($prefix)
+		{
+			case '':
+				// This is more of a hack; it assumes all tables are CMS tables if the prefix is empty.
+				return '#__' . $tableName;
+				break;
+
+			default:
+				// Normal behaviour for 99% of sites
+				$tableAbstract = $tableName;
+				if (!empty($prefix))
+				{
+					if (substr($tableName, 0, strlen($prefix)) == $prefix)
+					{
+						$tableAbstract = '#__' . substr($tableName, strlen($prefix));
+					}
+					else
+					{
+						$tableAbstract = $tableName;
+					}
+				}
+
+				return $tableAbstract;
+				break;
+		}
+	}
 
 	/**
 	 * Get the number of affected rows for the previous executed SQL statement.
@@ -398,6 +443,56 @@ abstract class Base
 	public function getDateFormat()
 	{
 		return 'Y-m-d H:i:s';
+	}
+
+	/**
+	 * Return the database driver type, e.g. "mysql" for all drivers which can talk to MySQL
+	 *
+	 * @return string
+	 */
+	public function getDriverType()
+	{
+		return $this->driverType;
+	}
+
+	/**
+	 * Get the error message
+	 *
+	 * @return string The error message for the most recent query
+	 */
+	public function getErrorMsg($escaped = false)
+	{
+		if ($escaped)
+		{
+			return addslashes($this->errorMsg);
+		}
+		else
+		{
+			return $this->errorMsg;
+		}
+	}
+
+	/**
+	 * Get the error number
+	 *
+	 * @return int The error number for the most recent query
+	 */
+	public function getErrorNum()
+	{
+		return $this->errorNum;
+	}
+
+	/**
+	 * Method to escape a string for usage in an SQL statement.
+	 *
+	 * @param   string   $text   The string to be escaped.
+	 * @param   boolean  $extra  Optional parameter to provide extra escaping.
+	 *
+	 * @return  string  The escaped string.
+	 */
+	public function getEscaped($text, $extra = false)
+	{
+		return $this->escape($text, $extra);
 	}
 
 	/**
@@ -484,6 +579,28 @@ abstract class Base
 	/**
 	 * Retrieves field information about the given tables.
 	 *
+	 * @param   mixed    $tables    A table name or a list of table names.
+	 * @param   boolean  $typeOnly  True to only return field types.
+	 *
+	 * @return  array  An array of fields by table.
+	 */
+	public function getTableFields($tables, $typeOnly = true)
+	{
+		$results = [];
+
+		$tables = (array) $tables;
+
+		foreach ($tables as $table)
+		{
+			$results[$table] = $this->getTableColumns($table, $typeOnly);
+		}
+
+		return $results;
+	}
+
+	/**
+	 * Retrieves field information about the given tables.
+	 *
 	 * @param   mixed  $tables  A table name or a list of table names.
 	 *
 	 * @return  array  An array of keys for the table(s).
@@ -522,14 +639,11 @@ abstract class Base
 	}
 
 	/**
-	 * Determine whether or not the database engine supports UTF-8 character encoding.
+	 * Get the version of the database connector
 	 *
-	 * @return  boolean  True if the database engine supports UTF-8 character encoding.
+	 * @return  string  The database connector version.
 	 */
-	public function hasUTFSupport()
-	{
-		return $this->utf;
-	}
+	abstract public function getVersion();
 
 	/**
 	 * Determines if the database engine supports UTF-8 character encoding.
@@ -542,18 +656,14 @@ abstract class Base
 	}
 
 	/**
-	 * Get the version of the database connector
+	 * Determine whether or not the database engine supports UTF-8 character encoding.
 	 *
-	 * @return  string  The database connector version.
+	 * @return  boolean  True if the database engine supports UTF-8 character encoding.
 	 */
-	abstract public function getVersion();
-
-	/**
-	 * Method to get the auto-incremented value from the last INSERT statement.
-	 *
-	 * @return  integer  The value of the auto-increment field from the last inserted row.
-	 */
-	abstract public function insertid();
+	public function hasUTFSupport()
+	{
+		return $this->utf;
+	}
 
 	/**
 	 * Inserts a row into a table based on an object's properties.
@@ -611,6 +721,13 @@ abstract class Base
 
 		return true;
 	}
+
+	/**
+	 * Method to get the auto-incremented value from the last INSERT statement.
+	 *
+	 * @return  integer  The value of the auto-increment field from the last inserted row.
+	 */
+	abstract public function insertid();
 
 	/**
 	 * Method to check whether the installed database version is supported by the database driver
@@ -735,26 +852,24 @@ abstract class Base
 	 */
 	public function loadNextObject($class = 'stdClass')
 	{
-		static $cursor = null;
-
 		// Execute the query and get the result set cursor.
-		if (is_null($cursor))
+		if (is_null($this->cursor))
 		{
-			if (!($cursor = $this->execute()))
+			if (!($this->cursor = $this->execute()))
 			{
 				return $this->errorNum ? null : false;
 			}
 		}
 
 		// Get the next row from the result set as an object of type $class.
-		if ($row = $this->fetchObject($cursor, $class))
+		if ($row = $this->fetchObject($this->cursor, $class))
 		{
 			return $row;
 		}
 
 		// Free up system resources and return.
-		$this->freeResult($cursor);
-		$cursor = null;
+		$this->freeResult($this->cursor);
+		$this->cursor = null;
 
 		return false;
 	}
@@ -766,26 +881,24 @@ abstract class Base
 	 */
 	public function loadNextRow()
 	{
-		static $cursor = null;
-
 		// Execute the query and get the result set cursor.
-		if (is_null($cursor))
+		if (is_null($this->cursor))
 		{
-			if (!($cursor = $this->execute()))
+			if (!($this->cursor = $this->execute()))
 			{
 				return $this->errorNum ? null : false;
 			}
 		}
 
 		// Get the next row from the result set as an object of type $class.
-		if ($row = $this->fetchArray($cursor))
+		if ($row = $this->fetchArray($this->cursor))
 		{
 			return $row;
 		}
 
 		// Free up system resources and return.
-		$this->freeResult($cursor);
-		$cursor = null;
+		$this->freeResult($this->cursor);
+		$this->cursor = null;
 
 		return false;
 	}
@@ -888,6 +1001,19 @@ abstract class Base
 	}
 
 	/**
+	 * Method to get an array of values from the <var>$offset</var> field in each row of the result set from
+	 * the database query.
+	 *
+	 * @param   integer  $offset  The row offset to use to build the result array.
+	 *
+	 * @return  mixed    The return value or null if the query failed.
+	 */
+	public function loadResultArray($offset = 0)
+	{
+		return $this->loadColumn($offset);
+	}
+
+	/**
 	 * Method to get the first row of the result set from the database query as an array.  Columns are indexed
 	 * numerically so the first column in the result set would be accessible via <var>$row[0]</var>, etc.
 	 *
@@ -965,21 +1091,52 @@ abstract class Base
 	public abstract function lockTable($tableName);
 
 	/**
+	 * Wrap an SQL statement identifier name such as column, table or database names in quotes to prevent injection
+	 * risks and reserved word conflicts.
+	 *
+	 * @param   string  $name  The identifier name to wrap in quotes.
+	 *
+	 * @return  string  The quote wrapped name.
+	 */
+	public function nameQuote($name)
+	{
+		return $this->quoteName($name);
+	}
+
+	/**
+	 * Opens a database connection. It MUST be overriden by children classes
+	 *
+	 * @return Base
+	 */
+	public function open()
+	{
+		// Don't try to reconnect if we're already connected
+		if (is_resource($this->connection) && !is_null($this->connection))
+		{
+			return $this;
+		}
+
+		// Determine utf-8 support
+		$this->utf = $this->hasUTF();
+
+		// Set charactersets (needed for MySQL 4.1.2+)
+		if ($this->utf)
+		{
+			$this->setUTF();
+		}
+
+		// Select the current database
+		$this->select($this->_database);
+
+		return $this;
+	}
+
+	/**
 	 * Execute the SQL statement.
 	 *
 	 * @return  mixed  A database cursor resource on success, boolean false on failure.
 	 */
 	abstract public function query();
-
-	/**
-	 * An alias for query()
-	 *
-	 * @return  mixed  A database cursor resource on success, boolean false on failure.
-	 */
-	public function execute()
-	{
-		return $this->query();
-	}
 
 	/**
 	 * Method to quote and optionally escape a string to database requirements for insertion into the database.
@@ -996,10 +1153,11 @@ abstract class Base
 	 * Wrap an SQL statement identifier name such as column, table or database names in quotes to prevent injection
 	 * risks and reserved word conflicts.
 	 *
-	 * @param   mixed  $name      The identifier name to wrap in quotes, or an array of identifier names to wrap in quotes.
-	 *                            Each type supports dot-notation name.
-	 * @param   mixed  $as        The AS query part associated to $name. It can be string or array, in latter case it has to be
-	 *                            same length of $name; if is null there will not be any AS part for string or array element.
+	 * @param   mixed  $name      The identifier name to wrap in quotes, or an array of identifier names to wrap in
+	 *                            quotes. Each type supports dot-notation name.
+	 * @param   mixed  $as        The AS query part associated to $name. It can be string or array, in latter case it
+	 *                            has to be same length of $name; if is null there will not be any AS part for string
+	 *                            or array element.
 	 */
 	public function quoteName($name, $as = null)
 	{
@@ -1010,7 +1168,7 @@ abstract class Base
 			$quotedAs = '';
 			if (!is_null($as))
 			{
-				$as = (array) $as;
+				$as       = (array) $as;
 				$quotedAs .= ' AS ' . $this->quoteNameStr($as);
 			}
 
@@ -1039,6 +1197,18 @@ abstract class Base
 			return $fin;
 		}
 	}
+
+	/**
+	 * Renames a table in the database.
+	 *
+	 * @param   string  $oldTable  The name of the table to be renamed
+	 * @param   string  $newTable  The new name for the table.
+	 * @param   string  $backup    Table prefix
+	 * @param   string  $prefix    For the table - used to rename constraints in non-mysql databases
+	 *
+	 * @return  Base  Returns this object to support chaining.
+	 */
+	public abstract function renameTable($oldTable, $newTable, $backup = null, $prefix = null);
 
 	/**
 	 * This function replaces a string identifier <var>$prefix</var> with the string held is the
@@ -1133,16 +1303,17 @@ abstract class Base
 	}
 
 	/**
-	 * Renames a table in the database.
+	 * Resets the error condition in the driver. Useful to reset the error state after handling a thrown exception.
 	 *
-	 * @param   string  $oldTable  The name of the table to be renamed
-	 * @param   string  $newTable  The new name for the table.
-	 * @param   string  $backup    Table prefix
-	 * @param   string  $prefix    For the table - used to rename constraints in non-mysql databases
-	 *
-	 * @return  Base  Returns this object to support chaining.
+	 * @return $this for chaining
 	 */
-	public abstract function renameTable($oldTable, $newTable, $backup = null, $prefix = null);
+	public function resetErrors()
+	{
+		$this->errorNum = 0;
+		$this->errorMsg = '';
+
+		return $this;
+	}
 
 	/**
 	 * Select a database for use.
@@ -1228,6 +1399,13 @@ abstract class Base
 	}
 
 	/**
+	 * Unlocks tables in the database.
+	 *
+	 * @return  Base  Returns this object to support chaining.
+	 */
+	public abstract function unlockTables();
+
+	/**
 	 * Updates a row in a table based on an object's properties.
 	 *
 	 * @param   string   $table   The name of the database table to update.
@@ -1305,168 +1483,6 @@ abstract class Base
 		$this->setQuery(sprintf($statement, implode(",", $fields), implode(' AND ', $where)));
 
 		return $this->execute();
-	}
-
-	/**
-	 * Unlocks tables in the database.
-	 *
-	 * @return  Base  Returns this object to support chaining.
-	 */
-	public abstract function unlockTables();
-
-	/**
-	 * Get the error message
-	 *
-	 * @return string The error message for the most recent query
-	 */
-	public function getErrorMsg($escaped = false)
-	{
-		if ($escaped)
-		{
-			return addslashes($this->errorMsg);
-		}
-		else
-		{
-			return $this->errorMsg;
-		}
-	}
-
-	/**
-	 * Get the error number
-	 *
-	 * @return int The error number for the most recent query
-	 */
-	public function getErrorNum()
-	{
-		return $this->errorNum;
-	}
-
-	/**
-	 * Resets the error condition in the driver. Useful to reset the error state after handling a thrown exception.
-	 *
-	 * @return $this for chaining
-	 */
-	public function resetErrors()
-	{
-		$this->errorNum = 0;
-		$this->errorMsg = '';
-
-		return $this;
-	}
-
-	/**
-	 * Method to escape a string for usage in an SQL statement.
-	 *
-	 * @param   string   $text   The string to be escaped.
-	 * @param   boolean  $extra  Optional parameter to provide extra escaping.
-	 *
-	 * @return  string  The escaped string.
-	 */
-	public function getEscaped($text, $extra = false)
-	{
-		return $this->escape($text, $extra);
-	}
-
-	/**
-	 * Retrieves field information about the given tables.
-	 *
-	 * @param   mixed    $tables    A table name or a list of table names.
-	 * @param   boolean  $typeOnly  True to only return field types.
-	 *
-	 * @return  array  An array of fields by table.
-	 */
-	public function getTableFields($tables, $typeOnly = true)
-	{
-		$results = [];
-
-		$tables = (array) $tables;
-
-		foreach ($tables as $table)
-		{
-			$results[$table] = $this->getTableColumns($table, $typeOnly);
-		}
-
-		return $results;
-	}
-
-	/**
-	 * Method to get an array of values from the <var>$offset</var> field in each row of the result set from
-	 * the database query.
-	 *
-	 * @param   integer  $offset  The row offset to use to build the result array.
-	 *
-	 * @return  mixed    The return value or null if the query failed.
-	 */
-	public function loadResultArray($offset = 0)
-	{
-		return $this->loadColumn($offset);
-	}
-
-	/**
-	 * Wrap an SQL statement identifier name such as column, table or database names in quotes to prevent injection
-	 * risks and reserved word conflicts.
-	 *
-	 * @param   string  $name  The identifier name to wrap in quotes.
-	 *
-	 * @return  string  The quote wrapped name.
-	 */
-	public function nameQuote($name)
-	{
-		return $this->quoteName($name);
-	}
-
-	/**
-	 * Returns the abstracted name of a database object
-	 *
-	 * @param   string  $tableName
-	 *
-	 * @return  string
-	 */
-	public function getAbstract($tableName)
-	{
-		$prefix = $this->getPrefix();
-
-		// Don't return abstract names for non-CMS tables
-		if (is_null($prefix))
-		{
-			return $tableName;
-		}
-
-		switch ($prefix)
-		{
-			case '':
-				// This is more of a hack; it assumes all tables are CMS tables if the prefix is empty.
-				return '#__' . $tableName;
-				break;
-
-			default:
-				// Normal behaviour for 99% of sites
-				$tableAbstract = $tableName;
-				if (!empty($prefix))
-				{
-					if (substr($tableName, 0, strlen($prefix)) == $prefix)
-					{
-						$tableAbstract = '#__' . substr($tableName, strlen($prefix));
-					}
-					else
-					{
-						$tableAbstract = $tableName;
-					}
-				}
-
-				return $tableAbstract;
-				break;
-		}
-	}
-
-	/**
-	 * Return the database driver type, e.g. "mysql" for all drivers which can talk to MySQL
-	 *
-	 * @return string
-	 */
-	public function getDriverType()
-	{
-		return $this->driverType;
 	}
 
 	/**

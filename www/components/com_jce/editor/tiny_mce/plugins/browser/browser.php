@@ -93,21 +93,21 @@ class WFBrowserPlugin extends WFMediaManager
         $app = JFactory::getApplication();
 
         $document = WFDocument::getInstance();
-        $layout = $app->input->getCmd('layout', 'plugin');
+        $slot = $app->input->getCmd('slot', 'plugin');
 
         // update some document variables
         $document->setName('browser');
         $document->setTitle(JText::_('WF_BROWSER_TITLE'));
 
         if ($document->get('standalone') == 1) {
-            if ($layout === 'plugin') {
+            if ($slot === 'plugin') {
                 $document->addScript(array('window.min'), 'plugins');
 
                 $callback = $app->input->getCmd('callback', '');
-                $element = $app->input->getCmd('fieldid', '');
+                $element = $app->input->getCmd('fieldid', 'field-media-id');
 
                 // Joomla 4 field variable not converted
-                if (!$element || $element === 'field-media-id') {
+                if ($element == 'field-media-id') {
                     $element = $app->input->getCmd('element', '');
                 }
 
@@ -130,7 +130,7 @@ class WFBrowserPlugin extends WFMediaManager
             $document->addStyleSheet(array('browser.min'), 'plugins');
         }
 
-        if ($layout === 'plugin') {
+        if ($slot === 'plugin') {
             $document->addScript(array('browser'), 'plugins');
         }
     }

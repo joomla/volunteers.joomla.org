@@ -1,7 +1,7 @@
 <?php
 /**
  * @package   akeebabackup
- * @copyright Copyright (c)2006-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -482,6 +482,13 @@ class Com_AkeebaInstallerScript extends \FOF40\InstallScript\Component
 
 			// Obsolete plugin file
 			'plugins/console/akeebabackup.xml',
+
+			// Remove “Archive integrity check” feature
+			'administrator/components/com_akeeba/BackupPlatform/Joomla3x/Finalization',
+
+			// Remove PieCon.js
+			'media/com_akeeba/js/piecon.min.js',
+			'media/com_akeeba/js/piecon.min.map',
 		],
 		'folders' => [
 			// Directories used up to version 4.1 (inclusive)
@@ -562,6 +569,11 @@ class Com_AkeebaInstallerScript extends \FOF40\InstallScript\Component
 			'administrator/components/com_akeeba/BackupEngine/Postproc/pcloud.json',
 			'administrator/components/com_akeeba/BackupEngine/Postproc/Pcloud.php',
 			'administrator/components/com_akeeba/BackupEngine/Postproc/Connector/Pcloud.php',
+
+			// Remove iDriveSync — the service has been discontinued
+			'administrator/components/com_akeeba/BackupEngine/Postproc/idrivesync.json',
+			'administrator/components/com_akeeba/BackupEngine/Postproc/Idrivesync.php',
+			'administrator/components/com_akeeba/BackupEngine/Postproc/Connector/Idrivesync.php',
 		],
 	];
 

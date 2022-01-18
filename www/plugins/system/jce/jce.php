@@ -27,11 +27,13 @@ class PlgSystemJce extends JPlugin
 
         $id = $app->input->get('fieldid');
         $mediatype = $app->input->getVar('mediatype', $app->input->getVar('view', 'images'));
+        $context = $app->input->getVar('context', '');
 
         $options = WFBrowserHelper::getMediaFieldOptions(array(
-            'element' => $id,
+            'element'   => $id,
             'converted' => true,
             'mediatype' => $mediatype,
+            'context'   => $context
         ));
 
         if (!empty($options['url'])) {
@@ -176,6 +178,12 @@ class PlgSystemJce extends JPlugin
 
         // form has a converted media field
         if ($hasMedia) {
+            if ((bool) $params->get('replace_media_manager', 1)) {
+                $option     = $app->input->getCmd('option'); 
+                $component  = JComponentHelper::getComponent($option);                
+                JFactory::getDocument()->addScriptOptions('plg_system_jce', array('replace_media' => true, 'context' => $component->id), true);
+            }
+
             $form->addFieldPath(JPATH_PLUGINS . '/system/jce/fields');
 
             // Include jQuery

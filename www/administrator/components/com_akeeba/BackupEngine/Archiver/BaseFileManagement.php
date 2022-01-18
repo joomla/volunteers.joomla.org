@@ -3,7 +3,7 @@
  * Akeeba Engine
  *
  * @package   akeebaengine
- * @copyright Copyright (c)2006-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -34,32 +34,23 @@ if (!function_exists('akstrlen'))
  */
 abstract class BaseFileManagement extends Base
 {
-	/** @var resource File pointer to the archive being currently written to */
-	protected $fp = null;
-
 	/** @var resource File pointer to the archive's central directory file (for ZIP) */
 	protected $cdfp = null;
 
-	/** @var   array  An array of open file pointers */
-	private $filePointers = [];
+	/** @var resource File pointer to the archive being currently written to */
+	protected $fp = null;
 
 	/** @var   array  An array of the last open files for writing and their last written to offsets */
 	private $fileOffsets = [];
 
-	/**
-	 * Release file pointers when the object is being serialized
-	 *
-	 * @codeCoverageIgnore
-	 *
-	 * @return  void
-	 */
-	public function _onSerialize()
-	{
-		$this->_closeAllFiles();
+	/** @var   array  An array of open file pointers */
+	private $filePointers = [];
 
-		$this->fp   = null;
-		$this->cdfp = null;
-	}
+	/** @var   null|string  The last filename fwrite() wrote to */
+	private $lastFileName = null;
+
+	/** @var   null|resource  The last file pointer fwrite() wrote to */
+	private $lastFilePointer = null;
 
 	/**
 	 * Release file pointers when the object is being destroyed
@@ -77,34 +68,36 @@ abstract class BaseFileManagement extends Base
 	}
 
 	/**
-	 * Opens a file, if it's not already open, or returns its cached file pointer if it's already open
+	 * Release file pointers when the object is being serialized
 	 *
-	 * @param   string  $file  The filename to open
-	 * @param   string  $mode  File open mode, defaults to binary write
+	 * @codeCoverageIgnore
 	 *
-	 * @return  resource
+	 * @return  void
 	 */
-	protected function fopen($file, $mode = 'w')
+	public function _onSerialize()
 	{
-		if (!array_key_exists($file, $this->filePointers))
+		$this->_closeAllFiles();
+
+		$this->fp   = null;
+		$this->cdfp = null;
+	}
+
+	/**
+	 * Closes all open files known to this archiver object
+	 *
+	 * @return  void
+	 */
+	protected function _closeAllFiles()
+	{
+		if (!empty($this->filePointers))
 		{
-			//Factory::getLog()->debug("Opening backup archive $file with mode $mode");
-			$this->filePointers[$file] = @fopen($file, $mode);
-
-			// If we open a file for append we have to seek to the correct offset
-			if (substr($mode, 0, 1) == 'a')
+			foreach ($this->filePointers as $file => $fp)
 			{
-				if (isset($this->fileOffsets[$file]))
-				{
-					Factory::getLog()->debug("Truncating backup archive file $file to " . $this->fileOffsets[$file] . " bytes");
-					@ftruncate($this->filePointers[$file], $this->fileOffsets[$file]);
-				}
+				$this->conditionalFileClose($fp);
 
-				fseek($this->filePointers[$file], 0, SEEK_END);
+				unset($this->filePointers[$file]);
 			}
 		}
-
-		return $this->filePointers[$file];
 	}
 
 	/**
@@ -153,6 +146,37 @@ abstract class BaseFileManagement extends Base
 	}
 
 	/**
+	 * Opens a file, if it's not already open, or returns its cached file pointer if it's already open
+	 *
+	 * @param   string  $file  The filename to open
+	 * @param   string  $mode  File open mode, defaults to binary write
+	 *
+	 * @return  resource
+	 */
+	protected function fopen($file, $mode = 'w')
+	{
+		if (!array_key_exists($file, $this->filePointers))
+		{
+			//Factory::getLog()->debug("Opening backup archive $file with mode $mode");
+			$this->filePointers[$file] = @fopen($file, $mode);
+
+			// If we open a file for append we have to seek to the correct offset
+			if (substr($mode, 0, 1) == 'a')
+			{
+				if (isset($this->fileOffsets[$file]))
+				{
+					Factory::getLog()->debug("Truncating backup archive file $file to " . $this->fileOffsets[$file] . " bytes");
+					@ftruncate($this->filePointers[$file], $this->fileOffsets[$file]);
+				}
+
+				fseek($this->filePointers[$file], 0, SEEK_END);
+			}
+		}
+
+		return $this->filePointers[$file];
+	}
+
+	/**
 	 * Write to file, defeating magic_quotes_runtime settings (pure binary write)
 	 *
 	 * @param   resource  $fp     Handle to a file
@@ -165,13 +189,10 @@ abstract class BaseFileManagement extends Base
 	 */
 	protected function fwrite($fp, $data, $p_len = null)
 	{
-		static $lastFp = null;
-		static $filename = null;
-
-		if ($fp !== $lastFp)
+		if ($fp !== $this->lastFilePointer)
 		{
-			$lastFp   = $fp;
-			$filename = array_search($fp, $this->filePointers, true);
+			$this->lastFilePointer = $fp;
+			$this->lastFileName    = array_search($fp, $this->filePointers, true);
 		}
 
 		$len = is_null($p_len) ? (akstrlen($data)) : $p_len;
@@ -182,17 +203,17 @@ abstract class BaseFileManagement extends Base
 			// Log debug information about the archive file's existence and current size. This helps us figure out if
 			// there is a server-imposed maximum file size limit.
 			clearstatcache();
-			$fileExists  = @file_exists($filename) ? 'exists' : 'does NOT exist';
-			$currentSize = @filesize($filename);
+			$fileExists  = @file_exists($this->lastFileName) ? 'exists' : 'does NOT exist';
+			$currentSize = @filesize($this->lastFileName);
 
-			Factory::getLog()->debug(__CLASS__ . "::_fwrite() ERROR!! Cannot write to archive file $filename. The file $fileExists. File size $currentSize bytes after writing $ret of $len bytes. Please check the output directory permissions and make sure you have enough disk space available. If this does not help, please set up a Part Size for Split Archives LOWER than this size and retry backing up.");
+			Factory::getLog()->debug(sprintf("%s::_fwrite() ERROR!! Cannot write to archive file %s. The file %s. File size %s bytes after writing %s of %d bytes. Please check the output directory permissions and make sure you have enough disk space available. If this does not help, please set up a Part Size for Split Archives LOWER than this size and retry backing up.", __CLASS__, $this->lastFileName, $fileExists, $currentSize, $ret, $len));
 
-			throw new ErrorException('Couldn\'t write to the archive file; check the output directory permissions and make sure you have enough disk space available.' . "[len=$ret / $len]");
+			throw new ErrorException(sprintf("Couldn\'t write to the archive file; check the output directory permissions and make sure you have enough disk space available. [len=%s / %s]", $ret, $len));
 		}
 
-		if ($filename !== false)
+		if ($this->lastFileName !== false)
 		{
-			$this->fileOffsets[$filename] = @ftell($fp);
+			$this->fileOffsets[$this->lastFileName] = @ftell($fp);
 		}
 
 		return $ret;
@@ -208,24 +229,6 @@ abstract class BaseFileManagement extends Base
 		if (isset($this->fileOffsets[$filename]))
 		{
 			unset($this->fileOffsets[$filename]);
-		}
-	}
-
-	/**
-	 * Closes all open files known to this archiver object
-	 *
-	 * @return  void
-	 */
-	protected function _closeAllFiles()
-	{
-		if (!empty($this->filePointers))
-		{
-			foreach ($this->filePointers as $file => $fp)
-			{
-				$this->conditionalFileClose($fp);
-
-				unset($this->filePointers[$file]);
-			}
 		}
 	}
 

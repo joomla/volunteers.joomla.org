@@ -203,12 +203,15 @@ class JceModelProfile extends JModelAdmin
     {
         $data = $this->getItem();
 
-        // convert 0 value to string containing both options
+        // convert 0 value to null to force defaults
         if (empty($data->area)) {
-            $data->area = '1,2';
+            $data->area = null;
         }
 
-        $data->device = explode(',', $data->device);
+        // convert to array if set
+        if (!empty($data->device)) {
+        	$data->device = explode(',', $data->device);
+        }
 
         if (!empty($data->components)) {
             $data->components = explode(',', $data->components);
@@ -717,6 +720,11 @@ class JceModelProfile extends JModelAdmin
 
             // merge and encode as json string
             $data['params'] = json_encode(WFUtility::array_merge_recursive_distinct($params, $json));
+        }
+
+        // set a default value for validation
+        if (empty($data['params'])) {
+        	$data['params'] = '{}';
         }
 
         if (parent::save($data)) {

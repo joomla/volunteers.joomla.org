@@ -1,8 +1,8 @@
 <?php
 /**
  * @package   FOF
- * @copyright Copyright (c)2010-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
- * @license   GNU General Public License version 2, or later
+ * @copyright Copyright (c)2010-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @license   GNU General Public License version 3, or later
  */
 
 defined('_JEXEC') || die;
@@ -14,7 +14,6 @@ use Joomla\CMS\Filesystem\Folder;
 use Joomla\CMS\Installer\Installer as JoomlaInstaller;
 use Joomla\CMS\Installer\InstallerAdapter;
 use Joomla\CMS\Log\Log;
-use Joomla\CMS\Table\Extension;
 
 if (class_exists('file_fof40InstallerScript', false))
 {
@@ -174,6 +173,14 @@ class file_fof40InstallerScript
 			return;
 		}
 
+		// Auto-uninstall this package when it is no longer needed.
+		if (($type != 'install') && ($this->countHardcodedDependencies() === 0))
+		{
+			$this->uninstallSelf($parent);
+
+			return;
+		}
+
 		// Remove obsolete files and folders
 		$this->removeFilesAndFolders($this->removeFiles);
 
@@ -236,7 +243,7 @@ class file_fof40InstallerScript
 	public function uninstall($parent)
 	{
 		// Check dependencies on FOF
-		$dependencyCount = count($this->getDependencies('fof40'));
+		$dependencyCount = $this->countHardcodedDependencies();
 
 		if ($dependencyCount !== 0)
 		{
@@ -323,159 +330,6 @@ class file_fof40InstallerScript
 			}
 
 			@include_once $filePath;
-		}
-	}
-
-	/**
-	 * Get the dependencies for a package from the #__akeeba_common table
-	 *
-	 * @param   string  $package  The package
-	 *
-	 * @return  array  The dependencies
-	 */
-	protected function getDependencies($package)
-	{
-		$db = JoomlaFactory::getDbo();
-
-		$query = $db->getQuery(true)
-			->select($db->qn('value'))
-			->from($db->qn('#__akeeba_common'))
-			->where($db->qn('key') . ' = ' . $db->q($package));
-
-		try
-		{
-			$dependencies = $db->setQuery($query)->loadResult();
-			$dependencies = json_decode($dependencies, true);
-
-			if (empty($dependencies))
-			{
-				$dependencies = [];
-			}
-		}
-		catch (Exception $e)
-		{
-			$dependencies = [];
-		}
-
-		return $dependencies;
-	}
-
-	/**
-	 * Sets the dependencies for a package into the #__akeeba_common table
-	 *
-	 * @param   string  $package       The package
-	 * @param   array   $dependencies  The dependencies list
-	 */
-	protected function setDependencies($package, array $dependencies)
-	{
-		$db = JoomlaFactory::getDbo();
-
-		$query = $db->getQuery(true)
-			->delete('#__akeeba_common')
-			->where($db->qn('key') . ' = ' . $db->q($package));
-
-		try
-		{
-			$db->setQuery($query)->execute();
-		}
-		catch (Exception $e)
-		{
-			// Do nothing if the old key wasn't found
-		}
-
-		$object = (object) [
-			'key'   => $package,
-			'value' => json_encode($dependencies),
-		];
-
-		try
-		{
-			$db->insertObject('#__akeeba_common', $object, 'key');
-		}
-		catch (Exception $e)
-		{
-			// Do nothing if the old key wasn't found
-		}
-	}
-
-	/**
-	 * Adds a package dependency to #__akeeba_common
-	 *
-	 * @param   string  $package     The package
-	 * @param   string  $dependency  The dependency to add
-	 */
-	protected function addDependency($package, $dependency)
-	{
-		$dependencies = $this->getDependencies($package);
-
-		if (!in_array($dependency, $dependencies))
-		{
-			$dependencies[] = $dependency;
-
-			$this->setDependencies($package, $dependencies);
-		}
-	}
-
-	/**
-	 * Removes a package dependency from #__akeeba_common
-	 *
-	 * @param   string  $package     The package
-	 * @param   string  $dependency  The dependency to remove
-	 */
-	protected function removeDependency($package, $dependency)
-	{
-		$dependencies = $this->getDependencies($package);
-
-		if (in_array($dependency, $dependencies))
-		{
-			$index = array_search($dependency, $dependencies);
-			unset($dependencies[$index]);
-
-			$this->setDependencies($package, $dependencies);
-		}
-	}
-
-	/**
-	 * Do I have a dependency for a package in #__akeeba_common
-	 *
-	 * @param   string  $package     The package
-	 * @param   string  $dependency  The dependency to check for
-	 *
-	 * @return bool
-	 */
-	protected function hasDependency($package, $dependency)
-	{
-		$dependencies = $this->getDependencies($package);
-
-		return in_array($dependency, $dependencies);
-	}
-
-	/**
-	 * Try to log a warning / error with Joomla
-	 *
-	 * @param   string  $message   The message to write to the log
-	 * @param   bool    $error     Is this an error? If not, it's a warning. (default: false)
-	 * @param   string  $category  Log category, default jerror
-	 *
-	 * @return  void
-	 */
-	protected function log($message, $error = false, $category = 'jerror')
-	{
-		// Just in case...
-		if (!class_exists('Log', true))
-		{
-			return;
-		}
-
-		$priority = $error ? Log::ERROR : Log::WARNING;
-
-		try
-		{
-			Log::add($message, $priority, $category);
-		}
-		catch (Exception $e)
-		{
-			// Swallow the exception.
 		}
 	}
 
@@ -663,5 +517,93 @@ class file_fof40InstallerScript
 				File::copy($sourcePath, $targetPath);
 			}
 		}
+	}
+
+	/**
+	 * Count the number of old FOF + FEF based extensions installed on this site
+	 *
+	 * @return  int
+	 */
+	private function countHardcodedDependencies()
+	{
+		// Look for fof.xml in the backend directories of the following components
+		$hardcodedDependencies = [
+			'com_admintools',
+			'com_akeeba',
+			'com_ars',
+			'com_ats',
+			'com_compatibility',
+			'com_datacompliance',
+			'com_contactus',
+			'com_docimport',
+			'com_loginguard',
+		];
+
+		$count = 0;
+
+		foreach ($hardcodedDependencies as $component)
+		{
+			$filePath = JPATH_ADMINISTRATOR . '/components/' . $component . '/fof.xml';
+
+			if (@file_exists($filePath))
+			{
+				$count++;
+			}
+		}
+
+		return $count;
+	}
+
+	/**
+	 * Uninstall this package.
+	 *
+	 * This runs on update when there are no more dependencies left.
+	 *
+	 * @param  \Joomla\CMS\Installer\Adapter\FileAdapter $adapter
+	 *
+	 * @return void
+	 */
+	private function uninstallSelf($adapter)
+	{
+		$parent = $adapter->getParent();
+
+		if (empty($parent) || !property_exists($parent, 'extension'))
+		{
+			return;
+		}
+
+		if (version_compare(JVERSION, '4.0', 'lt'))
+		{
+			$db = \Joomla\CMS\Factory::getDbo();
+		}
+		else
+		{
+			$db = \Joomla\CMS\Factory::getContainer()->get('DatabaseDriver');
+		}
+
+		try
+		{
+			$query = $db->getQuery(true)
+				->select($db->quoteName('extension_id'))
+				->from($db->quoteName('#__extensions'))
+				->where($db->quoteName('type') . ' = ' . $db->quote('file'))
+				->where($db->quoteName('name') . ' = ' . $db->quote('file_fof40'));
+
+			$id = $db->setQuery($query)->loadResult();
+		}
+		catch (Exception $e)
+		{
+			return;
+		}
+
+		if (empty($id))
+		{
+			return;
+		}
+
+		$msg = 'Automatically uninstalling FOF 4; this package is no longer required on your site.';
+		Log::add($msg, Log::INFO, 'jerror');
+
+		$parent->uninstall('file', $id);
 	}
 }

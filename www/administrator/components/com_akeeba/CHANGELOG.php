@@ -1,4 +1,25 @@
 <?php die();?>
+Akeeba Backup 8.0.15
+================================================================================
++ Support for MySQL 8 invisible columns
+# [LOW] Rare type error under PHP 8 during restoration
+# [LOW] Backend still tries to load PieCon, causing an error to be logged
+
+Akeeba Backup 8.0.14
+================================================================================
+- Remove piecon (pie graph favicon showing the backup progress)
+~ JSON API: Forcibly use the ‘json’ origin everywhere
+~ JSON API: Throw an error if the backup ID sent to stepBackup does not exist
+~ JSON API: Improved backup IDs prevent a number of JSON API issues
+
+Akeeba Backup 8.0.13
+================================================================================
+- Removed iDriveSync; the service has been discontinued by the provider.
+- Removed the “Archive integrity check” feature.
+~ Dropbox connector updated to require TLS v1.2
+~ Improved the display of the files and folders filters page
+# [LOW] Check failed backups: All Super Users were notified even when an email was supplied
+
 Akeeba Backup 8.0.12
 ================================================================================
 # [LOW] PHP 8 error if the output directory is empty

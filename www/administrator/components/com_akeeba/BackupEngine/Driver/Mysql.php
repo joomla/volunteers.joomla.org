@@ -3,7 +3,7 @@
  * Akeeba Engine
  *
  * @package   akeebaengine
- * @copyright Copyright (c)2006-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -40,27 +40,6 @@ class Mysql extends Base
 	protected $host;
 
 	/**
-	 * Username
-	 *
-	 * @var   string
-	 */
-	protected $user;
-
-	/**
-	 * Password
-	 *
-	 * @var   string
-	 */
-	protected $password;
-
-	/**
-	 * Should I select a database?
-	 *
-	 * @var   bool
-	 */
-	protected $selectDatabase;
-
-	/**
 	 * The character(s) used to quote SQL statement names such as table names or field names,
 	 * etc. The child classes should define this as necessary.  If a single character string the
 	 * same character is used for both sides of the quoted name, else the first character will be
@@ -79,6 +58,33 @@ class Mysql extends Base
 	 * @since  11.1
 	 */
 	protected $nullDate = '0000-00-00 00:00:00';
+
+	/**
+	 * Password
+	 *
+	 * @var   string
+	 */
+	protected $password;
+
+	/**
+	 * Should I select a database?
+	 *
+	 * @var   bool
+	 */
+	protected $selectDatabase;
+
+	/**
+	 * Username
+	 *
+	 * @var   string
+	 */
+	protected $user;
+
+	/** @var bool Are we in the process of reconnecting to the database server? */
+	private $isReconnecting = false;
+
+	/** @var array|null A cache of the tables contained in the currently connected database */
+	public $tablesCache = null;
 
 	/**
 	 * Database object constructor
@@ -145,16 +151,6 @@ class Mysql extends Base
 	 * Test to see if the MySQL connector is available.
 	 *
 	 * @return  boolean  True on success, false otherwise.
-	 */
-	public static function test()
-	{
-		return (function_exists('mysql_connect'));
-	}
-
-	/**
-	 * Test to see if the MySQL connector is available.
-	 *
-	 * @return  boolean  True on success, false otherwise.
 	 *
 	 * @since   12.1
 	 */
@@ -163,50 +159,14 @@ class Mysql extends Base
 		return (function_exists('mysql_connect'));
 	}
 
-	public function open()
+	/**
+	 * Test to see if the MySQL connector is available.
+	 *
+	 * @return  boolean  True on success, false otherwise.
+	 */
+	public static function test()
 	{
-		if ($this->connected())
-		{
-			return;
-		}
-		else
-		{
-			$this->close();
-		}
-
-		// perform a number of fatality checks, then return gracefully
-		if (!function_exists('mysql_connect'))
-		{
-			$this->errorNum = 1;
-			$this->errorMsg = 'The MySQL adapter "mysql" is not available.';
-
-			return;
-		}
-
-		if (!($this->connection = @mysql_connect($this->host, $this->user, $this->password, true)))
-		{
-			$this->errorNum = 2;
-			$this->errorMsg = 'Could not connect to MySQL';
-
-			return;
-		}
-
-		// Set sql_mode to non_strict mode
-		mysql_query("SET @@SESSION.sql_mode = '';", $this->connection);
-
-		// If auto-select is enabled select the given database.
-		if ($this->selectDatabase && !empty($this->_database))
-		{
-			if (!$this->select($this->_database))
-			{
-				$this->errorNum = 3;
-				$this->errorMsg = "Cannot select database {$this->_database}";
-
-				return;
-			}
-		}
-
-		$this->setUTF();
+		return (function_exists('mysql_connect'));
 	}
 
 	public function close()
@@ -223,6 +183,40 @@ class Mysql extends Base
 		$this->connection = null;
 
 		return $return;
+	}
+
+	/**
+	 * Determines if the connection to the server is active.
+	 *
+	 * @return  boolean  True if connected to the database engine.
+	 */
+	public function connected()
+	{
+		if (is_resource($this->connection))
+		{
+			return @mysql_ping($this->connection);
+		}
+
+		return false;
+	}
+
+	/**
+	 * Drops a table from the database.
+	 *
+	 * @param   string   $tableName  The name of the database table to drop.
+	 * @param   boolean  $ifExists   Optionally specify that the table must exist before it is dropped.
+	 *
+	 * @return  Mysql  Returns this object to support chaining.
+	 */
+	public function dropTable($tableName, $ifExists = true)
+	{
+		$query = $this->getQuery(true);
+
+		$this->setQuery('DROP TABLE ' . ($ifExists ? 'IF EXISTS ' : '') . $query->quoteName($tableName));
+
+		$this->query();
+
+		return $this;
 	}
 
 	/**
@@ -262,37 +256,27 @@ class Mysql extends Base
 	}
 
 	/**
-	 * Determines if the connection to the server is active.
+	 * Method to fetch a row from the result set cursor as an associative array.
 	 *
-	 * @return  boolean  True if connected to the database engine.
+	 * @param   mixed  $cursor  The optional result set cursor from which to fetch the row.
+	 *
+	 * @return  mixed  Either the next row from the result set or false if there are no more rows.
 	 */
-	public function connected()
+	public function fetchAssoc($cursor = null)
 	{
-		if (is_resource($this->connection))
-		{
-			return @mysql_ping($this->connection);
-		}
-
-		return false;
+		return mysql_fetch_assoc($cursor ?: $this->cursor);
 	}
 
 	/**
-	 * Drops a table from the database.
+	 * Method to free up the memory used for the result set.
 	 *
-	 * @param   string   $tableName  The name of the database table to drop.
-	 * @param   boolean  $ifExists   Optionally specify that the table must exist before it is dropped.
+	 * @param   mixed  $cursor  The optional result set cursor from which to fetch the row.
 	 *
-	 * @return  Mysql  Returns this object to support chaining.
+	 * @return  void
 	 */
-	public function dropTable($tableName, $ifExists = true)
+	public function freeResult($cursor = null)
 	{
-		$query = $this->getQuery(true);
-
-		$this->setQuery('DROP TABLE ' . ($ifExists ? 'IF EXISTS ' : '') . $query->quoteName($tableName));
-
-		$this->query();
-
-		return $this;
+		mysql_free_result($cursor ?: $this->cursor);
 	}
 
 	/**
@@ -350,33 +334,6 @@ class Mysql extends Base
 	}
 
 	/**
-	 * Shows the table CREATE statement that creates the given tables.
-	 *
-	 * @param   mixed  $tables  A table name or a list of table names.
-	 *
-	 * @return  array  A list of the create SQL for the tables.
-	 */
-	public function getTableCreate($tables)
-	{
-		// Initialise variables.
-		$result = [];
-
-		// Sanitize input to an array and iterate over the list.
-		$tables = (array) $tables;
-		foreach ($tables as $table)
-		{
-			// Set the query to get the table CREATE statement.
-			$this->setQuery('SHOW CREATE table ' . $this->quoteName($this->escape($table)));
-			$row = $this->loadRow();
-
-			// Populate the result array based on the create statements.
-			$result[$table] = $row[1];
-		}
-
-		return $result;
-	}
-
-	/**
 	 * Retrieves field information about a given table.
 	 *
 	 * @param   string   $table     The name of the database table.
@@ -413,6 +370,33 @@ class Mysql extends Base
 	}
 
 	/**
+	 * Shows the table CREATE statement that creates the given tables.
+	 *
+	 * @param   mixed  $tables  A table name or a list of table names.
+	 *
+	 * @return  array  A list of the create SQL for the tables.
+	 */
+	public function getTableCreate($tables)
+	{
+		// Initialise variables.
+		$result = [];
+
+		// Sanitize input to an array and iterate over the list.
+		$tables = (array) $tables;
+		foreach ($tables as $table)
+		{
+			// Set the query to get the table CREATE statement.
+			$this->setQuery('SHOW CREATE table ' . $this->quoteName($this->escape($table)));
+			$row = $this->loadRow();
+
+			// Populate the result array based on the create statements.
+			$result[$table] = $row[1];
+		}
+
+		return $result;
+	}
+
+	/**
 	 * Get the details list of keys for a table.
 	 *
 	 * @param   string  $table  The name of the table.
@@ -440,6 +424,207 @@ class Mysql extends Base
 		$tables = $this->loadColumn();
 
 		return $tables;
+	}
+
+	/**
+	 * Returns an array with the names of tables, views, procedures, functions and triggers
+	 * in the database. The table names are the keys of the tables, whereas the value is
+	 * the type of each element: table, view, merge, temp, procedure, function or trigger.
+	 * Note that merge are MRG_MYISAM tables and temp is non-permanent data table, usually
+	 * set up as temporary, black hole or federated tables. These two types should never,
+	 * ever, have their data dumped in the SQL dump file.
+	 *
+	 * @param   bool  $abstract  Return abstract or normal names? Defaults to true (abstract names)
+	 *
+	 * @return array
+	 */
+	public function getTables($abstract = true)
+	{
+		if (!empty($this->tablesCache[$this->_database]))
+		{
+			return $this->tablesCache[$this->_database];
+		}
+
+		$sql = "SHOW TABLES";
+		$this->setQuery($sql);
+		$all_tables = $this->loadColumn();
+
+		if (!empty($all_tables))
+		{
+			// Start by adding tables and views to the list
+			foreach ($all_tables as $table_name)
+			{
+				if ($abstract)
+				{
+					$table_name = $this->getAbstract($table_name);
+				}
+				$this->tablesCache[$this->_database][$table_name] = 'table';
+			}
+
+			// Loop all metadatas
+			foreach ($all_tables as $table_metadata)
+			{
+				$table_name     = $table_metadata;
+				$table_abstract = $this->getAbstract($table_metadata);
+				$type           = 'table';
+
+				if ($abstract)
+				{
+					$table_metadata = $table_abstract;
+				}
+
+				$create = $this->get_create($table_abstract, $table_name, $type);
+				// Scan for the table engine.
+				$engine = null; // So that we detect VIEWs correctly
+
+				if ($type == 'table')
+				{
+					$engine      = 'MyISAM'; // So that even with MySQL 4 hosts we don't screw this up
+					$engine_keys = ['ENGINE=', 'TYPE='];
+					foreach ($engine_keys as $engine_key)
+					{
+						$start_pos = strrpos($create, $engine_key);
+						if ($start_pos !== false)
+						{
+							// Advance the start position just after the position of the ENGINE keyword
+							$start_pos += strlen($engine_key);
+							// Try to locate the space after the engine type
+							$end_pos = stripos($create, ' ', $start_pos);
+							if ($end_pos === false)
+							{
+								// Uh... maybe it ends with ENGINE=EngineType;
+								$end_pos = stripos($create, ';');
+							}
+							if ($end_pos !== '')
+							{
+								// Grab the string
+								$engine = substr($create, $start_pos, $end_pos - $start_pos);
+							}
+						}
+					}
+					$engine = strtoupper($engine);
+				}
+
+				switch ($engine)
+				{
+					// Views -- FIX: They are detected based on their CREATE STATEMENT
+					case null:
+						$this->tablesCache[$this->_database][$table_metadata] = 'view';
+						break;
+
+					// Merge tables
+					case 'MRG_MYISAM':
+						$this->tablesCache[$this->_database][$table_metadata] = 'merge';
+						break;
+
+					// Tables whose data we do not back up (memory, federated and can-have-no-data tables)
+					case 'MEMORY':
+					case 'EXAMPLE':
+					case 'BLACKHOLE':
+					case 'FEDERATED':
+					$this->tablesCache[$this->_database][$table_metadata] = 'temp';
+						break;
+
+					// Normal tables
+					default:
+						break;
+				} // switch
+			} // foreach
+		} // if !empty
+
+		// If we have MySQL > 5.0 add the list of stored procedures, stored functions
+		// and triggers
+		$registry        = Factory::getConfiguration();
+		$enable_entities = $registry->get('engine.dump.native.advanced_entitites', true);
+		if ($enable_entities)
+		{
+			// 1. Stored procedures
+			$sql = "SHOW PROCEDURE STATUS WHERE " . $this->quoteName('Db') . "=" . $this->quote($this->_database);
+			$this->setQuery($sql);
+
+			try
+			{
+				$all_entries = $this->loadAssocList();
+			}
+			catch (Exception $e)
+			{
+				$all_entries = [];
+			}
+
+			if (is_array($all_entries) || $all_entries instanceof \Countable ? count($all_entries) : 0)
+			{
+				foreach ($all_entries as $entry)
+				{
+					$table_name = $entry['Name'];
+					if ($abstract)
+					{
+						$table_name = $this->getAbstract($table_name);
+					}
+					$this->tablesCache[$this->_database][$table_name] = 'procedure';
+				}
+			}
+
+			// 2. Stored functions
+			$sql = "SHOW FUNCTION STATUS WHERE " . $this->quoteName('Db') . "=" . $this->quote($this->_database);
+			$this->setQuery($sql);
+
+			try
+			{
+				$all_entries = $this->loadColumn(1);
+			}
+			catch (Exception $e)
+			{
+				$all_entries = [];
+			}
+
+			// If we have filters, make sure the tables pass the filtering
+			if (is_array($all_entries))
+			{
+				if (count($all_entries))
+				{
+					foreach ($all_entries as $table_name)
+					{
+						if ($abstract)
+						{
+							$table_name = $this->getAbstract($table_name);
+						}
+						$this->tablesCache[$this->_database][$table_name] = 'function';
+					}
+				}
+			}
+
+			// 3. Triggers
+			$sql = "SHOW TRIGGERS";
+			$this->setQuery($sql);
+
+			try
+			{
+				$all_entries = $this->loadColumn();
+			}
+			catch (Exception $e)
+			{
+				$all_entries = [];
+			}
+
+			// If we have filters, make sure the tables pass the filtering
+			if (is_array($all_entries))
+			{
+				if (count($all_entries))
+				{
+					foreach ($all_entries as $table_name)
+					{
+						if ($abstract)
+						{
+							$table_name = $this->getAbstract($table_name);
+						}
+						$this->tablesCache[$this->_database][$table_name] = 'trigger';
+					}
+				}
+			}
+
+		}
+
+		return $this->tablesCache[$this->_database];
 	}
 
 	/**
@@ -488,6 +673,52 @@ class Mysql extends Base
 		return $this;
 	}
 
+	public function open()
+	{
+		if ($this->connected())
+		{
+			return;
+		}
+		else
+		{
+			$this->close();
+		}
+
+		// perform a number of fatality checks, then return gracefully
+		if (!function_exists('mysql_connect'))
+		{
+			$this->errorNum = 1;
+			$this->errorMsg = 'The MySQL adapter "mysql" is not available.';
+
+			return;
+		}
+
+		if (!($this->connection = @mysql_connect($this->host, $this->user, $this->password, true)))
+		{
+			$this->errorNum = 2;
+			$this->errorMsg = 'Could not connect to MySQL';
+
+			return;
+		}
+
+		// Set sql_mode to non_strict mode
+		mysql_query("SET @@SESSION.sql_mode = '';", $this->connection);
+
+		// If auto-select is enabled select the given database.
+		if ($this->selectDatabase && !empty($this->_database))
+		{
+			if (!$this->select($this->_database))
+			{
+				$this->errorNum = 3;
+				$this->errorMsg = "Cannot select database {$this->_database}";
+
+				return;
+			}
+		}
+
+		$this->setUTF();
+	}
+
 	/**
 	 * Execute the SQL statement.
 	 *
@@ -495,8 +726,6 @@ class Mysql extends Base
 	 */
 	public function query()
 	{
-		static $isReconnecting = false;
-
 		if (!is_resource($this->connection))
 		{
 			throw new RuntimeException($this->errorMsg, $this->errorNum);
@@ -530,9 +759,9 @@ class Mysql extends Base
 		if (!$this->cursor)
 		{
 			// Check if the server was disconnected.
-			if (!$this->connected() && !$isReconnecting)
+			if (!$this->connected() && !$this->isReconnecting)
 			{
-				$isReconnecting = true;
+				$this->isReconnecting = true;
 
 				try
 				{
@@ -552,8 +781,8 @@ class Mysql extends Base
 				}
 
 				// Since we were able to reconnect, run the query again.
-				$result         = $this->query();
-				$isReconnecting = false;
+				$result               = $this->query();
+				$this->isReconnecting = false;
 
 				return $result;
 			}
@@ -670,30 +899,6 @@ class Mysql extends Base
 	}
 
 	/**
-	 * Method to fetch a row from the result set cursor as an associative array.
-	 *
-	 * @param   mixed  $cursor  The optional result set cursor from which to fetch the row.
-	 *
-	 * @return  mixed  Either the next row from the result set or false if there are no more rows.
-	 */
-	public function fetchAssoc($cursor = null)
-	{
-		return mysql_fetch_assoc($cursor ?: $this->cursor);
-	}
-
-	/**
-	 * Method to free up the memory used for the result set.
-	 *
-	 * @param   mixed  $cursor  The optional result set cursor from which to fetch the row.
-	 *
-	 * @return  void
-	 */
-	public function freeResult($cursor = null)
-	{
-		mysql_free_result($cursor ?: $this->cursor);
-	}
-
-	/**
 	 * Unlocks tables in the database.
 	 *
 	 * @return  Mysql  Returns this object to support chaining.
@@ -706,209 +911,6 @@ class Mysql extends Base
 		$this->setQuery('UNLOCK TABLES')->execute();
 
 		return $this;
-	}
-
-	/**
-	 * Returns an array with the names of tables, views, procedures, functions and triggers
-	 * in the database. The table names are the keys of the tables, whereas the value is
-	 * the type of each element: table, view, merge, temp, procedure, function or trigger.
-	 * Note that merge are MRG_MYISAM tables and temp is non-permanent data table, usually
-	 * set up as temporary, black hole or federated tables. These two types should never,
-	 * ever, have their data dumped in the SQL dump file.
-	 *
-	 * @param   bool  $abstract  Return abstract or normal names? Defaults to true (abstract names)
-	 *
-	 * @return array
-	 */
-	public function getTables($abstract = true)
-	{
-		static $tables = [];
-
-		if (!empty($tables))
-		{
-			return $tables;
-		}
-
-		$sql = "SHOW TABLES";
-		$this->setQuery($sql);
-		$all_tables = $this->loadColumn();
-
-		if (!empty($all_tables))
-		{
-			// Start by adding tables and views to the list
-			foreach ($all_tables as $table_name)
-			{
-				if ($abstract)
-				{
-					$table_name = $this->getAbstract($table_name);
-				}
-				$tables[$table_name] = 'table';
-			}
-
-			// Loop all metadatas
-			foreach ($all_tables as $table_metadata)
-			{
-				$table_name     = $table_metadata;
-				$table_abstract = $this->getAbstract($table_metadata);
-				$type           = 'table';
-
-				if ($abstract)
-				{
-					$table_metadata = $table_abstract;
-				}
-
-				$create = $this->get_create($table_abstract, $table_name, $type);
-				// Scan for the table engine.
-				$engine = null; // So that we detect VIEWs correctly
-
-				if ($type == 'table')
-				{
-					$engine      = 'MyISAM'; // So that even with MySQL 4 hosts we don't screw this up
-					$engine_keys = ['ENGINE=', 'TYPE='];
-					foreach ($engine_keys as $engine_key)
-					{
-						$start_pos = strrpos($create, $engine_key);
-						if ($start_pos !== false)
-						{
-							// Advance the start position just after the position of the ENGINE keyword
-							$start_pos += strlen($engine_key);
-							// Try to locate the space after the engine type
-							$end_pos = stripos($create, ' ', $start_pos);
-							if ($end_pos === false)
-							{
-								// Uh... maybe it ends with ENGINE=EngineType;
-								$end_pos = stripos($create, ';');
-							}
-							if ($end_pos !== '')
-							{
-								// Grab the string
-								$engine = substr($create, $start_pos, $end_pos - $start_pos);
-							}
-						}
-					}
-					$engine = strtoupper($engine);
-				}
-
-				switch ($engine)
-				{
-					// Views -- FIX: They are detected based on their CREATE STATEMENT
-					case null:
-						$tables[$table_metadata] = 'view';
-						break;
-
-					// Merge tables
-					case 'MRG_MYISAM':
-						$tables[$table_metadata] = 'merge';
-						break;
-
-					// Tables whose data we do not back up (memory, federated and can-have-no-data tables)
-					case 'MEMORY':
-					case 'EXAMPLE':
-					case 'BLACKHOLE':
-					case 'FEDERATED':
-						$tables[$table_metadata] = 'temp';
-						break;
-
-					// Normal tables
-					default:
-						break;
-				} // switch
-			} // foreach
-		} // if !empty
-
-		// If we have MySQL > 5.0 add the list of stored procedures, stored functions
-		// and triggers
-		$registry        = Factory::getConfiguration();
-		$enable_entities = $registry->get('engine.dump.native.advanced_entitites', true);
-		if ($enable_entities)
-		{
-			// 1. Stored procedures
-			$sql = "SHOW PROCEDURE STATUS WHERE " . $this->quoteName('Db') . "=" . $this->quote($this->_database);
-			$this->setQuery($sql);
-
-			try
-			{
-				$all_entries = $this->loadAssocList();
-			}
-			catch (Exception $e)
-			{
-				$all_entries = [];
-			}
-
-			if (is_array($all_entries) || $all_entries instanceof \Countable ? count($all_entries) : 0)
-			{
-				foreach ($all_entries as $entry)
-				{
-					$table_name = $entry['Name'];
-					if ($abstract)
-					{
-						$table_name = $this->getAbstract($table_name);
-					}
-					$tables[$table_name] = 'procedure';
-				}
-			}
-
-			// 2. Stored functions
-			$sql = "SHOW FUNCTION STATUS WHERE " . $this->quoteName('Db') . "=" . $this->quote($this->_database);
-			$this->setQuery($sql);
-
-			try
-			{
-				$all_entries = $this->loadColumn(1);
-			}
-			catch (Exception $e)
-			{
-				$all_entries = [];
-			}
-
-			// If we have filters, make sure the tables pass the filtering
-			if (is_array($all_entries))
-			{
-				if (count($all_entries))
-				{
-					foreach ($all_entries as $table_name)
-					{
-						if ($abstract)
-						{
-							$table_name = $this->getAbstract($table_name);
-						}
-						$tables[$table_name] = 'function';
-					}
-				}
-			}
-
-			// 3. Triggers
-			$sql = "SHOW TRIGGERS";
-			$this->setQuery($sql);
-
-			try
-			{
-				$all_entries = $this->loadColumn();
-			}
-			catch (Exception $e)
-			{
-				$all_entries = [];
-			}
-
-			// If we have filters, make sure the tables pass the filtering
-			if (is_array($all_entries))
-			{
-				if (count($all_entries))
-				{
-					foreach ($all_entries as $table_name)
-					{
-						if ($abstract)
-						{
-							$table_name = $this->getAbstract($table_name);
-						}
-						$tables[$table_name] = 'trigger';
-					}
-				}
-			}
-
-		}
-
-		return $tables;
 	}
 
 	/**
@@ -941,7 +943,8 @@ class Mysql extends Base
 	 *
 	 * @param   string  $table_abstract  The abstracted name of the entity
 	 * @param   string  $table_name      The name of the table
-	 * @param   string  $type            The type of the entity to scan. If it's found to differ, the correct type is returned.
+	 * @param   string  $type            The type of the entity to scan. If it's found to differ, the correct type is
+	 *                                   returned.
 	 *
 	 * @return string The CREATE command, w/out newlines
 	 */
@@ -1036,7 +1039,8 @@ class Mysql extends Base
 
 	protected function unsafe_escape($string)
 	{
-		if (function_exists('mb_ereg_replace')) {
+		if (function_exists('mb_ereg_replace'))
+		{
 			return mb_ereg_replace('[\x00\x0A\x0D\x1A\x22\x27\x5C]', '\\\0', $string);
 		}
 

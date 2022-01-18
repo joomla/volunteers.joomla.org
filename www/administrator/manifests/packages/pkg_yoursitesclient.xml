@@ -3,9 +3,9 @@
     <name>PKG_YOURSITESCLIENT</name>
     <packagename>yoursitesclient</packagename>
     <url>http://www.gwesystems.com</url>
-    <creationDate>October 2021</creationDate>
+    <creationDate>December 2021</creationDate>
     <license>http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL</license>
-    <version>1.23.0</version>
+    <version>1.26.0</version>
     <author>Geraint Edwards</author>
     <copyright>(C) 2017-2020 GWE Systems Ltd</copyright>
     <authorEmail></authorEmail>

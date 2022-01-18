@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @version    CVS: 1.23.0.1
+ * @version    CVS: 1.26.0.1
  * @package    com_yoursites
  * @author     Geraint Edwards
  * @copyright  2017-2020 GWE Systems Ltd
@@ -66,14 +66,16 @@ class plgSystemYourSites extends JPlugin
 			{
 				$requestData = @base64_decode($input->get('json64', '', 'raw'));
 			}
-			$requestData = json_decode($requestData);
-			$jsontask = $requestData->task;
-			if ($jsontask === "updateextension")
+			if (is_string($requestData))
 			{
-				$plugin = JPluginHelper::getPlugin("system" , "falangdriver");
-				if ($plugin)
+				$requestData = json_decode($requestData);
+				if ($requestData && isset($requestData->task) && $requestData->task === "updateextension")
 				{
-					$plugin->name .= "dummy";
+					$plugin = JPluginHelper::getPlugin("system", "falangdriver");
+					if ($plugin)
+					{
+						$plugin->name .= "dummy";
+					}
 				}
 			}
 		}
@@ -594,15 +596,20 @@ class plgSystemYourSites extends JPlugin
 
 		// only work for clone sites
 		$base = JUri::base(true);
-		if (strpos($base, "._ysts_") === false)
+		if (strpos($base, "._ysts_") === false && strpos($base, "clone_ysts_") === false)
 		{
 			return;
 		}
 
-		$parts = explode("/._ysts_", $base);
+		$parts = explode("/clone_ysts_", $base);
 		if (count($parts) !== 2)
 		{
-			return;
+			$parts = explode("/._ysts_", $base);
+			if (count($parts) !== 2)
+			{
+				return;
+			}
+
 		}
 
 
@@ -662,6 +669,39 @@ class plgSystemYourSites extends JPlugin
 		preg_match_all($pattern, $buffer, $matches);
 		if (count($matches) == 2){
 			$root = str_replace("/._ysts_" . $parts[1], "", JUri::root());
+			foreach ($matches[1] as $match)
+			{
+				if (!file_exists(JPATH_SITE . $match))
+				{
+					//echo "2. replace " . $match. " with " . $root . $match ."<Br>";
+					$buffer = str_replace( $match, $root . $match, $buffer);
+				}
+			}
+		}
+
+		$matches = array();
+		$pattern = "#['|\"]([^\s|\t|\r|\n]*?)\clone_ysts_" . $parts[1] . "(/images/[^)''\"\s]+\.(?:jpg|jpeg|gif|png))#";
+		preg_match_all($pattern, $buffer, $matches);
+		if (count($matches) == 3){
+			$root = str_replace("/clone_ysts_" . $parts[1], "", JUri::root());
+			for ($m = 0; $m < count($matches[2]); $m++)
+			{
+				$match = $matches[2][$m];
+				if (!file_exists(JPATH_SITE . $match))
+				{
+					$char1 = substr($matches[0][$m], 0, 1);
+
+					//echo "1. replace " . $matches[0][$m] . " with " . $char1 .  $root .  substr($matches[2][$m], 1). "<Br>";
+					$buffer = str_replace( $matches[0][$m], $char1 . $root . substr($matches[2][$m], 1) , $buffer);
+				}
+			}
+		}
+
+		$matches = array();
+		$pattern = "#['|\"](images/[^)''\"\s]+\.(?:jpg|jpeg|gif|png))#";
+		preg_match_all($pattern, $buffer, $matches);
+		if (count($matches) == 2){
+			$root = str_replace("/clone_ysts_" . $parts[1], "", JUri::root());
 			foreach ($matches[1] as $match)
 			{
 				if (!file_exists(JPATH_SITE . $match))

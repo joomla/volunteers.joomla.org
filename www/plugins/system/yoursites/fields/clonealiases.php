@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @version    CVS: 1.23.0
+ * @version    CVS: 1.26.0
  * @package    com_yoursites
  * @author     Geraint Edwards <yoursites@gwesystems.com>
  * @copyright  2016-2020 GWE Systems Ltd
@@ -30,7 +30,7 @@ class JFormFieldClonealiases extends JFormFieldList
 			$this->value = array();
 		}
 
-		$folders = Folder::folders(JPATH_SITE , "._ysts_", false, false, array('.svn', 'CVS', '.DS_Store', '__MACOSX'), array());
+		$folders = Folder::folders(JPATH_SITE , "clone_ysts_", false, false, array('.svn', 'CVS', '.DS_Store', '__MACOSX'), array());
 
 		$input = "";
 		foreach ($folders as $folder)
@@ -38,6 +38,16 @@ class JFormFieldClonealiases extends JFormFieldList
 			$value = isset($this->value[$folder]) && !empty(trim($this->value[$folder])) ? $this->value[$folder] : $folder;
 			$input .= "<input type='text' name='" . $this->name. "[$folder]' value='" . $value . "'/> => $folder <br>\n";
 		}
+
+		// old style clones
+		$folders = Folder::folders(JPATH_SITE , "._ysts_", false, false, array('.svn', 'CVS', '.DS_Store', '__MACOSX'), array());
+
+		foreach ($folders as $folder)
+		{
+			$value = isset($this->value[$folder]) && !empty(trim($this->value[$folder])) ? $this->value[$folder] : $folder;
+			$input .= "<input type='text' name='" . $this->name. "[$folder]' value='" . $value . "'/> => $folder <br>\n";
+		}
+
 		if (empty($input))
 		{
 			$this->hidden = true;

@@ -130,7 +130,22 @@ class file_fof40InstallerScript
 		if (!empty($this->maximumJoomlaVersion) && !version_compare(JVERSION, $this->maximumJoomlaVersion, 'le'))
 		{
 			$jVersion = JVERSION;
-			$msg      = "<p>You need Joomla! $this->maximumJoomlaVersion or earlier to install this package but you have $jVersion installed</p>";
+			$msg = <<< HTML
+<h3>FOF is no longer needed on Joomla 4</h3>
+<p>
+	<strong>Summary: FOF is no longer used on Joomla 4. Please uninstall it.</strong>
+</p>
+<hr/>
+<p>
+	FOF a.k.a. Framework-on-Framework was an extension development framework used by Akeeba Ltd (and some third party extensions developed by companies not affiliated with Akeeba Ltd) on Joomla 1.5 to 3.10.
+</p>
+<p>
+	Akeeba Ltd has stopped using the FOF framework for developing extensions. All of our extensions have new, Joomla 4 native versions which use the Joomla Core MVC library, included in Joomla 4 itself.
+</p>
+<p>
+	You can no longer install or update FOF on Joomla 4.1 and later (you have {$jVersion}). In fact, you just need to uninstall it.
+</p>
+HTML;
 
 			Log::add($msg, Log::WARNING, 'jerror');
 

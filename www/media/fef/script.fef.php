@@ -2,9 +2,9 @@
 /**
  * Akeeba Frontend Framework (FEF)
  *
- * @package       fef
- * @copyright (c) 2017-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
- * @license       GNU General Public License version 3, or later
+ * @package   fef
+ * @copyright (c) 2017-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @license   GNU General Public License version 3, or later
  */
 
 defined('_JEXEC') or die();
@@ -103,7 +103,22 @@ class file_fefInstallerScript
 		if (!empty($this->maximumJoomlaVersion) && !version_compare(JVERSION, $this->maximumJoomlaVersion, 'le'))
 		{
 			$jVersion = JVERSION;
-			$msg      = "<p>You need Joomla! $this->maximumJoomlaVersion or earlier to install this package but you have $jVersion installed</p>";
+			$msg = <<< HTML
+<h3>FEF is no longer needed on Joomla 4</h3>
+<p>
+	<strong>Summary: FEF is no longer used on Joomla 4. Please uninstall it.</strong>
+</p>
+<hr/>
+<p>
+	Akeeba FEF a.k.a. the Akeeba Front-End Framework was a CSS and JavaScript framework used by Akeeba Ltd with the Joomla 3 versions of our software.
+</p>
+<p>
+	Akeeba Ltd has stopped using the FEF framework for developing extensions. All of our extensions have new, Joomla 4 native versions which use the Bootstrap library, included in Joomla 4 itself.
+</p>
+<p>
+	You can no longer install or update FEF on Joomla 4.1 and later (you have {$jVersion}). In fact, you just need to uninstall it.
+</p>
+HTML;
 
 			JLog::add($msg, JLog::WARNING, 'jerror');
 
@@ -189,13 +204,12 @@ class file_fefInstallerScript
 			return;
 		}
 
-		// Remove the obsolete dependency to FOF
-		$isFOFInstalled = @is_dir(JPATH_LIBRARIES . '/fof30');
-
-		if ($isFOFInstalled)
+		// Auto-uninstall this package when it is no longer needed.
+		if (($type != 'install') && ($this->countHardcodedDependencies() === 0))
 		{
-			// Remove self from FOF 3.0 dependencies
-			$this->removeDependency('fof30', 'file_fef');
+			$this->uninstallSelf($parent);
+
+			return;
 		}
 
 		$this->bugfixFilesNotCopiedOnUpdate($parent);
@@ -213,7 +227,7 @@ class file_fefInstallerScript
 	public function uninstall($parent)
 	{
 		// Check dependencies on FEF
-		$dependencyCount = count($this->getDependencies('file_fef'));
+		$dependencyCount = $this->countHardcodedDependencies();
 
 		if ($dependencyCount)
 		{
@@ -322,97 +336,6 @@ class file_fefInstallerScript
 		];
 
 		return $fefVersion['package']['date']->toUNIX() >= $fefVersion['installed']['date']->toUNIX();
-	}
-
-	/**
-	 * Get the dependencies for a package from the #__akeeba_common table
-	 *
-	 * @param   string  $package  The package
-	 *
-	 * @return  array  The dependencies
-	 */
-	protected function getDependencies($package)
-	{
-		$db = JFactory::getDbo();
-
-		$query = $db->getQuery(true)
-			->select($db->qn('value'))
-			->from($db->qn('#__akeeba_common'))
-			->where($db->qn('key') . ' = ' . $db->q($package));
-
-		try
-		{
-			$dependencies = $db->setQuery($query)->loadResult();
-			$dependencies = json_decode($dependencies, true);
-
-			if (empty($dependencies))
-			{
-				$dependencies = [];
-			}
-		}
-		catch (Exception $e)
-		{
-			$dependencies = [];
-		}
-
-		return $dependencies;
-	}
-
-	/**
-	 * Sets the dependencies for a package into the #__akeeba_common table
-	 *
-	 * @param   string  $package       The package
-	 * @param   array   $dependencies  The dependencies list
-	 */
-	protected function setDependencies($package, array $dependencies)
-	{
-		$db = JFactory::getDbo();
-
-		$query = $db->getQuery(true)
-			->delete('#__akeeba_common')
-			->where($db->qn('key') . ' = ' . $db->q($package));
-
-		try
-		{
-			$db->setQuery($query)->execute();
-		}
-		catch (Exception $e)
-		{
-			// Do nothing if the old key wasn't found
-		}
-
-		$object = (object) [
-			'key'   => $package,
-			'value' => json_encode($dependencies),
-		];
-
-		try
-		{
-			$db->insertObject('#__akeeba_common', $object, 'key');
-		}
-		catch (Exception $e)
-		{
-			// Do nothing if the old key wasn't found
-		}
-	}
-
-	/**
-	 * Removes a package dependency from #__akeeba_common
-	 *
-	 * @param   string  $package     The package
-	 * @param   string  $dependency  The dependency to remove
-	 */
-	protected function removeDependency($package, $dependency)
-	{
-		$dependencies = $this->getDependencies($package);
-
-		if (in_array($dependency, $dependencies))
-		{
-			$index = array_search($dependency, $dependencies);
-			unset($dependencies[$index]);
-
-			$this->setDependencies($package, $dependencies);
-		}
 	}
 
 	/**
@@ -532,5 +455,93 @@ class file_fefInstallerScript
 				File::copy($sourcePath, $targetPath);
 			}
 		}
+	}
+
+	/**
+	 * Count the number of old FOF + FEF based extensions installed on this site
+	 *
+	 * @return  int
+	 */
+	private function countHardcodedDependencies()
+	{
+		// Look for fof.xml in the backend directories of the following components
+		$hardcodedDependencies = [
+			'com_admintools',
+			'com_akeeba',
+			'com_ars',
+			'com_ats',
+			'com_compatibility',
+			'com_datacompliance',
+			'com_contactus',
+			'com_docimport',
+			'com_loginguard',
+		];
+
+		$count = 0;
+
+		foreach ($hardcodedDependencies as $component)
+		{
+			$filePath = JPATH_ADMINISTRATOR . '/components/' . $component . '/fof.xml';
+
+			if (@file_exists($filePath))
+			{
+				$count++;
+			}
+		}
+
+		return $count;
+	}
+
+	/**
+	 * Uninstall this package.
+	 *
+	 * This runs on update when there are no more dependencies left.
+	 *
+	 * @param  \Joomla\CMS\Installer\Adapter\FileAdapter $adapter
+	 *
+	 * @return void
+	 */
+	private function uninstallSelf($adapter)
+	{
+		$parent = $adapter->getParent();
+
+		if (empty($parent) || !property_exists($parent, 'extension'))
+		{
+			return;
+		}
+
+		if (version_compare(JVERSION, '4.0', 'lt'))
+		{
+			$db = \Joomla\CMS\Factory::getDbo();
+		}
+		else
+		{
+			$db = \Joomla\CMS\Factory::getContainer()->get('DatabaseDriver');
+		}
+
+		try
+		{
+			$query = $db->getQuery(true)
+				->select($db->quoteName('extension_id'))
+				->from($db->quoteName('#__extensions'))
+				->where($db->quoteName('type') . ' = ' . $db->quote('file'))
+				->where($db->quoteName('name') . ' = ' . $db->quote('file_fef'));
+
+			$id = $db->setQuery($query)->loadResult();
+		}
+		catch (Exception $e)
+		{
+			return;
+		}
+
+		if (empty($id))
+		{
+			return;
+		}
+
+		$msg = 'Automatically uninstalling FOF 4; this package is no longer required on your site.';
+		\Joomla\CMS\Log\Log::add($msg, \Joomla\CMS\Log\Log::INFO, 'jerror');
+
+		$parent->uninstall('file', $id);
 	}
 }

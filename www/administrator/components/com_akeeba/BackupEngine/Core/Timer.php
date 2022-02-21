@@ -129,7 +129,7 @@ class Timer
 		// Only run a sleep delay if we haven't reached the minexectime execution time
 		if (($minexectime > $elapsed_time) && ($elapsed_time > 0))
 		{
-			$sleep_msec = $minexectime - $elapsed_time;
+			$sleep_msec = (int)($minexectime - $elapsed_time);
 
 			if (!$serverSideSleep)
 			{

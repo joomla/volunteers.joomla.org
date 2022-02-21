@@ -71,7 +71,8 @@ class ConfigurationWizard extends Model
 			$this->chmod($outputDirectory, 511);
 
 			// Repeat the test
-			$fixOut = !@file_put_contents($filename, 'test');
+			$filename = $outputDirectory . '/test.dat';
+			$fixOut   = !@file_put_contents($filename, 'test');
 
 			if (!$fixOut)
 			{

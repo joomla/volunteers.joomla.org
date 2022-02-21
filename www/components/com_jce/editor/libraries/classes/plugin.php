@@ -218,6 +218,7 @@ class WFEditorPlugin extends JObject
             'plugins' => array('core' => array($name), 'external' => array()),
             'sections' => array('dlg', $name . '_dlg', 'colorpicker'),
             'mode' => 'plugin',
+            'language' => WFLanguage::getTag()
         ));
 
         $data = $parser->load();
@@ -237,7 +238,7 @@ class WFEditorPlugin extends JObject
         jimport('joomla.filesystem.folder');
         $document = WFDocument::getInstance();
 
-        if ($document->get('standalone') === 0) {
+        if ($document->get('standalone') == 0) {
             $document->addScript(array('tiny_mce_popup'), 'tiny_mce');
         }
 

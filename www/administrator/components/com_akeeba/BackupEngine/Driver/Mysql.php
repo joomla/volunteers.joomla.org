@@ -229,6 +229,11 @@ class Mysql extends Base
 	 */
 	public function escape($text, $extra = false)
 	{
+		if (is_null($text))
+		{
+			return 'NULL';
+		}
+
 		$result = @mysql_real_escape_string($text, $this->getConnection());
 
 		if ($result === false)

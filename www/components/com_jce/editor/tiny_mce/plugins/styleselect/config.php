@@ -95,8 +95,6 @@ class WFStyleselectPluginConfig
                 foreach ((array) $custom_styles as $style) {
                     $style = (object) $style;
 
-                    $style->ceFalseOverride = true;
-
                     // clean up title
                     if (isset($style->title)) {
                         $style->title = self::cleanString($style->title);
@@ -120,7 +118,8 @@ class WFStyleselectPluginConfig
                         $style->classes = self::cleanString($style->classes);
                     }
 
-                    if (isset($style->styles)) {
+                    // validate and cleanup styles
+                    if (isset($style->styles) && preg_match('#\s*([^:]+):\s*([^;]+);?#', $style->styles)) {
                         // replace comma with semi-colon and remove duplicates
                         $style->styles = preg_replace('#[;]+#', ';', $style->styles);
                     }
@@ -152,10 +151,11 @@ class WFStyleselectPluginConfig
                         // match all if not set
                         if (!isset($style->selector)) {
                             $style->selector = '*';
-
                             // set to element
                             if (isset($style->element)) {
                                 $style->selector = $style->element;
+                            } else {
+                                $style->inline = 'span';
                             }
                         }
                     }

@@ -2,9 +2,9 @@
 /**
  * Akeeba Frontend Framework (FEF)
  *
- * @package       fef
- * @copyright (c) 2017-2021 Nicholas K. Dionysopoulos / Akeeba Ltd
- * @license       GNU General Public License version 3, or later
+ * @package   fef
+ * @copyright (c) 2017-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @license   GNU General Public License version 3, or later
  */
 
 // Protect from unauthorized access

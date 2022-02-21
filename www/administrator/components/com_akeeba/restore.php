@@ -1,10 +1,20 @@
 <?php
 /**
- * Akeeba UNiTE
+ * Akeeba Kickstart
+ * An AJAX-powered archive extraction tool
  *
+ * @package   kickstart
  * @copyright Copyright (c)2008-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
- * @license   GNU GPL version 3 or, at your option, any later version
- * @package   unite
+ * @license   GNU General Public License version 3, or later
+ */
+
+/**
+ * Akeeba Restore
+ * An AJAX-powered archive extraction library for JPA, JPS and ZIP archives
+ *
+ * @package   restore
+ * @copyright Copyright (c)2008-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @license   GNU General Public License version 3, or later
  */
 
 define('_AKEEBA_RESTORATION', 1);
@@ -1496,6 +1506,36 @@ abstract class AKAbstractUnarchiver extends AKAbstractPart
 		$mustSkip     = !$this->matchesGlobPatterns($lastFileName, $extractList);
 
 		return $mustSkip;
+	}
+
+	protected function fuzzySignatureSearch($requiredSignatures, $sigLen)
+	{
+		if (!is_array($requiredSignatures))
+		{
+			$requiredSignatures = [$requiredSignatures];
+		}
+
+		fseek($this->fp, 0, SEEK_SET);
+
+		$stuff  = $this->fread($this->fp, 131072);
+		$maxPos = function_exists('mb_strlen') ? mb_strlen($stuff, 'binary') : strlen($stuff);
+
+		for ($i = 0; $i < $maxPos; $i++)
+		{
+			foreach ($requiredSignatures as $signature)
+			{
+				$sigBinary = function_exists('mb_substr') ? mb_substr($stuff, $i, $sigLen, 'binary') : substr($stuff, $i, $sigLen);
+
+				if ($sigBinary === $signature)
+				{
+					fseek($this->fp, $i, SEEK_SET);
+
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -3868,6 +3908,24 @@ class AKUnarchiverJPA extends AKAbstractUnarchiver
 			return false;
 		}
 
+		// Fuzzy check for the start of archive.
+		debugMsg('Fuzzy checking for archive signature');
+
+		$sigFound = $this->fuzzySignatureSearch(array(
+			'JPA'
+		), 3);
+
+		if (!$sigFound)
+		{
+			debugMsg('Cannot find a valid archive signature in the first 128Kb of the first part file');
+
+			$this->setError(AKText::_('ERR_NOT_A_JPA_FILE'));
+
+			return false;
+		}
+
+		debugMsg(sprintf('File signature found, position %d', ftell($this->fp)));
+
 		// Read the signature
 		$sig = fread($this->fp, 3);
 
@@ -4663,6 +4721,26 @@ class AKUnarchiverZIP extends AKUnarchiverJPA
 			return false;
 		}
 
+		// Fuzzy check for the start of archive.
+		debugMsg('Fuzzy checking for archive signature');
+
+		$sigFound = $this->fuzzySignatureSearch(array(
+			pack('V', 0x08074b50), // Multi-part ZIP
+			pack('V', 0x30304b50), // Multi-part ZIP (alternate)
+			pack('V', 0x04034b50)  // Single file
+		), 4);
+
+		if (!$sigFound)
+		{
+			debugMsg('Cannot find a valid archive signature in the first 128Kb of the first part file');
+
+			$this->setError(AKText::_('ERR_CORRUPT_ARCHIVE'));
+
+			return false;
+		}
+
+		debugMsg(sprintf('File signature found, position %d', ftell($this->fp)));
+
 		// Read a possible multipart signature
 		$sigBinary  = fread($this->fp, 4);
 		$headerData = unpack('Vsig', $sigBinary);
@@ -4679,9 +4757,9 @@ class AKUnarchiverZIP extends AKUnarchiverJPA
 		}
 
 		$multiPartSigs = array(
-			0x08074b50,        // Multi-part ZIP
-			0x30304b50,        // Multi-part ZIP (alternate)
-			0x04034b50        // Single file
+			0x08074b50, // Multi-part ZIP
+			0x30304b50, // Multi-part ZIP (alternate)
+			0x04034b50  // Single file
 		);
 		if (!in_array($headerData['sig'], $multiPartSigs))
 		{
@@ -5047,6 +5125,24 @@ class AKUnarchiverJPS extends AKUnarchiverJPA
 		{
 			return false;
 		}
+
+		// Fuzzy check for the start of archive.
+		debugMsg('Fuzzy checking for archive signature');
+
+		$sigFound = $this->fuzzySignatureSearch(array(
+			'JPS'
+		), 3);
+
+		if (!$sigFound)
+		{
+			debugMsg('Cannot find a valid archive signature in the first 128Kb of the first part file');
+
+			$this->setError(AKText::_('ERR_NOT_A_JPS_FILE'));
+
+			return false;
+		}
+
+		debugMsg(sprintf('File signature found, position %d', ftell($this->fp)));
 
 		// Read the signature
 		$sig = fread($this->fp, 3);
@@ -5997,7 +6093,7 @@ class AKCoreTimer extends AKAbstractObject
 		// Only run a sleep delay if we haven't reached the minexectime execution time
 		if (($minexectime > $elapsed_time) && ($elapsed_time > 0))
 		{
-			$sleep_msec = $minexectime - $elapsed_time;
+			$sleep_msec = (int)($minexectime - $elapsed_time);
 
 			if (function_exists('usleep'))
 			{

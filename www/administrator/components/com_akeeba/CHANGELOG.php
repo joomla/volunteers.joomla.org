@@ -1,4 +1,21 @@
 <?php die();?>
+Akeeba Backup 8.1.1
+================================================================================
+~ PHP 8.1 compatibility changes
+# [HIGH] Wrong RewriteBase set up in the .htaccess Maker when restoring a Joomla site with Admin Tools Professional installed
+
+Akeeba Backup 8.1.0
+================================================================================
++ Allow using [REMOTESTATUS] in the email subject, not just the body
++ Joomla restoration: modify domains in the Admin Tools' Allowed Domains and server config maker features if necessary
+# [HIGH] Problems restoring if a table name ends in 0 when another table with an identical name EXCEPT the trailing zero is also being backed up
+# [HIGH] Backing up to SQL: indices would not have the correct table name prefix
+# [HIGH] Backing up as SQL: the query for finder_taxonomy does not use the correct prefix
+# [MEDIUM] Log Priorities global configuration option got mangled restoring a Joomla 4 site
+# [HIGH] PHP fatal error on PHP 8 if the output directory does not exist
+# [LOW] Occasional display issue on Chromium browsers with the database and file / folder filter pages.
+# [LOW] RackSpace CloudFiles: some hosts change the case of HTTP headers
+
 Akeeba Backup 8.0.15
 ================================================================================
 + Support for MySQL 8 invisible columns

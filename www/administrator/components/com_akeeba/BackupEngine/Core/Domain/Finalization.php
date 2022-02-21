@@ -431,6 +431,9 @@ class Finalization extends Part
 			$body = str_replace('[TOTALSIZE]', $this->formatByteSize($totalSize), $body);
 		}
 
+		// Post-process the subject (support the [REMOTESTATUS] variable)
+		$subject = str_replace('[REMOTESTATUS]', $remoteStatus, $subject);
+
 		// Sometimes $body contains literal \n instead of newlines
 		$body = str_replace('\\n', "\n", $body);
 

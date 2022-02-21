@@ -11,7 +11,7 @@
 defined('JPATH_PLATFORM') or die('RESTRICTED');
 
 // Some shortcuts to make life easier
-define('WF_VERSION', '2.9.18');
+define('WF_VERSION', '2.9.20');
 
 // JCE Administration Component
 define('WF_ADMINISTRATOR',     JPATH_ADMINISTRATOR.'/components/com_jce');

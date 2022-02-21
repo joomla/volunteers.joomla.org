@@ -35,10 +35,9 @@ class WFHelpPlugin extends WFEditorPlugin
 
         $params = JComponentHelper::getParams('com_jce');
 
-        $registry = new JRegistry($params);
-        $url = $registry->get('preferences.help_url', 'https://www.joomlacontenteditor.net');
-        $method = $registry->get('preferences.help_method', 'reference');
-        $pattern = $registry->get('preferences.help_pattern', '/$1/$2/$3');
+        $url = $params->get('help_url', 'https://www.joomlacontenteditor.net');
+        $method = $params->get('help_method', 'reference');
+        $pattern = $params->get('help_pattern', '/$1/$2/$3');
 
         // trim url of trailing slash
         $url = trim($url, '/');
@@ -80,6 +79,10 @@ class WFHelpPlugin extends WFEditorPlugin
         $tabs->addTab('help', 1, array('plugin' => $this));
 
         $document = WFDocument::getInstance();
+
+        if ($document->get('standalone') == 1) {
+            $document->addScript(array('window.min'));
+        }
 
         $document->addScript(array('help.min'), 'plugins');
         $document->addStyleSheet(array('help.min'), 'plugins');
@@ -205,7 +208,7 @@ class WFHelpPlugin extends WFEditorPlugin
 
         $result = '';
 
-        $result .= '<ul class="uk-nav uk-nav-side" id="help-menu"><li class="uk-nav-header">' . JText::_('WF_' . strtoupper($category) . '_TITLE') . '</li>';
+        $result .= '<ul class="uk-nav" id="help-menu"><li class="uk-nav-header">' . JText::_('WF_' . strtoupper($category) . '_TITLE') . '</li>';
         $result .= $this->getTopics($file);
         $result .= '</ul>';
 

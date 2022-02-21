@@ -119,6 +119,29 @@ abstract class Base extends Part
 	private $fp = null;
 
 	/**
+	 * Should I be using an abstract prefix (#__) for table names?
+	 *
+	 * @var   bool
+	 * @since 9.1.0
+	 */
+	private $useAbstractPrefix;
+
+	/**
+	 * Public constructor.
+	 *
+	 * @return  void
+	 * @since   9.1.0
+	 */
+	public function __construct()
+	{
+		$this->useAbstractPrefix =
+			Factory::getEngineParamsProvider()->getScriptingParameter('db.saveasname', 'normal') !== 'output';
+
+		parent::__construct();
+	}
+
+
+	/**
 	 * This method is called when the factory is being serialized and is used to perform necessary cleanup steps.
 	 *
 	 * @return  void
@@ -187,9 +210,11 @@ abstract class Base extends Part
 		Factory::getLog()->debug(__CLASS__ . " :: Getting temporary file");
 		$this->tempFile = Factory::getTempFiles()->registerTempFile(dechex(crc32(microtime())) . '.sql');
 		Factory::getLog()->debug(__CLASS__ . " :: Temporary file is {$this->tempFile}");
+
 		// Get the base name of the dump file
 		$partNumber = intval($partNumber);
 		$baseName   = $this->dumpFile;
+
 		if ($partNumber > 0)
 		{
 			// The file names are in the format dbname.sql, dbname.s01, dbname.s02, etc
@@ -679,9 +704,15 @@ abstract class Base extends Part
 	{
 		if (!empty($data))
 		{
-			if ($addMarker)
+			if ($addMarker && $this->useAbstractPrefix)
 			{
 				$this->data_cache .= '/**ABDB**/';
+			}
+			elseif (!$this->useAbstractPrefix)
+			{
+				// Replace #__ with the prefix when writing plain .sql files
+				$db   = $this->getDB();
+				$data = $db->replacePrefix($data) . "\n";
 			}
 
 			$this->data_cache .= $data;

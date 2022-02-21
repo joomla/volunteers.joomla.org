@@ -176,6 +176,11 @@ class Sqlite extends Base
 			return $text;
 		}
 
+		if (is_null($text))
+		{
+			return 'NULL';
+		}
+
 		return SQLite3::escapeString($text);
 	}
 

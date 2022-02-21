@@ -55,7 +55,7 @@ class StackFinder extends FilterBase
 		// Get the SQL query, constructed correctly for the DB technology in use.
 		$db  = Factory::getDatabase();
 		$sql = (string) $db->getQuery(true)
-			->insert('#__finder_taxonomy')
+			->insert($db->quoteName('#__finder_taxonomy'))
 			->columns(array_map([$db, 'quoteName'], [
 				'id', 'parent_id', 'lft', 'rgt', 'level', 'path', 'title', 'alias', 'state', 'access', 'language',
 			]))

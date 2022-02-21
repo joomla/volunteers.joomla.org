@@ -186,7 +186,7 @@ class Onedrive extends Base
 
 		$this->isChunked  = $config->get('engine.postproc.' . $this->settingsKey . '.chunk_upload', true);
 		$this->chunkSize  = $config->get('engine.postproc.' . $this->settingsKey . '.chunk_upload_size', 10) * 1024 * 1024;
-		$defaultDirectory = $config->get('engine.postproc.' . $this->settingsKey . '.directory', '');
+		$defaultDirectory = rtrim($config->get('engine.postproc.' . $this->settingsKey . '.directory', ''), '/');
 		$this->directory  = $config->get('volatile.postproc.directory', $defaultDirectory);
 
 		// Sanity checks

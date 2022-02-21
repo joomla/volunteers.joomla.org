@@ -155,6 +155,11 @@ class Mysqli extends Mysql
 	 */
 	public function escape($text, $extra = false)
 	{
+		if (is_null($text))
+		{
+			return 'NULL';
+		}
+
 		$result = @mysqli_real_escape_string($this->getConnection(), $text);
 
 		if ($result === false)

@@ -176,7 +176,7 @@ class file_fof40InstallerScript
 		// Auto-uninstall this package when it is no longer needed.
 		if (($type != 'install') && ($this->countHardcodedDependencies() === 0))
 		{
-			$this->uninstallSelf($parent);
+			// $this->uninstallSelf($parent);
 
 			return;
 		}
@@ -242,6 +242,11 @@ class file_fof40InstallerScript
 	 */
 	public function uninstall($parent)
 	{
+		// if (version_compare(JVERSION, '4.0.0', 'ge'))
+		// {
+		// 	return;
+		// }
+
 		// Check dependencies on FOF
 		$dependencyCount = $this->countHardcodedDependencies();
 

@@ -213,8 +213,8 @@ class Request
 		// Parse body into XML
 		if (
 			($this->response->error === false)
-			&& isset($this->response->headers['Content-Type'])
-			&& (strstr($this->response->headers['Content-Type'], 'application/json') !== false)
+			&& isset($this->response->headers['content-type'])
+			&& (strstr($this->response->headers['content-type'], 'application/json') !== false)
 			&& isset($this->response->body)
 		)
 		{
@@ -323,7 +323,7 @@ class Request
 		else
 		{
 			[$header, $value] = explode(': ', trim($data), 2);
-			$this->response->headers[$header] = is_numeric($value) ? (int) $value : $value;
+			$this->response->headers[strtolower($header)] = is_numeric($value) ? (int) $value : $value;
 		}
 
 		return $strlen;

@@ -129,8 +129,8 @@ class Mysql extends Base
 
 					$previousChar    = ($pos > 0) ? substr($tableSql, $pos - 1, 1) : '';
 					$nextChar        = ($pos < (strlen($tableSql) - $fullNameLength)) ? substr($tableSql, $pos + $fullNameLength, 1) : '';
-					$prevIsTableChar = empty($previousChar) ? false : preg_match($fullCharRegex, $previousChar);
-					$nextIsTableChar = empty($nextChar) ? false : preg_match($fullCharRegex, $nextChar);
+					$prevIsTableChar = $previousChar === '' ? false : preg_match($fullCharRegex, $previousChar);
+					$nextIsTableChar = $nextChar === '' ? false : preg_match($fullCharRegex, $nextChar);
 
 					if ($prevIsTableChar || $nextIsTableChar)
 					{

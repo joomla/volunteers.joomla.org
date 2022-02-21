@@ -1683,7 +1683,7 @@ class DataModel extends Model implements TableInterface
 
 		$order = $db->qn($order);
 
-		$dir = strtoupper($this->getState('filter_order_Dir', null, 'cmd'));
+		$dir = strtoupper($this->getState('filter_order_Dir', '', 'cmd'));
 
 		if (!in_array($dir, ['ASC', 'DESC']))
 		{

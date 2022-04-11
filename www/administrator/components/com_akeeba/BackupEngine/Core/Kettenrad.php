@@ -404,9 +404,23 @@ class Kettenrad extends Part
 		// Apply an infinite time limit if required
 		if ($registry->get('akeeba.tuning.settimelimit', 0))
 		{
+			if (function_exists('ini_set'))
+			{
+				@ini_set('max_execution_time', 844000);
+			}
+
 			if (function_exists('set_time_limit'))
 			{
 				set_time_limit(0);
+			}
+		}
+
+		// Apply a large memory limit (1Gb) if required
+		if ($registry->get('akeeba.tuning.setmemlimit', 0))
+		{
+			if (function_exists('ini_set'))
+			{
+				ini_set('memory_limit', '17179869184');
 			}
 		}
 

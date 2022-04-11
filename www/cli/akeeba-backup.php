@@ -135,6 +135,16 @@ ENDBLOCK;
 			echo "JPATH_ADMINISTRATOR : " . JPATH_ADMINISTRATOR . "\n\n";
 		}
 
+		if (class_exists('Joomla\CMS\Component\ComponentHelper') && \Joomla\CMS\Component\ComponentHelper::isEnabled('com_akeebabackup'))
+		{
+			echo "ERROR!\n";
+			echo "Please finish upgrading to Akeeba Backup 9 and uninstall Akeeba Backup 8\n";
+			echo "per the instructions shown on your site's backend, Components, Akeeba Backup\n";
+			echo "\n";
+			echo "This script will refuse to continue.\n";
+			die("\n");
+		}
+
 		// Load the engine
 		$factoryPath = JPATH_ADMINISTRATOR . '/components/com_akeeba/BackupEngine/Factory.php';
 		define('JPATH_COMPONENT_ADMINISTRATOR', JPATH_ADMINISTRATOR . '/components/com_akeeba');
@@ -267,6 +277,7 @@ ENDBLOCK;
 					'akeeba.tuning.nobreak.proactive'       => 1,
 					'akeeba.tuning.nobreak.finalization'    => 1,
 					'akeeba.tuning.settimelimit'            => 0,
+					'akeeba.tuning.setmemlimit'             => 1,
 					'akeeba.tuning.nobreak.domains'         => 0,
 				], $overrides);
 			}

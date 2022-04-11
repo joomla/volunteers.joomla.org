@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @version    CVS: 1.26.0
+ * @version    CVS: 1.27.0
  * @package    com_yoursites
  * @author     Geraint Edwards <via website>
  * @copyright  2016-2020 GWE Systems Ltd
@@ -211,6 +211,10 @@ function ProcessYstsJsonRequest(&$requestObject, $returnData)
 
 			case "errorreporting":
 				setErrorReporting($requestObject, $returnData);
+				break;
+
+			case "caching":
+				setCaching($requestObject, $returnData);
 				break;
 
 			case "findjoomlaupdates":
@@ -1097,6 +1101,59 @@ function setErrorReporting($requestObject, &$returnData)
 		if (in_array($newlevel, array("default", "none", "simple", "maximum", "development")))
 		{
 			$configuration = str_replace("public \$error_reporting = '$error_reporting';", "public \$error_reporting = '$newlevel';", $configuration);
+		}
+
+		if (!JFile::write($configfile, $configuration))
+		{
+			$returnData->errormessages[]  = JText::_('COM_CONFIG_ERROR_WRITE_FAILED');
+		}
+
+		// Attempt to make the file unwriteable if using FTP.
+		if (!$ftp['enabled'] && JPath::isOwner($configfile) && !JPath::setPermissions($configfile, '0444'))
+		{
+			$returnData->messages[]  = JText::_('COM_CONFIG_ERROR_CONFIGURATION_PHP_NOTUNWRITABLE');
+		}
+
+
+	}
+	else
+	{
+		$returnData->error = 1;
+		$returnData->errormessages[]  = JText::_('COM_YOURSITES_COULD_NOT_TOGGLE_DEBUG_MODE_CONFIGURATION_FILE_MISSING');
+		return $returnData;
+	}
+
+
+	return $returnData;
+}
+
+function setCaching($requestObject, &$returnData)
+{
+
+	if (JFile::exists(JPATH_SITE .  "/configuration.php"))
+	{
+		$configfile = JPATH_SITE . "/configuration.php";
+
+		// Get the new FTP credentials.
+		$ftp = JClientHelper::getCredentials('ftp', true);
+
+		// Attempt to make the file writeable if using FTP.
+		if (!$ftp['enabled'] && JPath::isOwner($configfile) && !JPath::setPermissions($configfile, '0644'))
+		{
+			$returnData->errormessages[]  = JText::_('COM_CONFIG_ERROR_CONFIGURATION_PHP_NOTWRITABLE');
+		}
+
+		// Attempt to write the configuration file as a PHP class named JConfig.
+		$configuration = file_get_contents($configfile);
+
+		$jconfig = JFactory::getConfig();
+
+		$caching  = $jconfig->get('caching', 'none');
+		$newlevel = $requestObject->newlevel;
+
+		if (in_array($newlevel, array("0", "1", "2")))
+		{
+			$configuration = str_replace("public \$caching = '$caching';", "public \$caching = '$newlevel';", $configuration);
 		}
 
 		if (!JFile::write($configfile, $configuration))
@@ -2318,33 +2375,36 @@ function clearTmp($requestObject, & $returnData)
 	$tempdir = $config->get('tmp_path');
 
 	// remove package files from tmp folder
-	$packagefiles = JFolder::files($tempdir, '\.zip');
-	if (count($packagefiles))
+	if (is_dir($tempdir))
 	{
-		foreach ($packagefiles as $packagefile)
+		$packagefiles = JFolder::files($tempdir, '\.zip');
+		if (count($packagefiles))
 		{
-			@unlink($tempdir . "/" . $packagefile);
-		}
-	}
-
-	try
-	{
-		$di = new RecursiveDirectoryIterator($tempdir, FilesystemIterator::SKIP_DOTS);
-		$ri = new RecursiveIteratorIterator($di, RecursiveIteratorIterator::CHILD_FIRST);
-		foreach ( $ri as $file ) {
-			$rawfile = $file->getRealPath();
-			if ($rawfile == $tempdir . DIRECTORY_SEPARATOR . "index.html")
+			foreach ($packagefiles as $packagefile)
 			{
-				continue;
+				@unlink($tempdir . "/" . $packagefile);
 			}
-			$file->isDir() ? rmdir($file) : unlink($file);
+		}
+
+		try
+		{
+			$di = new RecursiveDirectoryIterator($tempdir, FilesystemIterator::SKIP_DOTS);
+			$ri = new RecursiveIteratorIterator($di, RecursiveIteratorIterator::CHILD_FIRST);
+			foreach ($ri as $file)
+			{
+				$rawfile = $file->getRealPath();
+				if ($rawfile == $tempdir . DIRECTORY_SEPARATOR . "index.html")
+				{
+					continue;
+				}
+				$file->isDir() ? rmdir($file) : unlink($file);
+			}
+		}
+		catch (Exception $e)
+		{
+
 		}
 	}
-	catch (Exception $e)
-	{
-
-	}
-
 	$returnData->messages[]  = JText::_('COM_YOURSITES_TMP_PACKAGE_FILES_CLEANED');
 
 	$returnData->siteinfo = array();
@@ -3931,8 +3991,18 @@ function directLogin($requestObject, & $returnData, $redirect = true)
 
 	if (!$adminuser)
 	{
-		$returnData->result = "Invalid User";
-		return false;
+		$lang = JFactory::getLanguage();
+		$lang->load("plg_system_yoursites", JPATH_ADMINISTRATOR, null, false, true);
+		echo JText::_("PLG_YOURSITES_DIRECT_LOGIN_USER_MISSING");
+		exit(0);
+	}
+
+	if ($adminuser->block)
+	{
+		$lang = JFactory::getLanguage();
+		$lang->load("plg_system_yoursites", JPATH_ADMINISTRATOR, null, false, true);
+		echo JText::_("PLG_YOURSITES_DIRECT_LOGIN_USER_IS_BLOCKED");
+		exit(0);
 	}
 
 	// Do we require a 2 factor authentication code
@@ -5606,7 +5676,7 @@ function getJoomlaUpdateSitesIds($column = 0)
  *
  * @return  boolean  True on success.
  *
- * @since   1.26.0
+ * @since   1.27.0
  * @throws  \RuntimeException
  */
 function copyr2($src, $dest, $prefix, & $returnData, $exclusions = array())
@@ -5767,7 +5837,7 @@ function copyr2($src, $dest, $prefix, & $returnData, $exclusions = array())
  *
  * @return  boolean  True on success.
  *
- * @since   1.26.0
+ * @since   1.27.0
  * @throws  \RuntimeException
  */
 function deleter2($src, & $returnData)
@@ -5904,6 +5974,9 @@ function getSiteInfo(& $returnData)
 	$jconfig          = JFactory::getConfig();
 	$returnData->siteinfo["debug"]            = $jconfig->get('debug', '0');
 	$returnData->siteinfo["error_reporting"]  = $jconfig->get('error_reporting', 'none');
+	$returnData->siteinfo["caching"]          = $jconfig->get('caching', '0');
+	$returnData->siteinfo["cache_handler"]    = $jconfig->get('cache_handler', 'file');
+	$returnData->siteinfo["cachetime"]        = $jconfig->get('cachetime', '15');
 
 	// DB size
 	$db = JFactory::getDbo();

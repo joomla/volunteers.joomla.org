@@ -345,7 +345,7 @@ class Jps extends BaseArchiver
 			// Virtual: Single step, multiple blocks, compressed
 			$this->putVirtualFileToArchive($sourceNameOrData);
 		}
-		else
+		elseif (!$isDir)
 		{
 			// Regular file: multiple step, multiple blocks, compressed
 			if ($this->putFileIntoArchive($sourceNameOrData, $fileSize) === true)

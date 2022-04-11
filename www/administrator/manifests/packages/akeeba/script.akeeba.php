@@ -153,7 +153,44 @@ class Pkg_AkeebaInstallerScript
 		// Check the maximum Joomla! version
 		if (!version_compare(JVERSION, $this->maximumJoomlaVersion, 'le'))
 		{
-			$msg = "<p>You need Joomla! $this->maximumJoomlaVersion or earlier to install this component</p>";
+			//$msg = "<p>You need Joomla! $this->maximumJoomlaVersion or earlier to install this component</p>";
+
+			$hasOldVersion = \Joomla\CMS\Component\ComponentHelper::isInstalled('com_akeeba');
+			$jVersion = JVERSION;
+
+			if ($hasOldVersion)
+			{
+				$upgradeMessage = <<< HTML
+<p class="fs-2">
+	Please go to <a href="index.php?option=com_akeeba">Components, Akeeba Backup</a> to learn how to install
+	Akeeba Backup 9 — the Joomla 4 native version of our software — and migrate your backup settings and backup
+	archives with a single click. 
+</p>
+HTML;
+			}
+			else
+			{
+				$upgradeMessage = <<< HTML
+<p class="fs-2">
+	Please go to <a href="https://www.akeeba.com/download.html">our site's Download page</a> to download
+	Akeeba Backup 9, the Joomla 4 native version of our software.
+</p>
+
+HTML;
+			}
+
+			$msg = <<< HTML
+<div class="m-4">
+	<h3 class="alert-heading fs-1">Akeeba Backup 8 cannot be installed or used with Joomla 4.1 and later versions</h3>
+	$upgradeMessage
+	<p class="fs-5">
+		<strong>Note:</strong> You will see the messages “Extension Install: Custom install routine failure.”
+		 and “Error installing package” printed below. This is normal and expected. Since Akeeba Backup 8 is not
+		 meant to be used with Joomla $jVersion it refuses to install at all and Joomla produces these two messages.
+	</p>
+</div>
+HTML;
+
 			JLog::add($msg, JLog::WARNING, 'jerror');
 
 			return false;

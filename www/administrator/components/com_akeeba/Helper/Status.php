@@ -247,6 +247,11 @@ class Status
 
 		$quirk['severity'] = $quirk['severity'] == 'critical' ? 'high' : $quirk['severity'];
 
+		if ($quirk['code'] == 400)
+		{
+			return sprintf("<li><a class=\"severity-%s\" href=\"%s\" target=\"_blank\">%s</a></li>\n", $quirk['severity'], 'https://www.akeeba.com/documentation/akeeba-backup-joomla/migrating-from-old-akeeba-backup.html', $quirk['description']);
+		}
+
 		return '<li><a class="severity-' . $quirk['severity'] .
 			'" href="' . $quirk['help_url'] . '" target="_blank">' . $quirk['description'] . '</a>' . "</li>\n";
 

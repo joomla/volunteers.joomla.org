@@ -150,6 +150,7 @@ class Azure extends AzureStorage
 	 * @return  Container
 	 *
 	 * @throws  Api
+	 * @see     https://docs.microsoft.com/en-us/rest/api/storageservices/list-blobs
 	 */
 	public function getContainer($containerName = '')
 	{
@@ -160,7 +161,7 @@ class Azure extends AzureStorage
 
 		if (!self::isValidContainerName($containerName))
 		{
-			throw new Api('Container name does not adhere to container naming conventions. See http://msdn.microsoft.com/en-us/library/dd135715.aspx for more information.');
+			throw new Api('Container name does not adhere to container naming conventions. See https://docs.microsoft.com/en-us/rest/api/storageservices/Naming-and-Referencing-Containers--Blobs--and-Metadata for more information.');
 		}
 
 		// Perform request
@@ -195,15 +196,16 @@ class Azure extends AzureStorage
 	/**
 	 * Put blob
 	 *
-	 * @param   string  $containerName       Container name
-	 * @param   string  $blobName            Blob name
-	 * @param   string  $localFileName       Local file name to be uploaded
-	 * @param   array   $metadata            Key/value pairs of meta data
-	 * @param   array   $additionalHeaders   Additional headers. See
-	 *                                       http://msdn.microsoft.com/en-us/library/dd179371.aspx for more information.
+	 * @param   string  $containerName      Container name
+	 * @param   string  $blobName           Blob name
+	 * @param   string  $localFileName      Local file name to be uploaded
+	 * @param   array   $metadata           Key/value pairs of meta data
+	 * @param   array   $additionalHeaders  Additional headers.
 	 *
 	 * @return  Instance  Partial blob properties
 	 * @throws  Api
+	 * @see     https://docs.microsoft.com/en-us/rest/api/storageservices/put-blob
+	 * @see     https://docs.microsoft.com/en-us/rest/api/storageservices/Specifying-Conditional-Headers-for-Blob-Service-Operations
 	 */
 	public function putBlob($containerName = '', $blobName = '', $localFileName = '', $metadata = [], $additionalHeaders = [])
 	{
@@ -214,7 +216,7 @@ class Azure extends AzureStorage
 
 		if (!self::isValidContainerName($containerName))
 		{
-			throw new Api('Container name does not adhere to container naming conventions. See http://msdn.microsoft.com/en-us/library/dd135715.aspx for more information.');
+			throw new Api('Container name does not adhere to container naming conventions. See https://docs.microsoft.com/en-us/rest/api/storageservices/Naming-and-Referencing-Containers--Blobs--and-Metadata for more information.');
 		}
 
 		if ($blobName === '')
@@ -237,7 +239,7 @@ class Azure extends AzureStorage
 			throw new Api('Blobs stored in the root container can not have a name containing a forward slash (/).');
 		}
 
-		// Mandatory headers for this API version, see https://msdn.microsoft.com/en-us/library/azure/dd179451.aspx
+		// Mandatory headers for this API version, see https://docs.microsoft.com/en-us/rest/api/storageservices/Put-Blob
 		$headers = [
 			'x-ms-blob-type' => 'BlockBlob',
 		];
@@ -292,10 +294,11 @@ class Azure extends AzureStorage
 	 * @param   string  $containerName      Container name
 	 * @param   string  $blobName           Blob name
 	 * @param   array   $metadata           Key/value pairs of meta data
-	 * @param   array   $additionalHeaders  Additional headers. See
-	 *                                      http://msdn.microsoft.com/en-us/library/dd179371.aspx for more information.
+	 * @param   array   $additionalHeaders  Additional headers.
 	 *
 	 * @throws  Api
+	 * @see     https://docs.microsoft.com/en-us/rest/api/storageservices/set-blob-metadata
+	 * @see     https://docs.microsoft.com/en-us/rest/api/storageservices/Specifying-Conditional-Headers-for-Blob-Service-Operations
 	 */
 	public function setBlobMetadata($containerName = '', $blobName = '', $metadata = [], $additionalHeaders = [])
 	{
@@ -306,7 +309,7 @@ class Azure extends AzureStorage
 
 		if (!self::isValidContainerName($containerName))
 		{
-			throw new Api('Container name does not adhere to container naming conventions. See http://msdn.microsoft.com/en-us/library/dd135715.aspx for more information.');
+			throw new Api('Container name does not adhere to container naming conventions. See https://docs.microsoft.com/en-us/rest/api/storageservices/Naming-and-Referencing-Containers--Blobs--and-Metadata for more information.');
 		}
 
 		if ($blobName === '')
@@ -356,10 +359,11 @@ class Azure extends AzureStorage
 	 * @param   string  $localFileName      Local file name to store downloaded blob
 	 * @param   string  $snapshotId         Snapshot identifier
 	 * @param   string  $leaseId            Lease identifier
-	 * @param   array   $additionalHeaders  Additional headers. See
-	 *                                      http://msdn.microsoft.com/en-us/library/dd179371.aspx for more information.
+	 * @param   array   $additionalHeaders  Additional headers.
 	 *
 	 * @throws  Api
+	 * @see     https://docs.microsoft.com/en-us/rest/api/storageservices/get-blob
+	 * @see     https://docs.microsoft.com/en-us/rest/api/storageservices/Specifying-Conditional-Headers-for-Blob-Service-Operations
 	 */
 	public function getBlob($containerName = '', $blobName = '', $localFileName = '', $snapshotId = null, $leaseId = null, $additionalHeaders = [])
 	{
@@ -370,7 +374,7 @@ class Azure extends AzureStorage
 
 		if (!self::isValidContainerName($containerName))
 		{
-			throw new Api('Container name does not adhere to container naming conventions. See http://msdn.microsoft.com/en-us/library/dd135715.aspx for more information.');
+			throw new Api('Container name does not adhere to container naming conventions. See https://docs.microsoft.com/en-us/rest/api/storageservices/Naming-and-Referencing-Containers--Blobs--and-Metadata for more information.');
 		}
 
 		if ($blobName === '')
@@ -394,12 +398,13 @@ class Azure extends AzureStorage
 	 * @param   string  $blobName           Blob name
 	 * @param   string  $snapshotId         Snapshot identifier
 	 * @param   string  $leaseId            Lease identifier
-	 * @param   array   $additionalHeaders  Additional headers. See
-	 *                                      http://msdn.microsoft.com/en-us/library/dd179371.aspx for more information.
+	 * @param   array   $additionalHeaders  Additional headers.
 	 *
 	 * @return  mixed  Blob contents
 	 *
 	 * @throws  Api
+	 * @see     https://docs.microsoft.com/en-us/rest/api/storageservices/get-blob
+	 * @see     https://docs.microsoft.com/en-us/rest/api/storageservices/Specifying-Conditional-Headers-for-Blob-Service-Operations
 	 */
 	public function getBlobData($containerName = '', $blobName = '', $snapshotId = null, $leaseId = null, $additionalHeaders = [])
 	{
@@ -410,7 +415,7 @@ class Azure extends AzureStorage
 
 		if (!self::isValidContainerName($containerName))
 		{
-			throw new Api('Container name does not adhere to container naming conventions. See http://msdn.microsoft.com/en-us/library/dd135715.aspx for more information.');
+			throw new Api('Container name does not adhere to container naming conventions. See https://docs.microsoft.com/en-us/rest/api/storageservices/Naming-and-Referencing-Containers--Blobs--and-Metadata for more information.');
 		}
 
 		if ($blobName === '')
@@ -462,10 +467,11 @@ class Azure extends AzureStorage
 	 * @param   string  $blobName           Blob name
 	 * @param   string  $snapshotId         Snapshot identifier
 	 * @param   string  $leaseId            Lease identifier
-	 * @param   array   $additionalHeaders  Additional headers. See
-	 *                                      http://msdn.microsoft.com/en-us/library/dd179371.aspx for more information.
+	 * @param   array   $additionalHeaders  Additional headers.
 	 *
 	 * @throws  Api
+	 * @see     https://docs.microsoft.com/en-us/rest/api/storageservices/delete-blob
+	 * @see     https://docs.microsoft.com/en-us/rest/api/storageservices/Specifying-Conditional-Headers-for-Blob-Service-Operations
 	 */
 	public function deleteBlob($containerName = '', $blobName = '', $snapshotId = null, $leaseId = null, $additionalHeaders = [])
 	{
@@ -476,7 +482,7 @@ class Azure extends AzureStorage
 
 		if (!self::isValidContainerName($containerName))
 		{
-			throw new Api('Container name does not adhere to container naming conventions. See http://msdn.microsoft.com/en-us/library/dd135715.aspx for more information.');
+			throw new Api('Container name does not adhere to container naming conventions. See https://docs.microsoft.com/en-us/rest/api/storageservices/Naming-and-Referencing-Containers--Blobs--and-Metadata for more information.');
 		}
 
 		if ($blobName === '')

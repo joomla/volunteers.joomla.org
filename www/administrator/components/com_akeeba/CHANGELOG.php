@@ -1,8 +1,21 @@
 <?php die();?>
+Akeeba Backup 8.1.3
+================================================================================
++ Restoration: ANGIE now applies very high memory and execution time limits to prevent some timeout / memory outage issues on most hosts.
++ Restoration: ANGIE now warns you if you leave the database connection information empty
++ Option to set a really large PHP memory limit during backup
+~ More helpful and forceful installation abortion message when you try to install this package on Joomla 4.1 or later.
+# [LOW] The JPS archiver would show warnings about unreadable files when archiving directories without any files in them.
+
+Akeeba Backup 8.1.2
+================================================================================
+~ Make it clearer that you need Akeeba Backup 9 on Joomla 4.
+# [HIGH] Uploading to OVH is broken on many servers not using a proxy
+# [HIGH] Wrong RewriteBase set up in the .htaccess Maker when restoring a Joomla site with Admin Tools Professional installed
+
 Akeeba Backup 8.1.1
 ================================================================================
 ~ PHP 8.1 compatibility changes
-# [HIGH] Wrong RewriteBase set up in the .htaccess Maker when restoring a Joomla site with Admin Tools Professional installed
 
 Akeeba Backup 8.1.0
 ================================================================================

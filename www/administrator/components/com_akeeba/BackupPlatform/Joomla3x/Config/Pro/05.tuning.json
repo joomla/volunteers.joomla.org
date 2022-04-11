@@ -97,5 +97,11 @@
         "type": "bool",
         "title": "COM_AKEEBA_CONFIG_ADVANCED_SETTIMELIMIT_LABEL",
         "description": "COM_AKEEBA_CONFIG_ADVANCED_SETTIMELIMIT_DESC"
+    },
+    "akeeba.tuning.setmemlimit": {
+        "default": "0",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_ADVANCED_SETMEMLIMIT_LABEL",
+        "description": "COM_AKEEBA_CONFIG_ADVANCED_SETMEMLIMIT_DESC"
     }
 }

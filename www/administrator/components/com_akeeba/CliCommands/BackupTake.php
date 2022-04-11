@@ -120,6 +120,7 @@ class BackupTake extends AbstractCommand
 					'akeeba.tuning.nobreak.proactive'       => 1,
 					'akeeba.tuning.nobreak.finalization'    => 1,
 					'akeeba.tuning.settimelimit'            => 0,
+					'akeeba.tuning.setmemlimit'             => 1,
 					'akeeba.tuning.nobreak.domains'         => 0,
 				], $overrides));
 			}

@@ -5,7 +5,7 @@
 
             <field name="title" type="text" default="" hint="WF_STYLEFORMAT_TITLE" label="" hiddenLabel="true" />
 
-            <field name="element" type="groupedlist" label="WF_STYLEFORMAT_ELEMENT" description="WF_STYLEFORMAT_ELEMENT_DESC">
+            <field name="element" type="groupedlist" default="" label="WF_STYLEFORMAT_ELEMENT" description="WF_STYLEFORMAT_ELEMENT_DESC">
                 <option value="" selected="selected">WF_OPTION_SELECTED_ELEMENT</option>
                 <group label="WF_OPTION_SECTION_ELEMENTS">
                     <option value="section">section</option>

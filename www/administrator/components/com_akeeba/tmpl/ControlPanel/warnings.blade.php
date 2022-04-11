@@ -14,28 +14,6 @@ $cloudFlareTestFile = 'CLOUDFLARE::' . $this->getContainer()->template->parsePat
 $cloudFlareTestFile .= '?' . $this->getContainer()->mediaVersion;
 
 ?>
-{{-- Joomla 4 upgrade prompt --}}
-@if(version_compare(JVERSION, '3.999.999', 'gt'))
-    <div class="akeeba-block--warning--large">
-        <h1>🚨 🚨 🚨 Please upgrade to Akeeeba Backup 9 🚨 🚨 🚨</h1>
-        <p style="font-size: 1.5rem; margin: 1rem 0 0">
-            You are currently using Akeeba Backup 8. This version was only made minimally compatible with Joomla 4 to allow you to upgrade from Joomla 3 to Joomla 4 without losing your backup archives and settings. We will not provide support for Akeeba Backup 8 running on Joomla 4.0 and later.
-        </p>
-        <p style="font-size: 1.5rem; margin: 1rem 0 0">
-            You need to download and install Akeeba Backup 9, our Joomla 4 native version of Akeeba Backup. It is fully supported for use on Joomla 4.
-        </p>
-        <p style="font-size: 1.5rem; margin: 1rem 0 0">
-            After installing Akeeba Backup 9 please click on Components, Akeeba Backup for Joomla!, Control Panel from Joomla's sidebar and follow the instructions on your screen to migrate your settings and your backups from Akeeba Backup 8.
-        </p>
-        <p>
-            <a href="https://www.akeeba.com/download.html" class="akeeba-btn--green--big--block" style="font-size: 1.5rem; margin: 2rem 0">
-                <span class="akion akion-ios-download" aria-hidden="true"></span>
-                Download Akeeba Backup 9 now
-            </a>
-        </p>
-    </div>
-@endif
-
 {{-- Joomla 3 End of Life notice --}}
 @if(time() > 1660683600)
     <div class="akeeba-block--warning">

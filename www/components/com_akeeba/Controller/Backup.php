@@ -63,6 +63,16 @@ class Backup extends Controller
 		$this->checkPermissions();
 		$this->setProfile();
 
+		if (class_exists('Joomla\CMS\Component\ComponentHelper') && \Joomla\CMS\Component\ComponentHelper::isEnabled('com_akeebabackup'))
+		{
+			@ob_end_clean();
+			echo '500 ERROR -- Please finish upgrading to Akeeba Backup 9 and uninstall Akeeba Backup 8 per the instructions shown on your site\'s backend, Components, Akeeba Backup';
+			flush();
+
+			$this->container->platform->closeApplication();
+		}
+
+
 		// Get the backup ID
 		$backupId = $this->input->get('backupid', null, 'cmd');
 

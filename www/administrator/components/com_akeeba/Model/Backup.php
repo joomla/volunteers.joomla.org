@@ -13,6 +13,7 @@ defined('_JEXEC') || die();
 use Akeeba\Engine\Base\Part;
 use Akeeba\Engine\Factory;
 use Akeeba\Engine\Platform;
+use Akeeba\Engine\Util\Logger;
 use Akeeba\Engine\Util\PushMessages;
 use Closure;
 use DateTimeZone;
@@ -250,6 +251,11 @@ class Backup extends Model
 			}
 
 			$kettenrad->setIgnoreMinimumExecutionTime(false);
+		}
+
+		if (version_compare(JVERSION, '4.0', 'ge'))
+		{
+			Factory::getLog()->warning(sprintf('You ar using Akeeba Backup %s on Joomla! %s. This is not supported and might lead to data loss. Please upgrade to Akeeba Backup 9 or later! YOU WILL RECEIVE NO SUPPORT WHATSOEVER FOR THIS BACKUP.', AKEEBA_VERSION, JVERSION));
 		}
 
 		$ret_array = $kettenrad->getStatusArray();

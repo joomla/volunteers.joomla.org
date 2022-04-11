@@ -91,5 +91,10 @@
         "default": "1",
         "type": "none",
         "protected": "1"
+    },
+    "akeeba.tuning.setmemlimit": {
+        "default": "1",
+        "type": "none",
+        "protected": "1"
     }
 }

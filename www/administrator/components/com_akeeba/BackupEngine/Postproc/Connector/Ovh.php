@@ -89,14 +89,14 @@ class Ovh extends Swift
 						],
 					],
 				],
-				'scope' => [
+				'scope'    => [
 					'project' => [
-						'id' => $this->tenantId,
+						'id'     => $this->tenantId,
 						'domain' => [
-							'name' => 'Default'
-						]
-					]
-				]
+							'name' => 'Default',
+						],
+					],
+				],
 			],
 		];
 		$json    = json_encode($message);
@@ -114,7 +114,7 @@ class Ovh extends Swift
 		$this->tenantId = $response->body->token->project->id;
 
 		// Get the token and its expiration
-		$this->token = $response->headers['X-Subject-Token'];
+		$this->token           = $response->headers['x-subject-token'];
 		$date                  = new DateTime($response->body->token->expires_at);
 		$this->tokenExpiration = $date->getTimestamp();
 

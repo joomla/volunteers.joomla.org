@@ -157,6 +157,11 @@ class Joomla3x extends BasePlatform
 		return false;
 	}
 
+	public static function quirk_400()
+	{
+		return version_compare(JVERSION, '4.0', 'ge');
+	}
+
 	/**
 	 * Loads the current configuration off the database table
 	 *
@@ -1151,6 +1156,9 @@ class Joomla3x extends BasePlatform
 	{
 		Factory::getConfigurationChecks()->addConfigurationCheckDefinition('013', 'critical', 'COM_AKEEBA_CPANEL_WARNING_Q013', [
 			Joomla3x::class, 'quirk_013',
+		]);
+		Factory::getConfigurationChecks()->addConfigurationCheckDefinition('400', 'critical', 'COM_AKEEBA_CPANEL_WARNING_Q400', [
+			Joomla3x::class, 'quirk_400',
 		]);
 	}
 

@@ -96,7 +96,7 @@ class AzureStorage
 	 *
 	 * @var string
 	 */
-	protected $_apiVersion = '2015-04-05';
+	protected $_apiVersion = '2019-12-12';
 
 	/**
 	 * Storage host name

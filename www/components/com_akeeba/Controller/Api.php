@@ -106,6 +106,11 @@ class Api extends Controller
 					break;
 			}
 
+			if (class_exists('Joomla\CMS\Component\ComponentHelper') && \Joomla\CMS\Component\ComponentHelper::isEnabled('com_akeebabackup'))
+			{
+				throw new \RuntimeException(sprintf('Please finish upgrading to Akeeba Backup 9 and uninstall Akeeba Backup 8 per the instructions shown on your site\'s backend, Components, Akeeba Backup'), 400);
+			}
+
 			$taskHandler = new Task($this->container);
 
 			$result = [

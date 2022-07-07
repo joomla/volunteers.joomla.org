@@ -37,6 +37,14 @@
         "description": "COM_AKEEBA_CONFIG_BOX_OPENOAUTH_DESC",
         "hook": "akconfig_onedrivebusiness_openoauth"
     },
+    "engine.postproc.onedrivebusiness.drive": {
+        "default": "",
+        "type": "enum",
+        "enumkeys": "COM_AKEEBA_CONFIG_ONEDRIVE_DRIVE_OPT_PERSONAL",
+        "enumvalues": "",
+        "title": "COM_AKEEBA_CONFIG_ONEDRIVE_DRIVE_TITLE",
+        "description": "COM_AKEEBA_CONFIG_ONEDRIVE_DRIVE_DESCRIPTION"
+    },
     "engine.postproc.onedrivebusiness.directory": {
         "default": "\/",
         "type": "string",

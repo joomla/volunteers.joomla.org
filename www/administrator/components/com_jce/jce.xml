@@ -2,12 +2,12 @@
 <extension type="component" version="3.8" method="upgrade">
     <name>COM_JCE</name>
     <author>Ryan Demmer</author>
-    <creationDate>31-03-2022</creationDate>
+    <creationDate>23-06-2022</creationDate>
     <copyright>Copyright (C) 2006 - 2022 Ryan Demmer. All rights reserved</copyright>
     <license>GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html</license>
     <authorEmail>info@joomlacontenteditor.net</authorEmail>
     <authorUrl>www.joomlacontenteditor.net</authorUrl>
-    <version>2.9.22</version>
+    <version>2.9.27</version>
     <description>COM_JCE_XML_DESCRIPTION</description>
 
     <files folder="components/com_jce">
@@ -47,7 +47,7 @@
         <menu view="cpanel" img="media/com_jce/img/logo.svg" link="option=com_jce">COM_JCE</menu>
 
         <submenu>
-            <menu view="cpanel" link="option=com_jce">COM_JCE_MENU_CPANEL</menu>
+            <menu view="cpanel" link="option=com_jce&amp;view=cpanel">COM_JCE_MENU_CPANEL</menu>
             <menu view="config" link="option=com_jce&amp;view=config">COM_JCE_MENU_CONFIG</menu>
             <menu view="profiles" link="option=com_jce&amp;view=profiles">COM_JCE_MENU_PROFILES</menu>
             <menu view="profiles" link="option=com_jce&amp;view=browser">COM_JCE_MENU_FILEBROWSER</menu>

@@ -1,4 +1,34 @@
 <?php die();?>
+Akeeba Backup 8.1.8
+================================================================================
++ Restoration: Warn about missing mysqli / PDO MySQL and REFUSE to proceed
+# [HIGH] Cannot download file from Amazon S3
+# [LOW] PHP Warning when backing up a database (purely cosmetic issue)
+
+Akeeba Backup 8.1.7
+================================================================================
++ Restoration: Warn about missing mysqli / PDO MySQL and REFUSE to proceed
+# [HIGH] Cannot download file from Amazon S3
+# [LOW] PHP Warning when backing up a database (purely cosmetic issue)
+
+Akeeba Backup 8.1.6
+================================================================================
+# [HIGH] Cannot connect to databases on localhost using the default named pipe
+# [MEDIUM] Custom Amazon S3 regions would not work with custom endpoints
+
+Akeeba Backup 8.1.5
+================================================================================
++ Support for custom Amazon S3 regions
+# [HIGH] Pagination in the Manage Backups page was broken
+
+Akeeba Backup 8.1.4
+================================================================================
++ Much improved FTP functions for uploading backup archives and transferring sites
++ Upload to Azure BLOB Storage now supports chunked uploads, files up to 190.7TB (up from 64Mb)
++ OneDrive for Business: you can now use Drives other than your personal
+~ Stricter conditions for determining when to show the “Manage remotely stored files” button in Manage Backups
+# [MEDIUM] OneDrive: Uploads may fail if they are between 4Mb and 100Mb
+
 Akeeba Backup 8.1.3
 ================================================================================
 + Restoration: ANGIE now applies very high memory and execution time limits to prevent some timeout / memory outage issues on most hosts.

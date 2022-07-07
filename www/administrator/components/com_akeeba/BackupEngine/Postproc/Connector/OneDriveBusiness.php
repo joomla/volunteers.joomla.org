@@ -11,22 +11,12 @@ namespace Akeeba\Engine\Postproc\Connector;
 
 defined('AKEEBAENGINE') || die();
 
-use Exception;
-use RuntimeException;
-
 class OneDriveBusiness extends OneDrive
 {
 	/**
 	 * The URL of the helper script which is used to get fresh API tokens
 	 */
 	public const helperUrl = 'https://www.akeeba.com/oauth2/onedrivebusiness.php';
-
-	/**
-	 * The root URL for the MS Graph API
-	 *
-	 * @see  https://docs.microsoft.com/en-us/graph/api/resources/onedrive?view=graph-rest-1.0
-	 */
-	protected $rootUrl = 'https://graph.microsoft.com/v1.0/me/';
 
 	/**
 	 * Size limit for single part uploads.
@@ -41,6 +31,28 @@ class OneDriveBusiness extends OneDrive
 	 * @see https://docs.microsoft.com/en-us/onedrive/developer/rest-api/concepts/direct-endpoint-differences?view=odsp-graph-online#instance-annotations
 	 */
 	public const nameConflictBehavior = '@microsoft.graph.conflictBehavior';
+
+	/**
+	 * The root URL for the MS Graph API
+	 *
+	 * @see  https://docs.microsoft.com/en-us/graph/api/resources/onedrive?view=graph-rest-1.0
+	 */
+	protected $rootUrl = 'https://graph.microsoft.com/v1.0/me/';
+
+	/**
+	 * The Drive ID we are connecting to.
+	 *
+	 * @var   string|null
+	 * @since 9.2.2
+	 */
+	private $driveId;
+
+	public function __construct(?string $accessToken, ?string $refreshToken, ?string $dlid = null, ?string $driveId = null)
+	{
+		parent::__construct($accessToken, $refreshToken, $dlid);
+
+		$this->setDriveId($driveId);
+	}
 
 	/**
 	 * Get the raw listing of a folder
@@ -68,16 +80,7 @@ class OneDriveBusiness extends OneDrive
 			$relativeUrl .= sprintf('(q=\'%s\')', urlencode($searchString));
 		}
 
-		/**
-		 * Order the results by name, ascending
-		 *
-		 * @see https://docs.microsoft.com/en-us/graph/query-parameters#orderby-parameter
-		 */
-		$queryParams = [
-			'$orderby' => 'displayName asc',
-		];
-
-		$result = $this->fetch('GET', $relativeUrl . '?' . http_build_query($queryParams));
+		$result = $this->fetch('GET', $relativeUrl);
 
 		return $result;
 	}
@@ -110,5 +113,132 @@ class OneDriveBusiness extends OneDrive
 
 		return $info['uploadUrl'];
 	}
+
+	/**
+	 * Get a list of Drives accessible to this user's account.
+	 *
+	 * @return  array  String indexed array of Drive ID => User readable name.
+	 *
+	 * @since   9.2.2
+	 */
+	public function getDrives()
+	{
+		$relativeUrl = 'drives';
+
+		$result = $this->fetch('GET', $relativeUrl);
+
+		$translate = function ($string)
+		{
+			$translation = $string;
+
+			if (class_exists(\Joomla\CMS\Language\Text::class))
+			{
+				$translation = \Joomla\CMS\Language\Text::_($string);
+			}
+
+			if (class_exists(\Awf\Text\Text::class))
+			{
+				$translation = \Awf\Text\Text::_($string);
+			}
+
+			if ($translation === $string && substr($string, 0, 11) === 'COM_AKEEBA_')
+			{
+				$string = 'COM_AKEEBABACKUP_' . substr($string, 11);
+			}
+
+			if (class_exists(\Joomla\CMS\Language\Text::class))
+			{
+				$translation = \Joomla\CMS\Language\Text::_($string);
+			}
+
+			if (class_exists(\Awf\Text\Text::class))
+			{
+				$translation = \Awf\Text\Text::_($string);
+			}
+
+			return $translation;
+		};
+
+		if (empty($result) || !is_array($result) || !isset($result['value']) || !is_array($result['value']) || empty($result['value']))
+		{
+			return [
+				'' => 'Drive (OneDrive Personal)',
+			];
+		}
+
+		$keys   = array_map(function ($driveArray) {
+			return $driveArray['id'] ?? '';
+		}, $result['value']);
+		$values = array_map(function ($driveArray) {
+			$description = $driveArray['description'] ?? 'Drive';
+
+			switch ($driveArray['driveType'] ?? 'personal')
+			{
+				case 'personal':
+					$type = 'OneDrive Personal';
+					break;
+
+				case 'business':
+					$type = 'OneDrive for Business';
+					break;
+
+				case 'documentLibrary':
+					$type = 'SharePoint';
+					break;
+			}
+
+			return sprintf('%s (%s)', $description, $type);
+		}, $result['value']);
+
+		return array_combine($keys, $values);
+	}
+
+	/**
+	 * Set the effective Drive ID
+	 *
+	 * @param   string|null  $driveId
+	 *
+	 * @return  void
+	 */
+	public function setDriveId(?string $driveId)
+	{
+		$this->driveId = $driveId;
+
+		$this->rootUrl = empty($this->driveId) ? 'https://graph.microsoft.com/v1.0/me/' : 'https://graph.microsoft.com/v1.0/';
+	}
+
+	protected function normalizeDrivePath($relativePath, $collection = '')
+	{
+		if (empty($this->driveId))
+		{
+			return parent::normalizeDrivePath($relativePath, $collection);
+		}
+
+		$relativePath = trim($relativePath, '/');
+
+		if (empty($relativePath))
+		{
+			$path = '/drives/' . $this->driveId . '/items/root';
+
+			if ($collection)
+			{
+				$path .= '/' . $collection;
+			}
+
+			return $path;
+		}
+
+		$path = '/drives/' . $this->driveId . '/items/root:/' . $relativePath;
+
+		if ($collection)
+		{
+			$path = sprintf("/drives/%s/root:/%s:/%s", $this->driveId, $relativePath, $collection);
+		}
+
+		$path = str_replace(' ', '%20', $path);
+
+		return $path;
+	}
+
 
 }

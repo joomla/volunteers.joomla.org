@@ -239,7 +239,7 @@ class V4 extends Signature
 			$queryString  = @substr($canonicalURI, $questionMarkPos + 1);
 			@parse_str($queryString, $extraQuery);
 
-			if (is_array($extraQuery) || $extraQuery instanceof \Countable ? count($extraQuery) : 0)
+			if (count($extraQuery))
 			{
 				$parameters = array_merge($parameters, $extraQuery);
 			}

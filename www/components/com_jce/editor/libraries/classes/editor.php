@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright     Copyright (c) 2009-2021 Ryan Demmer. All rights reserved
+ * @copyright     Copyright (c) 2009-2022 Ryan Demmer. All rights reserved
  * @license       GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  * JCE is free software. This version may have been modified pursuant
  * to the GNU General Public License, and as distributed it includes or
@@ -165,6 +165,10 @@ class WFEditor
 
     public function init()
     {
+        if ($this->initialized) {
+            return $this;
+        }
+        
         $this->initialized = true;
 
         $settings = $this->getSettings();
@@ -420,10 +424,12 @@ class WFEditor
             // set stylesheets as string
             $settings['content_css'] = implode(',', $stylesheets);
 
-            // Editor Toggle
-            $settings['toggle'] = $wf->getParam('editor.toggle', 1, 1);
-            $settings['toggle_label'] = htmlspecialchars($wf->getParam('editor.toggle_label', ''));
-            $settings['toggle_state'] = $wf->getParam('editor.toggle_state', 1, 1);
+            if (WF_EDITOR_PRO) {
+                // Editor Toggle
+                $settings['toggle'] = $wf->getParam('editor.toggle', 0, 0);
+                $settings['toggle_label'] = htmlspecialchars($wf->getParam('editor.toggle_label', ''));
+                $settings['toggle_state'] = $wf->getParam('editor.toggle_state', 1, 1);
+            }
 
             // use cookies to store state
             $settings['use_state_cookies'] = (bool) $wf->getParam('editor.use_cookies', 1);
@@ -1216,9 +1222,6 @@ class WFEditor
                 } else {
                     JFactory::getApplication()->triggerEvent('onWfGetTemplateStylesheets', array(&$files, $template));
                 }
-
-                // clean up $files array
-                $files = array_unique(array_filter($files));
 
                 break;
             // Nothing, use editor default

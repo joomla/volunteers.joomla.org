@@ -9,15 +9,15 @@
     <dlid prefix="dlid=" suffix=""/>
     <name>Akeeba Backup package</name>
     <author>Nicholas K. Dionysopoulos</author>
-    <creationDate>2022-04-04</creationDate>
+    <creationDate>2022-06-23</creationDate>
     <packagename>akeeba</packagename>
-    <version>8.1.3</version>
+    <version>8.1.8</version>
     <url>https://www.akeeba.com</url>
     <packager>Akeeba Ltd</packager>
     <packagerurl>https://www.akeeba.com</packagerurl>
     <copyright>Copyright (c)2006-2019 Akeeba Ltd / Nicholas K. Dionysopoulos</copyright>
     <license>GNU GPL v3 or later</license>
-    <description>Akeeba Backup installation package v.8.1.3</description>
+    <description>Akeeba Backup installation package v.8.1.8</description>
 
     <!-- List of extensions to install -->
     <files>

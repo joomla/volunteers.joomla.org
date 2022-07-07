@@ -33,6 +33,12 @@
         "description": "COM_AKEEBA_CONFIG_BOX_OPENOAUTH_DESC",
         "hook": "akconfig_googledrive_openoauth"
     },
+    "engine.postproc.googledrive.refreshdrives": {
+        "default": "",
+        "type": "button",
+        "title": "COM_AKEEBA_CONFIG_GOOGLEDRIVE_REFRESHTEAMDRIVES_TITLE",
+        "hook": "akeeba_googledrive_refreshdrives"
+    },
     "engine.postproc.googledrive.team_drive": {
         "default": "",
         "type": "enum",

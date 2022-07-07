@@ -7,13 +7,13 @@
 
 <extension version="3.9.0" type="component" method="upgrade">
 	<name>Akeeba</name>
-	<creationDate>2022-04-04</creationDate>
+	<creationDate>2022-06-23</creationDate>
 	<author>Nicholas K. Dionysopoulos</author>
 	<authorEmail>nicholas@dionysopoulos.me</authorEmail>
 	<authorUrl>https://www.akeeba.com</authorUrl>
 	<copyright>Copyright (c)2006-2019 Akeeba Ltd / Nicholas K. Dionysopoulos</copyright>
 	<license>GNU GPL v3 or later</license>
-	<version>8.1.3</version>
+	<version>8.1.8</version>
 	<description>Akeeba Backup Pro - Full Joomla! site backup solution, Professional Edition</description>
 
 	<!-- Public front end files -->

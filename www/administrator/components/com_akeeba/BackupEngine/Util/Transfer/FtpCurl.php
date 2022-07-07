@@ -248,7 +248,7 @@ class FtpCurl extends Ftp implements TransferInterface
 	public function delete($fileName)
 	{
 		$commands = [
-			'DELE /' . $this->getPath($fileName),
+			'DELE ' . $this->getPath($fileName),
 		];
 
 		try
@@ -436,7 +436,20 @@ class FtpCurl extends Ftp implements TransferInterface
 	 */
 	public function cwd()
 	{
-		return '';
+		$commands = [
+			'PWD',
+		];
+
+		try
+		{
+			$result = $this->executeServerCommands($commands, '');
+		}
+		catch (RuntimeException $e)
+		{
+			return '/';
+		}
+
+		return $result;
 	}
 
 	/**
@@ -525,6 +538,32 @@ class FtpCurl extends Ftp implements TransferInterface
 	}
 
 	/**
+	 * Returns the absolute remote path from a path relative to the initial directory configured when creating the
+	 * transfer object.
+	 *
+	 * @param   string  $fileName  The relative path of a file or directory
+	 *
+	 * @return  string  The absolute path for use by the transfer object
+	 */
+	public function getPath($fileName)
+	{
+		$fileName = ltrim(str_replace('\\', '/', $fileName), '/');
+
+		$isInitialDirectory = $fileName === $this->directory;
+		$startsWithInitialDirectory = (strpos($fileName, rtrim($this->directory, '/') . '/') === 0)
+			|| (strpos($fileName, trim($this->directory, '/') . '/') === 0);
+
+		// Relative file? Add the initial directory
+		if (!$isInitialDirectory && !$startsWithInitialDirectory)
+		{
+			$fileName = '/' . trim($this->directory, '/') .
+				(empty($fileName) ? '' : '/') . $fileName;
+		}
+
+		return '/' . ltrim($fileName, '/');
+	}
+
+	/**
 	 * Returns a cURL resource handler for the remote FTP server
 	 *
 	 * @param   string  $remoteFile  Optional. The remote file / folder on the FTP server you'll be manipulating with cURL.
@@ -539,13 +578,21 @@ class FtpCurl extends Ftp implements TransferInterface
 		 * VERY IMPORTANT! WE NEED THE DOUBLE SLASH AFTER THE HOST NAME since we are giving an absolute path.
 		 * @see https://technicalsanctuary.wordpress.com/2012/11/01/curl-curl-9-server-denied-you-to-change-to-the-given-directory/
 		 */
+		$ftpUri = 'ftp://' . $this->host . '//';
 
-		$ftpUri = 'ftp://' . $this->host . '/';
+		$isInitialDirectory = $remoteFile === $this->directory;
+		$startsWithInitialDirectory = (strpos($remoteFile, rtrim($this->directory, '/') . '/') === 0)
+			|| (strpos($remoteFile, trim($this->directory, '/') . '/') === 0);
 
-		// Relative path? Append the initial directory.
-		if (substr($remoteFile, 0, 1) != '/')
+		// Relative file? Add the initial directory
+		if (!$isInitialDirectory && !$startsWithInitialDirectory)
 		{
-			$ftpUri .= $this->directory;
+			$ftpUri .= '/' . trim($this->directory, '/');
+		}
+
+		if (!empty($remoteFile) && substr($ftpUri, -2) !== '//')
+		{
+			$ftpUri .= '/';
 		}
 
 		// Add a remote file if necessary. The filename must be URL encoded since we're creating a URI.
@@ -752,15 +799,17 @@ class FtpCurl extends Ftp implements TransferInterface
 	/**
 	 * Executes arbitrary FTP commands
 	 *
-	 * @param   array  $commands  An array with the FTP commands to be executed
+	 * @param   string[]     $commands    An array with the FTP commands to be executed
+	 * @param   string|null  $remoteFile  The remote file / folder to use in the cURL URI when executing the commands
 	 *
 	 * @return  string  The output of the executed commands
 	 *
-	 * @throws  RuntimeException
 	 */
-	protected function executeServerCommands($commands)
+	protected function executeServerCommands(array $commands, ?string $remoteFile = null): string
 	{
-		$ch = $this->getCurlHandle($this->directory . '/');
+		$remoteFile = $remoteFile ?? ($this->directory . '/');
+
+		$ch = $this->getCurlHandle($remoteFile);
 
 		curl_setopt($ch, CURLOPT_QUOTE, $commands);
 		curl_setopt($ch, CURLOPT_HEADER, 1);

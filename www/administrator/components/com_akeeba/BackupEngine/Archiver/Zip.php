@@ -578,7 +578,14 @@ class Zip extends BaseArchiver
 		}
 
 		// Get the hex time.
-		$dtime = dechex($this->unix2DOSTime($fileModTime));
+		try
+		{
+			$dtime = dechex($this->unix2DOSTime($fileModTime));
+		}
+		catch (\Throwable $e)
+		{
+			$dtime = "00000000";
+		}
 
 		if (akstrlen($dtime) < 8)
 		{

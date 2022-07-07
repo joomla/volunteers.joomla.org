@@ -234,12 +234,32 @@ class Ftp implements TransferInterface, RemoteResourceInterface
 		}
 
 		// Attempt to change to the initial directory
-		if (!@ftp_chdir($this->connection, $this->directory))
+		$defaultDir  = @ftp_pwd($this->connection) ?: '/';
+		$directories = [
+			$this->directory,
+			rtrim($this->directory, '/'),
+			trim($this->directory, '/'),
+			$defaultDir,
+		];
+
+		foreach ($directories as $dir)
+		{
+			$changedDir = @ftp_chdir($this->connection, $dir);
+
+			if ($changedDir)
+			{
+				$this->directory = $dir;
+
+				break;
+			}
+		}
+
+		if (!$changedDir)
 		{
 			@ftp_close($this->connection);
 			$this->connection = null;
 
-			throw new RuntimeException(sprintf('Cannot change to initial FTP directory "%s" – make sure the folder exists and that you have adequate permissions to it', $this->directory), 500);
+			throw new RuntimeException(sprintf('Cannot change to initial FTP directory "%s" – make sure the folder exists and that you have adequate permissions to it. Pro tip: the default directory of your FTP connection is reported to be %s', $this->directory, $defaultDir), 500);
 		}
 
 		// Apply the passive mode preference
@@ -274,7 +294,24 @@ class Ftp implements TransferInterface, RemoteResourceInterface
 		fwrite($handle, $contents);
 		rewind($handle);
 
-		$ret = @ftp_fput($this->connection, $fileName, $handle, FTP_BINARY);
+		$cwd            = $this->cwd();
+		$remoteFilename = '/' . ltrim($fileName, '/');
+		$remotePath     = dirname($remoteFilename);
+		$remoteName     = basename($remoteFilename);
+
+		if (!$this->isDir($remotePath))
+		{
+			$this->mkdir($remotePath);
+		}
+
+		$changedDir = @ftp_chdir($this->connection, $remotePath);
+
+		$ret = $changedDir && @ftp_fput($this->connection, $remoteName, $handle, FTP_BINARY);
+
+		if ($changedDir)
+		{
+			@ftp_chdir($this->connection, $cwd);
+		}
 
 		fclose($handle);
 
@@ -304,7 +341,23 @@ class Ftp implements TransferInterface, RemoteResourceInterface
 			return false;
 		}
 
-		$ret = @ftp_fput($this->connection, $remoteFilename, $handle, FTP_BINARY);
+		$cwd            = $this->cwd();
+		$remoteFilename = '/' . ltrim($remoteFilename, '/');
+		$remotePath     = dirname($remoteFilename);
+		$remoteName     = basename($remoteFilename);
+
+		if (!$this->isDir($remotePath))
+		{
+			$this->mkdir($remotePath);
+		}
+
+		$changedDir = @ftp_chdir($this->connection, $remotePath);
+		$ret        = $changedDir && @ftp_fput($this->connection, $remoteName, $handle, FTP_BINARY);
+
+		if ($changedDir)
+		{
+			@ftp_chdir($this->connection, $cwd);
+		}
 
 		@fclose($handle);
 
@@ -325,7 +378,17 @@ class Ftp implements TransferInterface, RemoteResourceInterface
 
 		$handle = fopen('buffer://akeeba_engine_transfer_ftp', 'r+');
 
-		$result = @ftp_fget($this->connection, $handle, $fileName, FTP_BINARY);
+		$cwd            = $this->cwd();
+		$remoteFilename = '/' . ltrim($fileName, '/');
+		$remotePath     = dirname($remoteFilename);
+		$remoteName     = basename($remoteFilename);
+		$changedDir     = @ftp_chdir($this->connection, $remotePath);
+		$result         = $changedDir && @ftp_fget($this->connection, $handle, $remoteName, FTP_BINARY);
+
+		if ($changedDir)
+		{
+			@ftp_chdir($this->connection, $cwd);
+		}
 
 		if ($result === false)
 		{
@@ -358,7 +421,18 @@ class Ftp implements TransferInterface, RemoteResourceInterface
 	 */
 	public function download($remoteFilename, $localFilename, $useExceptions = true)
 	{
-		$ret = @ftp_get($this->connection, $localFilename, $remoteFilename, FTP_BINARY);
+		$cwd            = $this->cwd();
+		$remoteFilename = '/' . ltrim($remoteFilename, '/');
+		$remotePath     = dirname($remoteFilename);
+		$remoteName     = basename($remoteFilename);
+		$changedDir     = @ftp_chdir($this->connection, $remotePath);
+
+		$ret = $changedDir && @ftp_get($this->connection, $localFilename, $remoteName, FTP_BINARY);
+
+		if ($changedDir)
+		{
+			@ftp_chdir($this->connection, $cwd);
+		}
 
 		if (!$ret && $useExceptions)
 		{
@@ -377,7 +451,25 @@ class Ftp implements TransferInterface, RemoteResourceInterface
 	 */
 	public function delete($fileName)
 	{
-		return @ftp_delete($this->connection, $fileName);
+		$cwd            = $this->cwd();
+		$remoteFilename = '/' . ltrim($fileName, '/');
+		$remotePath     = dirname($remoteFilename);
+		$remoteName     = basename($remoteFilename);
+
+		if (!$this->isDir($remotePath))
+		{
+			$this->mkdir($remotePath);
+		}
+
+		$changedDir = @ftp_chdir($this->connection, $remotePath);
+		$ret        = $changedDir && @ftp_delete($this->connection, $remoteName);;
+
+		if ($changedDir)
+		{
+			ftp_chdir($this->connection, $cwd);
+		}
+
+		return $ret;
 	}
 
 	/**
@@ -395,12 +487,34 @@ class Ftp implements TransferInterface, RemoteResourceInterface
 
 		$handle = fopen('buffer://akeeba_engine_transfer_ftp', 'r+');
 
-		$ret = @ftp_fget($this->connection, $handle, $from, FTP_BINARY);
+		$cwd            = $this->cwd();
+		$remoteFilename = '/' . ltrim($from, '/');
+		$remotePath     = dirname($remoteFilename);
+		$remoteName     = basename($remoteFilename);
+		$changedDir     = @ftp_chdir($this->connection, $remotePath);
+
+		$ret = $changedDir && @ftp_fget($this->connection, $handle, $remoteName, FTP_BINARY);
 
 		if ($ret !== false)
 		{
 			rewind($handle);
-			$ret = @ftp_fput($this->connection, $to, $handle, FTP_BINARY);
+
+			$remoteFilename = '/' . ltrim($to, '/');
+			$remotePath     = dirname($remoteFilename);
+			$remoteName     = basename($remoteFilename);
+
+			if (!$this->isDir($remotePath))
+			{
+				$this->mkdir($remotePath);
+			}
+
+			$changedDir = @ftp_chdir($this->connection, $remotePath);
+			$ret        = $changedDir && @ftp_fput($this->connection, $remoteName, $handle, FTP_BINARY);
+		}
+
+		if ($changedDir)
+		{
+			@ftp_chdir($this->connection, $cwd);
 		}
 
 		fclose($handle);
@@ -604,11 +718,12 @@ class Ftp implements TransferInterface, RemoteResourceInterface
 	 */
 	public function getWrapperStringFor($path)
 	{
+		$usernameEncoded = urlencode($this->username);
 		$passwordEncoded = urlencode($this->password);
 		$hostname        = $this->host . ($this->port ? ":{$this->port}" : '');
 		$protocol        = $this->ssl ? "ftps" : "ftp";
 
-		return "{$protocol}://{$this->username}:{$passwordEncoded}@{$hostname}{$path}";
+		return "{$protocol}://{$usernameEncoded}:{$passwordEncoded}@{$hostname}{$path}";
 	}
 
 	/**

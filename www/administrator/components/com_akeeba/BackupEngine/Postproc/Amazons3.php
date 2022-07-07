@@ -235,7 +235,8 @@ class Amazons3 extends Base
 			'customEndpoint'      => $akeebaConfig->get('engine.postproc.amazons3.customendpoint', ''),
 			'signatureMethod'     => $akeebaConfig->get('engine.postproc.amazons3.signature', 'v2'),
 			'useLegacyPathAccess' => $akeebaConfig->get('engine.postproc.amazons3.pathaccess', '0') == 1,
-			'region'              => $akeebaConfig->get('engine.postproc.amazons3.region', ''),
+			'region'              => $akeebaConfig->get('engine.postproc.amazons3.region', '')
+				?: $akeebaConfig->get('engine.postproc.amazons3.custom_region', ''),
 			'disableMultipart'    => $akeebaConfig->get('engine.postproc.amazons3.legacy', 0) == 1,
 			'bucket'              => $akeebaConfig->get('engine.postproc.amazons3.bucket', null),
 			'directory'           => $akeebaConfig->get('engine.postproc.amazons3.directory', null),

@@ -707,6 +707,13 @@ class Mysql extends Base
 		{
 			$table_sql = $temp[0][2];
 
+			if (empty($table_sql))
+			{
+				Factory::getLog()->warning("Cannot get the structure of $type $table_abstract. The database refused to return the CREATE command for this $type. Please check your database privileges. Your database backup may be incomplete.");
+
+				return null;
+			}
+
 			// MySQL adds the database name into everything. We have to remove it.
 			$dbName    = $db->qn($this->database) . '.`';
 			$table_sql = str_replace($dbName, '`', $table_sql);
@@ -956,6 +963,12 @@ class Mysql extends Base
 			// Get the CREATE command
 			$dependencies              = [];
 			$new_entry['create']       = $this->get_create($table_abstract, $table_name, $new_entry['type'], $dependencies);
+
+			if ($new_entry['create'] === null)
+			{
+				continue;
+			}
+
 			$new_entry['dependencies'] = $dependencies;
 
 			if ($new_entry['type'] == 'view')
@@ -1099,6 +1112,12 @@ class Mysql extends Base
 
 						$dependencies                    = [];
 						$new_entry['create']             = $this->get_create($entity_abstract, $entity_name, $new_entry['type'], $dependencies);
+
+						if ($new_entry['create'] === null)
+						{
+							continue;
+						}
+
 						$new_entry['dependencies']       = $dependencies;
 						$this->tables_data[$entity_name] = $new_entry;
 					}
@@ -1146,6 +1165,12 @@ class Mysql extends Base
 
 						$dependencies                    = [];
 						$new_entry['create']             = $this->get_create($entity_abstract, $entity_name, $new_entry['type'], $dependencies);
+
+						if ($new_entry['create'] === null)
+						{
+							continue;
+						}
+
 						$new_entry['dependencies']       = $dependencies;
 						$this->tables_data[$entity_name] = $new_entry;
 					}
@@ -1187,6 +1212,12 @@ class Mysql extends Base
 
 						$dependencies                    = [];
 						$new_entry['create']             = $this->get_create($entity_abstract, $entity_name, $new_entry['type'], $dependencies);
+
+						if ($new_entry['create'] === null)
+						{
+							continue;
+						}
+
 						$new_entry['dependencies']       = $dependencies;
 						$this->tables_data[$entity_name] = $new_entry;
 					}
@@ -1520,6 +1551,11 @@ class Mysql extends Base
 	 */
 	protected function push_table($table_name, $stack = [], $currentRecursionDepth = 0)
 	{
+		if (!isset($this->tables_data[$table_name]))
+		{
+			return;
+		}
+
 		// Load information
 		$table_data = $this->tables_data[$table_name];
 
@@ -1703,7 +1739,7 @@ class Mysql extends Base
 			}
 
 			// Create drop statements if required (the key is defined by the scripting engine)
-			if (Factory::getEngineParamsProvider()->getScriptingParameter('db.dropstatements', 0))
+			if (!empty($outCreate) && Factory::getEngineParamsProvider()->getScriptingParameter('db.dropstatements', 0))
 			{
 				if (array_key_exists('create', $this->tables_data[$tableName]))
 				{
@@ -1733,6 +1769,7 @@ class Mysql extends Base
 			 * with DELIMITER $$ commands.
 			 */
 			if (
+				!empty($outCreate) &&
 				(Factory::getEngineParamsProvider()->getScriptingParameter('db.delimiterstatements', 0) == 1)
 				&& in_array($this->tables_data[$tableName]['type'], ['trigger', 'function', 'procedure'])
 			)
@@ -1742,12 +1779,12 @@ class Mysql extends Base
 			}
 
 			// Write the CREATE command after any DROP command which might be necessary.
-			if (!$this->writeDump($outCreate, true))
+			if (!empty($outCreate) && !$this->writeDump($outCreate, true))
 			{
 				return;
 			}
 
-			if ($dump_records)
+			if (!empty($outCreate) && $dump_records)
 			{
 				// We are dumping data from a table, get the row count
 				$this->getRowCount($tableAbstract);
@@ -1758,7 +1795,7 @@ class Mysql extends Base
 					$dump_records = false;
 				}
 			}
-			else
+			elseif (!$dump_records)
 			{
 				/**
 				 * Do NOT move this line to the if-block below. We need to only log this message on tables which are
@@ -1768,7 +1805,7 @@ class Mysql extends Base
 			}
 
 			// The table is either filtered or we cannot get the row count. Either way we should not dump any data.
-			if (!$dump_records)
+			if (!$dump_records || empty($outCreate))
 			{
 				$this->maxRange  = 0;
 				$this->nextRange = 1;
@@ -1861,8 +1898,9 @@ class Mysql extends Base
 			$numRows      = 0;
 			$use_abstract = Factory::getEngineParamsProvider()->getScriptingParameter('db.abstractnames', 1);
 
-			$filters    = Factory::getFilters();
-			$mustFilter = $filters->hasFilterType('dbobject', 'children');
+			$filters            = Factory::getFilters();
+			$mustFilterRows     = $filters->hasFilterType('dbobject', 'children');
+			$mustFilterContents = $filters->canFilterDatabaseRowContent();
 
 			try
 			{
@@ -1912,7 +1950,7 @@ class Mysql extends Base
 				}
 
 				// If row-level filtering is enabled, please run the filtering
-				if ($mustFilter)
+				if ($mustFilterRows)
 				{
 					$isFiltered = $filters->isFiltered(
 						[
@@ -1934,6 +1972,11 @@ class Mysql extends Base
 
 						continue;
 					}
+				}
+
+				if ($mustFilterContents)
+				{
+					$filters->filterDatabaseRowContent($dbRoot, $tableAbstract, $myRow);
 				}
 
 				if (
@@ -2161,7 +2204,7 @@ class Mysql extends Base
 		}
 
 		// Check for end of table dump (so that it happens inside the same operation)
-		if (!($this->nextRange < $this->maxRange))
+		if ($this->nextRange >= $this->maxRange)
 		{
 			// Tell the user we are done with the table
 			Factory::getLog()->debug("Done dumping " . $tableAbstract);

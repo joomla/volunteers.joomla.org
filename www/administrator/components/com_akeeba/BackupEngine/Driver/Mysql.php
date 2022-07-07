@@ -527,7 +527,7 @@ class Mysql extends Base
 					case 'EXAMPLE':
 					case 'BLACKHOLE':
 					case 'FEDERATED':
-					$this->tablesCache[$this->_database][$table_metadata] = 'temp';
+						$this->tablesCache[$this->_database][$table_metadata] = 'temp';
 						break;
 
 					// Normal tables

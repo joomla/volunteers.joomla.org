@@ -20,6 +20,11 @@ trait ProxyAware
 	 */
 	protected function applyProxySettingsToCurl($ch)
 	{
+		if (defined('AKEEBA_NO_PROXY_AWARE'))
+		{
+			return;
+		}
+
 		$proxySettings = Platform::getInstance()->getProxySettings();
 
 		if (!$proxySettings['enabled'])
@@ -39,6 +44,11 @@ trait ProxyAware
 
 	protected function getProxyStreamContext()
 	{
+		if (defined('AKEEBA_NO_PROXY_AWARE'))
+		{
+			return [];
+		}
+
 		$ret           = [];
 		$proxySettings = Platform::getInstance()->getProxySettings();
 

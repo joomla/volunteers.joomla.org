@@ -40,6 +40,9 @@ abstract class Base extends Part
 	/** @var string MySQL database server port (optional) */
 	protected $port = '';
 
+	/** @var string MySQL socket or named pipe (optional) */
+	protected $socket = '';
+
 	/** @var string MySQL user name, for authentication */
 	protected $username = '';
 
@@ -51,6 +54,9 @@ abstract class Base extends Part
 
 	/** @var string The database driver to use */
 	protected $driver = '';
+
+	/** @var array|null The MySQL SSL options */
+	protected $ssl;
 
 	// **********************************************************************
 	// File handling fields
@@ -208,7 +214,8 @@ abstract class Base extends Part
 	protected function getBackupFilePaths($partNumber = 0)
 	{
 		Factory::getLog()->debug(__CLASS__ . " :: Getting temporary file");
-		$this->tempFile = Factory::getTempFiles()->registerTempFile(dechex(crc32(microtime())) . '.sql');
+		$basename       = substr(md5(microtime() . random_bytes(8)), random_int(0, 16), 16);
+		$this->tempFile = Factory::getTempFiles()->registerTempFile($basename . '.sql');
 		Factory::getLog()->debug(__CLASS__ . " :: Temporary file is {$this->tempFile}");
 
 		// Get the base name of the dump file
@@ -324,18 +331,31 @@ abstract class Base extends Part
 
 		// Process parameters, passed to us using the setup() public method
 		Factory::getLog()->debug(__CLASS__ . " :: Processing parameters");
+
 		if (is_array($this->_parametersArray))
 		{
-			$this->driver             = array_key_exists('driver', $this->_parametersArray) ? $this->_parametersArray['driver'] : $this->driver;
-			$this->host               = array_key_exists('host', $this->_parametersArray) ? $this->_parametersArray['host'] : $this->host;
-			$this->port               = array_key_exists('port', $this->_parametersArray) ? $this->_parametersArray['port'] : $this->port;
-			$this->username           = array_key_exists('username', $this->_parametersArray) ? $this->_parametersArray['username'] : $this->username;
-			$this->username           = array_key_exists('user', $this->_parametersArray) ? $this->_parametersArray['user'] : $this->username;
-			$this->password           = array_key_exists('password', $this->_parametersArray) ? $this->_parametersArray['password'] : $this->password;
-			$this->database           = array_key_exists('database', $this->_parametersArray) ? $this->_parametersArray['database'] : $this->database;
-			$this->prefix             = array_key_exists('prefix', $this->_parametersArray) ? $this->_parametersArray['prefix'] : $this->prefix;
-			$this->dumpFile           = array_key_exists('dumpFile', $this->_parametersArray) ? $this->_parametersArray['dumpFile'] : $this->dumpFile;
-			$this->processEmptyPrefix = array_key_exists('process_empty_prefix', $this->_parametersArray) ? $this->_parametersArray['process_empty_prefix'] : $this->processEmptyPrefix;
+			$this->driver             = $this->_parametersArray['driver'] ?? $this->driver;
+			$this->host               = $this->_parametersArray['host'] ?? $this->host;
+			$this->port               = $this->_parametersArray['port'] ?? $this->port;
+			$this->socket             = $this->_parametersArray['socket'] ?? $this->socket;
+			$this->username           = $this->_parametersArray['username'] ?? $this->username;
+			$this->username           = $this->_parametersArray['user'] ?? $this->username;
+			$this->password           = $this->_parametersArray['password'] ?? $this->password;
+			$this->database           = $this->_parametersArray['database'] ?? $this->database;
+			$this->prefix             = $this->_parametersArray['prefix'] ?? $this->prefix;
+			$this->dumpFile           = $this->_parametersArray['dumpFile'] ?? $this->dumpFile;
+			$this->processEmptyPrefix = $this->_parametersArray['process_empty_prefix'] ?? $this->processEmptyPrefix;
+			$this->ssl                = $this->_parametersArray['ssl'] ?? $this->ssl;
+			$this->ssl                = is_array($this->ssl) ? $this->ssl : [];
+
+			$this->ssl['enable']             = (bool)(($this->ssl['enable'] ?? $this->_parametersArray['dbencryption'] ?? false) ?: false);
+			$this->ssl['cipher']             = ($this->ssl['cipher'] ?? $this->_parametersArray['dbsslcipher'] ?? null) ?: null;
+			$this->ssl['ca']                 = ($this->ssl['ca'] ?? $this->_parametersArray['dbsslca'] ?? null) ?: null;
+			$this->ssl['capath']             = ($this->ssl['capath'] ?? $this->_parametersArray['dbsslcapath'] ?? null) ?: null;
+			$this->ssl['key']                = ($this->ssl['key'] ?? $this->_parametersArray['dbsslkey'] ?? null) ?: null;
+			$this->ssl['cert']               = ($this->ssl['cert'] ?? $this->_parametersArray['dbsslcert'] ?? null) ?: null;
+			$this->ssl['verify_server_cert'] = (bool)(($this->ssl['verify_server_cert'] ?? $this->_parametersArray['dbsslverifyservercert'] ?? false) ?: false);
+
 		}
 
 		// Make sure we have self-assigned the first part
@@ -491,7 +511,7 @@ abstract class Base extends Part
 		}
 
 		// We need this to write out the cached extra SQL statements before closing the file.
-		$this->writeDump(null);
+		$this->writeDump(null, true);
 
 		// Close the file pointer (otherwise the SQL file is left behind)
 		$this->closeFile();
@@ -726,6 +746,15 @@ abstract class Base extends Part
 
 		if ((strlen($this->data_cache) >= $this->cache_size) || (is_null($data) && (!empty($this->data_cache))))
 		{
+			$this->data_cache = rtrim($this->data_cache, "\n");
+
+			if ($this->useAbstractPrefix && $addMarker && substr($this->data_cache, -10) !== '/**ABDB**/')
+			{
+				$this->data_cache .= '/**ABDB**/';
+			}
+
+			$this->data_cache .= "\n";
+
 			Factory::getLog()->debug("Writing " . strlen($this->data_cache) . " bytes to the dump file");
 			$result = $this->writeline($this->data_cache);
 
@@ -794,15 +823,18 @@ abstract class Base extends Part
 	 */
 	protected function &getDB()
 	{
-		$host     = $this->host . ($this->port != '' ? ':' . $this->port : '');
-		$user     = $this->username;
-		$password = $this->password;
-		$driver   = $this->driver;
-		$database = $this->database;
-		$prefix   = is_null($this->prefix) ? '' : $this->prefix;
-		$options  = [
-			'driver'   => $driver, 'host' => $host, 'user' => $user, 'password' => $password,
-			'database' => $database, 'prefix' => $prefix,
+		$ssl     = $this->ssl ?? [];
+		$ssl     = is_array($ssl) ? $ssl : [];
+		$options = [
+			'driver'   => $this->driver,
+			'host'     => $this->host,
+			'port'     => $this->port,
+			'socket'   => $this->socket,
+			'user'     => $this->username,
+			'password' => $this->password,
+			'database' => $this->database,
+			'prefix'   => is_null($this->prefix) ? '' : $this->prefix,
+			'ssl'      => $ssl,
 		];
 
 		$db = Factory::getDatabase($options);

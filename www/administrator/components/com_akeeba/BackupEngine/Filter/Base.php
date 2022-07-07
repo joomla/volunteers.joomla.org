@@ -52,7 +52,7 @@ abstract class Base
 	/**
 	 * Extra SQL statements to append to the SQL dump file. Useful for extension
 	 * filters which have to filter out specific database records. This method
-	 * must be overriden in children classes.
+	 * must be overridden in children classes.
 	 *
 	 * @param   string  $root  The database for which to get the extra SQL statements
 	 *
@@ -61,6 +61,13 @@ abstract class Base
 	public function getExtraSQL(string $root): array
 	{
 		return [];
+	}
+
+	public $canFilterDatabaseRowContent = false;
+
+	public function filterDatabaseRowContent(string $root, string $tableAbstract, array &$row): void
+	{
+		// No operation
 	}
 
 	/**

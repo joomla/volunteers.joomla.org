@@ -16,6 +16,7 @@ use Akeeba\Engine\Factory;
 use Akeeba\Engine\Postproc\ProxyAware;
 use Akeeba\Engine\Util\RandomValue;
 use Akeeba\Engine\Util\Transfer as EngineTransfer;
+use Countable;
 use Exception;
 use FOF40\Model\Model;
 use Joomla\CMS\Filesystem\File;
@@ -27,6 +28,14 @@ use RuntimeException;
 class Transfer extends Model
 {
 	use ProxyAware;
+
+	/**
+	 * Caches the domain names and whether they can be resolved by DNS
+	 *
+	 * @var   array
+	 * @since 8.1.4
+	 */
+	private static $domainResolvable = [];
 
 	/**
 	 * Get the information for the latest backup
@@ -177,10 +186,25 @@ class Transfer extends Model
 		// file. We have to cater for that, just in case...
 		if (!$isValid)
 		{
-			$http  = HttpFactory::getHttp();
-			$dummy = $http->get($uri->toString(), [], 5);
 
-			$isValid = !is_null($dummy);
+			try
+			{
+				$http    = HttpFactory::getHttp();
+				$dummy   = $http->get($uri->toString(), [], 5);
+				$isValid = !is_null($dummy);
+			}
+			catch (Exception $e)
+			{
+				// Nope
+			}
+		}
+
+		// Sometimes just the SSL certificate is wrong. Let's give it a go.
+		if (!$isValid)
+		{
+			$dummy = $this->httpGet($uri->toString(), [], 5);
+
+			$isValid = !empty($dummy);
 		}
 
 		if (!$isValid)
@@ -842,8 +866,15 @@ class Transfer extends Model
 
 		$http     = HttpFactory::getHttp();
 		$wrongSSL = false;
-		$response = $http->get($url . '/' . basename($sourceFile), [], 10);
-		$data     = $response->body ?: null;
+		try
+		{
+			$response = $http->get($url . '/' . basename($sourceFile), [], 10);
+			$data     = $response->body ?: null;
+		}
+		catch (Exception $e)
+		{
+			$data = null;
+		}
 
 		/**
 		 * The download of the test file failed. This can mean that the (S)FTP directory does not match the site URL we
@@ -856,19 +887,19 @@ class Transfer extends Model
 			$results  = dns_get_record($hostname, DNS_A);
 
 			// If there are no IPv4 records let's try to get IPv6 records
-			if ((is_array($results) || $results instanceof \Countable ? count($results) : 0) == 0)
+			if ((is_array($results) || $results instanceof Countable ? count($results) : 0) == 0)
 			{
 				$results = dns_get_record($hostname, DNS_AAAA);
 			}
 
 			// No DNS records. So, that's why fetching data failed!
-			if ((is_array($results) || $results instanceof \Countable ? count($results) : 0) == 0)
+			if ((is_array($results) || $results instanceof Countable ? count($results) : 0) == 0)
 			{
 				// Delete the temporary file
 				$connector->delete($connector->getPath(basename($sourceFile)));
 
 				// And now throw the error
-				throw new TransferFatalError(Text::sprintf('COM_AKEEBA_TRANSFER_ERR_WRONGSSL', $hostname));
+				throw new TransferFatalError(Text::sprintf('COM_AKEEBA_TRANSFER_ERR_DNS', $hostname));
 			}
 
 			/**
@@ -965,9 +996,7 @@ class Transfer extends Model
 
 		$baseUrl = rtrim($baseUrl, '/');
 
-		$http     = HttpFactory::getHttp();
-		$response = $http->get($baseUrl . '/kickstart.php?task=serverinfo', [], 10);
-		$rawData  = $response->body ?: null;
+		$rawData = $this->httpGet($baseUrl . '/kickstart.php?task=serverinfo', [], 10);
 
 		if (is_null($rawData))
 		{
@@ -1202,9 +1231,9 @@ class Transfer extends Model
 
 		$dataLength = function_exists('mb_strlen') ? mb_strlen($data, 'ASCII') : strlen($data);
 
-		$http    = HttpFactory::getHttp();
-		$result  = $http->post($uri->toString(), $data, [], $phpTimeout);
-		$rawData = $result->body ?: '';
+		$rawData = $this->httpPost($uri->toString(), http_build_query([
+			'data' => $data
+		]), [], $phpTimeout);
 
 		unset($data);
 
@@ -1299,13 +1328,18 @@ class Transfer extends Model
 			$remoteDirectory = $config['directory'] . (empty($directory) ? '' : ('/' . $directory));
 			$remoteFile      = $remoteDirectory . '/' . $tempFile;
 
-			$connector->upload($localTempFile, $remoteFile, true);
+			$uploaded = $connector->upload($localTempFile, $remoteFile, true);
 		}
 		catch (RuntimeException $e)
 		{
 			File::delete($localTempFile);
 
 			throw $e;
+		}
+
+		if (!$uploaded)
+		{
+			throw new RuntimeException(Text::sprintf('COM_AKEEBA_TRANSFER_ERR_CANNOTUPLOADTEMP', $localTempFile, $remoteFile));
 		}
 
 		// ==== Call Kickstart to piece together the file
@@ -1328,9 +1362,7 @@ class Transfer extends Model
 
 		$dataLength = function_exists('mb_strlen') ? mb_strlen($data, 'ASCII') : strlen($data);
 
-		$http    = HttpFactory::getHttp();
-		$result  = $http->get($uri->toString(), [], $phpTimeout);
-		$rawData = $result->body ?: '';
+		$rawData = $this->httpGet($uri->toString(), [], $phpTimeout);
 
 		// ==== Delete the temporary files
 		if (!@unlink($localTempFile))
@@ -1379,5 +1411,219 @@ class Transfer extends Model
 		}
 
 		return $dataLength;
+	}
+
+	/**
+	 * Perform an HTTP GET and return the results.
+	 *
+	 * This method is rigged to work EVEN IF the TLS/SSL certificate of the target server is invalid or self-signed.
+	 * This is unfortunately a very typical use case when transferring sites as the target site most often than not is
+	 * not fully set up yet (no domain assigned, no TLS certificate assigned and so on).
+	 *
+	 * If, however, the domain name of the target URL cannot resolve neither as IPv4 nor as IPv6 we'll throw an
+	 * exception.
+	 *
+	 * @param   string  $url      The URL to fetch
+	 * @param   array   $headers  Any headers to send (optional). Default: none.
+	 * @param   int     $timeout  The timeout in seconds (optional). Default: 10 seconds.
+	 *
+	 * @return  string|null
+	 * @since   8.1.4
+	 */
+	private function httpGet(string $url, array $headers = [], int $timeout = 10): ?string
+	{
+		// First I'm going to try with the HTTP factory which is the most reliable method for properly set up sites.
+		$http     = HttpFactory::getHttp();
+
+		try
+		{
+			$response = $http->get($url, $headers, $timeout);
+			$data     = $response->body ?: null;
+		}
+		catch (Exception $e)
+		{
+			// We absorb all exceptions since they are all generic, it's not a different exception per error type :(
+			$data = null;
+		}
+
+		// Non-null returns mean that the HTTP factory worked. Return early and spare us the trouble.
+		if (!is_null($data))
+		{
+			return $data;
+		}
+
+		// Does the domain name resolve?
+		$uri      = new Uri($url);
+		$hostname = strtolower($uri->getHost());
+
+		if (!isset(self::$domainResolvable[$hostname]))
+		{
+			$results  = dns_get_record($hostname, DNS_A);
+
+			// If there are no IPv4 records let's try to get IPv6 records
+			if (((is_array($results) || ($results instanceof Countable)) ? count($results) : 0) == 0)
+			{
+				$results = dns_get_record($hostname, DNS_AAAA);
+			}
+
+			// No DNS records. So, that's why fetching data failed!
+			self::$domainResolvable[$hostname] = (is_array($results) || $results instanceof Countable ? count($results) : 0) > 0;
+		}
+
+		// If the domain doesn't resolve complain loudly.
+		if (!self::$domainResolvable[$hostname])
+		{
+			throw new TransferFatalError(Text::sprintf('COM_AKEEBA_TRANSFER_ERR_DNS', $hostname));
+		}
+
+		/**
+		 * The DNS resolution worked. A different error has occurred. Unfortunately, we don't know WHAT happened so we
+		 * will make an assumption that the problem is that the TLS/SSL certificate is invalid (e.g. wrong Common Name)
+		 * or self-signed. We are going to use the PHP URL fopen wrappers to try and run the request regardless. This is
+		 * not very secure but, as we said, it's an unfortunate reality of how this feature is used :(
+		 */
+		$contextOptions = $this->getProxyStreamContext();
+		$contextOptions   = array_merge_recursive($contextOptions, [
+			'http' => [
+				'timeout'         => $timeout,
+				'follow_location' => 1,
+			],
+			'ssl'  => [
+				'verify_peer'      => false,
+				'verify_peer_name' => false,
+			],
+		]);
+
+		// Headers are provided as a dictionary. PHP expects them as a plain array of "Header-Name: Value" entries.
+		if (isset($headers))
+		{
+			$headers = array_map(function ($k, $v) {
+				if (is_numeric($k) && strpos($v, ':') !== false)
+				{
+					return $v;
+				}
+
+				return $k . ':' . $v;
+			}, array_keys($headers), array_values($headers));
+		}
+
+		if (!empty($headers))
+		{
+			$context['http']['header'] = array_values($headers);
+		}
+
+		// Create the context and run the request
+		$context = stream_context_create($contextOptions);
+
+		return @file_get_contents($url, false, $context) ?: null;
+	}
+
+	/**
+	 * Perform an HTTP POST and return the results.
+	 *
+	 * This method is rigged to work EVEN IF the TLS/SSL certificate of the target server is invalid or self-signed.
+	 * This is unfortunately a very typical use case when transferring sites as the target site most often than not is
+	 * not fully set up yet (no domain assigned, no TLS certificate assigned and so on).
+	 *
+	 * If, however, the domain name of the target URL cannot resolve neither as IPv4 nor as IPv6 we'll throw an
+	 * exception.
+	 *
+	 * @param   string  $url      The URL to fetch
+	 * @param   string  $data     The data to send over POST
+	 * @param   array   $headers  Any headers to send (optional). Default: none.
+	 * @param   int     $timeout  The timeout in seconds (optional). Default: 10 seconds.
+	 *
+	 * @return  string|null
+	 * @since   8.1.4
+	 */
+	private function httpPost(string $url, string $data, array $headers = [], int $timeout = 10): ?string
+	{
+		// First I'm going to try with the HTTP factory which is the most reliable method for properly set up sites.
+		$http = HttpFactory::getHttp();
+
+		try
+		{
+			$response = $http->post($url, $data, $headers, $timeout);
+			$ret      = $response->body ?: null;
+		}
+		catch (Exception $e)
+		{
+			// We absorb all exceptions since they are all generic, it's not a different exception per error type :(
+			$ret = null;
+		}
+
+		// Non-null returns mean that the HTTP factory worked. Return early and spare us the trouble.
+		if (!is_null($ret))
+		{
+			return $ret;
+		}
+
+		// Does the domain name resolve?
+		$uri      = new Uri($url);
+		$hostname = strtolower($uri->getHost());
+
+		if (!isset(self::$domainResolvable[$hostname]))
+		{
+			$results = dns_get_record($hostname, DNS_A);
+
+			// If there are no IPv4 records let's try to get IPv6 records
+			if (((is_array($results) || ($results instanceof Countable)) ? count($results) : 0) == 0)
+			{
+				$results = dns_get_record($hostname, DNS_AAAA);
+			}
+
+			// No DNS records. So, that's why fetching data failed!
+			self::$domainResolvable[$hostname] = (is_array($results) || $results instanceof Countable ? count($results) : 0) > 0;
+		}
+
+		// If the domain doesn't resolve complain loudly.
+		if (!self::$domainResolvable[$hostname])
+		{
+			throw new TransferFatalError(Text::sprintf('COM_AKEEBA_TRANSFER_ERR_DNS', $hostname));
+		}
+
+		/**
+		 * The DNS resolution worked. A different error has occurred. Unfortunately, we don't know WHAT happened so we
+		 * will make an assumption that the problem is that the TLS/SSL certificate is invalid (e.g. wrong Common Name)
+		 * or self-signed. We are going to use the PHP URL fopen wrappers to try and run the request regardless. This is
+		 * not very secure but, as we said, it's an unfortunate reality of how this feature is used :(
+		 */
+		// Add necessary headers
+		if (!isset($headers['Content-Type']))
+		{
+			$headers['Content-Type'] = 'application/x-www-form-urlencoded; charset=utf-8';
+		}
+
+		$headers['Content-Length'] = function_exists('mb_strlen') ? \mb_strlen($data, 'ASCII') : \strlen($data);
+
+		// Headers are provided as a dictionary. PHP expects them as a plain array of "Header-Name: Value" entries.
+		$headers = array_map(function ($k, $v) {
+			if (is_numeric($k) && strpos($v, ':') !== false)
+			{
+				return $v;
+			}
+
+			return $k . ':' . $v;
+		}, array_keys($headers), array_values($headers));
+
+		$contextOptions = $this->getProxyStreamContext();
+		$contextOptions = array_merge_recursive($contextOptions, [
+			'http' => [
+				'method'          => 'POST',
+				'content'         => $data,
+				'timeout'         => $timeout,
+				'follow_location' => 1,
+				'header'          => array_values($headers),
+			],
+			'ssl'  => [
+				'verify_peer'      => false,
+				'verify_peer_name' => false,
+			],
+		]);
+
+		// Create the context and run the request
+		$context = stream_context_create($contextOptions);
+
+		return @file_get_contents($url, false, $context) ?: null;
 	}
 }

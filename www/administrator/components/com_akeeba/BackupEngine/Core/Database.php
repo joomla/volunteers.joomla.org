@@ -14,7 +14,6 @@ defined('AKEEBAENGINE') || die();
 use Akeeba\Engine\Driver\Base as DriverBase;
 use Akeeba\Engine\Driver\Mysqli;
 use Akeeba\Engine\Platform;
-use Exception;
 
 /**
  * A utility class to return a database connection object
@@ -26,76 +25,79 @@ class Database
 	/**
 	 * Returns a database connection object. It caches the created objects for future use.
 	 *
-	 * @param   array  $options  Options to use when instantiating the database connection
+	 * @param   array  $options  The database driver connection options
 	 *
-	 * @return DriverBase
+	 * @return  DriverBase|object  A DriverBase object or something with magic methods that's compatible with it
 	 */
-	public static function &getDatabase($options, $unset = false)
+	public static function &getDatabase(array $options)
 	{
-		if (!is_array(self::$instances))
+		// Get the options signature.
+		$signature = md5(serialize($options));
+
+		// If there's a cached object return it.
+		if (!empty(self::$instances[$signature]))
 		{
-			self::$instances = [];
+			return self::$instances[$signature];
 		}
 
-		$signature = serialize($options);
+		// Get the driver name / class
+		$driver = preg_replace('/[^A-Z0-9_\\\.-]/i', '', $options['driver'] ?? '');
 
-		if ($unset)
+		// If there is no driver specified ask the Platform to guess it.
+		if (empty($driver))
 		{
-			if (!empty(self::$instances[$signature]))
-			{
-				$db = self::$instances[$signature];
-				$db = null;
-				unset(self::$instances[$signature]);
-			}
-			$null = null;
-
-			return $null;
+			$default_signature = md5(serialize(Platform::getInstance()->get_platform_database_options()));
+			$driver            = Platform::getInstance()->get_default_database_driver($signature === $default_signature);
 		}
 
-		if (empty(self::$instances[$signature]))
+		// Ensure we have the FQN of the driver class
+		if ((substr($driver, 0, 7) != '\\Akeeba') && substr($driver, 0, 7) != 'Akeeba\\')
 		{
-			$driver   = array_key_exists('driver', $options) ? $options['driver'] : '';
-			$select   = array_key_exists('select', $options) ? $options['select'] : true;
-			$database = array_key_exists('database', $options) ? $options['database'] : null;
-
-			$driver = preg_replace('/[^A-Z0-9_\\\.-]/i', '', $driver);
-
-			if (empty($driver))
-			{
-				// No driver specified; try to guess
-				$default_signature = serialize(Platform::getInstance()->get_platform_database_options());
-				if ($signature == $default_signature)
-				{
-					$driver = Platform::getInstance()->get_default_database_driver(true);
-				}
-				else
-				{
-					$driver = Platform::getInstance()->get_default_database_driver(false);
-				}
-			}
-			else
-			{
-				// Make sure a full driver name was given
-				if ((substr($driver, 0, 7) != '\\Akeeba') && substr($driver, 0, 7) != 'Akeeba\\')
-				{
-					$driver = '\\Akeeba\\Engine\\Driver\\' . ucfirst($driver);
-				}
-			}
-
-			// Useful for PHP 7 which does NOT have the ancient mysql adapter
-			if (($driver == '\\Akeeba\\Engine\\Driver\\Mysql') && !function_exists('mysql_connect'))
-			{
-				$driver = Mysqli::class;
-			}
-
-			self::$instances[$signature] = new $driver($options);
+			$driver = '\\Akeeba\\Engine\\Driver\\' . ucfirst($driver);
 		}
+
+		// Map the legacy MySQL driver to the newer MySQLi
+		if (($driver == '\\Akeeba\\Engine\\Driver\\Mysql') && !function_exists('mysql_connect'))
+		{
+			$driver = Mysqli::class;
+		}
+
+		// Translate MySQL SSL options
+		if (!isset($options['ssl']) || !is_array($options['ssl']))
+		{
+			$options['ssl'] = [
+				'enable'             => (bool) ($options['dbencryption'] ?? false),
+				'cipher'             => ($options['dbsslcipher'] ?? '') ?: '',
+				'ca'                 => ($options['dbsslca'] ?? '') ?: '',
+				'capath'             => ($options['dbsslcapath'] ?? '') ?: '',
+				'key'                => ($options['dbsslkey'] ?? '') ?: '',
+				'cert'               => ($options['dbsslcert'] ?? '') ?: '',
+				'verify_server_cert' => ($options['dbsslverifyservercert'] ?? false) ?: false,
+			];
+		}
+
+		// Instantiate the database driver object and return it
+		self::$instances[$signature] = new $driver($options);
 
 		return self::$instances[$signature];
 	}
 
-	public static function unsetDatabase($options)
+	/**
+	 * Un-cache a database driver object
+	 *
+	 * @param   array  $options  The database driver connection options
+	 *
+	 * @return  void
+	 */
+	public static function unsetDatabase(array $options): void
 	{
-		self::getDatabase($options, true);
+		$signature = md5(serialize($options));
+
+		if (!isset(self::$instances[$signature]))
+		{
+			return;
+		}
+
+		unset(self::$instances[$signature]);
 	}
 }

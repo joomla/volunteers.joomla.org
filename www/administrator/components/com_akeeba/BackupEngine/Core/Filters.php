@@ -25,7 +25,7 @@ class Filters
 	/** @var array An array holding data for all defined filters */
 	private $filter_registry = [];
 
-	/** @var array Hash array with instances of all filters as $filter_name => filter_object */
+	/** @var FilterBase[] Hash array with instances of all filters as $filter_name => filter_object */
 	private $filters = [];
 
 	/** @var bool True after the filter clean up has run */
@@ -213,7 +213,8 @@ class Filters
 	/**
 	 * Extended filtering information of a given object. Applies only to exclusion filters.
 	 *
-	 * @param   string|array  $test       The string to check for filter status (e.g. filename, dir name, table name, etc)
+	 * @param   string|array  $test       The string to check for filter status (e.g. filename, dir name, table name,
+	 *                                    etc)
 	 * @param   string        $root       The exclusion root test belongs to
 	 * @param   string        $object     What type of object is it? dir|file|dbobject
 	 * @param   string        $subtype    Filter subtype (all|content|children)
@@ -382,6 +383,21 @@ class Filters
 		}
 
 		return $ret;
+	}
+
+	public function filterDatabaseRowContent(string $root, string $tableAbstract, array &$row): void
+	{
+		foreach ($this->filters as $filter)
+		{
+			$filter->filterDatabaseRowContent($root, $tableAbstract, $row);
+		}
+	}
+
+	public function canFilterDatabaseRowContent(): bool
+	{
+		return array_reduce($this->filters, function (bool $carry, FilterBase $filter) {
+			return $carry || $filter->canFilterDatabaseRowContent;
+		}, false);
 	}
 
 	/**

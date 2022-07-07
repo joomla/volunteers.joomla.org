@@ -10,16 +10,15 @@
 namespace Akeeba\Engine\Postproc\Connector\S3v4;
 
 use Akeeba\Engine\Postproc\Connector\S3v4\Response\Error;
-use Akeeba\Engine\Postproc\ProxyAware;
 use Akeeba\Engine\Util\FileCloseAware;
 
 // Protection against direct access
 defined('AKEEBAENGINE') || die();
 
+
 class Request
 {
 	use FileCloseAware;
-	use ProxyAware;
 
 	/**
 	 * The HTTP verb to use
@@ -396,9 +395,6 @@ class Request
 
 		// Basic setup
 		$curl = curl_init();
-
-		$this->applyProxySettingsToCurl($curl);
-
 		curl_setopt($curl, CURLOPT_USERAGENT, 'AkeebaBackupProfessional/S3PostProcessor');
 
 		if ($this->configuration->isSSL())
@@ -620,6 +616,8 @@ class Request
 				break;
 
 			default:
+				$this->response->setHeader(strtolower($header), is_numeric($value) ? (int) $value : $value);
+
 				if (preg_match('/^x-amz-meta-.*$/', $header))
 				{
 					$this->setHeader($header, is_numeric($value) ? (int) $value : $value);
@@ -727,6 +725,8 @@ class Request
 		}
 
 		/**
+		 * Only applies to Amazon S3 proper.
+		 *
 		 * When using the Amazon S3 with the v4 signature API we have to use a different hostname per region. The
 		 * mapping can be found in https://docs.aws.amazon.com/general/latest/gr/s3.html#s3_region
 		 *
@@ -735,24 +735,27 @@ class Request
 		 *
 		 * v4 signing does NOT support non-Amazon endpoints.
 		 */
-		// Most endpoints: s3-REGION.amazonaws.com
-		$regionalEndpoint = $region . '.amazonaws.com';
+		if (in_array($endpoint, ['s3.amazonaws.com', 'amazonaws.com.cn']))
+		{
+			// Most endpoints: s3-REGION.amazonaws.com
+			$regionalEndpoint = $region . '.amazonaws.com';
 
-		// Exception: China
-		if (substr($region, 0, 3) == 'cn-')
-		{
-			// Chinese endpoint, e.g.: s3.cn-north-1.amazonaws.com.cn
-			$regionalEndpoint = $regionalEndpoint . '.cn';
-		}
+			// Exception: China
+			if (substr($region, 0, 3) == 'cn-')
+			{
+				// Chinese endpoint, e.g.: s3.cn-north-1.amazonaws.com.cn
+				$regionalEndpoint = $regionalEndpoint . '.cn';
+			}
 
-		// If dual-stack URLs are enabled then prepend the endpoint
-		if ($configuration->getDualstackUrl())
-		{
-			$endpoint = 's3.dualstack.' . $regionalEndpoint;
-		}
-		else
-		{
-			$endpoint = 's3.' . $regionalEndpoint;
+			// If dual-stack URLs are enabled then prepend the endpoint
+			if ($configuration->getDualstackUrl())
+			{
+				$endpoint = 's3.dualstack.' . $regionalEndpoint;
+			}
+			else
+			{
+				$endpoint = 's3.' . $regionalEndpoint;
+			}
 		}
 
 		// Legacy path style access: return just the endpoint

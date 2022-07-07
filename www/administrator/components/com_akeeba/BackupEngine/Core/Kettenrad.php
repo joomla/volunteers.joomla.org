@@ -114,6 +114,14 @@ class Kettenrad extends Part
 		}
 	}
 
+	public function _onSerialize()
+	{
+		parent::_onSerialize();
+
+		$this->array_cache = null;
+	}
+
+
 	/**
 	 * Returns the unique Backup ID
 	 *

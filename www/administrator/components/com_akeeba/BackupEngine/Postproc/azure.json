@@ -15,6 +15,21 @@
         "title": "COM_AKEEBA_CONFIG_DELETEAFTER_TITLE",
         "description": "COM_AKEEBA_CONFIG_DELETEAFTER_DESCRIPTION"
     },
+    "engine.postproc.azure.chunk_upload": {
+        "default": "1",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_BOX_CHUNKUPLOAD_ENABLE"
+    },
+    "engine.postproc.azure.chunk_upload_size": {
+        "default": "20",
+        "type": "integer",
+        "min": "1",
+        "max": "4000",
+        "shortcuts": "5|10|20|40|50|75|100|250|1024|2047",
+        "scale": "1",
+        "uom": "MB",
+        "title": "COM_AKEEBA_CONFIG_BOX_CHUNKUPLOAD_SIZE"
+    },
     "engine.postproc.azure.account": {
         "default": "",
         "type": "string",

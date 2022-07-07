@@ -115,6 +115,11 @@ abstract class Part
 	 */
 	protected $lastException = null;
 
+	public function _onSerialize()
+	{
+		$this->lastException = null;
+	}
+
 	/**
 	 * Public constructor
 	 *

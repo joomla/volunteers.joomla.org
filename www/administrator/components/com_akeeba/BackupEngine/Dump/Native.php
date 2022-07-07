@@ -49,14 +49,8 @@ class Native extends Part
 		// Get the DB connection parameters
 		if (is_array($this->_parametersArray))
 		{
-			$driver   = array_key_exists('driver', $this->_parametersArray) ? $this->_parametersArray['driver'] : 'mysql';
-			$host     = array_key_exists('host', $this->_parametersArray) ? $this->_parametersArray['host'] : '';
-			$port     = array_key_exists('port', $this->_parametersArray) ? $this->_parametersArray['port'] : '';
-			$username = array_key_exists('username', $this->_parametersArray) ? $this->_parametersArray['username'] : '';
-			$username = array_key_exists('user', $this->_parametersArray) ? $this->_parametersArray['user'] : $username;
-			$password = array_key_exists('password', $this->_parametersArray) ? $this->_parametersArray['password'] : '';
-			$database = array_key_exists('database', $this->_parametersArray) ? $this->_parametersArray['database'] : '';
-			$prefix   = array_key_exists('prefix', $this->_parametersArray) ? $this->_parametersArray['prefix'] : '';
+			$driver   = $this->_parametersArray['driver'] ?? 'mysql';
+			$prefix   = $this->_parametersArray['prefix'] ?? '';
 
 			if (($driver == 'mysql') && !function_exists('mysql_connect'))
 			{
@@ -65,12 +59,25 @@ class Native extends Part
 
 			$options = [
 				'driver'   => $driver,
-				'host'     => $host . ($port != '' ? ':' . $port : ''),
-				'user'     => $username,
-				'password' => $password,
-				'database' => $database,
+				'host'     => $this->_parametersArray['host'] ?? '',
+				'port'     => $this->_parametersArray['port'] ?? '',
+				'user'     => $this->_parametersArray['user'] ?? ($this->_parametersArray['username'] ?? ''),
+				'password' => $this->_parametersArray['password'] ?? '',
+				'database' => $this->_parametersArray['database'] ?? '',
 				'prefix'   => is_null($prefix) ? '' : $prefix,
 			];
+
+			$options['ssl'] = $this->_parametersArray['ssl'] ?? [];
+			$options['ssl'] = is_array($options['ssl']) ? $options['ssl'] : [];
+
+			$options['ssl']['enable']             = (bool) ($options['ssl']['enable'] ?? $this->_parametersArray['dbencryption'] ?? false);
+			$options['ssl']['cipher']             = ($options['ssl']['cipher'] ?? $this->_parametersArray['dbsslcipher'] ?? null) ?: null;
+			$options['ssl']['ca']                 = ($options['ssl']['ca'] ?? $this->_parametersArray['dbsslca'] ?? null) ?: null;
+			$options['ssl']['capath']             = ($options['ssl']['capath'] ?? $this->_parametersArray['dbsslcapath'] ?? null) ?: null;
+			$options['ssl']['key']                = ($options['ssl']['key'] ?? $this->_parametersArray['dbsslkey'] ?? null) ?: null;
+			$options['ssl']['cert']               = ($options['ssl']['cert'] ?? $this->_parametersArray['dbsslcert'] ?? null) ?: null;
+			$options['ssl']['verify_server_cert'] = (bool) (($options['ssl']['verify_server_cert'] ?? $this->_parametersArray['dbsslverifyservercert'] ?? false) ?: false);
+
 		}
 
 		$db         = Factory::getDatabase($options);

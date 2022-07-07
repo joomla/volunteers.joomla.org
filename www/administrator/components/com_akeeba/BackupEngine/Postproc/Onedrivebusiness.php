@@ -13,11 +13,12 @@ defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Factory;
 use Akeeba\Engine\Platform;
+use Akeeba\Engine\Postproc\Connector\GoogleDrive as ConnectorGoogleDrive;
 use Akeeba\Engine\Postproc\Connector\OneDriveBusiness as ConnectorOneDrive;
 use Akeeba\Engine\Postproc\Exception\BadConfiguration;
-use Akeeba\Engine\Postproc\Exception\RangeDownloadNotSupported;
+use Awf\Text\Text;
 use Exception;
-use RuntimeException;
+use Joomla\CMS\Language\Text as JText;
 
 class Onedrivebusiness extends Onedrive
 {
@@ -34,6 +35,13 @@ class Onedrivebusiness extends Onedrive
 	 * @var   string
 	 */
 	protected $settingsKey = 'onedrivebusiness';
+
+	public function __construct()
+	{
+		parent::__construct();
+
+		$this->allowedCustomAPICallMethods[] = 'getDrives';
+	}
 
 	protected function makeConnector()
 	{
@@ -94,8 +102,83 @@ class Onedrivebusiness extends Onedrive
 		return $connector;
 	}
 
+	/**
+	 * Used by the interface to display a list of drives to choose from.
+	 *
+	 * @param   array  $params
+	 *
+	 * @return  array
+	 *
+	 * @throws  Exception
+	 */
+	public function getDrives($params = [])
+	{
+		// Get the default item (the personal Drive)
+		$baseItem = 'Drive (OneDrive Personal)';
+
+		if (class_exists('\Joomla\CMS\Language\Text'))
+		{
+			$baseItem = JText::_('COM_AKEEBA_CONFIG_ONEDRIVE_DRIVE_OPT_PERSONAL');
+
+			if ($baseItem === 'COM_AKEEBA_CONFIG_ONEDRIVE_DRIVE_OPT_PERSONAL')
+			{
+				$baseItem = JText::_('COM_AKEEBABACKUP_CONFIG_ONEDRIVE_DRIVE_OPT_PERSONAL');
+			}
+		}
+
+		if (class_exists('\Awf\Text\Text'))
+		{
+			$baseItem = \Awf\Text\Text::_('COM_AKEEBA_CONFIG_ONEDRIVE_DRIVE_OPT_PERSONAL');
+
+			if ($baseItem === 'COM_AKEEBA_CONFIG_ONEDRIVE_DRIVE_OPT_PERSONAL')
+			{
+				$baseItem = \Awf\Text\Text::_('COM_AKEEBABACKUP_CONFIG_ONEDRIVE_DRIVE_OPT_PERSONAL');
+			}
+		}
+
+		$items = [
+			'' => $baseItem,
+		];
+
+		// Try to get a list of Team Drives
+		try
+		{
+			$this->configOverrides = $params;
+			/** @var \Akeeba\Engine\Postproc\Connector\OneDriveBusiness $connector */
+			$connector = $this->getConnector(true);
+			$connector->ping();
+
+			$items = array_merge($items, $connector->getDrives());
+		}
+		catch (Exception $e)
+		{
+			// No worries, the user hasn't configured Google Drive correctly just yet.
+		}
+
+		$ret = [];
+
+		foreach ($items as $k => $v)
+		{
+			$ret[] = [$k, $v];
+		}
+
+		return $ret;
+	}
+
 	protected function getOAuth2HelperUrl()
 	{
 		return ConnectorOneDrive::helperUrl;
+	}
+
+	/** @inheritDoc */
+	protected function mustChunk(int $fileSize): bool
+	{
+		return $fileSize > 4194304;
+	}
+
+	/** @inheritDoc */
+	protected function mustSingeUpload(int $fileSize): bool
+	{
+		return ($fileSize <= $this->chunkSize) || ($fileSize <= 4194304);
 	}
 }

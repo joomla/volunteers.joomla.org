@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright 	Copyright (c) 2009-2021 Ryan Demmer. All rights reserved
+ * @copyright 	Copyright (c) 2009-2022 Ryan Demmer. All rights reserved
  * @license   	GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  * JCE is free software. This version may have been modified pursuant
  * to the GNU General Public License, and as distributed it includes or
@@ -69,8 +69,8 @@ class JceTableProfiles extends JTable
 				$this->area = '0';
 			}
 			
-			// Params can be an empty json string
-			if (!empty($this->params))
+			// Params can be an empty json string for new tables
+			if (empty($this->params))
 			{
 				$this->params = '{}';
 			}

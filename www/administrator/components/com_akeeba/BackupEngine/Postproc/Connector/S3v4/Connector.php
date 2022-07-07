@@ -81,7 +81,10 @@ class Connector
 
 		if (($input->getSize() <= 0) || (($input->getInputType() == Input::INPUT_DATA) && (!strlen($input->getDataReference()))))
 		{
-			throw new CannotPutFile('Missing input parameters', 0);
+			if (substr($uri, -1) !== '/')
+			{
+				throw new CannotPutFile('Missing input parameters', 0);
+			}
 		}
 
 		// We need to post with Content-Length and Content-Type, MD5 is optional
@@ -206,9 +209,13 @@ class Connector
 		if ($response->error->isError())
 		{
 			throw new CannotGetFile(
-				sprintf(__METHOD__ . "({$bucket}, {$uri}): [%s] %s\n\nDebug info:\n%s",
-					$response->error->getCode(), $response->error->getMessage(), print_r($response->body, true)),
-				$response->error->getCode()
+				sprintf(__METHOD__ . "({%s}, {%s}): [%s] %s\n\nDebug info:\n%s",
+					$bucket,
+					$uri,
+					$response->error->getCode(),
+					$response->error->getMessage(),
+					print_r($response->body, true)
+				)
 			);
 		}
 
@@ -219,6 +226,48 @@ class Connector
 
 		return null;
 	}
+
+	/**
+	 * Get information about an object.
+	 *
+	 * @param   string                $bucket  Bucket name
+	 * @param   string                $uri     Object URI
+	 *
+	 * @return  array  The headers returned by Amazon S3
+	 *
+	 * @throws  CannotGetFile  If the file does not exist
+	 * @see     https://docs.aws.amazon.com/AmazonS3/latest/API/API_HeadObject.html
+	 */
+	public function headObject(string $bucket, string $uri): array
+	{
+		$request = new Request('HEAD', $bucket, $uri, $this->configuration);
+
+		$response = $request->getResponse();
+
+		if (!$response->error->isError() && (($response->code !== 200) && ($response->code !== 206)))
+		{
+			$response->error = new Error(
+				$response->code,
+				"Unexpected HTTP status {$response->code}"
+			);
+		}
+
+		if ($response->error->isError())
+		{
+			throw new CannotGetFile(
+				sprintf(__METHOD__ . "({%s}, {%s}): [%s] %s\n\nDebug info:\n%s",
+					$bucket,
+					$uri,
+					$response->error->getCode(),
+					$response->error->getMessage(),
+					print_r($response->body, true)
+				)
+			);
+		}
+
+		return $response->getHeaders();
+	}
+
 
 	/**
 	 * Delete an object
@@ -244,9 +293,12 @@ class Connector
 		if ($response->error->isError())
 		{
 			throw new CannotDeleteFile(
-				sprintf(__METHOD__ . "({$bucket}, {$uri}): [%s] %s",
-					$response->error->getCode(), $response->error->getMessage()),
-				$response->error->getCode()
+				sprintf(__METHOD__ . "({%s}, {%s}): [%s] %s",
+					$bucket,
+					$uri,
+					$response->error->getCode(),
+					$response->error->getMessage()
+				)
 			);
 		}
 	}
@@ -320,7 +372,7 @@ class Connector
 		{
 			parse_str($query, $parameters);
 
-			if (is_array($parameters) || $parameters instanceof \Countable ? count($parameters) : 0)
+			if (count($parameters))
 			{
 				foreach ($parameters as $k => $v)
 				{
@@ -358,8 +410,7 @@ class Connector
 		if ($response->error->isError())
 		{
 			throw new CannotGetBucket(
-				sprintf(__METHOD__ . "(): [%s] %s", $response->error->getCode(), $response->error->getMessage()),
-				$response->error->getCode()
+				sprintf(__METHOD__ . "(): [%s] %s", $response->error->getCode(), $response->error->getMessage())
 			);
 		}
 
@@ -438,8 +489,7 @@ class Connector
 		if ($response->error->isError())
 		{
 			throw new CannotGetBucket(
-				sprintf(__METHOD__ . "(): [%s] %s", $response->error->getCode(), $response->error->getMessage()),
-				$response->error->getCode()
+				sprintf(__METHOD__ . "(): [%s] %s", $response->error->getCode(), $response->error->getMessage())
 			);
 		}
 
@@ -594,8 +644,7 @@ class Connector
 		if ($response->error->isError())
 		{
 			throw new CannotListBuckets(
-				sprintf(__METHOD__ . "(): [%s] %s", $response->error->getCode(), $response->error->getMessage()),
-				$response->error->getCode()
+				sprintf(__METHOD__ . "(): [%s] %s", $response->error->getCode(), $response->error->getMessage())
 			);
 		}
 
@@ -691,7 +740,11 @@ class Connector
 		if ($response->error->isError())
 		{
 			throw new CannotPutFile(
-				sprintf(__METHOD__ . "(): [%s] %s\n\nDebug info:\n%s", $response->error->getCode(), $response->error->getMessage(), print_r($response->body, true))
+				sprintf(__METHOD__ . "(): [%s] %s\n\nDebug info:\n%s",
+					$response->error->getCode(),
+					$response->error->getMessage(),
+					print_r($response->body, true)
+				)
 			);
 		}
 
@@ -938,7 +991,7 @@ class Connector
 
 		if ($response->error->isError())
 		{
-			if ($response->error->getMessage() == 'RequestTimeout')
+			if ($response->error->getCode() == 'RequestTimeout')
 			{
 				return;
 			}

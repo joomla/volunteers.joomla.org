@@ -40,21 +40,18 @@ class CRC32
 
 		if (function_exists("hash_file"))
 		{
-			$res = $this->crc32UsingHashExtension($filename);
-
-			Factory::getLog()->debug("File $filename - CRC32 = " . dechex($res) . " [HASH_FILE]");
+			$res        = $this->crc32UsingHashExtension($filename);
+			$calcMethod = 'HASH_FILE';
 		}
-		else if (function_exists("file_get_contents") && (@filesize($filename) <= $AkeebaPackerZIP_CHUNK_SIZE))
+		elseif (function_exists("file_get_contents") && (@filesize($filename) <= $AkeebaPackerZIP_CHUNK_SIZE))
 		{
-			$res = $this->crc32Legacy($filename);
-
-			Factory::getLog()->debug("File $filename - CRC32 = " . dechex($res) . " [FILE_GET_CONTENTS]");
+			$res        = $this->crc32Legacy($filename);
+			$calcMethod = 'FILE_GET_CONTENTS';
 		}
 		else
 		{
-			$res = 0;
-
-			Factory::getLog()->debug("File $filename - CRC32 = " . dechex($res) . " [FAKE - CANNOT CALCULATE]");
+			$res        = 0;
+			$calcMethod = 'FAKE - CANNOT CALCULATE';
 		}
 
 		if ($res === false)
@@ -62,6 +59,24 @@ class CRC32
 			$res = 0;
 
 			Factory::getLog()->warning("File $filename - NOT READABLE: CRC32 IS WRONG!");
+		}
+		else
+		{
+			try
+			{
+				$humanReadable = dechex($res);
+			}
+			catch (\Throwable $e)
+			{
+			}
+
+			if (($humanReadable ?? null) === null)
+			{
+				$temp = $res > 2147483647 ? -($res - 2147483648) : $res;
+				$humanReadable = dechex($res);
+			}
+
+			Factory::getLog()->debug(sprintf("File %s - CRC32 = %s [%s]", $filename, $humanReadable ?? '(cannot display - you have a 32-bit version of PHP)', $calcMethod));
 		}
 
 		return $res;

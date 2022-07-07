@@ -43,11 +43,11 @@ class Onedrive extends Base
 	protected $isChunked = false;
 
 	/**
-	 * Chunk size (MB)
+	 * Chunk size (bytes)
 	 *
 	 * @var int
 	 */
-	protected $chunkSize = 10;
+	protected $chunkSize = 10485760;
 
 	/**
 	 * The name of the OAuth2 callback method in the parent window (the configuration page)
@@ -106,10 +106,12 @@ class Onedrive extends Base
 
 		if (!$haveCheckedRemoteDirectory)
 		{
-			Factory::getLog()->debug(sprintf(
-				"%s -- Checking if OneDrive directory %s already exists or needs to be created.",
-				__METHOD__, $directory
-			));
+			Factory::getLog()->debug(
+				sprintf(
+					"%s -- Checking if OneDrive directory %s already exists or needs to be created.",
+					__METHOD__, $directory
+				)
+			);
 
 			try
 			{
@@ -129,11 +131,10 @@ class Onedrive extends Base
 
 		// Check if the size of the file is compatible with chunked uploading
 		clearstatcache();
-		$totalSize   = filesize($localFilepath);
-		$isBigEnough = $this->isChunked ? ($totalSize > $this->chunkSize) : false;
+		$totalSize = filesize($localFilepath) ?: 0;
 
 		// Chunked uploads if the feature is enabled and the file is at least as big as the chunk size.
-		if ($this->isChunked && $isBigEnough)
+		if ($this->mustChunk($totalSize) || ($this->isChunked && !$this->mustSingeUpload($totalSize)))
 		{
 			return $this->multipartUpload($localFilepath, $remotePath, $totalSize);
 		}
@@ -174,6 +175,30 @@ class Onedrive extends Base
 		$connector->ping();
 
 		$connector->delete($path);
+	}
+
+	/**
+	 * Do I have to force a chunked upload?
+	 *
+	 * @param   int  $fileSize
+	 *
+	 * @return bool
+	 */
+	protected function mustChunk(int $fileSize): bool
+	{
+		return $fileSize > 104857600;
+	}
+
+	/**
+	 * Do I have to force a single part upload?
+	 *
+	 * @param   int  $fileSize
+	 *
+	 * @return bool
+	 */
+	protected function mustSingeUpload(int $fileSize): bool
+	{
+		return ($fileSize <= $this->chunkSize) || ($fileSize <= 4194304);
 	}
 
 	protected function makeConnector()
@@ -283,28 +308,34 @@ class Onedrive extends Base
 		$config = Factory::getConfiguration();
 
 		// Are we already processing a multipart upload?
-		Factory::getLog()->debug(sprintf(
-			"%s - Using chunked upload, part size %d",
-			__METHOD__, $this->chunkSize
-		));
+		Factory::getLog()->debug(
+			sprintf(
+				"%s - Using chunked upload, part size %d",
+				__METHOD__, $this->chunkSize
+			)
+		);
 
 		$offset    = $config->get('volatile.engine.postproc.' . $this->settingsKey . '.offset', 0);
 		$upload_id = $config->get('volatile.engine.postproc.' . $this->settingsKey . '.upload_id', null);
 
 		if (empty($upload_id))
 		{
-			Factory::getLog()->debug(sprintf(
-				"%s - Trying to remove existing file by the same name (%s)",
-				__METHOD__, $remotePath
-			));
+			Factory::getLog()->debug(
+				sprintf(
+					"%s - Trying to remove existing file by the same name (%s)",
+					__METHOD__, $remotePath
+				)
+			);
 
 			// Try deleting the file first because OneDrive doesn't allow replacing files when using multipart uploads
 			$connector->delete($remotePath, false);
 
-			Factory::getLog()->debug(sprintf(
-				"%s - Creating new upload session",
-				__METHOD__
-			));
+			Factory::getLog()->debug(
+				sprintf(
+					"%s - Creating new upload session",
+					__METHOD__
+				)
+			);
 
 			try
 			{
@@ -312,10 +343,12 @@ class Onedrive extends Base
 			}
 			catch (Exception $e)
 			{
-				Factory::getLog()->debug(sprintf(
-					"%s - Failed to create a new upload session; will try to refresh the tokens first",
-					__METHOD__
-				));
+				Factory::getLog()->debug(
+					sprintf(
+						"%s - Failed to create a new upload session; will try to refresh the tokens first",
+						__METHOD__
+					)
+				);
 
 				$upload_id = null;
 			}
@@ -330,17 +363,21 @@ class Onedrive extends Base
 				}
 				catch (Exception $e)
 				{
-					throw new RuntimeException(sprintf(
-						"The upload session for remote file %s cannot be created",
-						$remotePath
-					), 500, $e);
+					throw new RuntimeException(
+						sprintf(
+							"The upload session for remote file %s cannot be created",
+							$remotePath
+						), 500, $e
+					);
 				}
 			}
 
-			Factory::getLog()->debug(sprintf(
-				"%s - New upload session %s",
-				__METHOD__, $upload_id
-			));
+			Factory::getLog()->debug(
+				sprintf(
+					"%s - New upload session %s",
+					__METHOD__, $upload_id
+				)
+			);
 
 			$config->set('volatile.engine.postproc.' . $this->settingsKey . '.upload_id', $upload_id);
 		}
@@ -352,24 +389,30 @@ class Onedrive extends Base
 				$offset = 0;
 			}
 
-			Factory::getLog()->debug(sprintf(
-				"%s - Uploading chunked part",
-				__METHOD__
-			));
+			Factory::getLog()->debug(
+				sprintf(
+					"%s - Uploading chunked part",
+					__METHOD__
+				)
+			);
 
 			$result = $connector->uploadPart($upload_id, $localFilepath, $offset, $this->chunkSize);
 
-			Factory::getLog()->debug(sprintf(
-				"%s - Got uploadPart result %s",
-				__METHOD__, print_r($result, true)
-			));
+			Factory::getLog()->debug(
+				sprintf(
+					"%s - Got uploadPart result %s",
+					__METHOD__, print_r($result, true)
+				)
+			);
 		}
 		catch (Exception $e)
 		{
-			Factory::getLog()->debug(sprintf(
-				"%s - Got uploadPart Exception %s: %s",
-				__METHOD__, $e->getCode(), $e->getMessage()
-			));
+			Factory::getLog()->debug(
+				sprintf(
+					"%s - Got uploadPart Exception %s: %s",
+					__METHOD__, $e->getCode(), $e->getMessage()
+				)
+			);
 
 			// Let's retry
 			$this->tryCount++;
@@ -377,23 +420,29 @@ class Onedrive extends Base
 			// However, if we've already retried twice, we stop retrying and call it a failure
 			if ($this->tryCount > 2)
 			{
-				throw new RuntimeException(sprintf(
-					"%s - Maximum number of retries exceeded. The upload has failed.",
-					__METHOD__
-				), 500, $e);
+				throw new RuntimeException(
+					sprintf(
+						"%s - Maximum number of retries exceeded. The upload has failed.",
+						__METHOD__
+					), 500, $e
+				);
 			}
 
-			Factory::getLog()->debug(sprintf(
-				"%s - Error detected, trying to force-refresh the tokens",
-				__METHOD__
-			));
+			Factory::getLog()->debug(
+				sprintf(
+					"%s - Error detected, trying to force-refresh the tokens",
+					__METHOD__
+				)
+			);
 
 			$this->forceRefreshTokens();
 
-			Factory::getLog()->debug(sprintf(
-				"%s - Retrying chunk upload",
-				__METHOD__
-			));
+			Factory::getLog()->debug(
+				sprintf(
+					"%s - Retrying chunk upload",
+					__METHOD__
+				)
+			);
 
 			return false;
 		}
@@ -403,10 +452,12 @@ class Onedrive extends Base
 
 		if (isset($result['name']) || ($nextOffset > $totalSize))
 		{
-			Factory::getLog()->debug(sprintf(
-				"%s - Chunked upload is now complete",
-				__METHOD__
-			));
+			Factory::getLog()->debug(
+				sprintf(
+					"%s - Chunked upload is now complete",
+					__METHOD__
+				)
+			);
 
 			$config->set('volatile.engine.postproc.' . $this->settingsKey . '.offset', null);
 			$config->set('volatile.engine.postproc.' . $this->settingsKey . '.upload_id', null);

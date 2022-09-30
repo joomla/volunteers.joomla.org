@@ -4,19 +4,19 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e35198f8056b95bc946a061de8010fe9",
+    "content-hash": "79fb4fa6166eecf04a56f49b4f816ad2",
     "packages": [
         {
             "name": "gettext/gettext",
             "version": "v3.6.1",
             "source": {
                 "type": "git",
-                "url": "https://github.com/oscarotero/Gettext.git",
+                "url": "https://github.com/php-gettext/Gettext.git",
                 "reference": "cd3be64443551e3a693117c4bccbe53e36282456"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/oscarotero/Gettext/zipball/cd3be64443551e3a693117c4bccbe53e36282456",
+                "url": "https://api.github.com/repos/php-gettext/Gettext/zipball/cd3be64443551e3a693117c4bccbe53e36282456",
                 "reference": "cd3be64443551e3a693117c4bccbe53e36282456",
                 "shasum": ""
             },
@@ -71,12 +71,12 @@
             "version": "2.4.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/mlocati/cldr-to-gettext-plural-rules.git",
+                "url": "https://github.com/php-gettext/Languages.git",
                 "reference": "1b74377bd0c4cd87e8d72b948f5d8867e23505a5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mlocati/cldr-to-gettext-plural-rules/zipball/1b74377bd0c4cd87e8d72b948f5d8867e23505a5",
+                "url": "https://api.github.com/repos/php-gettext/Languages/zipball/1b74377bd0c4cd87e8d72b948f5d8867e23505a5",
                 "reference": "1b74377bd0c4cd87e8d72b948f5d8867e23505a5",
                 "shasum": ""
             },
@@ -169,6 +169,7 @@
                 "translation",
                 "twig"
             ],
+            "abandoned": "simplesamlphp/twig-configurable-i18n",
             "time": "2016-10-03T12:34:15+00:00"
         },
         {
@@ -293,12 +294,12 @@
                 }
             },
             "autoload": {
-                "psr-0": {
-                    "SAML2\\": "src/"
-                },
                 "files": [
                     "src/_autoload.php"
-                ]
+                ],
+                "psr-0": {
+                    "SAML2\\": "src/"
+                }
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
@@ -312,6 +313,61 @@
             ],
             "description": "SAML2 PHP library from SimpleSAMLphp",
             "time": "2018-07-12T09:56:19+00:00"
+        },
+        {
+            "name": "symfony/polyfill-ctype",
+            "version": "v1.8.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/polyfill-ctype.git",
+                "reference": "7cc359f1b7b80fc25ed7796be7d96adc9b354bae"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/polyfill-ctype/zipball/7cc359f1b7b80fc25ed7796be7d96adc9b354bae",
+                "reference": "7cc359f1b7b80fc25ed7796be7d96adc9b354bae",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.3"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.8-dev"
+                }
+            },
+            "autoload": {
+                "files": [
+                    "bootstrap.php"
+                ],
+                "psr-4": {
+                    "Symfony\\Polyfill\\Ctype\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                },
+                {
+                    "name": "Gert de Pagter",
+                    "email": "BackEndTea@gmail.com"
+                }
+            ],
+            "description": "Symfony polyfill for ctype functions",
+            "homepage": "https://symfony.com",
+            "keywords": [
+                "compatibility",
+                "ctype",
+                "polyfill",
+                "portable"
+            ],
+            "time": "2018-04-30T19:57:29+00:00"
         },
         {
             "name": "twig/extensions",
@@ -367,34 +423,36 @@
                 "i18n",
                 "text"
             ],
+            "abandoned": true,
             "time": "2017-06-08T18:19:53+00:00"
         },
         {
             "name": "twig/twig",
-            "version": "v1.35.3",
+            "version": "v1.42.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/twigphp/Twig.git",
-                "reference": "b48680b6eb7d16b5025b9bfc4108d86f6b8af86f"
+                "reference": "21707d6ebd05476854805e4f91b836531941bcd4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/twigphp/Twig/zipball/b48680b6eb7d16b5025b9bfc4108d86f6b8af86f",
-                "reference": "b48680b6eb7d16b5025b9bfc4108d86f6b8af86f",
+                "url": "https://api.github.com/repos/twigphp/Twig/zipball/21707d6ebd05476854805e4f91b836531941bcd4",
+                "reference": "21707d6ebd05476854805e4f91b836531941bcd4",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.3.3"
+                "php": ">=5.4.0",
+                "symfony/polyfill-ctype": "^1.8"
             },
             "require-dev": {
                 "psr/container": "^1.0",
                 "symfony/debug": "^2.7",
-                "symfony/phpunit-bridge": "^3.3"
+                "symfony/phpunit-bridge": "^3.4.19|^4.1.8|^5.0"
             },
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.35-dev"
+                    "dev-master": "1.42-dev"
                 }
             },
             "autoload": {
@@ -423,16 +481,16 @@
                 },
                 {
                     "name": "Twig Team",
-                    "homepage": "http://twig.sensiolabs.org/contributors",
+                    "homepage": "https://twig.symfony.com/contributors",
                     "role": "Contributors"
                 }
             ],
             "description": "Twig, the flexible, fast, and secure template language for PHP",
-            "homepage": "http://twig.sensiolabs.org",
+            "homepage": "https://twig.symfony.com",
             "keywords": [
                 "templating"
             ],
-            "time": "2018-03-20T04:25:58+00:00"
+            "time": "2019-06-18T15:35:16+00:00"
         },
         {
             "name": "whitehat101/apr1-md5",
@@ -893,16 +951,16 @@
             "time": "2014-11-20T16:49:30+00:00"
         },
         {
-            "name": "mikey179/vfsStream",
+            "name": "mikey179/vfsstream",
             "version": "v1.6.5",
             "source": {
                 "type": "git",
-                "url": "https://github.com/mikey179/vfsStream.git",
+                "url": "https://github.com/bovigo/vfsStream.git",
                 "reference": "d5fec95f541d4d71c4823bb5e30cf9b9e5b96145"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mikey179/vfsStream/zipball/d5fec95f541d4d71c4823bb5e30cf9b9e5b96145",
+                "url": "https://api.github.com/repos/bovigo/vfsStream/zipball/d5fec95f541d4d71c4823bb5e30cf9b9e5b96145",
                 "reference": "d5fec95f541d4d71c4823bb5e30cf9b9e5b96145",
                 "shasum": ""
             },
@@ -1345,6 +1403,7 @@
             "keywords": [
                 "tokenizer"
             ],
+            "abandoned": true,
             "time": "2017-12-04T08:55:13+00:00"
         },
         {
@@ -1473,6 +1532,7 @@
                 "mock",
                 "xunit"
             ],
+            "abandoned": true,
             "time": "2015-10-02T06:51:40+00:00"
         },
         {
@@ -1963,6 +2023,7 @@
             ],
             "description": "Symfony Debug Component",
             "homepage": "https://symfony.com",
+            "abandoned": "symfony/error-handler",
             "time": "2018-06-22T15:01:26+00:00"
         },
         {
@@ -2179,61 +2240,6 @@
             "time": "2018-05-30T04:18:42+00:00"
         },
         {
-            "name": "symfony/polyfill-ctype",
-            "version": "v1.8.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/symfony/polyfill-ctype.git",
-                "reference": "7cc359f1b7b80fc25ed7796be7d96adc9b354bae"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-ctype/zipball/7cc359f1b7b80fc25ed7796be7d96adc9b354bae",
-                "reference": "7cc359f1b7b80fc25ed7796be7d96adc9b354bae",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=5.3.3"
-            },
-            "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "1.8-dev"
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Symfony\\Polyfill\\Ctype\\": ""
-                },
-                "files": [
-                    "bootstrap.php"
-                ]
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Symfony Community",
-                    "homepage": "https://symfony.com/contributors"
-                },
-                {
-                    "name": "Gert de Pagter",
-                    "email": "BackEndTea@gmail.com"
-                }
-            ],
-            "description": "Symfony polyfill for ctype functions",
-            "homepage": "https://symfony.com",
-            "keywords": [
-                "compatibility",
-                "ctype",
-                "polyfill",
-                "portable"
-            ],
-            "time": "2018-04-30T19:57:29+00:00"
-        },
-        {
             "name": "symfony/polyfill-mbstring",
             "version": "v1.8.0",
             "source": {
@@ -2260,12 +2266,12 @@
                 }
             },
             "autoload": {
-                "psr-4": {
-                    "Symfony\\Polyfill\\Mbstring\\": ""
-                },
                 "files": [
                     "bootstrap.php"
-                ]
+                ],
+                "psr-4": {
+                    "Symfony\\Polyfill\\Mbstring\\": ""
+                }
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
@@ -2316,12 +2322,12 @@
                 }
             },
             "autoload": {
-                "psr-4": {
-                    "Symfony\\Polyfill\\Php54\\": ""
-                },
                 "files": [
                     "bootstrap.php"
                 ],
+                "psr-4": {
+                    "Symfony\\Polyfill\\Php54\\": ""
+                },
                 "classmap": [
                     "Resources/stubs"
                 ]
@@ -2375,12 +2381,12 @@
                 }
             },
             "autoload": {
-                "psr-4": {
-                    "Symfony\\Polyfill\\Php55\\": ""
-                },
                 "files": [
                     "bootstrap.php"
-                ]
+                ],
+                "psr-4": {
+                    "Symfony\\Polyfill\\Php55\\": ""
+                }
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
@@ -2431,12 +2437,12 @@
                 }
             },
             "autoload": {
-                "psr-4": {
-                    "Symfony\\Polyfill\\Php70\\": ""
-                },
                 "files": [
                     "bootstrap.php"
                 ],
+                "psr-4": {
+                    "Symfony\\Polyfill\\Php70\\": ""
+                },
                 "classmap": [
                     "Resources/stubs"
                 ]
@@ -2489,12 +2495,12 @@
                 }
             },
             "autoload": {
-                "psr-4": {
-                    "Symfony\\Polyfill\\Php72\\": ""
-                },
                 "files": [
                     "bootstrap.php"
-                ]
+                ],
+                "psr-4": {
+                    "Symfony\\Polyfill\\Php72\\": ""
+                }
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
@@ -2695,5 +2701,6 @@
         "ext-json": "*",
         "ext-mbstring": "*"
     },
-    "platform-dev": []
+    "platform-dev": [],
+    "plugin-api-version": "1.1.0"
 }

@@ -1,4 +1,57 @@
 <?php die();?>
+Akeeba Backup 8.2.6
+================================================================================
+! A packaging issue broke the restoration script in backup archives
+
+Akeeba Backup 8.2.5
+================================================================================
+# [HIGH] Cannot open the Step 1 - Authentication page for OAuth2-based post-processing engines
+
+Akeeba Backup 8.2.4
+================================================================================
+# [HIGH] Some password managers prevent successful submission of the Site Setup page (you get an error about a missing email address)
+# [LOW] Push messages may be untranslated strings when a backup is taken over the API or the frontend backup URL
+
+Akeeba Backup 8.2.3
+================================================================================
+# [HIGH] BackBlaze B2 single file uploads were broken
+# [MEDIUM] Restoration. Administrator email appears as "undefined" in the Site Setup page
+# [LOW] Restoration: Wrong message about the emial address when the administrator passwords don't match
+
+Akeeba Backup 8.2.2
+================================================================================
+~ Changed all warnings to much more compact DETAILS elements
+~ Much simpler message if you try to run Akeeba Backup on an unsupported (too low) version of PHP.
++ Allow installation on all Joomla 4 versions so you can uninstall the package in some uncommon cases
++ Option about including the latest backup in remote quotas
+- Removed the PHP version warning. Joomla already warns you about EOL versions of PHP.
+# [LOW] ZIP Archiver, invalid CRC32 calculated for some small files in the installation folder
+
+Akeeba Backup 8.2.1
+================================================================================
+~ Better warnings about CRC32 for ZIP files on 32-bit versions of PHP
+# [HIGH] Quota settings and emails are not processed at the end of the backup process
+
+Akeeba Backup 8.2.0
+================================================================================
++ ANGIE for Joomla: reset session and cache options in Site Setup
++ Support for ShowOn to conditionally show options in the Configuration page
+# [HIGH] Single part uploads to Azure stopped working
+
+Akeeba Backup 8.1.10
+================================================================================
++ Upload to Swift: Support for Keystone v3
+# [LOW] "Test FTP connection" button was not correctly applying the passive mode
+
+Akeeba Backup 8.1.9
+================================================================================
++ More informative error messages for database connection issues during restoration
+~ Workaround for utf8_encode and _decode being deprecated in PHP 8.2
+# [LOW] Restoration: You were shown separate port and socket options which were not taken into account
+# [MEDIUM] Restoration: Using a custom port or socket might result in the wrong hostname being written in the restored site's configuration file
+# [MEDIUM] Possible infinite loop on PHP 8 during DB restoration if a SQL file is missing
+# [LOW] Invalid SQL dump if we cannot get the create commands for a function, procedure or trigger
+
 Akeeba Backup 8.1.8
 ================================================================================
 + Restoration: Warn about missing mysqli / PDO MySQL and REFUSE to proceed

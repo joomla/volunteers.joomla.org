@@ -1,7 +1,7 @@
 <?php
 /**
  * @package   akeebabackup
- * @copyright Copyright (c)2006-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -27,12 +27,6 @@ defined('_JEXEC') || die();
 @include('admin:com_akeeba/Backup/script')
 
 <div id="akeebaBackup8Wrapper">
-    {{-- Obsolete PHP version warning --}}
-    @include('admin:com_akeeba/CommonTemplates/phpversion_warning', [
-        'softwareName'  => 'Akeeba Backup',
-        'minPHPVersion' => '7.2.0',
-    ])
-
     {{-- Backup Setup --}}
     <div id="backup-setup" class="akeeba-panel--primary">
         <header class="akeeba-block-header">

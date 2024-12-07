@@ -3,7 +3,7 @@
  * Akeeba Engine
  *
  * @package   akeebaengine
- * @copyright Copyright (c)2006-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -118,8 +118,10 @@ class Swift extends Base
 		// Retrieve engine configuration data
 		$config = Factory::getConfiguration();
 
+		$version      = trim($config->get('engine.postproc.swift.keystone_version', 'v2'));
 		$authurl      = trim($config->get('engine.postproc.swift.authurl', ''));
 		$tenantid     = trim($config->get('engine.postproc.swift.tenantid', ''));
+		$domain       = trim($config->get('engine.postproc.swift.domain', 'default'));
 		$username     = trim($config->get('engine.postproc.swift.username', ''));
 		$password     = trim($config->get('engine.postproc.swift.password', ''));
 		$containerurl = $config->get('engine.postproc.swift.containerurl', 0);
@@ -169,8 +171,10 @@ class Swift extends Base
 		$config->set('volatile.postproc.directory', $directory);
 
 		return [
+			'version'      => $version,
 			'authurl'      => $authurl,
 			'tenantid'     => $tenantid,
+			'domain'       => $domain,
 			'username'     => $username,
 			'password'     => $password,
 			'containerurl' => $containerurl,
@@ -183,7 +187,7 @@ class Swift extends Base
 		$settings = $this->getSettings();
 
 		// Create the API connector object
-		$connector = new SwiftConnector($settings['authurl'], $settings['tenantid'], $settings['username'], $settings['password']);
+		$connector = new SwiftConnector($settings['version'], $settings['authurl'], $settings['tenantid'], $settings['username'], $settings['password'], $settings['domain']);
 		$connector->setStorageEndpoint($settings['containerurl']);
 
 		// Authenticate

@@ -1,10 +1,10 @@
 <?php
 
 /**
- * @version    CVS: 1.27.0
+ * @version    CVS: 1.49.0
  * @package    com_yoursites
  * @author     Geraint Edwards <via website>
- * @copyright  2016-2020 GWE Systems Ltd
+ * @copyright  2016-YOURSITES_COPYRIGHT GWE Systems Ltd
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
@@ -28,6 +28,7 @@ class YstsSampleChecks
 			$customresult->checkinfo['key']  = "COM_YOURSITES_EXTRA_CHECK_SAMPLE_CORRECT_DETAIL";
 			$customresult->checkinfo['data'] = array($live_site);
 			$customresult->checkinfo['status'] = 1;
+			$customresult->valid = 1;
 		}
 		else
 		{
@@ -36,6 +37,7 @@ class YstsSampleChecks
 			$customresult->checkinfo['key']  = "COM_YOURSITES_EXTRA_CHECK_SAMPLE_INCORRECT_DETAIL";
 			$customresult->checkinfo['data'] = array($live_site);
 			$customresult->checkinfo['status'] = -1;
+			$customresult->valid = 0;
 		}
 
 	}

@@ -1,7 +1,7 @@
 <?php
 /**
  * @package   akeebabackup
- * @copyright Copyright (c)2006-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -139,9 +139,9 @@ class Configuration extends Controller
 		$model->setState('user', $this->input->get('user', '', 'raw', 2));
 		$model->setState('pass', $this->input->get('pass', '', 'raw', 2));
 		$model->setState('initdir', $this->input->get('initdir', '', 'raw', 2));
-		$model->setState('usessl', $this->input->get('usessl', '', 'raw', 2) == 'true');
-		$model->setState('passive', $this->input->get('passive', '', 'raw', 2) == 'true');
-		$model->setState('passive_mode_workaround', $this->input->get('passive_mode_workaround', '', 'raw', 2) == 'true');
+		$model->setState('usessl', (bool) $this->input->getInt('usessl', 0));
+		$model->setState('passive', (bool) $this->input->getInt('passive', 0));
+		$model->setState('passive_mode_workaround', (bool) $this->input->getInt('passive_mode_workaround', 0));
 
 		try
 		{

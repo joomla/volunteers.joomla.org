@@ -1,8 +1,8 @@
 <?xml version="1.0" ?>
 <extension version="3.4" type="plugin" group="jce" method="upgrade">
     <name>WF_STYLESELECT_TITLE</name>
-    <version>2.9.27</version>
-    <creationDate>23-06-2022</creationDate>
+    <version>2.9.33</version>
+    <creationDate>18-01-2023</creationDate>
     <author>Ryan Demmer</author>
     <authorEmail>info@joomlacontenteditor.net</authorEmail>
     <authorUrl>https://www.joomlacontenteditor.net/</authorUrl>
@@ -17,9 +17,14 @@
                 <option value="custom">WF_STYLESELECT_CUSTOM</option>
             </field>
 
-            <field name="stylesheet" placeholder="eg: templates/$template/css/content.css" type="text" size="100" default="" label="WF_STYLESELECT_STYLESHEET_CUSTOM" description="WF_STYLESELECT_STYLESHEET_CUSTOM_DESC" parent="styles[stylesheet]" />
+            <field name="stylesheet" hint="eg: templates/$template/css/content.css" type="text" size="100" default="" label="WF_STYLESELECT_STYLESHEET_CUSTOM" description="WF_STYLESELECT_STYLESHEET_CUSTOM_DESC" parent="styles[stylesheet]" />
 
             <field name="sort" type="yesno" default="1" label="WF_STYLESELECT_STYLES_SORT" description="WF_STYLESELECT_STYLES_SORT_DESC">
+                <option value="1">JYES</option>
+                <option value="0">JNO</option>
+            </field>
+
+            <field name="preview_styles" type="yesno" default="1" label="WF_STYLESELECT_STYLES_PREVIEW_STYLES" description="WF_STYLESELECT_STYLES_PREVIEW_STYLES_DESC">
                 <option value="1">JYES</option>
                 <option value="0">JNO</option>
             </field>

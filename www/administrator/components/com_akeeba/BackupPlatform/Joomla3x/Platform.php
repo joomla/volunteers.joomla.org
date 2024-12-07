@@ -1,7 +1,7 @@
 <?php
 /**
  * @package   akeebabackup
- * @copyright Copyright (c)2006-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -18,6 +18,7 @@ use Akeeba\Engine\Factory;
 use Akeeba\Engine\Finalization\TestExtract;
 use Akeeba\Engine\Platform;
 use Akeeba\Engine\Platform\Base as BasePlatform;
+use Akeeba\Engine\Psr\Log\LogLevel;
 use DateTimeZone;
 use Exception;
 use FOF40\Container\Container;
@@ -31,7 +32,6 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Mail\Mail;
 use Joomla\CMS\Uri\Uri;
 use Joomla\CMS\Version;
-use Psr\Log\LogLevel;
 
 if (!defined('DS'))
 {

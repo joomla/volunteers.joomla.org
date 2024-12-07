@@ -28,7 +28,8 @@
         "shortcuts": "5|10|20|40|50|75|100|250|1024|2047",
         "scale": "1",
         "uom": "MB",
-        "title": "COM_AKEEBA_CONFIG_BOX_CHUNKUPLOAD_SIZE"
+        "title": "COM_AKEEBA_CONFIG_BOX_CHUNKUPLOAD_SIZE",
+        "showon": "engine.postproc.azure.chunk_upload:1"
     },
     "engine.postproc.azure.account": {
         "default": "",

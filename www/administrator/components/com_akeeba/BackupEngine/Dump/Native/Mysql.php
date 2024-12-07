@@ -3,7 +3,7 @@
  * Akeeba Engine
  *
  * @package   akeebaengine
- * @copyright Copyright (c)2006-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -424,13 +424,6 @@ class Mysql extends Base
 	 * This is used wherever we need to detect an arbitrary, unquoted MySQL identifier per
 	 * https://dev.mysql.com/doc/refman/5.7/en/identifiers.html
 	 *
-	 * Normally, we can use a pretty simple regular expression that makes use of the \X property (extended grapheme
-	 * cluster) to describe the supported characters outside the 0-9, a-Z, A-Z, dollar and underscore ASCII ranges.
-	 *
-	 * HOWEVER! We discovered that Ubuntu 18.04 ships with a version of PCRE which does not support the \X property
-	 * in character classes (the stuff between brackets). In this case we have to fall back to a long-winded regex
-	 * that explicitly adds the \u0080 - \uFFFF range as an alternative.
-	 *
 	 * Also what if Unicode support is not compiled in PCRE? In this case we will fall back to a much simpler regex
 	 * which only supports the ASCII subset of the allowed characters. In this case your database dump will be wrong
 	 * if you use table names with non-ASCII characters.
@@ -447,10 +440,9 @@ class Mysql extends Base
 
 		if (is_null($validCharRegEx) || is_null($unicodeFlag))
 		{
-			$brokenPCRE     = @preg_match('/[0-9a-zA-Z$_\X]/u', 's') === false;
 			$noUnicode      = @preg_match('/\p{L}/u', 'σ') !== 1;
 			$unicodeFlag    = $noUnicode ? '' : 'u';
-			$validCharRegEx = $noUnicode ? '[0-9a-zA-Z$_]' : ($brokenPCRE ? '[0-9a-zA-Z$_]|[\x{0080}-\x{FFFF}]' : '[0-9a-zA-Z$_\X]');
+			$validCharRegEx = $noUnicode ? '[0-9a-zA-Z$_]' : '[0-9a-zA-Z$_]|[\x{0080}-\x{FFFF}]';
 		}
 
 		return [$validCharRegEx, $unicodeFlag];

@@ -28,7 +28,8 @@
         "shortcuts": "5|10|20|40|60",
         "scale": "1",
         "uom": "MB",
-        "title": "COM_AKEEBA_CONFIG_BOX_CHUNKUPLOAD_SIZE"
+        "title": "COM_AKEEBA_CONFIG_BOX_CHUNKUPLOAD_SIZE",
+        "showon": "engine.postproc.onedrivebusiness.chunk_upload:1"
     },
     "engine.postproc.onedrivebusiness.openoauth": {
         "default": "",

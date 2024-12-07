@@ -7,12 +7,19 @@
  */
 defined('JPATH_BASE') or die;
 
+use Joomla\CMS\Component\ComponentHelper;
+use Joomla\CMS\Factory;
+use Joomla\CMS\Form\Form;
+use Joomla\CMS\HTML\HTMLHelper;
+use Joomla\CMS\Plugin\CMSPlugin;
+use Joomla\CMS\Plugin\PluginHelper;
+
 /**
  * JCE.
  *
  * @since       2.5.5
  */
-class PlgSystemJce extends JPlugin
+class PlgSystemJce extends CMSPlugin
 {
     public function onPlgSystemJceContentPrepareForm($form, $data)
     {
@@ -21,19 +28,21 @@ class PlgSystemJce extends JPlugin
 
     private function getMediaRedirectUrl()
     {
-        $app = JFactory::getApplication();
+        $app = Factory::getApplication();
 
         require_once JPATH_ADMINISTRATOR . '/components/com_jce/helpers/browser.php';
 
         $id = $app->input->get('fieldid', '');
         $mediatype = $app->input->getVar('mediatype', $app->input->getVar('view', 'images'));
         $context = $app->input->getVar('context', '');
+        $plugin = $app->input->getCmd('plugin', '');
 
         $options = WFBrowserHelper::getMediaFieldOptions(array(
-            'element'   => $id,
+            'element' => $id,
             'converted' => true,
             'mediatype' => $mediatype,
-            'context'   => $context
+            'context' => $context,
+            'plugin' => $plugin,
         ));
 
         if (empty($options['url'])) {
@@ -48,19 +57,19 @@ class PlgSystemJce extends JPlugin
         $url = $this->getMediaRedirectUrl();
 
         if ($url) {
-            JFactory::getApplication()->redirect($url);
+            Factory::getApplication()->redirect($url);
         }
     }
 
     private function isEditorEnabled()
     {
-        return JPluginHelper::isEnabled('editors', 'jce');
+        return ComponentHelper::isEnabled('com_jce') && PluginHelper::isEnabled('editors', 'jce');
     }
 
     private function canRedirectMedia()
     {
-        $app = JFactory::getApplication();
-        $params = JComponentHelper::getParams('com_jce');
+        $app = Factory::getApplication();
+        $params = ComponentHelper::getParams('com_jce');
 
         // must have fieldid
         if (!$app->input->get('fieldid')) {
@@ -84,22 +93,48 @@ class PlgSystemJce extends JPlugin
 
     public function onAfterRoute()
     {
+        if (false == $this->isEditorEnabled()) {
+            return false;
+        }
+
         if ($this->canRedirectMedia() && $this->isEditorEnabled()) {
             // redirect to file browser
             $this->redirectMedia();
         }
+
+        /*$app = Factory::getApplication();
+        $params = ComponentHelper::getParams('com_jce');
+
+        // flexi-content mediafield
+        if ($app->input->getCmd('option') == 'com_media') {
+            if ((bool) $params->get('replace_media_manager', 1) == true) {
+                $vars = $app->input->getArray();
+
+                $valid = true;
+
+                foreach($vars as $key => $value) {
+                    if ($key == 'task' || strpos('api', $key) !== false) {
+                        $valid = false;
+                    }
+                }
+
+                if ($valid) {
+                    Factory::getApplication()->redirect('index.php?option=com_jce&view=browser');
+                }
+            }
+        }*/
     }
 
     public function onAfterDispatch()
     {
-        $app = JFactory::getApplication();
+        $app = Factory::getApplication();
 
         // only in "site"
         if ($app->getClientId() !== 0) {
             return;
         }
 
-        $document = JFactory::getDocument();
+        $document = Factory::getDocument();
 
         // only if enabled
         if ((int) $this->params->get('column_styles', 1)) {
@@ -125,21 +160,19 @@ class PlgSystemJce extends JPlugin
      */
     public function onContentPrepareForm($form, $data)
     {
-        $app = JFactory::getApplication();
+        $app = Factory::getApplication();
 
-        $version = new JVersion();
+        $version = new Joomla\CMS\Version();
 
-        // Joomla 3.9 or later...
+        // Joomla 3.10 or later...
         if (!$version->isCompatible('3.9')) {
             return true;
         }
 
-        if (!($form instanceof JForm)) {
+        if (!($form instanceof Form)) {
             $this->_subject->setError('JERROR_NOT_A_FORM');
             return false;
         }
-
-        $params = JComponentHelper::getParams('com_jce');
 
         // editor not enabled
         if (false == $this->isEditorEnabled()) {
@@ -151,8 +184,13 @@ class PlgSystemJce extends JPlugin
             return true;
         }
 
+        $params = ComponentHelper::getParams('com_jce');
+
         $hasMedia = false;
         $fields = $form->getFieldset();
+
+        // should the Joomla Media field be converted?
+        $replace_media_manager = (bool) $params->get('replace_media_manager', 1);
 
         foreach ($fields as $field) {
             if (method_exists($field, 'getAttribute') === false) {
@@ -170,10 +208,10 @@ class PlgSystemJce extends JPlugin
 
             if ($type) {
                 // joomla media field and flexi-content converted media field
-                if (strtolower($type) === 'media' || strtolower($type) === 'fcmedia') {
+                if (strtolower($type) == 'media' || strtolower($type) == 'fcmedia') {
 
                     // media replacement disabled, skip...
-                    if ((bool) $params->get('replace_media_manager', 1) === false) {
+                    if ($replace_media_manager == false) {
                         continue;
                     }
 
@@ -184,24 +222,26 @@ class PlgSystemJce extends JPlugin
                 }
 
                 // jce media field
-                if (strtolower($type) === 'mediajce') {
+                if (strtolower($type) == 'mediajce' || strtolower($type) == 'extendedmedia') {
                     $hasMedia = true;
                 }
             }
         }
 
-        // form has a converted media field
+        // form has a media field
         if ($hasMedia) {
-            if ((bool) $params->get('replace_media_manager', 1)) {
-                $option     = $app->input->getCmd('option'); 
-                $component  = JComponentHelper::getComponent($option);                
-                JFactory::getDocument()->addScriptOptions('plg_system_jce', array('replace_media' => true, 'context' => $component->id), true);
-            }
+            $option = $app->input->getCmd('option');
+            $component = ComponentHelper::getComponent($option);
 
-            $form->addFieldPath(JPATH_PLUGINS . '/system/jce/fields');
+            Factory::getDocument()->addScriptOptions('plg_system_jce', array(
+                'replace_media' => $replace_media_manager,
+                'context' => $component->id,
+            ), true);
+
+            $form->addFieldPath(JPATH_PLUGINS . '/fields/mediajce/fields');
 
             // Include jQuery
-            JHtml::_('jquery.framework');
+            HTMLHelper::_('jquery.framework');
 
             $document = JFactory::getDocument();
             $document->addScript(JURI::root(true) . '/plugins/system/jce/js/media.js', array('version' => 'auto'));
@@ -215,28 +255,67 @@ class PlgSystemJce extends JPlugin
     {
         $items = glob(__DIR__ . '/templates/*.php');
 
-        $app = JFactory::getApplication();
+        $app = Factory::getApplication();
 
         if (method_exists($app, 'getDispatcher')) {
-            $dispatcher = JFactory::getApplication()->getDispatcher();
+            $dispatcher = Factory::getApplication()->getDispatcher();
         } else {
             $dispatcher = JEventDispatcher::getInstance();
         }
 
-        foreach($items as $item) {
+        foreach ($items as $item) {
             $name = basename($item, '.php');
 
             $className = 'WfTemplate' . ucfirst($name);
 
-            require_once($item);
+            require_once $item;
 
-			if (class_exists($className)) {
+            if (class_exists($className)) {
                 // Instantiate and register the event
-				$plugin = new $className($dispatcher);
+                $plugin = new $className($dispatcher);
 
-				if ($plugin instanceof \Joomla\CMS\Extension\PluginInterface) {
+                if ($plugin instanceof \Joomla\CMS\Extension\PluginInterface) {
                     $plugin->registerListeners();
-				}
+                }
+            }
+        }
+    }
+
+    public function onWfPluginInit($instance)
+    {
+        $app = Factory::getApplication();
+        $user = Factory::getUser();
+
+        // set mediatype values for Template Manager parameters
+        if ($app->input->getCmd('plugin') == 'browser.templatemanager') {
+
+            // only in "admin"
+            if ($app->getClientId() !== 1) {
+                return;
+            }
+
+            // restrict to admin with component manage access
+            if (!$user->authorise('core.manage', 'com_jce')) {
+                return false;
+            }
+
+            // check for element and standalone should indicate mediafield
+            if ($app->input->getVar('element') && $app->input->getInt('standalone')) {
+                $mediatype = $app->input->getVar('mediatype');
+
+                if (!$mediatype) {
+                    return false;
+                }
+
+                $accept = $instance->getParam('templatemanager.extensions', '');
+
+                if ($accept) {
+                    $instance->setFileTypes($accept);
+                    $accept = $instance->getFileTypes();
+                    $mediatype = implode(',', array_intersect(explode(',', $mediatype), $accept));
+                }
+
+                $instance->setFileTypes($mediatype);
             }
         }
     }

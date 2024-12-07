@@ -1,7 +1,7 @@
 <?php
 /**
  * @package   akeebabackup
- * @copyright Copyright (c)2006-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -14,6 +14,7 @@ use Akeeba\Engine\Archiver\Directftp;
 use Akeeba\Engine\Archiver\Directsftp;
 use Akeeba\Engine\Factory;
 use Akeeba\Engine\Platform;
+use Akeeba\Engine\Postproc\Base;
 use Akeeba\Engine\Util\Transfer\FtpCurl;
 use Akeeba\Engine\Util\Transfer\SftpCurl;
 use Exception;
@@ -157,7 +158,7 @@ class Configuration extends Model
 		// Get the engine
 		$engineObject = Factory::getPostprocEngine($engine);
 
-		if ($engineObject === false)
+		if (!$engineObject instanceof Base)
 		{
 			return;
 		}
@@ -181,7 +182,7 @@ class Configuration extends Model
 
 		$engineObject = Factory::getPostprocEngine($engine);
 
-		if ($engineObject === false)
+		if ($engineObject instanceof Base)
 		{
 			return false;
 		}

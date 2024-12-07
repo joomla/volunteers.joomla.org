@@ -376,6 +376,8 @@ class JceModelProfile extends JModelAdmin
             // remove duplicates
             $rows = array_unique($rows);
 
+            $extensions = JcePluginsHelper::getExtensions();
+
             // only need plugins with xml files
             foreach (JcePluginsHelper::getPlugins() as $name => $plugin) {
                 $plugin->icon = empty($plugin->icon) ? array() : explode(',', $plugin->icon);
@@ -422,8 +424,6 @@ class JceModelProfile extends JModelAdmin
 
                     // bind data to the form
                     $plugin->form->bind($data->params);
-
-                    $extensions = JcePluginsHelper::getExtensions();
 
                     foreach ($extensions as $type => $items) {
 
@@ -714,7 +714,7 @@ class JceModelProfile extends JModelAdmin
                 if (array_key_exists($item, $data['params'])) {
                     $value = $data['params'][$item];
                     // clean and add to json array for merging
-                    $json[$item] = filter_var_array($value, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+                    $json[$item] = filter_var_array($value, FILTER_SANITIZE_SPECIAL_CHARS);
                 }
             }
 

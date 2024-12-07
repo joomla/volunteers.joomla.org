@@ -3,7 +3,7 @@
  * Akeeba Engine
  *
  * @package   akeebaengine
- * @copyright Copyright (c)2006-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -40,11 +40,14 @@ class Backblaze
 	/** @var  string  The Backblaze B2 Account ID */
 	private $accountId;
 
+	/** @var  AccountInformation  Account information returned from authorizeAccount */
+	private $accountInformation;
+
 	/** @var  string  The Backblaze B2 Application Key */
 	private $applicationKey;
 
-	/** @var  AccountInformation  Account information returned from authorizeAccount */
-	private $accountInformation;
+	/** @var  BucketInformation[]  A list of the buckets in this account, used by getBucketId */
+	private $buckets;
 
 	/**
 	 * Default cURL options
@@ -61,9 +64,6 @@ class Backblaze
 		CURLOPT_CAINFO         => AKEEBA_CACERT_PEM,
 	];
 
-	/** @var  BucketInformation[]  A list of the buckets in this account, used by getBucketId */
-	private $buckets;
-
 	/**
 	 * Creates a new Backblaze B2 API Connector object.
 	 *
@@ -74,6 +74,190 @@ class Backblaze
 	{
 		$this->accountId      = $accountId;
 		$this->applicationKey = $applicationKey;
+	}
+
+	/**
+	 * Cancel a multipart upload
+	 *
+	 * @param   string  $fileId  The fileId returned by startUpload
+	 *
+	 * @return  FileInformation  The information of the file being canceled
+	 */
+	public function cancelUpload($fileId)
+	{
+		if (!$this->getAccountInformation()->allowed->canWriteFiles())
+		{
+			throw new NotAllowed('Writing to files');
+		}
+
+		$apiUrl       = $this->getApiUrl();
+		$explicitPost = [
+			'fileId' => $fileId,
+		];
+		$additional   = [
+			'headers' => [
+				'Accept: application/json',
+			],
+		];
+		$apiReturn    = $this->fetch('POST', $apiUrl, 'b2api/v1/b2_cancel_large_file', $additional, $explicitPost);
+
+		return new FileInformation($apiReturn);
+	}
+
+	/**
+	 * Deletes a specific version of a file, given a file ID.
+	 *
+	 * @param   string  $fileName  The filename to delete all versions of. Can be a path.
+	 * @param   string  $fileId    The file ID to delete.
+	 *
+	 * @return  void
+	 */
+	public function deleteByFileId($fileName, $fileId)
+	{
+		if (!$this->getAccountInformation()->allowed->canDeleteFiles())
+		{
+			throw new NotAllowed('Deleting files');
+		}
+
+		$apiUrl     = $this->getApiUrl();
+		$body       = [
+			'fileName' => $fileName,
+			'fileId'   => $fileId,
+		];
+		$additional = [
+			'headers' => [
+				'Accept: application/json',
+			],
+		];
+
+		$this->fetch('POST', $apiUrl, '/b2api/v1/b2_delete_file_version', $additional, json_encode($body));
+	}
+
+	/**
+	 * Deletes all versions of a file, given a filename. Uses getFileVersions internally.
+	 *
+	 * @param   string  $bucketId  The bucket ID. Use getBucketId.
+	 * @param   string  $fileName  The filename to delete all versions of. Can be a path.
+	 *
+	 * @return  void
+	 */
+	public function deleteByFileName($bucketId, $fileName)
+	{
+		if (!$this->getAccountInformation()->allowed->canDeleteFiles())
+		{
+			throw new NotAllowed('Deleting files');
+		}
+
+		$files = $this->getFileVersions($bucketId, $fileName);
+
+		if (empty($files))
+		{
+			return;
+		}
+
+		foreach ($files as $file)
+		{
+			$this->deleteByFileId($file->fileName, $file->fileId);
+		}
+	}
+
+	/**
+	 * Download a file when you know its name
+	 *
+	 * @param   string  $bucketName  The name of the bucket you are downloading from
+	 * @param   string  $fileName    The path of the file in the bucket you are downloading
+	 * @param   string  $localFile   The path of the file in your local filesystem (download target)
+	 * @param   array   $headers     HTTP headers to pass, see the link below
+	 *
+	 * @return  void
+	 *
+	 * @see https://www.backblaze.com/b2/docs/b2_download_file_by_name.html
+	 */
+	public function downloadFile($bucketName, $fileName, $localFile, $headers = [])
+	{
+		if (!$this->getAccountInformation()->allowed->canReadFiles())
+		{
+			throw new NotAllowed('Reading files');
+		}
+
+		if (!$this->getAccountInformation()->allowed->isBucketAllowed($bucketName))
+		{
+			throw new NotAllowed("Accessing the $bucketName bucket");
+		}
+
+		if (!$this->getAccountInformation()->allowed->isPrefixAllowed($fileName))
+		{
+			throw new NotAllowed("Accessing the $fileName file; the prefix (directory) is not allowed)");
+		}
+
+		$accountInfo = $this->getAccountInformation();
+		$url         = rtrim($accountInfo->downloadUrl, '/') . '/';
+		$relativeUrl = 'file/' . $bucketName . '/' . ltrim($fileName, '/');
+
+		$this->fetch('GET', $url, $relativeUrl, [
+			'headers'   => $headers,
+			'file'      => $localFile,
+			'file_mode' => 'wb',
+		]);
+	}
+
+	/**
+	 * Download a file when you know its ID
+	 *
+	 * @param   string  $fileId     The file ID returned when uploading or by getFileVersions
+	 * @param   string  $localFile  The path of the file in your local filesystem (download target)
+	 * @param   array   $headers    HTTP headers to pass, see the link below
+	 *
+	 * @return  void
+	 *
+	 * @see https://www.backblaze.com/b2/docs/b2_download_file_by_id.html
+	 */
+	public function downloadFileById($fileId, $localFile, $headers = [])
+	{
+		if (!$this->getAccountInformation()->allowed->canReadFiles())
+		{
+			throw new NotAllowed('Reading files');
+		}
+
+		$accountInfo = $this->getAccountInformation();
+		$url         = rtrim($accountInfo->downloadUrl, '/') . '/';
+		$relativeUrl = 'api/b2_download_file_by_id?fileId=' . $fileId;
+
+		$this->fetch('GET', $url, $relativeUrl, [
+			'headers'   => $headers,
+			'file'      => $localFile,
+			'file_mode' => 'wb',
+		]);
+	}
+
+	/**
+	 * Finishes a multipart file upload.
+	 *
+	 * @param   string    $fileId       The ID of the file being uploaded
+	 * @param   string[]  $sha1PerPart  List of SHA-1 sums per uploaded part. First part at array index 0.
+	 *
+	 * @return  FileInformation  Note that you should not expect to get the SHA-1 of the entire file, per API docs.
+	 */
+	public function finishUpload($fileId, $sha1PerPart)
+	{
+		if (!$this->getAccountInformation()->allowed->canWriteFiles())
+		{
+			throw new NotAllowed('Writing to files');
+		}
+
+		$apiUrl       = $this->getApiUrl();
+		$explicitPost = json_encode([
+			'fileId'        => $fileId,
+			'partSha1Array' => $sha1PerPart,
+		]);
+		$additional   = [
+			'headers' => [
+				'Accept: application/json',
+			],
+		];
+		$apiReturn    = $this->fetch('POST', $apiUrl, 'b2api/v1/b2_finish_large_file', $additional, $explicitPost);
+
+		return new FileInformation($apiReturn);
 	}
 
 	/**
@@ -115,41 +299,6 @@ class Backblaze
 	}
 
 	/**
-	 * List all of the buckets in the account
-	 *
-	 * @return  BucketInformation[]
-	 *
-	 * @see  https://www.backblaze.com/b2/docs/b2_list_buckets.html
-	 */
-	public function listBuckets()
-	{
-		if (!$this->getAccountInformation()->allowed->canListBuckets())
-		{
-			throw new NotAllowed('Retrieving a list of your BackBlaze B2 buckets');
-		}
-
-		$apiUrl       = $this->getApiUrl();
-		$explicitPost = json_encode([
-			'accountId' => $this->getAccountInformation()->accountId,
-		]);
-		$additional   = [
-			'headers' => [
-				'Accept: application/json',
-			],
-		];
-
-		$apiReturn = $this->fetch('POST', $apiUrl, 'b2api/v1/b2_list_buckets', $additional, $explicitPost);
-		$return    = [];
-
-		foreach ($apiReturn['buckets'] as $bucket)
-		{
-			$return[] = new BucketInformation($bucket);
-		}
-
-		return $return;
-	}
-
-	/**
 	 * Get the bucket ID, required for use in the API, from the unique bucket name which the end user knows and sees in
 	 * the BackBlaze B2 interface.
 	 *
@@ -183,6 +332,135 @@ class Backblaze
 	}
 
 	/**
+	 * Returns the available file versions for a given file path.
+	 *
+	 * @param   string  $bucketId  The bucket ID. Use getBucketId.
+	 * @param   string  $fileName  The filename to return versions for. Can be a path.
+	 *
+	 * @return  FileInformation[]  The FileInformation objects for each file version.
+	 */
+	public function getFileVersions($bucketId, $fileName)
+	{
+		if (!$this->getAccountInformation()->allowed->canReadFiles())
+		{
+			throw new NotAllowed('Reading files');
+		}
+
+		$apiUrl = $this->getApiUrl();
+		$body   = [
+			'bucketId' => $bucketId,
+			'prefix'   => $fileName,
+		];
+
+		$additional = [
+			'headers' => [
+				'Accept: application/json',
+			],
+		];
+
+		$apiReturn = $this->fetch('POST', $apiUrl, '/b2api/v1/b2_list_file_versions', $additional, json_encode($body));
+		$return    = [];
+
+		foreach ($apiReturn['files'] as $file)
+		{
+			// If no fileName is returned that's a folder
+			if (empty($file['fileName']))
+			{
+				continue;
+			}
+
+			// The API returns versions for all files, starting with the one we requested. Hence the filtering here.
+			if ($file['fileName'] != $fileName)
+			{
+				continue;
+			}
+
+			$return[] = new FileInformation($file);
+		}
+
+		return $return;
+	}
+
+	/**
+	 * Get the upload URL, including the special upload authorization token, for multipart file uploads.
+	 *
+	 * This is the second step. The next steps are uploadPart and either finishUpload to finalize the upload, or
+	 * cancelUpload to abort the multipart upload process.
+	 *
+	 * @param   string  $fileId
+	 *
+	 * @return  UploadURL
+	 */
+	public function getPartUploadUrl($fileId)
+	{
+		if (!$this->getAccountInformation()->allowed->canWriteFiles())
+		{
+			throw new NotAllowed('Writing to files');
+		}
+
+		$apiUrl       = $this->getApiUrl();
+		$explicitPost = json_encode([
+			'fileId' => $fileId,
+		]);
+		$additional   = [
+			'headers' => [
+				'Accept: application/json',
+			],
+		];
+
+		$apiReturn = $this->fetch('POST', $apiUrl, 'b2api/v1/b2_get_upload_part_url', $additional, $explicitPost);
+
+		return new UploadURL($apiReturn);
+	}
+
+	/**
+	 * Create a singed URL which allows anyone to download a file for a specific period of time.
+	 *
+	 * @param   string  $bucketName  The name of the bucket you are downloading from
+	 * @param   string  $fileName    The path of the file in the bucket you are downloading
+	 * @param   int     $expiresIn   How many seconds will the URL be valid for. Default is the maximum, one week.
+	 *
+	 * @return  string  The signed download URL which can be shared
+	 */
+	public function getSignedUrl($bucketName, $fileName, $expiresIn = 604800)
+	{
+		if (!$this->getAccountInformation()->allowed->canReadFiles())
+		{
+			throw new NotAllowed('Reading files');
+		}
+
+		// Let's get the bucket ID
+		$bucketId = $this->getBucketId($bucketName);
+
+		// $expiresIn must be between 1 and 604800 seconds
+		$expiresIn = min($expiresIn, 604800);
+		$expiresIn = max(1, $expiresIn);
+
+		// Use b2_get_download_authorization to get a temporary authorization code
+		$apiUrl     = $this->getApiUrl();
+		$body       = [
+			'bucketId'               => $bucketId,
+			'fileNamePrefix'         => $fileName,
+			'validDurationInSeconds' => $expiresIn,
+		];
+		$additional = [
+			'headers' => [
+				'Accept: application/json',
+			],
+		];
+
+		$authResponse = $this->fetch('POST', $apiUrl, '/b2api/v1/b2_get_download_authorization', $additional, json_encode($body));
+
+		// Construct the signed URL
+		$accountInfo = $this->getAccountInformation();
+		$url         = rtrim($accountInfo->downloadUrl, '/');
+		$url         .= '/file/' . $bucketName . '/' . ltrim($fileName, '/');
+		$url         .= '?Authorization=' . $authResponse['authorizationToken'];
+
+		return $url;
+	}
+
+	/**
 	 * Gets the URL for the upload API of the given bucket
 	 *
 	 * @param   string  $bucketId  The ID of the bucket (NOT the name!). Use getBucketId to retrieve it.
@@ -212,49 +490,38 @@ class Backblaze
 	}
 
 	/**
-	 * Single part upload of a file to BackBlaze B2
+	 * List all of the buckets in the account
 	 *
-	 * @param   string  $bucketId     The ID of the bucket to upload to. Use getBucketId to fetch it.
-	 * @param   string  $remoteFile   The path of the file in the bucket.
-	 * @param   string  $localFile    The path to the local file to upload.
-	 * @param   string  $contentType  The MIME content type of the uploaded file.
+	 * @return  BucketInformation[]
 	 *
-	 * @return  FileInformation
+	 * @see  https://www.backblaze.com/b2/docs/b2_list_buckets.html
 	 */
-	public function uploadSingleFile($bucketId, $remoteFile, $localFile, $contentType = 'application/octet-stream')
+	public function listBuckets()
 	{
-		if (!$this->getAccountInformation()->allowed->canWriteFiles())
+		if (!$this->getAccountInformation()->allowed->canListBuckets())
 		{
-			throw new NotAllowed('Writing to files');
+			throw new NotAllowed('Retrieving a list of your BackBlaze B2 buckets');
 		}
 
-		if (!$this->getAccountInformation()->allowed->isPrefixAllowed($remoteFile))
-		{
-			throw new NotAllowed("Accessing the $remoteFile file; the prefix (directory) is not allowed)");
-		}
-
-		$uploadUrl = $this->getUploadUrl($bucketId);
-
-		clearstatcache(false, $localFile);
-		$sha1          = sha1_file($localFile);
-		$contentLength = filesize($localFile);
-
-		$additional = [
+		$apiUrl       = $this->getApiUrl();
+		$explicitPost = json_encode([
+			'accountId' => $this->getAccountInformation()->accountId,
+		]);
+		$additional   = [
 			'headers' => [
 				'Accept: application/json',
-				sprintf('X-Bz-File-Name: %s', $remoteFile),
-				sprintf('Content-Type: %s', $contentType),
-				sprintf('Content-Length: %s', $contentLength),
-				sprintf('X-Bz-Content-Sha1: %s', $sha1),
-				// WARNING: Uploads use a different authorization token than the API itself!
-				sprintf('Authorization: %s', $uploadUrl->authorizationToken),
 			],
-			'file'    => $localFile,
 		];
 
-		$apiReturn = $this->fetch('POST', $uploadUrl->uploadUrl, '', $additional);
+		$apiReturn = $this->fetch('POST', $apiUrl, 'b2api/v1/b2_list_buckets', $additional, $explicitPost);
+		$return    = [];
 
-		return new FileInformation($apiReturn);
+		foreach ($apiReturn['buckets'] as $bucket)
+		{
+			$return[] = new BucketInformation($bucket);
+		}
+
+		return $return;
 	}
 
 	/**
@@ -298,35 +565,90 @@ class Backblaze
 	}
 
 	/**
-	 * Get the upload URL, including the special upload authorization token, for multipart file uploads.
+	 * Upload a file. Automatically determines single- or multi-part upload based on the size of the file, the part
+	 * size and the absolute minimum part size that's possible.
 	 *
-	 * This is the second step. The next steps are uploadPart and either finishUpload to finalize the upload, or
-	 * cancelUpload to abort the multipart upload process.
+	 * @param   string  $bucketId     The ID of the bucket. Use getBucketId.
+	 * @param   string  $remoteFile   The path of the uploaded file in B2
+	 * @param   string  $localFile    Path to the file to upload
+	 * @param   int     $partSize     Part size for multipart uploads, default 5M
+	 * @param   string  $contentType  MIME content type of the uploaded file
 	 *
-	 * @param   string  $fileId
-	 *
-	 * @return  UploadURL
+	 * @return  FileInformation
 	 */
-	public function getPartUploadUrl($fileId)
+	public function uploadFile($bucketId, $remoteFile, $localFile, $partSize = 5242880, $contentType = 'application/octet-stream')
 	{
 		if (!$this->getAccountInformation()->allowed->canWriteFiles())
 		{
 			throw new NotAllowed('Writing to files');
 		}
 
-		$apiUrl       = $this->getApiUrl();
-		$explicitPost = json_encode([
-			'fileId' => $fileId,
-		]);
-		$additional   = [
-			'headers' => [
-				'Accept: application/json',
-			],
-		];
+		clearstatcache(false, $localFile);
+		$fileSize = @filesize($localFile);
 
-		$apiReturn = $this->fetch('POST', $apiUrl, 'b2api/v1/b2_get_upload_part_url', $additional, $explicitPost);
+		$minPartSize = $this->getAccountInformation()->absoluteMinimumPartSize;
 
-		return new UploadURL($apiReturn);
+		if (($fileSize < $minPartSize) || ($partSize < $minPartSize))
+		{
+			return $this->uploadSingleFile($bucketId, $remoteFile, $localFile, $contentType);
+		}
+
+		/**
+		 * Backblaze supports up to 10000 parts. We have to try increasing the part size until we're sure our  file
+		 * will upload in a number of parts that's less than that.
+		 */
+		while ($fileSize / $partSize > 10000)
+		{
+			// Increase by 5M in each step
+			$partSize += 5242880;
+		}
+
+		return $this->uploadLargeFile($bucketId, $remoteFile, $localFile, $partSize, $contentType);
+	}
+
+	/**
+	 * Upload a file using a multipart upload.
+	 *
+	 * @param   string  $bucketId     The ID of the bucket. Use getBucketId.
+	 * @param   string  $remoteFile   The path of the uploaded file in B2
+	 * @param   string  $localFile    Path to the file to upload
+	 * @param   int     $partSize     Part size for multipart uploads, default 5M
+	 * @param   string  $contentType  MIME content type of the uploaded file
+	 *
+	 * @return  FileInformation
+	 */
+	public function uploadLargeFile($bucketId, $remoteFile, $localFile, $partSize = 5242880, $contentType = 'application/octet-stream')
+	{
+		if (!$this->getAccountInformation()->allowed->canWriteFiles())
+		{
+			throw new NotAllowed('Writing to files');
+		}
+
+		if (!$this->getAccountInformation()->allowed->isPrefixAllowed($remoteFile))
+		{
+			throw new NotAllowed("Accessing the $remoteFile file; the prefix (directory) is not allowed)");
+		}
+
+		$fileStartInfo = $this->startUpload($bucketId, $remoteFile, $contentType);
+		$uploadUrl     = $this->getPartUploadUrl($fileStartInfo->fileId);
+		$partNumber    = 0;
+		$sha1Array     = [];
+
+		while (true)
+		{
+			try
+			{
+				$partInfo    = $this->uploadPart($uploadUrl, $localFile, ++$partNumber, $partSize);
+				$sha1Array[] = $partInfo->contentSha1;
+			}
+			catch (OutOfBoundsException $e)
+			{
+				// I am done uploading parts
+				break;
+			}
+		}
+
+		return $this->finishUpload($fileStartInfo->fileId, $sha1Array);
 	}
 
 	/**
@@ -404,75 +726,16 @@ class Backblaze
 	}
 
 	/**
-	 * Finishes a multipart file upload.
+	 * Single part upload of a file to BackBlaze B2
 	 *
-	 * @param   string    $fileId       The ID of the file being uploaded
-	 * @param   string[]  $sha1PerPart  List of SHA-1 sums per uploaded part. First part at array index 0.
-	 *
-	 * @return  FileInformation  Note that you should not expect to get the SHA-1 of the entire file, per API docs.
-	 */
-	public function finishUpload($fileId, $sha1PerPart)
-	{
-		if (!$this->getAccountInformation()->allowed->canWriteFiles())
-		{
-			throw new NotAllowed('Writing to files');
-		}
-
-		$apiUrl       = $this->getApiUrl();
-		$explicitPost = json_encode([
-			'fileId'        => $fileId,
-			'partSha1Array' => $sha1PerPart,
-		]);
-		$additional   = [
-			'headers' => [
-				'Accept: application/json',
-			],
-		];
-		$apiReturn    = $this->fetch('POST', $apiUrl, 'b2api/v1/b2_finish_large_file', $additional, $explicitPost);
-
-		return new FileInformation($apiReturn);
-	}
-
-	/**
-	 * Cancel a multipart upload
-	 *
-	 * @param   string  $fileId  The fileId returned by startUpload
-	 *
-	 * @return  FileInformation  The information of the file being canceled
-	 */
-	public function cancelUpload($fileId)
-	{
-		if (!$this->getAccountInformation()->allowed->canWriteFiles())
-		{
-			throw new NotAllowed('Writing to files');
-		}
-
-		$apiUrl       = $this->getApiUrl();
-		$explicitPost = [
-			'fileId' => $fileId,
-		];
-		$additional   = [
-			'headers' => [
-				'Accept: application/json',
-			],
-		];
-		$apiReturn    = $this->fetch('POST', $apiUrl, 'b2api/v1/b2_cancel_large_file', $additional, $explicitPost);
-
-		return new FileInformation($apiReturn);
-	}
-
-	/**
-	 * Upload a file using a multipart upload.
-	 *
-	 * @param   string  $bucketId     The ID of the bucket. Use getBucketId.
-	 * @param   string  $remoteFile   The path of the uploaded file in B2
-	 * @param   string  $localFile    Path to the file to upload
-	 * @param   int     $partSize     Part size for multipart uploads, default 5M
-	 * @param   string  $contentType  MIME content type of the uploaded file
+	 * @param   string  $bucketId     The ID of the bucket to upload to. Use getBucketId to fetch it.
+	 * @param   string  $remoteFile   The path of the file in the bucket.
+	 * @param   string  $localFile    The path to the local file to upload.
+	 * @param   string  $contentType  The MIME content type of the uploaded file.
 	 *
 	 * @return  FileInformation
 	 */
-	public function uploadLargeFile($bucketId, $remoteFile, $localFile, $partSize = 5242880, $contentType = 'application/octet-stream')
+	public function uploadSingleFile($bucketId, $remoteFile, $localFile, $contentType = 'application/octet-stream')
 	{
 		if (!$this->getAccountInformation()->allowed->canWriteFiles())
 		{
@@ -484,319 +747,28 @@ class Backblaze
 			throw new NotAllowed("Accessing the $remoteFile file; the prefix (directory) is not allowed)");
 		}
 
-		$fileStartInfo = $this->startUpload($bucketId, $remoteFile, $contentType);
-		$uploadUrl     = $this->getPartUploadUrl($fileStartInfo->fileId);
-		$partNumber    = 0;
-		$sha1Array     = [];
-
-		while (true)
-		{
-			try
-			{
-				$partInfo    = $this->uploadPart($uploadUrl, $localFile, ++$partNumber, $partSize);
-				$sha1Array[] = $partInfo->contentSha1;
-			}
-			catch (OutOfBoundsException $e)
-			{
-				// I am done uploading parts
-				break;
-			}
-		}
-
-		return $this->finishUpload($fileStartInfo->fileId, $sha1Array);
-	}
-
-	/**
-	 * Upload a file. Automatically determines single- or multi-part upload based on the size of the file, the part
-	 * size and the absolute minimum part size that's possible.
-	 *
-	 * @param   string  $bucketId     The ID of the bucket. Use getBucketId.
-	 * @param   string  $remoteFile   The path of the uploaded file in B2
-	 * @param   string  $localFile    Path to the file to upload
-	 * @param   int     $partSize     Part size for multipart uploads, default 5M
-	 * @param   string  $contentType  MIME content type of the uploaded file
-	 *
-	 * @return  FileInformation
-	 */
-	public function uploadFile($bucketId, $remoteFile, $localFile, $partSize = 5242880, $contentType = 'application/octet-stream')
-	{
-		if (!$this->getAccountInformation()->allowed->canWriteFiles())
-		{
-			throw new NotAllowed('Writing to files');
-		}
+		$uploadUrl = $this->getUploadUrl($bucketId);
 
 		clearstatcache(false, $localFile);
-		$fileSize = @filesize($localFile);
-
-		$minPartSize = $this->getAccountInformation()->absoluteMinimumPartSize;
-
-		if (($fileSize < $minPartSize) || ($partSize < $minPartSize))
-		{
-			return $this->uploadSingleFile($bucketId, $remoteFile, $localFile, $contentType);
-		}
-
-		/**
-		 * Backblaze supports up to 10000 parts. We have to try increasing the part size until we're sure our  file
-		 * will upload in a number of parts that's less than that.
-		 */
-		while ($fileSize / $partSize > 10000)
-		{
-			// Increase by 5M in each step
-			$partSize += 5242880;
-		}
-
-		return $this->uploadLargeFile($bucketId, $remoteFile, $localFile, $partSize, $contentType);
-	}
-
-	/**
-	 * Returns the available file versions for a given file path.
-	 *
-	 * @param   string  $bucketId  The bucket ID. Use getBucketId.
-	 * @param   string  $fileName  The filename to return versions for. Can be a path.
-	 *
-	 * @return  FileInformation[]  The FileInformation objects for each file version.
-	 */
-	public function getFileVersions($bucketId, $fileName)
-	{
-		if (!$this->getAccountInformation()->allowed->canReadFiles())
-		{
-			throw new NotAllowed('Reading files');
-		}
-
-		$apiUrl = $this->getApiUrl();
-		$body   = [
-			'bucketId' => $bucketId,
-			'prefix'   => $fileName,
-		];
+		$sha1          = sha1_file($localFile);
+		$contentLength = filesize($localFile);
 
 		$additional = [
 			'headers' => [
 				'Accept: application/json',
+				sprintf('X-Bz-File-Name: %s', $remoteFile),
+				sprintf('Content-Type: %s', $contentType),
+				sprintf('Content-Length: %s', $contentLength),
+				sprintf('X-Bz-Content-Sha1: %s', $sha1),
+				// WARNING: Uploads use a different authorization token than the API itself!
+				sprintf('Authorization: %s', $uploadUrl->authorizationToken),
 			],
+			'file'    => $localFile,
 		];
 
-		$apiReturn = $this->fetch('POST', $apiUrl, '/b2api/v1/b2_list_file_versions', $additional, json_encode($body));
-		$return    = [];
+		$apiReturn = $this->fetch('POST', $uploadUrl->uploadUrl, '', $additional);
 
-		foreach ($apiReturn['files'] as $file)
-		{
-			// If no fileName is returned that's a folder
-			if (empty($file['fileName']))
-			{
-				continue;
-			}
-
-			// The API returns versions for all files, starting with the one we requested. Hence the filtering here.
-			if ($file['fileName'] != $fileName)
-			{
-				continue;
-			}
-
-			$return[] = new FileInformation($file);
-		}
-
-		return $return;
-	}
-
-	/**
-	 * Deletes all versions of a file, given a filename. Uses getFileVersions internally.
-	 *
-	 * @param   string  $bucketId  The bucket ID. Use getBucketId.
-	 * @param   string  $fileName  The filename to delete all versions of. Can be a path.
-	 *
-	 * @return  void
-	 */
-	public function deleteByFileName($bucketId, $fileName)
-	{
-		if (!$this->getAccountInformation()->allowed->canDeleteFiles())
-		{
-			throw new NotAllowed('Deleting files');
-		}
-
-		$files = $this->getFileVersions($bucketId, $fileName);
-
-		if (empty($files))
-		{
-			return;
-		}
-
-		foreach ($files as $file)
-		{
-			$this->deleteByFileId($file->fileName, $file->fileId);
-		}
-	}
-
-	/**
-	 * Deletes a specific version of a file, given a file ID.
-	 *
-	 * @param   string  $fileName  The filename to delete all versions of. Can be a path.
-	 * @param   string  $fileId    The file ID to delete.
-	 *
-	 * @return  void
-	 */
-	public function deleteByFileId($fileName, $fileId)
-	{
-		if (!$this->getAccountInformation()->allowed->canDeleteFiles())
-		{
-			throw new NotAllowed('Deleting files');
-		}
-
-		$apiUrl     = $this->getApiUrl();
-		$body       = [
-			'fileName' => $fileName,
-			'fileId'   => $fileId,
-		];
-		$additional = [
-			'headers' => [
-				'Accept: application/json',
-			],
-		];
-
-		$this->fetch('POST', $apiUrl, '/b2api/v1/b2_delete_file_version', $additional, json_encode($body));
-	}
-
-	/**
-	 * Create a singed URL which allows anyone to download a file for a specific period of time.
-	 *
-	 * @param   string  $bucketName  The name of the bucket you are downloading from
-	 * @param   string  $fileName    The path of the file in the bucket you are downloading
-	 * @param   int     $expiresIn   How many seconds will the URL be valid for. Default is the maximum, one week.
-	 *
-	 * @return  string  The signed download URL which can be shared
-	 */
-	public function getSignedUrl($bucketName, $fileName, $expiresIn = 604800)
-	{
-		if (!$this->getAccountInformation()->allowed->canReadFiles())
-		{
-			throw new NotAllowed('Reading files');
-		}
-
-		// Let's get the bucket ID
-		$bucketId = $this->getBucketId($bucketName);
-
-		// $expiresIn must be between 1 and 604800 seconds
-		$expiresIn = min($expiresIn, 604800);
-		$expiresIn = max(1, $expiresIn);
-
-		// Use b2_get_download_authorization to get a temporary authorization code
-		$apiUrl     = $this->getApiUrl();
-		$body       = [
-			'bucketId'               => $bucketId,
-			'fileNamePrefix'         => $fileName,
-			'validDurationInSeconds' => $expiresIn,
-		];
-		$additional = [
-			'headers' => [
-				'Accept: application/json',
-			],
-		];
-
-		$authResponse = $this->fetch('POST', $apiUrl, '/b2api/v1/b2_get_download_authorization', $additional, json_encode($body));
-
-		// Construct the signed URL
-		$accountInfo = $this->getAccountInformation();
-		$url         = rtrim($accountInfo->downloadUrl, '/');
-		$url         .= '/file/' . $bucketName . '/' . ltrim($fileName, '/');
-		$url         .= '?Authorization=' . $authResponse['authorizationToken'];
-
-		return $url;
-	}
-
-	/**
-	 * Download a file when you know its name
-	 *
-	 * @param   string  $bucketName  The name of the bucket you are downloading from
-	 * @param   string  $fileName    The path of the file in the bucket you are downloading
-	 * @param   string  $localFile   The path of the file in your local filesystem (download target)
-	 * @param   array   $headers     HTTP headers to pass, see the link below
-	 *
-	 * @return  void
-	 *
-	 * @see https://www.backblaze.com/b2/docs/b2_download_file_by_name.html
-	 */
-	public function downloadFile($bucketName, $fileName, $localFile, $headers = [])
-	{
-		if (!$this->getAccountInformation()->allowed->canReadFiles())
-		{
-			throw new NotAllowed('Reading files');
-		}
-
-		if (!$this->getAccountInformation()->allowed->isBucketAllowed($bucketName))
-		{
-			throw new NotAllowed("Accessing the $bucketName bucket");
-		}
-
-		if (!$this->getAccountInformation()->allowed->isPrefixAllowed($fileName))
-		{
-			throw new NotAllowed("Accessing the $fileName file; the prefix (directory) is not allowed)");
-		}
-
-		$accountInfo = $this->getAccountInformation();
-		$url         = rtrim($accountInfo->downloadUrl, '/') . '/';
-		$relativeUrl = 'file/' . $bucketName . '/' . ltrim($fileName, '/');
-
-		$this->fetch('GET', $url, $relativeUrl, [
-			'headers'   => $headers,
-			'file'      => $localFile,
-			'file_mode' => 'wb',
-		]);
-	}
-
-	/**
-	 * Download a file when you know its ID
-	 *
-	 * @param   string  $fileId     The file ID returned when uploading or by getFileVersions
-	 * @param   string  $localFile  The path of the file in your local filesystem (download target)
-	 * @param   array   $headers    HTTP headers to pass, see the link below
-	 *
-	 * @return  void
-	 *
-	 * @see https://www.backblaze.com/b2/docs/b2_download_file_by_id.html
-	 */
-	public function downloadFileById($fileId, $localFile, $headers = [])
-	{
-		if (!$this->getAccountInformation()->allowed->canReadFiles())
-		{
-			throw new NotAllowed('Reading files');
-		}
-
-		$accountInfo = $this->getAccountInformation();
-		$url         = rtrim($accountInfo->downloadUrl, '/') . '/';
-		$relativeUrl = 'api/b2_download_file_by_id?fileId=' . $fileId;
-
-		$this->fetch('GET', $url, $relativeUrl, [
-			'headers'   => $headers,
-			'file'      => $localFile,
-			'file_mode' => 'wb',
-		]);
-	}
-
-	/**
-	 * Return the API URL for all operations except file downloads. It includes the all important trailing slash which
-	 * fetch() expects to be present.
-	 *
-	 * @return  string
-	 */
-	protected function getApiUrl()
-	{
-		$apiUrl = $this->getAccountInformation()->apiUrl;
-		$apiUrl = rtrim($apiUrl, '/');
-
-		return $apiUrl . '/';
-	}
-
-	/**
-	 * Return the API URL for file download operations only. It includes the all important trailing slash which fetch()
-	 * expects to be present.
-	 *
-	 * @return  string
-	 */
-	protected function getDownloadUrl()
-	{
-		$downloadUrl = $this->getAccountInformation()->downloadUrl;
-		$downloadUrl = rtrim($downloadUrl, '/');
-
-		return $downloadUrl . '/';
+		return new FileInformation($apiReturn);
 	}
 
 	/**
@@ -970,8 +942,9 @@ class Backblaze
 		}
 		elseif (in_array($method, ['POST', 'PUT']) && $fp)
 		{
-			$options[CURLOPT_POST]   = true;
-			$options[CURLOPT_INFILE] = $fp;
+			$options[CURLOPT_PUT]   = true;
+			$options[CURLOPT_CUSTOMREQUEST] = $method;
+			$options[CURLOPT_INFILE]        = $fp;
 
 			if ($file)
 			{
@@ -1116,5 +1089,33 @@ class Backblaze
 		}
 
 		return $response;
+	}
+
+	/**
+	 * Return the API URL for all operations except file downloads. It includes the all important trailing slash which
+	 * fetch() expects to be present.
+	 *
+	 * @return  string
+	 */
+	protected function getApiUrl()
+	{
+		$apiUrl = $this->getAccountInformation()->apiUrl;
+		$apiUrl = rtrim($apiUrl, '/');
+
+		return $apiUrl . '/';
+	}
+
+	/**
+	 * Return the API URL for file download operations only. It includes the all important trailing slash which fetch()
+	 * expects to be present.
+	 *
+	 * @return  string
+	 */
+	protected function getDownloadUrl()
+	{
+		$downloadUrl = $this->getAccountInformation()->downloadUrl;
+		$downloadUrl = rtrim($downloadUrl, '/');
+
+		return $downloadUrl . '/';
 	}
 }

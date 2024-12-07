@@ -1,14 +1,15 @@
 <?php
 
 /**
- * @version    CVS: 1.27.0
+ * @version    CVS: 1.49.0
  * @package    com_yoursites
  * @author     Geraint Edwards <via website>
- * @copyright  2016-2020 GWE Systems Ltd
+ * @copyright  2016-2023 GWE Systems Ltd
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
 use Joomla\CMS\Access\Access;
+use Joomla\CMS\MVC\Factory\LegacyFactory;
 
 defined('_JEXEC') or die;
 
@@ -16,16 +17,32 @@ class YstsGlobalcheckin
 {
 	public static $actionname = "Global Checkin";
 
-	public static function executeAction( &$returnData, $requestObject = null )
+	public static function executeAction(&$returnData, $requestObject = null)
 	{
 		try
 		{
 			// Get the Joomla! com_checkin model
-			$model = JModelLegacy::getInstance("Checkin", "CheckingModel");
+			$model = JModelLegacy::getInstance("Checkin", "CheckinModel");
 			if (!$model)
 			{
-				include_once JPATH_ADMINISTRATOR . '/components/com_checkin/models/checkin.php';
-				$model = new CheckinModelCheckin();
+				if (version_compare(JVERSION, '4.0.0', "lt"))
+				{
+					include_once JPATH_ADMINISTRATOR . '/components/com_checkin/models/checkin.php';
+					$model = new CheckinModelCheckin();
+				}
+				else
+				{
+
+					$LegacyFactory = new LegacyFactory;
+					JModelLegacy::addIncludePath(JPATH_ADMINISTRATOR . "/components/com_checkin/Model");
+					$model         = $LegacyFactory->createModel('Checkin', 'CheckinModel', array('ignore_request' => true));
+				}
+
+				if (!$model)
+				{
+					$returnData->error           = 1;
+					$returnData->result          = "No Checkin Model available";
+				}
 				$items = $model->getItems();
 
 				if (count($items))

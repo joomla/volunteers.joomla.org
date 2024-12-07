@@ -3,7 +3,7 @@
  * Akeeba Engine
  *
  * @package   akeebaengine
- * @copyright Copyright (c)2006-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -46,7 +46,7 @@ interface LogInterface
 	/**
 	 * Add a message to the log
 	 *
-	 * @param   string  $level    One of the Psr\Log\LogLevel constants
+	 * @param   string  $level    One of the Akeeba\Engine\Psr\Log\LogLevel constants
 	 * @param   string  $message  The message to log
 	 * @param   array   $context  Currently not used. Left here for PSR-3 compatibility.
 	 *

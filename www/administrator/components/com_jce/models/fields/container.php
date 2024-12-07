@@ -51,17 +51,7 @@ class JFormFieldContainer extends JFormField
     {
         $group = $this->group;
 
-        // subfields require JCE Pro
-        if (isset($this->element['pro']) && !WF_EDITOR_PRO) {
-            return "";
-        }
-        
-        $subForm    = new JForm('', array('control' => $this->formControl . '[' . str_replace('.', '][', $group) . ']'));
-        $children   = $this->element->children();
-
-        $subForm->load($children);
-        $subForm->setFields($children);
-
+        $children = $this->element->children();
         $data = $this->form->getData()->toObject();
 
         // extract relevant data level using group
@@ -71,42 +61,114 @@ class JFormFieldContainer extends JFormField
             }
         }
 
-        $subForm->bind($data);
+        $count = 1;
+
+        $repeatable = (string) $this->element['repeatable'];
+
+        if ($repeatable) {            
+            // find number of potential repeatable fields
+            foreach ($children as $child) {
+                $name = (string) $child->attributes()['name'];
+
+                if (isset($data->$name) && is_array($data->$name)) {
+                    $count = max(count($data->$name), $count);
+                }
+            }
+        }
 
         // And finaly build a main container
         $str = array();
 
-        $fields = $subForm->getFieldset();
-
-        if ($this->class === 'inset') {
+        if ($this->class == 'inset') {
             $this->class .= ' well well-small well-light p-4 bg-light';
         }
 
         $str[] = '<div class="form-field-container ' . $this->class . '">';
-        $str[] = '  <fieldset class="form-field-container-group">';
+        $str[] = '<fieldset class="form-field-container-group">';
 
         if ($this->element['label']) {
             $text = $this->element['label'];
             $text = $this->translateLabel ? JText::_($text) : $text;
-            
+
             $str[] = '<legend>' . $text . '</legend>';
         }
 
-        if ($this->element['description']) {
+        if ((string) $this->element['description']) {
             $text = $this->element['description'];
             $text = $this->translateLabel ? JText::_($text) : $text;
-            
+
             $str[] = '<small class="description">' . $text . '</small>';
 
             // reset description
             $this->description = '';
         }
 
-        foreach ($fields as $field) {
-            $str[] = $field->renderField(array('description' => $field->description));
+        // repeatable
+        if ($repeatable) {
+            $str[] = '<div class="form-field-repeatable">';
         }
 
-        $str[] = '  </fieldset>';
+        for ($i = 0; $i < $count; $i++) {
+
+            if ($repeatable) {
+                $str[] = '<div class="form-field-repeatable-item well well-small p-3 bg-light my-2">';
+                $str[] = '  <div class="form-field-repeatable-item-group">';
+            }
+
+            $subForm = new JForm('', array('control' => $this->formControl . '[' . str_replace('.', '][', $group) . ']'));
+
+            $subForm->load($children);
+            $subForm->setFields($children);
+
+            $subForm->bind($data);
+            $fields = $subForm->getFieldset();
+
+            foreach ($fields as $field) {
+                $name = (string) $field->element['name'];
+                $value = (string) $field->element['default'];
+
+                if (isset($data->$name)) {
+                    $value = $data->$name;
+                }
+
+                if (is_array($value)) {
+                    $value = isset($value[$i]) ? $value[$i] : '';
+                }
+
+                // escape value
+                $field->value = htmlspecialchars($value, ENT_COMPAT, 'UTF-8');
+                $field->setup($field->element, $field->value);
+
+                if ($repeatable) {
+                    // reset id
+                    $field->id .= '_' . $i;
+
+                    if (strpos($field->name, '[]') === false) {
+                        $field->name .= '[]';
+                    }
+                }
+
+                $str[] = $field->renderField(array('description' => $field->description));
+            }
+
+            if ($repeatable) {
+                $str[] = '</div>';
+
+                $str[] = '<div class="form-field-repeatable-item-control">';
+                $str[] = '<button class="btn btn-link form-field-repeatable-add" aria-label="' . JText::_('JGLOBAL_FIELD_ADD') . '"><i class="icon icon-plus pull-right float-right"></i></button>';
+                $str[] = '<button class="btn btn-link form-field-repeatable-remove" aria-label="' . JText::_('JGLOBAL_FIELD_REMOVE') . '"><i class="icon icon-trash pull-right float-right"></i></button>';
+                $str[] = '</div>';
+
+                $str[] = '</div>';
+            }
+        }
+
+        // repeatable
+        if ($repeatable) {
+            $str[] = '</div>';
+        }
+
+        $str[] = '</fieldset>';
         $str[] = '</div>';
 
         return implode("", $str);

@@ -38,7 +38,8 @@
         "scale": "1048576",
         "uom": "MB",
         "title": "COM_AKEEBA_CONFIG_SIZEQUOTA_VALUE_TITLE",
-        "description": "COM_AKEEBA_CONFIG_SIZEQUOTA_VALUE_DESCRIPTION"
+        "description": "COM_AKEEBA_CONFIG_SIZEQUOTA_VALUE_DESCRIPTION",
+        "showon": "akeeba.quota.size_quota:1"
     },
     "akeeba.quota.enable_count_quota": {
         "default": "1",
@@ -55,6 +56,7 @@
         "scale": "1",
         "uom": "",
         "title": "COM_AKEEBA_CONFIG_COUNTQUOTA_VALUE_TITLE",
-        "description": "COM_AKEEBA_CONFIG_COUNTQUOTA_VALUE_DESCRIPTION"
+        "description": "COM_AKEEBA_CONFIG_COUNTQUOTA_VALUE_DESCRIPTION",
+        "showon": "akeeba.quota.enable_count_quota:1"
     }
 }

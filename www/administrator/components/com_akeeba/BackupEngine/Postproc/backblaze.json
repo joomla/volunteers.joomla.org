@@ -53,6 +53,7 @@
         "shortcuts": "5|10|20|40|60|80|100",
         "scale": "1",
         "uom": "MB",
-        "title": "COM_AKEEBA_CONFIG_BOX_CHUNKUPLOAD_SIZE"
+        "title": "COM_AKEEBA_CONFIG_BOX_CHUNKUPLOAD_SIZE",
+        "shown": "engine.postproc.backblaze.disableMultipart:0"
     }
 }

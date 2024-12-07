@@ -1,7 +1,7 @@
 <?php
 /**
  * @package   akeebabackup
- * @copyright Copyright (c)2006-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -13,9 +13,8 @@ defined('_JEXEC') || die();
 use Akeeba\Engine\Base\Part;
 use Akeeba\Engine\Factory;
 use Akeeba\Engine\Platform;
-use Akeeba\Engine\Util\Logger;
+use Akeeba\Engine\Psr\Log\LogLevel;
 use Akeeba\Engine\Util\PushMessages;
-use Closure;
 use DateTimeZone;
 use DirectoryIterator;
 use Exception;
@@ -23,10 +22,7 @@ use FOF40\Date\Date;
 use FOF40\Factory\Exception\ModelNotFound;
 use FOF40\Model\Model;
 use FOF40\Timer\Timer;
-use JDatabaseDriver;
-use JLoader;
 use Joomla\CMS\Language\Text;
-use Psr\Log\LogLevel;
 use RuntimeException;
 
 /**

@@ -27,7 +27,7 @@ class PlgQuickiconEos310 extends CMSPlugin
 	 * @var    string
 	 * @since  3.10.0
 	 */
-	const EOS_DATE = '2023-08-17';
+	const EOS_DATE = '2025-02-17';
 
 	/**
 	 * Application object
@@ -200,8 +200,8 @@ class PlgQuickiconEos310 extends CMSPlugin
 		{
 			return array(
 				'id'            => 5,
-				'messageText'   => 'PLG_QUICKICON_EOS310_MESSAGE_ERROR_SUPPORT_ENDED',
-				'quickiconText' => 'PLG_QUICKICON_EOS310_MESSAGE_ERROR_SUPPORT_ENDED_SHORT',
+				'messageText'   => 'PLG_QUICKICON_EOS310_MESSAGE_WARNING_ELTS_SUPPORT_ENDED',
+				'quickiconText' => 'PLG_QUICKICON_EOS310_MESSAGE_WARNING_ELTS_SUPPORT_ENDED_SHORT',
 				'messageType'   => 'error',
 				'image'         => 'minus-circle',
 				'messageLink'   => 'https://docs.joomla.org/Special:MyLanguage/Planning_for_Mini-Migration_-_Joomla_3.10.x_to_4.x',
@@ -210,13 +210,13 @@ class PlgQuickiconEos310 extends CMSPlugin
 			);
 		}
 
-		// The security support is ending in 6 months
-		if ($monthsUntilEOS <= 6)
+		// The eos support is ending in 6 months
+		if ($monthsUntilEOS < 6)
 		{
 			return array(
 				'id'            => 4,
-				'messageText'   => 'PLG_QUICKICON_EOS310_MESSAGE_WARNING_SUPPORT_ENDING',
-				'quickiconText' => 'PLG_QUICKICON_EOS310_MESSAGE_WARNING_SUPPORT_ENDING_SHORT',
+				'messageText'   => 'PLG_QUICKICON_EOS310_MESSAGE_WARNING_ELTS_SUPPORT_ENDING',
+				'quickiconText' => 'PLG_QUICKICON_EOS310_MESSAGE_WARNING_ELTS_SUPPORT_ENDING_SHORT',
 				'messageType'   => 'warning',
 				'image'         => 'warning-circle',
 				'messageLink'   => 'https://docs.joomla.org/Special:MyLanguage/Planning_for_Mini-Migration_-_Joomla_3.10.x_to_4.x',
@@ -225,52 +225,16 @@ class PlgQuickiconEos310 extends CMSPlugin
 			);
 		}
 
-		// We are in security only mode now, 12 month to go from now on
-		if ($monthsUntilEOS <= 12)
-		{
-			return array(
-				'id'            => 3,
-				'messageText'   => 'PLG_QUICKICON_EOS310_MESSAGE_WARNING_SECURITY_ONLY',
-				'quickiconText' => 'PLG_QUICKICON_EOS310_MESSAGE_WARNING_SECURITY_ONLY_SHORT',
-				'messageType'   => 'warning',
-				'image'         => 'warning-circle',
-				'messageLink'   => 'https://docs.joomla.org/Special:MyLanguage/Planning_for_Mini-Migration_-_Joomla_3.10.x_to_4.x',
-				'groupText'     => 'PLG_QUICKICON_EOS310_GROUPNAME_WARNING',
-				'snoozable'     => true,
-			);
-		}
-
-		// We still have 16 month to go, lets remind our users about the pre upgrade checker
-		if ($monthsUntilEOS <= 16)
-		{
-			return array(
-				'id'            => 2,
-				'messageText'   => 'PLG_QUICKICON_EOS310_MESSAGE_INFO_02',
-				'quickiconText' => 'PLG_QUICKICON_EOS310_MESSAGE_INFO_02_SHORT',
-				'messageType'   => 'info',
-				'image'         => 'info-circle',
-				'messageLink'   => 'https://docs.joomla.org/Special:MyLanguage/Pre-Update_Check',
-				'groupText'     => 'PLG_QUICKICON_EOS310_GROUPNAME_INFO',
-				'snoozable'     => true,
-			);
-		}
-
-		// Lets start our messages 2 month after the initial release, still 22 month to go
-		if ($monthsUntilEOS <= 22)
-		{
-			return array(
-				'id'            => 1,
-				'messageText'   => 'PLG_QUICKICON_EOS310_MESSAGE_INFO_01',
-				'quickiconText' => 'PLG_QUICKICON_EOS310_MESSAGE_INFO_01_SHORT',
-				'messageType'   => 'info',
-				'image'         => 'info-circle',
-				'messageLink'   => 'https://www.joomla.org/4/#features',
-				'groupText'     => 'PLG_QUICKICON_EOS310_GROUPNAME_INFO',
-				'snoozable'     => true,
-			);
-		}
-
-		return false;
+		return array(
+			'id'            => 1,
+			'messageText'   => 'PLG_QUICKICON_EOS310_MESSAGE_WARNING_ELTS_SUPPORT',
+			'quickiconText' => 'PLG_QUICKICON_EOS310_MESSAGE_WARNING_ELTS_SUPPORT_SHORT',
+			'messageType'   => 'info',
+			'image'         => 'info-circle',
+			'messageLink'   => 'https://www.joomla.org/4/#features',
+			'groupText'     => 'PLG_QUICKICON_EOS310_GROUPNAME_INFO',
+			'snoozable'     => true,
+		);
 	}
 
 	/**

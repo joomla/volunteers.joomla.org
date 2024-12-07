@@ -3,7 +3,7 @@
  * Akeeba Engine
  *
  * @package   akeebaengine
- * @copyright Copyright (c)2006-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -488,7 +488,7 @@ abstract class Base implements PlatformInterface
 			->from($db->qn($this->tableNameStats))
 			->where($db->qn('profile_id') . ' = ' . $db->q($profile))
 			->where($db->qn('remote_filename') . ' LIKE ' . $db->q($engine . '://%'))
-			->order($db->qn('id') . ' ASC');
+			->order($db->qn('id') . ' DESC');
 
 		$db->setQuery($sql);
 

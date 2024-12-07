@@ -43,7 +43,7 @@ class BaseInstaller
 	 *
 	 * @var   string
 	 */
-	protected $maximumJoomlaVersion = '4.0.99';
+	protected $maximumJoomlaVersion = '4.999.999';
 
 	/**
 	 * Post-installation message definitions for Joomla! 3.2 or later.

@@ -329,7 +329,7 @@ class Compatibility extends \JObject
 
 				foreach ($attrs as $key => $data)
 				{
-					$key = strtolower($key);
+					$key                              = strtolower($key);
 					$this->currentUpdate->$name->$key = $data;
 				}
 				break;
@@ -555,6 +555,10 @@ class Compatibility extends \JObject
 		xml_set_element_handler($this->xmlParser, '_startElement', '_endElement');
 		xml_set_character_data_handler($this->xmlParser, '_characterData');
 
+		if (empty($response->body))
+		{
+			return false;
+		}
 		if (!xml_parse($this->xmlParser, $response->body))
 		{
 			Log::add(

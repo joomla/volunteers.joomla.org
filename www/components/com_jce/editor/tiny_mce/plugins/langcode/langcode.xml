@@ -1,0 +1,17 @@
+<?xml version="1.0" ?>
+<extension version="3.4" type="plugin" group="jce" method="upgrade">
+	<name>WF_LANGCODE_TITLE</name>
+	<version>2.9.33</version>
+	<creationDate>18-01-2023</creationDate>
+	<author>Ryan Demmer</author>
+	<authorEmail>info@joomlacontenteditor.net</authorEmail>
+	<authorUrl>https://www.joomlacontenteditor.net/</authorUrl>
+	<copyright>Ryan Demmer</copyright>
+	<license>GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html</license>
+	<description>WF_LANGCODE_DESC</description>
+	<icon>langcode</icon>
+	<layout>langcode</layout>
+	<files></files>
+	<languages></languages>
+	<help></help>
+</extension>

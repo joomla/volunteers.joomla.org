@@ -3,7 +3,7 @@
  * Akeeba Engine
  *
  * @package   akeebaengine
- * @copyright Copyright (c)2006-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -18,7 +18,7 @@ use Akeeba\Engine\Configuration;
 use Akeeba\Engine\Factory;
 use Akeeba\Engine\Platform;
 use Exception;
-use Psr\Log\LogLevel;
+use Akeeba\Engine\Psr\Log\LogLevel;
 use RuntimeException;
 
 /* Windows system detection */
@@ -38,7 +38,7 @@ if (!defined('_AKEEBA_IS_WINDOWS'))
  * Packing engine. Takes care of putting gathered files (the file list) into
  * an archive.
  */
-class Pack extends Part
+final class Pack extends Part
 {
 	/** @var array Directories left to be scanned */
 	private $directory_list;

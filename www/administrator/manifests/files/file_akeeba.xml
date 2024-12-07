@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--~
   ~ @package   akeebabackup
-  ~ @copyright Copyright (c)2006-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+  ~ @copyright Copyright (c)2006-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
   ~ @license   GNU General Public License version 3, or later
   -->
 
@@ -12,9 +12,9 @@
     <authorUrl>https://www.akeeba.com</authorUrl>
     <copyright>Copyright (c)2006-2019 Akeeba Ltd / Nicholas K. Dionysopoulos</copyright>
     <license>GNU GPL v3 or later</license>
-    <version>8.1.8</version>
-    <creationDate>2022-06-23</creationDate>
-    <description>Akeeba Backup CLI scripts v.8.1.8</description>
+    <version>8.2.6</version>
+    <creationDate>2023-01-18</creationDate>
+    <description>Akeeba Backup CLI scripts v.8.2.6</description>
 
     <fileset>
         <files target="cli">

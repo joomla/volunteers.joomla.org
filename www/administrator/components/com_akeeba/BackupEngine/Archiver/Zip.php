@@ -3,7 +3,7 @@
  * Akeeba Engine
  *
  * @package   akeebaengine
- * @copyright Copyright (c)2006-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -46,9 +46,6 @@ class Zip extends BaseArchiver
 	/** @var int Total number of part files */
 	private $totalParts = 1;
 
-	/** @var CRC32 The CRC32 calculations object */
-	private $crcCalculator = null;
-
 	/**
 	 * Class constructor - initializes internal operating parameters
 	 *
@@ -67,6 +64,20 @@ class Zip extends BaseArchiver
 		$this->enableSymlinkTargetStorage();
 
 		parent::__construct();
+
+		if (!function_exists('hash_file') || !function_exists('hash'))
+		{
+			$action = version_compare(PHP_VERSION, '7.4.0', 'lt')
+				? 'Please ask your host to enable the PHP hash extension and to make sure the hash_file() and hash() functions are not disabled.'
+				: 'Please ask your host to change their PHP configuration so that the hash_file() and hash() functions are not disabled.';
+
+			Factory::getLog()->warning(
+				sprintf(
+					'Your server lacks support for the hash_file() and/or hash() functions. CRC32 checksum cannot be calculated. Third party ZIP extraction tools may report the backup archive as broken. %s',
+					$action
+				)
+			);
+		}
 	}
 
 	/**
@@ -304,8 +315,6 @@ class Zip extends BaseArchiver
 			define("_AKEEBA_DIRECTORY_READ_CHUNK", $config->get('engine.archiver.zip.cd_glue_chunk_size')); // How much data to read at once when finalizing ZIP archives
 		}
 
-		$this->crcCalculator = Factory::getCRC32Calculator();
-
 		parent::__bootstrap_code();
 	}
 
@@ -430,7 +439,7 @@ class Zip extends BaseArchiver
 		}
 
 		$this->fwrite($this->cdfp, $hexdtime); /* Last mod time/date. */
-		$this->fwrite($this->cdfp, pack('V', $crc)); /* CRC 32 information. */
+		$this->fwrite($this->cdfp, $crc); /* CRC 32 information. */
 		$this->fwrite($this->cdfp, pack('V', $c_len)); /* Compressed filesize. */
 
 		if ($compressionMethod == 0)
@@ -578,24 +587,7 @@ class Zip extends BaseArchiver
 		}
 
 		// Get the hex time.
-		try
-		{
-			$dtime = dechex($this->unix2DOSTime($fileModTime));
-		}
-		catch (\Throwable $e)
-		{
-			$dtime = "00000000";
-		}
-
-		if (akstrlen($dtime) < 8)
-		{
-			$dtime = "00000000";
-		}
-
-		$hexdtime = chr(hexdec($dtime[6] . $dtime[7])) .
-			chr(hexdec($dtime[4] . $dtime[5])) .
-			chr(hexdec($dtime[2] . $dtime[3])) .
-			chr(hexdec($dtime[0] . $dtime[1]));
+		$hexdtime = pack('V', $this->unix2DOSTime($fileModTime));
 
 		// If it's a split ZIP file, we've got to make sure that the header can fit in the part
 		if ($this->useSplitArchive)
@@ -640,7 +632,7 @@ class Zip extends BaseArchiver
 		$this->fwrite($this->fp, pack('v', 2048)); /* General purpose bit flag. Bit 11 set = use UTF-8 encoding for filenames & comments */
 		$this->fwrite($this->fp, ($compressionMethod == 8) ? "\x08\x00" : "\x00\x00"); /* Compression method. */
 		$this->fwrite($this->fp, $hexdtime); /* Last modification time/date. */
-		$this->fwrite($this->fp, pack('V', $crc)); /* CRC 32 information. */
+		$this->fwrite($this->fp, $crc); /* CRC 32 information. */
 		$this->fwrite($this->fp, pack('V', $c_len)); /* Compressed filesize. */
 		$this->fwrite($this->fp, pack('V', $unc_len)); /* Uncompressed filesize. */
 		$this->fwrite($this->fp, pack('v', $fn_length)); /* Length of filename. */
@@ -689,35 +681,94 @@ class Zip extends BaseArchiver
 	 */
 	protected function getCRCForEntity(&$sourceNameOrData, &$isVirtual, &$isDir, &$isSymlink)
 	{
+		// No hash? No CRC32!
+		if (!function_exists('hash'))
+		{
+			return pack('V', 0);
+		}
+
+		// Do I need to reverse the endianness of CRC32b data?
+		static $reverseEndianness = null;
+
+		if ($reverseEndianness === null)
+		{
+			$reverseEndianness = hash('crc32b', 'The quick brown fox jumped over the lazy dog.', true) === pack('N', 2191738434);
+		}
+
+		$entityType = 'file';
+		$loggedName = null;
+
+		// Directories: dummy CRC-32
 		if (!$isSymlink && $isDir)
 		{
-			// Dummy CRC for dirs
-			$crc = 0;
+			$entityType = 'folder';
+			$crc        = pack('V', 0);
+		}
+		// Symlinks: CRC32 of the link source
+		elseif ($isSymlink)
+		{
+			$entityType = 'symlink';
+			$crc        = hash('crc32b', @readlink($sourceNameOrData) ?: '', true);
+		}
+		// Virtual files: CRC32 of the contents
+		elseif ($isVirtual)
+		{
+			$entityType = 'virtual file';
+			$loggedName = sprintf('of size %u', strlen($sourceNameOrData));
+			$crc        = hash('crc32b', $sourceNameOrData ?: '', true);
+		}
+		// Files: CRC32 of the file contents
+		else
+		{
+			// Get the CRC32 for the file
+			$crc = function_exists("hash_file") ? @hash_file('crc32b', $sourceNameOrData, true) : null;
 
-			return $crc;
+			// If the file was unreadable skip it
+			if ($crc === false)
+			{
+				throw new WarningException('Could not calculate CRC32 for ' . $sourceNameOrData . '. Looks like it is an unreadable file.');
+			}
+
+			// If hash_file is not available use a fake CRC32
+			$crc = $crc ?: pack('V', 0);
 		}
 
-		if ($isSymlink)
+		/**
+		 * If CRC32 returns Big Endian data I'll have to convert it to Little Endian, as required by ZIP.
+		 *
+		 * I cannot unpack as Big Endian and repack as Little Endian. The intermediate conversion to integer might
+		 * overflow 32-bit versions of PHP as its internal integer type is platform-dependent.
+		 *
+		 * I cannot reverse the string using string functions because the internal character encoding may be something
+		 * other than ASCII / 8-bit and mb_string might not be available.
+		 *
+		 * Instead, I am unpacking the binary string as an array of unsigned bytes and then repacking the bytes, in
+		 * reverse order, into a binary string. pack() and unpack() are not affected by the character encoding. Using
+		 * unsigned bytes guarantees they will fit into internal integer variables regardless of the platform used.
+		 */
+		if ($crc !== "\000\000\000\000" && $reverseEndianness)
 		{
-			$crc = \crc32(@readlink($sourceNameOrData));
-
-			return $crc;
+			$temp = array_values(unpack('C4', $crc));
+			$crc  = pack('C*', $temp[3], $temp[2], $temp[1], $temp[0]);
 		}
 
-		if ($isVirtual)
+		// Log the calculated CRC32 if the site is in debug mode
+		if (defined('AKEEBADEBUG'))
 		{
-			$crc = \crc32($sourceNameOrData);
+			$asHexChars = array_map(
+				function ($c) {
+					return dechex($c);
+				}, unpack('C*', $crc)
+			);
 
-			return $crc;
-		}
-
-		// This is supposed to be the fast way to calculate CRC32 of a (large) file.
-		$crc = $this->crcCalculator->crc32_file($sourceNameOrData, $this->AkeebaPackerZIP_CHUNK_SIZE);
-
-		// If the file was unreadable, $crc will be false, so we skip the file
-		if ($crc === false)
-		{
-			throw new WarningException('Could not calculate CRC32 for ' . $sourceNameOrData . '. Looks like it is an unreadable file.');
+			Factory::getLog()->debug(
+				sprintf(
+					'%s %s - CRC32 = %s',
+					$entityType,
+					$loggedName ?? $sourceNameOrData,
+					implode('', $reverseEndianness ? array_reverse($asHexChars) : $asHexChars)
+				)
+			);
 		}
 
 		return $crc;

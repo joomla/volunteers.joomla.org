@@ -1,10 +1,10 @@
 <?php
 
 /**
- * @version    CVS: 1.27.0
+ * @version    CVS: 1.49.0
  * @package    com_yoursites
  * @author     Geraint Edwards
- * @copyright  2017-2020 GWE Systems Ltd
+ * @copyright  2017-YOURSITES_COPYRIGHT GWE Systems Ltd
  * @license    GNU General Public License version 3 or later; see LICENSE.txt
  */
 // no direct access

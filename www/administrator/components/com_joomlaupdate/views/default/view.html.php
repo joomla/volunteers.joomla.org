@@ -150,6 +150,12 @@ class JoomlaupdateViewDefault extends JViewLegacy
 			// "Custom"
 			case 'custom':
 				$this->langKey         = 'COM_JOOMLAUPDATE_VIEW_DEFAULT_UPDATES_INFO_CUSTOM';
+
+				if (strpos($params->get('customurl', ''), 'https://elts-updates.joomla.org') === 0)
+				{
+					$this->langKey         = 'COM_JOOMLAUPDATE_VIEW_DEFAULT_UPDATES_INFO_ELTS';
+				}
+
 				$this->updateSourceKey = JText::_('COM_JOOMLAUPDATE_CONFIG_UPDATESOURCE_CUSTOM');
 				break;
 

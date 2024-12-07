@@ -3,7 +3,7 @@
  * Akeeba Engine
  *
  * @package   akeebaengine
- * @copyright Copyright (c)2006-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -17,20 +17,22 @@ use Akeeba\Engine\Core\Filters;
 use Akeeba\Engine\Core\Kettenrad;
 use Akeeba\Engine\Core\Timer;
 use Akeeba\Engine\Driver\Base;
+use Akeeba\Engine\Dump\Native;
 use Akeeba\Engine\Postproc\PostProcInterface;
 use Akeeba\Engine\Util\ConfigurationCheck;
-use Akeeba\Engine\Util\CRC32;
 use Akeeba\Engine\Util\Encrypt;
 use Akeeba\Engine\Util\EngineParameters;
 use Akeeba\Engine\Util\FactoryStorage;
 use Akeeba\Engine\Util\FileLister;
 use Akeeba\Engine\Util\FileSystem;
 use Akeeba\Engine\Util\Logger;
-use Akeeba\Engine\Util\PushMessages;
+use Akeeba\Engine\Util\PushMessagesInterface;
 use Akeeba\Engine\Util\RandomValue;
 use Akeeba\Engine\Util\SecureSettings;
 use Akeeba\Engine\Util\Statistics;
 use Akeeba\Engine\Util\TemporaryFiles;
+use DateTime;
+use DateTimeZone;
 use Exception;
 use RuntimeException;
 
@@ -79,14 +81,22 @@ abstract class Factory
 	private static $temporaryObjectList = [];
 
 	/**
+	 * The class to use for push messages
+	 *
+	 * @since 9.3.1
+	 * @var   string
+	 */
+	private static $pushClassName = 'Util\\PushMessages';
+
+	/**
 	 * Gets a serialized snapshot of the Factory for safekeeping (hibernate)
 	 *
 	 * @return  string  The serialized snapshot of the Factory
 	 */
-	public static function serialize()
+	public static function serialize(): string
 	{
 		// Call _onSerialize in all objects known to the factory
-		foreach (static::$objectList as $class_name => $object)
+		foreach (static::$objectList as $object)
 		{
 			if (method_exists($object, '_onSerialize'))
 			{
@@ -99,6 +109,7 @@ abstract class Factory
 			'root'             => static::$root,
 			'objectList'       => static::$objectList,
 			'engineClassnames' => static::$engineClassnames,
+			'pushClassname'    => static::$pushClassName,
 		];
 
 		// Serialize the factory
@@ -108,19 +119,20 @@ abstract class Factory
 	/**
 	 * Regenerates the full Factory state from a serialized snapshot (resume)
 	 *
-	 * @param   string  $serialized_data  The serialized snapshot to resume from
+	 * @param   string  $serializedData  The serialized snapshot to resume from
 	 *
 	 * @return  void
 	 */
-	public static function unserialize($serialized_data)
+	public static function unserialize(string $serializedData): void
 	{
 		static::nuke();
 
-		$engineInfo = unserialize($serialized_data);
+		$engineInfo = unserialize($serializedData);
 
 		static::$root                = $engineInfo['root'] ?? '';
 		static::$objectList          = $engineInfo['objectList'] ?? [];
 		static::$engineClassnames    = $engineInfo['engineClassnames'] ?? [];
+		static::$pushClassName       = $engineInfo['pushClassname'] ?? 'Utils\\PushMessages';
 		static::$temporaryObjectList = [];
 	}
 
@@ -131,12 +143,12 @@ abstract class Factory
 	 */
 	public static function nuke()
 	{
-		foreach (static::$objectList as $key => $object)
+		foreach (static::$objectList as &$object)
 		{
 			$object = null;
 		}
 
-		foreach (static::$temporaryObjectList as $key => $object)
+		foreach (static::$temporaryObjectList as &$object)
 		{
 			$object = null;
 		}
@@ -148,18 +160,21 @@ abstract class Factory
 	/**
 	 * Saves the engine state to temporary storage
 	 *
-	 * @param   string  $tag       The backup origin to save. Leave empty to get from already loaded Kettenrad instance.
-	 * @param   string  $backupId  The backup ID to save. Leave empty to get from already loaded Kettenrad instance.
+	 * @param   string|null  $tag       The backup origin to save. Leave empty to get from already loaded Kettenrad
+	 *                                  instance.
+	 * @param   string|null  $backupId  The backup ID to save. Leave empty to get from already loaded Kettenrad
+	 *                                  instance.
 	 *
 	 * @return  void
 	 *
 	 * @throws  RuntimeException  When the state save fails for any reason
+	 * @noinspection PhpUnused
 	 */
-	public static function saveState($tag = null, $backupId = null)
+	public static function saveState(?string $tag = null, ?string $backupId = null): void
 	{
 		$kettenrad = static::getKettenrad();
-		$tag = $tag ?: $kettenrad->getTag();
-		$backupId = $backupId ?: $kettenrad->getBackupId();
+		$tag       = $tag ?: $kettenrad->getTag();
+		$backupId  = $backupId ?: $kettenrad->getBackupId();
 
 		$saveTag = rtrim($tag . '.' . ($backupId ?: ''), '.');
 		$ret     = $kettenrad->getStatusArray();
@@ -209,20 +224,21 @@ abstract class Factory
 	 *
 	 * When failIfMissing is true (default) an exception will be thrown if the memory file / database record is no
 	 * longer there. This is a clear indication of an issue with the storage engine, e.g. the host deleting the memory
-	 * files in the middle of the backup step. Therefore we'll switch the storage engine type before throwing the
+	 * files in the middle of the backup step. Therefore, we'll switch the storage engine type before throwing the
 	 * exception.
 	 *
 	 * When failIfMissing is false we do NOT throw an exception. Instead, we do a hard reset of the backup factory. This
 	 * is required by the resetState method when we ask it to reset multiple origins at once.
 	 *
-	 * @param   string  $tag            The backup origin to load
-	 * @param   string  $backupId       The backup ID to load
-	 * @param   bool    $failIfMissing  Throw an exception if the memory data is no longer there
+	 * @param   string|null  $tag            The backup origin to load
+	 * @param   string|null  $backupId       The backup ID to load
+	 * @param   bool         $failIfMissing  Throw an exception if the memory data is no longer there
 	 *
 	 * @return  void
 	 */
-	public static function loadState($tag = null, $backupId = null, $failIfMissing = true)
+	public static function loadState(?string $tag = null, ?string $backupId = null, bool $failIfMissing = true): void
 	{
+		/** @noinspection PhpUndefinedConstantInspection */
 		$tag     = $tag ?: (defined('AKEEBA_BACKUP_ORIGIN') ? AKEEBA_BACKUP_ORIGIN : 'backend');
 		$loadTag = rtrim($tag . '.' . ($backupId ?: ''), '.');
 
@@ -237,7 +253,7 @@ abstract class Factory
 			if (empty($profile) || ($profile <= 1))
 			{
 				// Only bother loading a configuration if none has been already loaded
-				$filters      = [
+				$filters = [
 					['field' => 'tag', 'value' => $tag],
 				];
 
@@ -268,9 +284,9 @@ abstract class Factory
 		Factory::getLog()->open($loadTag);
 		Factory::getLog()->debug("Kettenrad :: Attempting to load from database ($tag) [$loadTag]");
 
-		$serialized_factory = static::getFactoryStorage()->get($loadTag);
+		$serializedFactory = static::getFactoryStorage()->get($loadTag);
 
-		if ($serialized_factory === false)
+		if ($serializedFactory === null)
 		{
 			if ($failIfMissing)
 			{
@@ -284,9 +300,9 @@ abstract class Factory
 		}
 
 		Factory::getLog()->debug(" -- Loaded stored Akeeba Factory ($tag) [$loadTag]");
-		static::unserialize($serialized_factory);
+		static::unserialize($serializedFactory);
 
-		unset($serialized_factory);
+		unset($serializedFactory);
 	}
 
 	// ========================================================================
@@ -325,16 +341,17 @@ abstract class Factory
 	 *
 	 * @return  void
 	 * @throws  Exception
+	 * @noinspection PhpUnused
 	 */
-	public static function resetState($config = [])
+	public static function resetState(array $config = []): void
 	{
-		$default_config = [
+		$defaultConfig = [
 			'global' => true,
 			'log'    => false,
 			'maxrun' => 180,
 		];
 
-		$config = (object) array_merge($default_config, $config);
+		$config = (object) array_merge($defaultConfig, $config);
 
 		// Pause logging if so desired
 		if (!$config->log)
@@ -374,8 +391,8 @@ abstract class Factory
 			try
 			{
 				$backupTickTime = !empty($running['backupend']) ? $running['backupend'] : $running['backupstart'];
-				$tz             = new \DateTimeZone('UTC');
-				$tstamp         = (new \DateTime($backupTickTime, $tz))->getTimestamp();
+				$tz             = new DateTimeZone('UTC');
+				$tstamp         = (new DateTime($backupTickTime, $tz))->getTimestamp();
 			}
 			catch (Exception $e)
 			{
@@ -440,9 +457,10 @@ abstract class Factory
 	 *
 	 * @return  Configuration  The Akeeba Configuration object
 	 */
-	public static function getConfiguration()
+	public static function getConfiguration(): Configuration
 	{
-		return static::getObjectInstance('Configuration');
+		/** @noinspection PhpIncompatibleReturnTypeInspection */
+		return static::getObjectInstance(Configuration::class);
 	}
 
 	/**
@@ -450,20 +468,22 @@ abstract class Factory
 	 *
 	 * @return  Statistics
 	 */
-	public static function getStatistics()
+	public static function getStatistics(): Statistics
 	{
-		return static::getObjectInstance('Util\\Statistics');
+		/** @noinspection PhpIncompatibleReturnTypeInspection */
+		return static::getObjectInstance(Statistics::class);
 	}
 
 	/**
 	 * Returns the currently configured archiver engine
 	 *
-	 * @param   bool  $reset  Should I try to forcible create a new instance?
+	 * @param   bool  $reset  Should I try to forcibly create a new instance?
 	 *
-	 * @return  Archiver\Base
+	 * @return  Archiver\Base|null
 	 */
-	public static function getArchiverEngine($reset = false)
+	public static function getArchiverEngine(bool $reset = false): ?Archiver\Base
 	{
+		/** @noinspection PhpIncompatibleReturnTypeInspection */
 		return static::getEngineInstance(
 			'archiver', 'akeeba.advanced.archiver_engine',
 			'Archiver\\', 'Archiver\\Jpa',
@@ -474,12 +494,13 @@ abstract class Factory
 	/**
 	 * Returns the currently configured dump engine
 	 *
-	 * @param   boolean  $reset  Should I try to forcible create a new instance?
+	 * @param   boolean  $reset  Should I try to forcibly create a new instance?
 	 *
-	 * @return  Dump\Base
+	 * @return  Dump\Base|Native|null
 	 */
-	public static function getDumpEngine($reset = false)
+	public static function getDumpEngine(bool $reset = false): ?object
 	{
+		/** @noinspection PhpIncompatibleReturnTypeInspection */
 		return static::getEngineInstance(
 			'dump', 'akeeba.advanced.dump_engine',
 			'Dump\\', 'Dump\\Native',
@@ -490,12 +511,13 @@ abstract class Factory
 	/**
 	 * Returns the filesystem scanner engine instance
 	 *
-	 * @param   bool  $reset  Should I try to forcible create a new instance?
+	 * @param   bool  $reset  Should I try to forcibly create a new instance?
 	 *
-	 * @return  Scan\Base  The scanner engine
+	 * @return  Scan\Base|null  The scanner engine
 	 */
-	public static function getScanEngine($reset = false)
+	public static function getScanEngine(bool $reset = false): ?Scan\Base
 	{
+		/** @noinspection PhpIncompatibleReturnTypeInspection */
 		return static::getEngineInstance(
 			'scan', 'akeeba.advanced.scan_engine',
 			'Scan\\', 'Scan\\Large',
@@ -507,19 +529,21 @@ abstract class Factory
 	 * Returns the current post-processing engine. If no class is specified we
 	 * return the post-processing engine configured in akeeba.advanced.postproc_engine
 	 *
-	 * @param   string  $engine  The name of the post-processing class to forcibly return
+	 * @param   string|null  $engine  The name of the post-processing class to forcibly return
 	 *
-	 * @return  PostProcInterface
+	 * @return  PostProcInterface|null
 	 */
-	public static function getPostprocEngine($engine = null)
+	public static function getPostprocEngine(?string $engine = null): ?PostProcInterface
 	{
 		if (!is_null($engine))
 		{
 			static::$engineClassnames['postproc'] = 'Postproc\\' . ucfirst($engine);
 
+			/** @noinspection PhpIncompatibleReturnTypeInspection */
 			return static::getObjectInstance(static::$engineClassnames['postproc']);
 		}
 
+		/** @noinspection PhpIncompatibleReturnTypeInspection */
 		return static::getEngineInstance(
 			'postproc', 'akeeba.advanced.postproc_engine',
 			'Postproc\\', 'Postproc\\None',
@@ -536,9 +560,10 @@ abstract class Factory
 	 *
 	 * @return  Filters  The Filters feature class' object instance
 	 */
-	public static function getFilters()
+	public static function getFilters(): Filters
 	{
-		return static::getObjectInstance('Core\\Filters');
+		/** @noinspection PhpIncompatibleReturnTypeInspection */
+		return static::getObjectInstance(Filters::class);
 	}
 
 	/**
@@ -547,33 +572,42 @@ abstract class Factory
 	 *
 	 * @param   string  $filter_name  The filter class to load, without AEFilter prefix
 	 *
-	 * @return  Filter\Base  The filter class' object instance
+	 * @return  Filter\Base|null  The filter class' object instance
 	 */
-	public static function getFilterObject($filter_name)
+	public static function getFilterObject(string $filter_name): ?Filter\Base
 	{
+		/** @noinspection PhpIncompatibleReturnTypeInspection */
 		return static::getObjectInstance('Filter\\' . ucfirst($filter_name));
 	}
 
 	/**
 	 * Loads an engine domain class and returns its associated object
 	 *
-	 * @param   string  $domain_name  The name of the domain, e.g. installer for AECoreDomainInstaller
+	 * @param   string  $domainName  The name of the domain, e.g. installer for AECoreDomainInstaller
 	 *
-	 * @return  Part
+	 * @return  Part|null
 	 */
-	public static function getDomainObject($domain_name)
+	public static function getDomainObject(string $domainName): ?Part
 	{
-		return static::getObjectInstance('Core\\Domain\\' . ucfirst($domain_name));
+		/** @noinspection PhpIncompatibleReturnTypeInspection */
+		return static::getObjectInstance('Core\\Domain\\' . ucfirst($domainName));
 	}
 
 	/**
 	 * Returns a database connection object. It's an alias of AECoreDatabase::getDatabase()
 	 *
-	 * @param   array  $options  Options to use when instantiating the database connection
+	 * !!! IMPORTANT !!!
+	 * DO NOT STATIC TYPE THIS METHOD.
+	 *
+	 * Akeeba Backup for Joomla is using a decorator to the Joomla DB object which makes use of the magic __call method
+	 * to proxy driver calls. As a result it cannot adhere to an object declaration or interface. Until this is
+	 * refactored we have to keep this method untyped.
+	 *
+	 * @param   array|null  $options  Options to use when instantiating the database connection
 	 *
 	 * @return  Base
 	 */
-	public static function getDatabase($options = null)
+	public static function getDatabase(?array $options = null)
 	{
 		if (is_null($options))
 		{
@@ -591,11 +625,11 @@ abstract class Factory
 	/**
 	 * Returns a database connection object. It's an alias of AECoreDatabase::getDatabase()
 	 *
-	 * @param   array  $options  Options to use when instantiating the database connection
+	 * @param   array|null  $options  Options to use when instantiating the database connection
 	 *
 	 * @return  void
 	 */
-	public static function unsetDatabase($options = null)
+	public static function unsetDatabase(?array $options = null): void
 	{
 		if (is_null($options))
 		{
@@ -609,13 +643,14 @@ abstract class Factory
 	}
 
 	/**
-	 * Get the a reference to the Akeeba Engine's timer
+	 * Get a reference to the Akeeba Engine's timer
 	 *
 	 * @return  Timer
 	 */
-	public static function getTimer()
+	public static function getTimer(): Timer
 	{
-		return static::getObjectInstance('Core\\Timer');
+		/** @noinspection PhpIncompatibleReturnTypeInspection */
+		return static::getObjectInstance(Timer::class);
 	}
 
 	/**
@@ -623,19 +658,21 @@ abstract class Factory
 	 *
 	 * @return  Kettenrad
 	 */
-	public static function getKettenrad()
+	public static function getKettenrad(): Kettenrad
 	{
-		return static::getObjectInstance('Core\\Kettenrad');
+		/** @noinspection PhpIncompatibleReturnTypeInspection */
+		return static::getObjectInstance(Kettenrad::class);
 	}
 
 	/**
-	 * Returns an instance of the factory storage class (formerly Tempvars)
+	 * Returns an instance of the factory temporary storage class
 	 *
 	 * @return  FactoryStorage
 	 */
-	public static function getFactoryStorage()
+	public static function getFactoryStorage(): FactoryStorage
 	{
-		return static::getTempObjectInstance('Util\\FactoryStorage');
+		/** @noinspection PhpIncompatibleReturnTypeInspection */
+		return static::getTempObjectInstance(FactoryStorage::class);
 	}
 
 	/**
@@ -643,19 +680,10 @@ abstract class Factory
 	 *
 	 * @return  Encrypt
 	 */
-	public static function getEncryption()
+	public static function getEncryption(): Encrypt
 	{
-		return static::getTempObjectInstance('Util\\Encrypt');
-	}
-
-	/**
-	 * Returns an instance of the CRC32 calculations class
-	 *
-	 * @return  CRC32
-	 */
-	public static function getCRC32Calculator()
-	{
-		return static::getTempObjectInstance('Util\\CRC32');
+		/** @noinspection PhpIncompatibleReturnTypeInspection */
+		return static::getTempObjectInstance(Encrypt::class);
 	}
 
 	/**
@@ -663,9 +691,10 @@ abstract class Factory
 	 *
 	 * @return  RandomValue
 	 */
-	public static function getRandval()
+	public static function getRandval(): RandomValue
 	{
-		return static::getTempObjectInstance('Util\\RandomValue');
+		/** @noinspection PhpIncompatibleReturnTypeInspection */
+		return static::getTempObjectInstance(RandomValue::class);
 	}
 
 	/**
@@ -673,19 +702,22 @@ abstract class Factory
 	 *
 	 * @return  FileSystem
 	 */
-	public static function getFilesystemTools()
+	public static function getFilesystemTools(): FileSystem
 	{
-		return static::getTempObjectInstance('Util\\FileSystem');
+		/** @noinspection PhpIncompatibleReturnTypeInspection */
+		return static::getTempObjectInstance(FileSystem::class);
 	}
 
 	/**
 	 * Returns an instance of the filesystem tools class
 	 *
 	 * @return  FileLister
+	 * @noinspection PhpUnused
 	 */
-	public static function getFileLister()
+	public static function getFileLister(): FileLister
 	{
-		return static::getTempObjectInstance('Util\\FileLister');
+		/** @noinspection PhpIncompatibleReturnTypeInspection */
+		return static::getTempObjectInstance(FileLister::class);
 	}
 
 	// ========================================================================
@@ -698,9 +730,10 @@ abstract class Factory
 	 *
 	 * @return  EngineParameters
 	 */
-	public static function getEngineParamsProvider()
+	public static function getEngineParamsProvider(): EngineParameters
 	{
-		return static::getTempObjectInstance('Util\\EngineParameters');
+		/** @noinspection PhpIncompatibleReturnTypeInspection */
+		return static::getTempObjectInstance(EngineParameters::class);
 	}
 
 	/**
@@ -708,9 +741,10 @@ abstract class Factory
 	 *
 	 * @return  Logger
 	 */
-	public static function getLog()
+	public static function getLog(): Logger
 	{
-		return static::getTempObjectInstance('Util\\Logger');
+		/** @noinspection PhpIncompatibleReturnTypeInspection */
+		return static::getTempObjectInstance(Logger::class);
 	}
 
 	/**
@@ -718,9 +752,10 @@ abstract class Factory
 	 *
 	 * @return  ConfigurationCheck
 	 */
-	public static function getConfigurationChecks()
+	public static function getConfigurationChecks(): ConfigurationCheck
 	{
-		return static::getTempObjectInstance('Util\\ConfigurationCheck');
+		/** @noinspection PhpIncompatibleReturnTypeInspection */
+		return static::getTempObjectInstance(ConfigurationCheck::class);
 	}
 
 	/**
@@ -728,9 +763,10 @@ abstract class Factory
 	 *
 	 * @return  SecureSettings
 	 */
-	public static function getSecureSettings()
+	public static function getSecureSettings(): SecureSettings
 	{
-		return static::getTempObjectInstance('Util\\SecureSettings');
+		/** @noinspection PhpIncompatibleReturnTypeInspection */
+		return static::getTempObjectInstance(SecureSettings::class);
 	}
 
 	/**
@@ -738,19 +774,38 @@ abstract class Factory
 	 *
 	 * @return  TemporaryFiles
 	 */
-	public static function getTempFiles()
+	public static function getTempFiles(): TemporaryFiles
 	{
-		return static::getTempObjectInstance('Util\\TemporaryFiles');
+		/** @noinspection PhpIncompatibleReturnTypeInspection */
+		return static::getTempObjectInstance(TemporaryFiles::class);
 	}
 
 	/**
 	 * Get the connector object for push messages
 	 *
-	 * @return  PushMessages
+	 * !!! WARNING !!! DO NOT STATIC TYPE
+	 *
+	 * The object type may change using setPushClass.
+	 *
+	 * @return  PushMessagesInterface
 	 */
 	public static function getPush()
 	{
-		return static::getObjectInstance('Util\\PushMessages');
+		/** @noinspection PhpIncompatibleReturnTypeInspection */
+		return static::getObjectInstance(self::$pushClassName);
+	}
+
+	/**
+	 * Set the push notifications helper class to use with this factory
+	 *
+	 * @param   string  $className  The classname to use
+	 *
+	 * @since   9.3.1
+	 * @noinspection PhpUnused
+	 */
+	public static function setPushClass(string $className): void
+	{
+		self::$pushClassName = $className;
 	}
 
 	/**
@@ -758,7 +813,7 @@ abstract class Factory
 	 *
 	 * @return  string
 	 */
-	public static function getAkeebaRoot()
+	public static function getAkeebaRoot(): string
 	{
 		if (empty(static::$root))
 		{
@@ -776,9 +831,9 @@ abstract class Factory
 	 *                               no fallback.
 	 * @param   bool    $reset       Should I force-reload the engine? Default: false.
 	 *
-	 * @return  mixed  The Singleton engine object instance
+	 * @return  object|null  The Singleton engine object instance
 	 */
-	protected static function getEngineInstance($engineType, $configKey, $prefix, $fallback, $reset = false)
+	protected static function getEngineInstance(string $engineType, string $configKey, string $prefix, string $fallback, bool $reset = false): ?object
 	{
 		if (!$reset && !empty(static::$engineClassnames[$engineType]))
 		{
@@ -798,7 +853,7 @@ abstract class Factory
 		$object                                = static::getObjectInstance(static::$engineClassnames[$engineType]);
 
 		// If the engine object does not exist, fall back to the default
-		if (!empty($fallback) && $object === false)
+		if (!empty($fallback) && !is_object($object))
 		{
 			static::unsetObjectInstance(static::$engineClassnames[$engineType]);
 
@@ -811,29 +866,41 @@ abstract class Factory
 	/**
 	 * Internal function which instantiates an object of a class named $class_name.
 	 *
-	 * @param   string  $class_name
+	 * @param   string  $className
 	 *
-	 * @return  mixed
+	 * @return  object|null
 	 */
-	protected static function getObjectInstance($class_name)
+	protected static function getObjectInstance(string $className): ?object
 	{
-		$class_name = trim($class_name, '\\');
+		$className = trim($className, '\\');
 
-		if (isset(static::$objectList[$class_name]))
+		if (substr($className, 0, 14) === 'Akeeba\\Engine\\')
 		{
-			return static::$objectList[$class_name];
+			$searchClass = $className;
+			$className = substr($className, 14);
+		}
+		else
+		{
+			$searchClass = '\\Akeeba\\Engine\\' . $className;
 		}
 
-		static::$objectList[$class_name] = false;
+		if (isset(static::$objectList[$className]))
+		{
+			return static::$objectList[$className];
+		}
 
-		$searchClass = '\\Akeeba\\Engine\\' . $class_name;
+		static::$objectList[$className] = null;
 
 		if (class_exists($searchClass))
 		{
-			static::$objectList[$class_name] = new $searchClass;
+			static::$objectList[$className] = new $searchClass;
+		}
+		elseif (class_exists($className))
+		{
+			static::$objectList[$className] = new $className;
 		}
 
-		return static::$objectList[$class_name];
+		return static::$objectList[$className];
 	}
 
 	// ========================================================================
@@ -843,16 +910,21 @@ abstract class Factory
 	/**
 	 * Internal function which removes the object of the class named $class_name
 	 *
-	 * @param   string  $class_name
+	 * @param   string  $className
 	 *
 	 * @return  void
 	 */
-	protected static function unsetObjectInstance($class_name)
+	protected static function unsetObjectInstance(string $className): void
 	{
-		if (isset(static::$objectList[$class_name]))
+		if (substr($className, 0, 14) === 'Akeeba\\Engine\\')
 		{
-			static::$objectList[$class_name] = null;
-			unset(static::$objectList[$class_name]);
+			$className = substr($className, 14);
+		}
+
+		if (isset(static::$objectList[$className]))
+		{
+			static::$objectList[$className] = null;
+			unset(static::$objectList[$className]);
 		}
 	}
 
@@ -860,27 +932,35 @@ abstract class Factory
 	 * Internal function which instantiates an object of a class named $class_name. This is a temporary instance which
 	 * will not survive serialisation and subsequent unserialisation.
 	 *
-	 * @param   string  $class_name
+	 * @param   string  $className
 	 *
-	 * @return  mixed
+	 * @return  object|null
 	 */
-	protected static function getTempObjectInstance($class_name)
+	protected static function getTempObjectInstance(string $className): ?object
 	{
-		$class_name = trim($class_name, '\\');
+		$className = trim($className, '\\');
 
-		if (!isset(static::$temporaryObjectList[$class_name]))
+		if (substr($className, 0, 14) === 'Akeeba\\Engine\\')
 		{
-			static::$temporaryObjectList[$class_name] = false;
+			$searchClass = $className;
+			$className = substr($className, 14);
+		}
+		else
+		{
+			$searchClass = '\\Akeeba\\Engine\\' . $className;
+		}
 
-			$searchClassname = '\\Akeeba\\Engine\\' . $class_name;
+		if (!isset(static::$temporaryObjectList[$className]))
+		{
+			static::$temporaryObjectList[$className] = null;
 
-			if (class_exists($searchClassname))
+			if (class_exists($searchClass))
 			{
-				static::$temporaryObjectList[$class_name] = new $searchClassname;
+				static::$temporaryObjectList[$className] = new $searchClass;
 			}
 		}
 
-		return static::$temporaryObjectList[$class_name];
+		return static::$temporaryObjectList[$className];
 	}
 
 	/**
@@ -890,7 +970,7 @@ abstract class Factory
 	 *
 	 * @return  void
 	 */
-	protected static function removeTemporaryData($originTag)
+	protected static function removeTemporaryData(string $originTag): void
 	{
 		static::loadState($originTag, null, false);
 		// Remove temporary files
@@ -905,7 +985,7 @@ abstract class Factory
  *
  * If a PHP reports a timeout we will log this before letting PHP kill us.
  */
-function AkeebaTimeoutTrap()
+function AkeebaTimeoutTrap(): void
 {
 	if (connection_status() >= 2)
 	{

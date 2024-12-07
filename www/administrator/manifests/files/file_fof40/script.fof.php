@@ -47,7 +47,7 @@ class file_fof40InstallerScript
 	 *
 	 * @var   string
 	 */
-	protected $maximumJoomlaVersion = '4.0.999';
+	protected $maximumJoomlaVersion = '4.999.999';
 
 	/**
 	 * The name of the subdirectory under JPATH_LIBRARIES where this version of FOF is installed.
@@ -131,19 +131,19 @@ class file_fof40InstallerScript
 		{
 			$jVersion = JVERSION;
 			$msg = <<< HTML
-<h3>FOF is no longer needed on Joomla 4</h3>
+<h3>FOF is no longer needed on Joomla 5</h3>
 <p>
-	<strong>Summary: FOF is no longer used on Joomla 4. Please uninstall it.</strong>
+	<strong>Summary: FOF is no longer used on Joomla 5. Please uninstall it.</strong>
 </p>
 <hr/>
 <p>
 	FOF a.k.a. Framework-on-Framework was an extension development framework used by Akeeba Ltd (and some third party extensions developed by companies not affiliated with Akeeba Ltd) on Joomla 1.5 to 3.10.
 </p>
 <p>
-	Akeeba Ltd has stopped using the FOF framework for developing extensions. All of our extensions have new, Joomla 4 native versions which use the Joomla Core MVC library, included in Joomla 4 itself.
+	Akeeba Ltd has stopped using the FOF framework for developing extensions. All of our extensions have new, Joomla 4 and later native versions which use the Joomla Core MVC library, included in Joomla itself.
 </p>
 <p>
-	You can no longer install or update FOF on Joomla 4.1 and later (you have {$jVersion}). In fact, you just need to uninstall it.
+	You can no longer install or update FOF on Joomla 5.0 and later (you have {$jVersion}). In fact, you just need to uninstall it.
 </p>
 HTML;
 
@@ -159,7 +159,7 @@ HTML;
 
 			if (defined('AKEEBA_PACKAGE_INSTALLING'))
 			{
-				$msg = "<p>Your site has a newer version of FOF 3 than the one bundled with this package. Please note that <strong>you can safely ignore the “Custom install routine failure” message</strong> below. It is not a real error; it is an expected message which is always printed by Joomla! in this case and which cannot be suppressed.</p>";
+				$msg = "<p>Your site has a newer version of FOF 4 than the one bundled with this package. Please note that <strong>you can safely ignore the “Custom install routine failure” message</strong> below. It is not a real error; it is an expected message which is always printed by Joomla! in this case and which cannot be suppressed.</p>";
 			}
 
 			Log::add($msg, Log::WARNING, 'jerror');
@@ -257,10 +257,10 @@ HTML;
 	 */
 	public function uninstall($parent)
 	{
-		// if (version_compare(JVERSION, '4.0.0', 'ge'))
-		// {
-		// 	return;
-		// }
+		 if (version_compare(JVERSION, '4.1.0', 'ge'))
+		 {
+		 	return;
+		 }
 
 		// Check dependencies on FOF
 		$dependencyCount = $this->countHardcodedDependencies();

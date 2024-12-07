@@ -21,7 +21,7 @@ if (!class_exists('FOF40\\Autoloader\\Autoloader'))
 
 if (!defined('FOF40_INCLUDED'))
 {
-	define('FOF40_INCLUDED', '4.1.3');
+	define('FOF40_INCLUDED', '4.1.4');
 
 	JoomlaFactory::getLanguage()->load('lib_fof40', JPATH_SITE, 'en-GB', true);
 	JoomlaFactory::getLanguage()->load('lib_fof40', JPATH_SITE, null, true);

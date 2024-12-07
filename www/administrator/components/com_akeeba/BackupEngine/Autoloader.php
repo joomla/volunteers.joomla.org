@@ -3,7 +3,7 @@
  * Akeeba Engine
  *
  * @package   akeebaengine
- * @copyright Copyright (c)2006-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -45,7 +45,6 @@ class Autoloader
 		self::$enginePath = __DIR__;
 
 		spl_autoload_register([$this, 'autoload_akeeba_engine']);
-		spl_autoload_register([$this, 'autoload_psr3']);
 	}
 
 	/**
@@ -126,52 +125,6 @@ class Autoloader
 				{
 					include_once $path;
 				}
-			}
-		}
-	}
-
-	/**
-	 * An autoloader for our copy of PSR-3
-	 *
-	 * @param   string  $className  The name of the class to load
-	 *
-	 * @return  void
-	 */
-	public function autoload_psr3($className)
-	{
-		// Trim the trailing backslash
-		$className = ltrim($className, '\\');
-
-		// Make sure the class has an Akeeba\Engine prefix
-		if (substr($className, 0, 7) != 'Psr\\Log')
-		{
-			return;
-		}
-
-		// Remove the prefix and explode on backslashes
-		$className = substr($className, 7);
-		$class     = explode('\\', $className);
-
-		$rootPath = self::$enginePath . '/Psr/Log';
-
-		// First try finding in structured directory format (preferred)
-		$path = $rootPath . '/' . implode('/', $class) . '.php';
-
-		if (@file_exists($path))
-		{
-			include_once $path;
-		}
-
-		// Then try the duplicate last name structured directory format (not recommended)
-		if (!class_exists($className, false))
-		{
-			reset($class);
-			$lastPart = end($class);
-			$path     = $rootPath . '/' . implode('/', $class) . '/' . $lastPart . '.php';
-
-			if (@file_exists($path))
-			{
-				include_once $path;
 			}
 		}
 	}

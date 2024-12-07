@@ -461,13 +461,16 @@ class LanguageHelper
 		if (!function_exists('parse_ini_file') || $isParseIniFileDisabled)
 		{
 			$contents = file_get_contents($fileName);
-			$contents = str_replace('_QQ_', '"\""', $contents);
-			$strings = @parse_ini_string($contents);
+			$strings = @parse_ini_string($contents, false, INI_SCANNER_RAW);
+			$strings = str_replace('_QQ_', '\"', $strings);
 		}
 		else
 		{
-			$strings = @parse_ini_file($fileName);
+			$strings = @parse_ini_file($fileName, false, INI_SCANNER_RAW);
 		}
+
+		// Ini files are processed in the "RAW" mode of parse_ini_string, leaving escaped quotes untouched - lets postprocess them
+		$strings = str_replace('\"', '"', $strings);
 
 		// Restore error tracking to what it was before.
 		if ($debug === true)

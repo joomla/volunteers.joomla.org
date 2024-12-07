@@ -67,7 +67,8 @@
         "default": "1",
         "type": "bool",
         "title": "COM_AKEEBA_CONFIG_ENGINE_ARCHIVER_DIRECTFTPCURL_PASVWORKAROUND_TITLE",
-        "description": "COM_AKEEBA_CONFIG_ENGINE_ARCHIVER_DIRECTFTPCURL_PASVWORKAROUND_DESCRIPTION"
+        "description": "COM_AKEEBA_CONFIG_ENGINE_ARCHIVER_DIRECTFTPCURL_PASVWORKAROUND_DESCRIPTION",
+        "showon": "engine.postproc.ftpcurl.passive_mode:1"
     },
     "engine.postproc.ftpcurl.ftp_test": {
         "default": "0",

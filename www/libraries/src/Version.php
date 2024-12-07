@@ -49,7 +49,7 @@ final class Version
 	 * @var    integer
 	 * @since  3.8.0
 	 */
-	const PATCH_VERSION = 10;
+	const PATCH_VERSION = 14;
 
 	/**
 	 * Extra release version info.
@@ -60,7 +60,7 @@ final class Version
 	 * @var    string
 	 * @since  3.8.0
 	 */
-	const EXTRA_VERSION = '';
+	const EXTRA_VERSION = 'elts';
 
 	/**
 	 * Release version.
@@ -78,7 +78,7 @@ final class Version
 	 * @since  3.5
 	 * @deprecated  4.0  Use separated version constants instead
 	 */
-	const DEV_LEVEL = '10';
+	const DEV_LEVEL = '14-elts';
 
 	/**
 	 * Development status.
@@ -103,7 +103,7 @@ final class Version
 	 * @var    string
 	 * @since  3.5
 	 */
-	const CODENAME = 'Daraja';
+	const CODENAME = 'Extended Long Term Support';
 
 	/**
 	 * Release date.
@@ -111,7 +111,7 @@ final class Version
 	 * @var    string
 	 * @since  3.5
 	 */
-	const RELDATE = '18-June-2022';
+	const RELDATE = '28-November-2023';
 
 	/**
 	 * Release time.
@@ -119,7 +119,7 @@ final class Version
 	 * @var    string
 	 * @since  3.5
 	 */
-	const RELTIME = '16:32';
+	const RELTIME = '16:00';
 
 	/**
 	 * Release timezone.

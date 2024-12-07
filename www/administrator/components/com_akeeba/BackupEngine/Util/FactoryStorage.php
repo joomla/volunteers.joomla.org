@@ -3,7 +3,7 @@
  * Akeeba Engine
  *
  * @package   akeebaengine
- * @copyright Copyright (c)2006-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -108,11 +108,11 @@ class FactoryStorage
 	 *
 	 * @param   string|null  $tag  Backup tag. Used to determine the session state (memory) file name.
 	 *
-	 * @return  false|string
+	 * @return  string|null
 	 */
 	public function &get($tag = null)
 	{
-		$ret              = false;
+		$ret              = null;
 		$storage_filename = $this->get_storage_filename($tag);
 		$isPHPFile        = true;
 		$data             = @file_get_contents($storage_filename);
@@ -139,7 +139,7 @@ class FactoryStorage
 		}
 		catch (RuntimeException $e)
 		{
-			$ret = false;
+			$ret = null;
 		}
 
 		unset($data);

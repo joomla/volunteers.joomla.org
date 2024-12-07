@@ -1,7 +1,7 @@
 <?php
 /**
  * @package   akeebabackup
- * @copyright Copyright (c)2006-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -46,7 +46,7 @@ class Pkg_AkeebaInstallerScript
 	 *
 	 * @var   string
 	 */
-	protected $maximumJoomlaVersion = '4.0.999';
+	protected $maximumJoomlaVersion = '4.999.999';
 
 	/**
 	 * A list of extensions (modules, plugins) to enable after installation. Each item has four values, in this order:

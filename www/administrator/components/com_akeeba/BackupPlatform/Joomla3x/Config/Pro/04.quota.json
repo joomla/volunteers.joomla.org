@@ -8,6 +8,13 @@
         "title": "COM_AKEEBA_CONFIG_REMOTEQUOTA_ENABLE_TITLE",
         "description": "COM_AKEEBA_CONFIG_REMOTEQUOTA_ENABLE_DESCRIPTION"
     },
+    "akeeba.quota.remote_latest": {
+        "default": "1",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_REMOTEQUOTALATEST_TITLE",
+        "description": "COM_AKEEBA_CONFIG_REMOTEQUOTALATEST_DESCRIPTION",
+        "showon": "akeeba.quota.remote:1"
+    },
     "akeeba.quota.maxage.enable": {
         "default": "0",
         "type": "bool",
@@ -23,7 +30,8 @@
         "scale": "1",
         "uom": "days",
         "title": "COM_AKEEBA_CONFIG_MAXAGEQUOTA_MAXDAYS_TITLE",
-        "description": "COM_AKEEBA_CONFIG_MAXAGEQUOTA_MAXDAYS_DESCRIPTION"
+        "description": "COM_AKEEBA_CONFIG_MAXAGEQUOTA_MAXDAYS_DESCRIPTION",
+        "showon": "akeeba.quota.maxage.enable:1"
     },
     "akeeba.quota.maxage.keepday": {
         "default": "1",
@@ -34,7 +42,8 @@
         "scale": "1",
         "uom": "day",
         "title": "COM_AKEEBA_CONFIG_MAXAGEQUOTA_KEEPDAY_TITLE",
-        "description": "COM_AKEEBA_CONFIG_MAXAGEQUOTA_KEEPDAY_DESCRIPTION"
+        "description": "COM_AKEEBA_CONFIG_MAXAGEQUOTA_KEEPDAY_DESCRIPTION",
+        "showon": "akeeba.quota.maxage.enable:1"
     },
     "akeeba.quota.obsolete_quota": {
         "default": "50",
@@ -51,7 +60,8 @@
         "default": "0",
         "type": "bool",
         "title": "COM_AKEEBA_CONFIG_SIZEQUOTA_ENABLE_TITLE",
-        "description": "COM_AKEEBA_CONFIG_SIZEQUOTA_ENABLE_DESCRIPTION"
+        "description": "COM_AKEEBA_CONFIG_SIZEQUOTA_ENABLE_DESCRIPTION",
+        "showon": "akeeba.quota.size_quota:1"
     },
 	"akeeba.quota.size_quota": {
 		"default": "15728640",
@@ -78,6 +88,7 @@
         "shortcuts": "1|5|10|50|100|200",
         "scale": "1",
         "title": "COM_AKEEBA_CONFIG_COUNTQUOTA_VALUE_TITLE",
-        "description": "COM_AKEEBA_CONFIG_COUNTQUOTA_VALUE_DESCRIPTION"
+        "description": "COM_AKEEBA_CONFIG_COUNTQUOTA_VALUE_DESCRIPTION",
+        "showon": "akeeba.quota.enable_count_quota:1"
     }
 }

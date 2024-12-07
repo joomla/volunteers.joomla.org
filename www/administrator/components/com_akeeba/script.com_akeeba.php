@@ -1,7 +1,7 @@
 <?php
 /**
  * @package   akeebabackup
- * @copyright Copyright (c)2006-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -489,6 +489,10 @@ class Com_AkeebaInstallerScript extends \FOF40\InstallScript\Component
 			// Remove PieCon.js
 			'media/com_akeeba/js/piecon.min.js',
 			'media/com_akeeba/js/piecon.min.map',
+
+			// Remove obsolete common PHP version warnings
+			'administrator/components/com_akeeba/tmpl/CommonTemplates/phpversion_warning.php',
+			'administrator/components/com_akeeba/tmpl/CommonTemplates/wrongphp.php',
 		],
 		'folders' => [
 			// Directories used up to version 4.1 (inclusive)

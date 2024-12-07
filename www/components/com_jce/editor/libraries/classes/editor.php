@@ -273,9 +273,9 @@ class WFEditor
                 $userParams = json_decode($userParams, true);
             }
 
-            // Remove values with invalid key
+            // Remove values with invalid key, must be indexed array
             $userParams = array_filter($userParams, function ($key) {
-                return !is_numeric($key);
+                return is_numeric($key);
             }, ARRAY_FILTER_USE_KEY);
 
             foreach ($userParams as $userParam) {
@@ -293,7 +293,14 @@ class WFEditor
                 }
 
                 if ($name && $value !== '') {
-                    $settings[$name] = trim($value, " \t\n\r\0\x0B'\"");
+                    $value = trim($value, " \t\n\r\0\x0B'\"");
+
+                    // convert to boolean
+                    if (is_bool($value)) {
+                        $value = (bool) $value;
+                    }
+                    
+                    $settings[$name] = $value;
                 }
             }
         }
@@ -878,8 +885,8 @@ class WFEditor
                     $items[] = 'advlist';
                 }
 
-                // Load wordcount if path is enabled
-                if ($wf->getParam('editor.path', 1)) {
+                // Load wordcount if enabled
+                if ($wf->getParam('editor.wordcount', 1)) {
                     $items[] = 'wordcount';
                 }
 
@@ -1103,7 +1110,7 @@ class WFEditor
             return false;
         }
 
-        // search for template.css file using JPath
+        // search for editor.css file using JPath
         $file = JPath::find(array(
             JPATH_SITE . '/templates/' . $name . '/css',
             JPATH_SITE . '/media/templates/site/' . $name . '/css'

@@ -3,7 +3,7 @@
  * Akeeba Engine
  *
  * @package   akeebaengine
- * @copyright Copyright (c)2006-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -630,7 +630,7 @@ abstract class BaseArchiver extends BaseFileManagement
 	/**
 	 * Put up to $fileLength bytes of the file pointer $sourceFilePointer into the backup archive. Returns true if we
 	 * ran out of time and need to perform a step break. Returns false when the whole quantity of data has been copied.
-	 * Throws an ErrorException if soemthing really bad happens.
+	 * Throws an ErrorException if something terrible happens.
 	 *
 	 * @param   resource  $sourceFilePointer  The pointer to the input file
 	 * @param   int       $fileLength         How many bytes to copy
@@ -642,12 +642,13 @@ abstract class BaseArchiver extends BaseFileManagement
 		// Get references to engine objects we're going to be using
 		$configuration = Factory::getConfiguration();
 		$timer         = Factory::getTimer();
+		$isEOF         = false;
 
 		// Quick copy data into the archive, AKEEBA_CHUNK bytes at a time
-		while (!feof($sourceFilePointer) && ($timer->getTimeLeft() > 0) && ($fileLength > 0))
+		while (!$isEOF && ($timer->getTimeLeft() > 0) && ($fileLength > 0))
 		{
-			// Normally I read up to AKEEBA_CHUNK bytes at a time
-			$chunkSize = AKEEBA_CHUNK;
+			// Normally I read up to AKEEBA_CHUNK bytes at a time, unless the remaining $fileLength is smaller.
+			$chunkSize = min(AKEEBA_CHUNK, $fileLength);
 
 			// Do I have a split ZIP?
 			if ($this->useSplitArchive)
@@ -690,6 +691,41 @@ abstract class BaseArchiver extends BaseFileManagement
 
 			// Subtract the written bytes from the bytes left to write
 			$fileLength -= $bytesWritten;
+
+			/**
+			 * Have we reached the End of File?
+			 *
+			 * When we have read _exactly_ as many bytes as the size of the file we have not, in fact, reached EOF. We
+			 * reach the EOF if we try to read _beyond_ the actual end of file.
+			 *
+			 * So, if we have read exactly as many bytes as the file claimed to be at the start of backup (i.e. the
+			 * $fileLength is now 0) we try to read one more byte. If this returns no data (or false, e.g. the file went
+			 * away in the meantime) OR PHP reports we reached EOF then we consider we've reached EOF.
+			 *
+			 * If the file grew in size in the meantime this condition will fail and $isEOF will be false. We will still
+			 * exit the while loop because $fileLength === 0 but the next if-block after the while-block will catch this
+			 * discrepancy and issue a warning that the file grew in size.
+			 */
+			$isEOF = feof($sourceFilePointer);
+
+			if (!$isEOF && $fileLength === 0)
+			{
+				$junk = fread($sourceFilePointer, 1);
+				$isEOF = (($junk === false) || (is_string($junk) && strlen($junk) === 0)) || feof($sourceFilePointer);
+				fseek($sourceFilePointer, -1, SEEK_CUR);
+			}
+		}
+
+		/**
+		 * We have finished reading the entire file as per its size before we started backing it up. However, we still
+		 * have not reached EOF (there's more to the file). This means that the file grew in size in the meantime. Warn
+		 * the user.
+		 */
+		if (!$isEOF && ($timer->getTimeLeft() > 0) && ($fileLength === 0))
+		{
+			Factory::getLog()->warning(
+				'The file grew in size while putting it in the backup archive. If this is a temporary or cache file we advise you to exclude it, or exclude the contents of the temporary / cache folder it is contained in.'
+			);
 		}
 
 		/**
@@ -698,9 +734,11 @@ abstract class BaseArchiver extends BaseFileManagement
 		 * change the file header since it may be in a previous part file that's already been post-processed. All we can
 		 * do is try to warn the user.
 		 */
-		while (feof($sourceFilePointer) && ($timer->getTimeLeft() > 0) && ($fileLength > 0))
+		if ($isEOF && ($timer->getTimeLeft() > 0) && ($fileLength > 0))
 		{
-			throw new ErrorException('The file shrunk or went away while putting it in the backup archive. Your archive is damaged! If this is a temporary or cache file we advise you to exclude the contents of the temporary / cache folder it is contained in.');
+			throw new ErrorException(
+				'The file shrunk or went away while putting it in the backup archive. Your archive is damaged! If this is a temporary or cache file we advise you to exclude it, or exclude the contents of the temporary / cache folder it is contained in.'
+			);
 		}
 
 		// WARNING!!! The extra $unc_len != 0 check is necessary as PHP won't reach EOF for 0-byte files.

@@ -4,7 +4,7 @@
  * An AJAX-powered archive extraction tool
  *
  * @package   kickstart
- * @copyright Copyright (c)2008-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2008-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -13,7 +13,7 @@
  * An AJAX-powered archive extraction library for JPA, JPS and ZIP archives
  *
  * @package   restore
- * @copyright Copyright (c)2008-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2008-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -184,7 +184,7 @@ function clearFileInOPCache($file)
  * An AJAX-powered archive extraction library for JPA, JPS and ZIP archives
  *
  * @package   restore
- * @copyright Copyright (c)2008-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2008-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -462,7 +462,7 @@ abstract class AKAbstractObject
  * An AJAX-powered archive extraction library for JPA, JPS and ZIP archives
  *
  * @package   restore
- * @copyright Copyright (c)2008-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2008-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -834,7 +834,7 @@ abstract class AKAbstractPart extends AKAbstractObject
  * An AJAX-powered archive extraction library for JPA, JPS and ZIP archives
  *
  * @package   restore
- * @copyright Copyright (c)2008-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2008-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -1604,7 +1604,7 @@ abstract class AKAbstractUnarchiver extends AKAbstractPart
  * An AJAX-powered archive extraction library for JPA, JPS and ZIP archives
  *
  * @package   restore
- * @copyright Copyright (c)2008-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2008-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -1673,7 +1673,7 @@ abstract class AKAbstractPostproc extends AKAbstractObject
  * An AJAX-powered archive extraction library for JPA, JPS and ZIP archives
  *
  * @package   restore
- * @copyright Copyright (c)2008-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2008-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -1694,7 +1694,7 @@ abstract class AKAbstractPartObserver
  * An AJAX-powered archive extraction library for JPA, JPS and ZIP archives
  *
  * @package   restore
- * @copyright Copyright (c)2008-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2008-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -1834,7 +1834,7 @@ class AKPostprocDirect extends AKAbstractPostproc
  * An AJAX-powered archive extraction library for JPA, JPS and ZIP archives
  *
  * @package   restore
- * @copyright Copyright (c)2008-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2008-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -2461,7 +2461,7 @@ class AKPostprocFTP extends AKAbstractPostproc
  * An AJAX-powered archive extraction library for JPA, JPS and ZIP archives
  *
  * @package   restore
- * @copyright Copyright (c)2008-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2008-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -3110,7 +3110,7 @@ class AKPostprocSFTP extends AKAbstractPostproc
  * An AJAX-powered archive extraction library for JPA, JPS and ZIP archives
  *
  * @package   restore
- * @copyright Copyright (c)2008-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2008-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -3879,7 +3879,7 @@ class AKPostprocHybrid extends AKAbstractPostproc
  * An AJAX-powered archive extraction library for JPA, JPS and ZIP archives
  *
  * @package   restore
- * @copyright Copyright (c)2008-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2008-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -3919,7 +3919,7 @@ class AKUnarchiverJPA extends AKAbstractUnarchiver
 		{
 			debugMsg('Cannot find a valid archive signature in the first 128Kb of the first part file');
 
-			$this->setError(AKText::_('ERR_NOT_A_JPA_FILE'));
+			$this->setError(AKText::sprintf('ERR_INVALID_ARCHIVE_LONG', 'jpa', 'j'));
 
 			return false;
 		}
@@ -3933,7 +3933,7 @@ class AKUnarchiverJPA extends AKAbstractUnarchiver
 		{
 			// Not a JPA file
 			debugMsg('Invalid archive signature');
-			$this->setError(AKText::_('ERR_NOT_A_JPA_FILE'));
+			$this->setError(AKText::sprintf('ERR_INVALID_ARCHIVE_LONG', 'jpa', 'j'));
 
 			return false;
 		}
@@ -4020,12 +4020,33 @@ class AKUnarchiverJPA extends AKAbstractUnarchiver
 			if ($this->isEOF(true))
 			{
 				// This file is finished; make sure it's the last one
-				$this->nextFile();
+				$gotNextFile = $this->nextFile();
+
+				if (!$gotNextFile && $this->getState() !== 'postrun')
+				{
+					debugMsg(sprintf('Cannot open file %s for part #%d', $this->archiveList[$this->currentPartNumber] ?: '(unknown)', $this->currentPartNumber));
+
+					$this->setError(AKText::sprintf(
+						'INVALID_FILE_HEADER_OFFSET_ZERO',
+						$this->archiveList[$this->currentPartNumber] ?: '(unknown)',
+						$this->currentPartNumber,
+						'jpa',
+						'j'
+					));
+
+					return false;
+				}
 
 				if (!$this->isEOF(false))
 				{
 					debugMsg('Invalid file signature before end of archive encountered');
-					$this->setError(AKText::sprintf('INVALID_FILE_HEADER', $this->currentPartNumber, $this->currentPartOffset));
+					$this->setError(AKText::sprintf(
+						'INVALID_FILE_HEADER',
+						$this->currentPartNumber,
+						$this->currentPartOffset,
+						'jpa',
+						'j'
+					));
 
 					return false;
 				}
@@ -4054,8 +4075,22 @@ class AKUnarchiverJPA extends AKAbstractUnarchiver
 
 				if ($screwed)
 				{
-					debugMsg('Invalid file block signature');
 					// This is not a file block! The archive is corrupt.
+					debugMsg('Invalid file block signature');
+
+					if (count($this->archiveList) > 1)
+					{
+						$this->setError(AKText::sprintf(
+							'INVALID_FILE_HEADER_MULTIPART',
+							$this->currentPartNumber,
+							$this->currentPartOffset,
+							'jpa',
+							'j'
+						));
+
+						return false;
+					}
+
 					$this->setError(AKText::sprintf('INVALID_FILE_HEADER', $this->currentPartNumber, $this->currentPartOffset));
 
 					return false;
@@ -4687,7 +4722,7 @@ class AKUnarchiverJPA extends AKAbstractUnarchiver
  * An AJAX-powered archive extraction library for JPA, JPS and ZIP archives
  *
  * @package   restore
- * @copyright Copyright (c)2008-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2008-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -4734,7 +4769,7 @@ class AKUnarchiverZIP extends AKUnarchiverJPA
 		{
 			debugMsg('Cannot find a valid archive signature in the first 128Kb of the first part file');
 
-			$this->setError(AKText::_('ERR_CORRUPT_ARCHIVE'));
+			$this->setError(AKText::sprintf('ERR_INVALID_ARCHIVE_LONG', 'zip', 'z'));
 
 			return false;
 		}
@@ -4764,7 +4799,7 @@ class AKUnarchiverZIP extends AKUnarchiverJPA
 		if (!in_array($headerData['sig'], $multiPartSigs))
 		{
 			debugMsg('Invalid header signature ' . dechex($headerData['sig']));
-			$this->setError(AKText::_('ERR_CORRUPT_ARCHIVE'));
+			$this->setError(AKText::sprintf('ERR_INVALID_ARCHIVE_LONG', 'zip', 'z'));
 
 			return false;
 		}
@@ -4788,7 +4823,7 @@ class AKUnarchiverZIP extends AKUnarchiverJPA
 		if ($this->isEOF(true))
 		{
 			debugMsg('Opening next archive part');
-			$this->nextFile();
+			$gotNextFile = $this->nextFile();
 		}
 
 		$this->currentPartOffset = ftell($this->fp);
@@ -4818,7 +4853,7 @@ class AKUnarchiverZIP extends AKUnarchiverJPA
 			{
 				debugMsg('EOF before reading header');
 
-				$this->nextFile();
+				$gotNextFile = $this->nextFile();
 			}
 		}
 
@@ -4845,8 +4880,56 @@ class AKUnarchiverZIP extends AKUnarchiverJPA
 			}
 			else
 			{
+				if (isset($gotNextFile) && !$gotNextFile && $this->getState() !== 'postrun')
+				{
+					debugMsg(sprintf('Cannot open file %s for part #%d', $this->archiveList[$this->currentPartNumber] ?: '(unknown)', $this->currentPartNumber));
+
+					$this->setError(AKText::sprintf(
+						'INVALID_FILE_HEADER_OFFSET_ZERO',
+						$this->archiveList[$this->currentPartNumber] ?: '(unknown)',
+						$this->currentPartNumber,
+						'zip',
+						'z'
+					));
+
+					return false;
+				}
+
+				if ($this->currentPartOffset === 0 && $this->currentPartNumber > 0)
+				{
+					$this->setError(AKText::sprintf(
+						'INVALID_FILE_HEADER_MULTIPART',
+						$this->currentPartNumber,
+						$this->currentPartOffset,
+						'jpa',
+						'j'
+					));
+
+					return false;
+				}
+
 				debugMsg('Invalid signature ' . dechex($headerData['sig']) . ' at ' . ftell($this->fp));
-				$this->setError(AKText::_('ERR_CORRUPT_ARCHIVE'));
+
+				if (count($this->archiveList) > 1)
+				{
+					$this->setError(AKText::sprintf(
+						'INVALID_FILE_HEADER_MULTIPART',
+						$this->currentPartNumber,
+						$this->currentPartOffset,
+						'zip',
+						'z'
+					));
+
+					return false;
+				}
+
+				$this->setError(AKText::sprintf(
+					'INVALID_FILE_HEADER',
+					$this->currentPartNumber,
+					$this->currentPartOffset,
+					'zip',
+					'z'
+				));
 
 				return false;
 			}
@@ -5035,7 +5118,7 @@ class AKUnarchiverZIP extends AKUnarchiverJPA
  * An AJAX-powered archive extraction library for JPA, JPS and ZIP archives
  *
  * @package   restore
- * @copyright Copyright (c)2008-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2008-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -5137,7 +5220,7 @@ class AKUnarchiverJPS extends AKUnarchiverJPA
 		{
 			debugMsg('Cannot find a valid archive signature in the first 128Kb of the first part file');
 
-			$this->setError(AKText::_('ERR_NOT_A_JPS_FILE'));
+			$this->setError(AKText::sprintf('ERR_INVALID_ARCHIVE_LONG', 'jps', 'j'));
 
 			return false;
 		}
@@ -5149,8 +5232,8 @@ class AKUnarchiverJPS extends AKUnarchiverJPA
 
 		if ($sig != 'JPS')
 		{
-			// Not a JPA file
-			$this->setError(AKText::_('ERR_NOT_A_JPS_FILE'));
+			// Not a JPS file
+			$this->setError(AKText::sprintf('ERR_INVALID_ARCHIVE_LONG', 'jps', 'j'));
 
 			return false;
 		}
@@ -5234,7 +5317,23 @@ class AKUnarchiverJPS extends AKUnarchiverJPA
 			if ($this->isEOF(true))
 			{
 				// This file is finished; make sure it's the last one
-				$this->nextFile();
+				$gotNextFile = $this->nextFile();
+
+				if (!$gotNextFile && $this->getState() !== 'postrun')
+				{
+					debugMsg(sprintf('Cannot open file %s for part #%d', $this->archiveList[$this->currentPartNumber] ?: '(unknown)', $this->currentPartNumber));
+
+					$this->setError(AKText::sprintf(
+						'INVALID_FILE_HEADER_OFFSET_ZERO',
+						$this->archiveList[$this->currentPartNumber] ?: '(unknown)',
+						$this->currentPartNumber,
+						'jps',
+						'j'
+					));
+
+					return false;
+				}
+
 				if (!$this->isEOF(false))
 				{
 					$this->setError(AKText::sprintf('INVALID_FILE_HEADER', $this->currentPartNumber, $this->currentPartOffset));
@@ -5254,7 +5353,26 @@ class AKUnarchiverJPS extends AKUnarchiverJPA
 					return false;
 				}
 
-				$this->setError(AKText::sprintf('INVALID_FILE_HEADER', $this->currentPartNumber, $this->currentPartOffset));
+				if (count($this->archiveList) > 1)
+				{
+					$this->setError(AKText::sprintf(
+						'INVALID_FILE_HEADER_MULTIPART',
+						$this->currentPartNumber,
+						$this->currentPartOffset,
+						'jps',
+						'j'
+					));
+
+					return false;
+				}
+
+				$this->setError(AKText::sprintf(
+					'INVALID_FILE_HEADER',
+					$this->currentPartNumber,
+					$this->currentPartOffset,
+					'jps',
+					'j'
+				));
 
 				return false;
 			}
@@ -5944,7 +6062,7 @@ class AKUnarchiverJPS extends AKUnarchiverJPA
  * An AJAX-powered archive extraction library for JPA, JPS and ZIP archives
  *
  * @package   restore
- * @copyright Copyright (c)2008-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2008-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -6140,7 +6258,7 @@ class AKCoreTimer extends AKAbstractObject
  * An AJAX-powered archive extraction library for JPA, JPS and ZIP archives
  *
  * @package   restore
- * @copyright Copyright (c)2008-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2008-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -6269,7 +6387,7 @@ class AKUtilsHtaccess extends AKAbstractObject
  * An AJAX-powered archive extraction library for JPA, JPS and ZIP archives
  *
  * @package   restore
- * @copyright Copyright (c)2008-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2008-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -6374,7 +6492,7 @@ class AKUtilsLister extends AKAbstractObject
  * An AJAX-powered archive extraction library for JPA, JPS and ZIP archives
  *
  * @package   restore
- * @copyright Copyright (c)2008-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2008-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -7176,7 +7294,7 @@ function runZapper(AKAbstractPartObserver $observer = null)
  * An AJAX-powered archive extraction library for JPA, JPS and ZIP archives
  *
  * @package   restore
- * @copyright Copyright (c)2008-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2008-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -7745,7 +7863,7 @@ class AKText extends AKAbstractObject
  * An AJAX-powered archive extraction library for JPA, JPS and ZIP archives
  *
  * @package   restore
- * @copyright Copyright (c)2008-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2008-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -8061,7 +8179,7 @@ class AKFactory
  * An AJAX-powered archive extraction library for JPA, JPS and ZIP archives
  *
  * @package   restore
- * @copyright Copyright (c)2008-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2008-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -8100,7 +8218,7 @@ interface AKEncryptionAESAdapterInterface
  * An AJAX-powered archive extraction library for JPA, JPS and ZIP archives
  *
  * @package   restore
- * @copyright Copyright (c)2008-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2008-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -8187,7 +8305,7 @@ abstract class AKEncryptionAESAdapterAbstract
  * An AJAX-powered archive extraction library for JPA, JPS and ZIP archives
  *
  * @package   restore
- * @copyright Copyright (c)2008-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2008-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -8288,7 +8406,7 @@ class Mcrypt extends AKEncryptionAESAdapterAbstract implements AKEncryptionAESAd
  * An AJAX-powered archive extraction library for JPA, JPS and ZIP archives
  *
  * @package   restore
- * @copyright Copyright (c)2008-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2008-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -8392,7 +8510,7 @@ class OpenSSL extends AKEncryptionAESAdapterAbstract implements AKEncryptionAESA
  * An AJAX-powered archive extraction library for JPA, JPS and ZIP archives
  *
  * @package   restore
- * @copyright Copyright (c)2008-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2008-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -9065,7 +9183,7 @@ class AKEncryptionAES
  * An AJAX-powered archive extraction library for JPA, JPS and ZIP archives
  *
  * @package   restore
- * @copyright Copyright (c)2008-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2008-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -9381,7 +9499,7 @@ function masterSetup()
  * An AJAX-powered archive extraction library for JPA, JPS and ZIP archives
  *
  * @package   restore
- * @copyright Copyright (c)2008-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2008-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 

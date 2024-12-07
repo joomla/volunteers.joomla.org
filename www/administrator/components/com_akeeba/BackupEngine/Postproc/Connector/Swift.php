@@ -3,7 +3,7 @@
  * Akeeba Engine
  *
  * @package   akeebaengine
- * @copyright Copyright (c)2006-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -23,6 +23,14 @@ use stdClass;
 class Swift
 {
 	use FileCloseAware;
+
+	/**
+	 * The Keystone version to use for authenticating. One of v2, v3.
+	 *
+	 * @var    string
+	 * @since  9.3.0
+	 */
+	protected $keystoneVersion = 'v2';
 
 	/**
 	 * The authentication server (Keystone) endpoint, e.g. https://auth.cloud.ovh.net/v2.0
@@ -63,6 +71,14 @@ class Swift
 	 * @since  6.1.0
 	 */
 	protected $tenantId;
+
+	/**
+	 * The Keystone v3 authentication domain
+	 *
+	 * @var    string
+	 * @since  9.3.0
+	 */
+	protected $domain;
 
 	/**
 	 * The OpenStack username
@@ -109,12 +125,14 @@ class Swift
 	 *
 	 * @since   6.1.0
 	 */
-	public function __construct($authEndpoint, $tenantId, $username, $password)
+	public function __construct($keystoneVersion, $authEndpoint, $tenantId, $username, $password, $keystoneDomain = 'default')
 	{
-		$this->authEndpoint = $authEndpoint;
-		$this->tenantId     = $tenantId;
-		$this->username     = $username;
-		$this->password     = $password;
+		$this->keystoneVersion = $keystoneVersion;
+		$this->authEndpoint    = $authEndpoint;
+		$this->tenantId        = $tenantId;
+		$this->username        = $username;
+		$this->password        = $password;
+		$this->domain          = $keystoneDomain;
 	}
 
 	/**
@@ -592,6 +610,29 @@ class Swift
 	 */
 	protected function authenticate()
 	{
+		switch ($this->keystoneVersion)
+		{
+			case 'v2':
+				return $this->authenticateV2();
+				break;
+
+			case 'v3':
+			default:
+				return $this->authenticateV3();
+				break;
+		}
+	}
+
+	/**
+	 * Authenticate to the OpenStack cloud using Keystone v2 and retrieve a fresh token
+	 *
+	 * @return  string
+	 * @throws  Http
+	 *
+	 * @since   6.1.0
+	 */
+	protected function authenticateV2()
+	{
 		// Send the token request to Keystone
 		$message = [
 			'auth' => [
@@ -639,6 +680,93 @@ class Swift
 				foreach ($service->endpoints as $endpoint)
 				{
 					$this->endPoints[$endpoint->region] = $endpoint->publicURL;
+				}
+			}
+		}
+
+		// Callback
+		if (is_callable($this->authenticationCallback))
+		{
+			call_user_func_array($this->authenticationCallback, [&$this, $response]);
+		}
+
+		return $this->token;
+	}
+
+	/**
+	 * Returns the authentication token using Keystone v3 authentication.
+	 *
+	 * @return  string
+	 * @throws  Http
+	 *
+	 * @since   9.3.0
+	 */
+	protected function authenticateV3()
+	{
+		// Send the scoped token request to Keystone
+		$message = [
+			'auth' => [
+				'identity' => [
+					'methods'  => [
+						'password',
+					],
+					'password' => [
+						'user' => [
+							'name'     => $this->username,
+							'domain'   => [
+								'name' => $this->domain,
+							],
+							'password' => $this->password,
+						],
+					],
+				],
+				'scope'    => [
+					'project' => [
+						'id'     => $this->tenantId,
+						'domain' => [
+							'name' => $this->domain,
+						],
+					],
+				],
+			],
+		];
+		$json    = json_encode($message);
+		$url     = rtrim($this->authEndpoint, '/') . '/v3/auth/tokens';
+
+		$request       = new Request('POST', $url);
+		$request->data = $json;
+		$request->setHeader('Accept', 'application/json');
+		$request->setHeader('Content-Type', 'application/json');
+		$request->setHeader('Content-Length', strlen($request->data));
+
+		$response = $request->getResponse();
+
+		// Get the tenant (project) ID
+		$this->tenantId = $response->body->token->project->id;
+
+		// Get the token and its expiration
+		$this->token           = $response->headers['x-subject-token'];
+		$date                  = new DateTime($response->body->token->expires_at);
+		$this->tokenExpiration = $date->getTimestamp();
+
+		// Loop through the serviceCatalog and index the Swift endpoints
+		if (isset($response->body->token->catalog))
+		{
+			foreach ($response->body->token->catalog as $service)
+			{
+				if ($service->type != 'object-store')
+				{
+					continue;
+				}
+
+				if (!isset($service->endpoints))
+				{
+					continue;
+				}
+
+				foreach ($service->endpoints as $endpoint)
+				{
+					$this->endPoints[$endpoint->region_id] = $endpoint->url;
 				}
 			}
 		}

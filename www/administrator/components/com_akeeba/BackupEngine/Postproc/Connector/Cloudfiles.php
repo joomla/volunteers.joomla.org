@@ -3,7 +3,7 @@
  * Akeeba Engine
  *
  * @package   akeebaengine
- * @copyright Copyright (c)2006-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -68,7 +68,7 @@ class Cloudfiles extends Swift
 			throw new MissingApikey('You have not specified your CloudFiles API key');
 		}
 
-		parent::__construct('https://identity.api.rackspacecloud.com/v2.0', '', $username, $apiKey);
+		parent::__construct('v2', 'https://identity.api.rackspacecloud.com/v2.0', '', $username, $apiKey, 'default');
 
 		// Very simplistic options parsing
 		if (is_array($options) && count($options))

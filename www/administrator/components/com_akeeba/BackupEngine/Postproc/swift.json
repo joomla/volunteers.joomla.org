@@ -15,6 +15,14 @@
         "title": "COM_AKEEBA_CONFIG_DELETEAFTER_TITLE",
         "description": "COM_AKEEBA_CONFIG_DELETEAFTER_DESCRIPTION"
     },
+    "engine.postproc.swift.keystone_version": {
+        "default": "v3",
+        "type": "enum",
+        "enumkeys": "COM_AKEEBA_CONFIG_SWIFT_KEYSTONE_VERSION_V2|COM_AKEEBA_CONFIG_SWIFT_KEYSTONE_VERSION_V3",
+        "enumvalues": "v2|v3",
+        "title": "COM_AKEEBA_CONFIG_SWIFT_KEYSTONE_VERSION_TITLE",
+        "description": "COM_AKEEBA_CONFIG_SWIFT_KEYSTONE_VERSION_DESCRIPTION"
+    },
     "engine.postproc.swift.authurl": {
         "default": "",
         "type": "string",
@@ -26,6 +34,13 @@
         "type": "string",
         "title": "COM_AKEEBA_CONFIG_SWIFT_TENANTID_TITLE",
         "description": "COM_AKEEBA_CONFIG_SWIFT_TENANTID_DESCRIPTION"
+    },
+    "engine.postproc.swift.domain": {
+        "default": "default",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_SWIFT_DOMAIN_TITLE",
+        "description": "COM_AKEEBA_CONFIG_SWIFT_DOMAIN_DESCRIPTION",
+        "showon": "engine.postproc.swift.keystone_version:v3"
     },
     "engine.postproc.swift.username": {
         "default": "",

@@ -38,9 +38,17 @@ class WFEditorPlugin extends JObject
         // get name and caller from plugin name
         if (strpos($name, '.') !== false) {
             list($name, $caller) = explode('.', $name);
-            // store caller
+
+            // validate then store caller
             if ($caller !== $name) {
-                $this->set('caller', $caller);
+
+                $profile = $this->getProfile();
+
+                if (!empty($profile)) {
+                    if (in_array($caller, explode(',', $profile->plugins))) {
+                        $this->set('caller', $caller);
+                    }
+                }
             }
         }
 
@@ -147,7 +155,7 @@ class WFEditorPlugin extends JObject
         if ($language->getTag() === WFLanguage::getTag()) {
             return $language->isRTL();
         }
-        
+
         return false;
     }
 
@@ -180,6 +188,8 @@ class WFEditorPlugin extends JObject
 
         // set standalone mode
         $document->set('standalone', $wf->input->getInt('standalone', 0));
+
+        JFactory::getApplication()->triggerEvent('onWfPluginInit', array($this));
     }
 
     public function execute()
@@ -218,7 +228,7 @@ class WFEditorPlugin extends JObject
             'plugins' => array('core' => array($name), 'external' => array()),
             'sections' => array('dlg', $name . '_dlg', 'colorpicker'),
             'mode' => 'plugin',
-            'language' => WFLanguage::getTag()
+            'language' => WFLanguage::getTag(),
         ));
 
         $data = $parser->load();
@@ -253,6 +263,8 @@ class WFEditorPlugin extends JObject
         if (is_file(JPATH_SITE . '/media/jce/css/plugin.css')) {
             $document->addStyleSheet(array('media/jce/css/plugin.css'), 'joomla');
         }
+
+        JFactory::getApplication()->triggerEvent('onWfPluginDisplay', array($this));
     }
 
     /**

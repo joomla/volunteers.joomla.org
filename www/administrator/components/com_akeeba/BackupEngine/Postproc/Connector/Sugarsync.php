@@ -3,7 +3,7 @@
  * Akeeba Engine
  *
  * @package   akeebaengine
- * @copyright Copyright (c)2006-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -14,6 +14,7 @@ defined('AKEEBAENGINE') || die();
 use Akeeba\Engine\Postproc\Connector\Sugarsync\Exception\Base as SugarsyncException;
 use Akeeba\Engine\Postproc\ProxyAware;
 use Akeeba\Engine\Util\FileCloseAware;
+use Akeeba\Engine\Util\Utf8;
 use DOMDocument;
 use DOMElement;
 
@@ -125,10 +126,10 @@ class Sugarsync
 
 		$xml = '<?xml version="1.0" encoding="UTF-8" ?>' . "\n";
 		$xml .= '<authRequest>' . "\n";
-		$xml .= '<username>' . utf8_encode($this->userEmail) . '</username>' . "\n";
-		$xml .= '<password>' . utf8_encode($this->userPassword) . '</password>' . "\n";
-		$xml .= '<accessKeyId>' . utf8_encode($this->accessKey) . '</accessKeyId>' . "\n";
-		$xml .= '<privateAccessKey>' . utf8_encode($this->privateKey) . '</privateAccessKey>' . "\n";
+		$xml .= '<username>' . Utf8::utf8_encode($this->userEmail) . '</username>' . "\n";
+		$xml .= '<password>' . Utf8::utf8_encode($this->userPassword) . '</password>' . "\n";
+		$xml .= '<accessKeyId>' . Utf8::utf8_encode($this->accessKey) . '</accessKeyId>' . "\n";
+		$xml .= '<privateAccessKey>' . Utf8::utf8_encode($this->privateKey) . '</privateAccessKey>' . "\n";
 		$xml .= '</authRequest>';
 
 		$descriptor = [
@@ -223,7 +224,7 @@ class Sugarsync
 		}
 
 		$xml = '<?xml version="1.0" encoding="UTF-8" ?>';
-		$xml .= '<folder><displayName>' . utf8_encode($newFoldername) . '</displayName></folder>';
+		$xml .= '<folder><displayName>' . Utf8::utf8_encode($newFoldername) . '</displayName></folder>';
 
 		$descriptor = [
 			'method'         => 'folder/' . $container,
@@ -415,7 +416,7 @@ class Sugarsync
 
 		$xml = '<?xml version="1.0" encoding="UTF-8" ?>';
 		$xml .= '<file>';
-		$xml .= '<displayName>' . utf8_encode($fileName) . '</displayName>';
+		$xml .= '<displayName>' . Utf8::utf8_encode($fileName) . '</displayName>';
 		$xml .= '<mediaType>' . $mimeType . '</mediaType>';
 		$xml .= '</file>';
 

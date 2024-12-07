@@ -159,10 +159,15 @@ abstract class WFUtility
             return false;
         }
 
+        // permitted characters below 127, eg: () Although reserved characters (sub-delims https://www.rfc-editor.org/rfc/rfc3986#section-2), probably OK in file paths
+        $permitted = array(40, 41);
+
         if (preg_match('#([^\w\.\-\/\\\\\s ])#i', $string, $matches)) {
             foreach ($matches as $match) {
+                $ord = ord($match);
+                
                 // not a safe UTF-8 character
-                if (ord($match) < 127) {
+                if ($ord < 127 && !in_array($ord, $permitted)) {
                     return false;
                 }
             }
@@ -447,7 +452,13 @@ abstract class WFUtility
         // check if multibyte string, use dirname() if not
         if (function_exists('mb_strlen')) {
             if (mb_strlen($path) === strlen($path)) {
-                return dirname($path);
+                $dir = dirname($path);
+                
+                if ($dir == ".") {
+                    return "";
+                }
+
+                return $dir;
             }
         }
 
@@ -458,7 +469,13 @@ abstract class WFUtility
         $slash = strrpos($path, '/') + 1;
 
         // return dirname
-        return substr($path, 0, $slash);
+        $dir = substr($path, 0, $slash);
+
+        if ($dir == ".") {
+            return "";
+        }
+
+        return $dir;
     }
 
     public static function mb_basename($path, $ext = '')

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--~
   ~ @package   akeebabackup
-  ~ @copyright Copyright (c)2006-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+  ~ @copyright Copyright (c)2006-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
   ~ @license   GNU General Public License version 3, or later
   -->
 
@@ -10,10 +10,10 @@
     <author>Nicholas K. Dionysopoulos</author>
     <authorEmail>nicholas@akeeba.com</authorEmail>
     <authorUrl>https://www.akeeba.com</authorUrl>
-    <copyright>Copyright (c)2006-2021 Nicholas K. Dionysopoulos</copyright>
+    <copyright>Copyright (c)2006-2023 Nicholas K. Dionysopoulos</copyright>
     <license>GNU General Public License version 3, or later</license>
-    <creationDate>2022-06-23</creationDate>
-    <version>8.1.8</version>
+    <creationDate>2023-01-18</creationDate>
+    <version>8.2.6</version>
     <description>PLG_QUICKICON_AKEEBABACKUP_XML_DESCRIPTION</description>
     <files>
         <filename plugin="akeebabackup">akeebabackup.php</filename>

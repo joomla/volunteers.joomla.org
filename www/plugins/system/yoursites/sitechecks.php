@@ -1,10 +1,10 @@
 <?php
 
 /**
- * @version    CVS: 1.27.0
+ * @version    CVS: 1.49.0
  * @package    com_yoursites
  * @author     Geraint Edwards <via website>
- * @copyright  2016-2020 GWE Systems Ltd
+ * @copyright  2016-YOURSITES_COPYRIGHT GWE Systems Ltd
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
@@ -17,6 +17,9 @@ Use Joomla\Filesystem\Folder;
 Use Joomla\CMS\Filesystem\File;
 use Joomla\CMS\Component\ComponentHelper;
 */
+
+use Joomla\CMS\Factory;
+
 defined('_JEXEC') or die;
 
 class YstsSiteChecks
@@ -32,7 +35,7 @@ class YstsSiteChecks
 		$query = $db->getQuery(true);
 		$query->select('*')
 			->from($db->quoteName("#__extensions"))
-			->where('folder = "twofactorauth" AND enabled = 1');
+			->where('folder IN( "twofactorauth", "multifactorauth") AND enabled = 1');
 
 		$db->setQuery($query);
 		$twofactorplugins = $db->loadObjectList();
@@ -43,8 +46,16 @@ class YstsSiteChecks
 		if (count($twofactorplugins) == 0)
 		{
 			$returnData->warning = 1;
-			$returnData->messages[] = "COM_YOURSITES_ADVCHECK_MISSING2FACTOR_FAILED";
-			$returnData->checkinfo['key']  = "COM_YOURSITES_ADVCHECK_MISSING2FACTOR_INCORRECT_NO_PLUGIN";
+			if (version_compare(JVERSION, "4.2.0", "ge"))
+			{
+				$returnData->messages[]       = "COM_YOURSITES_ADVCHECK_MISSINGMULTIFACTOR_FAILED";
+				$returnData->checkinfo['key'] = "COM_YOURSITES_ADVCHECK_MISSINGMULTIFACTOR_INCORRECT_NO_PLUGIN";
+			}
+			else
+			{
+				$returnData->messages[]       = "COM_YOURSITES_ADVCHECK_MISSING2FACTOR_FAILED";
+				$returnData->checkinfo['key'] = "COM_YOURSITES_ADVCHECK_MISSING2FACTOR_INCORRECT_NO_PLUGIN";
+			}
 			$returnData->checkinfo['data'] = array();
 			$returnData->checkinfo['status'] = -1;
 			return;
@@ -65,17 +76,43 @@ class YstsSiteChecks
 		// use array_keys with search value of 1 !!
 		$manageGroups    = isset($ruledata['core.manage']) ? array_keys($ruledata['core.manage']->getData(), 1) : array();
 		$adminGroups     = array_keys($ruledata['core.admin']->getData(), 1);
+		$createGroups    = isset($ruledata['core.create']) ? array_keys($ruledata['core.create']->getData(), 1) : array();
+		$deleteGroups    = isset($ruledata['core.delete']) ? array_keys($ruledata['core.delete']->getData(), 1) : array();
+		$editGroups      = isset($ruledata['core.edit']) ? array_keys($ruledata['core.edit']->getData(), 1) : array();
+		$editstateGroups = isset($ruledata['core.edit.state']) ? array_keys($ruledata['core.edit.state']->getData(), 1) : array();
+
 		$coreadminGroups = array_merge($manageGroups, $adminGroups);
 
-		$query = $db->getQuery(true);
-		$query->select('u.username')
-			->from("#__users as u" )
-			->innerJoin('#__user_usergroup_map as m on m.user_id = u.id')
-			->where('m.group_id in (' . implode(",", $coreadminGroups) . ')')
-			->where('u.otpKey = ""')
-			->where('u.block = 0')
-			->group('u.id');
+		if (isset($requestObject->checkdata->missing2factor->extended) && $requestObject->checkdata->missing2factor->extended)
+		{
+			$coreadminGroups = array_merge($manageGroups, $adminGroups, $createGroups, $deleteGroups, $editGroups, $editstateGroups);
+		}
 
+		$query = $db->getQuery(true);
+		if (version_compare(JVERSION, '4.2', 'ge')) {
+
+			$query->select('u.username')
+				->from("#__users as u")
+				->innerJoin('#__user_usergroup_map as m on m.user_id = u.id')
+				->where('m.group_id in (' . implode(",", $coreadminGroups) . ')')
+				->where('NOT EXISTS (SELECT mfa.id
+                   FROM   #__user_mfa as mfa
+                   WHERE  mfa.user_id = u.id AND mfa.default = 1)')
+				->where('u.block = 0')
+				->group('u.id');
+
+		}
+		else
+		{
+			$query->select('u.username')
+				->from("#__users as u")
+				->innerJoin('#__user_usergroup_map as m on m.user_id = u.id')
+				->where('m.group_id in (' . implode(",", $coreadminGroups) . ')')
+				->where('u.otpKey = ""')
+				->where('u.block = 0')
+				->group('u.id');
+
+		}
 		$db->setQuery($query);
 
 		$adminusers = $db->loadColumn();
@@ -83,18 +120,36 @@ class YstsSiteChecks
 		if (count($adminusers) !== 0)
 		{
 			$returnData->warning = 1;
-			$returnData->messages[] = "COM_YOURSITES_ADVCHECK_MISSING2FACTOR_INCORRECT";
-			//$returnData->messages[] = "Checked admin groups " . implode(", ", $adminGroups);
-			//$returnData->messages[] = "Checked manage groups " . implode(", ", $manageGroups);
+			if (version_compare(JVERSION, "4.2.0", "ge"))
+			{
+				$returnData->messages[] = "COM_YOURSITES_ADVCHECK_MISSINGMULTIFACTOR_INCORRECT";
+				//$returnData->messages[] = "Checked admin groups " . implode(", ", $adminGroups);
+				//$returnData->messages[] = "Checked manage groups " . implode(", ", $manageGroups);
 
-			$returnData->checkinfo['key']  = "COM_YOURSITES_ADVCHECK_MISSING2FACTOR_INCORRECT_R";
+				$returnData->checkinfo['key']  = "COM_YOURSITES_ADVCHECK_MISSINGMULTIFACTOR_INCORRECT_R";
+			}
+			else
+			{
+				$returnData->messages[] = "COM_YOURSITES_ADVCHECK_MISSING2FACTOR_INCORRECT";
+				//$returnData->messages[] = "Checked admin groups " . implode(", ", $adminGroups);
+				//$returnData->messages[] = "Checked manage groups " . implode(", ", $manageGroups);
+
+				$returnData->checkinfo['key']  = "COM_YOURSITES_ADVCHECK_MISSING2FACTOR_INCORRECT_R";
+			}
 			$returnData->checkinfo['data'] = $adminusers;
 			$returnData->checkinfo['status'] = -1;
 		}
 
 		if (count($twofactorplugins) > 0 && count($adminusers) == 0)
 		{
-			$returnData->checkinfo['key']  = "COM_YOURSITES_ADVCHECK_MISSING2FACTOR_CORRECT";
+			if (version_compare(JVERSION, "4.2.0", "ge"))
+			{
+				$returnData->checkinfo['key'] = "COM_YOURSITES_ADVCHECK_MISSINGMULTIFACTOR_CORRECT";
+			}
+			else
+			{
+				$returnData->checkinfo['key'] = "COM_YOURSITES_ADVCHECK_MISSING2FACTOR_CORRECT";
+			}
 			$returnData->checkinfo['data'] = array();
 			$returnData->checkinfo['status'] = 1;
 		}
@@ -107,6 +162,77 @@ class YstsSiteChecks
 			{
 				$returnData->checkinfo['require2factortoken'] = 1;
 			}
+		}
+
+	}
+
+	public static function databasefc( & $returnData, $requestObject)
+	{
+
+		// check database tables requiring field value checks
+
+		$tableFields = array();
+		if (isset($requestObject->checkdata->databasefc->extended) && $requestObject->checkdata->databasefc->extended)
+		{
+			$tableFields = $requestObject->checkdata->databasefc->extended;
+		}
+
+		if (count($tableFields) == 0)
+		{
+			$returnData->warning = 1;
+			$returnData->messages[]       = "COM_YOURSITES_ADVCHECK_DATABASEFC_FAILED";
+			$returnData->checkinfo['key'] = "COM_YOURSITES_ADVCHECK_DATABASEFC_INCORRECT_NO_FIELD_TO_CHECK";
+			$returnData->checkinfo['data'] = array();
+			$returnData->checkinfo['status'] = -1;
+			return;
+		}
+
+		if (in_array("COM_YOURSITES_ADVCHECK_FC_VALUE",$tableFields))
+		{
+			$db = JFactory::getDbo();
+
+			$query = $db->getQuery(true);
+			$query->select('max(length(value))')
+				->from("#__fields_values");
+			$db->setQuery($query);
+
+			$maxlength = $db->loadResult();
+
+			$jconfig = JFactory::getConfig();
+
+			$query = $db->getQuery(true);
+			$query->select('CHARACTER_MAXIMUM_LENGTH')
+				->from("INFORMATION_SCHEMA.COLUMNS")
+				->where("TABLE_SCHEMA  = " . $db->quote($jconfig->get('db')))
+				->where("TABLE_NAME = '". $jconfig->get('dbprefix') . "fields_values' ")
+				->where("COLUMN_NAME = 'value'");
+			$db->setQuery($query);
+
+			$capacity = $db->loadResult();
+
+			if ($maxlength > 0.9 * (int) $capacity)
+			{
+				$returnData->warning             = 1;
+				$returnData->messages[]          = "COM_YOURSITES_ADVCHECK_DATABASEFC_INCORRECT";
+				$returnData->checkinfo['key']    = "COM_YOURSITES_ADVCHECK_DATABASEFC_INCORRECT_R";
+				$returnData->checkinfo['data']   =  array("Table " . $db->replacePrefix('#__fields_values') . " Field : value MaxSize : " . $maxlength . " : Capacity : " . $capacity);
+				$returnData->checkinfo['status'] = -1;
+			}
+			else
+			{
+				$returnData->checkinfo['key']    = "COM_YOURSITES_ADVCHECK_DATABASEFC_CORRECT";
+				$returnData->checkinfo['data']   = array();
+				$returnData->checkinfo['status'] = 1;
+			}
+		}
+		else
+		{
+			$returnData->warning = 1;
+			$returnData->messages[]       = "COM_YOURSITES_ADVCHECK_DATABASEFC_FAILED";
+			$returnData->checkinfo['key'] = "COM_YOURSITES_ADVCHECK_DATABASEFC_INCORRECT_NO_FIELD_TO_CHECK";
+			$returnData->checkinfo['data'] = array();
+			$returnData->checkinfo['status'] = -1;
+			return;
 		}
 
 	}
@@ -325,6 +451,58 @@ class YstsSiteChecks
 			$returnData->checkinfo['data'] = $names;
 			$returnData->checkinfo['status'] = -1;
 		}
+
+	}
+
+	public static function systememail( & $returnData, $requestObject)
+	{
+		$userparams = JComponentHelper::getParams("com_users");
+
+		// Get all admin users
+		$db = JFactory::getDbo();
+		$query = $db->getQuery(true);
+
+		$query->clear()
+			->select($db->quoteName(array('name', 'email', 'sendEmail', 'id')))
+			->from($db->quoteName('#__users'))
+			->where($db->quoteName('sendEmail') . ' = 1');
+
+		$db->setQuery($query);
+		$rows = $db->loadObjectList();
+
+		$dodgyUsers = array();
+		foreach ($rows as $row)
+		{
+			$usercreator = Factory::getUser($row->id);
+
+			// Not authorised to create or manage users
+			if (!$usercreator->authorise('core.create', 'com_users') && !$usercreator->authorise('core.manage', 'com_users'))
+			{
+				$dodgyUsers[] = $usercreator->username . " ( " . $usercreator->id . " )";
+				continue;
+			}
+
+			// blocked or not activated
+			if ($usercreator->block || ($usercreator->activation !== "0" && $usercreator->activation !== ""))
+			{
+				$dodgyUsers[] = $usercreator->username . " ( " . $usercreator->id . " )";
+			}
+
+		}
+
+		if (count($dodgyUsers))
+		{
+			$returnData->warning = 1;
+			$returnData->messages[] = "COM_YOURSITES_ADVCHECK_SYSTEMEMAIL_INCORRECT";
+			$returnData->checkinfo['key']  = "COM_YOURSITES_ADVCHECK_SYSTEMEMAIL_INCORRECT_R";
+			$returnData->checkinfo['data'] = $dodgyUsers;
+			$returnData->checkinfo['status'] = -1;
+			return;
+		}
+
+		$returnData->checkinfo['key']  = "COM_YOURSITES_ADVCHECK_SYSTEMEMAIL_CORRECT";
+		$returnData->checkinfo['data'] = array();
+		$returnData->checkinfo['status'] = 1;
 
 	}
 

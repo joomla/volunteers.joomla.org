@@ -4,7 +4,7 @@
  * @version    CVS: 1.19.1RC
  * @package    com_yoursites
  * @author     Geraint Edwards <via website>
- * @copyright  2016-2020 GWE Systems Ltd
+ * @copyright  2016-YOURSITES_COPYRIGHT GWE Systems Ltd
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 

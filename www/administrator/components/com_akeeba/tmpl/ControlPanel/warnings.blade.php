@@ -1,7 +1,7 @@
 <?php
 /**
  * @package   akeebabackup
- * @copyright Copyright (c)2006-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -16,25 +16,29 @@ $cloudFlareTestFile .= '?' . $this->getContainer()->mediaVersion;
 ?>
 {{-- Joomla 3 End of Life notice --}}
 @if(time() > 1660683600)
-    <div class="akeeba-block--warning">
-        <h1>Joomla 3 is approaching its End of Life</h1>
+    <details class="akeeba-block--warning">
+        <summary>
+            Joomla 3 is approaching its End of Life
+        </summary>
         <p>
-            Joomla 3 will become End of Life on August 17th, 2023. We will no longer provide any support or software updates for Joomla 3 after it becomes End of Life.
+            Joomla 3 will become End of Life on August 17th, 2023. We only guarantee support and software updates for Joomla 3 before that date.
         </p>
         <p>
             Please upgrade your site to the latest Joomla version (Joomla 4 at the time of this writing) as soon as humanly possible. Afterwards, please update Akeeba Backup to the latest released version. The longer you delay the less likely is that there will be an upgrade path for your site.
         </p>
-    </div>
+    </details>
 @elseif(time() > 1692219600)
-    <div class="akeeba-block--info">
-        <h1>Joomla 3 is End of Life</h1>
+    <details class="akeeba-block--info">
+        <summary>
+            Joomla 3 is End of Life
+        </summary>
         <p>
-            We no longer provide support for using our software on Joomla 3 after it became End of Life on August 17th, 2023. We will no longer provide any kind of updates for this software including but not limited to: security updates, bug fixes, new features, or addressing compatibility issues with third party services and new web server and web browser versions.
+            We do <em>not</em> guarantee support and updates for our software on Joomla 3 after Joomla 3 became End of Life on August 17th, 2023. This means that we may not be able to provide security updates, bug fixes, new features, or addressing compatibility issues with third party services and new web server and web browser versions.
         </p>
         <p>
             Please upgrade your site to the latest Joomla version (Joomla 4 at the time of this writing) as soon as humanly possible and update Akeeba Backup to the latest released version. The longer you delay the less likely is that there will be an upgrade path for your site.
         </p>
-    </div>
+    </details>
 @endif
 
 {{-- Configuration Wizard pop-up --}}
@@ -69,8 +73,8 @@ $cloudFlareTestFile .= '?' . $this->getContainer()->mediaVersion;
     get involved with and better at web development. Stay curious!
     -->
     {{-- Web accessible output directory that coincides with or is inside in a CMS system folder --}}
-    <div class="akeeba-block--failure" id="outDirSystem" style="display: none">
-        <h3>@lang('COM_AKEEBA_CPANEL_HEAD_OUTDIR_INVALID')</h3>
+    <details class="akeeba-block--failure" id="outDirSystem" style="display: none">
+        <summary>@lang('COM_AKEEBA_CPANEL_HEAD_OUTDIR_INVALID')</summary>
         <p>
             @sprintf('COM_AKEEBA_CPANEL_LBL_OUTDIR_LISTABLE', realpath($this->getModel()->getOutputDirectory()))
         </p>
@@ -81,17 +85,17 @@ $cloudFlareTestFile .= '?' . $this->getContainer()->mediaVersion;
             @lang('COM_AKEEBA_CPANEL_LBL_OUTDIR_ISSYSTEM_FIX')
             @lang('COM_AKEEBA_CPANEL_LBL_OUTDIR_DELETEORBEHACKED')
         </p>
-    </div>
+    </details>
 
     {{-- Output directory can be listed over the web --}}
-    <div class="akeeba-block--{{ $this->hasOutputDirectorySecurityFiles ? 'failure' : 'warning' }}" id="insecureOutputDirectory" style="display: none">
-        <h3>
+    <details class="akeeba-block--{{ $this->hasOutputDirectorySecurityFiles ? 'failure' : 'warning' }}" id="insecureOutputDirectory" style="display: none">
+        <summary>
             @if ($this->hasOutputDirectorySecurityFiles)
             @lang('COM_AKEEBA_CPANEL_HEAD_OUTDIR_UNFIXABLE')
             @else
             @lang('COM_AKEEBA_CPANEL_HEAD_OUTDIR_INSECURE')
             @endif
-        </h3>
+        </summary>
         <p>
             @sprintf('COM_AKEEBA_CPANEL_LBL_OUTDIR_LISTABLE', realpath($this->getModel()->getOutputDirectory()))
         </p>
@@ -120,13 +124,13 @@ $cloudFlareTestFile .= '?' . $this->getContainer()->mediaVersion;
             @lang('COM_AKEEBA_CPANEL_LBL_OUTDIR_DELETEORBEHACKED')
         </p>
         @endif
-    </div>
+    </details>
 
     {{-- Output directory cannot be listed over the web but I can download files --}}
-    <div class="akeeba-block--warning" id="missingRandomFromFilename" style="display: none">
-        <h3>
+    <details class="akeeba-block--warning" id="missingRandomFromFilename" style="display: none">
+        <summary>
             @lang('COM_AKEEBA_CPANEL_HEAD_OUTDIR_INSECURE_ALT')
-        </h3>
+        </summary>
         <p>
             @sprintf('COM_AKEEBA_CPANEL_LBL_OUTDIR_FILEREADABLE', realpath($this->getModel()->getOutputDirectory()))
         </p>
@@ -148,7 +152,7 @@ $cloudFlareTestFile .= '?' . $this->getContainer()->mediaVersion;
                 @lang('COM_AKEEBA_CPANEL_BTN_FIXSECURITY')
             </button>
         </form>
-    </div>
+    </details>
 
 @endif
 
@@ -161,8 +165,8 @@ $cloudFlareTestFile .= '?' . $this->getContainer()->mediaVersion;
 
 {{-- Front-end backup secret word reminder --}}
 @unless(empty($this->frontEndSecretWordIssue))
-    <div class="akeeba-block--failure">
-        <h3>@lang('COM_AKEEBA_CPANEL_ERR_FESECRETWORD_HEADER')</h3>
+    <details class="akeeba-block--failure">
+        <summary>@lang('COM_AKEEBA_CPANEL_ERR_FESECRETWORD_HEADER')</summary>
         <p>@lang('COM_AKEEBA_CPANEL_ERR_FESECRETWORD_INTRO')</p>
         <p>{{ $this->frontEndSecretWordIssue }}</p>
         <p>
@@ -176,16 +180,13 @@ $cloudFlareTestFile .= '?' . $this->getContainer()->mediaVersion;
                 @lang('COM_AKEEBA_CPANEL_BTN_FESECRETWORD_RESET')
             </a>
         </p>
-    </div>
+    </details>
 @endunless
-
-{{-- Old PHP version reminder --}}
-@include('admin:com_akeeba/ControlPanel/warning_phpversion')
 
 {{-- Wrong media directory permissions --}}
 @unless($this->areMediaPermissionsFixed)
-    <div id="notfixedperms" class="akeeba-block--failure">
-        <h3>@lang('COM_AKEEBA_CONTROLPANEL_WARN_WARNING')</h3>
+    <details id="notfixedperms" class="akeeba-block--failure">
+        <summary>@lang('COM_AKEEBA_CONTROLPANEL_WARN_WARNING')</summary>
         <p>@lang('COM_AKEEBA_CONTROLPANEL_WARN_PERMS_L1')</p>
         <p>@lang('COM_AKEEBA_CONTROLPANEL_WARN_PERMS_L2')</p>
         <ol>
@@ -193,15 +194,15 @@ $cloudFlareTestFile .= '?' . $this->getContainer()->mediaVersion;
             <li>@lang('COM_AKEEBA_CONTROLPANEL_WARN_PERMS_L3B')</li>
         </ol>
         <p>@lang('COM_AKEEBA_CONTROLPANEL_WARN_PERMS_L4')</p>
-    </div>
+    </details>
 @endunless
 
 {{-- You need to enter your Download ID --}}
 @if($this->needsDownloadID)
-    <div class="akeeba-block--warning">
-        <h3>
+    <details class="akeeba-block--warning">
+        <summary>
             @lang('COM_AKEEBA_CPANEL_MSG_MUSTENTERDLID')
-        </h3>
+        </summary>
         <p>
             @sprintf('COM_AKEEBA_LBL_CPANEL_NEEDSDLID','https://www.akeeba.com/download/official/add-on-dlid.html')
         </p>
@@ -221,7 +222,7 @@ $cloudFlareTestFile .= '?' . $this->getContainer()->mediaVersion;
                 </button>
             </div>
         </form>
-    </div>
+    </details>
 @endif
 
 {{-- You have CORE; you need to upgrade, not just enter a Download ID --}}
@@ -232,10 +233,10 @@ $cloudFlareTestFile .= '?' . $this->getContainer()->mediaVersion;
 @endif
 
 {{-- Warn about CloudFlare Rocket Loader --}}
-<div class="akeeba-block--failure" style="display: none;" id="cloudFlareWarn">
-    <h3>@lang('COM_AKEEBA_CPANEL_MSG_CLOUDFLARE_WARN')</h3>
+<details class="akeeba-block--failure" style="display: none;" id="cloudFlareWarn">
+    <summary>@lang('COM_AKEEBA_CPANEL_MSG_CLOUDFLARE_WARN')</summary>
     <p>@sprintf('COM_AKEEBA_CPANEL_MSG_CLOUDFLARE_WARN1', 'https://support.cloudflare.com/hc/en-us/articles/200169456-Why-is-JavaScript-or-jQuery-not-working-on-my-site-')</p>
-</div>
+</details>
 <?php
 /**
  * DO NOT USE INLINE JAVASCRIPT FOR THIS SCRIPT. DO NOT REMOVE THE ATTRIBUTES.

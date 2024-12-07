@@ -3,7 +3,7 @@
  * Akeeba Engine
  *
  * @package   akeebaengine
- * @copyright Copyright (c)2006-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -454,6 +454,11 @@ class Dropbox2
 		}
 
 		$contentLength = $to - $from + 1;
+
+		if ($contentLength <= 0)
+		{
+			return;
+		}
 
 		$params        = [
 			'cursor' => [

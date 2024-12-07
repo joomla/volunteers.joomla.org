@@ -1,20 +1,17 @@
 <?xml version="1.0" ?>
 <extension version="3.4" type="plugin" group="jce" method="upgrade">
-    <name>WF_ATTRIBUTES_TITLE</name>
-    <version>2.9.11</version>
-    <creationDate>17-08-2021</creationDate>
-    <author>Ryan Demmer</author>
-    <authorEmail>info@joomlacontenteditor.net</authorEmail>
-    <authorUrl>https://www.joomlacontenteditor.net/</authorUrl>
-    <copyright>Ryan Demmer</copyright>
-    <license>GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html</license>
-    <description>WF_ATTRIBUTES_DESC</description>
-    <icon>attribs</icon>
-    <fields name="attributes">
-        <fieldset name="config"></fieldset>
-    </fields>
-    <help>
-        <topic key="attributes.about" title="WF_ATTRIBUTES_HELP_ABOUT" />
-    </help>
-    <languages></languages>
+	<name>WF_ATTRIBUTES_TITLE</name>
+	<version>2.9.33</version>
+	<creationDate>18-01-2023</creationDate>
+	<author>Ryan Demmer</author>
+	<authorEmail>info@joomlacontenteditor.net</authorEmail>
+	<authorUrl>https://www.joomlacontenteditor.net/</authorUrl>
+	<copyright>Ryan Demmer</copyright>
+	<license>GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html</license>
+	<description>WF_ATTRIBUTES_DESC</description>
+	<icon>attributes</icon>
+	<layout>attributes</layout>
+	<files></files>
+	<languages></languages>
+	<help></help>
 </extension>

@@ -17,6 +17,12 @@ use Joomla\CMS\Installer\Adapter\FileAdapter as JInstallerAdapterFile;
 use Joomla\CMS\Installer\Installer as JInstaller;
 use Joomla\CMS\Log\Log as JLog;
 
+if (class_exists('file_fefInstallerScript'))
+{
+	// WTAF?!
+	return;
+}
+
 /**
  * Akeeba FEF Installation Script
  *
@@ -43,7 +49,7 @@ class file_fefInstallerScript
 	 *
 	 * @var   string
 	 */
-	protected $maximumJoomlaVersion = '4.0.99';
+	protected $maximumJoomlaVersion = '4.999.999';
 
 	/**
 	 * Joomla! pre-flight event. This runs before Joomla! installs or updates the component. This is our last chance to
@@ -104,19 +110,19 @@ class file_fefInstallerScript
 		{
 			$jVersion = JVERSION;
 			$msg = <<< HTML
-<h3>FEF is no longer needed on Joomla 4</h3>
+<h3>FEF is no longer needed on Joomla 5</h3>
 <p>
-	<strong>Summary: FEF is no longer used on Joomla 4. Please uninstall it.</strong>
+	<strong>Summary: FEF is no longer used on Joomla 5. Please uninstall it.</strong>
 </p>
 <hr/>
 <p>
 	Akeeba FEF a.k.a. the Akeeba Front-End Framework was a CSS and JavaScript framework used by Akeeba Ltd with the Joomla 3 versions of our software.
 </p>
 <p>
-	Akeeba Ltd has stopped using the FEF framework for developing extensions. All of our extensions have new, Joomla 4 native versions which use the Bootstrap library, included in Joomla 4 itself.
+	Akeeba Ltd has stopped using the FEF framework for developing extensions. All of our extensions have new, Joomla 4 and later native versions which use the Bootstrap library, included in Joomla itself.
 </p>
 <p>
-	You can no longer install or update FEF on Joomla 4.1 and later (you have {$jVersion}). In fact, you just need to uninstall it.
+	You can no longer install or update FEF on Joomla 5.0 and later (you have {$jVersion}). In fact, you just need to uninstall it.
 </p>
 HTML;
 
@@ -201,7 +207,7 @@ HTML;
 		// Do not run on uninstall.
 		if ($type === 'uninstall')
 		{
-			return;
+			return true;
 		}
 
 		// Auto-uninstall this package when it is no longer needed.
@@ -209,10 +215,12 @@ HTML;
 		{
 			$this->uninstallSelf($parent);
 
-			return;
+			return true;
 		}
 
 		$this->bugfixFilesNotCopiedOnUpdate($parent);
+
+		return true;
 	}
 
 	/**
@@ -226,6 +234,11 @@ HTML;
 	 */
 	public function uninstall($parent)
 	{
+		if (version_compare(JVERSION, '4.1.0', 'ge'))
+		{
+			return false;
+		}
+
 		// Check dependencies on FEF
 		$dependencyCount = $this->countHardcodedDependencies();
 
@@ -239,6 +252,8 @@ HTML;
 		}
 
 		Folder::delete(JPATH_SITE . '/media/fef');
+
+		return true;
 	}
 
 	/**
@@ -539,7 +554,7 @@ HTML;
 			return;
 		}
 
-		$msg = 'Automatically uninstalling FOF 4; this package is no longer required on your site.';
+		$msg = 'Automatically uninstalling FEF; this package is no longer required on your site.';
 		\Joomla\CMS\Log\Log::add($msg, \Joomla\CMS\Log\Log::INFO, 'jerror');
 
 		$parent->uninstall('file', $id);

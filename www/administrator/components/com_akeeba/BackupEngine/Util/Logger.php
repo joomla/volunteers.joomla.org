@@ -3,7 +3,7 @@
  * Akeeba Engine
  *
  * @package   akeebaengine
- * @copyright Copyright (c)2006-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -16,9 +16,9 @@ use Akeeba\Engine\Platform;
 use Akeeba\Engine\Util\Log\LogInterface;
 use Akeeba\Engine\Util\Log\WarningsLoggerAware;
 use Akeeba\Engine\Util\Log\WarningsLoggerInterface;
-use Psr\Log\InvalidArgumentException;
-use Psr\Log\LoggerInterface;
-use Psr\Log\LogLevel;
+use Akeeba\Engine\Psr\Log\InvalidArgumentException;
+use Akeeba\Engine\Psr\Log\LoggerInterface;
+use Akeeba\Engine\Psr\Log\LogLevel;
 
 /**
  * Writes messages to the backup log file

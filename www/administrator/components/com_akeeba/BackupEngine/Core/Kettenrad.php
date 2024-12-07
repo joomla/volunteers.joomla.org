@@ -3,7 +3,7 @@
  * Akeeba Engine
  *
  * @package   akeebaengine
- * @copyright Copyright (c)2006-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -25,18 +25,18 @@ use Throwable;
 class Kettenrad extends Part
 {
 	/**
-	 * Set to true when deadOnTimeout is registered as a shutdown function
-	 *
-	 * @var bool
-	 */
-	public static $registeredShutdownCallback = false;
-
-	/**
 	 * Set to true when akeebaBackupErrorHandler is registered as an error handler
 	 *
 	 * @var bool
 	 */
 	public static $registeredErrorHandler = false;
+
+	/**
+	 * Set to true when deadOnTimeout is registered as a shutdown function
+	 *
+	 * @var bool
+	 */
+	public static $registeredShutdownCallback = false;
 
 	/**
 	 * Cached copy of the response array
@@ -46,11 +46,18 @@ class Kettenrad extends Part
 	private $array_cache = null;
 
 	/**
-	 * The list of remaining steps
+	 * A unique backup ID which allows us to run multiple parallel backups using the same backup origin (tag)
 	 *
-	 * @var array
+	 * @var string
 	 */
-	private $domain_chain = [];
+	private $backup_id = '';
+
+	/**
+	 * The active domain's class name
+	 *
+	 * @var string
+	 */
+	private $class = '';
 
 	/**
 	 * The current domain's name
@@ -60,11 +67,11 @@ class Kettenrad extends Part
 	private $domain = '';
 
 	/**
-	 * The active domain's class name
+	 * The list of remaining steps
 	 *
-	 * @var string
+	 * @var array
 	 */
-	private $class = '';
+	private $domain_chain = [];
 
 	/**
 	 * The current backup's tag (actually: the backup's origin)
@@ -79,13 +86,6 @@ class Kettenrad extends Part
 	 * @var int
 	 */
 	private $total_steps = 0;
-
-	/**
-	 * A unique backup ID which allows us to run multiple parallel backups using the same backup origin (tag)
-	 *
-	 * @var string
-	 */
-	private $backup_id = '';
 
 	/**
 	 * Set to true when there are warnings available when getStatusArray() is called. This is used at the end of the
@@ -145,64 +145,30 @@ class Kettenrad extends Part
 	}
 
 	/**
-	 * Returns the current backup tag. If none is specified, it sets it to be the
-	 * same as the current backup origin and returns the new setting.
+	 * Gets the percentage of the backup process done so far.
 	 *
 	 * @return string
 	 */
-	public function getTag()
+	public function getProgress()
 	{
-		if (empty($this->tag))
-		{
-			// If no tag exists, we resort to the pre-set backup origin
-			$tag       = Platform::getInstance()->get_backup_origin();
-			$this->tag = $tag;
-		}
+		// Get the overall percentage (based on domains complete so far)
+		$remainingSteps = count($this->domain_chain) + 1;
+		$totalSteps     = max($this->total_steps, 1);
+		$overall        = 1 - ($remainingSteps / $totalSteps);
 
-		return $this->tag;
-	}
+		// How much is this step worth?
+		$currentStepMaxContribution = 1 / $totalSteps;
 
-	/**
-	 * The public interface to Kettenrad.
-	 *
-	 * Internally it calls Part::tick(), wrapped in a try-catch block which traps any runaway Exception (PHP 5) or
-	 * Throwable we didn't manage to successfully suppress yet.
-	 *
-	 * @param   int  $nesting
-	 *
-	 * @return  array  A response array
-	 */
-	public function tick($nesting = 0)
-	{
-		$ret = null;
-		$e   = null;
+		// Get the percentage reported from the domain object, zero if we can't get a domain object.
+		$object = !empty($this->class) ? Factory::getDomainObject($this->class) : null;
+		$local  = is_object($object) ? $object->getProgress() : 0;
 
-		// PHP 7.x -- catch any unhandled Throwable, including PHP fatal errors
-		try
-		{
-			$ret = parent::tick($nesting);
-		}
-		catch (Throwable $e)
-		{
-			$this->setState(self::STATE_ERROR);
-			$this->lastException = $e;
-		}
+		// Calculate the percentage and apply [0, 100] bounds.
+		$percentage = (int) (100 * ($overall + $local * $currentStepMaxContribution));
+		$percentage = max(0, $percentage);
+		$percentage = min(100, $percentage);
 
-		// If an error occurred we don't have a return table. If that's the case create one and do log our errors.
-		if (!isset($ret))
-		{
-			// Log the existence of an unhandled exception
-			Factory::getLog()->warning("Kettenrad :: Caught unhandled exception. The backup will now fail.");
-
-			// Recursively log unhandled exceptions
-			self::logErrorsFromException($e);
-
-			// Create the missing return table
-			$ret               = $this->makeReturnTable();
-			$this->array_cache = array_merge(is_null($this->array_cache) ? [] : $this->array_cache, $ret);
-		}
-
-		return $ret;
+		return $percentage;
 	}
 
 	/**
@@ -255,30 +221,21 @@ class Kettenrad extends Part
 	}
 
 	/**
-	 * Gets the percentage of the backup process done so far.
+	 * Returns the current backup tag. If none is specified, it sets it to be the
+	 * same as the current backup origin and returns the new setting.
 	 *
 	 * @return string
 	 */
-	public function getProgress()
+	public function getTag()
 	{
-		// Get the overall percentage (based on domains complete so far)
-		$remainingSteps = count($this->domain_chain) + 1;
-		$totalSteps     = max($this->total_steps, 1);
-		$overall        = 1 - ($remainingSteps / $totalSteps);
+		if (empty($this->tag))
+		{
+			// If no tag exists, we resort to the pre-set backup origin
+			$tag       = Platform::getInstance()->get_backup_origin();
+			$this->tag = $tag;
+		}
 
-		// How much is this step worth?
-		$currentStepMaxContribution = 1 / $totalSteps;
-
-		// Get the percentage reported from the domain object, zero if we can't get a domain object.
-		$object = !empty($this->class) ? Factory::getDomainObject($this->class) : null;
-		$local  = is_object($object) ? $object->getProgress() : 0;
-
-		// Calculate the percentage and apply [0, 100] bounds.
-		$percentage = (int) (100 * ($overall + $local * $currentStepMaxContribution));
-		$percentage = max(0, $percentage);
-		$percentage = min(100, $percentage);
-
-		return $percentage;
+		return $this->tag;
 	}
 
 	/**
@@ -289,6 +246,81 @@ class Kettenrad extends Part
 	public function resetWarnings()
 	{
 		Factory::getLog()->debug('DEPRECATED: Akeeba Engine consumers must remove calls to resetWarnings()');
+	}
+
+	/**
+	 * The public interface to Kettenrad.
+	 *
+	 * Internally it calls Part::tick(), wrapped in a try-catch block which traps any runaway Exception (PHP 5) or
+	 * Throwable we didn't manage to successfully suppress yet.
+	 *
+	 * @param   int  $nesting
+	 *
+	 * @return  array  A response array
+	 */
+	public function tick($nesting = 0)
+	{
+		$ret = null;
+		$e   = null;
+
+		// PHP 7.x -- catch any unhandled Throwable, including PHP fatal errors
+		try
+		{
+			$ret = parent::tick($nesting);
+		}
+		catch (Throwable $e)
+		{
+			$this->setState(self::STATE_ERROR);
+			$this->lastException = $e;
+		}
+
+		// If an error occurred we don't have a return table. If that's the case create one and do log our errors.
+		if (!isset($ret))
+		{
+			// Log the existence of an unhandled exception
+			Factory::getLog()->warning("Kettenrad :: Caught unhandled exception. The backup will now fail.");
+
+			// Recursively log unhandled exceptions
+			self::logErrorsFromException($e);
+
+			// Create the missing return table
+			$ret               = $this->makeReturnTable();
+			$this->array_cache = array_merge(is_null($this->array_cache) ? [] : $this->array_cache, $ret);
+		}
+
+		return $ret;
+	}
+
+	/**
+	 * Finalization. Sets the state to STATE_FINISHED.
+	 *
+	 * @return  void
+	 */
+	protected function _finalize()
+	{
+		// Open the log
+		$logTag = $this->getLogTag();
+		Factory::getLog()->open($logTag);
+
+		// Kill the cached array
+		$this->array_cache = null;
+
+		// Remove the memory file
+		$tempVarsTag = $this->tag . (empty($this->backup_id) ? '' : ('.' . $this->backup_id));
+		Factory::getFactoryStorage()->reset($tempVarsTag);
+
+		// All done.
+		Factory::getLog()->debug("Kettenrad :: Just finished");
+		$this->setState(self::STATE_FINISHED);
+
+		// Send a push message to mark the end of backup
+		$pushSubjectKey = $this->warnings_issued ? 'COM_AKEEBA_PUSH_ENDBACKUP_WARNINGS_SUBJECT' : 'COM_AKEEBA_PUSH_ENDBACKUP_SUCCESS_SUBJECT';
+		$pushBodyKey    = $this->warnings_issued ? 'COM_AKEEBA_PUSH_ENDBACKUP_WARNINGS_BODY' : 'COM_AKEEBA_PUSH_ENDBACKUP_SUCCESS_BODY';
+		$platform       = Platform::getInstance();
+		$timeStamp      = date($platform->translate('DATE_FORMAT_LC2'));
+		$pushSubject    = sprintf($platform->translate($pushSubjectKey), $platform->get_site_name(), $platform->get_host());
+		$pushDetails    = sprintf($platform->translate($pushBodyKey), $platform->get_site_name(), $platform->get_host(), $timeStamp);
+		Factory::getPush()->message($pushSubject, $pushDetails);
 	}
 
 	/**
@@ -533,7 +565,7 @@ class Kettenrad extends Part
 				$result = $object->tick();
 
 				$hasErrorException = array_key_exists('ErrorException', $result) && is_object($result['ErrorException']);
-				$hasErrorString = array_key_exists('Error', $result) && !empty($result['Error']);
+				$hasErrorString    = array_key_exists('Error', $result) && !empty($result['Error']);
 
 				/**
 				 * Legacy objects may not be throwing exceptions on error, instead returning an Error string in the
@@ -614,9 +646,11 @@ class Kettenrad extends Part
 			$reason = ($timer->getTimeLeft() <= 0)
 				? 'we already ran out of time'
 				: 'a step break has already been requested';
-			$logger->debug(sprintf(
-				"Finishing step immediately because %s", $reason
-			));
+			$logger->debug(
+				sprintf(
+					"Finishing step immediately because %s", $reason
+				)
+			);
 		}
 		elseif (!$error)
 		{
@@ -642,10 +676,12 @@ class Kettenrad extends Part
 		 */
 		if (!is_object($object) && ($timer->getTimeLeft() > 0) && !$breakFlag)
 		{
-			throw new RuntimeException(sprintf(
-				"Kettenrad :: Empty object found when processing domain '%s'. This should never happen.",
-				$this->domain
-			));
+			throw new RuntimeException(
+				sprintf(
+					"Kettenrad :: Empty object found when processing domain '%s'. This should never happen.",
+					$this->domain
+				)
+			);
 		}
 		/** @noinspection PhpStatementHasEmptyBodyInspection */
 		elseif (!is_object($object))
@@ -682,38 +718,6 @@ class Kettenrad extends Part
 			$logger->debug('Kettenrad :: Setting the break flag between domains');
 			$registry->set('volatile.breakflag', true);
 		}
-	}
-
-	/**
-	 * Finalization. Sets the state to STATE_FINISHED.
-	 *
-	 * @return  void
-	 */
-	protected function _finalize()
-	{
-		// Open the log
-		$logTag = $this->getLogTag();
-		Factory::getLog()->open($logTag);
-
-		// Kill the cached array
-		$this->array_cache = null;
-
-		// Remove the memory file
-		$tempVarsTag = $this->tag . (empty($this->backup_id) ? '' : ('.' . $this->backup_id));
-		Factory::getFactoryStorage()->reset($tempVarsTag);
-
-		// All done.
-		Factory::getLog()->debug("Kettenrad :: Just finished");
-		$this->setState(self::STATE_FINISHED);
-
-		// Send a push message to mark the end of backup
-		$pushSubjectKey = $this->warnings_issued ? 'COM_AKEEBA_PUSH_ENDBACKUP_WARNINGS_SUBJECT' : 'COM_AKEEBA_PUSH_ENDBACKUP_SUCCESS_SUBJECT';
-		$pushBodyKey    = $this->warnings_issued ? 'COM_AKEEBA_PUSH_ENDBACKUP_WARNINGS_BODY' : 'COM_AKEEBA_PUSH_ENDBACKUP_SUCCESS_BODY';
-		$platform       = Platform::getInstance();
-		$timeStamp      = date($platform->translate('DATE_FORMAT_LC2'));
-		$pushSubject    = sprintf($platform->translate($pushSubjectKey), $platform->get_site_name(), $platform->get_host());
-		$pushDetails    = sprintf($platform->translate($pushBodyKey), $platform->get_site_name(), $platform->get_host(), $timeStamp);
-		Factory::getPush()->message($pushSubject, $pushDetails);
 	}
 
 	/**
@@ -789,9 +793,12 @@ function akeebaEngineErrorHandler($errno, $errstr, $errfile, $errline)
 		return false;
 	}
 
+	$loggable = false;
+	$type     = '';
+	$logMode  = 'debug';
+
 	switch ($errno)
 	{
-
 		case E_ERROR:
 		case E_USER_ERROR:
 		case E_RECOVERABLE_ERROR:
@@ -805,24 +812,40 @@ function akeebaEngineErrorHandler($errno, $errstr, $errfile, $errline)
 			break;
 
 		case E_WARNING:
+			$loggable = true;
+			$type     = 'WARNING';
+			$logMode  = defined('AKEEBADEBUG') ? 'warning' : 'debug';
+
+			break;
+
 		case E_USER_WARNING:
-			// Log as debug messages so that we don't spook the user with warnings
-			Factory::getLog()->debug("PHP WARNING (not an error; you can ignore) on line $errline in file $errfile:");
-			Factory::getLog()->debug($errstr);
+			$loggable = defined('AKEEBADEBUG');
+			$type     = 'User Warning';
 			break;
 
 		case E_NOTICE:
+			$loggable = defined('AKEEBADEBUG');
+			$type     = 'Notice';
+			break;
+
 		case E_USER_NOTICE:
-			// Log as debug messages so that we don't spook the user with notices
-			Factory::getLog()->debug("PHP NOTICE (not an error; you can ignore) on line $errline in file $errfile:");
-			Factory::getLog()->debug($errstr);
+			$loggable = defined('AKEEBADEBUG');
+			$type     = 'User Notice';
 			break;
 
 		case E_DEPRECATED:
+			$loggable = defined('AKEEBADEBUG');
+			$type     = 'Deprecated';
+			break;
+
 		case E_USER_DEPRECATED:
-			// Log as debug messages so that we don't spook the user with deprecated notices
-			Factory::getLog()->debug("PHP DEPRECATED (not an error; you can ignore) on line $errline in file $errfile:");
-			Factory::getLog()->debug($errstr);
+			$loggable = defined('AKEEBADEBUG');
+			$type     = 'User Deprecated';
+			break;
+
+		case E_STRICT:
+			$loggable = defined('AKEEBADEBUG');
+			$type     = 'Strict Notice';
 			break;
 
 		default:
@@ -830,6 +853,12 @@ function akeebaEngineErrorHandler($errno, $errstr, $errfile, $errline)
 			return false;
 
 			break;
+	}
+
+	if ($loggable)
+	{
+		Factory::getLog()->{$logMode}("PHP $type (not an error; you can ignore) on line $errline in file $errfile:");
+		Factory::getLog()->{$logMode}($errstr);
 	}
 
 	// Uncomment to prevent the execution of PHP's internal error handler

@@ -3,7 +3,7 @@
  * Akeeba Engine
  *
  * @package   akeebaengine
- * @copyright Copyright (c)2006-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -19,7 +19,7 @@ use RuntimeException;
 /**
  * Multiple database backup engine.
  */
-class Db extends Part
+final class Db extends Part
 {
 	/** @var array A list of the databases to be packed */
 	private $database_list = [];
@@ -243,8 +243,6 @@ class Db extends Part
 			Factory::getLog()->info("Closing the database connection to the main database");
 			Factory::unsetDatabase();
 		}
-
-		return;
 	}
 
 	/**

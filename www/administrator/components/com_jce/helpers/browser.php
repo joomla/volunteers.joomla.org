@@ -34,16 +34,12 @@ abstract class WfBrowserHelper
         return $options['url'];
     }
 
-    private static function getUrl()
+    public static function getMediaFieldOptions($options = array())
     {
         $app = JFactory::getApplication();
         $token = JFactory::getSession()->getFormToken();
 
-        return 'index.php?option=com_jce&task=plugin.display&plugin=browser&standalone=1&' . $token . '=1&client=' . $app->getClientId();
-    }
 
-    public static function getMediaFieldOptions($options = array())
-    {
         if (!isset($options['element'])) {
             $options['element'] = null;
         }
@@ -80,18 +76,42 @@ abstract class WfBrowserHelper
                 return $data;
             }
 
-            $data['url'] = self::getUrl();
+            $data['url'] = 'index.php?option=com_jce&task=plugin.display';
 
             // add default context
             if (!isset($options['context'])) {
                 $options['context'] = $wf->getContext();
             }
 
+            // append "caller" plugin
+            if (!empty($options['plugin'])) {
+                if (strpos($options['plugin'], 'browser') === false) {
+                    $options['plugin'] = 'browser.' . $options['plugin'];
+                }
+            } else {
+                $options['plugin'] = 'browser';
+            }
+
+            $options['standalone'] = 1;
+            $options[$token] = 1;
+            $options['client'] = $app->getClientId();
+
             foreach ($options as $key => $value) {
                 if ($value) {
                     $data['url'] .= '&' . $key . '=' . $value;
                 }
             }
+
+            // get allowed extensions
+            $accept = $wf->getParam('browser.extensions', 'jpg,jpeg,png,gif,mp3,m4a,mp4a,ogg,mp4,mp4v,mpeg,mov,webm,doc,docx,odg,odp,ods,odt,pdf,ppt,pptx,txt,xcf,xls,xlsx,csv,zip,tar,gz');
+            
+            $data['accept'] = array_map(function ($value) {                
+                if ($value[0] != '-') {
+                    return $value;
+                }
+            }, explode(',', $accept));
+
+            $data['accept'] = implode(',', array_filter($data['accept']));
 
             $data['upload'] = (int) $wf->getParam('browser.mediafield_upload', 1);
         }

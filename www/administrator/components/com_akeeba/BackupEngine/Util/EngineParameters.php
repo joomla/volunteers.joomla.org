@@ -3,7 +3,7 @@
  * Akeeba Engine
  *
  * @package   akeebaengine
- * @copyright Copyright (c)2006-2022 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @copyright Copyright (c)2006-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
  */
 
@@ -28,6 +28,13 @@ class EngineParameters
 	 * @var array
 	 */
 	public $scripting = null;
+
+	/**
+	 * The currently active scripting type
+	 *
+	 * @var string
+	 */
+	protected $activeType = null;
 
 	/**
 	 * Holds the known paths holding JSON definitions of engines, installers and configuration gui elements
@@ -58,98 +65,28 @@ class EngineParameters
 	protected $installer_list = [];
 
 	/**
-	 * The currently active scripting type
+	 * Append a path to the end of the paths list for a specific section
 	 *
-	 * @var string
-	 */
-	protected $activeType = null;
-
-	/**
-	 * Loads the scripting.json and returns an array with the domains, the scripts and the raw data
-	 *
-	 * @return  array  The parsed scripting.json. Array keys: domains, scripts, data
-	 */
-	public function loadScripting($jsonPath = '')
-	{
-		if (!empty($this->scripting))
-		{
-			return $this->scripting;
-		}
-
-		$this->scripting = [];
-		$jsonPath        = Factory::getAkeebaRoot() . '/Core/scripting.json';
-
-		if (!@file_exists($jsonPath))
-		{
-			return $this->scripting;
-		}
-
-		$rawData          = file_get_contents($jsonPath);
-		$rawScriptingData = empty($rawData) ? [] : json_decode($rawData, true);
-		$domain_keys      = explode('|', $rawScriptingData['volatile.akeebaengine.domains']);
-		$domains          = [];
-
-		foreach ($domain_keys as $key)
-		{
-			$record        = [
-				'domain' => $rawScriptingData['volatile.domain.' . $key . '.domain'],
-				'class'  => $rawScriptingData['volatile.domain.' . $key . '.class'],
-				'text'   => $rawScriptingData['volatile.domain.' . $key . '.text'],
-			];
-			$domains[$key] = $record;
-		}
-
-		$script_keys = explode('|', $rawScriptingData['volatile.akeebaengine.scripts']);
-		$scripts     = [];
-
-		foreach ($script_keys as $key)
-		{
-			$record        = [
-				'chain' => explode('|', $rawScriptingData['volatile.scripting.' . $key . '.chain']),
-				'text'  => $rawScriptingData['volatile.scripting.' . $key . '.text'],
-			];
-			$scripts[$key] = $record;
-		}
-
-		$this->scripting = [
-			'domains' => $domains,
-			'scripts' => $scripts,
-			'data'    => $rawScriptingData,
-		];
-
-		return $this->scripting;
-	}
-
-	/**
-	 * Imports the volatile scripting parameters to the registry
+	 * @param   string  $path     Absolute filesystem path to add
+	 * @param   string  $section  The section to add it to (gui, engine, installer, filters)
 	 *
 	 * @return  void
 	 */
-	public function importScriptingToRegistry()
+	public function addPath(string $path, string $section = 'gui')
 	{
-		$scripting     = $this->loadScripting();
-		$configuration = Factory::getConfiguration();
-		$configuration->mergeArray($scripting['data'], false);
-	}
+		$path = Factory::getFilesystemTools()->TranslateWinPath($path);
 
-	/**
-	 * Returns a volatile scripting parameter for the active backup type
-	 *
-	 * @param   string  $key      The relative key, e.g. core.createarchive
-	 * @param   mixed   $default  Default value
-	 *
-	 * @return  mixed  The scripting parameter's value
-	 */
-	public function getScriptingParameter($key, $default = null)
-	{
-		$configuration = Factory::getConfiguration();
-
-		if (is_null($this->activeType))
+		// If the array is empty, populate with the defaults
+		if (!array_key_exists($section, $this->enginePartPaths))
 		{
-			$this->activeType = $configuration->get('akeeba.basic.backup_type', 'full');
+			$this->getEnginePartPaths($section);
 		}
 
-		return $configuration->get('volatile.scripting.' . $this->activeType . '.' . $key, $default);
+		// If the path doesn't already exist, add it
+		if (!in_array($path, $this->enginePartPaths[$section]))
+		{
+			$this->enginePartPaths[$section][] = $path;
+		}
 	}
 
 	/**
@@ -161,7 +98,7 @@ class EngineParameters
 	 *
 	 * @return  array
 	 */
-	public function getDomainChain()
+	public function getDomainChain(): array
 	{
 		$configuration = Factory::getConfiguration();
 		$script        = $configuration->get('akeeba.basic.backup_type', 'full');
@@ -184,63 +121,13 @@ class EngineParameters
 	}
 
 	/**
-	 * Append a path to the end of the paths list for a specific section
-	 *
-	 * @param   string  $path     Absolute filesystem path to add
-	 * @param   string  $section  The section to add it to (gui, engine, installer, filters)
-	 *
-	 * @return  void
-	 */
-	public function addPath($path, $section = 'gui')
-	{
-		$path = Factory::getFilesystemTools()->TranslateWinPath($path);
-
-		// If the array is empty, populate with the defaults
-		if (!array_key_exists($section, $this->enginePartPaths))
-		{
-			$this->getEnginePartPaths($section);
-		}
-
-		// If the path doesn't already exist, add it
-		if (!in_array($path, $this->enginePartPaths[$section]))
-		{
-			$this->enginePartPaths[$section][] = $path;
-		}
-	}
-
-	/**
-	 * Add a path to the beginning of the paths list for a specific section
-	 *
-	 * @param   string  $path     Absolute filesystem path to add
-	 * @param   string  $section  The section to add it to (gui, engine, installer, filters)
-	 *
-	 * @return  void
-	 */
-	public function prependPath($path, $section = 'gui')
-	{
-		$path = Factory::getFilesystemTools()->TranslateWinPath($path);
-
-		// If the array is empty, populate with the defaults
-		if (!array_key_exists($section, $this->enginePartPaths))
-		{
-			$this->getEnginePartPaths($section);
-		}
-
-		// If the path doesn't already exist, add it
-		if (!in_array($path, $this->enginePartPaths[$section]))
-		{
-			array_unshift($this->enginePartPaths[$section], $path);
-		}
-	}
-
-	/**
 	 * Get the paths for a specific section
 	 *
 	 * @param   string  $section  The section to get the path list for (engine, installer, gui, filter)
 	 *
 	 * @return  array
 	 */
-	public function getEnginePartPaths($section = 'gui')
+	public function getEnginePartPaths(string $section = 'gui')
 	{
 		// Create the key if it's not already present
 		if (!array_key_exists($section, $this->enginePartPaths))
@@ -321,7 +208,7 @@ class EngineParameters
 	 *
 	 * @return  array
 	 */
-	public function getEnginesList($engine_type)
+	public function getEnginesList(string $engine_type): array
 	{
 		$engine_type = ucfirst($engine_type);
 
@@ -400,7 +287,7 @@ class EngineParameters
 	 *
 	 * @return  array
 	 */
-	public function getGUIGroups()
+	public function getGUIGroups(): array
 	{
 		// Try to serve cached data first
 		if (!empty($this->gui_list) && is_array($this->gui_list))
@@ -569,6 +456,51 @@ class EngineParameters
 			}
 		}
 
+		/**
+		 * Parse showon attributes
+		 *
+		 * The GUI list array format is like this:
+		 * ```
+		 * [
+		 *    '01.sectionName' => [
+		 *       'information' => [...],
+		 *       'parameters' => [
+		 *           'some.parameter.name' => [
+		 *               'title' => 'something',
+		 *               ...
+		 *               'showon' => 'some.other.parameter.name:1'
+		 *           ],
+		 *           ...
+		 *       ]
+		 *    ],
+		 *    ...
+		 * ]
+		 * ```
+		 *
+		 * We need to convert the shown of the parameters to JSON data which can be used by the `showon` JavaScript
+		 * code. The assumption only made here is that all parameter keys are turned into `INPUT` elements with an
+		 * attribute `name="var[some.parameter.name]"`. This is how the GUI code in all backup applications our company
+		 * makes works.
+		 *
+		 * For backup applications which do not have showon support (they lack the JavaScript code) this does not matter
+		 * and neither does it break anything. All parameters are shown all the time like we have been doing for years.
+		 */
+		$this->gui_list = array_map(
+			function (array $section): array {
+				foreach ($section['parameters'] as $paramName => &$paramDef)
+				{
+					if (isset($paramDef['showon']))
+					{
+						// Parse showon
+						$paramDef['showon'] = $this->parseShowOnConditions($paramDef['showon']);
+					}
+				}
+
+				return $section;
+			},
+			$this->gui_list
+		);
+
 		return $this->gui_list;
 	}
 
@@ -579,7 +511,7 @@ class EngineParameters
 	 *
 	 * @return  array
 	 */
-	public function getInstallerList($forDisplay = false)
+	public function getInstallerList(bool $forDisplay = false): array
 	{
 		// Try to serve cached data first
 		if (!empty($this->installer_list) && is_array($this->installer_list))
@@ -663,7 +595,7 @@ class EngineParameters
 	 *
 	 * @return   string
 	 */
-	public function getJsonGuiDefinition()
+	public function getJsonGuiDefinition(): string
 	{
 		// Initialize the array which will be converted to JSON representation
 		$json_array = [
@@ -740,6 +672,9 @@ class EngineParameters
 								}
 								$param[$option_key] = implode('|', $new_keys);
 								break;
+
+							case 'showon':
+								$param[$option_key] = $this->parseShowOnConditions($param[$option_key]);
 
 							default:
 						}
@@ -831,6 +766,94 @@ class EngineParameters
 	}
 
 	/**
+	 * Returns a volatile scripting parameter for the active backup type
+	 *
+	 * @param   string  $key      The relative key, e.g. core.createarchive
+	 * @param   mixed   $default  Default value
+	 *
+	 * @return  mixed  The scripting parameter's value
+	 */
+	public function getScriptingParameter(string $key, $default = null)
+	{
+		$configuration = Factory::getConfiguration();
+
+		if (is_null($this->activeType))
+		{
+			$this->activeType = $configuration->get('akeeba.basic.backup_type', 'full');
+		}
+
+		return $configuration->get('volatile.scripting.' . $this->activeType . '.' . $key, $default);
+	}
+
+	/**
+	 * Imports the volatile scripting parameters to the registry
+	 *
+	 * @return  void
+	 */
+	public function importScriptingToRegistry(): void
+	{
+		$scripting     = $this->loadScripting();
+		$configuration = Factory::getConfiguration();
+		$configuration->mergeArray($scripting['data'], false);
+	}
+
+	/**
+	 * Loads the scripting.json and returns an array with the domains, the scripts and the raw data
+	 *
+	 * @return  array  The parsed scripting.json. Array keys: domains, scripts, data
+	 */
+	public function loadScripting(?string $jsonPath = ''): ?array
+	{
+		if (!empty($this->scripting))
+		{
+			return $this->scripting;
+		}
+
+		$this->scripting = [];
+		$jsonPath        = $jsonPath ?: Factory::getAkeebaRoot() . '/Core/scripting.json';
+
+		if (!@file_exists($jsonPath))
+		{
+			return $this->scripting;
+		}
+
+		$rawData          = file_get_contents($jsonPath);
+		$rawScriptingData = empty($rawData) ? [] : json_decode($rawData, true);
+		$domain_keys      = explode('|', $rawScriptingData['volatile.akeebaengine.domains']);
+		$domains          = [];
+
+		foreach ($domain_keys as $key)
+		{
+			$record        = [
+				'domain' => $rawScriptingData['volatile.domain.' . $key . '.domain'],
+				'class'  => $rawScriptingData['volatile.domain.' . $key . '.class'],
+				'text'   => $rawScriptingData['volatile.domain.' . $key . '.text'],
+			];
+			$domains[$key] = $record;
+		}
+
+		$script_keys = explode('|', $rawScriptingData['volatile.akeebaengine.scripts']);
+		$scripts     = [];
+
+		foreach ($script_keys as $key)
+		{
+			$record        = [
+				'chain' => explode('|', $rawScriptingData['volatile.scripting.' . $key . '.chain']),
+				'text'  => $rawScriptingData['volatile.scripting.' . $key . '.text'],
+			];
+			$scripts[$key] = $record;
+		}
+
+		$this->scripting = [
+			'domains' => $domains,
+			'scripts' => $scripts,
+			'data'    => $rawScriptingData,
+		];
+
+		return $this->scripting;
+	}
+
+	/**
 	 * Parses an engine JSON file returning two arrays, one with the general information
 	 * of that engine and one with its configuration variables' definitions
 	 *
@@ -840,7 +863,7 @@ class EngineParameters
 	 *
 	 * @return  bool  True if the file was loaded
 	 */
-	public function parseEngineJSON($jsonPath, &$information, &$parameters)
+	public function parseEngineJSON(string $jsonPath, array &$information, array &$parameters): bool
 	{
 		if (!file_exists($jsonPath))
 		{
@@ -902,7 +925,7 @@ class EngineParameters
 	 *
 	 * @return bool True if the file was loaded
 	 */
-	public function parseInterfaceJSON($jsonPath, &$information, &$parameters)
+	public function parseInterfaceJSON(string $jsonPath, array &$information, array &$parameters): bool
 	{
 		if (!file_exists($jsonPath))
 		{
@@ -954,5 +977,80 @@ class EngineParameters
 		}
 
 		return true;
+	}
+
+	/**
+	 * Add a path to the beginning of the paths list for a specific section
+	 *
+	 * @param   string  $path     Absolute filesystem path to add
+	 * @param   string  $section  The section to add it to (gui, engine, installer, filters)
+	 *
+	 * @return  void
+	 */
+	public function prependPath(string $path, string $section = 'gui'): void
+	{
+		$path = Factory::getFilesystemTools()->TranslateWinPath($path);
+
+		// If the array is empty, populate with the defaults
+		if (!array_key_exists($section, $this->enginePartPaths))
+		{
+			$this->getEnginePartPaths($section);
+		}
+
+		// If the path doesn't already exist, add it
+		if (!in_array($path, $this->enginePartPaths[$section]))
+		{
+			array_unshift($this->enginePartPaths[$section], $path);
+		}
+	}
+
+	/**
+	 * Parse the `showon` conditions text into an instructions array for the ShowOn JavaScript
+	 *
+	 * @param   string|null  $showOn     The `showon` conditions text
+	 * @param   string|null  $arrayName  The array all of our parameters are members of, default 'var'.
+	 *
+	 * @return  array  The ShowOn JavaScript instructions
+	 *
+	 * @since   9.3.1
+	 */
+	private function parseShowOnConditions(?string $showOn, ?string $arrayName = 'var'): array
+	{
+		if (empty($showOn))
+		{
+			return [];
+		}
+
+		$showOnData  = [];
+		$showOnParts = preg_split('#(\[AND\]|\[OR\])#', $showOn, -1, PREG_SPLIT_DELIM_CAPTURE);
+		$op          = '';
+
+		foreach ($showOnParts as $showOnPart)
+		{
+			if (in_array($showOnPart, ['[AND]', '[OR]']))
+			{
+				$op = trim($showOnPart, '[]');
+
+				continue;
+			}
+
+			$compareEqual     = strpos($showOnPart, '!:') === false;
+			$showOnPartBlocks = explode(($compareEqual ? ':' : '!:'), $showOnPart, 2);
+
+			$field = $arrayName
+				? sprintf("%s[%s]", $arrayName, $showOnPartBlocks[0])
+				: $showOnPartBlocks[0];
+
+			$showOnData[] = [
+				'field'  => $field,
+				'values' => explode(',', $showOnPartBlocks[1]),
+				'sign'   => $compareEqual === true ? '=' : '!=',
+				'op'     => $op,
+			];
+
+			$op = '';
+		}
+
+		return $showOnData;
 	}
 }

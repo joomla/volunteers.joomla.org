@@ -24,12 +24,13 @@ $jlang->load('com_users', JPATH_SITE, null, true);
 
 $controller = JControllerLegacy::getInstance('Volunteers');
 $document = JFactory::getDocument();
+$input = JFactory::getApplication()->input;
 
 // Set the default view name and format from the Request.
-$id      = $this->input->getInt('id');
-$vName   = $this->input->getCmd('view');
+$id      = $input->getInt('id');
+$vName   = $input->getCmd('view');
 $vFormat = $document->getType();
-$lName   = $this->input->getCmd('layout', 'default');
+$lName   = $input->getCmd('layout', 'default');
 
 // Check for edit department form.
 if ($vName == 'department' && $lName == 'edit' && !$controller->checkEditId('com_volunteers.edit.department', $id))

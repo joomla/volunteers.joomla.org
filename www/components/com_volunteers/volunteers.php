@@ -37,42 +37,42 @@ $checkEditId = function($context, $id) {
 };
 
 // Check for edit department form.
-if ($vName == 'department' && $lName == 'edit' && !$checkEditId('com_volunteers.edit.department', $id))
+if ($vName == 'department' && $lName == 'edit' && $id && !$checkEditId('com_volunteers.edit.department', $id))
 {
 	// Somehow the person just went to the form - we don't allow that.
 	return JError::raiseError(403, JText::sprintf('JLIB_APPLICATION_ERROR_UNHELD_ID', $id));
 }
 
 // Check for edit member form.
-if ($vName == 'member' && $lName == 'edit' && !$checkEditId('com_volunteers.edit.member', $id))
+if ($vName == 'member' && $lName == 'edit' && $id && !$checkEditId('com_volunteers.edit.member', $id))
 {
 	// Somehow the person just went to the form - we don't allow that.
 	return JError::raiseError(403, JText::sprintf('JLIB_APPLICATION_ERROR_UNHELD_ID', $id));
 }
 
 // Check for edit report form.
-if ($vName == 'report' && $lName == 'edit' && !$checkEditId('com_volunteers.edit.report', $id))
+if ($vName == 'report' && $lName == 'edit' && $id && !$checkEditId('com_volunteers.edit.report', $id))
 {
 	// Somehow the person just went to the form - we don't allow that.
 	return JError::raiseError(403, JText::sprintf('JLIB_APPLICATION_ERROR_UNHELD_ID', $id));
 }
 
 // Check for edit role form.
-if ($vName == 'role' && $lName == 'edit' && !$checkEditId('com_volunteers.edit.role', $id))
+if ($vName == 'role' && $lName == 'edit' && $id && !$checkEditId('com_volunteers.edit.role', $id))
 {
 	// Somehow the person just went to the form - we don't allow that.
 	return JError::raiseError(403, JText::sprintf('JLIB_APPLICATION_ERROR_UNHELD_ID', $id));
 }
 
 // Check for edit team form.
-if ($vName == 'team' && $lName == 'edit' && !$checkEditId('com_volunteers.edit.team', $id))
+if ($vName == 'team' && $lName == 'edit' && $id && !$checkEditId('com_volunteers.edit.team', $id))
 {
 	// Somehow the person just went to the form - we don't allow that.
 	return JError::raiseError(403, JText::sprintf('JLIB_APPLICATION_ERROR_UNHELD_ID', $id));
 }
 
 // Check for edit volunteer form.
-if ($vName == 'volunteer' && $lName == 'edit' && !$checkEditId('com_volunteers.edit.volunteer', $id))
+if ($vName == 'volunteer' && $lName == 'edit' && $id && !$checkEditId('com_volunteers.edit.volunteer', $id))
 {
 	// Somehow the person just went to the form - we don't allow that.
 	return JError::raiseError(403, JText::sprintf('JLIB_APPLICATION_ERROR_UNHELD_ID', $id));

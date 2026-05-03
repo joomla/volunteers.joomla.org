@@ -220,18 +220,22 @@ class VolunteersModelBoard extends JModelAdmin
 		{
 			switch ($item->role)
 			{
+				case 33:
 				case 286:
 					$president['president-'.$item->volunteer_name . $item->date_ended] = $item;
 					break;
 
+				case 36:
 				case 287:
 					$vicepresident['vicepresident-'.$item->volunteer_name . $item->date_ended] = $item;
 					break;
 
+				case 35:
 				case 288:
 					$secretary['secretary-'.$item->volunteer_name . $item->date_ended] = $item;
 					break;
 
+				case 34:
 				case 289:
 					$treasurer['treasurer-'.$item->volunteer_name . $item->date_ended] = $item;
 					break;

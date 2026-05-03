@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @version    CVS: 1.49.0
+ * @version    CVS: 1.65.0
  * @package    com_yoursites
  * @author     Geraint Edwards <yoursites@gwesystems.com>
  * @copyright  2016-YOURSITES_COPYRIGHT GWE Systems Ltd
@@ -14,46 +14,61 @@ defined('JPATH_BASE') or die();
 Use Joomla\Filesystem\Folder;
 Use Joomla\CMS\Form\FormHelper;
 
-FormHelper::loadFieldClass('list');
+Use Joomla\CMS\Form\Field\ListField;
 
+if (version_compare(JVERSION, "5.0", "lt"))
+{
+    FormHelper::loadFieldClass('list');
+    class TempListField extends JFormFieldList
+    {
 
-class JFormFieldClonealiases extends JFormFieldList
+    }
+}
+else
+{
+    class TempListField extends ListField
+    {
+
+    }
+}
+
+class JFormFieldClonealiases extends TempListField
 {
 
-	protected $type = 'Clonealises';
+    protected $type = 'Clonealises';
 
-	protected function getInput()
-	{
-		$options = array();
-		if (!is_array($this->value))
-		{
-			$this->value = array();
-		}
+    protected function getInput()
+    {
+        $options = array();
+        if (!is_array($this->value))
+        {
+            $this->value = array();
+        }
 
-		$folders = Folder::folders(JPATH_SITE , "clone_ysts_", false, false, array('.svn', 'CVS', '.DS_Store', '__MACOSX'), array());
+        $folders = Folder::folders(JPATH_SITE , "clone_ysts_", false, false, array('.svn', 'CVS', '.DS_Store', '__MACOSX'), array());
 
-		$input = "";
-		foreach ($folders as $folder)
-		{
-			$value = isset($this->value[$folder]) && !empty(trim($this->value[$folder])) ? $this->value[$folder] : $folder;
-			$input .= "<input type='text' name='" . $this->name. "[$folder]' value='" . $value . "'/> => $folder <br>\n";
-		}
+        $input = "";
+        foreach ($folders as $folder)
+        {
+            $value = isset($this->value[$folder]) && !empty(trim($this->value[$folder])) ? $this->value[$folder] : $folder;
+            $input .= "<input type='text' name='" . $this->name. "[$folder]' value='" . $value . "'/> => $folder <br>\n";
+        }
 
-		// old style clones
-		$folders = Folder::folders(JPATH_SITE , "._ysts_", false, false, array('.svn', 'CVS', '.DS_Store', '__MACOSX'), array());
+        // old style clones
+        $folders = Folder::folders(JPATH_SITE , "._ysts_", false, false, array('.svn', 'CVS', '.DS_Store', '__MACOSX'), array());
 
-		foreach ($folders as $folder)
-		{
-			$value = isset($this->value[$folder]) && !empty(trim($this->value[$folder])) ? $this->value[$folder] : $folder;
-			$input .= "<input type='text' name='" . $this->name. "[$folder]' value='" . $value . "'/> => $folder <br>\n";
-		}
+        foreach ($folders as $folder)
+        {
+            $value = isset($this->value[$folder]) && !empty(trim($this->value[$folder])) ? $this->value[$folder] : $folder;
+            $input .= "<input type='text' name='" . $this->name. "[$folder]' value='" . $value . "'/> => $folder <br>\n";
+        }
 
-		if (empty($input))
-		{
-			$this->hidden = true;
-		}
-		return $input;
-	}
+        if (empty($input))
+        {
+            $this->hidden = true;
+        }
+        return $input;
+    }
 
 
 }

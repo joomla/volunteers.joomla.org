@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @version    CVS: 1.49.0
+ * @version    CVS: 1.65.0
  * @package    com_yoursites
  * @author     Geraint Edwards
  * @copyright  2017-YOURSITES_COPYRIGHT GWE Systems Ltd
@@ -10,8 +10,16 @@
 // no direct access
 defined('_JEXEC') or die('Restricted access');
 
-jimport('joomla.filesystem.folder');
-jimport('joomla.filesystem.file');
+use Joomla\CMS\Uri\Uri;
+use Joomla\Registry\Registry;
+use Joomla\CMS\Language\Text;
+use Joomla\CMS\Http\HttpFactory;
+use Joomla\CMS\Installer\Installer;
+use Joomla\CMS\Log\Log;
+use Joomla\CMS\Cache\Cache;
+use Joomla\CMS\Factory;
+use Joomla\Filesystem\File;
+
 
 class pkg_YoursitesclientInstallerScript
 {
@@ -30,13 +38,13 @@ class pkg_YoursitesclientInstallerScript
 		if (!in_array("sha256", hash_algos()))
 		{
 			$installer = $parent->getParent();
-			$installer->set('extension_message', '<strong>' . JText::_("PKG_YOURSITESCLIENT_SHA256_HASH_ALGORITHM_NOT_SUPPORTED_PLEASE_ROLL_BACK") . '</strong>');
-			//$installer->set('message', JText::_("PKG_YOURSITESCLIENT_SHA256_HASH_ALGORITHM_NOT_SUPPORTED_PLEASE_ROLL_BACK"));
+			$installer->set('extension_message', '<strong>' . Text::_("PKG_YOURSITESCLIENT_SHA256_HASH_ALGORITHM_NOT_SUPPORTED_PLEASE_ROLL_BACK") . '</strong>');
+			//$installer->set('message', Text::_("PKG_YOURSITESCLIENT_SHA256_HASH_ALGORITHM_NOT_SUPPORTED_PLEASE_ROLL_BACK"));
 			$installer->set('message', '');
 
 			// The script failed, rollback changes
 			throw new \RuntimeException(
-				JText::_("PKG_YOURSITESCLIENT_SHA256_HASH_ALGORITHM_NOT_SUPPORTED_PLEASE_ROLL_BACK")
+				Text::_("PKG_YOURSITESCLIENT_SHA256_HASH_ALGORITHM_NOT_SUPPORTED_PLEASE_ROLL_BACK")
 			);
 
 			return false;
@@ -71,34 +79,20 @@ class pkg_YoursitesclientInstallerScript
             return true;
         }
 
-        JLog::addLogger( array( 'text_file' => 'yoursites.php' ), JLog::ALL, array( 'yoursites' ) );
+        Log::addLogger( array( 'text_file' => 'yoursites.php' ), Log::ALL, array( 'yoursites' ) );
 
-        //JLog::add("Starting postflight", JLog::INFO, 'yoursites');
+        //Log::add("Starting postflight", Log::INFO, 'yoursites');
         $this->diagnose( "Starting postflight !", 'warning' );
 
         // $parent is the class calling this method
         // $type is the type of change (install, update or discover_install)
 
-        /*
-         * No longer needed
-         */
-        /*
-        if ($type == 'install' || $type == 'update')
-        {
-            // enable gwejson plugin - handler plugin is enabled later
-
-            $db    = JFactory::getDbo();
-            $query = "UPDATE #__extensions SET enabled=1 WHERE folder='system' and type='plugin' and element='gwejson'";
-            $db->setQuery($query);
-            $db->execute();
-        }
-        */
 
         // Sepcific Token
         $specifictoken = '$2y$10$yG1vnR/TrUlr2qg9HmVW1eNyh.YCKGCIMsu7HzrykYyFAVMxbDGPW';
 
         // Generic Token
-        $generictoken = '$2y$10$OWsZ20rVQBwIYMw3eWenOu77EeWmTATHSgQ/RKk5EsNAqK0pAUQjO';
+        $generictoken = '$2y$10$Z607pYPY5FVsladgUG6sruVBo.Hr2rBMKkh3mEXh0fB6GDu4Q8SeW';
 
         $tokenToUse = empty( $specifictoken ) ? $generictoken : $specifictoken;
 
@@ -108,7 +102,7 @@ class pkg_YoursitesclientInstallerScript
 
             $this->diagnose( "Setting up the authentication 1 !", 'warning' );
             // Set up generic parameters
-            $db    = JFactory::getDbo();
+            $db    = Factory::getDbo();
             $query = "UPDATE #__extensions "
                      . "SET enabled=1, state=1,"
                      . ' params = ' . $db->quote( json_encode( $eparams ) )
@@ -121,7 +115,7 @@ class pkg_YoursitesclientInstallerScript
         if ( $type == 'update' )
         {
             // Do we have settings from old handler plugin which we need to migrate?
-            $db    = JFactory::getDbo();
+            $db    = Factory::getDbo();
             $query = "SELECT * FROM #__extensions "
                      . " WHERE folder='system' and type='plugin' and element='yoursites'";
             $db->setQuery( $query );
@@ -131,14 +125,14 @@ class pkg_YoursitesclientInstallerScript
             $servertoken = "";
             if ( ! empty( $newyoursites->params ) )
             {
-                $nyp         = new JRegistry( $newyoursites->params );
+                $nyp         = new Registry( $newyoursites->params );
                 $servertoken = $nyp->get( "servertoken", "" );
             }
 
             if ( empty( $newyoursites->params ) || empty ( $servertoken ) )
             {
 
-                $db    = JFactory::getDbo();
+                $db    = Factory::getDbo();
                 $query = "SELECT * FROM #__extensions "
                          . " WHERE folder='yoursites' and type='plugin' and element='handler'";
                 $db->setQuery( $query );
@@ -154,14 +148,18 @@ class pkg_YoursitesclientInstallerScript
                 }
             }
 
-            // move old gwejson handler - pending deletion at a later date
-            if ( JFile::exists( JPATH_PLUGINS . '/yoursites/handler/gwejson_getupdatedata.php' ) )
+            // delete old gwejson handler files
+            if ( is_file( JPATH_PLUGINS . '/yoursites/handler/gwejson_getupdatedata.php' ) )
             {
-                JFile::move( JPATH_PLUGINS . '/yoursites/handler/gwejson_getupdatedata.php', JPATH_PLUGINS . '/yoursites/handler/KEEPgwejson_getupdatedata.php' );
+                File::delete( JPATH_PLUGINS . '/yoursites/handler/gwejson_getupdatedata.php');
+            }
+            if ( is_file( JPATH_PLUGINS . '/yoursites/handler/KEEPgwejson_getupdatedata.php' ) )
+            {
+                File::delete( JPATH_PLUGINS . '/yoursites/handler/KEEPgwejson_getupdatedata.php');
             }
 
             // Replace generic headers (fetching data afresh in case its been updated)
-            $db    = JFactory::getDbo();
+            $db    = Factory::getDbo();
             $query = "SELECT * FROM #__extensions "
                      . " WHERE folder='system' and type='plugin' and element='yoursites'";
             $db->setQuery( $query );
@@ -193,7 +191,7 @@ class pkg_YoursitesclientInstallerScript
             // Always replace server token if we have a non-generic one in the package
             if ( ! empty( $specifictoken ) )
             {
-                JFactory::getApplication()->enqueueMessage( JText::_( "PKG_YOURSITESCLIENT_SETTING_UP_SITE_SPECIFIC_TOKEN" ), 'info' );
+                Factory::getApplication()->enqueueMessage( Text::_( "PKG_YOURSITESCLIENT_SETTING_UP_SITE_SPECIFIC_TOKEN" ), 'info' );
 
                 // This is the specific token
                 $eparams->servertoken = $specifictoken;
@@ -209,7 +207,7 @@ class pkg_YoursitesclientInstallerScript
         // Bootstrap connection to server
 
         // Extension Details
-        $db    = JFactory::getDbo();
+        $db    = Factory::getDbo();
         $query = "SELECT * FROM #__extensions "
                  . " WHERE folder='system' and type='plugin' and element='yoursites'";
         $db->setQuery( $query );
@@ -245,7 +243,7 @@ class pkg_YoursitesclientInstallerScript
             $secureTheConnection = true;
         }
 
-        JLog::add( "Should we connect to server? connect to server && " . ( $secureTheConnection ? 'true' : 'false' ), JLog::INFO, 'yoursites' );
+        Log::add( "Should we connect to server? connect to server && " . ( $secureTheConnection ? 'true' : 'false' ), Log::INFO, 'yoursites' );
         $this->diagnose( "Should we connect to server? connect to server && " . ( $secureTheConnection ? 'true' : 'false' ), 'warning' );
 
         // This process is secured using Generic Token only - but doing so created a specific connection!
@@ -255,11 +253,11 @@ class pkg_YoursitesclientInstallerScript
             $debug = "&XDEBUG_SESSION_START=PHPSTORM";
             $debug = "";
 
-            // Use JHttpFactory that allows using CURL and Sockets as alternative method when available
+            // Use HttpFactory that allows using CURL and Sockets as alternative method when available
             // Adding a valid user agent string etc.
-            $goptions = new JRegistry;
+            $goptions = new Registry;
             $goptions->set( 'userAgent', 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:41.0) Gecko/20100101 Firefox/41.0' );
-            $http = JHttpFactory::getHTTP( $goptions );
+            $http = HttpFactory::getHTTP( $goptions );
 
             $path = "index.php?option=com_yoursites&task=site.register&tmpl=component";
             // enable debug ?
@@ -284,13 +282,13 @@ class pkg_YoursitesclientInstallerScript
                 }
                 else
                 {
-                    $user              = JFactory::getUser();
+                    $user              = Factory::getUser();
                     $data["superuser"] = $user->get( 'id' );
 
                     // Anonymous installation e.g. Watchful or YourSites update
                     if ( $data["superuser"] == 0 )
                     {
-                        $db    = JFactory::getDbo();
+                        $db    = Factory::getDbo();
                         $query = "SELECT * FROM #__users"
                                  . " WHERE username = " . $db->quote( 'sodnliwurbeniouwnefp9wuinefpiubweifubperugbiw[0239rjpkrmv-98n23' );
                         $db->setQuery( $query );
@@ -309,14 +307,14 @@ class pkg_YoursitesclientInstallerScript
             }
 
             // $base needs to be frontend and not have /administrator at the end but does need the trailing /
-            $base = JURI::base( false );
-            //JLog::add("base url is " . $base , JLog::INFO, 'yoursites');
+            $base = Uri::base( false );
+            //Log::add("base url is " . $base , Log::INFO, 'yoursites');
             $this->diagnose( "base url is " . $base, 'warning' );
             if ( strpos( $base, "/administrator" ) )
             {
                 $pos  = strrpos( $base, "/administrator" );
                 $base = substr( $base, 0, $pos ) . "/";
-                //JLog::add("modified base url is " . $base , JLog::INFO, 'yoursites');
+                //Log::add("modified base url is " . $base , Log::INFO, 'yoursites');
                 $this->diagnose( "modified base url is " . $base, 'warning' );
             }
             $data["url"] = $base;
@@ -336,11 +334,11 @@ class pkg_YoursitesclientInstallerScript
             {
                 $data["coreversion"] = JVERSION;
             }
-            $data["pluginversion"] = "1.49.0";
+            $data["pluginversion"] = "1.65.0";
 
             $yoursitesUrl = "https://manage.joomla.org/";
 
-            JLog::add( "Connecting to https://manage.joomla.org/ YourSites server " . $yoursitesUrl . $path, JLog::INFO, 'yoursites' );
+            Log::add( "Connecting to https://manage.joomla.org/ YourSites server " . $yoursitesUrl . $path, Log::INFO, 'yoursites' );
             $this->diagnose( "Connecting to https://manage.joomla.org/ YourSites server " . $yoursitesUrl . $path, 'warning' );
 
             // This doesn't work if yoursites server is not in DNS
@@ -348,7 +346,7 @@ class pkg_YoursitesclientInstallerScript
             {
                 $webpage = $http->post( $yoursitesUrl . $path, $data ); //, $headers);
                 //$webpage = $http->post(str_replace('wp-yoursites.net', 'dockfgherslknfg9o34n.net', $yoursitesUrl) . $path, $data); //, $headers);
-                JLog::add( "Got response from https://manage.joomla.org/ YourSites server " . $webpage->code, JLog::INFO, 'yoursites' );
+                Log::add( "Got response from https://manage.joomla.org/ YourSites server " . $webpage->code, Log::INFO, 'yoursites' );
                 $this->diagnose( "Got response from https://manage.joomla.org/ YourSites server " . $webpage->code, 'warning' );
             }
             catch ( Exception $e )
@@ -366,13 +364,14 @@ class pkg_YoursitesclientInstallerScript
                 */
                 $webpage       = new stdClass();
                 $webpage->body = "ERROR";
-                JFactory::getApplication()->enqueueMessage( JText::sprintf( "PKG_YOURSITESCLIENT_UNABLE_TO_LINK_THIS_SITE_TO_THE_YOURSITES_SERVER_AT", $yoursitesUrl ), 'error' );
-                //JFactory::getApplication()->enqueueMessage(JText::sprintf("PKG_YOURSITESCLIENT_ATTEMPTING_JS_CONNECTION_TO_THE_YOURSITES_SERVER_AT", $yoursitesUrl), 'warning');
-                JFactory::getApplication()->enqueueMessage( $e->getMessage(), 'error' );
-                JLog::add( "Unable to post to https://manage.joomla.org/ YourSites server ", JLog::INFO, 'yoursites' );
+                Factory::getApplication()->enqueueMessage( Text::sprintf( "PKG_YOURSITESCLIENT_UNABLE_TO_LINK_THIS_SITE_TO_THE_YOURSITES_SERVER_AT", $yoursitesUrl ), 'error' );
+                //Factory::getApplication()->enqueueMessage(Text::sprintf("PKG_YOURSITESCLIENT_ATTEMPTING_JS_CONNECTION_TO_THE_YOURSITES_SERVER_AT", $yoursitesUrl), 'warning');
+                Factory::getApplication()->enqueueMessage( $e->getMessage(), 'error' );
+                Log::add( "Unable to post to https://manage.joomla.org/ YourSites server ", Log::INFO, 'yoursites' );
             }
 
-            JLog::add( $webpage->body, JLog::INFO, 'yoursites' );
+			// Strip private keys if doing this!
+            Log::add( $webpage->body, Log::INFO, 'yoursites' );
 
             // ToDo - add meaningful completion message based on json return data
             //$this->diagnose(" url  = " . $yoursitesUrl . $path);
@@ -383,8 +382,8 @@ class pkg_YoursitesclientInstallerScript
             {
                 try
                 {
-                    //JLog::add("Decoding JSON from YourSites server", JLog::INFO, 'yoursites');
-                    //JLog::add($webpage->body, JLog::INFO, 'yoursites');
+                    //Log::add("Decoding JSON from YourSites server", Log::INFO, 'yoursites');
+                    //Log::add($webpage->body, Log::INFO, 'yoursites');
                     $updatedata = json_decode( $webpage->body );
 
                     $returnToken = isset( $updatedata->returnToken ) ? $updatedata->returnToken : false;
@@ -394,19 +393,19 @@ class pkg_YoursitesclientInstallerScript
 
                     if ( ! $updatedata || $updatedata->error )
                     {
-                        JFactory::getApplication()->enqueueMessage( JText::sprintf( "PKG_YOURSITESCLIENT_UNABLE_TO_LINK_THIS_SITE_TO_THE_YOURSITES_SERVER_AT", $yoursitesUrl ), 'error' );
+                        Factory::getApplication()->enqueueMessage( Text::sprintf( "PKG_YOURSITESCLIENT_UNABLE_TO_LINK_THIS_SITE_TO_THE_YOURSITES_SERVER_AT", $yoursitesUrl ), 'error' );
                         if ( isset( $updatedata->errormessages ) )
                         {
                             foreach ( $updatedata->errormessages as $errormessage )
                             {
-                                JFactory::getApplication()->enqueueMessage( JText::_( $errormessage, true ) );
+                                Factory::getApplication()->enqueueMessage( Text::_( $errormessage, true ) );
                             }
                         }
                     }
                     else if ( $updatedata->privatekey && $returnToken && $returnHash && password_verify( hash( 'sha256', $returnToken . " combined with " . $generictoken ), $returnHash ) )
                     {
 
-                        // JLog::add("Have private key from YourSites server", JLog::INFO, 'yoursites');
+                        // Log::add("Have private key from YourSites server", Log::INFO, 'yoursites');
                         // $this->diagnose($returnToken  . " " . $returnHash);
 
                         // Replace generic headers
@@ -419,27 +418,31 @@ class pkg_YoursitesclientInstallerScript
                                  . " WHERE folder='system' and type='plugin' and element='yoursites'";
                         $db->setQuery( $query );
                         $db->execute();
-                        JFactory::getApplication()->enqueueMessage( JText::sprintf( "PKG_YOURSITESCLIENT_SITE_SECURELY_CONNECTED", $yoursitesUrl ) );
+                        Factory::getApplication()->enqueueMessage( Text::sprintf( "PKG_YOURSITESCLIENT_SITE_SECURELY_CONNECTED", $yoursitesUrl ) );
                     }
                 }
                 catch ( Exception $e )
                 {
-                    JLog::add( "Decoding JSON from YourSites server FAILED", JLog::ERROR, 'yoursites' );
+                    Log::add( "Decoding JSON from YourSites server FAILED", Log::ERROR, 'yoursites' );
 
-                    JFactory::getApplication()->enqueueMessage( $e->getMessage() );
-                    JFactory::getApplication()->enqueueMessage( $webpage->body );
+                    Factory::getApplication()->enqueueMessage( $e->getMessage() );
+                    Factory::getApplication()->enqueueMessage( $webpage->body );
                 }
             }
             else
             {
-                JFactory::getApplication()->enqueueMessage( JText::sprintf( "PKG_YOURSITESCLIENT_UNABLE_TO_LINK_THIS_SITE_TO_THE_YOURSITES_SERVER_AT", $yoursitesUrl ), 'error' );
+                Factory::getApplication()->enqueueMessage( Text::sprintf( "PKG_YOURSITESCLIENT_UNABLE_TO_LINK_THIS_SITE_TO_THE_YOURSITES_SERVER_AT", $yoursitesUrl ), 'error' );
                 $this->diagnose( $webpage->body, 'error' );
+
+                // Strip private keys!
+                Log::add( $webpage->body, Log::INFO, 'yoursites' );
+
             }
 
         }
 
         // enable yoursites system plugin - just in case its not enabled yet!
-        $db    = JFactory::getDbo();
+        $db    = Factory::getDbo();
         $query = "UPDATE #__extensions SET enabled=1 WHERE folder='system' and type='plugin' and element='yoursites'";
         $db->setQuery( $query );
         $db->execute();
@@ -453,14 +456,14 @@ class pkg_YoursitesclientInstallerScript
         $db->setQuery( $query );
         $db->execute();
 
-        $db    = JFactory::getDbo();
+        $db    = Factory::getDbo();
         $query = "SELECT * FROM #__extensions "
                  . " WHERE folder='yoursites' and type='plugin' and element='handler'";
         $db->setQuery( $query );
         $oldyoursites = $db->loadObject();
         if ( $oldyoursites )
         {
-            JInstaller::getInstance()->uninstall($oldyoursites->type, $oldyoursites->extension_id);
+            Installer::getInstance()->uninstall($oldyoursites->type, $oldyoursites->extension_id);
         }
 
 
@@ -469,18 +472,18 @@ class pkg_YoursitesclientInstallerScript
 			'defaultgroup' => '_system',
 			'cachebase'    => JPATH_ADMINISTRATOR . '/cache'
 		);
-		$cache   = JCache::getInstance('callback', $options);
+		$cache   = Cache::getInstance('callback', $options);
 		$cache->clean();
 		
 		$options = array(
 			'defaultgroup' => 'com_plugins',
 			'cachebase'    => JPATH_ADMINISTRATOR . '/cache'
 		);
-		$cache   = JCache::getInstance('callback', $options);
+		$cache   = Cache::getInstance('callback', $options);
 		$cache->clean();
 
 		// This is the key one!
-		$cache = JFactory::getCache('com_plugins', 'callback');
+		$cache = Factory::getCache('com_plugins', 'callback');
 		$cache->clean();
 
         return;
@@ -607,7 +610,7 @@ class pkg_YoursitesclientInstallerScript
 
 	function diagnose($message, $type)
 	{
-//		JFactory::getApplication()->enqueueMessage($message, $type);
+//		Factory::getApplication()->enqueueMessage($message, $type);
 	}
 
 }

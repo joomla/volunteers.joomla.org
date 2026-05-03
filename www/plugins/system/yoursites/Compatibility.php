@@ -15,6 +15,8 @@ defined('JPATH_PLATFORM') or die;
  */
 // These are needed for compatibility tests which won't work in Joomla 3.7 in any case
 use Joomla\CMS\Factory;
+use Joomla\CMS\Language\Text;
+use Joomla\CMS\Object\CMSObject;
 use Joomla\CMS\Version;
 use Joomla\Registry\Registry;
 use Joomla\CMS\Http\HttpFactory;
@@ -26,7 +28,7 @@ use Joomla\CMS\Filter\InputFilter;
  *
  * @since  3.10.0
  */
-class Compatibility extends \JObject
+class Compatibility extends CMSObject
 {
 	/**
 	 * Update manifest `<name>` element
@@ -543,7 +545,7 @@ class Compatibility extends \JObject
 		if ($response === null || $response->code !== 200)
 		{
 			// TODO: Add a 'mark bad' setting here somehow
-			Log::add(\JText::sprintf('JLIB_UPDATER_ERROR_EXTENSION_OPEN_URL', $url), Log::WARNING, 'jerror');
+			Log::add(Text::sprintf('JLIB_UPDATER_ERROR_EXTENSION_OPEN_URL', $url), Log::WARNING, 'jerror');
 
 			return false;
 		}
@@ -555,7 +557,7 @@ class Compatibility extends \JObject
 		xml_set_element_handler($this->xmlParser, '_startElement', '_endElement');
 		xml_set_character_data_handler($this->xmlParser, '_characterData');
 
-		if (empty($response->body))
+		if (empty( (string) $response->body))
 		{
 			return false;
 		}

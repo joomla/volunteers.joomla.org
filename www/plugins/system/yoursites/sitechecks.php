@@ -1,33 +1,30 @@
 <?php
 
 /**
- * @version    CVS: 1.49.0
+ * @version    CVS: 1.65.0
  * @package    com_yoursites
  * @author     Geraint Edwards <via website>
  * @copyright  2016-YOURSITES_COPYRIGHT GWE Systems Ltd
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
-/*
- * Joomla 3.7.x and earlier don't support these - leave them out until we MUST have them for Joomla 4.x
- */
-/*
+defined('_JEXEC') or die;
+
+use Joomla\CMS\Plugin\PluginHelper;
+use Joomla\CMS\Date\Date;
 use Joomla\CMS\Access\Access;
 Use Joomla\Filesystem\Folder;
-Use Joomla\CMS\Filesystem\File;
+use Joomla\Filesystem\File;
 use Joomla\CMS\Component\ComponentHelper;
-*/
 
 use Joomla\CMS\Factory;
-
-defined('_JEXEC') or die;
 
 class YstsSiteChecks
 {
 	public static function missing2factor( & $returnData, $requestObject)
 	{
 
-		$db = JFactory::getDbo();
+		$db = Factory::getDbo();
 
 		// find list of super users and admin users NOT using 2 factor Authentication
 
@@ -70,7 +67,7 @@ class YstsSiteChecks
 		$levels = $db->loadColumn();
 
 		// Get members of core.admin able user groups
-		$rules = JAccess::getAssetRules(null);
+		$rules = Access::getAssetRules(null);
 		$ruledata = $rules->getData();
 		// super users and administrators
 		// use array_keys with search value of 1 !!
@@ -154,7 +151,7 @@ class YstsSiteChecks
 			$returnData->checkinfo['status'] = 1;
 		}
 
-		$plugin = JPluginHelper::getPlugin("system" , "yoursites");
+		$plugin = PluginHelper::getPlugin("system" , "yoursites");
 		if ($plugin)
 		{
 			$params      = json_decode($plugin->params);
@@ -189,7 +186,7 @@ class YstsSiteChecks
 
 		if (in_array("COM_YOURSITES_ADVCHECK_FC_VALUE",$tableFields))
 		{
-			$db = JFactory::getDbo();
+			$db = Factory::getDbo();
 
 			$query = $db->getQuery(true);
 			$query->select('max(length(value))')
@@ -198,7 +195,7 @@ class YstsSiteChecks
 
 			$maxlength = $db->loadResult();
 
-			$jconfig = JFactory::getConfig();
+			$jconfig = Factory::getConfig();
 
 			$query = $db->getQuery(true);
 			$query->select('CHARACTER_MAXIMUM_LENGTH')
@@ -240,7 +237,7 @@ class YstsSiteChecks
 	public static function dormantspecials( & $returnData, $requestObject)
 	{
 
-		$db = JFactory::getDbo();
+		$db = Factory::getDbo();
 
 		$returnData->checkinfo = array();
 		$returnData->checkinfo['data'] = array();
@@ -256,7 +253,7 @@ class YstsSiteChecks
 		$levels = $db->loadColumn();
 
 		// Get members of core.admin able user groups
-		$rules = JAccess::getAssetRules(null);
+		$rules = Access::getAssetRules(null);
 		$ruledata = $rules->getData();
 		// super users and administrators
 		$createGroups  = isset($ruledata['core.create'])  ? array_keys($ruledata['core.create']->getData(), 1)  : array();
@@ -268,7 +265,7 @@ class YstsSiteChecks
 		$specialGroups = array_unique(array_merge($createGroups, $editGroups, $publishGroups, $manageGroups, $adminGroups));
 		$specialGroups[] = -1;
 
-		$cutoff = new JDate("- " . (int) $requestObject->dormantspecialstime . " months");
+		$cutoff = new Date("- " . (int) $requestObject->dormantspecialstime . " months");
 		$query = $db->getQuery(true);
 		$query->select('CONCAT(u.username, " (" ,  u.lastvisitDate, ")")')
 			->from("#__users as u" )
@@ -296,7 +293,7 @@ class YstsSiteChecks
 
 	public static function usercaptcha( & $returnData, $requestObject)
 	{
-		$userparams = JComponentHelper::getParams("com_users");
+		$userparams = ComponentHelper::getParams("com_users");
 
 		if (!$userparams->get("allowUserRegistration" , 0))
 		{
@@ -311,7 +308,7 @@ class YstsSiteChecks
 		// if set to global then check global parameter
 		if ($captcha === "")
 		{
-			$captcha = JFactory::getConfig()->get('captcha', '');
+			$captcha = Factory::getConfig()->get('captcha', '');
 		}
 
 		if (empty($captcha))
@@ -324,7 +321,7 @@ class YstsSiteChecks
 		}
 
 		// Make sure the plugin is enabled!
-		$plugin = JPluginHelper::getPlugin('captcha', $captcha);
+		$plugin = PluginHelper::getPlugin('captcha', $captcha);
 		if (!$plugin) {
 			$returnData->warning = 1;
 			$returnData->checkinfo['key']  = "COM_YOURSITES_ADVCHECK_USERCAPTCHA_PLUGIN_NOT_ENABLED";
@@ -342,7 +339,7 @@ class YstsSiteChecks
 
 	public static function contentversioning( & $returnData, $requestObject)
 	{
-		$contentparams = JComponentHelper::getParams("com_content");
+		$contentparams = ComponentHelper::getParams("com_content");
 
 		if ($contentparams->get("save_history" , 0))
 		{
@@ -362,7 +359,7 @@ class YstsSiteChecks
 
 	public static function livesite( & $returnData, $requestObject)
 	{
-		$live_site = JFactory::getConfig()->get('live_site', '');
+		$live_site = Factory::getConfig()->get('live_site', '');
 
 		if (empty($live_site))
 		{
@@ -382,7 +379,7 @@ class YstsSiteChecks
 
 	public static function joomlaupdatesites( & $returnData, $requestObject)
 	{
-		$db = JFactory::getDbo();
+		$db = Factory::getDbo();
 		$query = $db->getQuery(true);
 		$query->select('us.name, us.enabled')
 			->from('#__update_sites AS us')
@@ -416,7 +413,7 @@ class YstsSiteChecks
 
 	public static function extensionupdatesites( & $returnData, $requestObject)
 	{
-		$db = JFactory::getDbo();
+		$db = Factory::getDbo();
 		$query = $db->getQuery(true);
 		$query->select('us.name, us.enabled, ex.type, ex.folder, ex.client_id, us.update_site_id')
 			->from('#__update_sites AS us')
@@ -456,10 +453,10 @@ class YstsSiteChecks
 
 	public static function systememail( & $returnData, $requestObject)
 	{
-		$userparams = JComponentHelper::getParams("com_users");
+		$userparams = ComponentHelper::getParams("com_users");
 
 		// Get all admin users
-		$db = JFactory::getDbo();
+		$db = Factory::getDbo();
 		$query = $db->getQuery(true);
 
 		$query->clear()
@@ -508,7 +505,7 @@ class YstsSiteChecks
 
 	public static function sendpassword( & $returnData, $requestObject)
 	{
-		$userparams = JComponentHelper::getParams("com_users");
+		$userparams = ComponentHelper::getParams("com_users");
 
 		$sendpassword = $userparams->get("sendpassword" , 0);
 		$allowUserRegistration = $userparams->get("allowUserRegistration" , 0);
@@ -538,7 +535,7 @@ class YstsSiteChecks
 
 	public static function weakpasswords( & $returnData, $requestObject)
 	{
-		$userparams = JComponentHelper::getParams("com_users");
+		$userparams = ComponentHelper::getParams("com_users");
 
 		$minimum_length    = intval($userparams->get("minimum_length" , 0));
 		$minimum_integers  = intval($userparams->get("minimum_integers" , 0)) > 0 ? 1 : 0;
@@ -582,7 +579,7 @@ class YstsSiteChecks
 
 		*/
 
-		$ftp_enable = JFactory::getConfig()->get('ftp_enable', 0);
+		$ftp_enable = Factory::getConfig()->get('ftp_enable', 0);
 
 		if ($ftp_enable)
 		{
@@ -592,8 +589,8 @@ class YstsSiteChecks
 			return;
 		}
 
-		$tmpDir  = JFactory::getConfig()->get('tmp_path', JPATH_ROOT . '/tmp');
-		$logDir  = JFactory::getConfig()->get('log_path', JPATH_ROOT . '/log');
+		$tmpDir  = Factory::getConfig()->get('tmp_path', JPATH_ROOT . '/tmp');
+		$logDir  = Factory::getConfig()->get('log_path', JPATH_ROOT . '/log');
 
 		if (!is_writable($tmpDir ))
 		{
@@ -642,7 +639,7 @@ class YstsSiteChecks
 				$customresult->checkinfo = array();
 				$customresult->messages = array();
 				$customresult->fieldname = $customconfig->configfield;
-				$customresult->fieldvalue = JFactory::getConfig()->get($customconfig->configfield, '');
+				$customresult->fieldvalue = Factory::getConfig()->get($customconfig->configfield, '');
 				$customresult->testvalue = $customconfig->configfieldcontent;
 				$customresult->valid = false;
 
@@ -784,10 +781,10 @@ class YstsSiteChecks
 				switch ($customfiles->fileoperator)
 				{
 					case "exists" :
-						$customresult->valid = JFile::exists(str_replace("//", "/", JPATH_SITE . "/" . $customresult->filepath));
+						$customresult->valid = is_file(str_replace("//", "/", JPATH_SITE . "/" . $customresult->filepath));
 						break;
 					case "notexists" :
-						$customresult->valid = !JFile::exists(str_replace("//", "/", JPATH_SITE . "/" . $customresult->filepath));
+						$customresult->valid = !is_file(str_replace("//", "/", JPATH_SITE . "/" . $customresult->filepath));
 						break;
 					case "contains" :
 						$file_content = file_get_contents(str_replace("//", "/", JPATH_SITE . "/" . $customresult->filepath));

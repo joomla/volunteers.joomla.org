@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @version    CVS: 1.49.0
+ * @version    CVS: 1.65.0
  * @package    com_yoursites
  * @author     Geraint Edwards
  * @copyright  2017-YOURSITES_COPYRIGHT GWE Systems Ltd
@@ -10,8 +10,7 @@
 // no direct access
 defined('_JEXEC') or die('Restricted access');
 
-jimport('joomla.filesystem.folder');
-jimport('joomla.filesystem.file');
+use Joomla\CMS\Factory;
 
 class plgsystemyoursitesInstallerScript
 {
@@ -43,7 +42,7 @@ class plgsystemyoursitesInstallerScript
 	function postflight($type, $parent)
 	{
 
-		$db = JFactory::getDbo();
+		$db = Factory::getDbo();
 		$charset = ($db->hasUTFSupport()) ? 'DEFAULT CHARACTER SET ' . $db->quoteName('utf8') : '';
 
 		$sql = <<<SQL

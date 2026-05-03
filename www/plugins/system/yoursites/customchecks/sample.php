@@ -1,14 +1,14 @@
 <?php
 
 /**
- * @version    CVS: 1.49.0
+ * @version    CVS: 1.65.0
  * @package    com_yoursites
  * @author     Geraint Edwards <via website>
  * @copyright  2016-YOURSITES_COPYRIGHT GWE Systems Ltd
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
-use Joomla\CMS\Access\Access;
+use Joomla\CMS\Factory;
 
 defined('_JEXEC') or die;
 
@@ -20,7 +20,7 @@ class YstsSampleChecks
 	{
 		$customresult->checkinfo['data'] = array();
 
-		$live_site = JFactory::getConfig()->get('live_site', '');
+		$live_site = Factory::getConfig()->get('live_site', '');
 
 		if (empty($live_site))
 		{

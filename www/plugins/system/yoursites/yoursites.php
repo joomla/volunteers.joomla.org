@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @version    CVS: 1.49.0.1
+ * @version    CVS: 1.65.0.1
  * @package    com_yoursites
  * @author     Geraint Edwards
  * @copyright  2017-YOURSITES_COPYRIGHT GWE Systems Ltd
@@ -14,15 +14,24 @@ defined( 'JPATH_BASE' ) or die;
  * But Joomla 5 load compatibility code later than us so we must use these!
  */
 
+use Joomla\CMS\Application\CMSApplication;
+use Joomla\CMS\Language\Text;
+use Joomla\CMS\Plugin\PluginHelper;
+use Joomla\CMS\Uri\Uri;
+use Joomla\CMS\Session\Session;
+use Joomla\Filesystem\File;
 use Joomla\Registry\Registry;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Plugin\CMSPlugin;
+use Joomla\CMS\Form\Form;
+Use Joomla\Filesystem\Path;
+Use Joomla\Filesystem\Folder;
 
 class plgSystemYourSites extends CMSPlugin {
     /**
      * Application object.
      *
-     * @var    JApplicationCms
+     * @var    CMSApplication
      * @since  3.5
      */
     protected $app;
@@ -71,7 +80,7 @@ class plgSystemYourSites extends CMSPlugin {
                 $requestData = json_decode( $requestData );
                 if ( $requestData && isset( $requestData->task ) && $requestData->task === "updateextension" )
                 {
-                    $plugin = JPluginHelper::getPlugin( "system", "falangdriver" );
+                    $plugin = PluginHelper::getPlugin( "system", "falangdriver" );
                     if ( $plugin )
                     {
                         $plugin->name .= "dummy";
@@ -96,7 +105,7 @@ class plgSystemYourSites extends CMSPlugin {
     // override edit article page and menu item edit page
     public function onContentPrepareForm( $form, $data ) {
 
-        if ( ! ( $form instanceof JForm ) )
+        if ( ! ( $form instanceof Form ) )
         {
             $this->_subject->setError( 'JERROR_NOT_A_FORM' );
 
@@ -126,7 +135,7 @@ class plgSystemYourSites extends CMSPlugin {
         if ( Factory::getApplication()->isClient( 'administrator' ) )
         {
 
-            $configFiles = JFolder::files( JPATH_PLUGINS . "/system/yoursites/customactions/", 'config_*.xml' );
+            $configFiles = Folder::files( JPATH_PLUGINS . "/system/yoursites/customactions/", 'config_*.xml' );
 
             foreach ( $configFiles as $configFile )
             {
@@ -200,7 +209,7 @@ class plgSystemYourSites extends CMSPlugin {
             }
             if ( count( $aliases ) )
             {
-                $current   = JUri::current();
+                $current   = Uri::current();
                 $parts     = \Joomla\Uri\UriHelper::parse_url( $current );
                 $path      = trim( $parts['path'], "/" );
                 $extrapath = "";
@@ -310,11 +319,11 @@ class plgSystemYourSites extends CMSPlugin {
         jimport( 'joomla.filesystem.file' );
         // Check for a custom version of the file first!
         $custom_file = str_replace( "yoursites_", "yoursites_custom_", $file );
-        if ( JFile::exists( $path . $custom_file . ".php" ) )
+        if ( is_file( $path . $custom_file . ".php" ) )
         {
             $file = $custom_file;
         }
-        if ( ! JFile::exists( $path . $file . ".php" ) )
+        if ( ! is_file( $path . $file . ".php" ) )
         {
             PlgSystemyoursites::throwAjaxError( "Whoops we could not find the file: " . $path . $file . ".php" );
 
@@ -325,7 +334,7 @@ class plgSystemYourSites extends CMSPlugin {
 
         if ( ! function_exists( "yoursites_skiptoken" ) || ! yoursites_skiptoken() )
         {
-            $token = JSession::getFormToken();;
+            $token = Session::getFormToken();;
             if ( $token != $input->get( 'token', '', 'string' ) )
             {
                 if ( $input->get( 'json', '', 'raw' ) )
@@ -541,7 +550,7 @@ class plgSystemYourSites extends CMSPlugin {
         if ( $input->getCmd( 'task' ) == 'yoursites.serviceworker' )
         {
             // Check for request forgeries
-//			Jsession::checkToken('get') or jexit(JText::_('JINVALID_TOKEN'));
+//			Session::checkToken('get') or jexit(Text::_('JINVALID_TOKEN'));
 
             // Manually clear cache in Firefox using
             // about:serviceworkers
@@ -645,7 +654,7 @@ class plgSystemYourSites extends CMSPlugin {
      *
     // This is how we configure diagnosis!
 
-    $plugin = JPluginHelper::getPlugin("system" , "yoursites");
+    $plugin = PluginHelper::getPlugin("system" , "yoursites");
     if ($plugin)
     {
         $pluginparams = new Registry($plugin->params);
@@ -764,6 +773,18 @@ class plgSystemYourSites extends CMSPlugin {
      * @return  void
      */
     public function onAfterDispatch() {
+        // Special handling of akeeba backups in Joomla 3 when the site is offline
+        if ( $this->app->input->getCmd( 'option' ) === 'com_akeeba'
+             && $this->app->get('offline')
+             && $this->app->input->getCmd( 'view' ) === 'api'
+             && $this->app->input->getCmd( 'format' ) === 'ysts'
+             && version_compare( JVERSION, '4.0', 'lt' )
+        )
+        {
+            $this->app->set('offline', 0);
+            return;
+        }
+
         if ( $this->app->input->getCmd( 'option' ) === 'com_ajax' || version_compare( JVERSION, '4.1', 'lt' ) )
         {
             return;
@@ -866,7 +887,7 @@ class plgSystemYourSites extends CMSPlugin {
         }
 
         // only work for clone sites
-        $base = JUri::base( true );
+        $base = Uri::base( true );
         if ( strpos( $base, "._ysts_" ) === false && strpos( $base, "clone_ysts_" ) === false )
         {
             return;
@@ -889,14 +910,14 @@ class plgSystemYourSites extends CMSPlugin {
         {
             // only looks one layer deep since $recurse is false by default but its still overkill so do it ourselves
             /*
-            $imagefiles = JFolder::files(JPATH_SITE . "/images");
+            $imagefiles = Folder::files(JPATH_SITE . "/images");
             if (count($imagefiles) > 1)
             {
                 return;
             }
             */
 
-            $path = JPath::clean( JPATH_SITE . "/images" );
+            $path = Path::clean( JPATH_SITE . "/images" );
             if ( is_dir( $path ) )
             {
                 // Read the source directory
@@ -922,10 +943,15 @@ class plgSystemYourSites extends CMSPlugin {
         preg_match_all( $pattern, $buffer, $matches );
         if ( count( $matches ) == 3 )
         {
-            $root = str_replace( "/._ysts_" . $parts[1], "", JUri::root() );
+            $root = str_replace( "/._ysts_" . $parts[1], "", Uri::root() );
             for ( $m = 0; $m < count( $matches[2] ); $m ++ )
             {
                 $match = $matches[2][$m];
+                if (strpos($match, '#joomlaImage://local-images') > 0)
+                {
+                    $match = substr($match, 0, strpos($match, '#joomlaImage://local-images'));
+                }
+
                 if ( ! file_exists( JPATH_SITE . $match ) )
                 {
                     $char1 = substr( $matches[0][$m], 0, 1 );
@@ -941,9 +967,14 @@ class plgSystemYourSites extends CMSPlugin {
         preg_match_all( $pattern, $buffer, $matches );
         if ( count( $matches ) == 2 )
         {
-            $root = str_replace( "/._ysts_" . $parts[1], "", JUri::root() );
+            $root = str_replace( "/._ysts_" . $parts[1], "", Uri::root() );
             foreach ( $matches[1] as $match )
             {
+                if (strpos($match, '#joomlaImage://local-images') > 0)
+                {
+                    $match = substr($match, 0, strpos($match, '#joomlaImage://local-images'));
+                }
+
                 if ( ! file_exists( JPATH_SITE . $match ) )
                 {
                     //echo "2. replace " . $match. " with " . $root . $match ."<Br>";
@@ -957,10 +988,15 @@ class plgSystemYourSites extends CMSPlugin {
         preg_match_all( $pattern, $buffer, $matches );
         if ( count( $matches ) == 3 )
         {
-            $root = str_replace( "/clone_ysts_" . $parts[1], "", JUri::root() );
+            $root = str_replace( "/clone_ysts_" . $parts[1], "", Uri::root() );
             for ( $m = 0; $m < count( $matches[2] ); $m ++ )
             {
                 $match = $matches[2][$m];
+                if (strpos($match, '#joomlaImage://local-images') > 0)
+                {
+                    $match = substr($match, 0, strpos($match, '#joomlaImage://local-images'));
+                }
+
                 if ( ! file_exists( JPATH_SITE . $match ) )
                 {
                     $char1 = substr( $matches[0][$m], 0, 1 );
@@ -976,9 +1012,14 @@ class plgSystemYourSites extends CMSPlugin {
         preg_match_all( $pattern, $buffer, $matches );
         if ( count( $matches ) == 2 )
         {
-            $root = str_replace( "/clone_ysts_" . $parts[1], "", JUri::root() );
+            $root = str_replace( "/clone_ysts_" . $parts[1], "", Uri::root() );
             foreach ( $matches[1] as $match )
             {
+                if (strpos($match, '#joomlaImage://local-images') > 0)
+                {
+                    $match = substr($match, 0, strpos($match, '#joomlaImage://local-images'));
+                }
+
                 if ( ! file_exists( JPATH_SITE . $match ) )
                 {
                     //echo "2. replace " . $match. " with " . $root . $match ."<Br>";

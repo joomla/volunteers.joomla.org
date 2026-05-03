@@ -1,13 +1,14 @@
 <?php
 
 /**
- * @version    CVS: 1.49.0
+ * @version    CVS: 1.65.0
  * @package    com_yoursites
  * @author     Geraint Edwards <via website>
- * @copyright  2016-2023 GWE Systems Ltd
+ * @copyright  2016-2025 GWE Systems Ltd
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
+use Joomla\CMS\MVC\Model\BaseDatabaseModel;
 use Joomla\CMS\Access\Access;
 use Joomla\CMS\MVC\Factory\LegacyFactory;
 
@@ -22,7 +23,7 @@ class YstsGlobalcheckin
 		try
 		{
 			// Get the Joomla! com_checkin model
-			$model = JModelLegacy::getInstance("Checkin", "CheckinModel");
+			$model = BaseDatabaseModel::getInstance("Checkin", "CheckinModel");
 			if (!$model)
 			{
 				if (version_compare(JVERSION, '4.0.0', "lt"))
@@ -34,7 +35,7 @@ class YstsGlobalcheckin
 				{
 
 					$LegacyFactory = new LegacyFactory;
-					JModelLegacy::addIncludePath(JPATH_ADMINISTRATOR . "/components/com_checkin/Model");
+					BaseDatabaseModel::addIncludePath(JPATH_ADMINISTRATOR . "/components/com_checkin/Model");
 					$model         = $LegacyFactory->createModel('Checkin', 'CheckinModel', array('ignore_request' => true));
 				}
 

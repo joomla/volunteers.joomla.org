@@ -212,7 +212,7 @@ class VolunteersModelReports extends JModelList
 	{
 		$items = parent::getItems();
 
-		if (JFactory::getApplication()->isSite())
+		if (JFactory::getApplication()->isClient('site'))
 		{
 			foreach ($items as $item)
 			{

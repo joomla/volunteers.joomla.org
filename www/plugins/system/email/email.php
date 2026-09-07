@@ -16,7 +16,7 @@ class plgSystemEmail extends JPlugin
 	function onAfterRoute()
 	{
             $app = JFactory::getApplication();
-            if($app->isAdmin()) return;
+            if($app->isClient('administrator')) return;
             $component = $app->input->getCmd('option');
             if($component != 'com_users') return;
             $task = $app->input->getCmd('task');

@@ -128,7 +128,7 @@ class VolunteersModelDepartments extends JModelList
 		}
 
 		// Filter by active state
-		$board = (JFactory::getApplication()->isSite() ? 0 : 1);
+		$board = (JFactory::getApplication()->isClient('site') ? 0 : 1);
 
 		if (!$board)
 		{
@@ -153,7 +153,7 @@ class VolunteersModelDepartments extends JModelList
 	{
 		$items = parent::getItems();
 
-		if (JFactory::getApplication()->isSite())
+		if (JFactory::getApplication()->isClient('site'))
 		{
 			$departments = array();
 			foreach ($items as $item)

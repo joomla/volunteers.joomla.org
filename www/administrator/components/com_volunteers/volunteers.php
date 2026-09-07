@@ -8,7 +8,9 @@
 // No direct access.
 defined('_JEXEC') or die;
 
-JHtml::_('behavior.tabstate');
+if (version_compare(JVERSION, '4.0.0', '<')) {
+    JHtml::_('behavior.tabstate');
+}
 
 if (!JFactory::getUser()->authorise('core.manage', 'com_volunteers'))
 {

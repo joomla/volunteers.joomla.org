@@ -195,7 +195,7 @@ class VolunteersModelTeams extends JModelList
 
 		if (is_array($parent))
 		{
-			$query->where('a.parent_id IN (' . implode($parent, ',') . ')');
+			$query->where('a.parent_id IN (' . implode(',', $parent) . ')');
 		}
 
 		if (is_numeric($parent) && ($parent > 0))
@@ -288,7 +288,7 @@ class VolunteersModelTeams extends JModelList
 
 		if (is_array($parent))
 		{
-			$query->where('parent_id IN (' . implode($parent, ',') . ')');
+			$query->where('parent_id IN (' . implode(',', $parent) . ')');
 		}
 
 		if (is_numeric($parent) && ($parent > 0))

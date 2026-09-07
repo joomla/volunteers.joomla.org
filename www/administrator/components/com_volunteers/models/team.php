@@ -181,7 +181,7 @@ class VolunteersModelTeam extends JModelAdmin
 				$query
 					->update('#__volunteers_members')
 					->set('date_ended = ' . $db->quote($data['date_ended']))
-					->where('id IN (' . implode($membersIds, ',') . ')');
+					->where('id IN (' . implode(',', $membersIds) . ')');
 
 				try
 				{

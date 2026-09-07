@@ -206,7 +206,7 @@ class VolunteersModelMembers extends JModelList
 
 		if (is_array($team))
 		{
-			$query->where('a.team IN (' . implode($team, ',') . ')');
+			$query->where('a.team IN (' . implode(',', $team) . ')');
 		}
 
 		if (is_numeric($team) && ($team > 0))
@@ -227,7 +227,7 @@ class VolunteersModelMembers extends JModelList
 
 		if (is_array($position))
 		{
-			$query->where('a.position IN (' . implode($position, ',') . ')');
+			$query->where('a.position IN (' . implode(',', $position) . ')');
 		}
 
 		if (is_numeric($position) && ($position > 0))

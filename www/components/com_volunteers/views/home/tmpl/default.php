@@ -9,8 +9,8 @@
 defined('_JEXEC') or die;
 
 JFactory::getDocument()->addScript('https://maps.googleapis.com/maps/api/js?key=AIzaSyC04czYnPuPFkO6eDAKX-j_lfrpanAAo-U');
-JFactory::getDocument()->addScript('media/com_volunteers/js/markerclusterer.js', 'text/javascript', true);
-JFactory::getDocument()->addScript('media/com_volunteers/js/oms.js', 'text/javascript', true);
+JFactory::getDocument()->addScript('media/com_volunteers/js/markerclusterer.js', array(), array('defer' => true));
+JFactory::getDocument()->addScript('media/com_volunteers/js/oms.js', array(), array('defer' => true));
 ?>
 
 <div class="row-fluid">

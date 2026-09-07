@@ -165,7 +165,7 @@ class VolunteersModelTeams extends JModelList
 		}
 
 		// Filter by active state
-		$active = $this->getState('filter.active', (JFactory::getApplication()->isSite()) ? 1 : null);
+		$active = $this->getState('filter.active', (JFactory::getApplication()->isClient('site')) ? 1 : null);
 
 		if (is_numeric($active))
 		{
@@ -224,7 +224,7 @@ class VolunteersModelTeams extends JModelList
 	{
 		$items = parent::getItems();
 
-		if (JFactory::getApplication()->isSite())
+		if (JFactory::getApplication()->isClient('site'))
 		{
 			$teams   = array();
 			$teamIds = array();

@@ -7,6 +7,8 @@
 
 // No direct access.
 defined('_JEXEC') or die;
+
+JHtml::_('bootstrap.tab', '#tab-container')
 ?>
 <?php if ($this->item->new): ?>
     <div class="alert alert-success">
@@ -20,8 +22,8 @@ defined('_JEXEC') or die;
     </div>
 <?php endif; ?>
 
-<div class="row-fluid profile">
-    <div class="span3 volunteer-image">
+<div class="row profile">
+    <div class="col-md-3 volunteer-image">
 		<?php echo VolunteersHelper::image($this->item->image, 'large', false, $this->item->name); ?>
 
 		<?php if ($this->item->certification): ?>
@@ -32,10 +34,10 @@ defined('_JEXEC') or die;
             </div>
 		<?php endif; ?>
     </div>
-    <div class="span9">
+    <div class="col-md-9">
         <div class="filter-bar">
 			<?php if (($this->user->id == $this->item->user_id) && $this->item->user_id): ?>
-                <a class="btn pull-right" href="https://identity.joomla.org/profile?layout=edit">
+                <a class="btn float-end" href="https://identity.joomla.org/profile?layout=edit">
                     <span class="icon-edit"></span> <?php echo JText::_('COM_VOLUNTEERS_TITLE_VOLUNTEERS_EDIT_MY') ?>
                 </a>
 			<?php endif; ?>
@@ -55,13 +57,13 @@ defined('_JEXEC') or die;
 
         <div class="btn-group">
 			<?php if ($this->item->joomlaforum): ?>
-                <a class="btn btn-joomlaforum" target="_blank" href="https://forum.joomla.org/memberlist.php?mode=viewprofile&u=<?php echo($this->item->joomlaforum) ?>">
+                <a class="btn btn-secondary btn-joomlaforum" target="_blank" href="https://forum.joomla.org/memberlist.php?mode=viewprofile&u=<?php echo($this->item->joomlaforum) ?>">
                     <span class="icon-joomla"></span>
 					<?php echo JText::_('COM_VOLUNTEERS_CONNECT_JOOMLAFORUM') ?></span>
                 </a>
 			<?php endif; ?>
 			<?php if ($this->item->joomladocs): ?>
-                <a class="btn btn-joomladocs" target="_blank" href="https://docs.joomla.org/User:<?php echo($this->item->joomladocs) ?>">
+                <a class="btn btn-secondary btn-joomladocs" target="_blank" href="https://docs.joomla.org/User:<?php echo($this->item->joomladocs) ?>">
                     <span class="icon-joomla"></span>
 					<?php echo JText::_('COM_VOLUNTEERS_CONNECT_JOOMLADOCS') ?>
                 </a>
@@ -71,27 +73,27 @@ defined('_JEXEC') or die;
         <p>
         <div class="btn-group">
 		    <?php if ($this->item->github): ?>
-                <a class="btn btn-gtihub" target="_blank" href="https://github.com/<?php echo($this->item->github) ?>">
-                    <span class="icon-github"></span>
-                    <span class="hidden-phone"><?php echo JText::_('COM_VOLUNTEERS_CONNECT_GITHUB') ?></span>
+                <a class="btn btn-secondary btn-github" target="_blank" href="https://github.com/<?php echo($this->item->github) ?>">
+                    <span class="fab fa-github"></span>
+                    <span class="d-none d-md-inline-block"><?php echo JText::_('COM_VOLUNTEERS_CONNECT_GITHUB') ?></span>
                 </a>
 		    <?php endif; ?>
 		    <?php if ($this->item->crowdin): ?>
-                <a class="btn btn-crowdin" target="_blank" href="https://crowdin.com/profile/<?php echo($this->item->crowdin) ?>">
+                <a class="btn btn-secondary btn-crowdin" target="_blank" href="https://crowdin.com/profile/<?php echo($this->item->crowdin) ?>">
                     <span class="icon-comments-2"></span>
-                    <span class="hidden-phone"><?php echo JText::_('COM_VOLUNTEERS_CONNECT_CROWDIN') ?></span>
+                    <span class="d-none d-md-inline-block"><?php echo JText::_('COM_VOLUNTEERS_CONNECT_CROWDIN') ?></span>
                 </a>
 		    <?php endif; ?>
 		    <?php if ($this->item->stackexchange): ?>
-                <a class="btn btn-stackexchange" target="_blank" href="https://stackexchange.com/users/<?php echo($this->item->stackexchange) ?>">
+                <a class="btn btn-secondary btn-stackexchange" target="_blank" href="https://stackexchange.com/users/<?php echo($this->item->stackexchange) ?>">
                     <span class="icon-comments-2"></span>
-                    <span class="hidden-phone"><?php echo JText::_('COM_VOLUNTEERS_CONNECT_STACKEXCHANGE') ?></span>
+                    <span class="d-none d-md-inline-block"><?php echo JText::_('COM_VOLUNTEERS_CONNECT_STACKEXCHANGE') ?></span>
                 </a>
 		    <?php endif; ?>
 		    <?php if ($this->item->joomlastackexchange): ?>
-                <a class="btn btn-joomlastackexchange" target="_blank" href="https://joomla.stackexchange.com/users/<?php echo($this->item->joomlastackexchange) ?>">
+                <a class="btn btn-secondary btn-joomlastackexchange" target="_blank" href="https://joomla.stackexchange.com/users/<?php echo($this->item->joomlastackexchange) ?>">
                     <span class="icon-comments-2"></span>
-                    <span class="hidden-phone"><?php echo JText::_('COM_VOLUNTEERS_CONNECT_JOOMLASTACKEXCHANGE') ?></span>
+                    <span class="d-none d-md-inline-block"><?php echo JText::_('COM_VOLUNTEERS_CONNECT_JOOMLASTACKEXCHANGE') ?></span>
                 </a>
 		    <?php endif; ?>
         </div>
@@ -100,27 +102,27 @@ defined('_JEXEC') or die;
         <p>
         <div class="btn-group">
 			<?php if ($this->item->website && ($this->item->website != 'http://')): ?>
-                <a class="btn" target="_blank" href="<?php echo($this->item->website) ?>">
+                <a class="btn btn-secondary" target="_blank" href="<?php echo($this->item->website) ?>">
                     <span class="icon-link"></span>
-                    <span class="hidden-phone"><?php echo JText::_('COM_VOLUNTEERS_CONNECT_WEBSITE') ?></span>
+                    <span class="d-none d-md-inline-block"><?php echo JText::_('COM_VOLUNTEERS_CONNECT_WEBSITE') ?></span>
                 </a>
 			<?php endif; ?>
 			<?php if ($this->item->twitter): ?>
-                <a class="btn btn-twitter" target="_blank" href="https://twitter.com/<?php echo($this->item->twitter) ?>">
-                    <span class="icon-twitter"></span>
-                    <span class="hidden-phone"><?php echo JText::_('COM_VOLUNTEERS_CONNECT_TWITTER') ?></span>
+                <a class="btn btn-secondary btn-twitter" target="_blank" href="https://twitter.com/<?php echo($this->item->twitter) ?>">
+                    <span class="fab fa-twitter"></span>
+                    <span class="d-none d-md-inline-block"><?php echo JText::_('COM_VOLUNTEERS_CONNECT_TWITTER') ?></span>
                 </a>
 			<?php endif; ?>
 			<?php if ($this->item->facebook): ?>
-                <a class="btn btn-facebook" target="_blank" href="https://www.facebook.com/<?php echo($this->item->facebook) ?>">
-                    <span class="icon-facebook"></span>
-                    <span class="hidden-phone"><?php echo JText::_('COM_VOLUNTEERS_CONNECT_FACEBOOK') ?></span>
+                <a class="btn btn-secondary btn-facebook" target="_blank" href="https://www.facebook.com/<?php echo($this->item->facebook) ?>">
+                    <span class="fab fa-facebook"></span>
+                    <span class="d-none d-md-inline-block"><?php echo JText::_('COM_VOLUNTEERS_CONNECT_FACEBOOK') ?></span>
                 </a>
 			<?php endif; ?>
 			<?php if ($this->item->linkedin): ?>
-                <a class="btn btn-linkedin" target="_blank" href="https://www.linkedin.com/in/<?php echo($this->item->linkedin) ?>">
-                    <span class="icon-linkedin"></span>
-                    <span class="hidden-phone"><?php echo JText::_('COM_VOLUNTEERS_CONNECT_LINKEDIN') ?></span>
+                <a class="btn btn-secondary btn-linkedin" target="_blank" href="https://www.linkedin.com/in/<?php echo($this->item->linkedin) ?>">
+                    <span class="fab fa-linkedin"></span>
+                    <span class="d-none d-md-inline-block"><?php echo JText::_('COM_VOLUNTEERS_CONNECT_LINKEDIN') ?></span>
                 </a>
 			<?php endif; ?>
         </div>
@@ -130,28 +132,28 @@ defined('_JEXEC') or die;
 
 <br>
 
-<div class="row-fluid">
-    <div class="span12">
+<div class="row">
+    <div class="col-md-12">
 
         <ul id="tab-container" class="nav nav-tabs">
 			<?php if ($this->item->teams->active): ?>
-                <li>
-                    <a href="#teams" data-toggle="tab"><?php echo JText::_('COM_VOLUNTEERS_TAB_TEAMSINVOLVED') ?></a>
+                <li class="nav-item">
+                    <a class="nav-link" href="#teams" data-bs-toggle="tab"><?php echo JText::_('COM_VOLUNTEERS_TAB_TEAMSINVOLVED') ?></a>
                 </li>
 			<?php endif; ?>
 			<?php if ($this->item->teams->honorroll): ?>
-                <li>
-                    <a href="#honorroll" data-toggle="tab"><?php echo JText::_('COM_VOLUNTEERS_TAB_HONORROLL') ?></a>
+                <li class="nav-item">
+                    <a class="nav-link" href="#honorroll" data-bs-toggle="tab"><?php echo JText::_('COM_VOLUNTEERS_TAB_HONORROLL') ?></a>
                 </li>
 			<?php endif; ?>
 			<?php if ($this->item->joomlastory): ?>
-                <li>
-                    <a href="#joomlastory" data-toggle="tab"><?php echo JText::_('COM_VOLUNTEERS_TAB_JOOMLASTORY') ?></a>
+                <li class="nav-item">
+                    <a class="nav-link" href="#joomlastory" data-bs-toggle="tab"><?php echo JText::_('COM_VOLUNTEERS_TAB_JOOMLASTORY') ?></a>
                 </li>
 			<?php endif; ?>
 			<?php if ($this->user->id != $this->item->user_id): ?>
-                <li>
-                    <a href="#contact" data-toggle="tab"><?php echo JText::_('COM_VOLUNTEERS_TAB_CONTACT') ?></a>
+                <li class="nav-item">
+                    <a class="nav-link" href="#contact" data-bs-toggle="tab"><?php echo JText::_('COM_VOLUNTEERS_TAB_CONTACT') ?></a>
                 </li>
 			<?php endif; ?>
         </ul>
@@ -280,17 +282,22 @@ defined('_JEXEC') or die;
 </div>
 
 <script type="text/javascript">
-    jQuery('.nav-tabs a:first').tab('show');
+    document.addEventListener('DOMContentLoaded', () => {
+        const triggerFirstTabEl = document.querySelector('.nav-tabs a')
+        window.bootstrap.Tab.getInstance(triggerFirstTabEl).show();
 
-    // Javascript to enable link to tab
-    var url = document.location.toString();
-    if (url.match('#')) {
-        jQuery('.nav-tabs a[href="#' + url.split('#')[1] + '"]').tab('show');
-    }
+        // Javascript to enable link to tab
+        var url = document.location.toString();
+        if (url.match('#')) {
+            const triggerUrlTabEl = document.querySelector('.nav-tabs a[href="#' + url.split('#')[1] + '"]')
+            window.bootstrap.Tab.getInstance(triggerUrlTabEl).show();
+        }
 
-    jQuery('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-        var target = this.href.split('#');
-        jQuery('.nav-tabs a').filter('[href="#' + target[1] + '"]').tab('show');
+        jQuery('a[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
+            var target = this.href.split('#');
+            const triggerClickTabEl = document.querySelector('.nav-tabs a[href="#' + target[1] + '"]')
+            window.bootstrap.Tab.getInstance(triggerClickTabEl).show();
+        });
     });
 
     // Report Spam Button

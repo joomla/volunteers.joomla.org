@@ -9,9 +9,9 @@
 defined('_JEXEC') or die;
 ?>
 
-<ul class="media-list">
+<ul class="media-list ms-0 list-unstyled">
     <li class="media">
-        <a class="pull-left" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $story->id) ?>">
+        <a class="float-start" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $story->id) ?>">
 			<?php echo VolunteersHelper::image($story->image, 'small', false, $story->name); ?>
         </a>
         <div class="media-body">
@@ -27,7 +27,7 @@ defined('_JEXEC') or die;
     </li>
     <li class="media">
         <p><?php echo JHtml::_('string.truncate', strip_tags(trim($story->joomlastory)), 500); ?></p>
-        <a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $story->id) ?>#joomlastory" class="btn">
+        <a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $story->id) ?>#joomlastory" class="btn btn-secondary">
             <span class="icon-chevron-right"></span><?php echo JText::_('COM_VOLUNTEERS_READ_MORE_JOOMLASTORY') ?>
         </a>
     </li>

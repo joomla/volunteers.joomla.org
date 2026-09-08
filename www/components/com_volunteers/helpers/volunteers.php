@@ -54,7 +54,7 @@ abstract class VolunteersHelper
 		}
 		else
 		{
-			$html = '<img class="img-rounded" alt="' . $alt . '" src="' . $image . '"/>';
+			$html = '<img class="img-rounded w-100" alt="' . $alt . '" src="' . $image . '"/>';
 		}
 
 		return $html;

@@ -17,10 +17,7 @@ JHtml::_('formbehavior.chosen', 'select');
 	<div class="row-fluid">
 		<div class="filter-bar">
 			<div class="btn-group pull-right">
-				<select name="filter_category" id="filter_category" onchange="document.adminForm.submit();">
-					<option value=""><?php echo JText::_('COM_VOLUNTEERS_SELECT_REPORTCATEGORY'); ?></option>
-					<?php echo JHtml::_('select.options', JHtmlVolunteers::reportcategories(), 'value', 'text', $this->state->get('filter.category')); ?>
-				</select>
+				<?php echo JHtmlVolunteers::reportcategories($this->state->get('filter.category')); ?>
 			</div>
 		</div>
 		<div class="page-header">

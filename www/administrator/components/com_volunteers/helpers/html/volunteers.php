@@ -210,20 +210,39 @@ abstract class JHtmlVolunteers
 	/**
 	 * Creates a list of departments and teams.
 	 *
-	 * @return  array  An array containing the departments and teams that can be selected.
+	 * @param   string  $activeFilter  The selected element in the list
+	 *
+	 * @return  string  The select dropdown for filtering by a report category.
 	 */
-	public static function reportcategories()
+	public static function reportcategories($activeFilter = '')
 	{
-		$department[] = JHtml::_('select.optgroup', JText::_('COM_VOLUNTEERS_FIELD_DEPARTMENTS'));
-		$departments  = array_merge($department, self::departments($prefix = true));
-		$department[] = JHtml::_('select.optgroup', '');
-		$team[]       = JHtml::_('select.optgroup', JText::_('COM_VOLUNTEERS_FIELD_TEAMS'));
-		$teams        = array_merge($team, self::teams($parent = false, $prefix = true));
-		$team[]       = JHtml::_('select.optgroup', '');
+		$groups                         = [];
+		$groups[]['items'][]            = JHtml::_('select.option', '', JText::_('COM_VOLUNTEERS_SELECT_REPORTCATEGORY'));
+		$groups['departments']          = [];
+		$groups['departments']['text']  = JText::sprintf('COM_VOLUNTEERS_FIELD_DEPARTMENTS');
+		$groups['departments']['items'] = [];
 
-		$options = array_merge($departments, $teams);
+		foreach (self::departments(true) as $department) {
+			$groups['departments']['items'][] = JHtml::_('select.option', $department->value, $department->text);
+		}
 
-		return $options;
+		$groups['teams']          = [];
+		$groups['teams']['text']  = JText::sprintf('COM_VOLUNTEERS_FIELD_TEAMS');
+		$groups['teams']['items'] = [];
+
+		foreach (self::teams(true) as $team) {
+			$groups['teams']['items'][] = JHtml::_('select.option', $team->value, $team->text);
+		}
+
+		return JHtml::_(
+			'select.groupedlist',
+			$groups,
+			'filter_category',
+			['list.attr' => [
+				'class' => 'form-select',
+				'onchange' => 'document.adminForm.submit();'
+			], 'list.select' => $activeFilter]
+		);
 	}
 
 	/**

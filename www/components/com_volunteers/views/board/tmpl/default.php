@@ -7,11 +7,13 @@
 
 // No direct access.
 defined('_JEXEC') or die;
+
+JHtml::_('bootstrap.tab', '#tab-container')
 ?>
-<div class="row-fluid">
+<div class="row">
     <div class="filter-bar">
 		<?php if ($this->acl->edit): ?>
-            <a class="btn pull-right" href="<?php echo JRoute::_('index.php?option=com_volunteers&task=department.edit&id=' . $this->item->id) ?>">
+            <a class="btn btn-secondary float-end" href="<?php echo JRoute::_('index.php?option=com_volunteers&task=department.edit&id=' . $this->item->id) ?>">
                 <span class="icon-edit"></span> <?php echo JText::_('COM_VOLUNTEERS_TITLE_DEPARTMENTS_EDIT') ?>
             </a>
 		<?php endif; ?>
@@ -32,31 +34,31 @@ defined('_JEXEC') or die;
     </dl>
 </div>
 
-<div class="row-fluid">
-    <div class="span12">
+<div class="row">
+    <div class="col-md-12">
 
         <ul id="tab-container" class="nav nav-tabs">
-            <li>
-                <a href="#members" data-toggle="tab"><?php echo JText::_('COM_VOLUNTEERS_TAB_MEMBERS') ?></a>
+            <li class="nav-item">
+                <a class="nav-link" href="#members" data-bs-toggle="tab"><?php echo JText::_('COM_VOLUNTEERS_TAB_MEMBERS') ?></a>
             </li>
 			<?php if ($this->item->members->honorroll): ?>
-                <li>
-                    <a href="#honorroll" data-toggle="tab"><?php echo JText::_('COM_VOLUNTEERS_TAB_HONORROLL') ?></a>
+                <li class="nav-item">
+                    <a class="nav-link" href="#honorroll" data-bs-toggle="tab"><?php echo JText::_('COM_VOLUNTEERS_TAB_HONORROLL') ?></a>
                 </li>
 			<?php endif; ?>
-            <li>
-                <a href="#reports" data-toggle="tab"><?php echo JText::_('COM_VOLUNTEERS_TAB_REPORTS') ?></a>
+            <li class="nav-item">
+                <a class="nav-link" href="#reports" data-bs-toggle="tab"><?php echo JText::_('COM_VOLUNTEERS_TAB_REPORTS') ?></a>
             </li>
-            <li>
-                <a href="#contact" data-toggle="tab"><?php echo JText::_('COM_VOLUNTEERS_TAB_CONTACT') ?></a>
+            <li class="nav-item">
+                <a class="nav-link" href="#contact" data-bs-toggle="tab"><?php echo JText::_('COM_VOLUNTEERS_TAB_CONTACT') ?></a>
             </li>
         </ul>
 
         <div class="tab-content">
-            <div class="tab-pane" id="members">
+            <div class="tab-pane fade" id="members">
 				<?php if ($this->acl->edit): ?>
-                    <div class="row-fluid">
-                        <a class="btn pull-right" href="<?php echo JRoute::_('index.php?option=com_volunteers&task=member.add&department=' . $this->item->id) ?>">
+                    <div class="row">
+                        <a class="btn btn-secondary float-end" href="<?php echo JRoute::_('index.php?option=com_volunteers&task=member.add&department=' . $this->item->id) ?>">
                             <span class="icon-new"></span> <?php echo JText::_('COM_VOLUNTEERS_MEMBER_ADD') ?>
                         </a>
                     </div>
@@ -76,7 +78,7 @@ defined('_JEXEC') or die;
 						<?php foreach ($this->item->members->active as $volunteer): ?>
                             <tr>
                                 <td class="volunteer-image">
-                                    <a class="pull-left" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $volunteer->volunteer) ?>">
+                                    <a class="float-start" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $volunteer->volunteer) ?>">
 										<?php echo VolunteersHelper::image($volunteer->volunteer_image, 'small', false, $volunteer->volunteer_image); ?>
                                     </a>
                                     <a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $volunteer->volunteer) ?>">
@@ -101,7 +103,7 @@ defined('_JEXEC') or die;
                                 </td>
 								<?php if ($this->acl->edit): ?>
                                     <td>
-                                        <a class="btn btn-small pull-right" href="<?php echo JRoute::_('index.php?option=com_volunteers&task=member.edit&id=' . $volunteer->id) ?>">
+                                        <a class="btn btn-sm float-end" href="<?php echo JRoute::_('index.php?option=com_volunteers&task=member.edit&id=' . $volunteer->id) ?>">
                                             <span class="icon-edit"></span> <?php echo JText::_('COM_VOLUNTEERS_EDIT') ?>
                                         </a>
                                     </td>
@@ -114,10 +116,10 @@ defined('_JEXEC') or die;
             </div>
 
 			<?php if ($this->item->members->honorroll): ?>
-                <div class="tab-pane" id="honorroll">
+                <div class="tab-pane fade" id="honorroll">
 					<?php if ($this->acl->edit): ?>
-                        <div class="row-fluid">
-                            <a class="btn pull-right" href="<?php echo JRoute::_('index.php?option=com_volunteers&task=member.add&department=' . $this->item->id) ?>">
+                        <div class="row">
+                            <a class="btn btn-secondary float-end" href="<?php echo JRoute::_('index.php?option=com_volunteers&task=member.add&department=' . $this->item->id) ?>">
                                 <span class="icon-new"></span> <?php echo JText::_('COM_VOLUNTEERS_MEMBER_ADD') ?>
                             </a>
                         </div>
@@ -137,7 +139,7 @@ defined('_JEXEC') or die;
 						<?php foreach ($this->item->members->honorroll as $volunteer): ?>
                             <tr>
                                 <td class="volunteer-image">
-                                    <a class="pull-left" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $volunteer->volunteer) ?>">
+                                    <a class="float-start" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $volunteer->volunteer) ?>">
 										<?php echo VolunteersHelper::image($volunteer->volunteer_image, 'small', false, $volunteer->volunteer_image); ?>
                                     </a>
                                     <a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $volunteer->volunteer) ?>">
@@ -165,7 +167,7 @@ defined('_JEXEC') or die;
                                 </td>
 								<?php if ($this->acl->edit): ?>
                                     <td>
-                                        <a class="btn btn-small pull-right" href="<?php echo JRoute::_('index.php?option=com_volunteers&task=member.edit&id=' . $volunteer->id) ?>">
+                                        <a class="btn btn-sm float-end" href="<?php echo JRoute::_('index.php?option=com_volunteers&task=member.edit&id=' . $volunteer->id) ?>">
                                             <span class="icon-edit"></span> <?php echo JText::_('COM_VOLUNTEERS_EDIT') ?>
                                         </a>
                                     </td>
@@ -177,10 +179,10 @@ defined('_JEXEC') or die;
                 </div>
 			<?php endif; ?>
 
-            <div class="tab-pane" id="reports">
+            <div class="tab-pane fade" id="reports">
 				<?php if ($this->acl->create_report): ?>
-                    <div class="row-fluid">
-                        <a class="btn pull-right" href="<?php echo JRoute::_('index.php?option=com_volunteers&task=report.add&department=' . $this->item->id) ?>">
+                    <div class="row">
+                        <a class="btn btn-secondary float-end" href="<?php echo JRoute::_('index.php?option=com_volunteers&task=report.add&department=' . $this->item->id) ?>">
                             <span class="icon-new"></span> <?php echo JText::_('COM_VOLUNTEERS_REPORT_ADD') ?>
                         </a>
                     </div>
@@ -188,15 +190,15 @@ defined('_JEXEC') or die;
 				<?php endif; ?>
 				<?php if ($this->item->reports): ?>
 					<?php foreach ($this->item->reports as $report): ?>
-                        <div class="row-fluid report">
-                            <div class="span2 volunteer-image">
+                        <div class="row report">
+                            <div class="col-md-2 volunteer-image">
                                 <a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $report->volunteer_id) ?>">
 									<?php echo VolunteersHelper::image($report->volunteer_image, 'large', false, $report->volunteer_name); ?>
                                 </a>
                             </div>
-                            <div class="span10">
+                            <div class="col-md-10">
 								<?php if ($this->acl->edit || ($report->created_by == $this->user->id)): ?>
-                                    <a class="btn btn-small pull-right" href="<?php echo JRoute::_('index.php?option=com_volunteers&task=report.edit&id=' . $report->id) ?>">
+                                    <a class="btn btn-sm float-end" href="<?php echo JRoute::_('index.php?option=com_volunteers&task=report.edit&id=' . $report->id) ?>">
                                         <span class="icon-edit"></span> <?php echo JText::_('COM_VOLUNTEERS_EDIT') ?>
                                     </a>
 								<?php endif; ?>
@@ -213,7 +215,7 @@ defined('_JEXEC') or die;
                                     <a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=board&id=' . $report->department) ?>"><?php echo $report->department_title; ?></a>
                                 </p>
                                 <p><?php echo JHtml::_('string.truncate', strip_tags(trim($report->description)), 300); ?></p>
-                                <a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=report&id=' . $report->id) ?>" class="btn">
+                                <a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=report&id=' . $report->id) ?>" class="btn btn-secondary">
 									<?php echo JText::_('COM_VOLUNTEERS_READ_MORE') ?>&nbsp;<?php echo($report->title); ?>
                                 </a>
                             </div>
@@ -225,7 +227,7 @@ defined('_JEXEC') or die;
                             <span class="icon-chevron-right"></span><?php echo JText::_('COM_VOLUNTEERS_REPORTS_BROWSE') ?>&nbsp
                         </a>
 					<?php endif; ?>
-                    <a class="btn btn-warning pull-right" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=reports&filter_category=d.' . $this->item->id . '&format=feed&type=rss') ?>">
+                    <a class="btn btn-warning float-end" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=reports&filter_category=d.' . $this->item->id . '&format=feed&type=rss') ?>">
                         <span class="icon-feed"></span> <?php echo JText::_('COM_VOLUNTEERS_RSSFEED') ?>
                     </a>
 				<?php else: ?>
@@ -237,7 +239,7 @@ defined('_JEXEC') or die;
 				<?php endif; ?>
             </div>
 
-            <div class="tab-pane" id="contact">
+            <div class="tab-pane fade" id="contact">
 				<?php if ($this->user->guest) : ?>
                     <p class="alert alert-info">
 						<?php echo JText::_('COM_VOLUNTEERS_NOTE_LOGIN_CONTACT_DEPARTMENT') ?>
@@ -283,17 +285,21 @@ defined('_JEXEC') or die;
 </div>
 
 <script type="text/javascript">
-    jQuery('.nav-tabs a:first').tab('show');
+    document.addEventListener('DOMContentLoaded', () => {
+    const triggerFirstTabEl = document.querySelector('.nav-tabs a')
+    window.bootstrap.Tab.getInstance(triggerFirstTabEl).show();
 
     // Javascript to enable link to tab
     var url = document.location.toString();
     if (url.match('#')) {
-        jQuery('.nav-tabs a[href="#' + url.split('#')[1] + '"]').tab('show');
+        const triggerUrlTabEl = document.querySelector('.nav-tabs a[href="#' + url.split('#')[1] + '"]')
+        window.bootstrap.Tab.getInstance(triggerUrlTabEl).show();
     }
 
-    jQuery('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+    jQuery('a[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
         var target = this.href.split('#');
-        jQuery('.nav-tabs a').filter('[href="#' + target[1] + '"]').tab('show');
+        const triggerClickTabEl = document.querySelector('.nav-tabs a[href="#' + target[1] + '"]')
+        window.bootstrap.Tab.getInstance(triggerClickTabEl).show();
     });
 
     // Responsive tables
@@ -316,4 +322,5 @@ defined('_JEXEC') or die;
             }
         }
     }
+    });
 </script>

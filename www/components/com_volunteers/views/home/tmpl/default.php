@@ -13,41 +13,41 @@ JFactory::getDocument()->addScript('media/com_volunteers/js/markerclusterer.js',
 JFactory::getDocument()->addScript('media/com_volunteers/js/oms.js', array(), array('defer' => true));
 ?>
 
-<div class="row-fluid">
-	<img style="width: 100%" src="/images/volunteer-header.png" alt="Become a Joomla! contributor">
+<div class="row">
+	<img class="w-100" src="<?php echo JUri::root(); ?>/images/volunteer-header.png" alt="Become a Joomla! contributor">
 </div>
 <br>
-<div class="row-fluid">
-	<div class="span6">
+<div class="row">
+	<div class="col-md-6">
 		<h2><?php echo JText::_('COM_VOLUNTEERS_HOME_INTRO_HOW_TITLE'); ?></h2>
 		<p><?php echo JText::_('COM_VOLUNTEERS_HOME_INTRO_HOW_DESC'); ?></p>
 		<p><?php echo JText::_('COM_VOLUNTEERS_HOME_INTRO_HOW_ACTION'); ?></p>
 		<p>
-			<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=roles'); ?>" class="btn"><span class="icon-chevron-right"></span><?php echo JText::_('COM_VOLUNTEERS_HOME_INTRO_HOW_BUTTON'); ?>
+			<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=roles'); ?>" class="btn btn-secondary"><span class="icon-chevron-right"></span><?php echo JText::_('COM_VOLUNTEERS_HOME_INTRO_HOW_BUTTON'); ?>
 			</a>
 		</p>
 	</div>
-	<div class="span6">
+	<div class="col-md-6">
 		<h2><?php echo JText::_('COM_VOLUNTEERS_HOME_INTRO_WHY_TITLE'); ?></h2>
 		<p><?php echo JText::_('COM_VOLUNTEERS_HOME_INTRO_WHY_DESC'); ?></p>
 		<p><?php echo JText::_('COM_VOLUNTEERS_HOME_INTRO_WHY_ACTION'); ?></p>
 		<p>
-			<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteers'); ?>" class="btn"><span class="icon-chevron-right"></span><?php echo JText::_('COM_VOLUNTEERS_HOME_INTRO_WHY_BUTTON'); ?>
+			<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteers'); ?>" class="btn btn-secondary"><span class="icon-chevron-right"></span><?php echo JText::_('COM_VOLUNTEERS_HOME_INTRO_WHY_BUTTON'); ?>
 			</a>
 		</p>
 	</div>
 </div>
 <br>
-<div class="row-fluid">
+<div class="row">
 	<h2><?php echo JText::_('COM_VOLUNTEERS_LATEST_REPORTS') ?></h2>
 	<?php if (!empty($this->reports)) foreach ($this->reports as $i => $item): ?>
-		<div class="row-fluid report">
-			<div class="span2">
+		<div class="row report">
+			<div class="col-md-2">
 				<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $item->volunteer_id) ?>">
 					<?php echo VolunteersHelper::image($item->volunteer_image, 'large', false, $item->volunteer_name); ?>
 				</a>
 			</div>
-			<div class="span10">
+			<div class="col-md-10">
 				<h3 class="report-title">
 					<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=report&id=' . $item->id) ?>">
 						<?php echo($item->title); ?>
@@ -61,17 +61,17 @@ JFactory::getDocument()->addScript('media/com_volunteers/js/oms.js', array(), ar
 					<a href="<?php echo $item->link; ?>"><?php echo $item->name; ?></a>
 				</p>
 				<p><?php echo JHtml::_('string.truncate', strip_tags(trim($item->description)), 380); ?></p>
-				<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=report&id=' . $item->id) ?>" class="btn">
+				<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=report&id=' . $item->id) ?>" class="btn btn-secondary">
 					<span class="icon-chevron-right"></span><?php echo JText::_('COM_VOLUNTEERS_READ_MORE') ?>&nbsp;<?php echo JHtml::_('string.truncate', $item->title, 55); ?>
 				</a>
 			</div>
 		</div>
 		<hr>
 	<?php endforeach; ?>
-	<a class="btn btn-large btn-block" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=reports'); ?>"><?php echo JText::_('COM_VOLUNTEERS_READ_MORE_REPORTS') ?></a>
+	<a class="btn btn-lg btn-secondary w-100" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=reports'); ?>"><?php echo JText::_('COM_VOLUNTEERS_READ_MORE_REPORTS') ?></a>
 </div>
 <br>
-<div class="row-fluid">
+<div class="row">
 	<h2><?php echo count($this->markers) . ' ' . JText::_('COM_VOLUNTEERS_VOLUNTEERS_WORLD') ?></h2>
 	<div id="map-canvas"></div>
 </div>

@@ -10,10 +10,10 @@ defined('_JEXEC') or die;
 ?>
 
 <?php if (!empty($volunteers)) foreach ($volunteers as $i => $item): ?>
-    <ul class="media-list latest-volunteers">
+    <ul class="media-list ms-0 list-unstyled latest-volunteers">
         <li class="media">
             <a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $item->id) ?>">
-						<span class="pull-left">
+						<span class="float-start">
 							<?php echo VolunteersHelper::image($item->image, 'small', false, $item->name); ?>
 						</span>
                 <div class="media-body">
@@ -28,4 +28,4 @@ defined('_JEXEC') or die;
         </li>
     </ul>
 <?php endforeach; ?>
-<a class="btn btn-large btn-block" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteers'); ?>"><?php echo JText::_('COM_VOLUNTEERS_READ_MORE_VOLUNTEERS') ?></a>
+<a class="btn btn-secondary btn-lg w-100" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteers'); ?>"><?php echo JText::_('COM_VOLUNTEERS_READ_MORE_VOLUNTEERS') ?></a>

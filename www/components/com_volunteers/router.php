@@ -5,623 +5,336 @@
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
-// No direct access.
 defined('_JEXEC') or die;
 
+use Exception;
+use Joomla\CMS\Application\SiteApplication;
+use Joomla\CMS\Component\Router\RouterView;
+use Joomla\CMS\Component\Router\RouterViewConfiguration;
+use Joomla\CMS\Component\Router\Rules\MenuRules;
+use Joomla\CMS\Component\Router\Rules\NomenuRules;
+use Joomla\CMS\Component\Router\Rules\StandardRules;
+use Joomla\CMS\Menu\AbstractMenu;
+use Joomla\Database\DatabaseInterface;
+use Joomla\Database\ParameterType;
+
 /**
- * Routing class from com_volunteers
+ * Routing class for com_volunteers
+ *
+ * @since 4.0.0
  */
-class VolunteersRouter extends JComponentRouterBase
+class VolunteersRouter extends RouterView
 {
-	/**
-	 * Build the route for the com_volunteers component
-	 *
-	 * @param   array &$query  An array of URL arguments
-	 *
-	 * @return  array  The URL arguments to use to assemble the subsequent URL.
-	 */
-	public function build(&$query)
-	{
-		// Initialize variables.
-		$segments = [];
-
-		// Handle the view
-		$view   = isset($query['view']) ? $query['view'] : null;
-		$layout = isset($query['layout']) ? $query['layout'] : null;
-		unset($query['view']);
-
-		// DB
-		$db = JFactory::getDbo();
-
-		switch ($view)
-		{
-			case 'department':
-				$dbQuery = $db->getQuery(true)
-					->select('alias')
-					->from('#__volunteers_departments')
-					->where('id=' . (int) $query['id']);
-				$db->setQuery($dbQuery);
-				$alias = $db->loadResult();
-
-				$segments[] = $alias;
-
-				if ($layout == 'edit')
-				{
-					$segments[] = 'edit';
-					unset($query['layout']);
-				}
-
-				$query['Itemid'] = $this->getItemid('departments');
-				unset($query['id']);
-
-				break;
-
-			case 'board':
-				$query['Itemid'] = $this->getItemid('board');
-				unset($query['id']);
-
-				break;
-
-			case 'team':
-				if (isset($query['id']))
-				{
-					$dbQuery = $db->getQuery(true)
-						->select('alias, department')
-						->from('#__volunteers_teams')
-						->where('id=' . (int) $query['id']);
-					$db->setQuery($dbQuery);
-					$team = $db->loadObject();
-
-					$segments[] = $team->alias;
-
-					if ($layout == 'edit')
-					{
-						$segments[] = 'edit';
-						unset($query['layout']);
-					}
-
-					if ($team->department == 58)
-					{
-						$query['Itemid'] = $this->getItemid('teams', 58);
-					}
-					else
-					{
-						$query['Itemid'] = $this->getItemid('teams');
-					}
-				}
-				else
-				{
-					$departmentId = JFactory::getApplication()->getUserState('com_volunteers.edit.team.departmentid');
-					$teamId       = JFactory::getApplication()->getUserState('com_volunteers.edit.team.teamid');
-
-					if ($teamId)
-					{
-						$dbQuery = $db->getQuery(true)
-							->select($db->qn('alias'))
-							->from('#__volunteers_teams')
-							->where('id=' . (int) $teamId);
-						$db->setQuery($dbQuery);
-
-						$segments[] = $db->loadResult();
-						$segments[] = 'subteam';
-					}
-					elseif ($departmentId)
-					{
-						$dbQuery = $db->getQuery(true)
-							->select($db->qn('alias'))
-							->from('#__volunteers_departments')
-							->where('id=' . (int) $departmentId);
-						$db->setQuery($dbQuery);
-
-						$segments[] = $db->loadResult();
-						$segments[] = 'team';
-					}
-
-					$segments[] = 'new';
-					unset($query['layout']);
-
-					$query['Itemid'] = $this->getItemid('teams');
-				}
-
-				unset($query['id']);
-
-				break;
-
-			case 'volunteer':
-				$dbQuery = $db->getQuery(true)
-					->select('alias')
-					->from('#__volunteers_volunteers')
-					->where('id=' . (int) $query['id']);
-				$db->setQuery($dbQuery);
-				$alias = $db->loadResult();
-
-				$segments[] = $query['id'] . '-' . $alias;
-
-				if ($layout == 'edit')
-				{
-					$segments[] = 'edit';
-					unset($query['layout']);
-				}
-
-				$query['Itemid'] = $this->getItemid('volunteers');
-				unset($query['id']);
-
-				break;
-
-			case 'member':
-				if (isset($query['id']))
-				{
-					$dbQuery = $db->getQuery(true)
-						->select(array($db->qn('department'), $db->qn('team')))
-						->from('#__volunteers_members')
-						->where('id=' . (int) $query['id']);
-					$db->setQuery($dbQuery);
-					$member = $db->loadObject();
-
-					if ($member->department)
-					{
-						$dbQuery = $db->getQuery(true)
-							->select($db->qn('alias'))
-							->from('#__volunteers_departments')
-							->where('id=' . (int) $member->department);
-						$db->setQuery($dbQuery);
-						$alias = $db->loadResult();
-
-						$query['Itemid'] = $this->getItemid('departments');
-					}
-
-					if ($member->team)
-					{
-						$dbQuery = $db->getQuery(true)
-							->select($db->qn('alias'))
-							->from('#__volunteers_teams')
-							->where('id=' . (int) $member->team);
-						$db->setQuery($dbQuery);
-						$alias = $db->loadResult();
-
-						$query['Itemid'] = $this->getItemid('teams');
-					}
-
-					$segments[] = $alias;
-					$segments[] = 'member';
-
-					if ($layout == 'edit')
-					{
-						$segments[] = 'edit';
-						unset($query['layout']);
-					}
-
-					$segments[] = $query['id'];
-				}
-				else
-				{
-					$departmentId = JFactory::getApplication()->getUserState('com_volunteers.edit.member.departmentid');
-					$teamId       = JFactory::getApplication()->getUserState('com_volunteers.edit.member.teamid');
-
-					if ($departmentId)
-					{
-						$dbQuery = $db->getQuery(true)
-							->select($db->qn('alias'))
-							->from('#__volunteers_departments')
-							->where('id=' . (int) $departmentId);
-						$db->setQuery($dbQuery);
-						$alias = $db->loadResult();
-
-						$query['Itemid'] = $this->getItemid('departments');
-					}
-
-					if ($teamId)
-					{
-						$dbQuery = $db->getQuery(true)
-							->select($db->qn('alias'))
-							->from('#__volunteers_teams')
-							->where('id=' . (int) $teamId);
-						$db->setQuery($dbQuery);
-						$alias = $db->loadResult();
-
-						$query['Itemid'] = $this->getItemid('teams');
-					}
-
-					$segments[] = $alias;
-					$segments[] = 'member';
-					$segments[] = 'new';
-					unset($query['layout']);
-				}
-				unset($query['id']);
-
-				break;
-
-			case 'role':
-				if (isset($query['id']))
-				{
-					$dbQuery = $db->getQuery(true)
-						->select($db->qn('team'))
-						->from('#__volunteers_roles')
-						->where('id=' . (int) $query['id']);
-					$db->setQuery($dbQuery);
-					$teamId = $db->loadResult();
-
-					$dbQuery = $db->getQuery(true)
-						->select($db->qn('alias'))
-						->from('#__volunteers_teams')
-						->where('id=' . (int) $teamId);
-					$db->setQuery($dbQuery);
-					$teamAlias = $db->loadResult();
-
-					$segments[] = $teamAlias;
-					$segments[] = 'role';
-
-					if ($layout == 'edit')
-					{
-						$segments[] = 'edit';
-						unset($query['layout']);
-					}
-
-					$segments[] = $query['id'];
-				}
-				else
-				{
-					$teamId = JFactory::getApplication()->getUserState('com_volunteers.edit.role.teamid');
-
-					$dbQuery = $db->getQuery(true)
-						->select($db->qn('alias'))
-						->from('#__volunteers_teams')
-						->where('id=' . (int) $teamId);
-					$db->setQuery($dbQuery);
-					$teamAlias = $db->loadResult();
-
-					$segments[] = $teamAlias;
-					$segments[] = 'role';
-					$segments[] = 'new';
-					unset($query['layout']);
-				}
-
-				$query['Itemid'] = $this->getItemid('teams');
-				unset($query['id']);
-
-				break;
-
-			case 'report':
-				if (isset($query['id']))
-				{
-					$dbQuery = $db->getQuery(true)
-						->select(array($db->qn('department'), $db->qn('team'), $db->qn('alias')))
-						->from('#__volunteers_reports')
-						->where('id=' . (int) $query['id']);
-					$db->setQuery($dbQuery);
-					$report = $db->loadObject();
-
-					if ($report->department)
-					{
-						$dbQuery = $db->getQuery(true)
-							->select('alias, parent_id')
-							->from('#__volunteers_departments')
-							->where('id=' . (int) $report->department);
-						$db->setQuery($dbQuery);
-						$item = $db->loadObject();
-
-						if ($item->parent_id == 0)
-						{
-							$query['Itemid'] = $this->getItemid('board');
-							$segments[]      = 'reports';
-						}
-						else
-						{
-							$query['Itemid'] = $this->getItemid('departments');
-							$segments[]      = $item->alias;
-							$segments[]      = 'reports';
-						}
-					}
-
-					if ($report->team)
-					{
-						$dbQuery = $db->getQuery(true)
-							->select($db->qn('alias'))
-							->from('#__volunteers_teams')
-							->where('id=' . (int) $report->team);
-						$db->setQuery($dbQuery);
-						$alias = $db->loadResult();
-
-						$query['Itemid'] = $this->getItemid('teams');
-
-						$segments[] = $alias;
-						$segments[] = 'reports';
-					}
-
-					if ($layout == 'edit')
-					{
-						$segments[] = 'edit';
-						unset($query['layout']);
-					}
-
-					$segments[] = $query['id'] . '-' . $report->alias;
-				}
-				else
-				{
-					$departmentId = JFactory::getApplication()->getUserState('com_volunteers.edit.report.departmentid');
-					$teamId       = JFactory::getApplication()->getUserState('com_volunteers.edit.report.teamid');
-
-					if ($departmentId)
-					{
-						$dbQuery = $db->getQuery(true)
-							->select($db->qn('alias'))
-							->from('#__volunteers_departments')
-							->where('id=' . (int) $departmentId);
-						$db->setQuery($dbQuery);
-						$alias = $db->loadResult();
-
-						$query['Itemid'] = $this->getItemid('departments');
-					}
-
-					if ($teamId)
-					{
-						$dbQuery = $db->getQuery(true)
-							->select($db->qn('alias'))
-							->from('#__volunteers_teams')
-							->where('id=' . (int) $teamId);
-						$db->setQuery($dbQuery);
-						$alias = $db->loadResult();
-
-						$query['Itemid'] = $this->getItemid('teams');
-					}
-
-					$segments[] = $alias;
-					$segments[] = 'reports';
-					$segments[] = 'new';
-					unset($query['layout']);
-				}
-				unset($query['id']);
-
-				break;
-
-			case 'teams':
-				$query['Itemid'] = $this->getItemid($view);
-				unset($query['id']);
-				break;
-
-			case 'my':
-				$query['Itemid'] = 109;
-				break;
-
-			case 'reports':
-			case 'volunteers':
-			case 'registration':
-			case 'home':
-			case 'roles':
-				$query['Itemid'] = $this->getItemid($view);
-				break;
-		}
-
-		return $segments;
-	}
-
-	/**
-	 * Parse the segments of a URL.
-	 *
-	 * @param   array &$segments  The segments of the URL to parse.
-	 *
-	 * @return  array  The URL attributes to be used by the application.
-	 */
-	public function parse(&$segments)
-	{
-		$vars = array();
-
-		// Get the active menu item.
-		$item = $this->menu->getActive();
-
-		// Count route segments
-		$count = count($segments);
-
-		if (!$count)
-		{
-			return $vars;
-		}
-
-		// Database
-		$db = JFactory::getDbo();
-
-		// View
-		$view = $item->query['view'];
-
-		// Handle the View
-		switch ($view)
-		{
-			case 'teams':
-			case 'departments':
-				// Members
-				if (isset($segments[1]) && ($segments[1] == 'member'))
-				{
-					$vars['view'] = 'member';
-
-					if (isset($segments[2]) && ($segments[2] == 'new'))
-					{
-						$vars['layout'] = 'edit';
-					}
-
-					if (isset($segments[2]) && ($segments[2] == 'edit'))
-					{
-						$vars['layout'] = 'edit';
-						$vars['id']     = $segments[3];
-					}
-				}
-				// Roles
-				elseif (isset($segments[1]) && ($segments[1] == 'role'))
-				{
-					$vars['view'] = 'role';
-
-					if (isset($segments[2]) && ($segments[2] == 'new'))
-					{
-						$vars['layout'] = 'edit';
-					}
-
-					if (isset($segments[2]) && ($segments[2] == 'edit'))
-					{
-						$vars['layout'] = 'edit';
-						$vars['id']     = $segments[3];
-					}
-				}
-				// Reports
-				elseif (isset($segments[1]) && ($segments[1] == 'reports'))
-				{
-					$vars['view'] = 'report';
-
-					if (isset($segments[2]) && ($segments[2] == 'new'))
-					{
-						$vars['layout'] = 'edit';
-					}
-					elseif (isset($segments[2]) && ($segments[2] == 'edit'))
-					{
-						$vars['layout'] = 'edit';
-						list($id) = explode('-', $segments[3], 2);
-						$vars['id'] = $id;
-					}
-					else
-					{
-						list($id) = explode('-', $segments[2], 2);
-						$vars['id'] = $id;
-					}
-				}
-				// Subteam
-				elseif (isset($segments[1]) && ($segments[1] == 'subteam' || $segments[1] == 'team'))
-				{
-					$vars['view'] = 'team';
-
-					if (isset($segments[2]) && ($segments[2] == 'new'))
-					{
-						$vars['layout'] = 'edit';
-					}
-				}
-				else
-				{
-					$dbQuery = $db->getQuery(true)
-						->select('id')
-						->from('#__volunteers_' . $view)
-						->where('alias=' . $db->quote($segments[0]));
-					$db->setQuery($dbQuery);
-					$id = $db->loadResult();
-
-					if (!$id)
-					{
-						JError::raiseError(404, JText::_('JERROR_PAGE_NOT_FOUND'));
-					}
-
-					$vars['view'] = substr($view, 0, -1);
-					$vars['id']   = $id;
-
-					if (isset($segments[1]) && ($segments[1] == 'edit'))
-					{
-						$vars['layout'] = 'edit';
-					}
-				}
-
-				break;
-
-			case 'board':
-				// Reports
-				if (isset($segments[0]) && ($segments[0] == 'reports'))
-				{
-					$vars['view'] = 'report';
-
-					list($id) = explode('-', $segments[1], 2);
-					$vars['id'] = $id;
-
-					if (isset($segments[1]) && ($segments[1] == 'new'))
-					{
-						$vars['layout'] = 'edit';
-					}
-					elseif (isset($segments[1]) && ($segments[1] == 'edit'))
-					{
-						$vars['layout'] = 'edit';
-						list($id) = explode('-', $segments[2], 2);
-						$vars['id'] = $id;
-					}
-					else
-					{
-						list($id) = explode('-', $segments[1], 2);
-						$vars['id'] = $id;
-					}
-				}
-
-				break;
-
-			case 'volunteers':
-				list($id) = explode('-', $segments[0], 2);
-				if (!is_numeric($id))
-				{
-					$dbQuery = $db->getQuery(true)
-						->select('id')
-						->from('#__volunteers_' . $view)
-						->where('alias=' . $db->quote($segments[0]));
-					$db->setQuery($dbQuery);
-					$id = $db->loadResult();
-
-					if (!$id)
-					{
-						JError::raiseError(404, JText::_('JERROR_PAGE_NOT_FOUND'));
-					}
-
-					$vars['view'] = 'volunteer';
-					$vars['id']   = $id;
-				}
-				else
-				{
-					$vars['view'] = 'volunteer';
-					$vars['id']   = $id;
-				}
-
-				if (isset($segments[1]) && ($segments[1] == 'edit'))
-				{
-					$vars['layout'] = 'edit';
-				}
-
-				break;
-
-			case 'home':
-				if (isset($segments[0]))
-				{
-					JError::raiseError(404, JText::_('JERROR_PAGE_NOT_FOUND'));
-				}
-				break;
-		}
-
-		return $vars;
-	}
-
-	private function getItemid($view, $id = null)
-	{
-		// Get all relevant menu items.
-		$items = $this->menu->getItems('component', 'com_volunteers');
-
-		// ItemId
-		$itemid = null;
-
-		if ($id) foreach ($items as $item)
-		{
-			if (isset($item->query['view']) && isset($item->query['id']) && $item->query['view'] == $view && $item->query['id'] == $id)
-			{
-				$itemid = $item->id;
-				break;
-			}
-		}
-
-		if (empty($itemid)) foreach ($items as $item)
-		{
-			if ($item->query['view'] == $view && !isset($item->query['id']))
-			{
-				$itemid = $query['Itemid'] = $item->id;
-				break;
-			}
-		}
-
-		if (empty($itemid)) foreach ($items as $item)
-		{
-			if ($item->query['view'] == $view)
-			{
-				$itemid = $query['Itemid'] = $item->id;
-				break;
-			}
-		}
-
-		return $itemid;
-	}
+    /**
+     * The database driver object
+     *
+     * @var    DatabaseInterface
+     * @since  4.0.0
+     */
+    private $db;
+
+    /**
+     * @param   SiteApplication           $app
+     * @param   AbstractMenu              $menu
+     *
+     * @since 4.0.0
+     * @throws Exception
+     */
+    public function __construct($app, $menu)
+    {
+        $departments = new RouterViewConfiguration('departments');
+        $this->registerView($departments);
+        $ccDepartment = new RouterViewConfiguration('department');
+        $ccDepartment->setKey('id')->setParent($departments);
+        $this->registerView($ccDepartment);
+        $ccMember = new RouterViewConfiguration('member');
+        $ccMember->setKey('id');
+        $this->registerView($ccMember);
+        $reports = new RouterViewConfiguration('reports');
+        $this->registerView($reports);
+        $ccReport = new RouterViewConfiguration('report');
+        $ccReport->setKey('id')->setParent($reports);
+        $this->registerView($ccReport);
+        $roles = new RouterViewConfiguration('roles');
+        $this->registerView($roles);
+        $ccRole = new RouterViewConfiguration('role');
+        $ccRole->setKey('id')->setParent($roles);
+        $this->registerView($ccRole);
+        $teams = new RouterViewConfiguration('teams');
+        $this->registerView($teams);
+        $ccTeam = new RouterViewConfiguration('team');
+        $ccTeam->setKey('id')->setParent($teams);
+        $this->registerView($ccTeam);
+        $volunteers = new RouterViewConfiguration('volunteers');
+        $this->registerView($volunteers);
+        $ccVolunteer = new RouterViewConfiguration('volunteer');
+        $ccVolunteer->setKey('id')->setParent($volunteers);
+        $this->registerView($ccVolunteer);
+        $board = new RouterViewConfiguration('board');
+        $this->registerView($board);
+        $home = new RouterViewConfiguration('home');
+        $this->registerView($home);
+        $my = new RouterViewConfiguration('my');
+        $this->registerView($my);
+
+        $this->db = \Joomla\CMS\Factory::getDbo();
+
+        parent::__construct($app, $menu);
+
+        $this->attachRule(new MenuRules($this));
+        $this->attachRule(new StandardRules($this));
+        $this->attachRule(new NomenuRules($this));
+    }
+
+    /**
+     * Method to get the segment(s) for an department
+     *
+     * @param   string  $id     ID of the department to retrieve the segments for
+     * @param   array   $query  The request that is built right now
+     *
+     * @return  array  The segments of this item
+     *
+     * @since 4.0.0
+     */
+    public function getDepartmentSegment(string $id, array $query)
+    {
+        if (!strpos($id, ':')) {
+            $id      = (int) $id;
+            $dbquery = $this->db->getQuery(true);
+            $dbquery->select($this->db->quoteName('alias'))
+                ->from($this->db->quoteName('#__volunteers_departments'))
+                ->where($this->db->quoteName('id') . ' = :id')
+                ->bind(':id', $query['id'], ParameterType::INTEGER);
+            $this->db->setQuery($dbquery);
+
+            $id .= ':' . $this->db->loadResult();
+        }
+
+        list($void, $segment) = explode(':', $id, 2);
+
+        return [$void => $segment];
+    }
+
+    /**
+     * Method to get the segment(s) for an member
+     *
+     * @param   string  $id     ID of the member to retrieve the segments for
+     * @param   array   $query  The request that is built right now
+     *
+     * @return  array  The segments of this item
+     *
+     * @since 4.0.0
+     */
+    public function getMemberSegment(string $id, array $query)
+    {
+        return [(int) $id => $id];
+    }
+
+    /**
+     * Method to get the segment(s) for an report
+     *
+     * @param   string  $id     ID of the report to retrieve the segments for
+     * @param   array   $query  The request that is built right now
+     *
+     * @return  array  The segments of this item
+     *
+     * @since 4.0.0
+     */
+    public function getReportSegment(string $id, array $query)
+    {
+        if (!strpos($id, ':')) {
+            $id      = (int) $id;
+            $dbquery = $this->db->getQuery(true);
+            $dbquery->select($this->db->quoteName('alias'))
+                ->from($this->db->quoteName('#__volunteers_reports'))
+                ->where($this->db->quoteName('id') . ' = :id')
+                ->bind(':id', $query['id'], ParameterType::INTEGER);
+            $this->db->setQuery($dbquery);
+
+            $id .= ':' . $this->db->loadResult();
+        }
+
+        return [(int) $id => $id];
+    }
+
+    /**
+     * Method to get the segment(s) for an role
+     *
+     * @param   string  $id     ID of the role to retrieve the segments for
+     * @param   array   $query  The request that is built right now
+     *
+     * @return  array  The segments of this item
+     *
+     * @since 4.0.0
+     */
+    public function getRoleSegment(string $id, array $query)
+    {
+        return [(int) $id => $id];
+    }
+
+    /**
+     * Method to get the segment(s) for an team
+     *
+     * @param   string  $id     ID of the team to retrieve the segments for
+     * @param   array   $query  The request that is built right now
+     *
+     * @return  array  The segments of this item
+     *
+     * @since 4.0.0
+     */
+    public function getTeamSegment(string $id, array $query)
+    {
+        if (!strpos($id, ':')) {
+            $id      = (int) $id;
+            $dbquery = $this->db->getQuery(true);
+            $dbquery->select($this->db->quoteName('alias'))
+                ->from($this->db->quoteName('#__volunteers_teams'))
+                ->where($this->db->quoteName('id') . ' = :id')
+                ->bind(':id', $query['id'], ParameterType::INTEGER);
+            $this->db->setQuery($dbquery);
+
+            $id .= ':' . $this->db->loadResult();
+        }
+
+        list($void, $segment) = explode(':', $id, 2);
+
+        return [$void => $segment];
+    }
+
+    /**
+     * Method to get the segment(s) for an volunteer
+     *
+     * @param   string  $id     ID of the volunteer to retrieve the segments for
+     * @param   array   $query  The request that is built right now
+     *
+     * @return  array  The segments of this item
+     *
+     * @since 4.0.0
+     */
+    public function getVolunteerSegment(string $id, array $query)
+    {
+        if (!strpos($id, ':')) {
+            $id      = (int) $id;
+            $dbquery = $this->db->getQuery(true);
+            $dbquery->select($this->db->quoteName('alias'))
+                ->from($this->db->quoteName('#__volunteers_volunteers'))
+                ->where($this->db->quoteName('id') . ' = :id')
+                ->bind(':id', $query['id'], ParameterType::INTEGER);
+            $this->db->setQuery($dbquery);
+
+            $id .= ':' . $this->db->loadResult();
+        }
+
+        return [(int) $id => $id];
+    }
+
+    /**
+     * Method to get the segment(s) for an department
+     *
+     * @param   string  $segment  Segment of the department to retrieve the ID for
+     * @param   array   $query    The request that is parsed right now
+     *
+     * @return  int   The id of this item or false
+     *
+     * @since 4.0.0
+     */
+    public function getDepartmentId(string $segment, array $query)
+    {
+        $dbquery = $this->db->getQuery(true);
+        $dbquery->select($this->db->quoteName('id'))
+            ->from($this->db->quoteName('#__volunteers_departments'))
+            ->where(
+                [
+                    $this->db->quoteName('alias') . ' = :alias',
+                ]
+            )
+            ->bind(':alias', $segment);
+        $this->db->setQuery($dbquery);
+
+        return (int) $this->db->loadResult();
+    }
+
+    /**
+     * Method to get the segment(s) for an member
+     *
+     * @param   string  $segment  Segment of the member to retrieve the ID for
+     * @param   array   $query    The request that is parsed right now
+     *
+     * @return  int   The id of this item or false
+     *
+     * @since 4.0.0
+     */
+    public function getMemberId(string $segment, array $query)
+    {
+        return (int) $segment;
+    }
+
+    /**
+     * Method to get the segment(s) for an report
+     *
+     * @param   string  $segment  Segment of the report to retrieve the ID for
+     * @param   array   $query    The request that is parsed right now
+     *
+     * @return  int   The id of this item or false
+     * @since 4.0.0
+     */
+    public function getReportId(string $segment, array $query)
+    {
+        return (int) $segment;
+    }
+
+    /**
+     * Method to get the segment(s) for an role
+     *
+     * @param   string  $segment  Segment of the role to retrieve the ID for
+     * @param   array   $query    The request that is parsed right now
+     *
+     * @return  int   The id of this item or false
+     *
+     * @since 4.0.0
+     */
+    public function getRoleId(string $segment, array $query)
+    {
+        return (int) $segment;
+    }
+    /**
+     * Method to get the segment(s) for an team
+     *
+     * @param   string  $segment  Segment of the team to retrieve the ID for
+     * @param   array   $query    The request that is parsed right now
+     *
+     * @return  int   The id of this item or false
+     *
+     * @since 4.0.0
+     */
+    public function getTeamId(string $segment, array $query)
+    {
+        $dbquery = $this->db->getQuery(true);
+        $dbquery->select($this->db->quoteName('id'))
+            ->from($this->db->quoteName('#__volunteers_teams'))
+            ->where(
+                [
+                    $this->db->quoteName('alias') . ' = :alias',
+                ]
+            )
+            ->bind(':alias', $segment);
+        $this->db->setQuery($dbquery);
+
+        return (int) $this->db->loadResult();
+    }
+
+    /**
+     * Method to get the segment(s) for an volunteer
+     *
+     * @param   string  $segment  Segment of the volunteer to retrieve the ID for
+     * @param   array   $query    The request that is parsed right now
+     *
+     * @return  int   The id of this item or false
+     *
+     * @since 4.0.0
+     */
+    public function getVolunteerId(string $segment, array $query)
+    {
+        return (int) $segment;
+    }
 }

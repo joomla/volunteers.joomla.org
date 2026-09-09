@@ -34,13 +34,13 @@ JFactory::getDocument()->addScriptDeclaration("
 
     <hr>
 
-    <div class="row-fluid">
-        <div class="span9">
+    <div class="row">
+        <div class="col-md-9">
             <div class="form-horizontal">
 				<?php echo $this->form->renderFieldset('item'); ?>
             </div>
         </div>
-        <div class="span3">
+        <div class="col-md-3">
 			<?php if (JFactory::getUser()->authorise('core.admin')): ?>
                 <div class="form-vertical well">
                     <h3><?php echo JText::_('COM_VOLUNTEERS_SECRETARY_ONLY') ?></h3>

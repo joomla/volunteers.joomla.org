@@ -45,7 +45,7 @@ class JFormFieldPerfectimage extends JFormField
 		$html[] = '</div>';
 
 		// Select button
-		$html[] = '<a href="#' . $this->id . '_modal" role="button" class="btn btn-primary perfect-image-select" data-toggle="modal" title="' . JText::_('COM_VOLUNTEERS_IMAGECROPPER_SELECT') . '">'
+		$html[] = '<a href="#' . $this->id . '_modal" role="button" class="btn btn-primary perfect-image-select" data-bs-toggle="modal" title="' . JText::_('COM_VOLUNTEERS_IMAGECROPPER_SELECT') . '">'
 			. '<span class="icon-list icon-white"></span> '
 			. JText::_('COM_VOLUNTEERS_IMAGECROPPER_SELECT') . '</a>';
 

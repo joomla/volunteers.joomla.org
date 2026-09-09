@@ -297,6 +297,7 @@ class VolunteersRouter extends RouterView
     {
         return (int) $segment;
     }
+
     /**
      * Method to get the segment(s) for an team
      *

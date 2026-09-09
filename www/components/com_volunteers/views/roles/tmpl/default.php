@@ -11,46 +11,48 @@ use Joomla\CMS\Filter\OutputFilter;
 defined('_JEXEC') or die;
 ?>
 
-<div class="row-fluid">
+<div class="row">
     <div class="page-header">
         <h1><?php echo JText::_('COM_VOLUNTEERS_TITLE_ROLESOPEN') ?></h1>
     </div>
     <p class="lead"><?php echo JText::_('COM_VOLUNTEERS_TITLE_ROLESOPEN_INTRO') ?></p>
 </div>
 
-<div class="row-fluid">
-    <div class="span12">
+<div class="row">
+    <div class="col-md-12">
 		<?php foreach ($this->items as $team => $roles): ?>
-            <div class="well well">
-                <h2 style="margin-top: 0;">
-                    <a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=team&id=' . $roles[0]->team) ?>" id="<?php echo OutputFilter::stringURLSafe($team); ?>">
-						<?php echo $team; ?>
-                    </a>
-                </h2>
-                <table class="table table-striped table-hover table-vertical-align">
-                    <thead>
-                    <th><?php echo JText::_('COM_VOLUNTEERS_FIELD_ROLE') ?></th>
-                    <th width="300px"></th>
-                    </thead>
-                    <tbody>
-					<?php foreach ($roles as $role): ?>
-                        <tr>
-                            <td>
-                                <h3><?php echo $role->title; ?></h3>
-								<?php echo $role->description; ?>
-                            </td>
-                            <td>
-	                            <a class="btn btn-small pull-right" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=team&id=' . $role->team . '#contact') ?>">
-		                            <span class="icon-mail"></span> <?php echo JText::_('COM_VOLUNTEERS_TAB_CONTACT') ?>
-	                            </a>
-                                <a class="btn btn-small pull-right" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=team&id=' . $role->team . '#getinvolved') ?>">
-                                    <span class="icon-chevron-right"></span> <?php echo JText::_('COM_VOLUNTEERS_ROLE_APPLY') ?>
-                                </a>
-                            </td>
-                        </tr>
-					<?php endforeach; ?>
-                    </tbody>
-                </table>
+            <div class="card mb-3 bg-light">
+                <div class="card-body">
+                    <h2 class="mt-0">
+                        <a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=team&id=' . $roles[0]->team) ?>" id="<?php echo OutputFilter::stringURLSafe($team); ?>">
+                            <?php echo $team; ?>
+                        </a>
+                    </h2>
+                    <table class="table table-striped table-hover table-vertical-align">
+                        <thead>
+                        <th><?php echo JText::_('COM_VOLUNTEERS_FIELD_ROLE') ?></th>
+                        <th width="300px"></th>
+                        </thead>
+                        <tbody>
+                        <?php foreach ($roles as $role): ?>
+                            <tr>
+                                <td>
+                                    <h3 class="h5"><?php echo $role->title; ?></h3>
+                                    <?php echo $role->description; ?>
+                                </td>
+                                <td>
+                                    <a class="btn btn-secondary btn-sm float-end" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=team&id=' . $role->team . '#contact') ?>">
+                                        <span class="icon-mail"></span> <?php echo JText::_('COM_VOLUNTEERS_TAB_CONTACT') ?>
+                                    </a>
+                                    <a class="btn btn-secondary btn-sm float-end" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=team&id=' . $role->team . '#getinvolved') ?>">
+                                        <span class="icon-chevron-right"></span> <?php echo JText::_('COM_VOLUNTEERS_ROLE_APPLY') ?>
+                                    </a>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 		<?php endforeach; ?>
     </div>

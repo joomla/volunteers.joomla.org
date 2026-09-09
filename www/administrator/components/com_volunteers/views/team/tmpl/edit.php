@@ -29,13 +29,13 @@ JFactory::getDocument()->addScriptDeclaration("
 
 	<hr>
 
-	<div class="row-fluid">
-		<div class="span9">
+	<div class="row">
+		<div class="col-md-9">
 			<div class="form-horizontal">
 				<?php echo $this->form->renderFieldset('item'); ?>
 			</div>
 		</div>
-		<div class="span3">
+		<div class="col-md-3">
 			<div class="form-vertical well">
 				<?php echo $this->form->renderFieldset('details'); ?>
 			</div>

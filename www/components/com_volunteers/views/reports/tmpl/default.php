@@ -16,7 +16,7 @@ JHtml::_('formbehavior.chosen', 'select');
 
 	<div class="row-fluid">
 		<div class="filter-bar">
-			<div class="btn-group pull-right">
+			<div class="btn-group float-end">
 				<?php echo JHtmlVolunteers::reportcategories($this->state->get('filter.category')); ?>
 			</div>
 		</div>
@@ -27,15 +27,15 @@ JHtml::_('formbehavior.chosen', 'select');
 
 	<?php if (!empty($this->items)): ?>
 		<?php foreach ($this->items as $i => $item): ?>
-			<div class="row-fluid report">
-				<div class="span2">
+			<div class="row report">
+				<div class="col-md-2">
 					<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $item->volunteer_id) ?>">
 						<?php echo VolunteersHelper::image($item->volunteer_image, 'large', false, $item->volunteer_name); ?>
 					</a>
 				</div>
-				<div class="span10">
+				<div class="col-md-10">
 					<?php if ($item->acl->edit || ($this->user->id == $item->created_by)): ?>
-						<a class="btn pull-right" href="<?php echo JRoute::_('index.php?option=com_volunteers&task=report.edit&id=' . $item->id) ?>">
+						<a class="btn btn-secondary float-end" href="<?php echo JRoute::_('index.php?option=com_volunteers&task=report.edit&id=' . $item->id) ?>">
 							<span class="icon-edit"></span> <?php echo JText::_('COM_VOLUNTEERS_EDIT') ?>
 						</a>
 					<?php endif; ?>
@@ -52,7 +52,7 @@ JHtml::_('formbehavior.chosen', 'select');
                         <a href="<?php echo $item->link; ?>"><?php echo $item->name; ?></a>
 					</p>
 					<p><?php echo JHtml::_('string.truncate', strip_tags(trim($item->description)), 500); ?></p>
-					<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=report&id=' . $item->id) ?>" class="btn">
+					<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=report&id=' . $item->id) ?>" class="btn btn-secondary">
 						<span class="icon-chevron-right"></span><?php echo JText::_('COM_VOLUNTEERS_READ_MORE') ?>&nbsp;<?php echo $item->title; ?>
 					</a>
 				</div>
@@ -60,24 +60,24 @@ JHtml::_('formbehavior.chosen', 'select');
 			<hr>
 		<?php endforeach; ?>
 	<?php else: ?>
-		<div class="row-fluid">
+		<div class="row">
 			<p class="alert alert-info">
 				<?php echo JText::_('COM_VOLUNTEERS_NOTE_NO_REPORTS') ?>
 			</p>
 		</div>
 	<?php endif; ?>
 
-	<div class="row-fluid">
-		<a class="btn pull-right btn-warning" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=reports&filter_category=' . $this->state->get('filter.category') . '&format=feed&type=rss') ?>">
+	<div class="row">
+		<a class="btn float-end btn-warning" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=reports&filter_category=' . $this->state->get('filter.category') . '&format=feed&type=rss') ?>">
 			<span class="icon-feed"></span> <?php echo JText::_('COM_VOLUNTEERS_RSSFEED') ?>
 		</a>
 	</div>
 
 	<div class="pagination">
-		<p class="counter pull-right">
-			<?php echo $this->pagination->getPagesCounter(); ?>
-		</p>
-
 		<?php echo $this->pagination->getPagesLinks(); ?>
+
+        <p class="counter ml-auto">
+            <?php echo $this->pagination->getPagesCounter(); ?>
+        </p>
 	</div>
 </form>

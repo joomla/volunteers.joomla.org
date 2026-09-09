@@ -49,15 +49,17 @@ $active = $this->state->get('filter.active', 1);
 			<?php $i = 0; ?>
 			<?php if (!empty($this->items)) foreach ($this->items as $item): ?>
 			<div class="col-md-2">
-				<div class="well well-small">
-					<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $item->id) ?>">
-						<?php echo VolunteersHelper::image($item->image, 'large', false, $item->name); ?>
-					</a>
-					<h4 class="text-center">
-						<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $item->id) ?>">
-							<?php echo $item->name; ?>
-						</a>
-					</h4>
+				<div class="card bg-light mb-3">
+                    <div class="card-body">
+                        <a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $item->id) ?>">
+                            <?php echo VolunteersHelper::image($item->image, 'large', false, $item->name); ?>
+                        </a>
+                        <h4 class="text-center h5">
+                            <a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $item->id) ?>">
+                                <?php echo $item->name; ?>
+                            </a>
+                        </h4>
+                    </div>
 				</div>
 			</div>
 			<?php $i++; ?>

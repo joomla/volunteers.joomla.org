@@ -87,6 +87,42 @@ class VolunteersRouter extends RouterView
     }
 
     /**
+     * Build method for URLs
+     *
+     * @param   array  &$query Array of query elements
+     *
+     * @return  array  Array of URL segments
+     *
+     * @since   3.5
+     */
+    public function build(&$query) {
+        $view = isset($query['view']) ? $query['view'] : null;
+
+        if ($view === 'team' && isset($query['id'])) {
+            $dbQuery = $this->db->getQuery(true)
+                ->select($this->db->quoteName(['alias', 'department']))
+                ->from($this->db->quoteName('#__volunteers_teams'))
+                ->where('id = :id')
+                ->bind(':id', $query['id'], ParameterType::INTEGER);
+            $this->db->setQuery($dbQuery);
+            $team = $this->db->loadObject();
+
+            if ($team->department == 58) {
+                $items = $this->menu->getItems('component', 'com_volunteers');
+
+                foreach ($items as $item) {
+                    if (isset($item->query['view']) && isset($item->query['id']) && $item->query['view'] == 'teams' && $item->query['id'] === (string) $team->department)
+                    {
+                        $query['Itemid'] = $item->id;
+                    }
+                }
+            }
+        }
+
+        return parent::build($query);
+    }
+
+    /**
      * Method to get the segment(s) for an department
      *
      * @param   string  $id     ID of the department to retrieve the segments for

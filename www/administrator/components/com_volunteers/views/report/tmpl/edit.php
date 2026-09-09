@@ -17,7 +17,6 @@ JFactory::getDocument()->addScriptDeclaration("
 	Joomla.submitbutton = function(task)
 	{
 		if (task == 'report.cancel' || document.formvalidator.isValid(document.getElementById('report-form'))) {
-			" . $this->form->getField('description')->save() . "
 			Joomla.submitform(task, document.getElementById('report-form'));
 		}
 	};

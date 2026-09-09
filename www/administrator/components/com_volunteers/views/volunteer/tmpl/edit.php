@@ -17,7 +17,6 @@ JFactory::getDocument()->addScriptDeclaration("
 	Joomla.submitbutton = function(task)
 	{
 		if (task == 'volunteer.cancel' || document.formvalidator.isValid(document.getElementById('volunteer-form'))) {
-			" . $this->form->getField('joomlastory')->save() . "
 			Joomla.submitform(task, document.getElementById('volunteer-form'));
 		}
 	};

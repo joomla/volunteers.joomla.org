@@ -17,7 +17,6 @@ JFactory::getDocument()->addScriptDeclaration("
 	Joomla.submitbutton = function(task)
 	{
 		if (task == 'team.cancel' || document.formvalidator.isValid(document.getElementById('team-form'))) {
-			" . $this->form->getField('getinvolved')->save() . "
 			Joomla.submitform(task, document.getElementById('team-form'));
 		}
 	};

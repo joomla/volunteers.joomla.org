@@ -9,16 +9,16 @@
 defined('_JEXEC') or die;
 ?>
 
-<div class="row-fluid report">
-	<div class="span2 volunteer-image">
+<div class="row report">
+	<div class="col-md-2 volunteer-image">
 		<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $this->item->volunteer_id) ?>">
 			<?php echo VolunteersHelper::image($this->item->volunteer_image, 'large', false, $this->item->volunteer_name); ?>
 		</a>
 	</div>
-	<div class="span10">
+	<div class="col-md-10">
 		<div class="filter-bar">
 			<?php if ($this->acl->edit || ($this->item->created_by == $this->user->id)): ?>
-				<a class="btn pull-right" href="<?php echo JRoute::_('index.php?option=com_volunteers&task=report.edit&id=' . $this->item->id) ?>">
+				<a class="btn btn-secondary float-end" href="<?php echo JRoute::_('index.php?option=com_volunteers&task=report.edit&id=' . $this->item->id) ?>">
 					<span class="icon-edit"></span> <?php echo JText::_('COM_VOLUNTEERS_EDIT') ?>
 				</a>
 			<?php endif; ?>

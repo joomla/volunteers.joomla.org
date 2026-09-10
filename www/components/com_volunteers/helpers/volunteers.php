@@ -50,11 +50,11 @@ abstract class VolunteersHelper
 		}
 		elseif ($size === 'small')
 		{
-			$html = '<img class="img-rounded" alt="' . $alt . '" src="' . $image . '" width="50px"/>';
+			$html = '<img class="rounded" alt="' . $alt . '" src="' . $image . '" width="50px"/>';
 		}
 		else
 		{
-			$html = '<img class="img-rounded mw-100" alt="' . $alt . '" src="' . $image . '"/>';
+			$html = '<img class="rounded mw-100" alt="' . $alt . '" src="' . $image . '"/>';
 		}
 
 		return $html;

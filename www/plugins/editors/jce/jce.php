@@ -1,21 +1,21 @@
 <?php
-
 /**
- * @copyright     Copyright (c) 2009-2022 Ryan Demmer. All rights reserved
- * @license       GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
- * JCE is free software. This version may have been modified pursuant
- * to the GNU General Public License, and as distributed it includes or
- * is derivative of works licensed under the GNU General Public License or
- * other free or open source software licenses
+ * @package     JCE
+ * @subpackage  Editors.Jce
+ *
+ * @copyright   Copyright (C) 2005 - 2023 Open Source Matters, Inc. All rights reserved.
+ * @copyright   Copyright (c) 2009-2024 Ryan Demmer. All rights reserved
+ * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
-// Do not allow direct access
-defined('JPATH_PLATFORM') or die;
 
-use Joomla\CMS\Factory;
-use Joomla\CMS\Component\ComponentHelper;
-use Joomla\CMS\Plugin\PluginHelper;
-use Joomla\CMS\Plugin\CMSPlugin;
+// Do not allow direct access
+\defined('_JEXEC') or die;
+
+use Joomla\CMS\Editor\Editor;
 use Joomla\CMS\Layout\LayoutHelper;
+use Joomla\CMS\Plugin\CMSPlugin;
+use Joomla\CMS\Uri\Uri;
+use Joomla\Plugin\Editors\Jce\PluginTraits\DisplayTrait;
 
 /**
  * JCE WYSIWYG Editor Plugin.
@@ -24,8 +24,15 @@ use Joomla\CMS\Layout\LayoutHelper;
  */
 class plgEditorJCE extends CMSPlugin
 {
-    protected static $instances = array();
-    
+    use DisplayTrait;
+
+    /**
+     * Affects constructor behavior. If true, language files will be loaded automatically.
+     *
+     * @var    boolean
+     */
+    protected $autoloadLanguage = true;
+
     /**
      * Constructor.
      *
@@ -35,65 +42,8 @@ class plgEditorJCE extends CMSPlugin
      * @since       1.5
      */
     public function __construct(&$subject, $config)
-    {        
-        parent::__construct($subject, $config);
-    }
-
-    protected function getEditorInstance()
-    {        
-        // pass config to WFEditor
-        $config = array(
-            'profile_id' => $this->params->get('profile_id', 0),
-            'plugin' => $this->params->get('plugin', '')
-        );
-
-        $signature = md5(serialize($config));
-
-        if (empty(self::$instances[$signature])) {
-            // load base file
-            require_once JPATH_ADMINISTRATOR . '/components/com_jce/includes/base.php';
-
-            // create editor
-            self::$instances[$signature] = new WFEditor($config);
-        }
-
-        return self::$instances[$signature];
-    }
-
-    /**
-     * Method to handle the onInit event.
-     *  - Initializes the JCE WYSIWYG Editor.
-     *
-     * @param   $toString Return javascript and css as a string
-     *
-     * @return string JavaScript Initialization string
-     *
-     * @since   1.5
-     */
-    public function onInit()
     {
-        if (!ComponentHelper::isEnabled('com_jce')) {
-            return false;
-        }
-        
-        $language = Factory::getLanguage();
-        $document = Factory::getDocument();
-
-        $language->load('plg_editors_jce', JPATH_ADMINISTRATOR);
-        $language->load('com_jce', JPATH_ADMINISTRATOR);
-
-        $editor = $this->getEditorInstance();
-        $editor->init();
-
-        foreach ($editor->getScripts() as $script) {
-            $document->addScript($script);
-        }
-
-        foreach ($editor->getStyleSheets() as $style) {
-            $document->addStylesheet($style);
-        }
-
-        $document->addScriptDeclaration(implode("\n", $editor->getScriptDeclaration()));
+        parent::__construct($subject, $config);
     }
 
     /**
@@ -126,101 +76,27 @@ class plgEditorJCE extends CMSPlugin
         return "WFEditor.getContent('" . $editor . "');";
     }
 
-    /**
-     * JCE WYSIWYG Editor - Display the editor area.
-     *
-     * @param   string   $name     The name of the editor area.
-     * @param   string   $content  The content of the field.
-     * @param   string   $width    The width of the editor area.
-     * @param   string   $height   The height of the editor area.
-     * @param   int      $col      The number of columns for the editor area.
-     * @param   int      $row      The number of rows for the editor area.
-     * @param   boolean  $buttons  True and the editor buttons will be displayed.
-     * @param   string   $id       An optional ID for the textarea. If not supplied the name is used.
-     * @param   string   $asset    The object asset
-     * @param   object   $author   The author.
-     * @param   array    $params   Associative array of editor parameters.
-     *
-     * @return  string
-     */
-    public function onDisplay($name, $content, $width, $height, $col, $row, $buttons = true, $id = null, $asset = null, $author = null, $params = array())
-    {
-        if (empty($id)) {
-            $id = $name;
-        }
-
-        // Only add "px" to width and height if they are not given as a percentage
-        if (is_numeric($width)) {
-            $width .= 'px';
-        }
-
-        if (is_numeric($height)) {
-            $height .= 'px';
-        }
-
-        if (empty($id)) {
-            $id = $name;
-        }
-
-        // Data object for the layout
-        $textarea = new stdClass;
-        $textarea->name = $name;
-        $textarea->id = $id;
-        $textarea->class = 'mce_editable wf-editor';
-        $textarea->cols = $col;
-        $textarea->rows = $row;
-        $textarea->width = $width;
-        $textarea->height = $height;
-        $textarea->content = $content;
-
-        $classes = version_compare(JVERSION, '4', 'ge') ? ' mb-2 joomla4' : '';
-
-        // Render Editor markup
-        $html = '<div class="editor wf-editor-container' . $classes . '">';
-        $html .= '<div class="wf-editor-header"></div>';
-        $html .= LayoutHelper::render('editor.textarea', $textarea, __DIR__ . '/layouts');
-        $html .= '</div>';
-
-        if (!ComponentHelper::isEnabled('com_jce')) {
-            return $html;
-        }
-
-        $editor = $this->getEditorInstance();
-
-        // no profile assigned or available
-        if (!$editor->hasProfile()) {
-            return $html;
-        }
-
-        if (!$editor->hasPlugin('joomla')) {
-            $html .= $this->displayButtons($id, $buttons, $asset, $author);
-        } else {
-            $list = $this->getXtdButtonsList($id, $buttons, $asset, $author);
-
-            if (!empty($list)) {
-                $options = array(
-                    'joomla_xtd_buttons' => $list,
-                );
-
-                Factory::getDocument()->addScriptOptions('plg_editor_jce', $options, true);
-            }
-
-            // render empty container for dynamic buttons
-            $html .= LayoutHelper::render('joomla.editors.buttons', array());
-        }
-
-        return $html;
-    }
-
     public function onGetInsertMethod($name)
     {
     }
 
-    private function getXtdButtonsList($name, $buttons, $asset, $author)
+    /**
+     * Get the XTD buttons as a list to render in the Joomla button menu
+     *
+     * @param   string  $editorId  The editor ID
+     * @param   array   $options   Associative array with additional parameters
+     *
+     * @return array
+     *
+     * @since 2.9.99.3
+     */
+    private function getXtdButtonsList($editorId, $options = [])
     {
-        $list = array();
+        $list = [];
 
-        $excluded = array('readmore', 'pagebreak', 'image');
+        $excluded = ['readmore', 'pagebreak'];
+
+        $buttons = $options['buttons'] ?? [];
 
         if (!is_array($buttons)) {
             $buttons = !$buttons ? false : $excluded;
@@ -228,73 +104,69 @@ class plgEditorJCE extends CMSPlugin
             $buttons = array_merge($buttons, $excluded);
         }
 
-        $buttons = $this->getXtdButtons($name, $buttons, $asset, $author);
+        $buttons = Editor::getInstance('jce')->getButtons($editorId, $buttons);
 
         if (!empty($buttons)) {
-            foreach ($buttons as $i => $button) {
-                if ($button->get('name')) {
-                    // Set some vars
-                    $icon = 'none icon-' . $button->get('icon', $button->get('name'));
+            $list[$editorId] = [];
 
-                    $name = 'button-' . $i . '-' . str_replace(' ', '-', $button->get('text'));
-                    $title = $button->get('text');
-                    $onclick = $button->get('onclick', '');
-
-                    if ($button->get('link') !== '#') {
-                        $href = JUri::base() . $button->get('link');
-                    } else {
-                        $href = '';
-                    }
-
-                    $list[] = array(
-                        'name' => $name,
-                        'title' => $title,
-                        'icon' => $icon,
-                        'href' => $href,
-                        'onclick' => $onclick,
-                        'svg' => $button->get('iconSVG'),
-                        'options' => $button->get('options', array())
-                    );
+            foreach ($buttons as $button) {
+                if (!$button->get('name')) {
+                    continue;
                 }
+
+                $id         = $editorId . '_' . $button->get('name');
+                $icon       = 'none icon-' . $button->get('icon', $button->get('name'));
+                $btnOptions = (array) $button->get('options', []);
+
+                $link = $button->get('link', '#');
+
+                if ($link === '#') {
+                    $link = $btnOptions['src'] ?? '';
+                } else {
+                    $link = Uri::base() . $link;
+                }
+
+                $list[$editorId][] = [
+                    'name'    => $button->get('text'),
+                    'id'      => $id,
+                    'title'   => $button->get('text'),
+                    'icon'    => $icon,
+                    'href'    => $link,
+                    'onclick' => $button->get('onclick', ''),
+                    'svg'     => $button->get('iconSVG'),
+                    'options' => $btnOptions,
+                    'action'  => $button->get('action', ''),
+                ];
             }
         }
+
         return $list;
     }
 
-    private function getXtdButtons($name, $buttons, $asset, $author)
+    /**
+     * Display the extended buttons for the editor.
+     *
+     * @param   string  $editorId  The editor ID
+     * @param   array   $options   Associative array with additional parameters
+     *
+     * @return  string
+     */
+    protected function displayXtdButtons($editorId, $options)
     {
-        $xtdbuttons = array();
-        if (is_array($buttons) || (is_bool($buttons) && $buttons)) {
-            $buttonsEvent = new Joomla\Event\Event(
-                'getButtons',
-                [
-                    'editor' => $name,
-                    'buttons' => $buttons,
-                ]
-            );
-            if (method_exists($this, 'getDispatcher')) {
-                $buttonsResult = $this->getDispatcher()->dispatch('getButtons', $buttonsEvent);
-                $xtdbuttons = $buttonsResult['result'];
-            } else {
-                $xtdbuttons = $this->_subject->getButtons($name, $buttons, $asset, $author);
-            }
-        }
-        return $xtdbuttons;
-    }
-
-    private function displayButtons($name, $buttons, $asset, $author)
-    {
-        $buttons = $this->getXtdButtons($name, $buttons, $asset, $author);
+        $buttons = Editor::getInstance('jce')->getButtons($editorId, $options['buttons'] ?? []);
 
         if (!empty($buttons)) {
-            // fix some legacy buttons
-            array_walk($buttons, function ($button) {
+            foreach ($buttons as $button) {
                 $cls = $button->get('class', '');
+
                 if (empty($cls) || strpos($cls, 'btn') === false) {
-                    $cls .= ' btn';
-                    $button->set('class', trim($cls));
+                    $button->set('class', trim($cls . ' btn'));
                 }
-            });
+
+                if ($options['hidden'] ?? false) {
+                    $button->set('class', 'd-none hidden');
+                }
+            }
 
             return LayoutHelper::render('joomla.editors.buttons', $buttons);
         }

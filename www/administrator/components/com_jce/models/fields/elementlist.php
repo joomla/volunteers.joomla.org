@@ -1,10 +1,19 @@
 <?php
+/**
+ * @package     JCE
+ * @subpackage  Admin
+ *
+ * @copyright   Copyright (C) 2005 - 2020 Open Source Matters, Inc. All rights reserved.
+ * @copyright   Copyright (c) 2009-2024 Ryan Demmer. All rights reserved
+ * @license     GNU General Public License version 2 or later; see LICENSE.txt
+ */
 
-defined('JPATH_PLATFORM') or die;
+\defined('_JEXEC') or die;
 
-JFormHelper::loadFieldClass('list');
+use Joomla\CMS\Form\Field\ListField;
+use Joomla\CMS\Language\Text;
 
-class JFormFieldElementList extends JFormFieldList
+class JFormFieldElementList extends ListField
 {
     /**
      * The form field type.
@@ -35,7 +44,7 @@ class JFormFieldElementList extends JFormFieldList
 
             $tmp = array(
                 'value' => $value,
-                'text' => JText::alt($text, $fieldname),
+                'text' => Text::alt($text, $fieldname),
                 'disable' => false,
                 'class' => '',
                 'selected' => false,

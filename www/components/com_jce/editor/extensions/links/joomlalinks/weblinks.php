@@ -1,25 +1,25 @@
 <?php
-
 /**
- * @copyright     Copyright (c) 2009-2022 Ryan Demmer. All rights reserved
- * @license       GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
- * JCE is free software. This version may have been modified pursuant
- * to the GNU General Public License, and as distributed it includes or
- * is derivative of works licensed under the GNU General Public License or
- * other free or open source software licenses
+ * @package     JCE
+ * @subpackage  Editor
+ *
+ * @copyright   Copyright (C) 2005 - 2020 Open Source Matters, Inc. All rights reserved.
+ * @copyright   Copyright (c) 2009-2024 Ryan Demmer. All rights reserved
+ * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
-defined('JPATH_PLATFORM') or die;
 
-class JoomlalinksWeblinks extends JObject
+\defined('_JEXEC') or die;
+
+use Joomla\CMS\Factory;
+use Joomla\CMS\Language\Text;
+use Joomla\CMS\Object\CMSObject;
+
+class JoomlalinksWeblinks extends CMSObject
 {
     private $option = 'com_weblinks';
 
     /**
      * Returns a reference to a editor object.
-     *
-     * This method must be invoked as:
-     *         <pre>  $browser =JContentEditor::getInstance();</pre>
-     *
      * @return JCE The editor object
      *
      * @since    1.5
@@ -42,7 +42,7 @@ class JoomlalinksWeblinks extends JObject
 
     public function getList()
     {
-        return '<li id="index.php?option=com_weblinks&view=categories" class="folder menu nolink"><div class="uk-tree-row"><a href="#"><span class="uk-tree-icon"></span><span class="uk-tree-text">' . JText::_('WF_LINKS_JOOMLALINKS_WEBLINKS') . '</span></a></div></li>';
+        return '<li id="index.php?option=com_weblinks&view=categories" class="folder menu nolink"><div class="uk-tree-row"><a href="#"><span class="uk-tree-icon"></span><span class="uk-tree-text">' . Text::_('WF_LINKS_JOOMLALINKS_WEBLINKS') . '</span></a></div></li>';
     }
 
     public function getLinks($args)
@@ -50,7 +50,9 @@ class JoomlalinksWeblinks extends JObject
         $wf = WFEditorPlugin::getInstance();
         $items = array();
 
-        if (!defined('JPATH_PLATFORM')) {
+        $version = new Joomla\CMS\Version();
+
+        if (!$version->isCompatible('4.0')) {
             require_once JPATH_SITE . '/includes/application.php';
         }
 
@@ -136,13 +138,15 @@ class JoomlalinksWeblinks extends JObject
 
                 foreach ($weblinks as $weblink) {
                     // language
+
                     if (isset($weblink->language)) {
                         $language = $weblink->language;
                     }
 
                     $id = WeblinksHelperRoute::getWeblinkRoute($weblink->slug, $weblink->catslug, $language);
 
-                    if (defined('JPATH_PLATFORM')) {
+                    // Joomla 4/5/6
+                    if ($version->isCompatible('4.0')) {
                         $id .= '&task=weblink.go';
                     }
 
@@ -161,33 +165,47 @@ class JoomlalinksWeblinks extends JObject
     public static function getWeblinks($id)
     {
         $wf = WFEditorPlugin::getInstance();
-        
-        $db = JFactory::getDBO();
-        $user = JFactory::getUser();
 
-        $dbquery = $db->getQuery(true);
+        $db = Factory::getDBO();
+        $user = Factory::getUser();
 
-        $section = JText::_('Web Links');
+        $query = $db->getQuery(true);
+
+        $section = Text::_('Web Links');
 
         $query = $db->getQuery(true);
 
         $case = '';
 
-        if ((int) $wf->getParam('links.joomlalinks.weblinks_alias', 1)) {
+        if ((int) $wf->getParam('links.joomlalinks.weblinks_alias', 0)) {
             //sqlsrv changes
             $case_when1 = ' CASE WHEN ';
-            $case_when1 .= $dbquery->charLength('a.alias', '!=', '0');
+            $case_when1 .= $query->charLength('a.alias', '!=', '0');
             $case_when1 .= ' THEN ';
-            $a_id = $dbquery->castAsChar('a.id');
-            $case_when1 .= $dbquery->concatenate(array($a_id, 'a.alias'), ':');
+
+            // Joomla 3 compatibility
+            if (method_exists($query, 'castAsChar')) {
+                $a_id = $query->castAsChar('a.id');
+            } else {
+                $a_id = $query->castAs('CHAR', 'a.id');
+            }
+
+            $case_when1 .= $query->concatenate(array($a_id, 'a.alias'), ':');
             $case_when1 .= ' ELSE ';
             $case_when1 .= $a_id . ' END as slug';
 
             $case_when2 = ' CASE WHEN ';
-            $case_when2 .= $dbquery->charLength('b.alias', '!=', '0');
+            $case_when2 .= $query->charLength('b.alias', '!=', '0');
             $case_when2 .= ' THEN ';
-            $c_id = $dbquery->castAsChar('b.id');
-            $case_when2 .= $dbquery->concatenate(array($c_id, 'b.alias'), ':');
+
+            // Joomla 3 compatibility
+            if (method_exists($query, 'castAsChar')) {
+                $c_id = $query->castAsChar('b.id');
+            } else {
+                $c_id = $query->castAs('CHAR', 'b.id');
+            }
+
+            $case_when2 .= $query->concatenate(array($c_id, 'b.alias'), ':');
             $case_when2 .= ' ELSE ';
             $case_when2 .= $c_id . ' END as catslug';
 
@@ -201,9 +219,9 @@ class JoomlalinksWeblinks extends JObject
         $query->where('a.catid = ' . (int) $id);
 
         $query->where('a.state = 1');
-        
+
         if (!$user->authorise('core.admin')) {
-            $query->where('b.access IN (' . implode(',', $user->getAuthorisedViewLevels()) . ')');
+            $query->where('b.access IN (' . implode(',', array_map('intval', $user->getAuthorisedViewLevels())) . ')');
         }
 
         $query->where('b.published = 1');
@@ -217,7 +235,7 @@ class JoomlalinksWeblinks extends JObject
     private static function route($url)
     {
         $wf = WFEditorPlugin::getInstance();
-        
+
         if ($wf->getParam('links.joomlalinks.sef_url', 0)) {
             $url = WFLinkHelper::route($url);
         }

@@ -1,11 +1,25 @@
 <?php
+/**
+ * @package     JCE
+ * @subpackage  Admin
+ *
+ * @copyright   Copyright (C) 2005 - 2020 Open Source Matters, Inc. All rights reserved.
+ * @copyright   Copyright (c) 2009-2024 Ryan Demmer. All rights reserved
+ * @license     GNU General Public License version 2 or later; see LICENSE.txt
+ */
 
-// Check to ensure this file is included in Joomla!
-defined('JPATH_PLATFORM') or die;
+\defined('_JEXEC') or die;
 
-jimport('joomla.application.component.view');
+use Joomla\CMS\Component\ComponentHelper;
+use Joomla\CMS\Factory;
+use Joomla\CMS\HTML\Helpers\Sidebar;
+use Joomla\CMS\HTML\HTMLHelper;
+use Joomla\CMS\Language\Text;
+use Joomla\CMS\MVC\View\HtmlView;
+use Joomla\CMS\Toolbar\ToolbarHelper;
+use Joomla\CMS\Uri\Uri;
 
-class JceViewCpanel extends JViewLegacy
+class JceViewCpanel extends HtmlView
 {
     protected $icons;
     protected $state;
@@ -15,27 +29,25 @@ class JceViewCpanel extends JViewLegacy
      */
     public function display($tpl = null)
     {
-        $user = JFactory::getUser();
-        
-        $this->state    = $this->get('State');
-        $this->icons    = $this->get('Icons');
-        $this->params   = JComponentHelper::getParams('com_jce');
+        $user = Factory::getUser();
+
+        $this->state = $this->get('State');
+        $this->icons = $this->get('Icons');
+        $this->params = ComponentHelper::getParams('com_jce');
 
         // Check for errors.
         if (count($errors = $this->get('Errors'))) {
-            JError::raiseError(500, implode("\n", $errors));
-
-            return false;
+            throw new Exception(implode("\n", $errors), 500);
         }
 
-        JHtml::_('jquery.framework');
+        HTMLHelper::_('jquery.framework');
 
-        $document = JFactory::getDocument();
-        $document->addScript(JURI::root(true) . '/media/com_jce/js/cpanel.min.js');
-        $document->addStyleSheet(JURI::root(true) . '/media/com_jce/css/cpanel.min.css');
+        $document = Factory::getDocument();
+        $document->addScript(Uri::root(true) . '/media/com_jce/admin/js/cpanel.min.js');
+        $document->addStyleSheet(Uri::root(true) . '/media/com_jce/admin/css/cpanel.min.css');
 
         $this->addToolbar();
-        $this->sidebar = JHtmlSidebar::render();
+        $this->sidebar = Sidebar::render();
         parent::display($tpl);
     }
 
@@ -47,16 +59,14 @@ class JceViewCpanel extends JViewLegacy
     protected function addToolbar()
     {
         $state = $this->get('State');
-        $user = JFactory::getUser();
+        $user = Factory::getUser();
 
-        JToolbarHelper::title('JCE - ' . JText::_('WF_CPANEL'), 'home');
+        ToolbarHelper::title('JCE - ' . Text::_('WF_CPANEL'), 'home');
 
-        $bar = JToolBar::getInstance('toolbar');
-
-        JHtmlSidebar::setAction('index.php?option=com_jce&view=cpanel');
+        Sidebar::setAction('index.php?option=com_jce&view=cpanel');
 
         if ($user->authorise('core.admin', 'com_jce')) {
-            JToolbarHelper::preferences('com_jce');
+            ToolbarHelper::preferences('com_jce');
         }
     }
 }

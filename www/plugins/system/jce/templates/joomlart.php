@@ -6,10 +6,12 @@
  */
 defined('JPATH_BASE') or die;
 
-class WfTemplateJoomlart extends JPlugin
+use Joomla\CMS\Plugin\CMSPlugin;
+
+class WfTemplateJoomlart extends CMSPlugin
 {
     public function onWfGetTemplateStylesheets(&$files, $template)
-    {                        
+    {
         $path = JPATH_SITE . '/templates/' . $template->name;
 
         if (!is_file($path . '/templateInfo.php')) {
@@ -19,11 +21,16 @@ class WfTemplateJoomlart extends JPlugin
         // add base template.css file
         $files[] = 'templates/' . $template->name . '/css/template.css';
 
+        // add custom.css
+        if (is_file($path . '/css/custom.css')) {
+            $files[] = 'templates/' . $template->name . '/css/custom.css';
+        }
+
         $items = array();
-            
+
         $list = glob(JPATH_SITE . '/media/t4/css/*.css');
 
-        foreach($list as $file) {
+        foreach ($list as $file) {
             $items[filemtime($file)] = $file;
         }
 

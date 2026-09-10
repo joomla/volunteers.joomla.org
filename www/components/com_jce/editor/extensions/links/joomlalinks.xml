@@ -1,12 +1,12 @@
 <?xml version="1.0" ?>
 <extension version="3.4" type="plugin" group="jce" method="upgrade">
     <name>WF_LINKS_JOOMLALINKS_TITLE</name>
-    <version>2.9.33</version>
-    <creationDate>18-01-2023</creationDate>
+    <version>2.9.99.5</version>
+    <creationDate>03-06-2026</creationDate>
     <author>Ryan Demmer</author>
     <authorEmail>info@joomlacontenteditor.net</authorEmail>
     <authorUrl>https://www.joomlacontenteditor.net/</authorUrl>
-    <copyright>Copyright (C) 2006 - 2022 Ryan Demmer. All rights reserved</copyright>
+    <copyright>Copyright (C) 2006 - 2026 Ryan Demmer. All rights reserved</copyright>
     <license>GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html</license>
     <description>WF_LINKS_JOOMLALINKS_DESC</description>
     <files>
@@ -25,7 +25,7 @@
                 <option value="1">JYES</option>
                 <option value="0">JNO</option>
             </field>
-            <field name="article_alias" type="yesno" default="1" label="WF_LINKS_JOOMLALINKS_PARAM_ARTICLE_ALIAS" description="WF_LINKS_JOOMLALINKS_PARAM_ARTICLE_ALIAS_DESC">
+            <field name="article_alias" type="yesno" default="0" label="WF_LINKS_JOOMLALINKS_PARAM_ARTICLE_ALIAS" description="WF_LINKS_JOOMLALINKS_PARAM_ARTICLE_ALIAS_DESC">
                 <option value="1">JYES</option>
                 <option value="0">JNO</option>
             </field>
@@ -45,7 +45,7 @@
                 <option value="1">JYES</option>
                 <option value="0">JNO</option>
             </field>
-            <field name="weblinks_alias" type="yesno" default="1" label="WF_LINKS_JOOMLALINKS_PARAM_WEBLINKS_ALIAS" description="WF_LINKS_JOOMLALINKS_PARAM_WEBLINKS_ALIAS_DESC">
+            <field name="weblinks_alias" type="yesno" default="0" label="WF_LINKS_JOOMLALINKS_PARAM_WEBLINKS_ALIAS" description="WF_LINKS_JOOMLALINKS_PARAM_WEBLINKS_ALIAS_DESC">
                 <option value="1">JYES</option>
                 <option value="0">JNO</option>
             </field>
@@ -61,7 +61,7 @@
                 <option value="1">JYES</option>
                 <option value="0">JNO</option>
             </field>
-            <field name="tags_alias" type="yesno" default="1" label="WF_LINKS_JOOMLALINKS_PARAM_TAGS_ALIAS" description="WF_LINKS_JOOMLALINKS_PARAM_TAGS_ALIAS_DESC">
+            <field name="tags_alias" type="yesno" default="0" label="WF_LINKS_JOOMLALINKS_PARAM_TAGS_ALIAS" description="WF_LINKS_JOOMLALINKS_PARAM_TAGS_ALIAS_DESC">
                 <option value="1">JYES</option>
                 <option value="0">JNO</option>
             </field>

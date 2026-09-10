@@ -1,14 +1,14 @@
 <?php
 
 /**
- * @copyright     Copyright (c) 2009-2022 Ryan Demmer. All rights reserved
- * @license       GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
- * JCE is free software. This version may have been modified pursuant
- * to the GNU General Public License, and as distributed it includes or
- * is derivative of works licensed under the GNU General Public License or
- * other free or open source software licenses
+ * @package     JCE
+ * @subpackage  Admin
+ *
+ * @copyright   Copyright (C) 2005 - 2023 Open Source Matters, Inc. All rights reserved.
+ * @copyright   Copyright (c) 2009-2024 Ryan Demmer. All rights reserved
+ * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
-defined('JPATH_PLATFORM') or die;
+\defined('_JEXEC') or die;
 
 // load constants
 require_once __DIR__ . '/constants.php';
@@ -43,7 +43,7 @@ JLoader::register('WFSearchExtension', WF_EDITOR_CLASSES . '/extensions/search.p
 JLoader::register('WFMediaManagerBase', WF_EDITOR_CLASSES . '/manager/base.php');
 JLoader::register('WFMediaManager', WF_EDITOR_CLASSES . '/manager.php');
 JLoader::register('WFFileBrowser', WF_EDITOR_CLASSES . '/browser.php');
-JLoader::register('Wf_Mobile_Detect', WF_EDITOR_CLASSES . '/mobile.php');
+JLoader::register('WFDeviceDetect', WF_EDITOR_CLASSES . '/devicedetect.php');
 
 JLoader::register('JcePluginsHelper', WF_ADMINISTRATOR . '/helpers/plugins.php');
 JLoader::register('JceEncryptHelper', WF_ADMINISTRATOR . '/helpers/encrypt.php');
@@ -52,6 +52,9 @@ JLoader::register('WFLinkHelper', WF_EDITOR_CLASSES . '/linkhelper.php');
 
 // Defuse
 JLoader::registerNamespace('Defuse\\Crypto', WF_ADMINISTRATOR . '/vendor/Defuse/Crypto', false, false, 'psr4');
+
+// Mobile Detect
+//JLoader::registerNamespace('Wf\\Detection', WF_EDITOR_CLASSES . '/vendor/MobileDetect/src', false, false, 'psr4');
 
 // CssMin
 JLoader::registerNamespace('tubalmartin\CssMin', WF_EDITOR_CLASSES . '/vendor/cssmin/src', false, false, 'psr4');

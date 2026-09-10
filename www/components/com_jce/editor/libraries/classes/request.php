@@ -1,16 +1,22 @@
 <?php
-
 /**
- * @copyright 	Copyright (c) 2009-2022 Ryan Demmer. All rights reserved
- * @license   	GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
- * JCE is free software. This version may have been modified pursuant
- * to the GNU General Public License, and as distributed it includes or
- * is derivative of works licensed under the GNU General Public License or
- * other free or open source software licenses
+ * @package     JCE
+ * @subpackage  Editor
+ *
+ * @copyright   Copyright (C) 2005 - 2020 Open Source Matters, Inc. All rights reserved.
+ * @copyright   Copyright (c) 2009-2024 Ryan Demmer. All rights reserved
+ * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
-defined('JPATH_PLATFORM') or die;
 
-final class WFRequest extends JObject
+\defined('_JEXEC') or die;
+
+use Joomla\CMS\Factory;
+use Joomla\CMS\Filter\InputFilter;
+use Joomla\CMS\Language\Text;
+use Joomla\CMS\Object\CMSObject;
+use Joomla\CMS\Session\Session;
+
+final class WFRequest extends CMSObject
 {
     protected static $instance;
 
@@ -115,8 +121,13 @@ final class WFRequest extends JObject
                 return self::checkQuery($key);
             }
 
-            if (strpos($key, '\u0000') !== false || strpos($value, '\u0000') !== false) {
-                JError::raiseError(403, 'RESTRICTED');
+            // Check if $key or $value is null before using strpos
+            if ($key !== null && strpos($key, '\u0000') !== false) {
+                throw new InvalidArgumentException('Invalid Data', 403);
+            }
+
+            if ($value !== null && strpos($value, '\u0000') !== false) {
+                throw new InvalidArgumentException('Invalid Data', 403);
             }
         }
     }
@@ -133,9 +144,9 @@ final class WFRequest extends JObject
         }
 
         // Check for request forgeries
-        JSession::checkToken('request') or jexit(JText::_('JINVALID_TOKEN'));
+        Session::checkToken('request') or jexit(Text::_('JINVALID_TOKEN'));
 
-        $app = JFactory::getApplication();
+        $app = Factory::getApplication();
 
         // empty arguments
         $args = array();
@@ -145,11 +156,8 @@ final class WFRequest extends JObject
 
         // get and encode json data
         if ($json) {
-            // remove slashes
-          $json = stripslashes($json);
-
-          // convert to JSON object
-          $json = json_decode($json);
+            // convert to JSON object
+            $json = json_decode($json);
         }
 
         // get current request id
@@ -173,20 +181,26 @@ final class WFRequest extends JObject
                 $fn = $json->method;
 
                 // clean function
-                $fn = JFilterInput::getInstance()->clean($fn, 'cmd');
+                $fn = InputFilter::getInstance()->clean($fn, 'cmd');
 
                 // pass params to input and flatten
-                if (!empty($json->params)) {
+                if (empty($json->params)) {
+                    $json->params = "";
+                }
+
+                try {
                     // check query
                     $this->checkQuery($json->params);
+                } catch (Exception $e) {
+                    $response->setError(array('code' => $e->getCode(), 'message' => $e->getMessage()))->send();
+                }
 
-                    // merge array with args
-                    if (is_array($json->params)) {
-                        $args = array_merge($args, $json->params);
+                // merge array with args
+                if (is_array($json->params)) {
+                    $args = array_merge($args, $json->params);
                     // pass through string or object
-                    } else {
-                        $args[] = $json->params;
-                    }
+                } else {
+                    $args[] = $json->params;
                 }
             } else {
                 $fn = $method;

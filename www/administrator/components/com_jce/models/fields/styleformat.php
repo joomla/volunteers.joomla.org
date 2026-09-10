@@ -1,21 +1,23 @@
 <?php
-
 /**
- * @copyright     Copyright (c) 2009-2022 Ryan Demmer. All rights reserved
- * @license       GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
- * JCE is free software. This version may have been modified pursuant
- * to the GNU General Public License, and as distributed it includes or
- * is derivative of works licensed under the GNU General Public License or
- * other free or open source software licenses
+ * @package     JCE
+ * @subpackage  Admin
+ *
+ * @copyright   Copyright (C) 2005 - 2020 Open Source Matters, Inc. All rights reserved.
+ * @copyright   Copyright (c) 2009-2024 Ryan Demmer. All rights reserved
+ * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
-defined('JPATH_BASE') or die;
 
-use Joomla\Utilities\ArrayHelper;
+\defined('_JEXEC') or die;
+
+use Joomla\CMS\Form\Form;
+use Joomla\CMS\Form\FormField;
+use Joomla\CMS\Language\Text;
 
 /**
  * Renders a select element.
  */
-class JFormFieldStyleFormat extends JFormField
+class JFormFieldStyleFormat extends FormField
 {
     /*
      * Element type
@@ -24,6 +26,46 @@ class JFormFieldStyleFormat extends JFormField
      * @var        string
      */
     protected $type = 'StyleFormat';
+
+    private function loadSubForm()
+    {
+        $subForm = new Form($this->name);
+        
+        // editor manifest
+        $manifest = JPATH_ADMINISTRATOR . '/components/com_jce/models/forms/styleformat.xml';
+        $xml = simplexml_load_file($manifest);
+        $subForm->load($xml);
+
+        return $subForm;
+    }
+
+    private function renderFields($form, $item)
+    {
+        $fields = $form->getFieldset();
+        
+        $data = array();
+
+        foreach ($fields as $field) {
+            $tmpField = clone $field;
+            
+            $key = (string) $tmpField->element['name'];
+
+            // default value
+            $tmpField->value = "";
+
+            if (array_key_exists($key, $item)) {
+                $tmpField->value = htmlspecialchars_decode($item[$key], ENT_QUOTES);
+            }
+
+            $tmpField->setup($tmpField->element, $tmpField->value, $this->group);
+            $tmpField->id = '';
+            $tmpField->name = '';
+
+            $data[] = '<div class="styleformat-item-' . $key . '" data-key="' . $key . '">' . $tmpField->renderField(array('description' => $tmpField->description)) . '</div>';
+        }
+
+        return implode('', $data);
+    }
 
     protected function getInput()
     {
@@ -62,45 +104,23 @@ class JFormFieldStyleFormat extends JFormField
             $items = array($default);
         }
 
-        $subForm = new JForm($this->name);
-
-        // editor manifest
-        $manifest = JPATH_ADMINISTRATOR . '/components/com_jce/models/forms/styleformat.xml';
-        $xml = simplexml_load_file($manifest);
-        $subForm->load($xml);
-
-        $fields = $subForm->getFieldset();
-
         $output[] = '<div class="styleformat-list">';
 
         $x = 0;
 
+        $subForm = $this->loadSubForm();
+
         foreach ($items as $item) {
-            $elements = array('<div class="styleformat">');
+            $elements = array('<div class="styleformat border bg-light-subtle">');
 
-            foreach($fields as $field) {
-                $key = (string) $field->element['name'];
-
-                // default value
-                $field->value = "";
-
-                if (array_key_exists($key, $item)) {
-                    $field->value = htmlspecialchars_decode($item[$key], ENT_QUOTES);
-                }
-
-                $field->setup($field->element, $field->value, $this->group);
-                $field->id = '';
-                $field->name = '';
-
-                $elements[] = '<div class="styleformat-item-' . $key . '" data-key="' . $key . '">' . $field->renderField(array('description' => $field->description)) . '</div>';
-            }
+            $elements[] = $this->renderFields($subForm, $item);
 
             $elements[] = '<div class="styleformat-header">';
 
             // handle
             $elements[] = '<span class="styleformat-item-handle"></span>';
             // delete button
-            $elements[] = '<button class="styleformat-item-trash btn btn-link pull-right float-right"><i class="icon icon-trash"></i></button>';
+            $elements[] = '<button class="styleformat-item-trash btn btn-link"><i class="icon icon-trash"></i></button>';
             // collapse
             $elements[] = '<button class="close collapse btn btn-link"><i class="icon icon-chevron-up"></i><i class="icon icon-chevron-down"></i></button>';
 
@@ -113,7 +133,7 @@ class JFormFieldStyleFormat extends JFormField
             $x++;
         }
 
-        $output[] = '<button class="btn btn-link styleformat-item-plus"><span class="span10 col-md-10 text-left">' . JText::_('WF_STYLEFORMAT_NEW') . '</span><i class="icon icon-plus pull-right float-right"></i></button>';
+        $output[] = '<button class="btn btn-link styleformat-item-plus border"><span class="text-left">' . Text::_('WF_STYLEFORMAT_NEW') . '</span><i class="icon icon-plus"></i></button>';
 
         // hidden field
         $output[] = '<input type="hidden" name="' . $this->name . '" value="" />';

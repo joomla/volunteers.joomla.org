@@ -1,0 +1,29 @@
+<?xml version="1.0" ?>
+<extension version="3.4" type="plugin" group="jce" method="upgrade">
+	<name>WF_AUTOSAVE_TITLE</name>
+	<version>2.9.99.5</version>
+	<creationDate>03-06-2026</creationDate>
+	<author>Moxiecode / Ryan Demmer</author>
+	<authorEmail>info@joomlacontenteditor.net</authorEmail>
+	<authorUrl>https://www.joomlacontenteditor.net/</authorUrl>
+	<copyright>Ryan Demmer</copyright>
+	<license>GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html</license>
+	<description>WF_AUTOSAVE_DESC</description>
+	<icon>autosave</icon>
+	<files></files>
+	<languages></languages>
+
+	<fields name="autosave">
+        <fieldset name="config">
+            <field name="ask_before_unload" type="yesno" default="0" label="WF_AUTOSAVE_ASK_BEFORE_UNLOAD" description="WF_AUTOSAVE_ASK_BEFORE_UNLOAD_DESC">
+				<option value="0">JNO</option>
+				<option value="1">JYES</option>
+			</field>
+			<field name="retention" type="text" default="20" label="WF_AUTOSAVE_RETENTION" description="WF_AUTOSAVE_RETENTION_DESC" />
+			<field name="interval" type="text" default="30" label="WF_AUTOSAVE_INTERVAL" description="WF_AUTOSAVE_INTERVAL_DESC" />
+		</fieldset>
+	</fields>
+
+	<help></help>
+</extension>
+ 

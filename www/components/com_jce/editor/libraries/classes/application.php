@@ -1,14 +1,21 @@
 <?php
 
 /**
- * @copyright     Copyright (c) 2009-2022 Ryan Demmer. All rights reserved
- * @license       GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
- * JCE is free software. This version may have been modified pursuant
- * to the GNU General Public License, and as distributed it includes or
- * is derivative of works licensed under the GNU General Public License or
- * other free or open source software licenses
+ * @package     JCE
+ * @subpackage  Editor
+ *
+ * @copyright   Copyright (C) 2005 - 2020 Open Source Matters, Inc. All rights reserved.
+ * @copyright   Copyright (c) 2009-2024 Ryan Demmer. All rights reserved
+ * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
-defined('JPATH_PLATFORM') or die;
+
+\defined('_JEXEC') or die;
+
+use Joomla\CMS\Component\ComponentHelper;
+use Joomla\CMS\Factory;
+use Joomla\CMS\Object\CMSObject;
+use Joomla\CMS\Plugin\PluginHelper;
+use Joomla\Registry\Registry;
 
 require_once JPATH_ADMINISTRATOR . '/components/com_jce/includes/base.php';
 
@@ -19,13 +26,13 @@ require_once JPATH_ADMINISTRATOR . '/components/com_jce/includes/base.php';
  *
  * @since    1.5
  */
-class WFApplication extends JObject
+class WFApplication extends CMSObject
 {
     // Editor instance
     protected static $instance;
 
     // Editor Profile
-    protected static $profile = array();
+    protected static $profiles = array();
 
     // Editor Params
     protected static $params = array();
@@ -41,7 +48,9 @@ class WFApplication extends JObject
         $this->setProperties($config);
 
         // store a reference to the Joomla Application input
-        $this->input = JFactory::getApplication()->input;
+        $this->input = Factory::getApplication()->input;
+
+        Factory::getApplication()->triggerEvent('onWfApplicationInit', array($this));
     }
 
     /**
@@ -78,7 +87,7 @@ class WFApplication extends JObject
     protected function getComponent($id = null, $option = null)
     {
         if ($id) {
-            $components = JComponentHelper::getComponents();
+            $components = ComponentHelper::getComponents();
 
             foreach ($components as $option => $component) {
                 if ($id == $component->id) {
@@ -87,22 +96,42 @@ class WFApplication extends JObject
             }
         }
 
-        return JComponentHelper::getComponent($option);
+        return ComponentHelper::getComponent($option);
     }
 
     public function getContext()
     {
-        $option = JFactory::getApplication()->input->getCmd('option');
-        $component = JComponentHelper::getComponent($option, true);
+        $option = Factory::getApplication()->input->getCmd('option');
+        $component = ComponentHelper::getComponent($option, true);
 
         return $component->id;
     }
 
+    private function isFileBrowser()
+    {
+        $app = Factory::getApplication();
+        $option = $app->input->getCmd('option', '');
+
+        if ($option !== 'com_jce') {
+            return false;
+        }
+
+        if ($app->input->getCmd('view') === 'browser') {
+            return true;
+        }
+
+        if ($app->input->getCmd('plugin') === 'browser') {
+            return true;
+        }
+
+        return false;
+    }
+
     private function getProfileVars()
     {
-        $app = JFactory::getApplication();
-        $user = JFactory::getUser();
-        $option = $this->getComponentOption();
+        $app = Factory::getApplication();
+        $user = Factory::getUser();
+        $option = $app->input->getCmd('option', '');
 
         $settings = array(
             'option' => $option,
@@ -124,21 +153,15 @@ class WFApplication extends JObject
                     $settings['option'] = $component->option;
                 }
             }
-
-            $profile_id = $app->input->getInt('profile_id');
-
-            if ($profile_id) {
-                $settings['profile_id'] = $profile_id;
-            }
         }
 
         // get the Joomla! area, default to "site"
         $settings['area'] = $app->getClientId() === 0 ? 1 : 2;
 
-        $mobile = new Wf_Mobile_Detect();
+        $mobile = new WFDeviceDetect();
 
         // phone
-        if ($mobile->isMobile()) {
+        if ($mobile->isPhone()) {
             $settings['device'] = 'phone';
         }
 
@@ -153,67 +176,145 @@ class WFApplication extends JObject
 
     private function isCorePlugin($plugin)
     {
-        return in_array($plugin, array('core', 'autolink', 'cleanup', 'code', 'format', 'importcss', 'colorpicker', 'upload', 'branding', 'inlinepopups', 'figure', 'ui'));
+        return in_array($plugin, array('core', 'autolink', 'cleanup', 'code', 'format', 'importcss', 'colorpicker', 'upload', 'branding', 'inlinepopups', 'figure', 'ui', 'help'));
+    }
+
+    public function isValidPlugin($name)
+    {
+        $plugins = JcePluginsHelper::getPlugins();
+
+        // installed plugins will have a name prefixed with "editor-", so remove to validate
+        if (preg_match('/^editor[-_]/', $name)) {
+            $name = preg_replace('/^editor[-_]/', '', $name);
+        }
+
+        if (!isset($plugins[$name])) {
+            return false;
+        }
+
+        $plugin = $plugins[$name];
+
+        if (isset($plugin->checksum) && strlen($plugin->checksum) == 64) {
+            $path = $plugin->path . '/' . $plugin->name . '.php';
+
+            if (!is_file($path)) {
+                return false;
+            }
+
+            return $plugin->checksum === hash_file('sha256', $path);
+        }
+
+        return true;
+    }
+
+    public function checkProfile($plugin)
+    {
+        $profile = $this->getActiveProfile(array('plugin' => $plugin));
+        return $profile ? true : false;
+    }
+    /**
+     * Return the active profile based on certain conditions.
+     *
+     * @param array $options An array of options to pass to the getProfile method
+     * @return object The active profile
+     */
+    public function getActiveProfile($options = array())
+    {
+        // in future this might return an array of profiles by key
+        $profiles = $this->getProfiles($options);
+
+        return $profiles;
     }
 
     /**
-     * Get an appropriate editor profile.
+     * Legacy getProfile function for backwards compatibility.
+     *
+     * @param array $options
+     * @return void
      */
-    public function getProfile($plugin = '', $id = 0)
+    public function getProfile($options = array())
     {
+        if (is_string($options)) {
+            $options = array('plugin' => $options);
+        }
+
+        return $this->getActiveProfile($options);
+    }
+
+    /**
+     * Get an array of editor profiles.
+     *
+     * @param array $options Array of options to pass to the getProfile method
+     * @return array Array of editor profiles by key, with "default" being the default profile
+     */
+    protected function getProfiles($options = array())
+    {
+        static $cache = array();
+
+        if (!isset($options['plugin'])) {
+            $options['plugin'] = '';
+        }
+
+        if (!isset($options['id'])) {
+            $options['id'] = 0;
+        }
+
+        // get the passed in options as variables
+        extract ($options);
+        
         // reset the value if it is a core plugin
         if ($this->isCorePlugin($plugin)) {
             $plugin = '';
         }
 
         // get the profile variables for the current context
-        $options = $this->getProfileVars();
+        $vars = $this->getProfileVars();
 
-        // add plugin to options array
-        $options['plugin'] = $plugin;
-
-        // assign profile_id to simple variable
-        if (isset($options['profile_id'])) {
-            $id = (int) $options['profile_id'];
+        // installed plugins will have a name prefixed with "editor-", so remove to validate
+        if (preg_match('/^editor[-_]/', $plugin)) {
+            $plugin = preg_replace('/^editor[-_]/', '', $plugin);
         }
 
-        // create a signature to store
-        $signature = md5(serialize($options));
+        // add plugin to vars array
+        $vars['plugin'] = $plugin;
 
-        if (!isset(self::$profile[$signature])) {
-            $db = JFactory::getDBO();
-            $user = JFactory::getUser();
-            $app = JFactory::getApplication();
+        $db = Factory::getDBO();
+        $user = Factory::getUser();
+        $app = Factory::getApplication();
 
-            $query = $db->getQuery(true);
-            $query->select('*')->from('#__wf_profiles')->where('published = 1')->order('ordering ASC');
+        $query = $db->getQuery(true);
+        $query->select('*')->from('#__wf_profiles')->where('published = 1')->order('ordering ASC');
 
-            if ($id) {
-                $query->where('id = ' . (int) $id);
-            }
+        $db->setQuery($query);
+        $items = $db->loadObjectList();
 
-            $db->setQuery($query);
-            $profiles = $db->loadObjectList();
+        // nothing found...
+        if (empty($items)) {
+            return null;
+        }
 
-            // nothing found...
-            if (empty($profiles)) {
-                return null;
-            }
+        $app->triggerEvent('onWfEditorProfileOptions', array(&$vars));
 
-            // select and return a specific profile by id
-            if ($id) {
-                // return
-                return (object) $profiles[0];
-            }
+        // create a unique signature to store
+        $signature = md5(serialize($vars));
 
-            foreach ($profiles as $item) {
+        if (!isset($cache[$signature])) {
+
+            foreach ($items as $item) {
                 // at least one user group or user must be set
                 if (empty($item->types) && empty($item->users)) {
                     continue;
                 }
 
+                $app->triggerEvent('onWfBeforeEditorProfileItem', array(&$item));
+
+                // event can "cancel" this profile item
+                if ($item === false) {
+                    continue;
+                }
+
                 // check user groups - a value should always be set
-                $groups = array_intersect($options['groups'], explode(',', $item->types));
+                $groups = array_intersect($vars['groups'], explode(',', $item->types));
 
                 // user not in the current group...
                 if (empty($groups)) {
@@ -223,9 +324,14 @@ class WFApplication extends JObject
                     }
                 }
 
-                // check component
+                // check component, but skip if this is the file browser
                 if (!empty($item->components)) {
-                    if (in_array($options['option'], explode(',', $item->components)) === false) {
+                    $components = explode(',', $item->components);
+
+                    // remove duplicates
+                    $components = array_unique($components);
+
+                    if (in_array($vars['option'], $components) === false) {
                         continue;
                     }
                 }
@@ -236,12 +342,12 @@ class WFApplication extends JObject
                 }
 
                 // check device
-                if (in_array($options['device'], explode(',', $item->device)) === false) {
+                if (in_array($vars['device'], explode(',', $item->device)) === false) {
                     continue;
                 }
 
                 // check area
-                if (!empty($item->area) && (int) $item->area != $options['area']) {
+                if (!empty($item->area) && (int) $item->area != $vars['area']) {
                     continue;
                 }
 
@@ -255,45 +361,24 @@ class WFApplication extends JObject
                     $item->params = JceEncryptHelper::decrypt($item->params);
                 }
 
+                $app->triggerEvent('onWfAfterEditorProfileItem', array(&$item));
+
+                // event can "cancel" this profile item
+                if ($item === false) {
+                    continue;
+                }
+
                 // assign item to profile
-                self::$profile[$signature] = (object) $item;
+                $cache[$signature] = (object) $item;
 
                 // return
-                return self::$profile[$signature];
+                return $cache[$signature];
             }
 
             return null;
         }
 
-        return self::$profile[$signature];
-    }
-
-    /**
-     * Get the component option.
-     *
-     * @return string
-     */
-    public function getComponentOption()
-    {
-        $app = JFactory::getApplication();
-
-        $option = $app->input->getCmd('option', '');
-
-        switch ($option) {
-            case 'com_section':
-                $option = 'com_content';
-                break;
-            case 'com_categories':
-                $section = $app->input->getCmd('section');
-
-                if ($section) {
-                    $option = $section;
-                }
-
-                break;
-        }
-
-        return $option;
+        return $cache[$signature];
     }
 
     /**
@@ -305,7 +390,7 @@ class WFApplication extends JObject
      */
     public function getParams($options = array())
     {
-        $app = JFactory::getApplication();
+        $app = Factory::getApplication();
 
         if (!isset(self::$params)) {
             self::$params = array();
@@ -348,7 +433,7 @@ class WFApplication extends JObject
 
         if (empty(self::$params[$signature])) {
             // get plugin
-            $editor = JPluginHelper::getPlugin('editors', 'jce');
+            $editor = PluginHelper::getPlugin('editors', 'jce');
 
             if (empty($editor->params)) {
                 $editor->params = '{}';
@@ -365,8 +450,8 @@ class WFApplication extends JObject
             // assign params to "editor" key
             $data1 = array('editor' => $data1);
 
-            // get params data for this profile
-            $profile = $this->getProfile($plugin);
+            // get params data for the active profile
+            $profile = $this->getActiveProfile(array('plugin' => $plugin));
 
             // create empty default if no profile or params are set
             $params = empty($profile->params) ? '{}' : $profile->params;
@@ -383,7 +468,7 @@ class WFApplication extends JObject
             $data = WFUtility::array_merge_recursive_distinct($data1, $data2, true);
 
             // create new registry with params
-            $params = new JRegistry($data);
+            $params = new Registry($data);
 
             self::$params[$signature] = $params;
         }

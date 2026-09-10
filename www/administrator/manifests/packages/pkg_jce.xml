@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<extension type="package" version="3.9" method="upgrade">
+<extension type="package" version="3.10" method="upgrade">
     <name>PKG_JCE</name>
     <author>Ryan Demmer</author>
-    <creationDate>18-01-2023</creationDate>
+    <creationDate>03-06-2026</creationDate>
     <packagename>jce</packagename>
-    <version>2.9.33</version>
+    <version>2.9.99.5</version>
     <url>https://www.joomlacontenteditor.net</url>
     <packager>Widget Factory Limited</packager>
     <packagerurl>https://www.joomlacontenteditor.net</packagerurl>
@@ -18,13 +18,14 @@
     <scriptfile>install.pkg.php</scriptfile>
     <files folder="packages">
         <file type="component" id="com_jce">com_jce.zip</file>
-        <file type="plugin" id="jce" group="editors">plg_editors_jce.zip</file>
         <file type="plugin" id="jce" group="content">plg_content_jce.zip</file>
+        <file type="plugin" id="jce" group="editors">plg_editors_jce.zip</file>
         <file type="plugin" id="jce" group="extension">plg_extension_jce.zip</file>
-        <file type="plugin" id="mediajce" group="fields">plg_fields_mediajce.zip</file>
         <file type="plugin" id="jce" group="installer">plg_installer_jce.zip</file>
         <file type="plugin" id="jce" group="quickicon">plg_quickicon_jce.zip</file>
         <file type="plugin" id="jce" group="system">plg_system_jce.zip</file>
+        <file type="plugin" id="mediajce" group="fields">plg_fields_mediajce.zip</file>
+        
     </files>
     
     <languages folder="language">
@@ -36,6 +37,7 @@
     <compatibility>
         <version>3</version>
         <version>4</version>
+        <version>5</version>
     </compatibility>
 
 </extension>

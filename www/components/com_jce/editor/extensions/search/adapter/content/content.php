@@ -1,24 +1,25 @@
 <?php
 /**
- * @copyright     Copyright (c) 2009-2022 Ryan Demmer. All rights reserved
- * @license       GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+ * @package     JCE
+ * @subpackage  Editor
  *
- * Adapted from the Joomla Search.content plugin - plugins/search/content/content.php
  * @copyright   Copyright (C) 2005 - 2020 Open Source Matters, Inc. All rights reserved.
- *
- * JCE is free software. This version may have been modified pursuant
- * to the GNU General Public License, and as distributed it includes or
- * is derivative of works licensed under the GNU General Public License or
- * other free or open source software licenses
+ * @copyright   Copyright (c) 2009-2024 Ryan Demmer. All rights reserved
+ * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
 
-defined('JPATH_PLATFORM') or die;
+\defined('_JEXEC') or die;
+
+use Joomla\CMS\Factory;
+use Joomla\CMS\Helper\RouteHelper;
+use Joomla\CMS\Language\Text;
+use Joomla\CMS\Plugin\CMSPlugin;
 
 /**
  * Content search plugin.
  *
  */
-class PlgWfSearchContent extends JPlugin
+class PlgWfSearchContent extends CMSPlugin
 {
     /**
      * Determine areas searchable by this plugin.
@@ -50,12 +51,12 @@ class PlgWfSearchContent extends JPlugin
      */
     public function onContentSearch($text, $phrase = '', $ordering = '', $areas = null)
     {
-        $db = JFactory::getDbo();
+        $db = Factory::getDbo();
         $serverType = $db->getServerType();
-        $app = JFactory::getApplication();
-        $user = JFactory::getUser();
-        $groups = implode(',', $user->getAuthorisedViewLevels());
-        $tag = JFactory::getLanguage()->getTag();
+        $app = Factory::getApplication();
+        $user = Factory::getUser();
+        $groups = implode(',', array_map('intval', $user->getAuthorisedViewLevels()));
+        $tag = Factory::getLanguage()->getTag();
 
         $searchText = $text;
 
@@ -66,7 +67,7 @@ class PlgWfSearchContent extends JPlugin
         $limit = $this->params->def('search_limit', 50);
 
         $nullDate = $db->getNullDate();
-        $date = JFactory::getDate();
+        $date = Factory::getDate();
         $now = $date->toSql();
 
         $text = trim($text);
@@ -144,7 +145,14 @@ class PlgWfSearchContent extends JPlugin
             $case_when1 = ' CASE WHEN ';
             $case_when1 .= $query->charLength('a.alias', '!=', '0');
             $case_when1 .= ' THEN ';
-            $a_id = $query->castAsChar('a.id');
+
+            // Joomla 3 compatibility
+            if (method_exists($query, 'castAsChar')) {
+                $a_id = $query->castAsChar('a.id');
+            } else {
+                $a_id = $query->castAs('CHAR', 'a.id');
+            }
+
             $case_when1 .= $query->concatenate(array($a_id, 'a.alias'), ':');
             $case_when1 .= ' ELSE ';
             $case_when1 .= $a_id . ' END as slug';
@@ -152,7 +160,14 @@ class PlgWfSearchContent extends JPlugin
             $case_when2 = ' CASE WHEN ';
             $case_when2 .= $query->charLength('b.alias', '!=', '0');
             $case_when2 .= ' THEN ';
-            $c_id = $query->castAsChar('b.id');
+            
+            // Joomla 3 compatibility
+            if (method_exists($query, 'castAsChar')) {
+                $c_id = $query->castAsChar('b.id');
+            } else {
+                $c_id = $query->castAs('CHAR', 'b.id');
+            }
+
             $case_when2 .= $query->concatenate(array($c_id, 'b.alias'), ':');
             $case_when2 .= ' ELSE ';
             $case_when2 .= $c_id . ' END as catslug';
@@ -183,12 +198,12 @@ class PlgWfSearchContent extends JPlugin
                 $rows = $db->loadObjectList();
             } catch (RuntimeException $e) {
                 $rows = array();
-                JFactory::getApplication()->enqueueMessage(JText::_('JERROR_AN_ERROR_HAS_OCCURRED'), 'error');
+                Factory::getApplication()->enqueueMessage(Text::_('JERROR_AN_ERROR_HAS_OCCURRED'), 'error');
             }
 
             if ($rows) {
                 // create a new RouteHelper instance
-                $router = new JHelperRoute();
+                $router = new RouteHelper();
 
                 foreach ($rows as $key => $row) {
                     $rows[$key]->href = $router->getRoute($row->slug, 'com_content.article', '', $row->language, $row->catslug);

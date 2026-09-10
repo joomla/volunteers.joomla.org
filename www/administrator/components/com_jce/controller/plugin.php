@@ -1,52 +1,53 @@
 <?php
 
 /**
- * @copyright     Copyright (c) 2009-2022 Ryan Demmer. All rights reserved
+ * @copyright     Copyright (c) 2009-2024 Ryan Demmer. All rights reserved
  * @license       GNU/GPL 3 - http://www.gnu.org/copyleft/gpl.html
  * JCE is free software. This version may have been modified pursuant
  * to the GNU General Public License, and as distributed it includes or
  * is derivative of works licensed under the GNU General Public License or
  * other free or open source software licenses
  */
-defined('JPATH_PLATFORM') or die;
+\defined('_JEXEC') or die;
 
 require_once JPATH_SITE . '/components/com_jce/editor/libraries/classes/application.php';
 
-class JceControllerPlugin extends JControllerLegacy
+use Joomla\CMS\Factory;
+use Joomla\CMS\MVC\Controller\BaseController;
+use Joomla\CMS\Session\Session;
+use Joomla\CMS\Language\Text;
+use Joomla\Filesystem\Path;
+
+class JceControllerPlugin extends BaseController
 {
     private static $map = array(
-        'image'     => 'imgmanager',
-        'imagepro'  => 'imgmanager_ext'
+        'image' => 'imgmanager',
+        'imagepro' => 'imgmanager_ext',
     );
 
-    private function createClassName($name) {
+    private function createClassName($name)
+    {
         $delim = array('-', '_');
 
         $name = str_replace($delim, ' ', $name);
 
         $className = 'WF' . ucwords($name) . 'Plugin';
-        
+
         // remove space
         $className = str_replace(' ', '', $className);
 
         return $className;
     }
-    
+
     public function execute($task)
     {
+        // check for session token
+        Session::checkToken('request') or jexit(Text::_('JINVALID_TOKEN'));
+        
         $wf = WFApplication::getInstance();
 
-        // check a valid profile exists
-        $wf->getProfile() or jexit('Invalid Profile');
-
-        // load language files
-        $language = JFactory::getLanguage();
-
-        $language->load('com_jce', JPATH_ADMINISTRATOR);
-
-        if (WF_EDITOR_PRO) {
-            $language->load('com_jce_pro', JPATH_SITE);
-        }
+        $app = Factory::getApplication();
+        $language = Factory::getLanguage();
 
         $plugin = $this->input->get('plugin');
 
@@ -67,40 +68,76 @@ class JceControllerPlugin extends JControllerLegacy
             $this->input->set('plugin', $mapped);
         }
 
-        $path = WF_EDITOR_PLUGINS . '/' . $plugin;
+        // check this is a valid plugin
+        if (!$wf->isValidPlugin($plugin)) {
+            throw new Exception(Text::_('JERROR_ALERTNOAUTHOR'), 403);
+        }
 
-        if (strpos($plugin, 'editor-') !== false) {
+        // check a valid profile exists
+        if (!$wf->checkProfile($plugin)) {
+            throw new Exception(Text::_('JERROR_ALERTNOAUTHOR'), 403);
+        }
+
+        // load language files
+        $language->load('com_jce', JPATH_ADMINISTRATOR);
+
+        // assume the file does not exist
+        $filepath = false;
+
+        // check installed plugins first
+        if (preg_match('/^editor[-_]/', $plugin)) {
             $path = JPATH_PLUGINS . '/jce/' . $plugin;
+            
+            // installed plugin path
+            $filepath = $path . '/' . $plugin . '.php';
+
+            // check for alternate path
+            if (is_dir($path . '/src')) {
+                // rename plugin
+                $name = substr($plugin, 7);
+                
+                // reset filepath
+                $filepath = $path . '/src/' . $name . '.php';
+            }
+
+            if (!file_exists($filepath)) {
+                $filepath = false;
+            }
         }
 
-        if (!file_exists($path . '/' . $plugin . '.php')) {
-            throw new InvalidArgumentException(ucfirst($plugin) . '" not found!');
+        // check custom and pro plugins
+        $app->triggerEvent('onWfPluginExecute', array($plugin, &$filepath));
+
+        // check core plugins
+        if (false === $filepath) {
+            $filepath = Path::find(
+                array(
+                    WF_EDITOR_PLUGINS . '/' . $plugin
+                ),
+                $plugin . '.php'
+            );
         }
 
-        include_once $path . '/' . $plugin . '.php';
+        if (false === $filepath) {
+            jexit('Invalid Plugin');
+        }
 
+        include_once $filepath;
+
+        // create classname
         $className = $this->createClassName($plugin);
 
-        if (class_exists($className)) {
+        if (class_exists($className)) {            
             // load language file if any
-            $language->load('plg_jce_' . basename($path), $path);
+            $language->load('plg_jce_' . $plugin, dirname($filepath));
 
-            $instance = new $className();
+            $instance = new $className(
+                array(
+                    'base_path' => dirname($filepath)
+                )
+            );
 
-            if (strpos($task, '.') !== false) {
-                list($name, $task) = explode('.', $task);
-            }
-
-            if ($task === 'display') {
-                $task = 'execute';
-            }
-    
-            // default to execute if task is not available
-            if (is_callable(array($instance, $task)) === false) {
-                $task = 'execute';
-            }
-    
-            $instance->$task();
+            $instance->execute($task);
         }
 
         jexit();

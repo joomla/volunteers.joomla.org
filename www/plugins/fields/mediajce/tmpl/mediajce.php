@@ -1,41 +1,55 @@
 <?php
 
 /**
- * @package     Joomla.Plugin
+ * @package     JCE
  * @subpackage  Fields.MediaJce
  *
- * @copyright   Copyright (C) 2005 - 2019 Open Source Matters, Inc. All rights reserved.
- * @copyright   Copyright (C) 2020 Ryan Demmer. All rights reserved.
+ * @copyright   Copyright (C) 2005 - 2023 Open Source Matters, Inc. All rights reserved.
+ * @copyright   Copyright (C) 2020 - 2024 Ryan Demmer. All rights reserved.
  * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
 defined('_JEXEC') or die;
 
-use Joomla\CMS\Filesystem\File;
-use Joomla\CMS\Filesystem\Path;
-use Joomla\Utilities\ArrayHelper;
-use Joomla\CMS\Helper\MediaHelper;
+use Joomla\CMS\Layout\LayoutHelper;
+use Joomla\Filesystem\File;
+use Joomla\Filesystem\Path;
 
-if (empty($field->value) || empty($field->value['media_src']))
-{
-	return;
+// load helper
+require_once JPATH_PLUGINS . '/fields/mediajce/helper/mediahelper.php';
+
+if (empty($field->value)) {
+    return;
+}
+
+// single value, may be subform
+if (is_string($field->value)) {
+    $field->value = array(
+        'media_src' => $field->value,
+        'media_type' => WfMediaHelper::isImage($field->value) ? 'embed' : 'link',
+    );
+}
+
+// no src value set
+if (empty($field->value['media_src'])) {
+    return;
 }
 
 $data = array(
-    'media_src'         => '',
-    'media_text'        => (string) $fieldParams->get('media_description', ''),
-    'media_type'        => (string) $fieldParams->get('mediatype', 'embed'),
-    'media_target'      => (string) $fieldParams->get('media_target', ''),
-    'media_class'       => (string) $fieldParams->get('media_class', ''),
-    'media_caption'     => '',
-    'media_supported'   => array('img', 'video', 'audio', 'iframe', 'a')
+    'media_src' => '',
+    'media_text' => (string) $fieldParams->get('media_description', ''),
+    'media_type' => (string) $fieldParams->get('display_type', 'embed'),
+    'media_target' => (string) $fieldParams->get('media_target', '_blank'),
+    'media_class' => (string) $fieldParams->get('media_class', ''),
+    'media_caption' => '',
+    'media_supported' => array('img', 'video', 'audio', 'iframe', 'a', 'object'),
 );
 
-foreach($field->value as $key => $value) {
-	if (empty($value)) {
-		continue;
-	}
-	
-	$data[$key] = $value;
+foreach ($field->value as $key => $value) {
+    if (empty($value)) {
+        continue;
+    }
+
+    $data[$key] = $value;
 }
 
 // convert to object
@@ -46,38 +60,31 @@ if (isset($data->src)) {
     $data->media_src = $data->src;
 }
 
+// add "image" to supported media to allow for "image" and "img"
+$data->media_supported[] = 'image';
+
 // clean Joomla 4 media stuff
 if ($pos = strpos($data->media_src, '#')) {
     $data->media_src = substr($data->media_src, 0, $pos);
 }
 
-$allowable = array(
-    'img'       => 'jpg,jpeg,png,gif',
-    'audio'     => 'mp3,m4a,mp4a,ogg',
-    'video'     => 'mp4,mp4v,mpeg,mov,webm',
-    'iframe'    => 'doc,docx,odg,odp,ods,odt,pdf,ppt,pptx,txt,xcf,xls,xlsx,csv'
-);
-
 // get file extension to determine tag
-$extension = File::getExt($data->media_src);
+$extension = pathinfo($data->media_src, PATHINFO_EXTENSION);
+
 // lowercase
 $extension = strtolower($extension);
 
-// get tag from extension
-array_walk($allowable, function ($values, $key) use ($extension, &$tag) {
-    if (in_array($extension, explode(',', $values))) {
-        $tag = $key;
-    }
-});
+// get layout from extension
+$layout = WfMediaHelper::getLayoutFromExtension($extension);
 
-// reset media_type as link
-if (false == in_array($tag, $data->media_supported)) {
-    $data->media_type = 'link';
+// reset to link if not extended media
+if ((int) $fieldParams->get('extendedmedia') == 0 && $layout !== 'image') {
+    $layout = 'link';
 }
 
-// reset tag type
-if ($data->media_type == 'link') {
-    $tag = 'a';
+// reset layout as link
+if (!in_array($layout, $data->media_supported) || $data->media_type == 'link') {
+    $layout = 'link';
 }
 
 $attribs = array();
@@ -90,107 +97,147 @@ if ($data->media_class) {
 $text = '';
 
 if ($data->media_text) {
-    $text = htmlentities($data->media_text, ENT_COMPAT, 'UTF-8', true);
+    $text = $data->media_text; // htmlspecialchars encoded in layout
 }
 
-switch ($tag) {
-    case 'a':
-    default:
-        $element = '<a href="%s"%s>%s</a>';
-        break;
-    case 'img':
-        $element = '<img src="%s"%s alt="%s" />';
-
-        $attribs['width']    = isset($data->media_width) ? $data->media_width : '';
-        $attribs['height']   = isset($data->media_height) ? $data->media_height : '';
-        $attribs['loading']  = 'lazy';
-        break;
-    case 'audio':
-        $element = '<audio src="%s"%s></audio>';
-        $attribs['controls'] = 'controls';
-
-        if ($text) {
-            $attribs['title'] = $text;
-        }
-
-        break;
-    case 'video':
-        $element = '<video src="%s"%s></video>';
-        $attribs['controls'] = 'controls';
-
-        $attribs['width']    = isset($data->media_width) ? $data->media_width : '';
-        $attribs['height']   = isset($data->media_height) ? $data->media_height : '';
-
-        if ($text) {
-            $attribs['title'] = $text;
-        }
-
-        break;
-    case 'iframe':
-        $element = '<iframe src="%s"%s></iframe>';
-
-        $attribs['frameborder'] = 0;
-        $attribs['width']    = isset($data->media_width) ? $data->media_width : '100%';
-        $attribs['height']   = isset($data->media_height) ? $data->media_height : '100%';
-        $attribs['loading']  = 'lazy';
-
-        if ($text) {
-            $attribs['title'] = $text;
-        }
-
-        break;
+// links
+if ($layout == 'link') {
+    $attribs['title'] = $text;
 }
 
-if ($data->media_type == 'embed' && $data->media_caption) {
-    $fig_attribs = '';
-    $caption_class = (string) $fieldParams->get('media_caption_class', '');
-
-    if ($caption_class) {
-        $caption_class = preg_replace('/[^A-Z0-9_- ]/i', '', $caption_class);
-        $fig_attribs = ' class="' . $caption_class . '"';
+// images
+if ($layout == 'image') {
+    if (isset($data->media_width)) {
+        $attribs['width'] = $data->media_width;
     }
 
-    $element = '<figure' . $fig_attribs . '>' . $element . '<figcaption>' . htmlentities($data->media_caption, ENT_COMPAT, 'UTF-8', true) . '</figcaption></figure>';
+    if (isset($data->media_height)) {
+        $attribs['height'] = $data->media_height;
+    }
+
+    // set lazy loading only if dimensions are set
+    if (!empty($data->media_width) && !empty($data->media_height)) {
+        $attribs['loading'] = 'lazy';
+    }
+
+    // set alt text or emty value
+    $attribs['alt'] = $text;
+}
+
+// audio
+if ($layout == 'audio') {
+    $attribs['controls'] = 'controls';
+
+    if ($text) {
+        $attribs['title'] = $text;
+    }
+}
+
+// video
+if ($layout == 'video') {
+    $attribs['controls'] = 'controls';
+
+    $attribs['width'] = isset($data->media_width) ? $data->media_width : '';
+    $attribs['height'] = isset($data->media_height) ? $data->media_height : '';
+
+    if ($text) {
+        $attribs['title'] = $text;
+    }
+}
+
+// object
+if ($layout == 'object') {
+    $attribs['width'] = isset($data->media_width) ? $data->media_width : '100%';
+    $attribs['height'] = isset($data->media_height) ? $data->media_height : '100%';
+
+    if ($text) {
+        $attribs['title'] = $text;
+    }
+
+    $attribs['data'] = $data->media_src;
+
+    $mimetype = WfMediaHelper::getMimeType($extension);
+
+    if ($mimetype) {
+        $attribs['type'] = $mimetype;
+    } else {
+        $layout = 'iframe';
+    }
+}
+
+// iframe
+if ($layout == 'iframe') {
+    $attribs['frameborder'] = 0;
+    $attribs['width'] = isset($data->media_width) ? $data->media_width : '100%';
+    $attribs['height'] = isset($data->media_height) ? $data->media_height : '100%';
+
+    // set lazy loading only if dimensions are set
+    if (!empty($data->media_width) && !empty($data->media_height)) {
+        $attribs['loading'] = 'lazy';
+    }
+
+    if ($text) {
+        $attribs['title'] = $text;
+    }
 }
 
 $buffer = '';
 
-// remove some common characters
-$path = preg_replace('#[\+\\\?\#%&<>"\'=\[\]\{\},;@\^\(\)£€$]#', '', $data->media_src);
+// perform pcre replacement of common invalid characters
+$path = preg_replace('#[\+\\\?\#%&<>"\'=\[\]\{\},;@\^\(\)£€$]#u', '', $data->media_src);
 
 // trim
 $path = trim($path);
 
-// check for valid path after clean
 if ($path) {
-
-    // clean path
+    // clean slashes
     $path = Path::clean($path);
 
-    // create full path
-    $fullpath = JPATH_SITE . '/' . trim($path, '/');
+    // set text as basename if not an image
+    if ($layout == 'link') {
+        // set default target
+        $attribs['target'] = $data->media_target;
 
-    // check path is valid
-    if (is_file($fullpath)) {
-        // set text as basename if not an image
-        if (!$text && $data->media_type == "link") {
-            $text = basename($path);
-
-            if ($data->media_target) {
-                if ($data->media_target == 'download') {
-                    $attribs['download'] = $path;
-                } else {
-                    $attribs['target'] = $data->media_target;
-                }
-            }
+        // set target as download
+        if ($data->media_target == 'download') {
+            $attribs['download'] = pathinfo($path, PATHINFO_FILENAME);
         }
+    }
 
-        $buffer .= sprintf(
-            $element,
-            htmlentities($path, ENT_COMPAT, 'UTF-8', true),
-            ArrayHelper::toString($attribs),
-            $text
-        );
+    if (!isset($attribs['class'])) {
+        $attribs['class'] = '';
+    }
+
+    // add media type class
+    $attribs['class'] .= ' mediajce-' . $layout;
+
+    // trim class
+    $attribs['class'] = trim($attribs['class']);
+
+    // check for valid path after clean
+    if (is_file(JPATH_SITE . '/' . $path)) {
+        $attribs['src'] = $path;
+
+        LayoutHelper::$defaultBasePath = JPATH_PLUGINS . '/fields/mediajce/layouts';
+
+        $buffer = LayoutHelper::render('plugins.fields.mediajce.' . $layout, $attribs);
+
+        // render with figure and figcaption
+        if ($data->media_type == 'embed' && $data->media_caption) {
+
+            $figure = array();
+            $caption_class = (string) $fieldParams->get('media_caption_class', '');
+
+            if ($caption_class) {
+                $caption_class = preg_replace('#[^ \w-]#i', '', $caption_class);
+                $figure['class'] = $caption_class;
+            }
+
+            $figure['caption'] = $data->media_caption;
+            $figure['html'] = $buffer;
+
+            $buffer = LayoutHelper::render('plugins.fields.mediajce.figure', $figure);
+        }
     }
 }
 

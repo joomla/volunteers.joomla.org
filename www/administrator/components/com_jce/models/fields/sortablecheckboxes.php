@@ -1,8 +1,18 @@
 <?php
+/**
+ * @package     JCE
+ * @subpackage  Admin
+ *
+ * @copyright   Copyright (C) 2005 - 2020 Open Source Matters, Inc. All rights reserved.
+ * @copyright   Copyright (c) 2009-2024 Ryan Demmer. All rights reserved
+ * @license     GNU General Public License version 2 or later; see LICENSE.txt
+ */
 
-defined('JPATH_PLATFORM') or die;
+\defined('_JEXEC') or die;
 
-class JFormFieldSortableCheckboxes extends JFormFieldCheckboxes
+use Joomla\CMS\Form\Field\CheckboxesField;
+
+class JFormFieldSortableCheckboxes extends CheckboxesField
 {
     /**
      * The form field type.
@@ -39,7 +49,7 @@ class JFormFieldSortableCheckboxes extends JFormFieldCheckboxes
     {
         $options = parent::getOptions();
 
-        foreach($options as $option) {
+        foreach ($options as $option) {
             if ($option->value == $value) {
                 return $option;
             }
@@ -47,7 +57,7 @@ class JFormFieldSortableCheckboxes extends JFormFieldCheckboxes
 
         return (object) array(
             'value' => $value,
-            'text' => $value
+            'text' => $value,
         );
     }
 
@@ -68,7 +78,7 @@ class JFormFieldSortableCheckboxes extends JFormFieldCheckboxes
             }
 
             // add default options not checked to the end of the options array
-            foreach($options as $option) {
+            foreach ($options as $option) {
                 if (!in_array($option->value, $values)) {
                     $custom[] = $option;
                 }

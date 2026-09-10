@@ -1,8 +1,19 @@
 <?php
+/**
+ * @package     JCE
+ * @subpackage  Admin
+ *
+ * @copyright   Copyright (C) 2005 - 2020 Open Source Matters, Inc. All rights reserved.
+ * @copyright   Copyright (c) 2009-2024 Ryan Demmer. All rights reserved
+ * @license     GNU General Public License version 2 or later; see LICENSE.txt
+ */
 
-defined('JPATH_PLATFORM') or die;
+\defined('_JEXEC') or die;
 
-class JFormFieldBlockformats extends JFormFieldCheckboxes
+use Joomla\CMS\Form\Field\CheckboxesField;
+use Joomla\CMS\Language\Text;
+
+class JFormFieldBlockformats extends CheckboxesField
 {
     /**
      * The form field type.
@@ -44,8 +55,9 @@ class JFormFieldBlockformats extends JFormFieldCheckboxes
         'footer' => 'Footer',
         'nav' => 'Nav',
         'figure' => 'Figure',
+        'dl' => 'Definition List',
         'dt' => 'Definition Term',
-        'dd' => 'Definition List'
+        'dd' => 'Definition Description'
     );
 
     /**
@@ -66,14 +78,14 @@ class JFormFieldBlockformats extends JFormFieldCheckboxes
         $options = array();
 
         if (empty($this->value)) {
-            $data       = array_keys(self::$blockformats);
-            $values     = $data;
+            $data = array_keys(self::$blockformats);
+            $values = $data;
         } else {
             if (is_string($this->value)) {
                 $this->value = explode(',', $this->value);
             }
-            $values     = $this->value;
-            $data       = array_unique(array_merge($this->value, array_keys(self::$blockformats)));
+            $values = $this->value;
+            $data = array_unique(array_merge($this->value, array_keys(self::$blockformats)));
         }
 
         // create default font structure
@@ -86,8 +98,8 @@ class JFormFieldBlockformats extends JFormFieldCheckboxes
 
             $tmp = array(
                 'value' => $format,
-                'text'  => JText::alt($text, $fieldname),
-                'checked' => in_array($format, $values)
+                'text' => Text::alt($text, $fieldname),
+                'checked' => in_array($format, $values),
             );
 
             $options[] = (object) $tmp;

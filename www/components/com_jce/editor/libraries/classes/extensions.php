@@ -1,20 +1,23 @@
 <?php
 
 /**
- * @copyright     Copyright (c) 2009-2022 Ryan Demmer. All rights reserved
- * @license       GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
- * JCE is free software. This version may have been modified pursuant
- * to the GNU General Public License, and as distributed it includes or
- * is derivative of works licensed under the GNU General Public License or
- * other free or open source software licenses
+ * @package     JCE
+ * @subpackage  Editor
+ *
+ * @copyright   Copyright (C) 2005 - 2020 Open Source Matters, Inc. All rights reserved.
+ * @copyright   Copyright (c) 2009-2024 Ryan Demmer. All rights reserved
+ * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
-defined('JPATH_PLATFORM') or die;
-// set as an extension parent
-if (!defined('_WF_EXT')) {
-    define('_WF_EXT', 1);
-}
 
-class WFExtension extends JObject
+\defined('_JEXEC') or die;
+
+use Joomla\CMS\Factory;
+use Joomla\Filesystem\File;
+use Joomla\Filesystem\Folder;
+use Joomla\CMS\Object\CMSObject;
+use Joomla\CMS\Plugin\PluginHelper;
+
+class WFExtension extends CMSObject
 {
     /**
      * Constructor activating the default information of the class.
@@ -48,9 +51,7 @@ class WFExtension extends JObject
     /**
      * Display the extension.
      */
-    public function display()
-    {
-    }
+    public function display() {}
 
     /**
      * Load a plugin extension.
@@ -59,10 +60,7 @@ class WFExtension extends JObject
      */
     private static function _load($types = array(), $extension = null, $config = array())
     {
-        jimport('joomla.filesystem.folder');
-        jimport('joomla.filesystem.file');
-
-        $language = JFactory::getLanguage();
+        $language = Factory::getLanguage();
 
         $extensions = array();
 
@@ -77,23 +75,22 @@ class WFExtension extends JObject
         $types = (array) $types;
 
         // get all installed plugins
-        $installed = JPluginHelper::getPlugin('jce');
+        $installed = PluginHelper::getPlugin('jce');
 
         if (!empty($installed)) {
-            foreach ($installed as $p) {
-
+            foreach ($installed as $item) {
                 // check for delimiter, only load "extensions"
-                if (strpos($p->name, '-') === false || strpos($p->name, 'editor-') !== false) {
+                if (!preg_match('/[-_]/', $item->name) || preg_match('/^editor[-_]/', $item->name)) {
                     continue;
                 }
+
+                $p = clone $item;
 
                 // set path
                 $p->path = JPATH_PLUGINS . '/jce/' . $p->name;
 
                 // get type and name
-                $parts = explode('-', $p->name);
-                $p->folder = $parts[0];
-                $p->extension = $parts[1];
+                list($p->folder, $p->extension) = preg_split('/[-_]/', $p->name, 2);
 
                 // load the correct type if set
                 if (!empty($types) && !in_array($p->folder, $types)) {
@@ -114,11 +111,13 @@ class WFExtension extends JObject
         }
 
         // get legacy extensions
-        $legacy = JFolder::folders(WF_EDITOR . '/extensions', '.', false, true);
+        $legacy = Folder::folders(WF_EDITOR . '/extensions', '.', false, true);
 
         $core = array(
             'aggregator' => array(
-                'dailymotion', 'vimeo', 'youtube',
+                'dailymotion',
+                'vimeo',
+                'youtube',
             ),
             'filesystem' => array(
                 'joomla',
@@ -148,7 +147,7 @@ class WFExtension extends JObject
             }
 
             // specific extension
-            if ($extension && !JFile::exists($item . '/' . $extension . '.php')) {
+            if ($extension && !is_file($item . '/' . $extension . '.php')) {
                 continue;
             }
 
@@ -160,7 +159,7 @@ class WFExtension extends JObject
 
                 $files = array($item . '/' . $extension . '.xml');
             } else {
-                $files = JFolder::files($item, '\.xml$', false, true);
+                $files = Folder::files($item, '\.xml$', false, true);
             }
 
             foreach ($files as $file) {
@@ -194,9 +193,6 @@ class WFExtension extends JObject
      */
     public static function loadExtensions($type, $extension = null, $config = array())
     {
-        jimport('joomla.filesystem.folder');
-        jimport('joomla.filesystem.file');
-
         if (!isset($config['base_path'])) {
             $config['base_path'] = WF_EDITOR;
         }
@@ -232,6 +228,10 @@ class WFExtension extends JObject
                         $root = $path . '/' . $name . '.php';
                         // redefine path
                         $item->path = $path . '/' . $name;
+                    }
+
+                    if (is_dir($path . '/src')) {
+                        $root = $path . '/src/' . $type . '.php';
                     }
 
                     if (file_exists($root)) {
@@ -277,5 +277,53 @@ class WFExtension extends JObject
     public function getView($options = array())
     {
         return new WFView($options);
+    }
+
+    protected function getCustomDefaultAttributes($data)
+    {
+        $custom = array();
+
+        if (is_string($data)) {
+            $data = html_entity_decode($data);
+            $data = json_decode($data, true);
+        }
+
+        // Remove values with invalid key, must be indexed array
+        $data = array_filter($data, function ($value, $key) {
+            return is_numeric($key) && $value != "";
+        }, ARRAY_FILTER_USE_BOTH);
+
+        foreach ($data as $attribute) {
+            if (empty($attribute)) {
+                continue;
+            }
+
+            $name = '';
+            $value = '';
+
+            // json associative array
+            if (is_array($attribute) && array_key_exists('name', $attribute)) {
+                extract($attribute);
+            }
+
+            if ($name && $value !== '') {
+                $value = trim($value, " \t\n\r\0\x0B'\"");
+                $value = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+
+                $custom[$name] = $value;
+            }
+        }
+
+        // remove empty values
+        $custom = array_filter($custom, function ($value) {
+            return $value !== '';
+        });
+
+        // remove invalid keys
+        $custom = array_filter($custom, function ($key) {
+            return preg_match('/^[a-zA-Z0-9\-_]+$/', $key);
+        }, ARRAY_FILTER_USE_KEY);
+
+        return $custom;
     }
 }

@@ -1,26 +1,39 @@
 <?php
 
 /**
- * @copyright 	Copyright (c) 2009-2022 Ryan Demmer. All rights reserved
- * @license   	GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
- * JCE is free software. This version may have been modified pursuant
- * to the GNU General Public License, and as distributed it includes or
- * is derivative of works licensed under the GNU General Public License or
- * other free or open source software licenses
+ * @package     JCE
+ * @subpackage  Admin
+ *
+ * @copyright   Copyright (C) 2005 - 2023 Open Source Matters, Inc. All rights reserved.
+ * @copyright   Copyright (c) 2009-2024 Ryan Demmer. All rights reserved
+ * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
-defined('JPATH_PLATFORM') or die;
+\defined('_JEXEC') or die;
 
-class JceControllerCpanel extends JControllerLegacy
+use Joomla\CMS\Factory;
+use Joomla\CMS\Language\Text;
+use Joomla\CMS\MVC\Controller\BaseController;
+use Joomla\CMS\Session\Session;
+
+class JceControllerCpanel extends BaseController
 {
     public function feed()
     {
+        Session::checkToken('get') or jexit(Text::_('JINVALID_TOKEN'));
+
+        $user = Factory::getUser();
+
+        if (!$user->authorise('core.manage', 'com_jce')) {
+            throw new Exception(Text::_('JERROR_ALERTNOAUTHOR'), 403);
+        }
+
         $model = $this->getModel('cpanel');
 
         echo json_encode(array(
-            'feeds' => $model->getFeeds()
+            'feeds' => $model->getFeeds(),
         ));
 
         // Close the application
-		JFactory::getApplication()->close();
+        Factory::getApplication()->close();
     }
 }

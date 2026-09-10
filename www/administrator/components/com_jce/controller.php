@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright     Copyright (c) 2009-2022 Ryan Demmer. All rights reserved
+ * @copyright     Copyright (c) 2009-2024 Ryan Demmer. All rights reserved
  * @license       GNU/GPL 3 - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  * JCE is free software. This version may have been modified pursuant
  * to the GNU General Public License, and as distributed it includes or
@@ -9,16 +9,19 @@
  * other free or open source software licenses
  */
 // no direct access
-defined('JPATH_PLATFORM') or die;
+\defined('_JEXEC') or die;
 
-JLoader::import('joomla.application.component.controller');
+use Joomla\CMS\MVC\Controller\BaseController;
+use Joomla\CMS\Factory;
+use Joomla\CMS\Language\Text;
+use Joomla\CMS\Uri\Uri;
 
 /**
  * JCE Component Controller.
  *
  * @since 1.5
  */
-class JceController extends JControllerLegacy
+class JceController extends BaseController
 {
     /**
      * @var string The extension for which the categories apply
@@ -58,11 +61,11 @@ class JceController extends JControllerLegacy
     public function display($cachable = false, $urlparams = false)
     {
         // Get the document object.
-        $document = JFactory::getDocument();
-        $app = JFactory::getApplication();
-        $user = JFactory::getUser();
+        $document = Factory::getDocument();
+        $app = Factory::getApplication();
+        $user = Factory::getUser();
 
-        JFactory::getLanguage()->load('com_jce', JPATH_ADMINISTRATOR);
+        Factory::getLanguage()->load('com_jce', JPATH_ADMINISTRATOR);
 
         // Set the default view name and format from the Request.
         $vName = $app->input->get('view', 'cpanel');
@@ -85,7 +88,7 @@ class JceController extends JControllerLegacy
         $adminViews = array('config', 'profiles', 'profile', 'mediabox');
 
         if (in_array($vName, $adminViews) && !$user->authorise('core.manage', 'com_jce')) {
-            throw new JAccessExceptionNotallowed(JText::_('JERROR_ALERTNOAUTHOR'), 403);
+            throw new Exception(Text::_('JERROR_ALERTNOAUTHOR'), 403);
         }
 
         // create view
@@ -93,7 +96,7 @@ class JceController extends JControllerLegacy
 
         // Get and render the view.
         if ($view) {
-            
+
             if ($vName != "cpanel") {
                 // use "profiles" for validating "profile" view
                 if ($vName == "profile") {
@@ -101,7 +104,7 @@ class JceController extends JControllerLegacy
                 }
 
                 if (!$user->authorise('jce.' . $vName, 'com_jce')) {
-                    throw new JAccessExceptionNotallowed(JText::_('JERROR_ALERTNOAUTHOR'), 403);
+                    throw new Exception(Text::_('JERROR_ALERTNOAUTHOR'), 403);
                 }
             }
             
@@ -118,14 +121,16 @@ class JceController extends JControllerLegacy
             // Push document object into the view.
             $view->document = $document;
 
+            $document->addStyleSheet(Uri::root(true) . '/media/com_jce/admin/css/global.min.css?' . md5(WF_VERSION));
+
             // only for Joomla 3.x
             if (version_compare(JVERSION, '4', 'lt')) {
-                // Load the submenu.
-                require_once JPATH_ADMINISTRATOR . '/components/com_jce/helpers/admin.php';
+                require_once __DIR__ . '/includes/classmap.php';
+                
                 JceHelperAdmin::addSubmenu($vName);
-            }
 
-            $document->addStyleSheet(JURI::root(true) . '/media/com_jce/css/global.min.css?' . md5(WF_VERSION));
+                $document->addStyleSheet(Uri::root(true) . '/media/com_jce/admin/css/compat.min.css?' . md5(WF_VERSION));
+            }
 
             $view->display();
         }

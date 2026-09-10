@@ -1,10 +1,21 @@
 <?php
+/**
+ * @package     JCE
+ * @subpackage  Admin
+ *
+ * @copyright   Copyright (C) 2005 - 2020 Open Source Matters, Inc. All rights reserved.
+ * @copyright   Copyright (c) 2009-2024 Ryan Demmer. All rights reserved
+ * @license     GNU General Public License version 2 or later; see LICENSE.txt
+ */
 
-defined('JPATH_PLATFORM') or die;
+\defined('_JEXEC') or die;
 
-JFormHelper::loadFieldClass('list');
+use Joomla\CMS\Form\Field\ListField;
+use Joomla\CMS\Form\Form;
+use Joomla\CMS\HTML\HTMLHelper;
+use Joomla\CMS\Language\Text;
 
-class JFormFieldFilesystem extends JFormFieldList
+class JFormFieldFilesystem extends ListField
 {
     /**
      * The form field type.
@@ -67,22 +78,22 @@ class JFormFieldFilesystem extends JFormFieldList
         $html .= '<div class="controls-row">';
 
         $html .= '<div class="control-group">';
-        $html .= JHtml::_('select.genericlist', $options, $this->name . '[name]', 'data-toggle="filesystem-options" class="custom-select"', 'value', 'text', $value['name']);
+        $html .= HTMLHelper::_('select.genericlist', $options, $this->name . '[name]', 'data-toggle="filesystem-options" class="custom-select"', 'value', 'text', $value['name']);
         $html .= '</div>';
 
         $html .= '<div class="filesystem-options clearfix">';
 
-        foreach ($plugins as $plugin) {            
-            $form = JForm::getInstance('plg_jce_' . $this->name . '_' . $plugin->name, $plugin->manifest, array('control' => $this->name . '[' . $plugin->name . ']'), true, '//extension');
+        foreach ($plugins as $plugin) {
+            $form = Form::getInstance('plg_jce_' . $this->name . '_' . $plugin->name, $plugin->manifest, array('control' => $this->name . '[' . $plugin->name . ']'), true, '//extension');
 
             if ($form) {
                 // get the data for this form, if set
                 $data = isset($value[$plugin->name]) ? $value[$plugin->name] : array();
-                
+
                 // bind data to form
                 $form->bind($data);
-                
-                $html .= '<div class="well well-small p-2 bg-light" data-toggle-target="filesystem-options-' . $plugin->name . '">';
+
+                $html .= '<div class="well well-small p-3 card" data-toggle-target="filesystem-options-' . $plugin->name . '">';
 
                 $fields = $form->getFieldset('filesystem.' . $plugin->name);
 
@@ -131,27 +142,22 @@ class JFormFieldFilesystem extends JFormFieldList
 
         $options = parent::getOptions();
 
-        /*$options[] = array(
-            'value' => '',
-            'text' => JText::_('WF_OPTION_NOT_SET'),
-        );*/
-
         $plugins = $this->getPlugins();
 
         foreach ($plugins as $plugin) {
-            $value = (string)$plugin->name;
-            $text = (string)$plugin->title;
+            $value = (string) $plugin->name;
+            $text = (string) $plugin->title;
 
             $tmp = array(
                 'value' => $value,
-                'text' => JText::alt($text, $fieldname),
+                'text' => Text::alt($text, $fieldname),
                 'disable' => false,
                 'class' => '',
                 'selected' => false,
             );
 
             // Add the option object to the result set.
-            $options[] = (object)$tmp;
+            $options[] = (object) $tmp;
         }
 
         reset($options);

@@ -1,20 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<extension version="3.8" type="plugin" group="system" method="upgrade">
+<extension version="3.9" type="plugin" group="system" method="upgrade">
   <name>plg_system_jce</name>
-  <version>2.9.33</version>
-  <creationDate>18-01-2023</creationDate>
+  <version>2.9.99.5</version>
+  <creationDate>03-06-2026</creationDate>
   <author>Ryan Demmer</author>
   <authorEmail>info@joomlacontenteditor.net</authorEmail>
   <authorUrl>http://www.joomlacontenteditor.net</authorUrl>
-  <copyright>Copyright (C) 2006 - 2022 Ryan Demmer. All rights reserved</copyright>
+  <copyright>Copyright (C) 2006 - 2026 Ryan Demmer. All rights reserved</copyright>
   <license>GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html</license>
   <description>PLG_SYSTEM_JCE_XML_DESCRIPTION</description>
   <files folder="plugins/system/jce">
     <file plugin="jce">jce.php</file>
-    <folder>css</folder>
-    <folder>js</folder>
+    <folder>forms</folder>
+    <folder>services</folder>
+    <folder>src</folder>
     <folder>templates</folder>
   </files>
+
+  <namespace path="src">Joomla\Plugin\System\Jce</namespace>
+
   <languages folder="administrator/language/en-GB">
     <language tag="en-GB">en-GB.plg_system_jce.ini</language>
     <language tag="en-GB">en-GB.plg_system_jce.sys.ini</language>

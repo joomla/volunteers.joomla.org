@@ -1,14 +1,22 @@
 <?php
 
 /**
- * @copyright     Copyright (c) 2009-2022 Ryan Demmer. All rights reserved
+ * @copyright     Copyright (c) 2009-2024 Ryan Demmer. All rights reserved
  * @license       GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  * JCE is free software. This version may have been modified pursuant
  * to the GNU General Public License, and as distributed it includes or
  * is derivative of works licensed under the GNU General Public License or
  * other free or open source software licenses
  */
-defined('JPATH_PLATFORM') or die;
+\defined('_JEXEC') or die;
+
+use Joomla\CMS\Factory;
+use Joomla\Filesystem\File;
+use Joomla\Filesystem\Folder;
+use Joomla\CMS\Language\Text;
+use Joomla\CMS\Plugin\PluginHelper;
+use Joomla\CMS\Table\Table;
+use Joomla\CMS\Uri\Uri;
 
 require_once JPATH_ADMINISTRATOR . '/components/com_jce/includes/base.php';
 
@@ -31,9 +39,21 @@ abstract class JcePluginsHelper
         return $commands;
     }
 
+    public static function isValidPlugin($name)
+    {
+        $plugins = self::getPlugins();
+        return isset($plugins[$name]);
+    }
+
+    /**
+     * Get a list of all code, pro and installed plugins.
+     *
+     * @return array $plugins
+     */
     public static function getPlugins()
     {
-        $language = JFactory::getLanguage();
+        $app = Factory::getApplication();
+        $language = Factory::getLanguage();
 
         static $plugins;
 
@@ -48,7 +68,7 @@ abstract class JcePluginsHelper
             if ($data) {
                 foreach ($data as $name => $attribs) {
                     // skip if the plugin file is missing
-                    if (!is_file(WF_EDITOR_PLUGINS . '/' . $name . '/editor_plugin.js')) {
+                    if (!is_file(WF_EDITOR_MEDIA . '/tinymce/plugins/' . $name . '/plugin.js')) {
                         continue;
                     }
 
@@ -70,45 +90,16 @@ abstract class JcePluginsHelper
                     $plugins[$name] = $attribs;
                 }
             }
-            // get pro json
-            if (is_file(__DIR__ . '/pro.json')) {
-                $pro = @file_get_contents(__DIR__ . '/pro.json');
-                // decode to object
-                if ($pro) {
-                    $data = json_decode($pro);
 
-                    if ($data) {
-                        foreach ($data as $name => $attribs) {
-                            // skip if the plugin file is missing
-                            if (!is_file(WF_EDITOR_PLUGINS . '/' . $name . '/editor_plugin.js')) {
-                                continue;
-                            }
-                            // update attributes
-                            $attribs->type = 'plugin';
-                            $attribs->path = WF_EDITOR_PLUGINS . '/' . $name;
-                            $attribs->manifest = WF_EDITOR_PLUGINS . '/' . $name . '/' . $name . '.xml';
-
-                            $attribs->image = '';
-
-                            if (!isset($attribs->class)) {
-                                $attribs->class = '';
-                            }
-
-                            // compatability
-                            $attribs->name = $name;
-                            // pass to array
-                            $plugins[$name] = $attribs;
-                        }
-                    }
-                }
-            }
+            // get plugins external sources via event, eg: JCE Pro System Plugin
+            $app->triggerEvent('onWfPluginsHelperGetPlugins', array(&$plugins));
 
             // get all installed plugins
-            $installed = JPluginHelper::getPlugin('jce');
+            $installed = PluginHelper::getPlugin('jce');
 
             foreach ($installed as $item) {
                 // check for delimiter, only load editor plugins
-                if (strpos($item->name, 'editor-') === false) {
+                if (!preg_match('/^editor[-_]/', $item->name)) {
                     continue;
                 }
 
@@ -128,16 +119,12 @@ abstract class JcePluginsHelper
 
                     if ($xml) {
                         // check xml file is valid
-                        if ((string)$xml->getName() != 'extension') {
+                        if ((string) $xml->getName() != 'extension') {
                             continue;
                         }
 
-                        // check for editor_plugins.js file
-                        if (!is_file($path . '/editor_plugin.js')) {
-                            continue;
-                        }
-
-                        $name = str_replace('editor-', '', $item->name);
+                        // remove "editor-" or "editor_"
+                        $name = substr($item->name, 7);
 
                         $attribs = new StdClass();
                         $attribs->name = $name;
@@ -145,8 +132,8 @@ abstract class JcePluginsHelper
 
                         $params = $xml->fields;
 
-                        $attribs->title = (string)$xml->name;
-                        $attribs->icon = (string)$xml->icon;
+                        $attribs->title = (string) $xml->name;
+                        $attribs->icon = (string) $xml->icon;
                         $attribs->editable = 0;
 
                         // set default values
@@ -154,13 +141,13 @@ abstract class JcePluginsHelper
                         $attribs->class = '';
 
                         if ($xml->icon->attributes()) {
-                            foreach($xml->icon->attributes() as $key => $value) {
+                            foreach ($xml->icon->attributes() as $key => $value) {
                                 $attribs->$key = $value;
                             }
                         }
 
                         if ($attribs->image) {
-                            $attribs->image = JURI::root(true) . '/' . $attribs->image;
+                            $attribs->image = Uri::root(true) . '/' . $attribs->image;
                         }
 
                         // can't be editable without parameters
@@ -168,7 +155,7 @@ abstract class JcePluginsHelper
                             $attribs->editable = 1;
                         }
 
-                        $row = (int)$xml->attributes()->row;
+                        $row = (int) $xml->attributes()->row;
 
                         // set row from passed in value or 0
                         $attribs->row = $row;
@@ -178,12 +165,21 @@ abstract class JcePluginsHelper
                             $attribs->row = 4;
                         }
 
-                        $attribs->description = (string)$xml->description;
+                        $attribs->description = (string) $xml->description;
                         $attribs->core = 0;
 
                         // relative path
                         $attribs->path = $path;
                         $attribs->url = 'plugins/jce/' . $item->name;
+
+                        // get snake-case name to check for media folder
+                        $snake_case_name = str_replace('-', '_', $item->name);
+
+                        // url in Joomla media folder
+                        if (is_dir(JPATH_SITE . '/media/plg_jce_' . $snake_case_name)) {
+                            $attribs->url = 'media/plg_jce_' . $snake_case_name;
+                        }
+
                         $attribs->type = 'plugin';
 
                         $plugins[$name] = $attribs;
@@ -202,10 +198,7 @@ abstract class JcePluginsHelper
      */
     public static function getExtensions($type = '')
     {
-        jimport('joomla.filesystem.folder');
-        jimport('joomla.filesystem.file');
-
-        $language = JFactory::getLanguage();
+        $language = Factory::getLanguage();
 
         static $extensions;
 
@@ -213,7 +206,7 @@ abstract class JcePluginsHelper
             $extensions = array();
 
             // recursively get all extension files
-            $files = JFolder::files(WF_EDITOR_EXTENSIONS, '\.xml$', true, true);
+            $files = Folder::files(WF_EDITOR_EXTENSIONS, '\.xml$', true, true);
 
             foreach ($files as $file) {
                 $name = basename($file, '.xml');
@@ -238,25 +231,24 @@ abstract class JcePluginsHelper
             }
 
             // get all installed plugins
-            $installed = JPluginHelper::getPlugin('jce');
+            $installed = PluginHelper::getPlugin('jce');
 
             if (!empty($installed)) {
                 foreach ($installed as $p) {
-
-                    // check for delimiter
-                    if (strpos($p->name, '-') === false) {
+                    // check for delimiter to remove legacy extensions
+                    if (!preg_match('/[-_]/', $p->name)) {
                         continue;
                     }
 
                     // only load "extensions", not editor plugins
-                    if (strpos($p->name, 'editor-') !== false) {
+                    if (preg_match('/^editor[-_]/', $p->name)) {
                         continue;
                     }
 
                     // set path
                     $p->path = JPATH_PLUGINS . '/jce/' . $p->name;
 
-                    $parts = explode('-', $p->name);
+                    $parts = preg_split('/[-_]/', $p->name, 2);
 
                     // get type and name
                     $p->folder = $parts[0];
@@ -268,8 +260,12 @@ abstract class JcePluginsHelper
                     $p->plugins = array();
                     $p->description = '';
 
-                    list($p->type, $p->name) = preg_split('/-/', $p->name);
-  
+                    // load language
+                    $language->load('plg_jce_' . $p->name, JPATH_ADMINISTRATOR);
+                    $language->load('plg_jce_' . $p->name, $p->path);
+
+                    list($p->type, $p->name) = preg_split('/[-_]/', $p->name, 2);
+
                     // create title from name parts, eg: plg_jce_filesystem_joomla
                     $p->title = 'plg_jce_' . $p->type . '_' . $p->name;
 
@@ -281,10 +277,6 @@ abstract class JcePluginsHelper
 
                     // set as not editable by default
                     $p->editable = 0;
-
-                    // load language
-                    $language->load('plg_jce_' . $p->type . '-' . $p->name, JPATH_ADMINISTRATOR);
-                    $language->load('plg_jce_' . $p->type . '-' . $p->name, $p->path);
 
                     $extensions[$p->type][] = $p;
                 }
@@ -300,10 +292,10 @@ abstract class JcePluginsHelper
 
     public static function addToProfile($id, $plugin)
     {
-        JTable::addIncludePath(JPATH_ADMINISTRATOR . '/components/com_jce/tables');
+        Table::addIncludePath(JPATH_ADMINISTRATOR . '/components/com_jce/tables');
 
         // Add to Default Group
-        $profile = JTable::getInstance('Profiles', 'JceTable');
+        $profile = Table::getInstance('Profiles', 'JceTable');
 
         if ($profile->load($id)) {
             // Add to plugins list
@@ -336,7 +328,7 @@ abstract class JcePluginsHelper
             }
 
             if (!$profile->store()) {
-                throw new Exception(JText::_('WF_INSTALLER_PLUGIN_PROFILE_ERROR'));
+                throw new Exception(Text::_('WF_INSTALLER_PLUGIN_PROFILE_ERROR'));
             }
         }
 
@@ -345,10 +337,10 @@ abstract class JcePluginsHelper
 
     public static function removeFromProfile($id, $plugin)
     {
-        JTable::addIncludePath(JPATH_ADMINISTRATOR . '/components/com_jce/tables');
+        Table::addIncludePath(JPATH_ADMINISTRATOR . '/components/com_jce/tables');
 
         // Add to Default Group
-        $profile = JTable::getInstance('Profiles', 'JceTable');
+        $profile = Table::getInstance('Profiles', 'JceTable');
 
         if ($profile->load($id)) {
             // remove from plugins list
@@ -377,7 +369,7 @@ abstract class JcePluginsHelper
                 }
 
                 if (!$profile->store()) {
-                    throw new Exception(JText::sprintf('WF_INSTALLER_REMOVE_FROM_GROUP_ERROR', $plugin->name));
+                    throw new Exception(Text::sprintf('WF_INSTALLER_REMOVE_FROM_GROUP_ERROR', $plugin->name));
                 }
             }
         }
@@ -390,29 +382,24 @@ abstract class JcePluginsHelper
      */
     private static function addIndexfiles($path)
     {
-        jimport('joomla.filesystem.folder');
-        jimport('joomla.filesystem.file');
-
         // get the base file
         $file = JPATH_ADMINISTRATOR . '/components/com_jce/index.html';
 
         if (is_file($file) && is_dir($path)) {
-            JFile::copy($file, $path . '/' . basename($file));
+            File::copy($file, $path . '/' . basename($file));
 
             // admin component
-            $folders = JFolder::folders($path, '.', true, true);
+            $folders = Folder::folders($path, '.', true, true);
 
             foreach ($folders as $folder) {
-                JFile::copy($file, $folder . '/' . basename($file));
+                File::copy($file, $folder . '/' . basename($file));
             }
         }
     }
 
     public static function postInstall($route, $plugin, $installer)
     {
-        $db = JFactory::getDBO();
-
-        jimport('joomla.filesystem.folder');
+        $db = Factory::getDBO();
 
         // load the plugin and enable
         if (isset($plugin->row) && $plugin->row > 0) {

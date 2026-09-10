@@ -1,18 +1,24 @@
 <?php
 /**
- * @copyright   Copyright (C) 2005 - 2014 Open Source Matters, Inc. All rights reserved
+ * @package     JCE
+ * @subpackage  Admin
+ *
+ * @copyright   Copyright (C) 2005 - 2020 Open Source Matters, Inc. All rights reserved.
+ * @copyright   Copyright (c) 2009-2024 Ryan Demmer. All rights reserved
  * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
-defined('JPATH_BASE') or die;
 
-JFormHelper::loadFieldClass('ordering');
+\defined('_JEXEC') or die;
+
+use Joomla\CMS\Factory;
+use Joomla\CMS\Form\Field\OrderingField;
 
 /**
  * Supports an HTML select list of plugins.
  *
  * @since       1.6
  */
-class JFormFieldProfileordering extends JFormFieldOrdering
+class JFormFieldProfileordering extends OrderingField
 {
     /**
      * The form field type.
@@ -30,7 +36,7 @@ class JFormFieldProfileordering extends JFormFieldOrdering
      */
     protected function getQuery()
     {
-        $db = JFactory::getDbo();
+        $db = Factory::getDbo();
 
         // Build the query for the ordering list.
         $query = $db->getQuery(true)

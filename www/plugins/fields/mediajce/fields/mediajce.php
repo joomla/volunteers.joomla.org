@@ -1,20 +1,20 @@
 <?php
-
 /**
- * @package     JCE - System Plugin
- * @subpackage  Fields
- * 
- * @copyright  (C) 2017 Open Source Matters, Inc. <https://www.joomla.org>
- * @copyright  (C) 2017 - 2022 Ryan Demmer. All rights reserved.
- * @license    GNU General Public License version 2 or later; see LICENSE.txt
+ * @package     JCE
+ * @subpackage  Fields.MediaJce
+ *
+ * @copyright   Copyright (C) 2005 - 2023 Open Source Matters, Inc. All rights reserved.
+ * @copyright   Copyright (C) 2020 - 2024 Ryan Demmer. All rights reserved.
+ * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
 
-defined('JPATH_PLATFORM') or die;
+\defined('_JEXEC') or die;
 
-use Joomla\CMS\Form\Field\MediaField;
-use Joomla\CMS\Helper\MediaHelper;
 use Joomla\CMS\Component\ComponentHelper;
-use Joomla\Registry\Registry;
+use Joomla\CMS\Plugin\PluginHelper;
+use Joomla\CMS\Form\Field\MediaField;
+use Joomla\CMS\Form\Form;
+use Joomla\CMS\Helper\MediaHelper;
 
 /**
  * Provides a modal media selector field for the JCE File Browser
@@ -39,6 +39,14 @@ class JFormFieldMediaJce extends MediaField
     protected $layout = 'joomla.form.field.media';
 
     /**
+     * The mediatype for the form field.
+     *
+     * @var    string
+     * @since  2.9.37
+     */
+    protected $mediatype = 'images';
+
+    /**
      * Method to attach a JForm object to the field.
      *
      * @param   SimpleXMLElement  $element  The SimpleXMLElement object representing the `<field>` tag for the form field object.
@@ -52,7 +60,7 @@ class JFormFieldMediaJce extends MediaField
      * @see     JFormField::setup()
      */
     public function setup(SimpleXMLElement $element, $value, $group = null)
-    {                
+    {
         // decode value if it is a string
         if (is_string($value)) {
             $json = json_decode($value, true);
@@ -60,17 +68,20 @@ class JFormFieldMediaJce extends MediaField
             if ($json) {
                 $value = isset($json['media_src']) ? $json['media_src'] : $value;
             }
-        } elseif (is_array($value)) {
+        } else {
+            $value = (array) $value;
             $value = isset($value['media_src']) ? $value['media_src'] : '';
-        }     
-        
+        }
+
         $result = parent::setup($element, $value, $group);
 
         if ($result === true) {
             $this->mediatype = isset($this->element['mediatype']) ? (string) $this->element['mediatype'] : 'images';
 
-            if (isset($this->types)) {
-                $this->value = MediaHelper::getCleanMediaFieldValue($this->value);
+            if (isset($this->types) && (bool) $this->element['converted'] === false) {
+                if (is_string($this->value)) {
+                    $this->value = MediaHelper::getCleanMediaFieldValue($this->value);
+                }
             }
         }
 
@@ -84,165 +95,67 @@ class JFormFieldMediaJce extends MediaField
      */
     public function getLayoutData()
     {
+        // Get the basic field data
+        $data = parent::getLayoutData();
+
         // component must be installed and enabled
         if (!ComponentHelper::isEnabled('com_jce')) {
-            return parent::getLayoutData();
+            return $data;
         }
         
-        require_once JPATH_ADMINISTRATOR . '/components/com_jce/helpers/browser.php';
+        // plugin must be enabled
+        if (!PluginHelper::isEnabled('system', 'jce')) {
+            return $data;
+        }
+
+        $data['class'] .= ' input-medium wf-media-input';
+
+        // not enabled for media field
+        if (!WfBrowserHelper::isMediaFieldEnabled()) {
+            $data['readonly'] = true;
+            $data['link'] = '';
+            return $data;
+        }
+
+        $converted = (bool) $this->element['converted'];
 
         $config = array(
             'element' => $this->id,
             'mediatype' => strtolower($this->mediatype),
-            'converted' => (int) $this->element['converted'] ? true : false
+            'converted' => $converted,
+            'mediafolder' => isset($this->element['media_folder']) ? (string) $this->element['media_folder'] : '',
         );
 
-        $options = WFBrowserHelper::getMediaFieldOptions($config);
-
-        $this->link = $options['url'];
-
-        // Get the basic field data
-        $data = parent::getLayoutData();
-
-        // not a valid file browser link
-        if (!$this->link) {
-            return $data;
-        }
+        // get individual field link
+        $this->link = WfBrowserHelper::getMediaFieldUrl($config);
 
         $extraData = array(
-            'link'      => $this->link,
-            'class'     => $this->element['class'] . ' input-medium wf-media-input wf-media-input-active'
+            'link'  => $this->link,
+            'class' => $data['class'] .= ' wf-media-input-active',
         );
+
+        if ($converted) {
+            $extraData['class'] .= ' wf-media-input-converted';;
+        }
+
+        // get global field options
+        $options = WfBrowserHelper::getMediaFieldOptions();
 
         if ($options['upload'] == 1) {
             $extraData['class'] .= ' wf-media-input-upload';
         }
 
-        // Joomla 4
-        if (isset($this->types)) {            
-            $mediaData = array(
-                'imagesAllowedExt'    => '',
-                'audiosAllowedExt'    => '',
-                'videosAllowedExt'    => '',
-                'documentsAllowedExt' => ''
-            );
+        if ($options['select_button'] == 0) {
+            $extraData['class'] .= ' wf-media-input-no-select-button';
+        }
 
-            $allowable = array('jpg,jpeg,png,gif', 'mp3,m4a,mp4a,ogg', 'mp4,mp4v,mpeg,mov,webm', 'doc,docx,odg,odp,ods,odt,pdf,ppt,pptx,txt,xcf,xls,xlsx,csv', 'zip,tar,gz');
+        $extraData['class'] .= ' wf-media-input-core';
 
-            if (!empty($options['accept'])) {
-                $accept = explode(',', $options['accept']);
-
-                array_walk($allowable, function (&$item) use ($accept) {
-                    $items = explode(',', $item);
-
-                    $values = array_intersect($items, $accept);
-                    $item   = empty($values) ? '' : implode(',', $values);
-                });
-            }
-
-            $mediaMap = array('images', 'audio', 'video', 'documents', 'media', 'files');
-
-            // find mediatype value if passed in values is an extension list, eg: pdf,docx
-            if (!in_array($this->mediatype, $mediaMap)) {
-                $accept = explode(',', $this->mediatype);
-
-                $mediatypes = array();
-
-                array_walk($allowable, function (&$item, $key) use ($accept, $mediaMap, &$mediatypes) {
-                    $items  = explode(',', $item);
-                    $values = array_intersect($items, $accept);
-
-                    if (!empty($values)) {
-                        $mediatypes[] = $mediaMap[$key];
-                        $item = implode(',', $values);
-                    }
-                });
-
-                if (count($mediatypes) == 2 && $mediatypes[0] == 'audio' && $mediatypes[1] == 'video') {
-                    $this->mediatype = 'media';
-                } else if (count($mediatypes) > 1) {
-                    $this->mediatype = 'files';
-                }
-            }
-
-            $mediaType = [0, 1, 2, 3];
-
-            switch ($this->mediatype) {
-                case 'images':
-                    $mediaType = [0];
-                    $mediaData['imagesAllowedExt'] = $allowable[0];
-                    break;
-                case 'audio':
-                    $mediaType = [1];
-                    $mediaData['audiosAllowedExt'] = $allowable[1];
-                    break;
-                case 'video':
-                    $mediaType = [2];
-                    $mediaData['videosAllowedExt'] = $allowable[2];
-                    break;
-                case 'media':
-                    $mediaType = [1, 2];
-                    $mediaData['audiosAllowedExt'] = $allowable[1];
-                    $mediaData['videosAllowedExt'] = $allowable[2];
-                    break;
-                case 'documents':
-                    $mediaType = [3];
-                    $mediaData['documentsAllowedExt'] = $allowable[3];
-                    break;
-                case 'files':
-                    $mediaType = [0, 1, 2, 3];
-
-                    $mediaData = array(
-                        'imagesAllowedExt'    => $allowable[0],
-                        'audiosAllowedExt'    => $allowable[1],
-                        'videosAllowedExt'    => $allowable[2],
-                        'documentsAllowedExt' => $allowable[3]
-                    );
-
-                    break;
-            }
-
-            $mediaData['mediaTypes'] = implode(',', $mediaType);
-
-            $extraData = array_merge($extraData, $mediaData);
+        // Joomla 3: reset the folder value if no default directory is set in parameters
+        if (empty($this->directory)) {
+            $extraData['folder'] = '';
         }
 
         return array_merge($data, $extraData);
-    }
-
-    /**
-     * Method to post-process a field value.
-     * Remove Joomla 4.2 Media Field parameters
-     *
-     * @param   mixed     $value  The optional value to use as the default for the field.
-     * @param   string    $group  The optional dot-separated form group path on which to find the field.
-     * @param   Registry  $input  An optional Registry object with the entire data set to filter
-     *                            against the entire form.
-     *
-     * @return  mixed   The processed value.
-     *
-     * @since   2.9.31
-     */
-    public function postProcess($value, $group = null, Registry $input = null)
-    {        
-        $value = MediaHelper::getCleanMediaFieldValue($value);
-
-        return $value;
-    }
-
-    /**
-     * Allow to override renderer include paths in child fields
-     *
-     * @return  array
-     *
-     * @since   3.5
-     */
-    protected function getLayoutPaths()
-    {
-        if (isset($this->types)) {
-            return array(JPATH_SITE . '/layouts', JPATH_PLUGINS . '/fields/mediajce/layouts');
-        }
-        
-        return parent::getLayoutPaths();
     }
 }

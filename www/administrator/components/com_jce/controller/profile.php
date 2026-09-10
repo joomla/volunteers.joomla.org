@@ -1,36 +1,59 @@
 <?php
 
 /**
- * @copyright 	Copyright (c) 2009-2022 Ryan Demmer. All rights reserved
- * @license   	GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
- * JCE is free software. This version may have been modified pursuant
- * to the GNU General Public License, and as distributed it includes or
- * is derivative of works licensed under the GNU General Public License or
- * other free or open source software licenses
+ * @package     JCE
+ * @subpackage  Admin
+ *
+ * @copyright   Copyright (C) 2005 - 2023 Open Source Matters, Inc. All rights reserved.
+ * @copyright   Copyright (c) 2009-2024 Ryan Demmer. All rights reserved
+ * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
 
-defined('JPATH_PLATFORM') or die;
+\defined('_JEXEC') or die;
 
-class JceControllerProfile extends JControllerForm
+use Joomla\CMS\Factory;
+use Joomla\CMS\MVC\Controller\FormController;
+
+class JceControllerProfile extends FormController
 {
     /**
-	 * The URL option for the component.
-	 *
-	 * @var    string
-	 */
-	protected $option = 'com_jce';
-    
+     * The URL option for the component.
+     *
+     * @var    string
+     */
+    protected $option = 'com_jce';
+
     /**
-	 * The URL view item variable.
-	 *
-	 * @var    string
-	 */
+     * The URL view item variable.
+     *
+     * @var    string
+     */
     protected $view_item = 'profile';
 
     /**
-	 * The URL view list variable.
-	 *
-	 * @var    string
-	 */
+     * The URL view list variable.
+     *
+     * @var    string
+     */
     protected $view_list = 'profiles';
+
+    public function __construct($config = array())
+    {
+        parent::__construct($config);
+
+        // only for Joomla 3.x
+        if (version_compare(JVERSION, '4', 'lt')) {
+            require_once JPATH_COMPONENT_ADMINISTRATOR . '/includes/classmap.php';
+        }
+    }
+
+    protected function allowAdd($data = [])
+    {
+        return Factory::getUser()->authorise('jce.profiles', 'com_jce');
+    }
+
+    protected function allowEdit($data = [], $key = 'id')
+    {
+        return Factory::getUser()->authorise('jce.profiles', 'com_jce');
+    }
 }

@@ -1,8 +1,20 @@
 <?php
+/**
+ * @package     JCE
+ * @subpackage  Admin
+ *
+ * @copyright   Copyright (C) 2005 - 2020 Open Source Matters, Inc. All rights reserved.
+ * @copyright   Copyright (c) 2009-2024 Ryan Demmer. All rights reserved
+ * @license     GNU General Public License version 2 or later; see LICENSE.txt
+ */
 
-defined('JPATH_PLATFORM') or die;
+\defined('_JEXEC') or die;
 
-class JFormFieldKeyValue extends JFormField
+use Joomla\CMS\Form\Form;
+use Joomla\CMS\Form\FormField;
+use Joomla\CMS\Language\Text;
+
+class JFormFieldKeyValue extends FormField
 {
 
     /**
@@ -47,22 +59,35 @@ class JFormFieldKeyValue extends JFormField
 
         if (is_string($values) && !empty($values)) {
             $value = htmlspecialchars_decode($this->value);
+            $value = html_entity_decode($value, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
             $values = json_decode($value, true);
 
-            if (empty($values) && strpos($value, ':') !== false && strpos($value, '{') === false) {
+            // not valid json
+            if (empty($values) || json_last_error() !== JSON_ERROR_NONE) {
                 $values = array();
-                
-                foreach (explode(',', $value) as $item) {
-                    $pair = explode(':', $item);
 
-                    array_walk($pair, function (&$val) {
-                        $val = trim($val, chr(0x22) . chr(0x27) . chr(0x38));
-                    });
+                // If the value is a string with key-value pairs, convert it to an array
+                if (strpos($value, ':') !== false && strpos($value, '{') === false) {
+                    foreach (explode(',', $value) as $item) {
+                        $pair = explode(':', $item);
 
-                    $values[] = array(
-                        'name'  => $pair[0],
-                        'value' => $pair[1]
+                        array_walk($pair, function (&$val) {
+                            $val = trim($val, chr(0x22) . chr(0x27) . chr(0x38));
+                        });
+
+                        $values[] = array(
+                            'name' => $pair[0],
+                            'value' => $pair[1],
+                        );
+                    }
+                } else {
+                    // where the value is a string with no key-value pairs, use only the "name" key
+                    $values = array(
+                        array(
+                            'name' => $value,
+                            'value' => '',
+                        ),
                     );
                 }
             }
@@ -78,51 +103,117 @@ class JFormFieldKeyValue extends JFormField
             );
         }
 
-        $subForm = new JForm($this->name, array('control' => $this->formControl));
-        $children = $this->element->children();
+        $subForm = new Form($this->name, array('control' => $this->formControl));
 
-        $subForm->load($children);
-        $subForm->setFields($children);
+        $children = (array) $this->element->children();
+
+        // if field has defined children
+        if (count($children)) {
+            $children = $this->element->children();
+
+            $subForm->load($children, true);
+            $subForm->setFields($children);
+        } else {
+            $label = $this->element['label'];
+
+            $xml = '<form><fields name="' . $this->name . '">';
+
+            $keyName = 'name';
+            $keyLabel = 'WF_LABEL_NAME';
+
+            if (isset($this->element['keyName'])) {
+                $keyName = $this->element['keyName'];
+            }
+
+            if (isset($this->element['keyLabel'])) {
+                $keyLabel = htmlspecialchars($this->element['keyLabel'], ENT_QUOTES, 'UTF-8');
+            }
+
+            $xml .= '<field name="' . $keyName . '" type="text" label="' . $keyLabel . '" description="" />';
+
+            $valueName = 'value';
+            $valueLabel = 'WF_LABEL_VALUE';
+
+            if (isset($this->element['valueName'])) {
+                $valueName = $this->element['valueName'];
+            }
+
+            if (isset($this->element['valueLabel'])) {
+                $valueLabel = htmlspecialchars($this->element['valueLabel'], ENT_QUOTES, 'UTF-8');
+            }
+
+            $xml .= '<field name="' . $valueName . '" type="text" label="' . $valueLabel . '" description="" />';
+
+            if ($this->element['boolean']) {
+                $xml .= '<field name="boolean" type="checkbox" class="wf-keyvalue-boolean" label="' . Text::_('WF_LABEL_BOOLEAN') . '" description="" />';
+            }
+
+            $xml .= '</fields></form>';
+
+            $subForm->load($xml);
+        }
 
         $fields = $subForm->getFieldset();
 
         // And finaly build a main container
         $str = array();
 
+        $sortable = '';
+
+        if (isset($this->element['sortable'])) {
+            $sortable = ' data-sortable="' . $this->element['sortable'] . '"';
+        }
+
+        $str[] = '<div class="form-field-repeatable"' . $sortable . '>';
+
+        // the default field names for the key-value pairs
+        $fieldItem = array('name', 'value');
+
         foreach ($values as $value) {
             $str[] = '<div class="form-field-repeatable-item wf-keyvalue">';
-            $str[] = '  <div class="form-field-repeatable-item-group well well-small p-4 bg-light">';
+            $str[] = '  <div class="form-field-repeatable-item-group well p-4 card">';
 
             $n = 0;
 
             foreach ($fields as $field) {
-                $field->element['multiple'] = true;
+                $tmpField = clone $field;
 
-                $name = (string) $field->element['name'];
+                $tmpField->element['multiple'] = true;
+
+                $name = (string) $tmpField->element['name'];
 
                 $val = is_array($value) && isset($value[$name]) ? $value[$name] : '';
- 
-                // escape value
-                $field->value = htmlspecialchars_decode($val);
 
-                $field->setup($field->element, $field->value, $this->group);
+                // if the original value is a string and does not match the field name, use the default field item name
+                if (!isset($value[$name]) && is_string($this->value)) {
+                    $key = $fieldItem[$n] ?? '';
+
+                    if ($key) {
+                        $val = $value[$key] ?? '';
+                    }
+                }
+
+                // escape value
+                $tmpField->value = htmlspecialchars_decode($val);
+
+                $tmpField->setup($tmpField->element, $tmpField->value, $this->group);
 
                 // reset id
-                $field->id .= '_' . $n;
+                $tmpField->id .= '_' . $n;
 
                 // reset name
-                $field->name = $name;
+                $tmpField->name = $name;
 
-                $str[] = $field->renderField(array('description' => $field->description));
-                
+                $str[] = $tmpField->renderField(array('description' => $tmpField->description));
+
                 $n++;
             }
 
             $str[] = '  </div>';
 
             $str[] = '  <div class="form-field-repeatable-item-control">';
-            $str[] = '      <button class="btn btn-link form-field-repeatable-add" aria-label="' . JText::_('JGLOBAL_FIELD_ADD') . '"><i class="icon icon-plus pull-right float-right"></i></button>';
-            $str[] = '      <button class="btn btn-link form-field-repeatable-remove" aria-label="' . JText::_('JGLOBAL_FIELD_REMOVE') . '"><i class="icon icon-trash pull-right float-right"></i></button>';
+            $str[] = '      <button class="btn btn-link form-field-repeatable-add" aria-label="' . Text::_('JGLOBAL_FIELD_ADD') . '"><i class="icon icon-plus pull-right float-right"></i></button>';
+            $str[] = '      <button class="btn btn-link form-field-repeatable-remove" aria-label="' . Text::_('JGLOBAL_FIELD_REMOVE') . '"><i class="icon icon-trash pull-right float-right"></i></button>';
             $str[] = '  </div>';
 
             $str[] = '</div>';
@@ -133,6 +224,8 @@ class JFormFieldKeyValue extends JFormField
         }
 
         $str[] = '<input type="hidden" name="' . $this->name . '" value="' . $this->value . '" />';
+
+        $str[] = '</div>';
 
         return implode("", $str);
     }

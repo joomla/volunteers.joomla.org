@@ -1,30 +1,37 @@
 <?php
-
 /**
- * @copyright 	Copyright (c) 2009-2022 Ryan Demmer. All rights reserved
- * @license   	GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
- * JCE is free software. This version may have been modified pursuant
- * to the GNU General Public License, and as distributed it includes or
- * is derivative of works licensed under the GNU General Public License or
- * other free or open source software licenses
+ * @package     JCE
+ * @subpackage  Admin
+ *
+ * @copyright   Copyright (C) 2005 - 2020 Open Source Matters, Inc. All rights reserved.
+ * @copyright   Copyright (c) 2009-2024 Ryan Demmer. All rights reserved
+ * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
-defined('JPATH_PLATFORM') or die;
 
-class JceViewConfig extends JViewLegacy
+\defined('_JEXEC') or die;
+
+use Joomla\CMS\Component\ComponentHelper;
+use Joomla\CMS\Factory;
+use Joomla\CMS\Language\Text;
+use Joomla\CMS\MVC\View\HtmlView;
+use Joomla\CMS\Toolbar\ToolbarHelper;
+use Joomla\CMS\Uri\Uri;
+
+class JceViewConfig extends HtmlView
 {
     public $form;
 
     public function display($tpl = null)
     {
-        $document = JFactory::getDocument();
+        $document = Factory::getDocument();
 
         $this->form = $this->get('Form');
 
-        $this->name = JText :: _('WF_CONFIG');
+        $this->name = Text::_('WF_CONFIG');
         $this->fieldsname = "config";
         $this->formclass = 'form-horizontal options-grid-form options-grid-form-full';
 
-        $params = JComponentHelper::getParams('com_jce');
+        $params = ComponentHelper::getParams('com_jce');
 
         if ($params->get('inline_help', 1)) {
             $this->formclass .= ' form-help-inline';
@@ -33,7 +40,14 @@ class JceViewConfig extends JViewLegacy
         $this->addToolbar();
         parent::display($tpl);
 
-        $document->addScript(JURI::root(true) . '/media/com_jce/js/core.min.js?' . md5(WF_VERSION));
+        $hash = md5(WF_VERSION);
+
+        $document->addStyleSheet(Uri::root(true) . '/media/com_jce/editor/vendor/jquery/css/jquery-ui.min.css?' . $hash);
+
+        $document->addScript(Uri::root(true) . '/media/com_jce/editor/vendor/jquery/js/jquery-ui.min.js?' . $hash);
+        $document->addScript(Uri::root(true) . '/media/com_jce/editor/vendor/jquery/js/jquery-ui.touch.min.js?' . $hash);
+
+        $document->addScript(Uri::root(true) . '/media/com_jce/admin/js/core.min.js?' . $hash);
     }
 
     /**
@@ -43,20 +57,20 @@ class JceViewConfig extends JViewLegacy
      */
     protected function addToolbar()
     {
-        JFactory::getApplication()->input->set('hidemainmenu', true);
+        Factory::getApplication()->input->set('hidemainmenu', true);
 
-        $user = JFactory::getUser();
-        JToolbarHelper::title('JCE - ' . JText::_('WF_CONFIGURATION'), 'equalizer');
+        $user = Factory::getUser();
+        ToolbarHelper::title('JCE - ' . Text::_('WF_CONFIGURATION'), 'equalizer');
 
         // If not checked out, can save the item.
         if ($user->authorise('jce.config', 'com_jce')) {
-            JToolbarHelper::apply('config.apply');
-            JToolbarHelper::save('config.save');
+            ToolbarHelper::apply('config.apply');
+            ToolbarHelper::save('config.save');
         }
 
-        JToolbarHelper::cancel('config.cancel', 'JTOOLBAR_CLOSE');
+        ToolbarHelper::cancel('config.cancel', 'JTOOLBAR_CLOSE');
 
-        JToolbarHelper::divider();
-        JToolbarHelper::help('WF_CONFIG_EDIT');
+        ToolbarHelper::divider();
+        ToolbarHelper::help('WF_CONFIG_EDIT');
     }
 }

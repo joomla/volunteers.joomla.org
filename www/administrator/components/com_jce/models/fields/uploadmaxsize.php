@@ -1,12 +1,17 @@
 <?php
-
 /**
- * @copyright   Copyright (C) 2005 - 2013 Open Source Matters, Inc. All rights reserved
- * @license     GNU General Public License version 2 or later; see LICENSE
+ * @package     JCE
+ * @subpackage  Admin
+ *
+ * @copyright   Copyright (C) 2005 - 2020 Open Source Matters, Inc. All rights reserved.
+ * @copyright   Copyright (c) 2009-2024 Ryan Demmer. All rights reserved
+ * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
-defined('JPATH_PLATFORM') or die;
 
-JFormHelper::loadFieldClass('number');
+\defined('_JEXEC') or die;
+
+use Joomla\CMS\Form\Field\NumberField;
+use Joomla\CMS\Language\Text;
 
 /**
  * Form Field class for the Joomla Platform.
@@ -15,7 +20,7 @@ JFormHelper::loadFieldClass('number');
  * @link        http://www.w3.org/TR/html-markup/input.text.html#input.text
  * @since       11.1
  */
-class JFormFieldUploadMaxSize extends JFormFieldNumber
+class JFormFieldUploadMaxSize extends NumberField
 {
     /**
      * The form field type.
@@ -35,16 +40,17 @@ class JFormFieldUploadMaxSize extends JFormFieldNumber
      */
     protected function getInput()
     {
-        $this->max = (int) $this->getUploadValue();
-        $this->class = trim($this->class.' input-small');
+        $max = $this->getUploadValue();
+
+        $this->max = (int) $max;
+        $this->class = trim($this->class . ' input-small');
 
         $html = '<div class="input-append input-group">';
-
         $html .= parent::getInput();
         $html .= '  <div class="input-group-append">';
         $html .= '      <span class="add-on input-group-text">Kb</span>';
         $html .= '  </div>';
-        $html .= '	<small class="help-inline form-text">&nbsp;<em>'.JText::_('WF_SERVER_UPLOAD_SIZE').' : '.$this->getUploadValue().'</em></small>';
+        $html .= '	<small class="help-inline form-text">&nbsp;<em>' . Text::_('WF_SERVER_UPLOAD_SIZE') . ' : ' . (string) $max . '</em></small>';
         $html .= '</div>';
 
         return $html;

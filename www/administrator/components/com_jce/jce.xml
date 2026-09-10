@@ -1,28 +1,26 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<extension type="component" version="3.9" method="upgrade">
+<extension type="component" version="3.10" method="upgrade">
     <name>COM_JCE</name>
     <author>Ryan Demmer</author>
-    <creationDate>18-01-2023</creationDate>
-    <copyright>Copyright (C) 2006 - 2022 Ryan Demmer. All rights reserved</copyright>
+    <creationDate>03-06-2026</creationDate>
+    <copyright>Copyright (C) 2006 - 2026 Ryan Demmer. All rights reserved</copyright>
     <license>GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html</license>
     <authorEmail>info@joomlacontenteditor.net</authorEmail>
     <authorUrl>www.joomlacontenteditor.net</authorUrl>
-    <version>2.9.33</version>
+    <version>2.9.99.5</version>
     <description>COM_JCE_XML_DESCRIPTION</description>
 
     <files folder="components/com_jce">
         <folder>editor</folder>
         <folder>views</folder>
-        <!--file>index.html</file-->
         <file>jce.php</file>
-        <file>licence.txt</file>
     </files>
 
     <!-- Component Media -->
     <media folder="media/com_jce" destination="com_jce">
-        <folder>css</folder>
-        <folder>img</folder>
-        <folder>js</folder>
+        <folder>admin</folder>
+        <folder>editor</folder>
+        <folder>site</folder>
     </media>
 
     <languages folder="language/en-GB">
@@ -68,7 +66,7 @@
             <file>controller.php</file>
             <file>index.html</file>
             <file>jce.php</file>
-            <file>licence.txt</file>
+            <file>LICENSE.txt</file>
         </files>
 
         <languages folder="administrator/language/en-GB">

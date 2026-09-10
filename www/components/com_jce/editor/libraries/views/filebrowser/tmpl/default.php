@@ -1,14 +1,17 @@
 <?php
-
 /**
- * @copyright    Copyright (c) 2009-2022 Ryan Demmer. All rights reserved
- * @license    GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
- * JCE is free software. This version may have been modified pursuant
- * to the GNU General Public License, and as distributed it includes or
- * is derivative of works licensed under the GNU General Public License or
- * other free or open source software licenses
+ * @package     JCE
+ * @subpackage  Editor
+ *
+ * @copyright   Copyright (C) 2005 - 2020 Open Source Matters, Inc. All rights reserved.
+ * @copyright   Copyright (c) 2009-2024 Ryan Demmer. All rights reserved
+ * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
-defined('JPATH_PLATFORM') or die;
+
+\defined('_JEXEC') or die;
+
+use Joomla\CMS\Language\Text;
+use Joomla\CMS\Session\Session;
 ?>
 <form class="uk-form uk-form-horizontal" onsubmit="return false;" action="<?php echo $this->action; ?>" target="_self" method="post" enctype="multipart/form-data">
   <div id="browser">
@@ -20,7 +23,7 @@ defined('JPATH_PLATFORM') or die;
         </div>
 
         <ul class="uk-breadcrumb pathway uk-margin-remove">
-          <li title="<?php echo JText::_('WF_LABEL_HOME', 'Home'); ?>">
+          <li title="<?php echo Text::_('WF_LABEL_HOME', 'Home'); ?>">
             <i class="uk-icon uk-icon-spinner"></i>
             <i class="uk-icon uk-icon-home"></i>
           </li>
@@ -33,7 +36,7 @@ defined('JPATH_PLATFORM') or die;
       <div class="uk-width-3-10 uk-width-large-1-4 uk-hidden-small">
         <div class="uk-navbar">
           <div class="uk-navbar-content uk-width-1-1 uk-text-center">
-            <?php echo JText::_('WF_LABEL_FOLDERS'); ?>
+            <?php echo Text::_('WF_LABEL_FOLDERS'); ?>
           </div>
         </div>
         <div id="browser-tree">
@@ -50,7 +53,7 @@ defined('JPATH_PLATFORM') or die;
             </button>
 
             <!-- Sort Extension -->
-            <button class="uk-width-1-10 uk-button uk-padding-remove uk-text-left" id="sort-ext" data-sort="extension" data-sort-type="extension" aria-label="<?php echo JText::_('WF_LABEL_EXTENSION'); ?>">
+            <button class="uk-width-1-10 uk-button uk-padding-remove uk-text-left" id="sort-ext" data-sort="extension" data-sort-type="extension" aria-label="<?php echo Text::_('WF_LABEL_EXTENSION'); ?>">
               <i class="uk-icon-sort-alpha-asc"></i>
               <i class="uk-icon-sort-alpha-desc"></i>
             </button>
@@ -59,26 +62,25 @@ defined('JPATH_PLATFORM') or die;
             <button class="uk-flex-item-auto uk-button uk-padding-remove uk-text-left" id="sort-name" data-sort="name" data-sort-type="string" aria-labelledby="sort-name-label">
               <i class="uk-icon-sort-alpha-asc"></i>
               <i class="uk-icon-sort-alpha-desc"></i>
-              <label id="sort-name-label" for="sort-name">&nbsp;<?php echo JText::_('WF_LABEL_NAME'); ?></label>
+              <label id="sort-name-label" for="sort-name">&nbsp;<?php echo Text::_('WF_LABEL_NAME'); ?></label>
             </button>
 
             <!-- Sort Date -->
             <button class="uk-width-2-10 uk-button uk-padding-remove uk-text-left uk-hidden-mini" id="sort-date" data-sort="modified" data-sort-type="date" aria-labelledby="sort-date-label" aria-hidden="true">
               <i class="uk-icon-sort-numeric-asc"></i>
               <i class="uk-icon-sort-numeric-desc"></i>
-              <label id="sort-data-label" for="sort-date">&nbsp;<?php echo JText::_('WF_LABEL_DATE'); ?></label>
+              <label id="sort-data-label" for="sort-date">&nbsp;<?php echo Text::_('WF_LABEL_DATE'); ?></label>
             </button>
 
             <!-- Sort Size -->
             <button class="uk-width-4-10 uk-button uk-text-left uk-hidden-mini" id="sort-size" data-sort="size" data-sort-type="number" aria-labelledby="sort-size-label" aria-hidden="true">
               <i class="uk-icon-sort-numeric-asc"></i>
               <i class="uk-icon-sort-numeric-desc"></i>
-              <label id="sort-size-label" for="sort-size">&nbsp;<?php echo JText::_('WF_LABEL_SIZE'); ?></label>
+              <label id="sort-size-label" for="sort-size">&nbsp;<?php echo Text::_('WF_LABEL_SIZE'); ?></label>
             </button>
 
-            <div class="uk-navbar uk-padding-remove uk-text-right uk-position-top-right">
-              <!-- Toggle Mode -->
-              <button class="uk-button view-mode" id="view-mode" aria-label="View Mode"><i class="uk-icon-list"></i><i class="uk-icon-grid"></i></button>
+             <!-- Toggle Mode -->
+             <button class="uk-button view-mode" id="view-mode" aria-label="View Mode"><i class="uk-icon-list"></i><i class="uk-icon-grid"></i></button>
               <!-- Toggle Details -->
               <button class="uk-button uk-active" id="show-details" aria-label="Toggle Details">
                 <i class="uk-icon-columns details"></i>
@@ -87,7 +89,6 @@ defined('JPATH_PLATFORM') or die;
               <button class="uk-button" id="show-search" aria-label="Search">
                 <i class="uk-icon-search"></i>
               </button>
-            </div>
 
             <div id="searchbox" class="uk-form-icon uk-form-icon-flip uk-hidden uk-flex-item-auto uk-position-absolute uk-position-top" role="popup">
               <input type="search" id="search" class="uk-width-1-1" autocomplete="off" spellcheck="false" autocapitalize="off" />
@@ -96,9 +97,15 @@ defined('JPATH_PLATFORM') or die;
           </div>
         </div>
 
-        <div class="folder-up" title="Up">
-          <button class="uk-button uk-button-link uk-width-1-1 uk-text-left uk-padding-remove" aria-label="Up"><i class="uk-width-1-10 uk-icon uk-icon-undo uk-icon-folder-up"></i>...</button>
-        </div>
+        <div class="uk-flex uk-flex-nowrap">
+          <div class="folder-up uk-flex-1 uk-width-1-1 uk-margin-right" title="<?php echo Text::_('WF_LABEL_FOLDER_UP'); ?>">
+            <button class="uk-button uk-button-link uk-width-1-1 uk-text-left uk-padding-remove" aria-label="Up"><i class="uk-width-1-10 uk-icon uk-icon-undo uk-icon-folder-up"></i>...</button>
+          </div>
+          <div class="grid-size uk-flex" title="<?php echo Text::_('WF_LABEL_GRID_SIZE'); ?>">
+            <button class="grid-size-plus uk-button uk-button-link uk-width-1-1 uk-text-left uk-padding-remove" aria-label="<?php echo Text::_('WF_LABEL_GRID_SIZE_INCREASE'); ?>"><i class="uk-width-1-10 uk-icon uk-icon-plus-circle"></i></button>
+            <button class="grid-size-minus uk-button uk-button-link uk-width-1-1 uk-text-left uk-padding-remove" aria-label="<?php echo Text::_('WF_LABEL_GRID_SIZE_DECREASE'); ?>"><i class="uk-width-1-10 uk-icon uk-icon-minus-circle"></i></button>
+          </div>
+        </div>  
 
         <div id="browser-list"></div>
 
@@ -113,18 +120,22 @@ defined('JPATH_PLATFORM') or die;
               </li>
             </ul>
             <div class="limit-text uk-navbar-content uk-width-2-4">
-              <label for="browser-list-limit-select" class="uk-margin-small-right">
-                <?php echo JText::_('WF_LABEL_SHOW'); ?>
-              </label>
-              <select id="browser-list-limit-select">
-                <option value="10">10</option>
-                <option value="25">25</option>
-                <option value="50">50</option>
-                <option value="100">100</option>
-                <option value="0">
-                  <?php echo JText::_('WF_OPTION_ALL'); ?>
-                </option>
+
+              <?php if (count((array) $this->list_limit_options)) : ?>
+                <label for="browser-list-limit-select" class="uk-margin-small-right">
+                  <?php echo Text::_('WF_LABEL_SHOW'); ?>
+                </label>
+                <select id="browser-list-limit-select">
+
+                <?php foreach ($this->list_limit_options as $value) : ?>
+                  <option value="<?php echo $value; ?>" <?php echo $value == $this->list_limit ? 'selected="selected"' : ''; ?>>
+                    <?php echo $value ? $value : Text::_('WF_OPTION_ALL'); ?>
+                  </option>
+                <?php endforeach; ?>
+
               </select>
+
+              <?php endif; ?>
             </div>
             <ul class="limit-right uk-pagination uk-pagination-right uk-width-1-4">
               <li class="limit-right uk-invisible" role="button">
@@ -142,7 +153,7 @@ defined('JPATH_PLATFORM') or die;
       <div class="uk-width-2-10 uk-position-relative uk-hidden-small">
         <div class="uk-navbar">
           <div class="uk-navbar-content uk-width-1-1 uk-text-center">
-            <?php echo JText::_('WF_LABEL_DETAILS'); ?>
+            <?php echo Text::_('WF_LABEL_DETAILS'); ?>
           </div>
         </div>
         <div id="browser-details-container" class="uk-grid uk-grid-collapse uk-flex uk-height-1-1">
@@ -173,5 +184,5 @@ defined('JPATH_PLATFORM') or die;
       </div>
   </div>
   </main>
-  <input type="hidden" name="<?php echo JSession::getFormToken(); ?>" value="1" />
+  <input type="hidden" name="<?php echo Session::getFormToken(); ?>" value="1" />
 </form>

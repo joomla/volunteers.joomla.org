@@ -1,16 +1,22 @@
 <?php
-
 /**
- * @copyright     Copyright (c) 2009-2022 Ryan Demmer. All rights reserved
- * @license       GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
- * JCE is free software. This version may have been modified pursuant
- * to the GNU General Public License, and as distributed it includes or
- * is derivative of works licensed under the GNU General Public License or
- * other free or open source software licenses
+ * @package     JCE
+ * @subpackage  Editor
+ *
+ * @copyright   Copyright (C) 2005 - 2020 Open Source Matters, Inc. All rights reserved.
+ * @copyright   Copyright (c) 2009-2024 Ryan Demmer. All rights reserved
+ * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
-defined('JPATH_PLATFORM') or die;
 
-class WFDocument extends JObject
+\defined('_JEXEC') or die;
+
+use Joomla\CMS\Factory;
+use Joomla\Filesystem\Path;
+use Joomla\CMS\Object\CMSObject;
+use Joomla\CMS\Session\Session;
+use Joomla\CMS\Uri\Uri;
+
+class WFDocument extends CMSObject
 {
     /**
      * Array of linked scripts.
@@ -69,8 +75,8 @@ class WFDocument extends JObject
     public $direction = 'ltr';
 
     private static $queryMap = array(
-        'imgmanager'=> 'image',
-        'imgmanager_ext' => 'imagepro'
+        'imgmanager' => 'image',
+        'imgmanager_ext' => 'imagepro',
     );
 
     /**
@@ -157,10 +163,10 @@ class WFDocument extends JObject
     private function getURL($relative = false)
     {
         if ($relative) {
-            return JURI::root(true) . '/components/com_jce/editor';
+            return Uri::root(true) . '/media/com_jce/editor';
         }
 
-        return JURI::root() . 'components/com_jce/editor';
+        return Uri::root() . 'media/com_jce/editor';
     }
 
     /**
@@ -237,35 +243,32 @@ class WFDocument extends JObject
                     $pre = $base . '';
                     break;
                 // JCE libraries resource folder
-                case 'libraries':
-                    $pre = $base . 'libraries/' . $type;
+                case 'media':
+                    $pre = $base . '/' . $type;
                     break;
                 case 'pro':
-                    $pre = $base . 'libraries/pro/' . $type;
+                    $pre = Uri::root(true) . '/media/plg_system_jcepro/editor/';
                     break;
                 case 'jquery':
-                    $pre = $base . 'libraries/vendor/jquery/' . $type;
+                    $pre = $base . 'vendor/jquery/' . $type;
                     break;
                 // TinyMCE folder
-                case 'tiny_mce':
-                    $pre = $base . 'tiny_mce';
+                case 'tinymce':
+                    $pre = $base . 'tinymce';
                     break;
                 // Tinymce plugins folder
                 case 'plugins':
-                    $pre = $base . 'tiny_mce/plugins/' . $plugin . '/' . $type;
+                    $pre = $base . 'tinymce/plugins/' . $plugin . '/' . $type;
                     break;
                 // Extensions folder
                 case 'extensions':
                     $pre = $base . 'extensions';
                     break;
                 case 'joomla':
-                    return JURI::root(true);
-                    break;
-                case 'media':
-                    return JURI::root(true) . '/media/system';
+                    return Uri::root(true);
                     break;
                 case 'component':
-                    $pre = JURI::root(true) . '/administrator/components/com_jce/media/' . $type;
+                    $pre = Uri::root(true) . '/media/com_jce/admin/' . $type;
                     break;
                 default:
                     $pre = $base . $path;
@@ -292,16 +295,14 @@ class WFDocument extends JObject
      */
     private function urlToPath($url)
     {
-        jimport('joomla.filesystem.path');
-
-        $root = JURI::root(true);
+        $root = Uri::root(true);
 
         // remove root from url
         if (!empty($root)) {
             $url = substr($url, strlen($root));
         }
 
-        return WFUtility::makePath(JPATH_SITE, JPath::clean($url));
+        return WFUtility::makePath(JPATH_SITE, Path::clean($url));
     }
 
     /**
@@ -313,7 +314,7 @@ class WFDocument extends JObject
      *
      * @since 1.5
      */
-    public function image($image, $root = 'libraries')
+    public function image($image, $root = 'media')
     {
         $parts = explode('.', $image);
         $parts = preg_replace('#[^A-Z0-9-_]#i', '', $parts);
@@ -327,13 +328,13 @@ class WFDocument extends JObject
         return $this->getBaseURL($root) . implode('/', $parts);
     }
 
-    public function removeScript($file, $root = 'libraries')
+    public function removeScript($file, $root = 'media')
     {
         $file = $this->buildScriptPath($file, $root);
         unset($this->scripts[$file]);
     }
 
-    public function removeCss($file, $root = 'libraries')
+    public function removeCss($file, $root = 'media')
     {
         $file = $this->buildStylePath($file, $root);
         unset($this->styles[$file]);
@@ -387,7 +388,7 @@ class WFDocument extends JObject
      *
      * @since 1.5
      */
-    public function addScript($files, $root = 'libraries', $type = 'text/javascript')
+    public function addScript($files, $root = 'media', $type = 'text/javascript')
     {
         $files = (array) $files;
 
@@ -413,7 +414,7 @@ class WFDocument extends JObject
      *
      * @since 1.5
      */
-    public function addStyleSheet($files, $root = 'libraries', $type = 'text/css')
+    public function addStyleSheet($files, $root = 'media', $type = 'text/css')
     {
         $files = (array) $files;
 
@@ -462,7 +463,7 @@ class WFDocument extends JObject
 
     public function getQueryString($query = array())
     {
-        $app = JFactory::getApplication();
+        $app = Factory::getApplication();
 
         // get plugin name and assign to query
         $name = $this->get('name');
@@ -478,26 +479,26 @@ class WFDocument extends JObject
         $query['slot'] = $app->input->getCmd('slot');
 
         // set standalone mode (for File Browser etc)
-        $query['standalone'] = $this->get('standalone');
+        $query['standalone'] = $this->get('standalone', 0);
 
         // set context id
-        $query['context'] = $app->input->getInt('context');
+        $query['context'] = $app->input->getInt('context', 0);
+
+        // get profile custom query variables
+        $query['profile_custom'] = $app->input->get('profile_custom', array(), 'array');
 
         // get token
-        $token = JSession::getFormToken();
+        $token = Session::getFormToken();
 
         // set token
         $query[$token] = 1;
 
-        $output = array();
+        // filter out empty values from the $query array
+        $query = array_filter($query, function ($value) {
+            return !empty($value);
+        });
 
-        foreach ($query as $key => $value) {
-            if ($value) {
-                $output[] = $key . '=' . $value;
-            }
-        }
-
-        return implode('&', $output);
+       return http_build_query($query);
     }
 
     private function getHash($files)
@@ -533,7 +534,7 @@ class WFDocument extends JObject
 
         // render stylesheets
         if ($this->get('compress_css', 0)) {
-            $file = JURI::base(true) . '/index.php?option=com_jce&' . $this->getQueryString(array('task' => 'plugin.pack', 'type' => 'css'));
+            $file = Uri::base(true) . '/index.php?option=com_jce&' . $this->getQueryString(array('task' => 'plugin.pack', 'type' => 'css'));
             // add hash
             $file .= '&' . $this->getHash(array_keys($this->styles));
 
@@ -553,7 +554,7 @@ class WFDocument extends JObject
 
         // Render scripts
         if ($this->get('compress_javascript', 0)) {
-            $script = JURI::base(true) . '/index.php?option=com_jce&' . $this->getQueryString(array('task' => 'plugin.pack'));
+            $script = Uri::base(true) . '/index.php?option=com_jce&' . $this->getQueryString(array('task' => 'plugin.pack'));
             // add hash
             $script .= '&' . $this->getHash(array_keys($this->scripts));
 
@@ -634,12 +635,12 @@ class WFDocument extends JObject
      */
     public function pack($minify = true, $gzip = false)
     {
-        $app = JFactory::getApplication();
+        $app = Factory::getApplication();
 
         if ($app->input->getCmd('task') == 'pack') {
 
             // check token
-            JSession::checkToken('get') or jexit();
+            Session::checkToken('get') or jexit();
 
             $type = $app->input->getWord('type', 'javascript');
 
@@ -665,7 +666,7 @@ class WFDocument extends JObject
                         'plugins' => array('core' => array($this->getName()), 'external' => array()),
                         'sections' => array('dlg', $this->getName() . '_dlg'),
                         'mode' => 'plugin',
-                        'language' => WFLanguage::getTag()
+                        'language' => WFLanguage::getTag(),
                     ));
 
                     $data .= $parser->load();

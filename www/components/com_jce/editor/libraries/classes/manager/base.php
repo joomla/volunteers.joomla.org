@@ -1,14 +1,17 @@
 <?php
 
 /**
- * @copyright     Copyright (c) 2009-2022 Ryan Demmer. All rights reserved
- * @license       GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
- * JCE is free software. This version may have been modified pursuant
- * to the GNU General Public License, and as distributed it includes or
- * is derivative of works licensed under the GNU General Public License or
- * other free or open source software licenses
+ * @package     JCE
+ * @subpackage  Editor
+ *
+ * @copyright   Copyright (C) 2005 - 2020 Open Source Matters, Inc. All rights reserved.
+ * @copyright   Copyright (c) 2009-2024 Ryan Demmer. All rights reserved
+ * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
-defined('JPATH_PLATFORM') or die;
+
+use Joomla\Registry\Registry;
+
+\defined('_JEXEC') or die;
 
 class WFMediaManagerBase extends WFEditorPlugin
 {
@@ -101,9 +104,6 @@ class WFMediaManagerBase extends WFEditorPlugin
 
         $options = $browser->getProperties();
 
-        // process options array
-        $browser->getFileSystem()->updateOptions($options);
-
         // set global options
         $document->addScriptDeclaration('FileBrowser.options=' . json_encode($options) . ';');
     }
@@ -118,45 +118,28 @@ class WFMediaManagerBase extends WFEditorPlugin
         return $this->getFileBrowser()->setFileTypes($filetypes);
     }
 
-    private function getFileSystem()
-    {
-        $filesystem = $this->getParam('filesystem.name', '');
+    public function onBeforeUpload(&$file, &$dir, &$name) {}
 
-        // if an object, get the name
-        if (is_object($filesystem)) {
-            $filesystem = isset($filesystem->name) ? $filesystem->name : 'joomla';
-        }
-
-        // if no value, default to "joomla"
-        if (empty($filesystem)) {
-            $filesystem = 'joomla';
-        }
-
-        return $filesystem;
-    }
-
-    public function onUpload($file, $relative = '')
-    {
-    }
+    public function onUpload($file, $relative = '') {}
 
     public function getDimensions($file)
     {
         $browser = $this->getFileBrowser();
-        $filesystem = $browser->getFileSystem();
-
-        $path = WFUtility::makePath($filesystem->getBaseDir(), rawurldecode($file));
 
         $data = array();
 
-        // images and flash
-        if (preg_match('#\.(jpg|jpeg|png|apng|gif|bmp|wbmp|tif|tiff|psd|ico|webp|swf)$#i', $file)) {
-            list($data['width'], $data['height']) = getimagesize($path);
+        $extension = WFUtility::getExtension($file, true);
 
+        // images and flash
+        if (in_array($extension, array('jpg', 'jpeg', 'png', 'apng', 'gif', 'bmp', 'wbmp', 'tif', 'tiff', 'psd', 'ico', 'webp', 'swf'))) {
+            list($data['width'], $data['height']) = $browser->getDimensions($file);
             return $data;
         }
 
+        $path = $browser->toAbsolute($file);
+
         // svg
-        if (preg_match('#\.svg$#i', $file)) {
+        if ($extension == 'svg') {
             $svg = @simplexml_load_file($path);
 
             if ($svg && isset($svg['viewBox'])) {
@@ -178,6 +161,220 @@ class WFMediaManagerBase extends WFEditorPlugin
     }
 
     /**
+     * Get the filesystem definition from parameters (with static caching).
+     *
+     * Reads the `filesystem` parameter to determine the active filesystem name
+     * (defaults to "joomla") and returns an object with:
+     *  - name (string): The active filesystem name.
+     *  - properties (Registry): Configuration for that filesystem.
+     *
+     * If a section matching the active name exists in the `filesystem` parameter,
+     * its values are loaded into the Registry; otherwise an empty Registry is used.
+     *
+     * The result is cached in a static variable for the lifetime of the request.
+     *
+     * @return \stdClass Object with `name` (string) and `properties` (Registry).
+     */
+    private function getFileSystemConfig()
+    {
+        static $filesystem = null;
+
+        if ($filesystem !== null) {
+            return $filesystem;
+        }
+
+        // get local (plugin) filesystem config
+        $config = (array) $this->getParam('filesystem', array());
+
+        // if no local filesystem name is set, use global config. This is to avoid using the local config values, eg: allow_root, if it has actually been reset to "inherit"
+        if (empty($config['name'])) {
+            // get global filesystem config
+            $config = (array) $this->getParam('editor.filesystem', array());
+        }
+
+        // Determine active filesystem name (defaults to "joomla")
+        $name = empty($config['name']) ? 'joomla' : $config['name'];
+
+        $item = array(
+            'name' => $name,
+            'properties' => new Registry(),
+        );
+
+        if (isset($config[$name])) {
+            $item = array(
+                'name' => $name,
+                'properties' => new Registry($config[$name]),
+            );
+        }
+
+        $filesystem = (object) $item;
+
+        return $filesystem;
+    }
+
+    private function getFilesystem($config = array())
+    {
+        static $instances = array();
+
+        $fs = $this->getFileSystemConfig();
+
+        // merge config with filesystem properties
+        if (isset($fs->properties)) {
+            $config = array_merge($fs->properties->toArray(), $config);
+        }
+
+        $signature = md5($fs->name . serialize($config));
+
+        if (!isset($instances[$signature])) {
+            $instances[$signature] = WFFileSystem::getInstance($fs->name, $config);
+        }
+
+        return $instances[$signature];
+    }
+
+    /**
+     * Build the Directory Store from parameters with correct defaults.
+     *
+     * Behavior:
+     * - Read editor base dir and plugin dir (with optional caller override).
+     * - If $dir is empty or an array with no non-blank paths, fall back to $baseDir.
+     * - Normalize string $dir to array format.
+     * - Only add a default "images" entry when there are no usable (non-blank) paths,
+     *   and only if allow_root is false. Otherwise, ignore blank rows.
+     * 
+     * @param  WFFileSystem $filesystem The filesystem instance to use.
+     *
+     * @return array        Associative array keyed by md5(path) => ['path' => ..., 'label' => ...]
+     */
+    protected function buildDirectoryStoreFromParams($filesystem): array
+    {
+        // default global filesystem configuration
+        $baseFs = (array) $this->getParam('editor.filesystem', array('name' => 'joomla'));
+
+        if (empty($baseFs['name'])) {
+            $baseFs['name'] = 'joomla'; // default to joomla filesystem
+        }
+
+        // get the global base directory value
+        $baseDir = $this->getParam('editor.dir', '', '', false);
+
+        // get directory from plugin parameter, fallback to base directory as it cannot itself be empty
+        $dir = $this->getParam($this->getName() . '.dir');
+
+        // check for directory set by caller, eg: Image Manager in Basic Dialog
+        if ($this->get('caller')) {
+            $dir = $this->getParam($this->get('caller') . '.dir', $dir);
+        }
+
+        // allow root: accept both spellings just in case
+        $allowRoot = (bool) ($filesystem->get('allowroot', $filesystem->get('allow_root', 0)));
+
+        // if the filesystem name matches the base filesystem name, use the base directory if no directory is set and allowRoot is false
+        if ($baseFs['name'] === $filesystem->get('name') && $allowRoot === false) {
+            // if no directory is set, or it is an empty array, use the base directory
+            if (empty($dir)) {
+                $dir = $baseDir;
+
+                // otherwise, if it is an array, check if it has a path value, if not use the base directory    
+            } else if (is_array($dir) && count(array_filter(array_column($dir, 'path'))) === 0) {
+                $dir = $baseDir;
+            }
+        }
+
+        // Normalize $dir into an array of directories if it is a string (legacy value)
+        if (!is_array($dir)) {
+            $dir = [
+                [
+                    'path' => $dir,
+                    'label' => '',
+                ],
+            ];
+        }
+
+        // Collect non-blank entries (trimmed)
+        $nonBlank = [];
+
+        foreach ($dir as $values) {
+            $path = trim($values['path'] ?? '');
+            $label = $values['label'] ?? '';
+
+            if ($path !== '') {
+                $nonBlank[] = ['path' => $path, 'label' => $label];
+            }
+        }
+
+        $dirStore = [];
+
+        // If no usable entries exist (all blank or effectively empty after normalization)
+        if (count($nonBlank) === 0) {
+            if ($allowRoot === false) {
+                $root = $filesystem->get('root', 'images'); // get the default root for the filesystem
+
+                if (empty($root)) {
+                    $root = 'images';
+                }
+
+                // Default ONLY here to "images"
+                $hash = md5($root);
+
+                $dirStore[$hash] = [
+                    'path'  => $root,
+                    'label' => '' // no label required for a single path
+                ];
+            } else {
+                // Root allowed: a single blank/root entry
+                $hash = md5('');
+
+                $dirStore[$hash] = [
+                    'path' => '',
+                    'label' => '',
+                ];
+            }
+
+            return $dirStore;
+        }
+
+        // Otherwise, at least one non-blank path exists — ignore blank rows
+        foreach ($nonBlank as $item) {
+            $hash = md5($item['path']);
+
+            $dirStore[$hash] = [
+                'path' => $item['path'],
+                'label' => $item['label'],
+            ];
+        }
+
+        return $dirStore;
+    }
+
+    private function getFeatures($filesystem)
+    {
+        $isReadOnly = $filesystem->get('readonly', false);
+
+        $allow = function ($param, $default = 1) use ($isReadOnly) {
+            return $isReadOnly ? false : $this->getParam($param, $default);
+        };
+
+        $features = array(
+            'help' => $allow('help_button', 1),
+            'upload' => $allow('upload'),
+            'folder' => array(
+                'create' => $allow('folder_new'),
+                'delete' => $allow('folder_delete'),
+                'rename' => $allow('folder_rename'),
+                'move'   => $allow('folder_move'),
+            ),
+            'file' => array(
+                'delete' => $allow('file_delete'),
+                'rename' => $allow('file_rename'),
+                'move'   => $allow('file_move'),
+            ),
+        );
+
+        return $features;
+    }
+
+    /**
      * Get the Media Manager configuration.
      *
      * @return array
@@ -187,12 +384,21 @@ class WFMediaManagerBase extends WFEditorPlugin
         $filetypes = $this->getParam('extensions', $this->get('_filetypes'));
         $textcase = $this->getParam('editor.websafe_textcase', '');
 
+        // flatten filetypes
+        $filetypes = WFUtility::formatFileTypesList('list', $filetypes);
+
+        $filesystem = $this->getFilesystem(array(
+            'upload_conflict'   => $this->getParam('editor.upload_conflict', 'overwrite'),
+            'upload_suffix'     => $this->getParam('editor.upload_suffix', '_copy'),
+            'filetypes'         => $filetypes
+        ));
+
         // implode textcase array to create string
         if (is_array($textcase)) {
             $textcase = array_filter($textcase, 'strlen');
             $textcase = implode(',', $textcase);
         }
-        
+
         $filter = $this->getParam('editor.dir_filter', array());
 
         // explode to array if string - 2.7.x...2.7.11
@@ -203,16 +409,7 @@ class WFMediaManagerBase extends WFEditorPlugin
         // remove empty values
         $filter = array_filter((array) $filter);
 
-        // get base directory from editor parameter
-        $baseDir = $this->getParam('editor.dir', '', '', false);
-
-        // get directory from plugin parameter, fallback to base directory as it cannot itself be empty
-        $dir = $this->getParam($this->getName() . '.dir', $baseDir);
-
-        // check for directory set by caller, eg: Image Manager in Basic Dialog
-        if ($this->get('caller')) {
-            $dir = $this->getParam($this->get('caller') . '.dir', $dir);
-        }
+        $dirStore = $this->buildDirectoryStoreFromParams($filesystem);
 
         // get websafe spaces parameter and convert legacy values
         $websafe_spaces = $this->getParam('editor.websafe_allow_spaces', '_');
@@ -236,9 +433,11 @@ class WFMediaManagerBase extends WFEditorPlugin
             $list_limit = 0;
         }
 
+        $features = $this->getFeatures($filesystem);
+
         $base = array(
-            'dir' => $dir,
-            'filesystem' => $this->getFileSystem(),
+            'dir' => $dirStore,
+            'filesystem' => $filesystem,
             'filetypes' => $filetypes,
             'filter' => $filter,
             'upload' => array(
@@ -251,20 +450,7 @@ class WFMediaManagerBase extends WFEditorPlugin
             ),
             'folder_tree' => $this->getParam('editor.folder_tree', 1),
             'list_limit' => $list_limit,
-            'features' => array(
-                'upload' => $this->getParam('upload', 1),
-                'folder' => array(
-                    'create' => $this->getParam('folder_new', 1),
-                    'delete' => $this->getParam('folder_delete', 1),
-                    'rename' => $this->getParam('folder_rename', 1),
-                    'move' => $this->getParam('folder_move', 1),
-                ),
-                'file' => array(
-                    'delete' => $this->getParam('file_delete', 1),
-                    'rename' => $this->getParam('file_rename', 1),
-                    'move' => $this->getParam('file_move', 1),
-                ),
-            ),
+            'features' => $features,
             'websafe_mode' => $this->getParam('editor.websafe_mode', 'utf-8'),
             'websafe_spaces' => $websafe_spaces,
             'websafe_textcase' => $textcase,
@@ -272,7 +458,8 @@ class WFMediaManagerBase extends WFEditorPlugin
             'position' => $this->getParam('editor.filebrowser_position', $this->getParam('editor.browser_position', 'bottom')),
             'use_state_cookies' => $this->getParam('editor.use_cookies', true),
             'search_depth' => $this->getParam('editor.filebrowser_search_depth', 3),
-            'allow_download' => $this->getParam('allow_download', 0)
+            'allow_download' => $this->getParam('allow_download', 0),
+            'list_limit_options' => $filesystem->get('list_limit_options', array(10, 25, 50, 100, 0))
         );
 
         return WFUtility::array_merge_recursive_distinct($base, $config);

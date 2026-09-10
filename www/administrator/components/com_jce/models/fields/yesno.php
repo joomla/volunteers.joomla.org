@@ -1,10 +1,18 @@
 <?php
+/**
+ * @package     JCE
+ * @subpackage  Admin
+ *
+ * @copyright   Copyright (C) 2005 - 2020 Open Source Matters, Inc. All rights reserved.
+ * @copyright   Copyright (c) 2009-2024 Ryan Demmer. All rights reserved
+ * @license     GNU General Public License version 2 or later; see LICENSE.txt
+ */
 
-defined('JPATH_PLATFORM') or die;
+\defined('_JEXEC') or die;
 
-JFormHelper::loadFieldClass('radio');
+use Joomla\CMS\Form\Field\RadioField;
 
-class JFormFieldYesNo extends JFormFieldRadio
+class JFormFieldYesNo extends RadioField
 {
     /**
      * The form field type.
@@ -32,7 +40,7 @@ class JFormFieldYesNo extends JFormFieldRadio
     {
         $return = parent::setup($element, $value, $group);
 
-        $this->class = trim($this->class.' btn-group btn-group-yesno');
+        $this->class = trim($this->class . ' btn-group btn-group-yesno');
 
         return $return;
     }

@@ -1,19 +1,26 @@
 <?php
-
 /**
- * @copyright     Copyright (c) 2009-2022 Ryan Demmer. All rights reserved
- * @license       GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
- * JCE is free software. This version may have been modified pursuant
- * to the GNU General Public License, and as distributed it includes or
- * is derivative of works licensed under the GNU General Public License or
- * other free or open source software licenses
+ * @package     JCE
+ * @subpackage  Editor
+ *
+ * @copyright   Copyright (C) 2005 - 2020 Open Source Matters, Inc. All rights reserved.
+ * @copyright   Copyright (c) 2009-2024 Ryan Demmer. All rights reserved
+ * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
-defined('JPATH_PLATFORM') or die;
+
+\defined('_JEXEC') or die;
+
+use Joomla\CMS\Factory;
+use Joomla\CMS\Form\Form;
+use Joomla\CMS\Language\Text;
+use Joomla\CMS\Object\CMSObject;
+use Joomla\CMS\Session\Session;
+use Joomla\CMS\Uri\Uri;
 
 /**
  * JCE class.
  */
-class WFEditorPlugin extends JObject
+class WFEditorPlugin extends CMSObject
 {
     // Editor Plugin instance
     private static $instance;
@@ -33,7 +40,7 @@ class WFEditorPlugin extends JObject
         parent::__construct();
 
         // get plugin name from url, fallback to default name if set
-        $name = JFactory::getApplication()->input->getCmd('plugin', $this->get('name'));
+        $name = Factory::getApplication()->input->getCmd('plugin', $this->get('name'));
 
         // get name and caller from plugin name
         if (strpos($name, '.') !== false) {
@@ -107,12 +114,13 @@ class WFEditorPlugin extends JObject
         static $view;
 
         if (!is_object($view)) {
+
             // create plugin view
             $view = new WFView(array(
                 'view_path' => $this->get('base_path'),
                 'template_path' => $this->get('template_path'),
                 'name' => $this->get('name'),
-                'layout' => $this->get('layout'),
+                'layout' => $this->get('layout')
             ));
         }
 
@@ -132,7 +140,12 @@ class WFEditorPlugin extends JObject
     {
         $wf = WFApplication::getInstance();
 
-        return $wf->getProfile($plugin);
+        $options = array(
+            'plugin' => $plugin
+        );
+
+        // get all profiles
+        return $wf->getActiveProfile($options);
     }
 
     protected function getPluginVersion()
@@ -150,7 +163,7 @@ class WFEditorPlugin extends JObject
 
     protected function isRtl()
     {
-        $language = JFactory::getLanguage();
+        $language = Factory::getLanguage();
 
         if ($language->getTag() === WFLanguage::getTag()) {
             return $language->isRTL();
@@ -161,7 +174,7 @@ class WFEditorPlugin extends JObject
 
     protected function initialize()
     {
-        $app = JFactory::getApplication();
+        $app = Factory::getApplication();
         $wf = WFApplication::getInstance();
 
         $version = $this->getVersion();
@@ -175,25 +188,41 @@ class WFEditorPlugin extends JObject
             $version .= $plugin_version;
         }
 
+        // default ui theme
+        $theme = 'light';
+
+        // get editor theme
+        $editor_theme = $wf->getParam('editor.toolbar_theme', 'modern');
+
+        // set ui theme variant
+        if ($editor_theme == 'modern.dark') {
+            $theme = 'dark';
+        }
+
         // create the document
         $document = WFDocument::getInstance(array(
             'version' => $version,
-            'title' => JText::_('WF_' . strtoupper($this->getName() . '_TITLE')),
+            'title' => Text::_('WF_' . strtoupper($this->getName() . '_TITLE')),
             'name' => $name,
             'language' => WFLanguage::getTag(),
             'direction' => $this->isRtl() ? 'rtl' : 'ltr',
             'compress_javascript' => $this->getParam('editor.compress_javascript', 0),
             'compress_css' => $this->getParam('editor.compress_css', 0),
+            'theme' => 'uk-jce-theme-' . $theme
         ));
 
         // set standalone mode
         $document->set('standalone', $wf->input->getInt('standalone', 0));
 
-        JFactory::getApplication()->triggerEvent('onWfPluginInit', array($this));
+        Factory::getApplication()->triggerEvent('onWfPluginInit', array($this));
     }
 
-    public function execute()
+    public function execute($task)
     {
+        if ($task == 'loadlanguages') {
+            return $this->loadlanguages();
+        }
+        
         $this->initialize();
 
         // process requests if any - method will end here
@@ -203,10 +232,15 @@ class WFEditorPlugin extends JObject
 
         $document = WFDocument::getInstance();
 
+        $query = array(
+            'task' => 'plugin.loadlanguages', 
+            'lang' => WFLanguage::getCode()
+        );
+
         // ini language
-        $document->addScript(array(JURI::base(true) . '/index.php?option=com_jce&' . $document->getQueryString(
-            array('task' => 'plugin.loadlanguages', 'lang' => WFLanguage::getCode())
-        )), 'joomla');
+        $document->addScript(
+            Uri::base(true) . '/index.php?option=com_jce&' . $document->getQueryString($query), 'joomla'
+        );
 
         // pack assets if required
         $document->pack(true, $this->getParam('editor.compress_gzip', 0));
@@ -220,7 +254,7 @@ class WFEditorPlugin extends JObject
         $document->render();
     }
 
-    public function loadlanguages()
+    protected function loadlanguages()
     {
         $name = $this->get('name');
 
@@ -241,30 +275,28 @@ class WFEditorPlugin extends JObject
     public function display()
     {
         // check session on get request
-        JSession::checkToken('get') or jexit(JText::_('JINVALID_TOKEN'));
+        Session::checkToken('get') or jexit(Text::_('JINVALID_TOKEN'));
 
         $this->initialize();
 
-        jimport('joomla.filesystem.folder');
         $document = WFDocument::getInstance();
 
         if ($document->get('standalone') == 0) {
-            $document->addScript(array('tiny_mce_popup'), 'tiny_mce');
+            $document->addScript(array('tinymce.popup'), 'tinymce');
         }
 
         $document->addScript(array('jquery.min'), 'jquery');
         $document->addScript(array('jquery-ui.min'), 'jquery');
-        $document->addScript(array('jquery-ui.touch.min'), 'jquery');
 
         $document->addScript(array('plugin.min.js'));
-        $document->addStyleSheet(array('plugin.min.css'), 'libraries');
+        $document->addStyleSheet(array('plugin.min.css'), 'media');
 
         // add custom plugin.css if exists
         if (is_file(JPATH_SITE . '/media/jce/css/plugin.css')) {
             $document->addStyleSheet(array('media/jce/css/plugin.css'), 'joomla');
         }
 
-        JFactory::getApplication()->triggerEvent('onWfPluginDisplay', array($this));
+        Factory::getApplication()->triggerEvent('onWfPluginDisplay', array($this));
     }
 
     /**
@@ -332,9 +364,12 @@ class WFEditorPlugin extends JObject
             $form_id .= '.' . basename($manifest, '.xml');
         }
 
+        // exclude custom attributes
+        $exclude[] = 'attributes';
+
         // get parameter defaults
         if (is_file($manifest)) {
-            $form = JForm::getInstance('com_jce.plugin.' . $form_id, $manifest, array('load_data' => false), true, '//extension');
+            $form = Form::getInstance('com_jce.plugin.' . $form_id, $manifest, array('load_data' => false), true, '//extension');
             $fields = $form->getFieldset($fieldset);
 
             foreach ($fields as $field) {
@@ -356,6 +391,43 @@ class WFEditorPlugin extends JObject
                 // only use non-empty values
                 if ($value !== '') {
                     $defaults[$key] = $value;
+                }
+            }
+        }
+
+        $customAttributes = $this->getParam($name . '.attributes', '');
+
+        if ($customAttributes) {
+            if (is_string($customAttributes)) {
+                $customAttributes = json_decode($customAttributes, true);
+            }
+
+            if (!is_array($customAttributes)) {
+                $customAttributes = array();
+            }
+            
+            // Remove values with invalid key, must be indexed array
+            $customAttributes = array_filter($customAttributes, function ($value, $key) {
+                return is_numeric($key) && $value != "";
+            }, ARRAY_FILTER_USE_BOTH);
+
+            foreach ($customAttributes as $attribute) {
+                if (empty($attribute)) {
+                    continue;
+                }
+
+                $name = '';
+                $value = '';
+
+                // json associative array
+                if (is_array($attribute) && array_key_exists('name', $attribute)) {
+                    extract($attribute);
+                }
+
+                if ($name && $value !== '') {
+                    $value = trim($value, " \t\n\r\0\x0B'\"");
+                    $value = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+                    $defaults[$name] = $value;
                 }
             }
         }

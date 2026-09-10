@@ -1,6 +1,20 @@
 <?php
+/**
+ * @package     JCE
+ * @subpackage  Admin
+ *
+ * @copyright   Copyright (C) 2005 - 2023 Open Source Matters, Inc. All rights reserved.
+ * @copyright   Copyright (c) 2009-2024 Ryan Demmer. All rights reserved
+ * @license     GNU General Public License version 2 or later; see LICENSE.txt
+ */
 
-defined('JPATH_PLATFORM') or die;
+\defined('_JEXEC') or die;
+
+use Joomla\CMS\Factory;
+use Joomla\CMS\Language\Text;
+use Joomla\CMS\Plugin\PluginHelper;
+use Joomla\CMS\Uri\Uri;
+use Joomla\CMS\HTML\Helpers\Sidebar;
 
 /**
  * Admin helper.
@@ -18,33 +32,33 @@ class JceHelperAdmin
      */
     public static function addSubmenu($vName)
     {
-        $uri = (string)JUri::getInstance();
+        $uri = (string) Uri::getInstance();
         $return = urlencode(base64_encode($uri));
 
-        $user = JFactory::getUser();
+        $user = Factory::getUser();
 
-        JHtmlSidebar::addEntry(
-            JText::_('WF_CPANEL'),
+        Sidebar::addEntry(
+            Text::_('WF_CPANEL'),
             'index.php?option=com_jce&view=cpanel',
             $vName == 'cpanel'
         );
 
         $views = array(
-            'config'    => 'WF_CONFIGURATION',
-            'profiles'  => 'WF_PROFILES',
-            'browser'   => 'WF_CPANEL_BROWSER',
-            'mediabox'  => 'WF_MEDIABOX'
+            'config' => 'WF_CONFIGURATION',
+            'profiles' => 'WF_PROFILES',
+            'browser' => 'WF_CPANEL_BROWSER',
+            'mediabox' => 'WF_MEDIABOX',
         );
 
-        foreach($views as $key => $label) {
-            
-            if ($key === "mediabox" && !JPluginHelper::isEnabled('system', 'jcemediabox')) {
+        foreach ($views as $key => $label) {
+
+            if ($key === "mediabox" && !PluginHelper::isEnabled('system', 'jcemediabox')) {
                 continue;
             }
-            
+
             if ($user->authorise('jce.' . $key, 'com_jce')) {
-                JHtmlSidebar::addEntry(
-                    JText::_($label),
+                Sidebar::addEntry(
+                    Text::_($label),
                     'index.php?option=com_jce&view=' . $key,
                     $vName == $key
                 );
@@ -54,7 +68,7 @@ class JceHelperAdmin
 
     public static function getTemplateStylesheets()
     {
-        require_once(JPATH_SITE . '/components/com_jce/editor/libraries/classes/editor.php');
+        require_once JPATH_SITE . '/components/com_jce/editor/libraries/classes/editor.php';
 
         return WFEditor::getTemplateStyleSheets();
     }

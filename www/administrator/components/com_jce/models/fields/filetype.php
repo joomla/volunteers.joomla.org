@@ -1,10 +1,19 @@
 <?php
+/**
+ * @package     JCE
+ * @subpackage  Admin
+ *
+ * @copyright   Copyright (C) 2005 - 2020 Open Source Matters, Inc. All rights reserved.
+ * @copyright   Copyright (c) 2009-2024 Ryan Demmer. All rights reserved
+ * @license     GNU General Public License version 2 or later; see LICENSE.txt
+ */
 
-defined('JPATH_PLATFORM') or die;
+\defined('_JEXEC') or die;
 
-JFormHelper::loadFieldClass('list');
+use Joomla\CMS\Form\Field\TextField;
+use Joomla\CMS\Language\Text;
 
-class JFormFieldFiletype extends JFormFieldText
+class JFormFieldFiletype extends TextField
 {
     /**
      * The form field type.
@@ -14,6 +23,13 @@ class JFormFieldFiletype extends JFormFieldText
      * @since  11.1
      */
     protected $type = 'Filetype';
+
+    /**
+     * The default value for the field.
+     *
+     * @var string
+     */
+    protected $defaultValue = '';
 
     /**
      * Method to attach a JForm object to the field.
@@ -48,7 +64,7 @@ class JFormFieldFiletype extends JFormFieldText
         return $return;
     }
 
-    private function mapValue($value)
+    private function mapValue($value, $isGrouped = false)
     {
         $data = array();
 
@@ -68,7 +84,20 @@ class JFormFieldFiletype extends JFormFieldText
                 }
             });
 
-            $data[$name] = $values;
+            if ($isGrouped) {
+                $data[$name] = $values;
+            } else {
+                // remove empty values
+                $values = array_filter($values, function ($value) {
+                    return !empty($value);
+                });
+
+                $data = array_merge($data, $values);
+            }
+        }
+
+        if (!$isGrouped) {
+            $data = array($data);
         }
 
         return $data;
@@ -79,10 +108,85 @@ class JFormFieldFiletype extends JFormFieldText
         $data = $this->mapValue($value);
         // get array values only
         $values = self::array_flatten($data, array());
+
         // convert to string
         $string = implode(',', $values);
+
         // return single array
         return explode(',', $string);
+    }
+
+    private function getDefaultValues()
+    {
+        $defaultValues = [
+            'default' => [],
+        ];
+
+        foreach ($this->element->children() as $element) {
+            if ($element->getName() === 'option') {
+                $defaultValues['default'][] = (string) $element;
+            }
+
+            if ($element->getName() === 'group') {
+                $name = (string) $element['label'];
+
+                $defaultValues[$name] = array();
+
+                // Iterate through the children and build an array of options.
+                foreach ($element->children() as $option) {
+                    // Only add <option /> elements.
+                    if ($option->getName() !== 'option') {
+                        continue;
+                    }
+
+                    $defaultValues[$name][] = (string) $option;
+                }
+            }
+        }
+
+        return $defaultValues;
+    }
+
+    private function isGrouped($values)
+    {
+        $keys = array_keys($values);
+
+        if (count($keys) == 1) {
+            $firstKey = $keys[0];
+
+            if (is_string($firstKey) && $firstKey !== 'default') {
+                return true;
+            }
+
+        } else {
+            return true;
+        }
+
+        return false;
+    }
+
+    private function reorderItems($items, $values)
+    {
+        // re-order the items so the non-default items are at the end
+        usort($items, function ($a, $b) use ($values) {
+            $a = strtolower($a);
+            $b = strtolower($b);
+
+            $is_default_a = !empty($values) && in_array($a, $values);
+            $is_default_b = !empty($values) && in_array($b, $values);
+
+            if ($is_default_a && !$is_default_b) {
+                return -1;
+            }
+
+            if (!$is_default_a && $is_default_b) {
+                return 1;
+            }
+
+            return 0;
+        });
+
+        return $items;
     }
 
     /**
@@ -97,16 +201,24 @@ class JFormFieldFiletype extends JFormFieldText
         // cleanup string
         $value = htmlspecialchars_decode($this->value);
 
-        // map default values to groups
-        $default = $this->mapValue($this->default);
+        // get default values from the manifest
+        $defaultValues = $this->getDefaultValues();
 
-        // remove leading = if any
+        // remove leading = if any (legacy clean up)
         if ($value && $value[0] === '=') {
             $value = substr($value, 1);
         }
 
-        // map values to groups
-        $data = $this->mapValue($value);
+        // check if these values are grouped by type
+        $grouped = $this->isGrouped($defaultValues);
+
+        // map value to groups or single array
+        $data = $this->mapValue($value, $grouped);
+
+        // reset value from $data for non-grouped values
+        if (!$grouped) {
+            $value = implode(',', $data[0]);
+        }
 
         $html = array();
 
@@ -120,15 +232,21 @@ class JFormFieldFiletype extends JFormFieldText
         $html[] = '     </div>';
         $html[] = ' </div>';
 
+        $customCount = 0;
+
         foreach ($data as $group => $items) {
             $custom = array();
 
-            $html[] = '<dl class="filetype-list">';
+            if (empty($items)) {
+                continue;
+            }
+
+            $html[] = '<dl class="filetype-list list-group">';
 
             if (is_string($group)) {
                 $checked = '';
 
-                $is_default = isset($default[$group]);
+                $is_default = isset($defaultValues[$group]);
 
                 if (empty($value) || $is_default || (!$is_default && $group[0] !== '-')) {
                     $checked = ' checked="checked"';
@@ -138,40 +256,53 @@ class JFormFieldFiletype extends JFormFieldText
                 $group = str_replace('-', '', $group);
 
                 $groupKey = 'WF_FILEGROUP_' . strtoupper($group);
-                $groupName = JText::_('WF_FILEGROUP_' . strtoupper($group));
+                $groupName = Text::_('WF_FILEGROUP_' . strtoupper($group));
 
                 // create simple label if there is no translation
                 if ($groupName === $groupKey) {
                     $groupName = ucfirst($group);
                 }
 
-                $html[] = '<dt class="filetype-group" data-filetype-group="' . $group . '"><label><input type="checkbox" value="' . $group . '"' . $checked . ' />' . $groupName . '</label></dt>';
+                $html[] = '<dt class="filetype-group list-group-item" data-filetype-group="' . $group . '"><label><input type="checkbox" value="' . $group . '"' . $checked . ' />' . $groupName . '</label></dt>';
             }
+
+            if (is_numeric($group)) {
+                $group = 'default';
+            }
+
+            $items = $this->reorderItems($items, $defaultValues[$group]);
 
             foreach ($items as $item) {
                 $checked = '';
 
                 $item = strtolower($item);
 
-                // clear minus sign
+                // clear minus sign from beginning of item
                 $mod = str_replace('-', '', $item);
 
-                $is_default = !empty($default[$group]) && in_array($item, $default[$group]);
+                // check if this is a default value or a custom value
+                $is_default = !empty($defaultValues[$group]) && in_array($mod, $defaultValues[$group]);
 
-                if (empty($value) || $is_default || (!$is_default && $mod === $item)) {
-                    $checked = ' checked="checked"';
-                }
-
-                $html[] = '<dd class="filetype-item"><label><input type="checkbox" value="' . $mod . '"' . $checked . ' /><span class="file ' . $mod . '"></span>&nbsp;' . $mod . '</label>';
+                $class = '';
 
                 if (!$is_default) {
-                    $html[] = '<button class="btn btn-link filetype-remove"><span class="icon-trash"></span></button>';
-                }
+                    $customCount++;
 
-                $html[] = '</dd>';
+                    $html[] = '<dd class="filetype-item filetype-custom row form-row list-group-item"><div class="file"></div><input type="text" class="span8 col-md-8 form-control" value="' . $mod . '" />';
+                    $html[] = '<button class="btn btn-link filetype-remove"><span class="icon-trash"></span></button>';
+                } else {
+                    if (empty($value) || $mod === $item) {
+                        $checked = ' checked="checked"';
+                    }
+                    
+                    $html[] = '<dd class="filetype-item list-group-item"><label><input type="checkbox" value="' . $mod . '"' . $checked . ' /><span class="file ' . $mod . '"></span>&nbsp;' . $mod . '</label>';
+                }
             }
 
-            $html[] = '<dd class="filetype-item filetype-custom row form-row"><div class="file"></div><input type="text" class="span8 col-md-8 form-control" value="" placeholder="' . JText::_('WF_EXTENSION_MAPPER_TYPE_NEW') . '" /><button class="pull-right float-right btn btn-link filetype-add"><span class="icon-plus"></span></button><button class="pull-right float-right btn btn-link filetype-remove"><span class="icon-trash"></span></button></dd>';
+            $html[] = '<dd class="filetype-item filetype-custom row form-row list-group-item"><div class="file"></div><input type="text" class="span8 col-md-8 form-control" value="" placeholder="' . Text::_('WF_EXTENSION_MAPPER_TYPE_NEW') . '" />';
+
+            $html[] = '<button class="btn btn-link filetype-remove"><span class="icon-trash"></span></button>';
+            $html[] = '<button class="btn btn-link filetype-add"><span class="icon-plus"></span></button>';
 
             $html[] = '</dl>';
         }

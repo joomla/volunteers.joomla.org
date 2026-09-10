@@ -1,14 +1,17 @@
 <?php
 
 /**
- * @copyright    Copyright (c) 2009-2022 Ryan Demmer. All rights reserved
- * @license    GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
- * JCE is free software. This version may have been modified pursuant
- * to the GNU General Public License, and as distributed it includes or
- * is derivative of works licensed under the GNU General Public License or
- * other free or open source software licenses
+ * @package     JCE
+ * @subpackage  Editor
+ *
+ * @copyright   Copyright (C) 2005 - 2020 Open Source Matters, Inc. All rights reserved.
+ * @copyright   Copyright (c) 2009-2024 Ryan Demmer. All rights reserved
+ * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
-defined('JPATH_PLATFORM') or die('RESTRICTED');
+
+\defined('_JEXEC') or die;
+
+use Joomla\CMS\Factory;
 
 abstract class WFLinkHelper
 {
@@ -35,39 +38,76 @@ abstract class WFLinkHelper
         return $url;
     }
 
-    public static function removeItemId($url)
+    private static function getDefaultItemId()
     {
-        $url = preg_replace('#&Itemid=[0-9]+#', '', $url);
+        // get menus
+        $menus = Factory::getApplication()->getMenu('site');
+
+        // get "default" menu
+        $default = $menus->getDefault();
+
+        return $default ? (int) $default->id : 0;
+    }
+
+    public static function removeAlias($url)
+    {
+        // Only strip alias after a numeric ID (e.g. id=1:article-alias)
+        $url = preg_replace('#(?<=\d):[\w-]+#u', '', $url);
 
         return $url;
     }
 
-    public static function removeHomeItemId($url) {
+    private static function parseQueryVars($url)
+    {
+        $parsed = parse_url($url, PHP_URL_QUERY);
+        $parsed = str_replace('&amp;', '&', $parsed);
+        parse_str($parsed, $vars);
+        return $vars;
+    }
+
+    public static function removeItemId($url)
+    {
         if (strpos($url, 'Itemid') === false) {
             return $url;
         }
-        
-        $parsed = parse_url($url, PHP_URL_QUERY);
-        $parsed = str_replace('&amp;', '&', $parsed);
 
-        parse_str($parsed, $vars);
+        $vars = self::parseQueryVars($url);
 
         if (!array_key_exists('Itemid', $vars)) {
             return $url;
         }
 
-        // get menus
-		$menus = JFactory::getApplication()->getMenu('site');
-        // get "default" menu
-        $default = $menus->getDefault();
-        
-        // Itemid is unique
-        if ($default->id != $vars['Itemid']) {
+        // only remove the Itemid if it is not the only query value
+        if (count($vars) === 1) {
             return $url;
         }
 
-        // remove "default" Itemid
-        $url = self::removeItemId($url);
+        // remove the itemid
+        unset($vars['Itemid']);
+
+        // rebuild the query string, preserving colons (valid in query values)
+        $query = str_replace('%3A', ':', http_build_query($vars));
+
+        return 'index.php?' . $query;
+    }
+
+    public static function removeHomeItemId($url)
+    {
+        if (strpos($url, 'Itemid') === false) {
+            return $url;
+        }
+
+        $vars = self::parseQueryVars($url);
+
+        if (!array_key_exists('Itemid', $vars)) {
+            return $url;
+        }
+
+        $defaultId = self::getDefaultItemId();
+
+        if ((int) $defaultId === (int) $vars['Itemid']) {
+            $url = self::removeItemId($url);
+        }
 
         return $url;
     }

@@ -1,18 +1,24 @@
 <?php
 
 /**
- * @copyright     Copyright (c) 2009-2022 Ryan Demmer. All rights reserved
- * @license       GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
- * JCE is free software. This version may have been modified pursuant
- * to the GNU General Public License, and as distributed it includes or
- * is derivative of works licensed under the GNU General Public License or
- * other free or open source software licenses
+ * @package     JCE
+ * @subpackage  Admin
+ *
+ * @copyright   Copyright (C) 2005 - 2023 Open Source Matters, Inc. All rights reserved.
+ * @copyright   Copyright (c) 2009-2024 Ryan Demmer. All rights reserved
+ * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
-defined('JPATH_PLATFORM') or die;
+\defined('_JEXEC') or die;
+
+use Joomla\CMS\Access\Access;
+use Joomla\CMS\Factory;
+use Joomla\Filesystem\File;
+use Joomla\CMS\Language\Text;
+use Joomla\CMS\Table\Table;
+use Joomla\String\StringHelper;
 
 abstract class JceProfilesHelper
 {
-
     /**
      * Create the Profiles table.
      *
@@ -20,11 +26,9 @@ abstract class JceProfilesHelper
      */
     public static function createProfilesTable()
     {
-        jimport('joomla.installer.helper');
+        $app = Factory::getApplication();
 
-        $app = JFactory::getApplication();
-
-        $db = JFactory::getDBO();
+        $db = Factory::getDBO();
         $driver = strtolower($db->name);
 
         switch ($driver) {
@@ -58,7 +62,7 @@ abstract class JceProfilesHelper
                 $db->setQuery(trim($query));
 
                 if (!$db->execute()) {
-                    $app->enqueueMessage(JText::_('WF_INSTALL_TABLE_PROFILES_ERROR') . $db->stdErr(), 'error');
+                    $app->enqueueMessage(Text::_('WF_INSTALL_TABLE_PROFILES_ERROR') . $db->stdErr(), 'error');
 
                     return false;
                 } else {
@@ -71,7 +75,7 @@ abstract class JceProfilesHelper
             $error = 'SQL FILE MISSING';
         }
 
-        $app->enqueueMessage(JText::_('WF_INSTALL_TABLE_PROFILES_ERROR') . !is_null($error) ? ' - ' . $error : '', 'error');
+        $app->enqueueMessage(Text::_('WF_INSTALL_TABLE_PROFILES_ERROR') . !is_null($error) ? ' - ' . $error : '', 'error');
 
         return false;
     }
@@ -85,8 +89,8 @@ abstract class JceProfilesHelper
      */
     public static function installProfiles()
     {
-        $app = JFactory::getApplication();
-        $db = JFactory::getDBO();
+        $app = Factory::getApplication();
+        $db = Factory::getDBO();
 
         if (self::createProfilesTable()) {
             self::buildCountQuery();
@@ -99,12 +103,12 @@ abstract class JceProfilesHelper
 
                 if (is_file($xml)) {
                     if (!self::processImport($xml)) {
-                        $app->enqueueMessage(JText::_('WF_INSTALL_PROFILES_ERROR'), 'error');
+                        $app->enqueueMessage(Text::_('WF_INSTALL_PROFILES_ERROR'), 'error');
 
                         return false;
                     }
                 } else {
-                    $app->enqueueMessage(JText::_('WF_INSTALL_PROFILES_NOFILE_ERROR'), 'error');
+                    $app->enqueueMessage(Text::_('WF_INSTALL_PROFILES_NOFILE_ERROR'), 'error');
 
                     return false;
                 }
@@ -118,7 +122,7 @@ abstract class JceProfilesHelper
 
     private static function buildCountQuery($name = '')
     {
-        $db = JFactory::getDBO();
+        $db = Factory::getDBO();
 
         $query = $db->getQuery(true);
 
@@ -134,17 +138,17 @@ abstract class JceProfilesHelper
 
     public static function getDefaultProfile()
     {
-        $mainframe = JFactory::getApplication();
+        $mainframe = Factory::getApplication();
         $file = JPATH_ADMINISTRATOR . '/components/com_jce/models/profiles.xml';
 
         $xml = simplexml_load_file($file);
 
-        JTable::addIncludePath(JPATH_ADMINISTRATOR . '/components/com_jce/tables');
+        Table::addIncludePath(JPATH_ADMINISTRATOR . '/components/com_jce/tables');
 
         if ($xml) {
             foreach ($xml->profiles->children() as $profile) {
                 if ($profile->attributes()->default) {
-                    $table = JTable::getInstance('Profiles', 'JceTable');
+                    $table = Table::getInstance('Profiles', 'JceTable');
 
                     foreach ($profile->children() as $item) {
                         switch ($item->getName()) {
@@ -183,14 +187,14 @@ abstract class JceProfilesHelper
      */
     public static function checkTable()
     {
-        $db = JFactory::getDBO();
+        $db = Factory::getDBO();
 
         $tables = $db->getTableList();
 
         if (!empty($tables)) {
             // swap array values with keys, convert to lowercase and return array keys as values
             $tables = array_keys(array_change_key_case(array_flip($tables)));
-            $app = JFactory::getApplication();
+            $app = Factory::getApplication();
             $match = str_replace('#__', strtolower($app->getCfg('dbprefix', '')), '#__wf_profiles');
 
             return in_array($match, $tables);
@@ -211,7 +215,7 @@ abstract class JceProfilesHelper
      */
     public static function checkTableContents()
     {
-        $db = JFactory::getDBO();
+        $db = Factory::getDBO();
 
         self::buildCountQuery();
 
@@ -220,9 +224,7 @@ abstract class JceProfilesHelper
 
     public static function getUserGroups($area)
     {
-        $db = JFactory::getDBO();
-
-        jimport('joomla.access.access');
+        $db = Factory::getDBO();
 
         $query = $db->getQuery(true);
 
@@ -235,9 +237,9 @@ abstract class JceProfilesHelper
         $back = array();
 
         foreach ($groups as $group) {
-            $create = JAccess::checkGroup($group, 'core.create');
-            $admin = JAccess::checkGroup($group, 'core.login.admin');
-            $super = JAccess::checkGroup($group, 'core.admin');
+            $create = Access::checkGroup($group, 'core.create');
+            $admin = Access::checkGroup($group, 'core.login.admin');
+            $super = Access::checkGroup($group, 'core.admin');
 
             if ($super) {
                 $back[] = $group;
@@ -279,29 +281,46 @@ abstract class JceProfilesHelper
     {
         $n = 0;
 
-        $app = JFactory::getApplication();
+        $app = Factory::getApplication();
 
         // load data from file
-        $data   = file_get_contents($file);
+        $data = file_get_contents($file);
+
+        $data = trim($data);
+
         // format params data as CDATA
-        $data   = preg_replace('#<params>{(.+?)}<\/params>#', '<params><![CDATA[{$1}]]></params>', $data);
-        // load processed string
-        $xml    = simplexml_load_string($data);
+        $data = preg_replace('#<params>{(.+?)}<\/params>#', '<params><![CDATA[{$1}]]></params>', $data);
 
-        $user = JFactory::getUser();
-        $date = new JDate();
+        // external entities are disabled by default in PHP 8+; guard PHP 7.x explicitly
+        if (PHP_MAJOR_VERSION < 8) {
+            $prev = libxml_disable_entity_loader(true);
+        }
+        $xml = simplexml_load_string($data);
+        if (PHP_MAJOR_VERSION < 8) {
+            libxml_disable_entity_loader($prev);
+        }
 
-        JTable::addIncludePath(JPATH_ADMINISTRATOR . '/components/com_jce/tables');
+        $user = Factory::getUser();
+        $date = Factory::getDate();
 
-        $language = JFactory::getLanguage();
+        Table::addIncludePath(JPATH_ADMINISTRATOR . '/components/com_jce/tables');
+
+        $language = Factory::getLanguage();
         $language->load('com_jce', JPATH_ADMINISTRATOR, null, true);
 
         if ($xml) {
             foreach ($xml->profiles->children() as $profile) {
-                $table = JTable::getInstance('Profiles', 'JceTable');
+                $table = Table::getInstance('Profiles', 'JceTable');
+
+                $allowedKeys = ['name', 'description', 'users', 'types', 'components', 'area', 'device', 'rows', 'plugins', 'published', 'ordering', 'params'];
 
                 foreach ($profile->children() as $item) {
                     $key = $item->getName();
+
+                    if (!in_array($key, $allowedKeys, true)) {
+                        continue;
+                    }
+
                     $value = (string) $item;
 
                     switch ($key) {
@@ -311,14 +330,14 @@ abstract class JceProfilesHelper
                                 // create name copy if exists
                                 while ($table->load(array('name' => $value))) {
                                     if ($value === $table->name) {
-                                        $value = Joomla\String\StringHelper::increment($value);
+                                        $value = StringHelper::increment($value);
                                     }
                                 }
                             }
                             break;
 
                         case 'description':
-                            $value = JText::_($value);
+                            $value = Text::_($value);
                             break;
                         case 'types':
 

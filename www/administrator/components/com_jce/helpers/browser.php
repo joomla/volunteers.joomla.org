@@ -1,44 +1,71 @@
 <?php
 
 /**
- * @copyright     Copyright (c) 2009-2022 Ryan Demmer. All rights reserved
- * @license       GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
- * JCE is free software. This version may have been modified pursuant
- * to the GNU General Public License, and as distributed it includes or
- * is derivative of works licensed under the GNU General Public License or
- * other free or open source software licenses
+ * @package     JCE
+ * @subpackage  Admin
+ *
+ * @copyright   Copyright (C) 2005 - 2023 Open Source Matters, Inc. All rights reserved.
+ * @copyright   Copyright (c) 2009-2024 Ryan Demmer. All rights reserved
+ * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
-defined('JPATH_PLATFORM') or die;
+\defined('_JEXEC') or die;
+
+use Joomla\CMS\Component\ComponentHelper;
+use Joomla\CMS\Factory;
+
+JLoader::register('WFApplication', JPATH_ADMINISTRATOR . '/components/com_jce/helpers/browser.php');
 
 abstract class WfBrowserHelper
 {
-    public static function getBrowserLink($element = null, $mediatype = '', $callback = '')
+    public static function getBrowserLink($element = null, $mediatype = '', $callback = '', $options = array())
     {
-        $options = self::getMediaFieldOptions(array(
+        $options = array_merge($options, array(
             'element' => $element,
             'mediatype' => $mediatype,
             'callback' => $callback,
         ));
 
-        return $options['url'];
+        $url = self::getMediaFieldUrl($options);
+
+        return $url;
     }
 
     public static function getMediaFieldLink($element = null, $mediatype = 'images', $callback = '')
     {
-        $options = self::getMediaFieldOptions(array(
+        $url = self::getMediaFieldUrl(array(
             'element' => $element,
             'mediatype' => $mediatype,
             'callback' => $callback,
         ));
 
-        return $options['url'];
+        return $url;
     }
 
-    public static function getMediaFieldOptions($options = array())
+    public static function isMediaFieldEnabled()
     {
-        $app = JFactory::getApplication();
-        $token = JFactory::getSession()->getFormToken();
+        static $enabled = null;
 
+        if ($enabled !== null) {
+            return $enabled;
+        }
+
+        require_once JPATH_SITE . '/components/com_jce/editor/libraries/classes/application.php';
+
+        $wf = WFApplication::getInstance();
+        $profile = $wf->getActiveProfile(['plugin' => 'browser']);
+
+        $enabled = $profile ? (bool) $wf->getParam('browser.mediafield_enable', 1) : false;
+
+        return $enabled;
+    }
+
+    public static function getMediaFieldUrl($options = array())
+    {
+        $app = Factory::getApplication();
+        $token = Factory::getSession()->getFormToken();
+
+        // get component params to check for media field conversion
+        $componentParams = ComponentHelper::getParams('com_jce');
 
         if (!isset($options['element'])) {
             $options['element'] = null;
@@ -56,66 +83,96 @@ abstract class WfBrowserHelper
             $options['converted'] = false;
         }
 
-        // set $url as empty string
-        $data = array(
-            'url' => '',
-            'upload' => 0,
-        );
+        if (!isset($options['mediafolder'])) {
+            $options['mediafolder'] = '';
+        }
 
-        // load editor class
-        require_once JPATH_SITE . '/components/com_jce/editor/libraries/classes/application.php';
+        if (self::isMediaFieldEnabled() === false) {
+            return '';
+        }
 
         // get editor instance
         $wf = WFApplication::getInstance();
 
-        // check the current user is in a profile
-        if ($wf->getProfile('browser')) {
+        // set base url
+        $url = 'index.php?option=com_jce&task=plugin.display';
 
-            // is conversion enabled?
-            if ($options['converted'] && (int) $wf->getParam('browser.mediafield_conversion', 1) === 0) {
-                return $data;
-            }
-
-            $data['url'] = 'index.php?option=com_jce&task=plugin.display';
-
-            // add default context
-            if (!isset($options['context'])) {
-                $options['context'] = $wf->getContext();
-            }
-
-            // append "caller" plugin
-            if (!empty($options['plugin'])) {
-                if (strpos($options['plugin'], 'browser') === false) {
-                    $options['plugin'] = 'browser.' . $options['plugin'];
-                }
-            } else {
-                $options['plugin'] = 'browser';
-            }
-
-            $options['standalone'] = 1;
-            $options[$token] = 1;
-            $options['client'] = $app->getClientId();
-
-            foreach ($options as $key => $value) {
-                if ($value) {
-                    $data['url'] .= '&' . $key . '=' . $value;
-                }
-            }
-
-            // get allowed extensions
-            $accept = $wf->getParam('browser.extensions', 'jpg,jpeg,png,gif,mp3,m4a,mp4a,ogg,mp4,mp4v,mpeg,mov,webm,doc,docx,odg,odp,ods,odt,pdf,ppt,pptx,txt,xcf,xls,xlsx,csv,zip,tar,gz');
-            
-            $data['accept'] = array_map(function ($value) {                
-                if ($value[0] != '-') {
-                    return $value;
-                }
-            }, explode(',', $accept));
-
-            $data['accept'] = implode(',', array_filter($data['accept']));
-
-            $data['upload'] = (int) $wf->getParam('browser.mediafield_upload', 1);
+        // add default context
+        if (empty($options['context'])) {
+            $options['context'] = $wf->getContext();
         }
 
-        return $data;
+        // append "caller" plugin
+        if (!empty($options['plugin'])) {
+            if (strpos($options['plugin'], 'browser') === false) {
+                $options['plugin'] = 'browser.' . $options['plugin'];
+            }
+        } else {
+            $options['plugin'] = 'browser';
+        }
+
+        $options['standalone'] = 1;
+        $options[$token] = 1;
+        $options['client'] = $app->getClientId();
+
+        // filter options values
+        $options = array_filter($options, function ($value) {
+            if (is_array($value)) {
+                return !empty($value);
+            }
+
+            return $value !== '' && $value !== null;
+        });
+
+        $url .= '&' . http_build_query($options);
+
+        return $url;
+    }
+
+    public static function getMediaFieldOptions($options = array())
+    {
+        if (self::isMediaFieldEnabled() === false) {
+            return $options;
+        }
+
+        $app = Factory::getApplication();
+
+        // get component params to check for media field conversion
+        $componentParams = ComponentHelper::getParams('com_jce');
+
+        // merge default options
+        $options = array_merge(array(
+            'upload' => 0,
+            'select_button' => 1,
+            'convert' => 0,
+            'mediafields' => array(),
+        ), $options);
+
+        // get editor instance
+        $wf = WFApplication::getInstance();
+        $profile = $wf->getActiveProfile(['plugin' => 'browser']);
+
+        // is conversion enabled?
+        $options['convert'] = (int) $componentParams->get('replace_media_manager', 1) && (int) $wf->getParam('browser.mediafield_conversion', 1);
+
+        // add default context
+        $options['context'] = $wf->getContext();
+
+        // get allowed extensions
+        $accept = $wf->getParam('browser.extensions', 'jpg,jpeg,png,gif,mp3,m4a,mp4a,ogg,mp4,mp4v,mpeg,mov,webm,doc,docx,odg,odp,ods,odt,pdf,ppt,pptx,txt,xcf,xls,xlsx,csv,zip,tar,gz');
+
+        $options['accept'] = array_map(function ($value) {
+            if ($value[0] != '-') {
+                return $value;
+            }
+        }, explode(',', $accept));
+
+        $options['accept'] = implode(',', array_filter($options['accept']));
+        $options['upload'] = (int) $wf->getParam('browser.mediafield_upload', 1);
+        $options['select_button'] = (int) $wf->getParam('browser.mediafield_select_button', 1);
+
+        $app->triggerEvent('onWfMediaFieldGetOptions', array(&$options, $profile));
+
+        return $options;
     }
 }

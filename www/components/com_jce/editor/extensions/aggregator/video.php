@@ -1,14 +1,14 @@
 <?php
-
 /**
- * @copyright 	Copyright (c) 2009-2019 Ryan Demmer. All rights reserved
- * @license   	GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
- * JCE is free software. This version may have been modified pursuant
- * to the GNU General Public License, and as distributed it includes or
- * is derivative of works licensed under the GNU General Public License or
- * other free or open source software licenses
+ * @package     JCE
+ * @subpackage  Editor
+ *
+ * @copyright   Copyright (C) 2005 - 2020 Open Source Matters, Inc. All rights reserved.
+ * @copyright   Copyright (c) 2009-2024 Ryan Demmer. All rights reserved
+ * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
-defined('JPATH_PLATFORM') or die;
+
+\defined('_JEXEC') or die;
 
 class WFAggregatorExtension_Video extends WFAggregatorExtension
 {
@@ -37,7 +37,7 @@ class WFAggregatorExtension_Video extends WFAggregatorExtension
     {
         $plugin = WFEditorPlugin::getInstance();
 
-        return array(
+        $defaults = array(
             'width' => $plugin->getParam('aggregator.video.width', ''),
             'height' => $plugin->getParam('aggregator.video.height', ''),
 
@@ -46,6 +46,14 @@ class WFAggregatorExtension_Video extends WFAggregatorExtension
             'autoplay' => (int) $plugin->getParam('aggregator.video.autoplay', 0),
             'muted' => (int) $plugin->getParam('aggregator.video.mute', 0)
         );
+
+        $attributes = $plugin->getParam('aggregator.video.attributes', '');
+
+        if ($attributes) {            
+            $defaults['attributes'] = $this->getCustomDefaultAttributes($attributes);
+        }
+
+        return $defaults;
     }
 
     public function getEmbedData($data, $url)
@@ -56,14 +64,19 @@ class WFAggregatorExtension_Video extends WFAggregatorExtension
             'controls' => 1,
             'loop' => 0,
             'autoplay' => 0,
-            'muted' => 0
+            'muted' => 0,
         );
 
-        foreach($params as $name => $value) {
+        foreach ($params as $name => $value) {
             if ($default[$name] === $value) {
                 continue;
             }
-            
+
+            if ($name == 'attributes') {
+                $data[$name] = $value;
+                continue;
+            }
+
             if ($value !== '') {
                 $data[$name] = $value;
             }

@@ -1,17 +1,16 @@
 <?php
-
 /**
  * @package     JCE
+ * @subpackage  Admin
  *
- * @copyright   Copyright (C) 2005 - 2017 Open Source Matters, Inc. All rights reserved.
- * @copyright   Copyright (C) 2022 Ryan Demmer All rights reserved.
+ * @copyright   Copyright (C) 2005 - 2020 Open Source Matters, Inc. All rights reserved.
+ * @copyright   Copyright (c) 2009-2024 Ryan Demmer. All rights reserved
  * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
 
-defined('JPATH_PLATFORM') or die;
+\defined('_JEXEC') or die;
 
 use Joomla\CMS\Form\Field\MediaField;
-use Joomla\CMS\Helper\MediaHelper;
 
 /**
  * Provides a modal media selector field for the JCE File Browser
@@ -36,6 +35,14 @@ class JFormFieldMediaJce extends MediaField
     protected $layout = 'joomla.form.field.media';
 
     /**
+     * Default mediatype
+     *
+     * @var    string
+     * @since  2.9.39
+     */
+    protected $mediatype;
+
+    /**
      * Method to attach a JForm object to the field.
      *
      * @param   SimpleXMLElement  $element  The SimpleXMLElement object representing the `<field>` tag for the form field object.
@@ -55,10 +62,9 @@ class JFormFieldMediaJce extends MediaField
         if ($result === true) {
             $this->mediatype = isset($this->element['mediatype']) ? (string) $this->element['mediatype'] : 'images';
 
-            // Joomla 4 custom layout
-            if (isset($this->types)) {
-                $this->layout = 'joomla.form.field.mediacustom';
-        	}
+            if (!isset($this->element['converted'])) {
+                $this->element['converted'] = 0;
+            }
         }
 
         return $result;
@@ -76,28 +82,28 @@ class JFormFieldMediaJce extends MediaField
         $config = array(
             'element' => $this->id,
             'mediatype' => strtolower($this->mediatype),
-            'converted' => (int) $this->element['converted'] ? true : false
+            'converted' => (int) $this->element['converted'] ? true : false,
         );
 
         if (isset($this->element['plugin'])) {
             $config['plugin'] = (string) $this->element['plugin'];
         }
 
-        $options = WFBrowserHelper::getMediaFieldOptions($config);
-
-        $this->link = $options['url'];
-
         // Get the basic field data
         $data = parent::getLayoutData();
+
+        $this->link = WFBrowserHelper::getMediaFieldUrl($config);
 
         // not a valid file browser link
         if (!$this->link) {
             return $data;
         }
+        
+        $options = WFBrowserHelper::getMediaFieldOptions($config);
 
         $extraData = array(
-            'link'      => $this->link,
-            'class'     => $this->element['class'] . ' input-medium wf-media-input wf-media-input-active'
+            'link' => $this->link,
+            'class' => $this->element['class'] . ' input-medium wf-media-input wf-media-input-active',
         );
 
         if ($options['upload'] == 1) {

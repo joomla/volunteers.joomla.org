@@ -3,9 +3,9 @@
     <name>PKG_YOURSITESCLIENT</name>
     <packagename>yoursitesclient</packagename>
     <url>http://www.gwesystems.com</url>
-    <creationDate>June 2025</creationDate>
+    <creationDate>May 2026</creationDate>
     <license>http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL</license>
-    <version>1.65.0</version>
+    <version>1.70.0</version>
     <author>GWE Systems Ltd</author>
     <copyright>(C) 2017-YOURSITES_COPYRIGHT GWE Systems Ltd</copyright>
     <authorEmail></authorEmail>

@@ -6,12 +6,12 @@
   'identity-provider' => 
   array (
     0 => 'saml:SP',
-    'idp' => 'https://identity.joomla.org/www/sso/saml2/idp/metadata.php',
+    'idp' => 'https://identity.joomla.org/sso/saml2/idp/metadata.php',
     'discoURL' => NULL,
     'NameIDPolicy' => 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified',
     'privatekey' => 'volunteers.pem',
     'certificate' => 'volunteers.crt',
-    'sign.logout' => true,
+    'sign.logout' => false,
     'signature.algorithm' => 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256',
     'SingleLogoutServiceBinding' => 
     array (
@@ -32,5 +32,10 @@
       1 => 'emailaddress',
       2 => 'upn',
     ),
+    'metadata.sign.enable' => false,
+    'metadata.sign.privatekey' => '',
+    'metadata.sign.privatekey_pass' => '',
+    'metadata.sign.certificate' => '',
+    'privatekey_pass' => '',
   ),
 );

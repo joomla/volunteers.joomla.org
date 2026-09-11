@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @version    CVS: 1.65.0
+ * @version    CVS: 1.70.0
  * @package    com_yoursites
  * @author     Geraint Edwards <via website>
  * @copyright  2016-YOURSITES_COPYRIGHT GWE Systems Ltd
@@ -341,7 +341,7 @@ class YstsSiteChecks
 	{
 		$contentparams = ComponentHelper::getParams("com_content");
 
-		if ($contentparams->get("save_history" , 0))
+		if ((int) $contentparams->get("save_history" , 0))
 		{
 			$returnData->checkinfo['key']  = "COM_YOURSITES_ADVCHECK_CONTENTVERSIONING_CORRECT";
 			$returnData->checkinfo['data'] = array();

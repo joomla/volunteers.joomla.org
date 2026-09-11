@@ -8,7 +8,7 @@
 
 namespace Joomla\CMS\Updater;
 
-defined('JPATH_PLATFORM') or die;
+defined('_JEXEC') or die;
 
 /*
  * Joomla 3.7.x and earlier don't support these - leave them out until we MUST have them for Joomla 4.x

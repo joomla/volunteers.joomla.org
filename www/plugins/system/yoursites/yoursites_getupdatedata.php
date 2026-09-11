@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @version    CVS: 1.65.0
+ * @version    CVS: 1.70.0
  * @package    com_yoursites
  * @author     Geraint Edwards <via website>
  * @copyright  2016-YOURSITES_COPYRIGHT GWE Systems Ltd
@@ -2369,7 +2369,8 @@ function updateExtension( $requestObject, &$returnData ) {
     $user->username = isset( $requestObject->updateUser ) ? $requestObject->updateUser : "YourSites";
 
     // JoomTestimonials is a naughty extension and runs rebuild on update sites during updates so we need to change the user permissions for for thism to work
-    if (strpos($extension->name, "joomtestimonials") > 0)
+    $useRootUser = false;
+    if (strpos($extension->name, "joomtestimonials") > 0) //  || strpos($extension->element, "fs_") === 0) // this extra bit was to allow flart updates to work but not needed
     {
         try {
             $user->id  = 4567891211;
@@ -2382,6 +2383,7 @@ function updateExtension( $requestObject, &$returnData ) {
             {
                 Factory::getApplication()->set('root_user', 4567891211 );
             }
+            $useRootUser = true;
         }
         catch ( \Throwable $e )
         {
@@ -2394,7 +2396,7 @@ function updateExtension( $requestObject, &$returnData ) {
 
     // reset username etc.
     $user->username = "";
-    if (strpos($extension->name, "joomtestimonials") > 0)
+    if ($useRootUser)
     {
         try {
             $user->id  = 0;
@@ -2555,7 +2557,7 @@ function uninstallExtension( $requestObject, &$returnData ) {
         if ($extension->package_id > 0)
         {
             $returnData->error           = true;
-            $returnData->errormessages[] = Text::sprintf('JLIB_INSTALLER_ERROR_CANNOT_UNINSTALL_CHILD_OF_PACKAGE', $extension->name);
+            $returnData->errormessages[] = Text::sprintf('JLIB_INSTALLER_ERROR_CANNOT_UNINSTALL_CHILD_OF_PACKAGE', $extension->name, $extension->package_id);
             return $returnData;
         }
 
@@ -5311,10 +5313,48 @@ function installExtension( $requestObject, &$returnData ) {
     $input->set( 'format', 'html' );
     Factory::getApplication()->loadDocument();
 
+    // Flart does it's own security checks which cause a problem but we don't have a means to check which extension it is at this point :(
+    $useRootUser = false;
+    /*
+    try {
+        $user->id  = 4567891211;
+        $root_user = Factory::getApplication()->get( 'root_user' );
+        if ( (int) $root_user )
+        {
+            $user->id = (int) $root_user;
+        }
+        else
+        {
+            Factory::getApplication()->set('root_user', 4567891211 );
+        }
+        $useRootUser = true;
+
+    }
+    catch (\Throwable $e)
+    {
+    }
+    */
+
     // Install sets state and enqueues messages
     $installmodel->install();
 
     $user->username = "";
+    if ($useRootUser)
+    {
+        try {
+            $user->id  = 0;
+            $root_user = Factory::getApplication()->get( 'root_user' );
+            if ( 4567891211 == (int) $root_user )
+            {
+                Factory::getApplication()->set( 'root_user', -1 );
+            }
+        }
+        catch ( \Throwable $e )
+        {
+
+        }
+    }
+
 
     /*
 	  $this->setState('name', $installer->get('name'));
@@ -7487,7 +7527,7 @@ function getJoomlaUpdateSitesIds( $column = 0 ) {
  * @return  boolean  True on success.
  *
  * @throws  \RuntimeException
- * @since   1.65.0
+ * @since   1.70.0
  */
 function copyr2( $src, $dest, $prefix, &$returnData, $exclusions = array() ) {
     diagnosticLog( $returnData, 'yoursites_cloning', "Starting to copy files from $src => $dest" );
@@ -7711,7 +7751,7 @@ function copyr2( $src, $dest, $prefix, &$returnData, $exclusions = array() ) {
  * @return  boolean  True on success.
  *
  * @throws  \RuntimeException
- * @since   1.65.0
+ * @since   1.70.0
  */
 function filelistr2( $src, $dest, $prefix, &$returnData, &$processedFiles, $exclusions = array() ) {
 
@@ -7830,7 +7870,7 @@ function filelistr2( $src, $dest, $prefix, &$returnData, &$processedFiles, $excl
  * @return  boolean  True on success.
  *
  * @throws  \RuntimeException
- * @since   1.65.0
+ * @since   1.70.0
  */
 function copylist2( &$returnData, &$processedFiles, $exclusions = array() ) {
 
@@ -7893,7 +7933,7 @@ function copylist2( &$returnData, &$processedFiles, $exclusions = array() ) {
  * @return  boolean  True on success.
  *
  * @throws  \RuntimeException
- * @since   1.65.0
+ * @since   1.70.0
  */
 function deleter2( $src, &$returnData ) {
 

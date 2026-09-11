@@ -220,7 +220,8 @@ class VolunteersModelVolunteers extends JModelList
 		$orderCol  = $this->state->get('list.ordering', 'user.name');
 		$orderDirn = $this->state->get('list.direction', 'asc');
 
-		$query->order($db->escape($orderCol . ' ' . $orderDirn));
+//		$query->order($db->escape($orderCol . ' ' . $orderDirn));
+$query->order('rand()');
 
 		return $query;
 	}

@@ -28,7 +28,7 @@ class PlgSystemVolunteers extends JPlugin
 	public function onAfterRoute()
 	{
 		// Run on frontend only
-		if ($this->app->isClient('administrator'))
+		if (!$this->app->isClient('site'))
 		{
 			return true;
 		}
@@ -80,7 +80,7 @@ class PlgSystemVolunteers extends JPlugin
 	public function onAfterRender()
 	{
 		// Run on frontend only
-		if ($this->app->isClient('administrator'))
+		if (!$this->app->isClient('site'))
 		{
 			return true;
 		}

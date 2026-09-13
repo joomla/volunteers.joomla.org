@@ -55,7 +55,7 @@ class PlgSystemJoomlaidentityclient extends CMSPlugin
 	public function onAfterRoute()
 	{
 		// Run on frontend only
-		if ($this->app->isClient('administrator'))
+		if (!$this->app->isClient('site'))
 		{
 			return;
 		}

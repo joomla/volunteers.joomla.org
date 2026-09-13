@@ -27,7 +27,7 @@ class JFormFieldTextprepend extends JFormFieldText
 	 */
 	public function getInput()
 	{
-		$html[] = '<div class="input-prepend"><span class="add-on">' . JText::_($this->element['prepend']) . '</span>';
+		$html[] = '<div class="input-group"><span class="input-group-text">' . JText::_($this->element['prepend']) . '</span>';
 		$html[] = parent::getInput();
 		$html[] = '</div>';
 

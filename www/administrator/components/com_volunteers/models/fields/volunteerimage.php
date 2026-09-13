@@ -8,6 +8,8 @@
 // No direct access.
 defined('_JEXEC') or die;
 
+use Joomla\CMS\Language\Text;
+
 /**
  * Sample list form field
  */
@@ -34,6 +36,10 @@ class JFormFieldVolunteerimage extends JFormField
         if ($this->value)
         {
             $html[] = '<img src="' . $this->value . '"/>';
+        }
+        else
+        {
+            $html[] = '<p>' . Text::_('COM_VOLUNTEERS_IMAGE_NOT_PROVIDED') .'</p>';
         }
 
         $html[] = '</div>';

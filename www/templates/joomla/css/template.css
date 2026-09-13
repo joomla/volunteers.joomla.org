@@ -1,7 +1,7 @@
 /*
  * Joomla.org site template
  *
- * @copyright  Copyright (C) 2005 - 2021 Open Source Matters, Inc. All rights reserved.
+ * @copyright  Copyright (C) 2005 - 2023 Open Source Matters, Inc. All rights reserved.
  * @license    GNU General Public License version 2 or later
  */
 /* >>> JUI >>> */
@@ -756,7 +756,7 @@ h4,
 h5,
 h6 {
   margin: 11px 0;
-  font-family: inherit;
+  font-family: 'Open Sans', sans-serif;
   font-weight: bold;
   line-height: 22px;
   color: inherit;
@@ -9484,7 +9484,7 @@ aside .nav .nav-child {
 
 .page-title {
   padding: 0 10px;
-  margin: 0;
+  margin: 5px 0 0 0;
   font-size: 30px;
   font-weight: normal;
   line-height: 50px;

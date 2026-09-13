@@ -82,14 +82,6 @@ class JoomlaTemplateHelper
 				break;
 			}
 
-
-			case 'exam.joomla.org':
-			{
-				$id = 'GTM-TRG37W';
-
-				break;
-			}
-
 			case 'extensions.joomla.org':
 			{
 				$id = 'GTM-MH6RGF';
@@ -132,13 +124,6 @@ class JoomlaTemplateHelper
 				break;
 			}
 
-			case 'resources.joomla.org':
-			{
-				$id = 'GTM-K8CR7K';
-
-				break;
-			}
-
 			case 'showcase.joomla.org':
 			{
 				$id = 'GTM-NKT9FP';
@@ -149,13 +134,6 @@ class JoomlaTemplateHelper
 			case 'tm.joomla.org':
 			{
 				$id = 'GTM-KZ7SM9';
-
-				break;
-			}
-
-			case 'vel.joomla.org':
-			{
-				$id = 'GTM-NKZPKQ';
 
 				break;
 			}
@@ -254,14 +232,6 @@ class JoomlaTemplateHelper
 				break;
 			}
 
-
-			case 'exam.joomla.org':
-			{
-				$tag = 'jexam';
-
-				break;
-			}
-
 			case 'extensions.joomla.org':
 			{
 				$hasCustom = true;
@@ -278,7 +248,7 @@ class JoomlaTemplateHelper
 				break;
 			}
 
-			case 'foundation.joomla.org':
+			case 'joomlafoundation.org':
 			{
 				$tag = 'jfoundation';
 
@@ -317,13 +287,6 @@ class JoomlaTemplateHelper
 				break;
 			}
 
-			case 'resources.joomla.org':
-			{
-				$tag = 'jrd';
-
-				break;
-			}
-
 			case 'showcase.joomla.org':
 			{
 				$tag = 'jshow';
@@ -337,14 +300,7 @@ class JoomlaTemplateHelper
 
 				break;
 			}
-
-			case 'vel.joomla.org':
-			{
-				$tag = 'jvel';
-
-				break;
-			}
-
+			
 			case 'volunteers.joomla.org':
 			{
 				$hasCustom = true;
@@ -399,6 +355,12 @@ class JoomlaTemplateHelper
 			$itemid = self::getSsoRoute($sso->id);
 
 			return 'index.php?Itemid=' . $itemid;
+		}
+
+		// New URL Routing in J4 means we don't need to retrieve the item id though the route helper which has been removed
+		if (version_compare(JVERSION, '4.0.0', 'ge'))
+		{
+			return 'index.php?option=com_users&view=login';
 		}
 
 		// Load the com_users route helper
@@ -493,7 +455,8 @@ class JoomlaTemplateHelper
 		try
 		{
 			return $cache->get(
-				function ($url) {
+				function ($url)
+				{
 					// Set a very short timeout to try and not bring the site down
 					$response = HttpFactory::getHttp()->get($url, [], 2);
 

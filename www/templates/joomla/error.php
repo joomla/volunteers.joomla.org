@@ -36,11 +36,11 @@ $sitename = $app->get('sitename');
 // Set the CSS URL based on whether we're in debug mode or it was explicitly chosen to not use the CDN
 if (JDEBUG || !$params->get('useCdn', '1'))
 {
-	$cssURL = HTMLHelper::_('stylesheet', 'template.min.css', ['pathOnly' => true, 'relative' => true, 'detectDebug' => (bool) JDEBUG, 'version' => '3.0.1-dev']);
+	$cssURL = HTMLHelper::_('stylesheet', 'template.min.css', ['pathOnly' => true, 'relative' => true, 'detectDebug' => (bool) JDEBUG, 'version' => '3.1.2-dev']);
 }
 else
 {
-	$cssURL = 'https://cdn.joomla.org/template/css/template_3.0.0.min.css';
+	$cssURL = 'https://cdn.joomla.org/template/css/template_3.1.1.min.css';
 }
 
 $bs3Css = false;
@@ -73,6 +73,8 @@ if (ModuleHelper::isEnabled('mod_languages'))
 {
 	$languageModCss = HTMLHelper::_('stylesheet', 'mod_languages/template.css', ['pathOnly' => true, 'version' => 'auto', 'relative' => true, 'detectDebug' => (bool) JDEBUG], []);
 }
+// Load Google Font
+$this->addHeadLink('https://fonts.googleapis.com/css?family=Open+Sans&display=swap', 'preload', 'rel', ['as' => 'style']);
 
 // Load template JavaScript
 $templateJs = HTMLHelper::_('script', 'template.js', ['pathOnly' => true, 'version' => 'auto', 'relative' => true, 'detectDebug' => (bool) JDEBUG], []);
@@ -124,14 +126,6 @@ $hasCookieControl = $params->get('cookieControlActive', 0);
 	<?php endif; ?>
 	<?php if ($customRtlCss) : ?>
 		<link href="<?php echo $customRtlCss; ?>" rel="stylesheet" />
-	<?php endif; ?>
-	<?php if ($params->get('googleFont')) : ?>
-		<link href="https://fonts.googleapis.com/css?family=<?php echo $params->get('googleFontName');?>" rel="stylesheet" />
-		<style>
-			h1, h2, h3, h4, h5, h6 {
-				font-family: '<?php echo str_replace('+', ' ', $params->get('googleFontName'));?>', sans-serif;
-			}
-		</style>
 	<?php endif; ?>
 	<?php if ($languageModCss) : ?>
 		<link href="<?php echo $languageModCss ?>" rel="stylesheet" />

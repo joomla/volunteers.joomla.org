@@ -18,11 +18,11 @@ $this->setHtml5(true);
 // Add Stylesheets - if the site is in debug mode or has explicitly chosen to not use the CDN, load the local media
 if (JDEBUG || !$this->params->get('useCdn', '1'))
 {
-    HTMLHelper::_('stylesheet', 'template.min.css', ['relative' => true, 'detectDebug' => (bool) JDEBUG, 'version' => '3.0.1-dev']);
+    HTMLHelper::_('stylesheet', 'template.min.css', ['relative' => true, 'detectDebug' => (bool) JDEBUG, 'version' => '3.1.2-dev']);
 }
 else
 {
-	$this->addStyleSheet('https://cdn.joomla.org/template/css/template_3.0.0.min.css');
+	$this->addStyleSheet('https://cdn.joomla.org/template/css/template_3.1.1.min.css');
 }
 
 // Bootstrap 3 polyfill
@@ -43,18 +43,8 @@ if ($this->direction === 'rtl')
 	HTMLHelper::_('stylesheet', 'custom-rtl.css', ['version' => 'auto', 'relative' => true, 'detectDebug' => false], []);
 }
 
-// Load Google Font if defined
-if ($this->params->get('googleFont'))
-{
-	$escapedFontName = str_replace('+', ' ', $this->params->get('googleFontName'));
-	$this->addStyleSheet('https://fonts.googleapis.com/css?family=' . $this->params->get('googleFontName'));
-	$this->addStyleDeclaration(<<<CSS
-		h1, h2, h3, h4, h5, h6, .site-title {
-			font-family: '$escapedFontName', sans-serif;
-		}
-CSS
-	);
-}
+// Load Google Font
+$this->addHeadLink('https://fonts.googleapis.com/css?family=Open+Sans&display=swap', 'preload', 'rel', ['as' => 'style']);
 
 // Load the HTML5 shim with optional override
 HTMLHelper::_('script', 'jui/html5.js', ['version' => 'auto', 'relative' => true, 'detectDebug' => (bool) JDEBUG, 'conditional' => 'lt IE 9'], []);

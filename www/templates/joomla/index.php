@@ -37,11 +37,11 @@ HTMLHelper::_('bootstrap.framework');
 // Add Stylesheets - if the site is in debug mode or has explicitly chosen to not use the CDN, load the local media
 if (JDEBUG || !$this->params->get('useCdn', '1'))
 {
-	HTMLHelper::_('stylesheet', 'template.min.css', ['relative' => true, 'detectDebug' => (bool) JDEBUG, 'version' => '3.0.1-dev']);
+	HTMLHelper::_('stylesheet', 'template.min.css', ['relative' => true, 'detectDebug' => (bool) JDEBUG, 'version' => '3.1.2-dev']);
 }
 else
 {
-	$this->addStyleSheet('https://cdn.joomla.org/template/css/template_3.0.0.min.css');
+	$this->addStyleSheet('https://cdn.joomla.org/template/css/template_3.1.1.min.css');
 }
 
 // Bootstrap 3 polyfill
@@ -62,18 +62,8 @@ if ($this->direction === 'rtl')
 	HTMLHelper::_('stylesheet', 'custom-rtl.css', ['version' => 'auto', 'relative' => true, 'detectDebug' => false], []);
 }
 
-// Load Google Font if defined
-if ($this->params->get('googleFont'))
-{
-	$escapedFontName = str_replace('+', ' ', $this->params->get('googleFontName'));
-	$this->addStyleSheet('https://fonts.googleapis.com/css?family=' . $this->params->get('googleFontName'));
-	$this->addStyleDeclaration(<<<CSS
-		h1, h2, h3, h4, h5, h6 {
-			font-family: '$escapedFontName', sans-serif;
-		}
-CSS
-	);
-}
+// Load Google Font
+$this->addHeadLink('https://fonts.googleapis.com/css?family=Open+Sans&display=swap', 'preload', 'rel', ['as' => 'style']);
 
 // Load template JavaScript
 HTMLHelper::_('script', 'template.js', ['version' => 'auto', 'relative' => true, 'detectDebug' => (bool) JDEBUG], []);
@@ -218,7 +208,7 @@ if ($hasCookieControl)
 			<div class="row-fluid">
 				<div class="span7">
 					<h1 class="page-title">
-						<a href="<?php echo $this->baseurl; ?>/"><?php echo HTMLHelper::_('string.truncate', $sitename, 40, false, false);?></a>
+						<a href="<?php echo $this->baseurl; ?>/"><img alt="Joomla CMS" width="40" height="40" src="https://cdn.joomla.org/images/Joomla_logo.png"><?php echo HTMLHelper::_('string.truncate', $sitename, 40, false, false);?></a>
 					</h1>
 				</div>
 				<div class="span5">
@@ -285,6 +275,8 @@ if ($hasCookieControl)
 			<jdoc:include type="modules" name="footer" style="none" />
 
 			<?php echo JoomlaTemplateHelper::getTemplateFooter($this->language, (bool) $this->params->get('useCdn', '1')); ?>
+			
+			<jdoc:include type="modules" name="footersponsor" style="none" />
 		</div>
 	</footer>
 

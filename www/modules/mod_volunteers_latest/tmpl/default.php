@@ -21,7 +21,7 @@ defined('_JEXEC') or die;
 						<?php echo $item->name; ?>
                     </h3>
                     <p class="muted">
-                        <span class="icon       -location"></span> <?php echo VolunteersHelper::location($item->country, $item->city); ?>
+                        <span class="icon-location"></span> <?php echo VolunteersHelper::location($item->country, $item->city); ?>
                     </p>
                 </div>
             </a>

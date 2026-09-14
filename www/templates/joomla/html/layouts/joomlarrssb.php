@@ -13,14 +13,14 @@ defined('_JEXEC') or die;
 
 // Import media
 JHtml::_('jquery.framework');
-JHtml::_('script', 'joomlarrssb/rrssb.min.js', false, true);
-JHtml::_('stylesheet', 'joomlarrssb/rrssb.css', [], true);
-JHtml::_('stylesheet', 'joomlarrssb/joomla.css', [], true);
+JHtml::_('script', 'joomlarrssb/rrssb.min.js', ['relative' => true]);
+JHtml::_('stylesheet', 'joomlarrssb/rrssb.css', ['relative' => true]);
+JHtml::_('stylesheet', 'joomlarrssb/joomla.css', ['relative' => true]);
 
 // Optional RTL support
 if (JFactory::getDocument()->getDirection() == 'rtl')
 {
-	JHtml::_('stylesheet', 'joomlarrssb/joomla-rtl.css', [], true);
+	JHtml::_('stylesheet', 'joomlarrssb/joomla-rtl.css', ['relative' => true]);
 }
 
 // If the item has an image use it otherwise default is hardcoded to the card image used for Twitter

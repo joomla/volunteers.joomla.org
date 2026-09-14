@@ -9,7 +9,7 @@
 defined('_JEXEC') or die;
 ?>
 
-<ul class="media-list ms-0 list-unstyled">
+<ul class="media-list ms-0 mb-0 list-unstyled">
     <li class="media">
         <a class="float-start me-2" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $story->id) ?>">
 			<?php echo VolunteersHelper::image($story->image, 'small', false, $story->name); ?>

@@ -1,3 +1,7 @@
 .btn span.icon-chevron-right {
     margin-inline-end: 5px;
 }
+
+.volunteer-location .icon-location {
+    margin-inline-end: 0.25rem;
+}

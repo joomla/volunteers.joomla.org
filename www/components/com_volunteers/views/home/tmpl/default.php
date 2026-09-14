@@ -41,7 +41,7 @@ JFactory::getDocument()->addScript('media/com_volunteers/js/oms.js', array(), ar
 <div class="row">
 	<h2><?php echo JText::_('COM_VOLUNTEERS_LATEST_REPORTS') ?></h2>
 	<?php if (!empty($this->reports)) foreach ($this->reports as $i => $item): ?>
-		<div class="row report">
+		<div class="row report mb-3">
 			<div class="col-md-2">
 				<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=volunteer&id=' . $item->volunteer_id) ?>">
 					<?php echo VolunteersHelper::image($item->volunteer_image, 'large', false, $item->volunteer_name); ?>

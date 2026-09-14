@@ -68,15 +68,17 @@ JHtml::_('formbehavior.chosen', 'select');
 	<?php endif; ?>
 
 	<div class="row">
-		<a class="btn float-end btn-warning" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=reports&filter_category=' . $this->state->get('filter.category') . '&format=feed&type=rss') ?>">
-			<span class="icon-feed"></span> <?php echo JText::_('COM_VOLUNTEERS_RSSFEED') ?>
-		</a>
+        <div class="col-md-3 offset-md-9">
+            <a class="btn float-end btn-warning" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=reports&filter_category=' . $this->state->get('filter.category') . '&format=feed&type=rss') ?>">
+                <span class="icon-feed"></span> <?php echo JText::_('COM_VOLUNTEERS_RSSFEED') ?>
+            </a>
+        </div>
 	</div>
 
 	<div class="pagination">
 		<?php echo $this->pagination->getPagesLinks(); ?>
 
-        <p class="counter ml-auto">
+        <p class="counter ms-auto">
             <?php echo $this->pagination->getPagesCounter(); ?>
         </p>
 	</div>

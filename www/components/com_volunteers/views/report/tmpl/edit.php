@@ -25,10 +25,10 @@ JFactory::getDocument()->addScriptDeclaration("
 <div class="report-edit">
 
     <form id="report" action="<?php echo JRoute::_('index.php?option=com_volunteers&task=report.save&id=' . (int) $this->item->id); ?>" method="post" class="form-validate form-horizontal" enctype="multipart/form-data">
-        <div class="row-fluid">
+        <div class="row">
             <div class="filter-bar">
 
-                <div class="btn-toolbar pull-right">
+                <div class="btn-toolbar float-end">
                     <div id="toolbar-cancel" class="btn-group">
                         <button class="btn btn-danger" onclick="Joomla.submitbutton('report.cancel')">
                             <span class="icon-cancel"></span> <?php echo JText::_('JCANCEL') ?>
@@ -68,8 +68,8 @@ JFactory::getDocument()->addScriptDeclaration("
 
         <hr>
 
-        <div class="row-fluid">
-            <div class="btn-toolbar pull-right">
+        <div class="row">
+            <div class="btn-toolbar float-end">
                 <div id="toolbar-cancel" class="btn-group">
                     <a class="btn btn-danger" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=team&id=' . $this->item->team . '#reports') ?>">
                         <span class="icon-cancel"></span> <?php echo JText::_('JCANCEL') ?>

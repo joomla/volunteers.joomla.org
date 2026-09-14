@@ -36,9 +36,9 @@ elseif ($this->item->team)
 <div class="member-edit">
 
 	<form id="member" action="<?php echo JRoute::_('index.php?option=com_volunteers&task=member.save&id=' . (int) $this->item->id); ?>" method="post" class="form-validate form-horizontal" enctype="multipart/form-data">
-		<div class="row-fluid">
+		<div class="row">
 			<div class="filter-bar">
-				<div class="btn-toolbar pull-right">
+				<div class="btn-toolbar float-end">
 					<div id="toolbar-cancel" class="btn-group">
 						<button class="btn btn-danger" onclick="Joomla.submitbutton('member.cancel')">
 							<span class="icon-cancel"></span> <?php echo JText::_('JCANCEL') ?>
@@ -88,8 +88,8 @@ elseif ($this->item->team)
 
 		<hr>
 
-		<div class="row-fluid">
-			<div class="btn-toolbar pull-right">
+		<div class="row">
+			<div class="btn-toolbar float-end">
 				<div id="toolbar-cancel" class="btn-group">
 					<a class="btn btn-danger" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=team&id=' . $this->item->team) ?>">
 						<span class="icon-cancel"></span> <?php echo JText::_('JCANCEL') ?>

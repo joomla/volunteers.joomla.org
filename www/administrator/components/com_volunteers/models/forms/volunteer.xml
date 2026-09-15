@@ -114,11 +114,8 @@
         />
 
         <field
-                addfieldpath="plugins/content/perfectimage/field"
                 name="image"
-                type="perfectimage"
-                ratio="1/1"
-                width="250"
+                type="volunteerimage"
                 label="COM_VOLUNTEERS_FIELD_IMAGE"
         />
 

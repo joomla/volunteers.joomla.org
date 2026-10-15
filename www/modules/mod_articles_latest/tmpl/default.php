@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @package     Joomla.Site
  * @subpackage  mod_articles_latest
@@ -8,15 +9,20 @@
  */
 
 defined('_JEXEC') or die;
+
+if (!$list) {
+    return;
+}
+
 ?>
-<ul class="latestnews<?php echo $moduleclass_sfx; ?> mod-list">
+<ul class="mod-articleslatest latestnews mod-list">
 <?php foreach ($list as $item) : ?>
-	<li itemscope itemtype="https://schema.org/Article">
-		<a href="<?php echo $item->link; ?>" itemprop="url">
-			<span itemprop="name">
-				<?php echo $item->title; ?>
-			</span>
-		</a>
-	</li>
+    <li itemscope itemtype="https://schema.org/Article">
+        <a href="<?php echo $item->link; ?>" itemprop="url">
+            <span itemprop="name">
+                <?php echo htmlspecialchars($item->title, ENT_QUOTES, 'UTF-8'); ?>
+            </span>
+        </a>
+    </li>
 <?php endforeach; ?>
 </ul>

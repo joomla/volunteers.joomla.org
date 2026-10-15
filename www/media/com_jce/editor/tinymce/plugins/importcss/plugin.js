@@ -1,4 +1,4 @@
-/* jce - 2.9.99.5 | 2026-06-03 | https://www.joomlacontenteditor.net | Source: https://github.com/widgetfactory/jce | Copyright (C) 2006 - 2026 Ryan Demmer. All rights reserved | GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html */
+/* jce - 2.9.99.12 | 2026-10-07 | https://www.joomlacontenteditor.net | Source: https://github.com/widgetfactory/jce | Copyright (C) 2006 - 2026 Ryan Demmer. All rights reserved | GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html; see LICENSE.txt */
 !function() {
     var each = tinymce.each, DOM = tinymce.DOM, PreviewCss = tinymce.util.PreviewCss;
     var rgba = {}, luma = {};
@@ -30,8 +30,8 @@
     tinymce.PluginManager.add("importcss", function(ed, url) {
         var self = this;
         function setGuideLinesColor() {
-            var gray = [ "#000000", "#080808", "#101010", "#181818", "#202020", "#282828", "#303030", "#383838", "#404040", "#484848", "#505050", "#585858", "#606060", "#686868", "#696969", "#707070", "#787878", "#808080", "#888888", "#909090", "#989898", "#a0a0a0", "#a8a8a8", "#a9a9a9", "#b0b0b0", "#b8b8b8", "#bebebe", "#c0c0c0", "#c8c8c8", "#d0d0d0", "#d3d3d3", "#d8d8d8", "#dcdcdc", "#e0e0e0", "#e8e8e8", "#f0f0f0", "#f5f5f5", "#f8f8f8", "#ffffff" ], blue = [ "#0d47a1", "#1565c0", "#1976d2", "#1e88e5", "#2196f3", "#42a5f5", "#64b5f6", "#90caf9", "#bbdefb", "#e3f2fd" ], guidelines = "#787878", control = "#1e88e5", bodybg = ed.dom.getStyle(ed.getBody(), "background-color", !0), color = ed.dom.getStyle(ed.getBody(), "color", !0);
-            if (bodybg) {
+            var gray = [ "#000000", "#080808", "#101010", "#181818", "#202020", "#282828", "#303030", "#383838", "#404040", "#484848", "#505050", "#585858", "#606060", "#686868", "#696969", "#707070", "#787878", "#808080", "#888888", "#909090", "#989898", "#a0a0a0", "#a8a8a8", "#a9a9a9", "#b0b0b0", "#b8b8b8", "#bebebe", "#c0c0c0", "#c8c8c8", "#d0d0d0", "#d3d3d3", "#d8d8d8", "#dcdcdc", "#e0e0e0", "#e8e8e8", "#f0f0f0", "#f5f5f5", "#f8f8f8", "#ffffff" ], blue = [ "#0d47a1", "#1565c0", "#1976d2", "#1e88e5", "#2196f3", "#42a5f5", "#64b5f6", "#90caf9", "#bbdefb", "#e3f2fd" ], guidelines = "#787878", control = "#1e88e5", caret = "", bodybg = ed.dom.getStyle(ed.getBody(), "background-color", !0), color = ed.dom.getStyle(ed.getBody(), "color", !0);
+            if (bodybg && "transparent" !== bodybg && !/,\s*0\s*\)$/.test(bodybg)) {
                 ed._hasGuidelines = !0;
                 for (var i = 0; i < gray.length; i++) if (isReadable(gray[i], bodybg, 4.5, 5) && ed.dom.toHex(color) !== ed.dom.toHex(gray[i])) {
                     guidelines = gray[i];
@@ -41,9 +41,10 @@
                     control = blue[i];
                     break;
                 }
+                color && !isReadable(color, bodybg, 4.5) && (caret = isReadable("#ffffff", bodybg, 4.5) ? "#ffffff" : "#000000"), 
                 (guidelines || control) && (css = ":root{", guidelines && (css = css + "--mce-guidelines: " + guidelines + ";--mce-visualchars: #a8a8a8;"), 
                 css += "--mce-placeholder: #efefef;", control && (css = css + "--mce-control-selection: " + control + ";--mce-control-selection-bg: #b4d7ff;"), 
-                ed.dom.addStyle(css += "}"));
+                caret && (css += "--mce-caret-color: " + caret + ";"), ed.dom.addStyle(css += "}"));
             }
         }
         ed.onImportCSS = new tinymce.util.Dispatcher(), ed.onImportCSS.add(function() {

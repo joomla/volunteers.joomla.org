@@ -1,4 +1,4 @@
-/* jce - 2.9.99.5 | 2026-06-03 | https://www.joomlacontenteditor.net | Source: https://github.com/widgetfactory/jce | Copyright (C) 2006 - 2026 Ryan Demmer. All rights reserved | GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html */
+/* jce - 2.9.99.12 | 2026-10-07 | https://www.joomlacontenteditor.net | Source: https://github.com/widgetfactory/jce | Copyright (C) 2006 - 2026 Ryan Demmer. All rights reserved | GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html; see LICENSE.txt */
 !function(tinymce) {
     var DOM = tinymce.DOM, Event = tinymce.dom.Event, each = tinymce.each, extend = tinymce.extend, VK = tinymce.VK, TreeWalker = tinymce.dom.TreeWalker, Delay = tinymce.util.Delay;
     function getSpanVal(td, name) {
@@ -14,7 +14,7 @@
             grid = [], gridWidth = 0, each([ "thead", "tbody", "tfoot" ], function(part) {
                 var rows = dom.select("> " + part + " tr", table);
                 each(rows, function(tr, y) {
-                    y += startY, each(dom.select("> td, > th", tr), function(td, x) {
+                    y += startY, each(Array.from(tr.cells), function(td, x) {
                         var x2, y2, rowspan, colspan;
                         if (grid[y]) for (;grid[y][x]; ) x++;
                         for (rowspan = getSpanVal(td, "rowspan"), colspan = getSpanVal(td, "colspan"), 
@@ -111,8 +111,8 @@
                 }), !pos;
             }), pos;
         }
-        buildGrid(), (selectedCell = dom.getParent(selection.getStart(), "th,td")) && (startPos = getPos(selectedCell), 
-        maxX = maxY = 0, each(grid, function(row, y) {
+        buildGrid(), (selectedCell = dom.getParent(selection.getStart(), "th,td")) && (startPos = getPos(selectedCell)) && (maxX = maxY = 0, 
+        each(grid, function(row, y) {
             each(row, function(cell, x) {
                 var colSpan;
                 isCellSelected(cell) && (cell = grid[y][x], maxX < x && (maxX = x), 
@@ -156,26 +156,29 @@
                 }
             },
             insertRow: function(before) {
-                var posY, cell, lastCell, x, rowElm, newRow, otherCell, rowSpan;
-                for (each(grid, function(row, y) {
+                var posY, cell, lastCell, lastExpandedCell, x, rowElm, newRow, otherCell, rowSpan;
+                if (each(grid, function(row, y) {
                     if (each(row, function(cell, x) {
                         if (isCellSelected(cell) && (cell = cell.elm, rowElm = cell.parentNode, 
                         newRow = cloneNode(rowElm, !1), posY = y, before)) return !1;
                     }), before) return !posY;
-                }), x = 0; x < grid[0].length; x++) if (grid[posY][x] && (cell = grid[posY][x].elm) != lastCell) {
-                    if (before) {
-                        if (0 < posY && grid[posY - 1][x] && 1 < (rowSpan = getSpanVal(otherCell = grid[posY - 1][x].elm, "rowSpan"))) {
-                            setSpanVal(otherCell, "rowSpan", rowSpan + 1);
+                }), void 0 !== posY && gridWidth) {
+                    for (x = 0; x < gridWidth; x++) if (grid[posY] && grid[posY][x] && (cell = grid[posY][x].elm) != lastCell) {
+                        if (lastCell = cell, before) {
+                            if (0 < posY && grid[posY - 1][x] && 1 < (rowSpan = getSpanVal(otherCell = grid[posY - 1][x].elm, "rowSpan"))) {
+                                otherCell != lastExpandedCell && (setSpanVal(otherCell, "rowSpan", rowSpan + 1), 
+                                lastExpandedCell = otherCell);
+                                continue;
+                            }
+                        } else if (1 < (rowSpan = getSpanVal(cell, "rowspan"))) {
+                            setSpanVal(cell, "rowSpan", rowSpan + 1);
                             continue;
                         }
-                    } else if (1 < (rowSpan = getSpanVal(cell, "rowspan"))) {
-                        setSpanVal(cell, "rowSpan", rowSpan + 1);
-                        continue;
+                        setSpanVal(otherCell = cloneCell(cell), "colSpan", cell.colSpan), 
+                        newRow.appendChild(otherCell);
                     }
-                    setSpanVal(otherCell = cloneCell(cell), "colSpan", cell.colSpan), 
-                    newRow.appendChild(otherCell), lastCell = cell;
+                    newRow.hasChildNodes() && (before ? rowElm.parentNode.insertBefore(newRow, rowElm) : dom.insertAfter(newRow, rowElm));
                 }
-                newRow.hasChildNodes() && (before ? rowElm.parentNode.insertBefore(newRow, rowElm) : dom.insertAfter(newRow, rowElm));
             },
             insertCol: function(before) {
                 var posX, lastCell;

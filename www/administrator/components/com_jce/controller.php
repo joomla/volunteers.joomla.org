@@ -1,8 +1,8 @@
 <?php
 
 /**
- * @copyright     Copyright (c) 2009-2024 Ryan Demmer. All rights reserved
- * @license       GNU/GPL 3 - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+ * @copyright     Copyright (c) 2009-2026 Ryan Demmer. All rights reserved
+ * @license       GNU General Public License version 2 or later; see LICENSE.txt
  * JCE is free software. This version may have been modified pursuant
  * to the GNU General Public License, and as distributed it includes or
  * is derivative of works licensed under the GNU General Public License or
@@ -24,29 +24,28 @@ use Joomla\CMS\Uri\Uri;
 class JceController extends BaseController
 {
     /**
-     * @var string The extension for which the categories apply
+     * Permission required to open each view.
      *
-     * @since  1.6
+     * Every screen is linked task-less as &view=x, which routes here rather than to the
+     * matching controller, so the view is what has to be gated - not the controller name.
+     * A null value means no jce.* permission of its own.
+     *
+     * The action is stated per view rather than derived from the view name: "profile"
+     * needs jce.profiles, so a derived name would be wrong.
+     *
+     * This mirrors DisplayController::ALLOWED_VIEWS in 3.0. Delta: 3.0 names the browser
+     * view "filebrowser" and accepts "browser" as an alias for it.
+     *
+     * @var array
      */
-    protected $extension;
-
-    /**
-     * Constructor.
-     *
-     * @param array $config An optional associative array of configuration settings
-     *
-     * @see     JController
-     * @since   1.5
-     */
-    public function __construct($config = array())
-    {
-        parent::__construct($config);
-
-        // Guess the JText message prefix. Defaults to the option.
-        if (empty($this->extension)) {
-            $this->extension = $this->input->get('extension', 'com_jce');
-        }
-    }
+    private const ALLOWED_VIEWS = array(
+        'cpanel' => null,
+        'config' => 'jce.config',
+        'profiles' => 'jce.profiles',
+        'profile' => 'jce.profiles',
+        'mediabox' => 'jce.mediabox',
+        'browser' => 'jce.browser',
+    );
 
     /**
      * Method to display a view.
@@ -54,7 +53,7 @@ class JceController extends BaseController
      * @param bool  $cachable  If true, the view output will be cached
      * @param array $urlparams An array of safe url parameters and their variable types, for valid values see {@link JFilterInput::clean()}
      *
-     * @return JController This object to support chaining
+     * @return BaseController This object to support chaining
      *
      * @since   1.5
      */
@@ -70,24 +69,31 @@ class JceController extends BaseController
         // Set the default view name and format from the Request.
         $vName = $app->input->get('view', 'cpanel');
         $vFormat = $document->getType();
-        $lName = $app->input->get('layout', 'default');
+        $lName = $app->input->getWord('layout', 'default');
 
-        // legacy front-end popup view
-        if ($vName === "popup") {
-            // add a view path
-            $this->addViewPath(JPATH_SITE . '/components/com_jce/views');
-            $view = $this->getView($vName, $vFormat);
+        $vName = strtolower($vName);
 
-            if ($view) {
-                $view->display();
-            }
-
-            return $this;
+        // An empty value means "the default view"; Input::get() returns it rather than
+        // falling back to the default above.
+        if ($vName === '') {
+            $vName = 'cpanel';
         }
 
-        $adminViews = array('config', 'profiles', 'profile', 'mediabox');
+        if (!array_key_exists($vName, self::ALLOWED_VIEWS)) {
+            throw new Exception(Text::_('JERROR_ALERTNOAUTHOR'), 403);
+        }
 
-        if (in_array($vName, $adminViews) && !$user->authorise('core.manage', 'com_jce')) {
+        // The admin screens additionally require component management rights. In 3.0 this
+        // check applies to the whole component, from ComponentDispatcher::checkAccess().
+        $adminViews = array('cpanel', 'config', 'profiles', 'profile', 'mediabox');
+
+        if (in_array($vName, $adminViews, true) && !$user->authorise('core.manage', 'com_jce')) {
+            throw new Exception(Text::_('JERROR_ALERTNOAUTHOR'), 403);
+        }
+
+        $action = self::ALLOWED_VIEWS[$vName];
+
+        if ($action !== null && !$user->authorise($action, 'com_jce')) {
             throw new Exception(Text::_('JERROR_ALERTNOAUTHOR'), 403);
         }
 
@@ -96,18 +102,6 @@ class JceController extends BaseController
 
         // Get and render the view.
         if ($view) {
-
-            if ($vName != "cpanel") {
-                // use "profiles" for validating "profile" view
-                if ($vName == "profile") {
-                    $vName = "profiles";
-                }
-
-                if (!$user->authorise('jce.' . $vName, 'com_jce')) {
-                    throw new Exception(Text::_('JERROR_ALERTNOAUTHOR'), 403);
-                }
-            }
-            
             // reset view name
             $vName = $view->getName();
 

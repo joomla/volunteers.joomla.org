@@ -1,21 +1,36 @@
 <?php
 
 /**
- * @copyright   Copyright (C) 2015 Ryan Demmer. All rights reserved
- * @copyright   Copyright (C) 2005 - 2016 Open Source Matters, Inc. All rights reserved
- * @license     GNU General Public License version 2 or later
+ * @copyright   Copyright (c) 2015-2026 Ryan Demmer. All rights reserved
+ * @copyright   Copyright (C) 2005 - 2024 Open Source Matters, Inc. All rights reserved
+ * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
 defined('JPATH_BASE') or die;
+
+use Joomla\CMS\Factory;
+use Joomla\CMS\Plugin\CMSPlugin;
+use Joomla\CMS\Form\Form;
 
 /**
  * JCE.
  *
  * @since       2.5.20
  */
-class PlgContentJce extends JPlugin
+class PlgContentJce extends CMSPlugin
 {
-    public function onContentPrepareForm($form, $data)
+    
+    /**
+     * Process form fields in content.
+     * This is included to process Joomla Media Fields in 3rd party extensions that call onContentPrepareForm after the System - JCE plugin has been dispatched.
+     *
+     * @param Form $form The form to be altered
+     * @param mixed $data The associated data for the form
+     *
+     * @return bool
+     *
+     */
+    public function onContentPrepareForm(Form $form, $data = [])
     {
-        JFactory::getApplication()->triggerEvent('onPlgSystemJceContentPrepareForm', array($form, $data));
+        Factory::getApplication()->triggerEvent('onWfContentPrepareForm', array($form, $data));
     }
 }

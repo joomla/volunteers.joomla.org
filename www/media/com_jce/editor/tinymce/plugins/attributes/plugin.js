@@ -1,4 +1,4 @@
-/* jce - 2.9.99.5 | 2026-06-03 | https://www.joomlacontenteditor.net | Source: https://github.com/widgetfactory/jce | Copyright (C) 2006 - 2026 Ryan Demmer. All rights reserved | GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html */
+/* jce - 2.9.99.12 | 2026-10-07 | https://www.joomlacontenteditor.net | Source: https://github.com/widgetfactory/jce | Copyright (C) 2006 - 2026 Ryan Demmer. All rights reserved | GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html; see LICENSE.txt */
 !function() {
     var languageValues = {
         Afrikaans: "af",
@@ -150,7 +150,7 @@
                     var attribs = {};
                     if (node) for (var attrs = node.attributes, i = attrs.length - 1; 0 <= i; i--) {
                         var name = attrs[i].name;
-                        "_" !== name.charAt(0) && -1 === name.indexOf("-mce-") && (attribs[name] = node.getAttribute(name));
+                        0 === name.indexOf("data-mce-on") ? attribs[name.replace("data-mce-", "")] = node.getAttribute(name) : "_" !== name.charAt(0) && -1 === name.indexOf("-mce-") && (attribs[name] = node.getAttribute(name));
                     }
                     return attribs;
                 }(node = isRootNode(node = ed.dom.getParent(node, function(n) {
@@ -167,10 +167,9 @@
                     attribsMap[name] = value; else {
                         var attr = {};
                         if ("_" === name.charAt(0) || -1 !== name.indexOf("-mce-")) return !0;
-                        value && (0 == name.indexOf("on") && (value = ed.dom.getAttrib(node, "data-mce-" + name) || value), 
-                        attr[name] = value, custom.push(attr));
+                        value && (attr[name] = value, custom.push(attr));
                     }
-                }), cm.createForm("attributes_form")), stylesList = (each([ "title", "id" ], function(name) {
+                }), cm.createForm("attributes_form")), node = (each([ "title", "id" ], function(name) {
                     form.add(cm.createTextBox("attributes_" + name, {
                         label: ed.getLang("attributes.label_" + name, name),
                         name: name
@@ -179,7 +178,7 @@
                     label: ed.getLang("attributes.label_class", "Classes"),
                     onselect: function() {},
                     name: "class"
-                })), langList = (form.add(stylesList), cm.createListBox("attributes_lang", {
+                })), langList = (form.add(node), cm.createListBox("attributes_lang", {
                     label: ed.getLang("attributes.label_lang", "Language"),
                     onselect: function(v) {},
                     name: "lang",
@@ -220,13 +219,13 @@
                             data.custom && (each(data.custom, function(item) {
                                 data = extend(data, item);
                             }), delete data.custom), each(data, function(value, name) {
-                                "onclick" != name && "ondblclick" != name || (delete data[name], 
-                                data["data-mce-" + name] = value, delete nodeAttribs["data-mce-" + name]), 
-                                delete nodeAttribs[name];
+                                0 === name.indexOf("on") && (delete data[name], 
+                                ed.settings.allow_event_attributes && (data["data-mce-" + name] = value), 
+                                delete nodeAttribs["data-mce-" + name]), delete nodeAttribs[name];
                             }), !selection.isCollapsed() && selection.getContent() == selection.getContent({
                                 format: "text"
                             }) ? ed.formatter.apply("attributes", data) : node && !isRootNode(node) && (each(nodeAttribs, function(val, name) {
-                                data[name] = null, "onclick" != name && "ondblclick" != name || (data["data-mce-" + name] = null);
+                                data[name] = null, 0 === name.indexOf("on") && (data["data-mce-" + name] = null);
                             }), mediaApi && mediaApi.isMediaObject(node) ? mediaApi.updateMedia(data) : ed.dom.setAttribs(node, data)), 
                             tinymce.dom.Event.cancel(e);
                         },

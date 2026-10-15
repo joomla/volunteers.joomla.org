@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @package     Joomla.Site
  * @subpackage  Layout
@@ -9,10 +10,13 @@
 
 defined('_JEXEC') or die;
 
+use Joomla\CMS\HTML\HTMLHelper;
+use Joomla\CMS\Language\Text;
+
 ?>
-			<dd class="create">
-					<span class="icon-calendar" aria-hidden="true"></span>
-					<time datetime="<?php echo JHtml::_('date', $displayData['item']->created, 'c'); ?>" itemprop="dateCreated">
-						<?php echo JText::sprintf('COM_CONTENT_CREATED_DATE_ON', JHtml::_('date', $displayData['item']->created, JText::_('DATE_FORMAT_LC3'))); ?>
-					</time>
-			</dd>
+<dd class="create">
+    <span class="icon-calendar icon-fw" aria-hidden="true"></span>
+    <time datetime="<?php echo HTMLHelper::_('date', $displayData['item']->created, 'c'); ?>">
+        <?php echo Text::sprintf('COM_CONTENT_CREATED_DATE_ON', HTMLHelper::_('date', $displayData['item']->created, Text::_('DATE_FORMAT_LC3'))); ?>
+    </time>
+</dd>

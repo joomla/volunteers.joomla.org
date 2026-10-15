@@ -1,8 +1,8 @@
 <?php
 
 /**
- * @copyright     Copyright (c) 2009-2024 Ryan Demmer. All rights reserved
- * @license       GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+ * @copyright     Copyright (c) 2009-2026 Ryan Demmer. All rights reserved
+ * @license       GNU General Public License version 2 or later; see LICENSE.txt
  * JCE is free software. This version may have been modified pursuant
  * to the GNU General Public License, and as distributed it includes or
  * is derivative of works licensed under the GNU General Public License or
@@ -347,30 +347,28 @@ abstract class JcePluginsHelper
             $plugins = explode(',', $profile->plugins);
             $key = array_search($plugin->name, $plugins);
 
-            if ($key) {
+            if ($key !== false) {
                 unset($plugins[$key]);
                 $profile->plugins = implode(',', array_values($plugins));
             }
 
-            if ($plugin->icon) {
-                // check if its in the profile
-                if (in_array($plugin->name, preg_split('/[;,]+/', $profile->rows))) {
-                    $lists = array();
-                    foreach (explode(';', $profile->rows) as $list) {
-                        $icons = explode(',', $list);
-                        foreach ($icons as $k => $v) {
-                            if ($plugin->name == $v) {
-                                unset($icons[$k]);
-                            }
+            // remove from the layout rows if it's in the profile, eg: added manually to the layout
+            if (in_array($plugin->name, preg_split('/[;,]+/', (string) $profile->rows))) {
+                $lists = array();
+                foreach (explode(';', $profile->rows) as $list) {
+                    $icons = explode(',', $list);
+                    foreach ($icons as $k => $v) {
+                        if ($plugin->name == $v) {
+                            unset($icons[$k]);
                         }
-                        $lists[] = implode(',', $icons);
                     }
-                    $profile->rows = implode(';', $lists);
+                    $lists[] = implode(',', $icons);
                 }
+                $profile->rows = implode(';', $lists);
+            }
 
-                if (!$profile->store()) {
-                    throw new Exception(Text::sprintf('WF_INSTALLER_REMOVE_FROM_GROUP_ERROR', $plugin->name));
-                }
+            if (!$profile->store()) {
+                throw new Exception(Text::sprintf('WF_INSTALLER_REMOVE_FROM_GROUP_ERROR', $plugin->name));
             }
         }
 
@@ -397,12 +395,12 @@ abstract class JcePluginsHelper
         }
     }
 
-    public static function postInstall($route, $plugin, $installer)
+    public static function postInstall($route, $plugin, $_installer)
     {
         $db = Factory::getDBO();
 
-        // load the plugin and enable
-        if (isset($plugin->row) && $plugin->row > 0) {
+        // only add to the Default profile if the plugin manifest sets a toolbar "row", otherwise plugins must be added to a profile manually
+        if ($route == 'install' && isset($plugin->row) && $plugin->row > 0) {
             $query = $db->getQuery(true);
 
             $query->select('id')->from('#__wf_profiles')->where('name = ' . $db->Quote('Default') . ' OR id = 1');
@@ -411,13 +409,25 @@ abstract class JcePluginsHelper
             $id = $db->loadResult();
 
             if ($id) {
-                if ($route == 'install') {
-                    // add to profile
-                    self::addToProfile($id, $plugin);
-                } else {
-                    // remove from profile
-                    self::removeFromProfile($id, $plugin);
-                }
+                // add to profile
+                self::addToProfile($id, $plugin);
+            }
+        }
+
+        // remove an uninstalled editor plugin from every profile it was added to, automatically or manually
+        if ($route == 'uninstall' && isset($plugin->type) && $plugin->type === 'plugin') {
+            $search = $db->quote('%' . $db->escape($plugin->name, true) . '%', false);
+
+            $query = $db->getQuery(true)
+                ->select($db->quoteName('id'))
+                ->from($db->quoteName('#__wf_profiles'))
+                ->where('(' . $db->quoteName('plugins') . ' LIKE ' . $search . ' OR ' . $db->quoteName('rows') . ' LIKE ' . $search . ')');
+
+            $db->setQuery($query);
+
+            // removeFromProfile() only removes exact name matches
+            foreach ($db->loadColumn() as $id) {
+                self::removeFromProfile((int) $id, $plugin);
             }
         }
 

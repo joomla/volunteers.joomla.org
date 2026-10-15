@@ -2,7 +2,7 @@
 /**
  * Joomla.org site template
  *
- * @copyright   Copyright (C) 2005 - 2017 Open Source Matters, Inc. All rights reserved.
+ * @copyright   Copyright (C) 2005 - 2023 Open Source Matters, Inc. All rights reserved.
  * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
 
@@ -450,7 +450,7 @@ class JoomlaTemplateHelper
 		$cache->setLifeTime(1440);
 
 		// Build the remote URL
-		$url = "https://cdn.joomla.org/template/renderer.php?section=$section&language=$lang";
+		$url = "https://cdn.joomla.org/template/j4/renderer.php?section=$section&language=$lang";
 
 		try
 		{

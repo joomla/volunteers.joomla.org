@@ -1,4 +1,4 @@
-/* This file includes original and modified code from various versions of TinyMCE, relicensed under GPL v2+ per LGPL 2.1 §3 where applicable. Source: https://github.com/widgetfactory/tinymce-muon; Copyright (c) Tiny Technologies, Inc. All rights reserved.; Copyright (c) 1999–2015 Ephox Corp. All rights reserved.; Copyright (c) 2009       Moxiecode Systems AB. All rights reserved.; Copyright (c) 2009–2025  Ryan Demmer. All rights reserved.; For a detailed history of modifications, refer to the Git commit history.; Licensed under the GNU General Public License version 2 or later (GPL v2+): https://www.gnu.org/licenses/gpl-2.0.html */
+/* This file includes original and modified code from various versions of TinyMCE, relicensed under GPL v2+ per LGPL 2.1 §3 where applicable. Source: https://github.com/widgetfactory/corvus; Copyright (c) Tiny Technologies, Inc. All rights reserved.; Copyright (c) 1999-2015 Ephox Corp. All rights reserved.; Copyright (c) 2009 Moxiecode Systems AB. All rights reserved.; Copyright (c) 2009-2026 Ryan Demmer. All rights reserved.; For a detailed history of modifications, refer to the Git commit history.; Licensed under the GNU General Public License version 2 or later (GPL v2+): https://www.gnu.org/licenses/gpl-2.0.html */
 !function() {
     "use strict";
     !function(win) {
@@ -103,30 +103,17 @@
                 return o;
             },
             addUnload: function(f, s) {
-                var unload;
-                function fakeUnload() {
-                    var doc = document;
-                    function stop() {
-                        doc.detachEvent("onstop", stop), unload && unload(), doc = 0;
-                    }
-                    "interactive" == doc.readyState && (doc && doc.attachEvent("onstop", stop), 
-                    win.setTimeout(function() {
-                        doc && doc.detachEvent("onstop", stop);
-                    }, 0));
-                }
-                return unload = function() {
+                var unload = function(e) {
                     var o, n, li = self.unloads;
-                    if (li) {
+                    if ((!e || !e.persisted) && li) {
                         for (n in li) (o = li[n]) && o.func && o.func.call(o.scope, 1);
-                        win.detachEvent ? (win.detachEvent("onbeforeunload", fakeUnload), 
-                        win.detachEvent("onunload", unload)) : win.removeEventListener && win.removeEventListener("unload", unload, !1), 
-                        self.unloads = o = li = unload = 0, win.CollectGarbage && CollectGarbage();
+                        win.removeEventListener("pagehide", unload), self.unloads = o = li = unload = 0;
                     }
-                }, f = {
+                };
+                return f = {
                     func: f,
                     scope: s || this
-                }, self.unloads ? self.unloads.push(f) : (win.attachEvent ? (win.attachEvent("onunload", unload), 
-                win.attachEvent("onbeforeunload", fakeUnload)) : win.addEventListener && win.addEventListener("unload", unload, !1), 
+                }, self.unloads ? self.unloads.push(f) : (win.addEventListener("pagehide", unload), 
                 self.unloads = [ f ]), f;
             },
             removeUnload: function(f) {
@@ -2466,14 +2453,17 @@
             uponSanitizeShadowNode: []
         };
     }
-    const html$1 = freeze([ "a", "abbr", "acronym", "address", "area", "article", "aside", "audio", "b", "bdi", "bdo", "big", "blink", "blockquote", "body", "br", "button", "canvas", "caption", "center", "cite", "code", "col", "colgroup", "content", "data", "datalist", "dd", "decorator", "del", "details", "dfn", "dialog", "dir", "div", "dl", "dt", "element", "em", "fieldset", "figcaption", "figure", "font", "footer", "form", "h1", "h2", "h3", "h4", "h5", "h6", "head", "header", "hgroup", "hr", "html", "i", "img", "input", "ins", "kbd", "label", "legend", "li", "main", "map", "mark", "marquee", "menu", "menuitem", "meter", "nav", "nobr", "ol", "optgroup", "option", "output", "p", "picture", "pre", "progress", "q", "rp", "rt", "ruby", "s", "samp", "search", "section", "select", "shadow", "slot", "small", "source", "spacer", "span", "strike", "strong", "style", "sub", "summary", "sup", "table", "tbody", "td", "template", "textarea", "tfoot", "th", "thead", "time", "tr", "track", "tt", "u", "ul", "var", "video", "wbr" ]), svg$1 = freeze([ "svg", "a", "altglyph", "altglyphdef", "altglyphitem", "animatecolor", "animatemotion", "animatetransform", "circle", "clippath", "defs", "desc", "ellipse", "enterkeyhint", "exportparts", "filter", "font", "g", "glyph", "glyphref", "hkern", "image", "inputmode", "line", "lineargradient", "marker", "mask", "metadata", "mpath", "part", "path", "pattern", "polygon", "polyline", "radialgradient", "rect", "stop", "style", "switch", "symbol", "text", "textpath", "title", "tref", "tspan", "view", "vkern" ]), svgFilters = freeze([ "feBlend", "feColorMatrix", "feComponentTransfer", "feComposite", "feConvolveMatrix", "feDiffuseLighting", "feDisplacementMap", "feDistantLight", "feDropShadow", "feFlood", "feFuncA", "feFuncB", "feFuncG", "feFuncR", "feGaussianBlur", "feImage", "feMerge", "feMergeNode", "feMorphology", "feOffset", "fePointLight", "feSpecularLighting", "feSpotLight", "feTile", "feTurbulence" ]), svgDisallowed = freeze([ "animate", "color-profile", "cursor", "discard", "font-face", "font-face-format", "font-face-name", "font-face-src", "font-face-uri", "foreignobject", "hatch", "hatchpath", "mesh", "meshgradient", "meshpatch", "meshrow", "missing-glyph", "script", "set", "solidcolor", "unknown", "use" ]), mathMl$1 = freeze([ "math", "menclose", "merror", "mfenced", "mfrac", "mglyph", "mi", "mlabeledtr", "mmultiscripts", "mn", "mo", "mover", "mpadded", "mphantom", "mroot", "mrow", "ms", "mspace", "msqrt", "mstyle", "msub", "msup", "msubsup", "mtable", "mtd", "mtext", "mtr", "munder", "munderover", "mprescripts" ]), mathMlDisallowed = freeze([ "maction", "maligngroup", "malignmark", "mlongdiv", "mscarries", "mscarry", "msgroup", "mstack", "msline", "msrow", "semantics", "annotation", "annotation-xml", "mprescripts", "none" ]), text = freeze([ "#text" ]), html = freeze([ "accept", "action", "align", "alt", "autocapitalize", "autocomplete", "autopictureinpicture", "autoplay", "background", "bgcolor", "border", "capture", "cellpadding", "cellspacing", "checked", "cite", "class", "clear", "color", "cols", "colspan", "command", "commandfor", "controls", "controlslist", "coords", "crossorigin", "datetime", "decoding", "default", "dir", "disabled", "disablepictureinpicture", "disableremoteplayback", "download", "draggable", "enctype", "enterkeyhint", "exportparts", "face", "for", "headers", "height", "hidden", "high", "href", "hreflang", "id", "inert", "inputmode", "integrity", "ismap", "kind", "label", "lang", "list", "loading", "loop", "low", "max", "maxlength", "media", "method", "min", "minlength", "multiple", "muted", "name", "nonce", "noshade", "novalidate", "nowrap", "open", "optimum", "part", "pattern", "placeholder", "playsinline", "popover", "popovertarget", "popovertargetaction", "poster", "preload", "pubdate", "radiogroup", "readonly", "rel", "required", "rev", "reversed", "role", "rows", "rowspan", "spellcheck", "scope", "selected", "shape", "size", "sizes", "slot", "span", "srclang", "start", "src", "srcset", "step", "style", "summary", "tabindex", "title", "translate", "type", "usemap", "valign", "value", "width", "wrap", "xmlns" ]), svg = freeze([ "accent-height", "accumulate", "additive", "alignment-baseline", "amplitude", "ascent", "attributename", "attributetype", "azimuth", "basefrequency", "baseline-shift", "begin", "bias", "by", "class", "clip", "clippathunits", "clip-path", "clip-rule", "color", "color-interpolation", "color-interpolation-filters", "color-profile", "color-rendering", "cx", "cy", "d", "dx", "dy", "diffuseconstant", "direction", "display", "divisor", "dur", "edgemode", "elevation", "end", "exponent", "fill", "fill-opacity", "fill-rule", "filter", "filterunits", "flood-color", "flood-opacity", "font-family", "font-size", "font-size-adjust", "font-stretch", "font-style", "font-variant", "font-weight", "fx", "fy", "g1", "g2", "glyph-name", "glyphref", "gradientunits", "gradienttransform", "height", "href", "id", "image-rendering", "in", "in2", "intercept", "k", "k1", "k2", "k3", "k4", "kerning", "keypoints", "keysplines", "keytimes", "lang", "lengthadjust", "letter-spacing", "kernelmatrix", "kernelunitlength", "lighting-color", "local", "marker-end", "marker-mid", "marker-start", "markerheight", "markerunits", "markerwidth", "maskcontentunits", "maskunits", "max", "mask", "mask-type", "media", "method", "mode", "min", "name", "numoctaves", "offset", "operator", "opacity", "order", "orient", "orientation", "origin", "overflow", "paint-order", "path", "pathlength", "patterncontentunits", "patterntransform", "patternunits", "points", "preservealpha", "preserveaspectratio", "primitiveunits", "r", "rx", "ry", "radius", "refx", "refy", "repeatcount", "repeatdur", "restart", "result", "rotate", "scale", "seed", "shape-rendering", "slope", "specularconstant", "specularexponent", "spreadmethod", "startoffset", "stddeviation", "stitchtiles", "stop-color", "stop-opacity", "stroke-dasharray", "stroke-dashoffset", "stroke-linecap", "stroke-linejoin", "stroke-miterlimit", "stroke-opacity", "stroke", "stroke-width", "style", "surfacescale", "systemlanguage", "tabindex", "tablevalues", "targetx", "targety", "transform", "transform-origin", "text-anchor", "text-decoration", "text-rendering", "textlength", "type", "u1", "u2", "unicode", "values", "viewbox", "visibility", "version", "vert-adv-y", "vert-origin-x", "vert-origin-y", "width", "word-spacing", "wrap", "writing-mode", "xchannelselector", "ychannelselector", "x", "x1", "x2", "xmlns", "y", "y1", "y2", "z", "zoomandpan" ]), mathMl = freeze([ "accent", "accentunder", "align", "bevelled", "close", "columnalign", "columnlines", "columnspacing", "columnspan", "denomalign", "depth", "dir", "display", "displaystyle", "encoding", "fence", "frame", "height", "href", "id", "largeop", "length", "linethickness", "lquote", "lspace", "mathbackground", "mathcolor", "mathsize", "mathvariant", "maxsize", "minsize", "movablelimits", "notation", "numalign", "open", "rowalign", "rowlines", "rowspacing", "rowspan", "rspace", "rquote", "scriptlevel", "scriptminsize", "scriptsizemultiplier", "selection", "separator", "separators", "stretchy", "subscriptshift", "supscriptshift", "symmetric", "voffset", "width", "xmlns" ]), xml = freeze([ "xlink:href", "xml:id", "xlink:title", "xml:space", "xmlns:xlink" ]), MUSTACHE_EXPR = seal(/{{[\w\W]*|^[\w\W]*}}/g), ERB_EXPR = seal(/<%[\w\W]*|^[\w\W]*%>/g), TMPLIT_EXPR = seal(/\${[\w\W]*/g), DATA_ATTR = seal(/^data-[\-\w.\u00B7-\uFFFF]+$/), ARIA_ATTR = seal(/^aria-[\-\w]+$/), IS_ALLOWED_URI = seal(/^(?:(?:(?:f|ht)tps?|mailto|tel|callto|sms|cid|xmpp|matrix):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i), IS_SCRIPT_OR_DATA = seal(/^(?:\w+script|data):/i), ATTR_WHITESPACE = seal(/[\u0000-\u0020\u00A0\u1680\u180E\u2000-\u2029\u205F\u3000]/g), DOCTYPE_NAME = seal(/^html$/i), CUSTOM_ELEMENT = seal(/^[a-z][.\w]*(-[.\w]+)+$/i), NODE_TYPE = {
+    function _resolveSetOption(cfg, key, fallback, options) {
+        return objectHasOwnProperty(cfg, key) && arrayIsArray(cfg[key]) ? addToSet(options.base ? clone(options.base) : {}, cfg[key], options.transform) : fallback;
+    }
+    const html$1 = freeze([ "a", "abbr", "acronym", "address", "area", "article", "aside", "audio", "b", "bdi", "bdo", "big", "blink", "blockquote", "body", "br", "button", "canvas", "caption", "center", "cite", "code", "col", "colgroup", "content", "data", "datalist", "dd", "decorator", "del", "details", "dfn", "dialog", "dir", "div", "dl", "dt", "element", "em", "fieldset", "figcaption", "figure", "font", "footer", "form", "h1", "h2", "h3", "h4", "h5", "h6", "head", "header", "hgroup", "hr", "html", "i", "img", "input", "ins", "kbd", "label", "legend", "li", "main", "map", "mark", "marquee", "menu", "menuitem", "meter", "nav", "nobr", "ol", "optgroup", "option", "output", "p", "picture", "pre", "progress", "q", "rp", "rt", "ruby", "s", "samp", "search", "section", "select", "shadow", "slot", "small", "source", "spacer", "span", "strike", "strong", "style", "sub", "summary", "sup", "table", "tbody", "td", "template", "textarea", "tfoot", "th", "thead", "time", "tr", "track", "tt", "u", "ul", "var", "video", "wbr" ]), svg$1 = freeze([ "svg", "a", "altglyph", "altglyphdef", "altglyphitem", "animatecolor", "animatemotion", "animatetransform", "circle", "clippath", "defs", "desc", "ellipse", "enterkeyhint", "exportparts", "filter", "font", "g", "glyph", "glyphref", "hkern", "image", "inputmode", "line", "lineargradient", "marker", "mask", "metadata", "mpath", "part", "path", "pattern", "polygon", "polyline", "radialgradient", "rect", "stop", "style", "switch", "symbol", "text", "textpath", "title", "tref", "tspan", "view", "vkern" ]), svgFilters = freeze([ "feBlend", "feColorMatrix", "feComponentTransfer", "feComposite", "feConvolveMatrix", "feDiffuseLighting", "feDisplacementMap", "feDistantLight", "feDropShadow", "feFlood", "feFuncA", "feFuncB", "feFuncG", "feFuncR", "feGaussianBlur", "feImage", "feMerge", "feMergeNode", "feMorphology", "feOffset", "fePointLight", "feSpecularLighting", "feSpotLight", "feTile", "feTurbulence" ]), svgDisallowed = freeze([ "animate", "color-profile", "cursor", "discard", "font-face", "font-face-format", "font-face-name", "font-face-src", "font-face-uri", "foreignobject", "hatch", "hatchpath", "mesh", "meshgradient", "meshpatch", "meshrow", "missing-glyph", "script", "set", "solidcolor", "unknown", "use" ]), mathMl$1 = freeze([ "math", "menclose", "merror", "mfenced", "mfrac", "mglyph", "mi", "mlabeledtr", "mmultiscripts", "mn", "mo", "mover", "mpadded", "mphantom", "mroot", "mrow", "ms", "mspace", "msqrt", "mstyle", "msub", "msup", "msubsup", "mtable", "mtd", "mtext", "mtr", "munder", "munderover", "mprescripts" ]), mathMlDisallowed = freeze([ "maction", "maligngroup", "malignmark", "mlongdiv", "mscarries", "mscarry", "msgroup", "mstack", "msline", "msrow", "semantics", "annotation", "annotation-xml", "mprescripts", "none" ]), text = freeze([ "#text" ]), html = freeze([ "accept", "action", "align", "alt", "autocapitalize", "autocomplete", "autopictureinpicture", "autoplay", "background", "bgcolor", "border", "capture", "cellpadding", "cellspacing", "checked", "cite", "class", "clear", "color", "cols", "colspan", "command", "commandfor", "controls", "controlslist", "coords", "crossorigin", "datetime", "decoding", "default", "dir", "disabled", "disablepictureinpicture", "disableremoteplayback", "download", "draggable", "enctype", "enterkeyhint", "exportparts", "face", "for", "headers", "height", "hidden", "high", "href", "hreflang", "id", "inert", "inputmode", "integrity", "ismap", "kind", "label", "lang", "list", "loading", "loop", "low", "max", "maxlength", "media", "method", "min", "minlength", "multiple", "muted", "name", "nonce", "noshade", "novalidate", "nowrap", "open", "optimum", "part", "pattern", "placeholder", "playsinline", "popover", "popovertarget", "popovertargetaction", "poster", "preload", "pubdate", "radiogroup", "readonly", "rel", "required", "rev", "reversed", "role", "rows", "rowspan", "spellcheck", "scope", "selected", "shape", "size", "sizes", "slot", "span", "srclang", "start", "src", "srcset", "step", "style", "summary", "tabindex", "title", "translate", "type", "usemap", "valign", "value", "width", "wrap", "xmlns" ]), svg = freeze([ "accent-height", "accumulate", "additive", "alignment-baseline", "amplitude", "ascent", "attributename", "attributetype", "azimuth", "basefrequency", "baseline-shift", "begin", "bias", "by", "class", "clip", "clippathunits", "clip-path", "clip-rule", "color", "color-interpolation", "color-interpolation-filters", "color-profile", "color-rendering", "cx", "cy", "d", "dx", "dy", "diffuseconstant", "direction", "display", "divisor", "dur", "edgemode", "elevation", "end", "exponent", "fill", "fill-opacity", "fill-rule", "filter", "filterunits", "flood-color", "flood-opacity", "font-family", "font-size", "font-size-adjust", "font-stretch", "font-style", "font-variant", "font-weight", "fx", "fy", "g1", "g2", "glyph-name", "glyphref", "gradientunits", "gradienttransform", "height", "href", "id", "image-rendering", "in", "in2", "intercept", "k", "k1", "k2", "k3", "k4", "kerning", "keypoints", "keysplines", "keytimes", "lang", "lengthadjust", "letter-spacing", "kernelmatrix", "kernelunitlength", "lighting-color", "local", "marker-end", "marker-mid", "marker-start", "markerheight", "markerunits", "markerwidth", "maskcontentunits", "maskunits", "max", "mask", "mask-type", "media", "method", "mode", "min", "name", "numoctaves", "offset", "operator", "opacity", "order", "orient", "orientation", "origin", "overflow", "paint-order", "path", "pathlength", "patterncontentunits", "patterntransform", "patternunits", "points", "preservealpha", "preserveaspectratio", "primitiveunits", "r", "rx", "ry", "radius", "refx", "refy", "repeatcount", "repeatdur", "restart", "result", "rotate", "scale", "seed", "shape-rendering", "slope", "specularconstant", "specularexponent", "spreadmethod", "startoffset", "stddeviation", "stitchtiles", "stop-color", "stop-opacity", "stroke-dasharray", "stroke-dashoffset", "stroke-linecap", "stroke-linejoin", "stroke-miterlimit", "stroke-opacity", "stroke", "stroke-width", "style", "surfacescale", "systemlanguage", "tabindex", "tablevalues", "targetx", "targety", "transform", "transform-origin", "text-anchor", "text-decoration", "text-rendering", "textlength", "type", "u1", "u2", "unicode", "values", "viewbox", "visibility", "version", "vert-adv-y", "vert-origin-x", "vert-origin-y", "width", "word-spacing", "wrap", "writing-mode", "xchannelselector", "ychannelselector", "x", "x1", "x2", "xmlns", "y", "y1", "y2", "z", "zoomandpan" ]), mathMl = freeze([ "accent", "accentunder", "align", "bevelled", "close", "columnalign", "columnlines", "columnspacing", "columnspan", "denomalign", "depth", "dir", "display", "displaystyle", "encoding", "fence", "frame", "height", "href", "id", "largeop", "length", "linethickness", "lquote", "lspace", "mathbackground", "mathcolor", "mathsize", "mathvariant", "maxsize", "minsize", "movablelimits", "notation", "numalign", "open", "rowalign", "rowlines", "rowspacing", "rowspan", "rspace", "rquote", "scriptlevel", "scriptminsize", "scriptsizemultiplier", "selection", "separator", "separators", "stretchy", "subscriptshift", "supscriptshift", "symmetric", "voffset", "width", "xmlns" ]), xml = freeze([ "xlink:href", "xml:id", "xlink:title", "xml:space", "xmlns:xlink" ]), MUSTACHE_EXPR = seal(/{{[\w\W]*|^[\w\W]*}}/g), ERB_EXPR = seal(/<%[\w\W]*|^[\w\W]*%>/g), TMPLIT_EXPR = seal(/\${[\w\W]*/g), DATA_ATTR = seal(/^data-[\-\w.\u00B7-\uFFFF]+$/), ARIA_ATTR = seal(/^aria-[\-\w]+$/), IS_ALLOWED_URI = seal(/^(?:(?:(?:f|ht)tps?|mailto|tel|callto|sms|cid|xmpp|matrix):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i), IS_SCRIPT_OR_DATA = seal(/^(?:\w+script|data):/i), ATTR_WHITESPACE = seal(/[\u0000-\u0020\u00A0\u1680\u180E\u2000-\u2029\u205F\u3000]/g), DOCTYPE_NAME = seal(/^html$/i), CUSTOM_ELEMENT = seal(/^[a-z][.\w]*(-[.\w]+)+$/i), ELEMENT_MARKUP_PROBE = seal(/<[/\w!]/g), COMMENT_MARKUP_PROBE = seal(/<[/\w]/g), FALLBACK_TAG_CLOSE = seal(/<\/no(script|embed|frames)/i), SELF_CLOSING_TAG = seal(/\/>/i), NODE_TYPE = {
         element: 1,
         attribute: 2,
         text: 3,
         cdataSection: 4,
         entityReference: 5,
         entityNode: 6,
-        progressingInstruction: 7,
+        processingInstruction: 7,
         comment: 8,
         document: 9,
         documentType: 10,
@@ -2483,15 +2473,25 @@
     var mouseEventRe, deprecated, purify = function createDOMPurify(argument_0) {
         argument_0 = 0 < arguments.length && void 0 !== argument_0 ? argument_0 : "undefined" == typeof window ? null : window;
         const DOMPurify = root => createDOMPurify(root);
-        if (DOMPurify.version = "3.4.6", DOMPurify.removed = [], !argument_0 || !argument_0.document || argument_0.document.nodeType !== NODE_TYPE.document || !argument_0.Element) return DOMPurify.isSupported = !1, 
+        if (DOMPurify.version = "3.4.11", DOMPurify.removed = [], !argument_0 || !argument_0.document || argument_0.document.nodeType !== NODE_TYPE.document || !argument_0.Element) return DOMPurify.isSupported = !1, 
         DOMPurify;
         let document = argument_0.document;
         const originalDocument = document, currentScript = originalDocument.currentScript, HTMLTemplateElement = (argument_0.DocumentFragment, 
         argument_0.HTMLTemplateElement), Node = argument_0.Node, Element = argument_0.Element, NodeFilter = argument_0.NodeFilter, _window$NamedNodeMap = argument_0.NamedNodeMap, DOMParser = (void 0 !== _window$NamedNodeMap || argument_0.NamedNodeMap || argument_0.MozNamedAttrMap, 
         argument_0.HTMLFormElement, argument_0.DOMParser), trustedTypes = argument_0.trustedTypes, cloneNode = lookupGetter(argument_0 = Element.prototype, "cloneNode"), remove = lookupGetter(argument_0, "remove"), getNextSibling = lookupGetter(argument_0, "nextSibling"), getChildNodes = lookupGetter(argument_0, "childNodes"), getParentNode = lookupGetter(argument_0, "parentNode"), getShadowRoot = lookupGetter(argument_0, "shadowRoot"), getAttributes = lookupGetter(argument_0, "attributes"), getNodeType = Node && Node.prototype ? lookupGetter(Node.prototype, "nodeType") : null, getNodeName = Node && Node.prototype ? lookupGetter(Node.prototype, "nodeName") : null;
         "function" == typeof HTMLTemplateElement && (argument_0 = document.createElement("template")).content && argument_0.content.ownerDocument && (document = argument_0.content.ownerDocument);
-        let trustedTypesPolicy, emptyHTML = "";
-        const _document = document, implementation = _document.implementation, createNodeIterator = _document.createNodeIterator, createDocumentFragment = _document.createDocumentFragment, getElementsByTagName = _document.getElementsByTagName, importNode = originalDocument.importNode;
+        let trustedTypesPolicy, emptyHTML = "", defaultTrustedTypesPolicy, defaultTrustedTypesPolicyResolved = !1, IN_TRUSTED_TYPES_POLICY = 0;
+        function _createTrustedHTML(html) {
+            _assertNotInTrustedTypesPolicy(), IN_TRUSTED_TYPES_POLICY++;
+            try {
+                return trustedTypesPolicy.createHTML(html);
+            } finally {
+                IN_TRUSTED_TYPES_POLICY--;
+            }
+        }
+        const _assertNotInTrustedTypesPolicy = function() {
+            if (0 < IN_TRUSTED_TYPES_POLICY) throw typeErrorCreate('A configured TRUSTED_TYPES_POLICY callback (createHTML or createScriptURL) must not call DOMPurify.sanitize, as that causes infinite recursion. Do not pass a policy whose callbacks wrap DOMPurify as TRUSTED_TYPES_POLICY; see the "DOMPurify and Trusted Types" section of the README.');
+        }, _document = document, implementation = _document.implementation, createNodeIterator = _document.createNodeIterator, createDocumentFragment = _document.createDocumentFragment, getElementsByTagName = _document.getElementsByTagName, importNode = originalDocument.importNode;
         let hooks = _createHooksMap();
         DOMPurify.isSupported = "function" == typeof entries && "function" == typeof getParentNode && implementation && void 0 !== implementation.createHTMLDocument;
         const MUSTACHE_EXPR$1 = MUSTACHE_EXPR, ERB_EXPR$1 = ERB_EXPR, TMPLIT_EXPR$1 = TMPLIT_EXPR, DATA_ATTR$1 = DATA_ATTR, ARIA_ATTR$1 = ARIA_ATTR, IS_SCRIPT_OR_DATA$1 = IS_SCRIPT_OR_DATA, ATTR_WHITESPACE$1 = ATTR_WHITESPACE, CUSTOM_ELEMENT$1 = CUSTOM_ELEMENT;
@@ -2533,15 +2533,17 @@
                 value: null
             }
         }));
-        let ALLOW_ARIA_ATTR = !0, ALLOW_DATA_ATTR = !0, ALLOW_UNKNOWN_PROTOCOLS = !1, ALLOW_SELF_CLOSE_IN_ATTR = !0, SAFE_FOR_TEMPLATES = !1, SAFE_FOR_XML = !0, WHOLE_DOCUMENT = !1, SET_CONFIG = !1, FORCE_BODY = !1, RETURN_DOM = !1, RETURN_DOM_FRAGMENT = !1, RETURN_TRUSTED_TYPE = !1, SANITIZE_DOM = !0, SANITIZE_NAMED_PROPS = !1, KEEP_CONTENT = !0, IN_PLACE = !1, USE_PROFILES = {}, FORBID_CONTENTS = null;
-        const DEFAULT_FORBID_CONTENTS = addToSet({}, [ "annotation-xml", "audio", "colgroup", "desc", "foreignobject", "head", "iframe", "math", "mi", "mn", "mo", "ms", "mtext", "noembed", "noframes", "noscript", "plaintext", "script", "style", "svg", "template", "thead", "title", "video", "xmp" ]);
+        let ALLOW_ARIA_ATTR = !0, ALLOW_DATA_ATTR = !0, ALLOW_UNKNOWN_PROTOCOLS = !1, ALLOW_SELF_CLOSE_IN_ATTR = !0, SAFE_FOR_TEMPLATES = !1, SAFE_FOR_XML = !0, WHOLE_DOCUMENT = !1, SET_CONFIG = !1, SET_CONFIG_ALLOWED_TAGS = null, SET_CONFIG_ALLOWED_ATTR = null, FORCE_BODY = !1, RETURN_DOM = !1, RETURN_DOM_FRAGMENT = !1, RETURN_TRUSTED_TYPE = !1, SANITIZE_DOM = !0, SANITIZE_NAMED_PROPS = !1, KEEP_CONTENT = !0, IN_PLACE = !1, USE_PROFILES = {}, FORBID_CONTENTS = null;
+        const DEFAULT_FORBID_CONTENTS = addToSet({}, [ "annotation-xml", "audio", "colgroup", "desc", "foreignobject", "head", "iframe", "math", "mi", "mn", "mo", "ms", "mtext", "noembed", "noframes", "noscript", "plaintext", "script", "selectedcontent", "style", "svg", "template", "thead", "title", "video", "xmp" ]);
         let DATA_URI_TAGS = null;
         const DEFAULT_DATA_URI_TAGS = addToSet({}, [ "audio", "video", "img", "source", "image", "track" ]);
         let URI_SAFE_ATTRIBUTES = null;
         const DEFAULT_URI_SAFE_ATTRIBUTES = addToSet({}, [ "alt", "class", "for", "id", "label", "name", "pattern", "placeholder", "role", "summary", "title", "value", "style", "xmlns" ]), MATHML_NAMESPACE = "http://www.w3.org/1998/Math/MathML", SVG_NAMESPACE = "http://www.w3.org/2000/svg", HTML_NAMESPACE = "http://www.w3.org/1999/xhtml";
         let NAMESPACE = HTML_NAMESPACE, IS_EMPTY_INPUT, ALLOWED_NAMESPACES = null;
-        const DEFAULT_ALLOWED_NAMESPACES = addToSet({}, [ MATHML_NAMESPACE, SVG_NAMESPACE, HTML_NAMESPACE ], stringToString);
-        let MATHML_TEXT_INTEGRATION_POINTS = addToSet({}, [ "mi", "mo", "mn", "ms", "mtext" ]), HTML_INTEGRATION_POINTS = addToSet({}, [ "annotation-xml" ]);
+        const DEFAULT_ALLOWED_NAMESPACES = addToSet({}, [ MATHML_NAMESPACE, SVG_NAMESPACE, HTML_NAMESPACE ], stringToString), DEFAULT_MATHML_TEXT_INTEGRATION_POINTS = freeze([ "mi", "mo", "mn", "ms", "mtext" ]);
+        let MATHML_TEXT_INTEGRATION_POINTS = addToSet({}, DEFAULT_MATHML_TEXT_INTEGRATION_POINTS);
+        const DEFAULT_HTML_INTEGRATION_POINTS = freeze([ "annotation-xml" ]);
+        let HTML_INTEGRATION_POINTS = addToSet({}, DEFAULT_HTML_INTEGRATION_POINTS);
         const COMMON_SVG_AND_HTML_ELEMENTS = addToSet({}, [ "title", "style", "font", "a", "script" ]);
         let PARSER_MEDIA_TYPE = null;
         const SUPPORTED_PARSER_MEDIA_TYPES = [ "application/xhtml+xml", "text/html" ];
@@ -2555,15 +2557,25 @@
                 argument_0 = clone(argument_0 && "object" == typeof argument_0 ? argument_0 : {}), 
                 PARSER_MEDIA_TYPE = -1 === SUPPORTED_PARSER_MEDIA_TYPES.indexOf(argument_0.PARSER_MEDIA_TYPE) ? "text/html" : argument_0.PARSER_MEDIA_TYPE, 
                 transformCaseFunc = "application/xhtml+xml" === PARSER_MEDIA_TYPE ? stringToString : stringToLowerCase, 
-                ALLOWED_TAGS = objectHasOwnProperty(argument_0, "ALLOWED_TAGS") && arrayIsArray(argument_0.ALLOWED_TAGS) ? addToSet({}, argument_0.ALLOWED_TAGS, transformCaseFunc) : DEFAULT_ALLOWED_TAGS, 
-                ALLOWED_ATTR = objectHasOwnProperty(argument_0, "ALLOWED_ATTR") && arrayIsArray(argument_0.ALLOWED_ATTR) ? addToSet({}, argument_0.ALLOWED_ATTR, transformCaseFunc) : DEFAULT_ALLOWED_ATTR, 
-                ALLOWED_NAMESPACES = objectHasOwnProperty(argument_0, "ALLOWED_NAMESPACES") && arrayIsArray(argument_0.ALLOWED_NAMESPACES) ? addToSet({}, argument_0.ALLOWED_NAMESPACES, stringToString) : DEFAULT_ALLOWED_NAMESPACES, 
-                URI_SAFE_ATTRIBUTES = objectHasOwnProperty(argument_0, "ADD_URI_SAFE_ATTR") && arrayIsArray(argument_0.ADD_URI_SAFE_ATTR) ? addToSet(clone(DEFAULT_URI_SAFE_ATTRIBUTES), argument_0.ADD_URI_SAFE_ATTR, transformCaseFunc) : DEFAULT_URI_SAFE_ATTRIBUTES, 
-                DATA_URI_TAGS = objectHasOwnProperty(argument_0, "ADD_DATA_URI_TAGS") && arrayIsArray(argument_0.ADD_DATA_URI_TAGS) ? addToSet(clone(DEFAULT_DATA_URI_TAGS), argument_0.ADD_DATA_URI_TAGS, transformCaseFunc) : DEFAULT_DATA_URI_TAGS, 
-                FORBID_CONTENTS = objectHasOwnProperty(argument_0, "FORBID_CONTENTS") && arrayIsArray(argument_0.FORBID_CONTENTS) ? addToSet({}, argument_0.FORBID_CONTENTS, transformCaseFunc) : DEFAULT_FORBID_CONTENTS, 
-                FORBID_TAGS = objectHasOwnProperty(argument_0, "FORBID_TAGS") && arrayIsArray(argument_0.FORBID_TAGS) ? addToSet({}, argument_0.FORBID_TAGS, transformCaseFunc) : clone({}), 
-                FORBID_ATTR = objectHasOwnProperty(argument_0, "FORBID_ATTR") && arrayIsArray(argument_0.FORBID_ATTR) ? addToSet({}, argument_0.FORBID_ATTR, transformCaseFunc) : clone({}), 
-                USE_PROFILES = !!objectHasOwnProperty(argument_0, "USE_PROFILES") && (argument_0.USE_PROFILES && "object" == typeof argument_0.USE_PROFILES ? clone(argument_0.USE_PROFILES) : argument_0.USE_PROFILES), 
+                ALLOWED_TAGS = _resolveSetOption(argument_0, "ALLOWED_TAGS", DEFAULT_ALLOWED_TAGS, {
+                    transform: transformCaseFunc
+                }), ALLOWED_ATTR = _resolveSetOption(argument_0, "ALLOWED_ATTR", DEFAULT_ALLOWED_ATTR, {
+                    transform: transformCaseFunc
+                }), ALLOWED_NAMESPACES = _resolveSetOption(argument_0, "ALLOWED_NAMESPACES", DEFAULT_ALLOWED_NAMESPACES, {
+                    transform: stringToString
+                }), URI_SAFE_ATTRIBUTES = _resolveSetOption(argument_0, "ADD_URI_SAFE_ATTR", DEFAULT_URI_SAFE_ATTRIBUTES, {
+                    transform: transformCaseFunc,
+                    base: DEFAULT_URI_SAFE_ATTRIBUTES
+                }), DATA_URI_TAGS = _resolveSetOption(argument_0, "ADD_DATA_URI_TAGS", DEFAULT_DATA_URI_TAGS, {
+                    transform: transformCaseFunc,
+                    base: DEFAULT_DATA_URI_TAGS
+                }), FORBID_CONTENTS = _resolveSetOption(argument_0, "FORBID_CONTENTS", DEFAULT_FORBID_CONTENTS, {
+                    transform: transformCaseFunc
+                }), FORBID_TAGS = _resolveSetOption(argument_0, "FORBID_TAGS", clone({}), {
+                    transform: transformCaseFunc
+                }), FORBID_ATTR = _resolveSetOption(argument_0, "FORBID_ATTR", clone({}), {
+                    transform: transformCaseFunc
+                }), USE_PROFILES = !!objectHasOwnProperty(argument_0, "USE_PROFILES") && (argument_0.USE_PROFILES && "object" == typeof argument_0.USE_PROFILES ? clone(argument_0.USE_PROFILES) : argument_0.USE_PROFILES), 
                 ALLOW_ARIA_ATTR = !1 !== argument_0.ALLOW_ARIA_ATTR, ALLOW_DATA_ATTR = !1 !== argument_0.ALLOW_DATA_ATTR, 
                 ALLOW_UNKNOWN_PROTOCOLS = argument_0.ALLOW_UNKNOWN_PROTOCOLS || !1, 
                 ALLOW_SELF_CLOSE_IN_ATTR = !1 !== argument_0.ALLOW_SELF_CLOSE_IN_ATTR, 
@@ -2578,17 +2590,17 @@
                     } catch (_unused) {}
                 }(argument_0.ALLOWED_URI_REGEXP) ? argument_0.ALLOWED_URI_REGEXP : IS_ALLOWED_URI, 
                 NAMESPACE = "string" == typeof argument_0.NAMESPACE ? argument_0.NAMESPACE : HTML_NAMESPACE, 
-                MATHML_TEXT_INTEGRATION_POINTS = objectHasOwnProperty(argument_0, "MATHML_TEXT_INTEGRATION_POINTS") && argument_0.MATHML_TEXT_INTEGRATION_POINTS && "object" == typeof argument_0.MATHML_TEXT_INTEGRATION_POINTS ? clone(argument_0.MATHML_TEXT_INTEGRATION_POINTS) : addToSet({}, [ "mi", "mo", "mn", "ms", "mtext" ]), 
-                HTML_INTEGRATION_POINTS = objectHasOwnProperty(argument_0, "HTML_INTEGRATION_POINTS") && argument_0.HTML_INTEGRATION_POINTS && "object" == typeof argument_0.HTML_INTEGRATION_POINTS ? clone(argument_0.HTML_INTEGRATION_POINTS) : addToSet({}, [ "annotation-xml" ]);
+                MATHML_TEXT_INTEGRATION_POINTS = objectHasOwnProperty(argument_0, "MATHML_TEXT_INTEGRATION_POINTS") && argument_0.MATHML_TEXT_INTEGRATION_POINTS && "object" == typeof argument_0.MATHML_TEXT_INTEGRATION_POINTS ? clone(argument_0.MATHML_TEXT_INTEGRATION_POINTS) : addToSet({}, DEFAULT_MATHML_TEXT_INTEGRATION_POINTS), 
+                HTML_INTEGRATION_POINTS = objectHasOwnProperty(argument_0, "HTML_INTEGRATION_POINTS") && argument_0.HTML_INTEGRATION_POINTS && "object" == typeof argument_0.HTML_INTEGRATION_POINTS ? clone(argument_0.HTML_INTEGRATION_POINTS) : addToSet({}, DEFAULT_HTML_INTEGRATION_POINTS);
                 var customElementHandling = objectHasOwnProperty(argument_0, "CUSTOM_ELEMENT_HANDLING") && argument_0.CUSTOM_ELEMENT_HANDLING && "object" == typeof argument_0.CUSTOM_ELEMENT_HANDLING ? clone(argument_0.CUSTOM_ELEMENT_HANDLING) : create$1(null);
                 if (CUSTOM_ELEMENT_HANDLING = create$1(null), objectHasOwnProperty(customElementHandling, "tagNameCheck") && isRegexOrFunction(customElementHandling.tagNameCheck) && (CUSTOM_ELEMENT_HANDLING.tagNameCheck = customElementHandling.tagNameCheck), 
                 objectHasOwnProperty(customElementHandling, "attributeNameCheck") && isRegexOrFunction(customElementHandling.attributeNameCheck) && (CUSTOM_ELEMENT_HANDLING.attributeNameCheck = customElementHandling.attributeNameCheck), 
                 objectHasOwnProperty(customElementHandling, "allowCustomizedBuiltInElements") && "boolean" == typeof customElementHandling.allowCustomizedBuiltInElements && (CUSTOM_ELEMENT_HANDLING.allowCustomizedBuiltInElements = customElementHandling.allowCustomizedBuiltInElements), 
-                SAFE_FOR_TEMPLATES && (ALLOW_DATA_ATTR = !1), RETURN_DOM_FRAGMENT && (RETURN_DOM = !0), 
-                USE_PROFILES && (ALLOWED_TAGS = addToSet({}, text), ALLOWED_ATTR = create$1(null), 
-                !0 === USE_PROFILES.html && (addToSet(ALLOWED_TAGS, html$1), addToSet(ALLOWED_ATTR, html)), 
-                !0 === USE_PROFILES.svg && (addToSet(ALLOWED_TAGS, svg$1), addToSet(ALLOWED_ATTR, svg), 
-                addToSet(ALLOWED_ATTR, xml)), !0 === USE_PROFILES.svgFilters && (addToSet(ALLOWED_TAGS, svgFilters), 
+                seal(CUSTOM_ELEMENT_HANDLING), SAFE_FOR_TEMPLATES && (ALLOW_DATA_ATTR = !1), 
+                RETURN_DOM_FRAGMENT && (RETURN_DOM = !0), USE_PROFILES && (ALLOWED_TAGS = addToSet({}, text), 
+                ALLOWED_ATTR = create$1(null), !0 === USE_PROFILES.html && (addToSet(ALLOWED_TAGS, html$1), 
+                addToSet(ALLOWED_ATTR, html)), !0 === USE_PROFILES.svg && (addToSet(ALLOWED_TAGS, svg$1), 
+                addToSet(ALLOWED_ATTR, svg), addToSet(ALLOWED_ATTR, xml)), !0 === USE_PROFILES.svgFilters && (addToSet(ALLOWED_TAGS, svgFilters), 
                 addToSet(ALLOWED_ATTR, svg), addToSet(ALLOWED_ATTR, xml)), !0 === USE_PROFILES.mathMl) && (addToSet(ALLOWED_TAGS, mathMl$1), 
                 addToSet(ALLOWED_ATTR, mathMl), addToSet(ALLOWED_ATTR, xml)), EXTRA_ELEMENT_HANDLING.tagCheck = null, 
                 EXTRA_ELEMENT_HANDLING.attributeCheck = null, objectHasOwnProperty(argument_0, "ADD_TAGS") && ("function" == typeof argument_0.ADD_TAGS ? EXTRA_ELEMENT_HANDLING.tagCheck = argument_0.ADD_TAGS : arrayIsArray(argument_0.ADD_TAGS) && addToSet(ALLOWED_TAGS = ALLOWED_TAGS === DEFAULT_ALLOWED_TAGS ? clone(ALLOWED_TAGS) : ALLOWED_TAGS, argument_0.ADD_TAGS, transformCaseFunc)), 
@@ -2601,8 +2613,14 @@
                 argument_0.TRUSTED_TYPES_POLICY) {
                     if ("function" != typeof argument_0.TRUSTED_TYPES_POLICY.createHTML) throw typeErrorCreate('TRUSTED_TYPES_POLICY configuration option must provide a "createHTML" hook.');
                     if ("function" != typeof argument_0.TRUSTED_TYPES_POLICY.createScriptURL) throw typeErrorCreate('TRUSTED_TYPES_POLICY configuration option must provide a "createScriptURL" hook.');
-                    trustedTypesPolicy = argument_0.TRUSTED_TYPES_POLICY, emptyHTML = trustedTypesPolicy.createHTML("");
-                } else null !== (trustedTypesPolicy = void 0 === trustedTypesPolicy ? function(trustedTypes, purifyHostElement) {
+                    customElementHandling = trustedTypesPolicy, trustedTypesPolicy = argument_0.TRUSTED_TYPES_POLICY;
+                    try {
+                        emptyHTML = _createTrustedHTML("");
+                    } catch (error) {
+                        throw trustedTypesPolicy = customElementHandling, error;
+                    }
+                } else null === argument_0.TRUSTED_TYPES_POLICY ? (trustedTypesPolicy = void 0, 
+                emptyHTML = "") : (trustedTypesPolicy = void 0 === trustedTypesPolicy ? (defaultTrustedTypesPolicyResolved || (defaultTrustedTypesPolicy = function(trustedTypes, purifyHostElement) {
                     if ("object" != typeof trustedTypes || "function" != typeof trustedTypes.createPolicy) return null;
                     var suffix;
                     purifyHostElement = "dompurify" + ((suffix = purifyHostElement && purifyHostElement.hasAttribute("data-tt-policy-suffix") ? purifyHostElement.getAttribute("data-tt-policy-suffix") : null) ? "#" + suffix : "");
@@ -2619,9 +2637,62 @@
                         return console.warn("TrustedTypes policy " + purifyHostElement + " could not be created."), 
                         null;
                     }
-                }(trustedTypes, currentScript) : trustedTypesPolicy) && "string" == typeof emptyHTML && (emptyHTML = trustedTypesPolicy.createHTML(""));
+                }(trustedTypes, currentScript), defaultTrustedTypesPolicyResolved = !0), 
+                defaultTrustedTypesPolicy) : trustedTypesPolicy) && "string" == typeof emptyHTML && (emptyHTML = _createTrustedHTML(""));
                 freeze && freeze(argument_0), CONFIG = argument_0;
             }
+        }
+        function _neutralizeRoot(root) {
+            var childNodes = getChildNodes(root);
+            if (childNodes) {
+                const snapshot = [];
+                arrayForEach(childNodes, child => {
+                    arrayPush(snapshot, child);
+                }), arrayForEach(snapshot, child => {
+                    try {
+                        remove(child);
+                    } catch (_) {}
+                });
+            }
+            var attributes = getAttributes(root);
+            if (attributes) for (let i = attributes.length - 1; 0 <= i; --i) {
+                var attribute = attributes[i];
+                if ("string" == typeof (attribute = attribute && attribute.name)) try {
+                    root.removeAttribute(attribute);
+                } catch (_) {}
+            }
+        }
+        function _initDocument(dirty) {
+            let doc = null, leadingWhitespace = null;
+            FORCE_BODY ? dirty = "<remove></remove>" + dirty : (matches = stringMatch(dirty, /^[\r\n\t ]+/), 
+            leadingWhitespace = matches && matches[0]), "application/xhtml+xml" === PARSER_MEDIA_TYPE && NAMESPACE === HTML_NAMESPACE && (dirty = '<html xmlns="http://www.w3.org/1999/xhtml"><head></head><body>' + dirty + "</body></html>");
+            var matches = trustedTypesPolicy ? _createTrustedHTML(dirty) : dirty;
+            if (NAMESPACE === HTML_NAMESPACE) try {
+                doc = new DOMParser().parseFromString(matches, PARSER_MEDIA_TYPE);
+            } catch (_) {}
+            if (!doc || !doc.documentElement) {
+                doc = implementation.createDocument(NAMESPACE, "template", null);
+                try {
+                    doc.documentElement.innerHTML = IS_EMPTY_INPUT ? emptyHTML : matches;
+                } catch (_) {}
+            }
+            return matches = doc.body || doc.documentElement, dirty && leadingWhitespace && matches.insertBefore(document.createTextNode(leadingWhitespace), matches.childNodes[0] || null), 
+            NAMESPACE === HTML_NAMESPACE ? getElementsByTagName.call(doc, WHOLE_DOCUMENT ? "html" : "body")[0] : WHOLE_DOCUMENT ? doc.documentElement : matches;
+        }
+        function _stripTemplateExpressions(value) {
+            return value = stringReplace(value, MUSTACHE_EXPR$1, " "), value = stringReplace(value, ERB_EXPR$1, " "), 
+            stringReplace(value, TMPLIT_EXPR$1, " ");
+        }
+        function _scrubTemplateExpressions2(node) {
+            node.normalize();
+            var walker = createNodeIterator.call(node.ownerDocument || node, node, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_COMMENT | NodeFilter.SHOW_CDATA_SECTION | NodeFilter.SHOW_PROCESSING_INSTRUCTION, null);
+            let currentNode = walker.nextNode();
+            for (;currentNode; ) currentNode.data = _stripTemplateExpressions(currentNode.data), 
+            currentNode = walker.nextNode();
+            var _node$querySelectorAl = null == (_node$querySelectorAl = node.querySelectorAll) ? void 0 : _node$querySelectorAl.call(node, "template");
+            _node$querySelectorAl && arrayForEach(_node$querySelectorAl, tmpl => {
+                _isDocumentFragment(tmpl.content) && _scrubTemplateExpressions2(tmpl.content);
+            });
         }
         function _removeAttribute(name, element) {
             try {
@@ -2641,42 +2712,17 @@
                 element.setAttribute(name, "");
             } catch (_) {}
         }
-        function _initDocument(dirty) {
-            let doc = null, leadingWhitespace = null;
-            FORCE_BODY ? dirty = "<remove></remove>" + dirty : (matches = stringMatch(dirty, /^[\r\n\t ]+/), 
-            leadingWhitespace = matches && matches[0]), "application/xhtml+xml" === PARSER_MEDIA_TYPE && NAMESPACE === HTML_NAMESPACE && (dirty = '<html xmlns="http://www.w3.org/1999/xhtml"><head></head><body>' + dirty + "</body></html>");
-            var matches = trustedTypesPolicy ? trustedTypesPolicy.createHTML(dirty) : dirty;
-            if (NAMESPACE === HTML_NAMESPACE) try {
-                doc = new DOMParser().parseFromString(matches, PARSER_MEDIA_TYPE);
-            } catch (_) {}
-            if (!doc || !doc.documentElement) {
-                doc = implementation.createDocument(NAMESPACE, "template", null);
-                try {
-                    doc.documentElement.innerHTML = IS_EMPTY_INPUT ? emptyHTML : matches;
-                } catch (_) {}
-            }
-            return matches = doc.body || doc.documentElement, dirty && leadingWhitespace && matches.insertBefore(document.createTextNode(leadingWhitespace), matches.childNodes[0] || null), 
-            NAMESPACE === HTML_NAMESPACE ? getElementsByTagName.call(doc, WHOLE_DOCUMENT ? "html" : "body")[0] : WHOLE_DOCUMENT ? doc.documentElement : matches;
-        }
-        function _scrubTemplateExpressions(node) {
-            node.normalize();
-            var walker = createNodeIterator.call(node.ownerDocument || node, node, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_COMMENT | NodeFilter.SHOW_CDATA_SECTION | NodeFilter.SHOW_PROCESSING_INSTRUCTION, null);
-            let currentNode = walker.nextNode();
-            for (;currentNode; ) {
-                let data = currentNode.data;
-                arrayForEach([ MUSTACHE_EXPR$1, ERB_EXPR$1, TMPLIT_EXPR$1 ], expr => {
-                    data = stringReplace(data, expr, " ");
-                }), currentNode.data = data, currentNode = walker.nextNode();
-            }
-        }
         function _isClobbered(element) {
             var realTagName = getNodeName ? getNodeName(element) : null;
-            return "string" == typeof realTagName && "form" === transformCaseFunc(realTagName) && ("string" != typeof element.nodeName || "string" != typeof element.textContent || "function" != typeof element.removeChild || element.attributes !== getAttributes(element) || "function" != typeof element.removeAttribute || "function" != typeof element.setAttribute || "string" != typeof element.namespaceURI || "function" != typeof element.insertBefore || "function" != typeof element.hasChildNodes || element.childNodes !== getChildNodes(element));
+            return "string" == typeof realTagName && "form" === transformCaseFunc(realTagName) && ("string" != typeof element.nodeName || "string" != typeof element.textContent || "function" != typeof element.removeChild || element.attributes !== getAttributes(element) || "function" != typeof element.removeAttribute || "function" != typeof element.setAttribute || "string" != typeof element.namespaceURI || "function" != typeof element.insertBefore || "function" != typeof element.hasChildNodes || element.nodeType !== getNodeType(element) || element.childNodes !== getChildNodes(element));
         }
         function _isNode(value) {
-            if (getNodeType && "object" == typeof value && null !== value) try {
+            if (!getNodeType || "object" != typeof value || null === value) return !1;
+            try {
                 return "number" == typeof getNodeType(value);
-            } catch (_) {}
+            } catch (_) {
+                return !1;
+            }
         }
         const formElement = document.createElement("form"), ALL_SVG_TAGS = addToSet({}, [ ...svg$1, ...svgFilters, ...svgDisallowed ]), ALL_MATHML_TAGS = addToSet({}, [ ...mathMl$1, ...mathMlDisallowed ]), _forceRemove = function(node) {
             arrayPush(DOMPurify.removed, {
@@ -2685,7 +2731,7 @@
             try {
                 getParentNode(node).removeChild(node);
             } catch (_) {
-                remove(node);
+                if (remove(node), !getParentNode(node)) throw typeErrorCreate("a node selected for removal could not be detached from its tree and cannot be safely returned; refusing to sanitize in place");
             }
         }, _createNodeIterator = function(root) {
             return createNodeIterator.call(root.ownerDocument || root, root, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_COMMENT | NodeFilter.SHOW_TEXT | NodeFilter.SHOW_PROCESSING_INSTRUCTION | NodeFilter.SHOW_CDATA_SECTION, null);
@@ -2698,7 +2744,7 @@
             }
         };
         function _executeHooks(hooks, currentNode, data) {
-            arrayForEach(hooks, hook => {
+            0 !== hooks.length && arrayForEach(hooks, hook => {
                 hook.call(DOMPurify, currentNode, data, CONFIG);
             });
         }
@@ -2706,62 +2752,53 @@
             if (FORBID_ATTR[lcName]) return !1;
             if (SANITIZE_DOM && ("id" === lcName || "name" === lcName) && (value in document || value in formElement)) return !1;
             var nameIsPermitted = ALLOWED_ATTR[lcName] || EXTRA_ELEMENT_HANDLING.attributeCheck instanceof Function && EXTRA_ELEMENT_HANDLING.attributeCheck(lcName, lcTag);
-            if ((!ALLOW_DATA_ATTR || FORBID_ATTR[lcName] || !regExpTest(DATA_ATTR$1, lcName)) && (!ALLOW_ARIA_ATTR || !regExpTest(ARIA_ATTR$1, lcName))) if (!nameIsPermitted || FORBID_ATTR[lcName]) {
-                if (!(_isBasicCustomElement(lcTag) && (CUSTOM_ELEMENT_HANDLING.tagNameCheck instanceof RegExp && regExpTest(CUSTOM_ELEMENT_HANDLING.tagNameCheck, lcTag) || CUSTOM_ELEMENT_HANDLING.tagNameCheck instanceof Function && CUSTOM_ELEMENT_HANDLING.tagNameCheck(lcTag)) && (CUSTOM_ELEMENT_HANDLING.attributeNameCheck instanceof RegExp && regExpTest(CUSTOM_ELEMENT_HANDLING.attributeNameCheck, lcName) || CUSTOM_ELEMENT_HANDLING.attributeNameCheck instanceof Function && CUSTOM_ELEMENT_HANDLING.attributeNameCheck(lcName, lcTag)) || "is" === lcName && CUSTOM_ELEMENT_HANDLING.allowCustomizedBuiltInElements && (CUSTOM_ELEMENT_HANDLING.tagNameCheck instanceof RegExp && regExpTest(CUSTOM_ELEMENT_HANDLING.tagNameCheck, value) || CUSTOM_ELEMENT_HANDLING.tagNameCheck instanceof Function && CUSTOM_ELEMENT_HANDLING.tagNameCheck(value)))) return !1;
-            } else if (!URI_SAFE_ATTRIBUTES[lcName] && !regExpTest(IS_ALLOWED_URI$1, stringReplace(value, ATTR_WHITESPACE$1, "")) && ("src" !== lcName && "xlink:href" !== lcName && "href" !== lcName || "script" === lcTag || 0 !== stringIndexOf(value, "data:") || !DATA_URI_TAGS[lcTag]) && (!ALLOW_UNKNOWN_PROTOCOLS || regExpTest(IS_SCRIPT_OR_DATA$1, stringReplace(value, ATTR_WHITESPACE$1, ""))) && value) return !1;
+            if (!(ALLOW_DATA_ATTR && regExpTest(DATA_ATTR$1, lcName) || ALLOW_ARIA_ATTR && regExpTest(ARIA_ATTR$1, lcName))) if (nameIsPermitted) {
+                if (!URI_SAFE_ATTRIBUTES[lcName] && !regExpTest(IS_ALLOWED_URI$1, stringReplace(value, ATTR_WHITESPACE$1, "")) && ("src" !== lcName && "xlink:href" !== lcName && "href" !== lcName || "script" === lcTag || 0 !== stringIndexOf(value, "data:") || !DATA_URI_TAGS[lcTag]) && (!ALLOW_UNKNOWN_PROTOCOLS || regExpTest(IS_SCRIPT_OR_DATA$1, stringReplace(value, ATTR_WHITESPACE$1, ""))) && value) return !1;
+            } else if (!(_isBasicCustomElement(lcTag) && (CUSTOM_ELEMENT_HANDLING.tagNameCheck instanceof RegExp && regExpTest(CUSTOM_ELEMENT_HANDLING.tagNameCheck, lcTag) || CUSTOM_ELEMENT_HANDLING.tagNameCheck instanceof Function && CUSTOM_ELEMENT_HANDLING.tagNameCheck(lcTag)) && (CUSTOM_ELEMENT_HANDLING.attributeNameCheck instanceof RegExp && regExpTest(CUSTOM_ELEMENT_HANDLING.attributeNameCheck, lcName) || CUSTOM_ELEMENT_HANDLING.attributeNameCheck instanceof Function && CUSTOM_ELEMENT_HANDLING.attributeNameCheck(lcName, lcTag)) || "is" === lcName && CUSTOM_ELEMENT_HANDLING.allowCustomizedBuiltInElements && (CUSTOM_ELEMENT_HANDLING.tagNameCheck instanceof RegExp && regExpTest(CUSTOM_ELEMENT_HANDLING.tagNameCheck, value) || CUSTOM_ELEMENT_HANDLING.tagNameCheck instanceof Function && CUSTOM_ELEMENT_HANDLING.tagNameCheck(value)))) return !1;
             return !0;
         }
-        function _sanitizeAttachedShadowRoots2(root) {
-            (getNodeType ? getNodeType(root) : root.nodeType) === NODE_TYPE.element && (sr = getShadowRoot ? getShadowRoot(root) : root.shadowRoot, 
-            _isDocumentFragment(sr)) && (_sanitizeAttachedShadowRoots2(sr), _sanitizeShadowDOM2(sr));
-            var sr = getChildNodes ? getChildNodes(root) : root.childNodes;
-            if (sr) {
-                const snapshot = [];
-                arrayForEach(sr, child => {
-                    arrayPush(snapshot, child);
-                });
-                for (const child of snapshot) _sanitizeAttachedShadowRoots2(child);
-            }
-        }
         const _sanitizeElements = function(currentNode) {
-            let content = null;
-            if (_executeHooks(hooks.beforeSanitizeElements, currentNode, null), 
-            !_isClobbered(currentNode)) {
-                var tagName = transformCaseFunc(currentNode.nodeName);
-                if (_executeHooks(hooks.uponSanitizeElement, currentNode, {
-                    tagName: tagName,
-                    allowedTags: ALLOWED_TAGS
-                }), !(SAFE_FOR_XML && currentNode.hasChildNodes() && !_isNode(currentNode.firstElementChild) && regExpTest(/<[/\w!]/g, currentNode.innerHTML) && regExpTest(/<[/\w!]/g, currentNode.textContent) || SAFE_FOR_XML && currentNode.namespaceURI === HTML_NAMESPACE && "style" === tagName && _isNode(currentNode.firstElementChild) || currentNode.nodeType === NODE_TYPE.progressingInstruction || SAFE_FOR_XML && currentNode.nodeType === NODE_TYPE.comment && regExpTest(/<[/\w]/g, currentNode.data))) {
-                    if (!FORBID_TAGS[tagName] && (EXTRA_ELEMENT_HANDLING.tagCheck instanceof Function && EXTRA_ELEMENT_HANDLING.tagCheck(tagName) || ALLOWED_TAGS[tagName])) return (getNodeType ? getNodeType(currentNode) : currentNode.nodeType) === NODE_TYPE.element && !function(element) {
-                        let parent = getParentNode(element);
-                        parent && parent.tagName || (parent = {
-                            namespaceURI: NAMESPACE,
-                            tagName: "template"
-                        });
-                        var tagName = stringToLowerCase(element.tagName), parentTagName = stringToLowerCase(parent.tagName);
-                        return ALLOWED_NAMESPACES[element.namespaceURI] && (element.namespaceURI === SVG_NAMESPACE ? parent.namespaceURI === HTML_NAMESPACE ? "svg" === tagName : parent.namespaceURI === MATHML_NAMESPACE ? "svg" === tagName && ("annotation-xml" === parentTagName || MATHML_TEXT_INTEGRATION_POINTS[parentTagName]) : Boolean(ALL_SVG_TAGS[tagName]) : element.namespaceURI === MATHML_NAMESPACE ? parent.namespaceURI === HTML_NAMESPACE ? "math" === tagName : parent.namespaceURI === SVG_NAMESPACE ? "math" === tagName && HTML_INTEGRATION_POINTS[parentTagName] : Boolean(ALL_MATHML_TAGS[tagName]) : element.namespaceURI === HTML_NAMESPACE ? !(parent.namespaceURI === SVG_NAMESPACE && !HTML_INTEGRATION_POINTS[parentTagName] || parent.namespaceURI === MATHML_NAMESPACE && !MATHML_TEXT_INTEGRATION_POINTS[parentTagName] || ALL_MATHML_TAGS[tagName]) && (COMMON_SVG_AND_HTML_ELEMENTS[tagName] || !ALL_SVG_TAGS[tagName]) : "application/xhtml+xml" === PARSER_MEDIA_TYPE && ALLOWED_NAMESPACES[element.namespaceURI]);
-                    }(currentNode) || ("noscript" === tagName || "noembed" === tagName || "noframes" === tagName) && regExpTest(/<\/no(script|embed|frames)/i, currentNode.innerHTML) ? (_forceRemove(currentNode), 
-                    !0) : (SAFE_FOR_TEMPLATES && currentNode.nodeType === NODE_TYPE.text && (content = currentNode.textContent, 
-                    arrayForEach([ MUSTACHE_EXPR$1, ERB_EXPR$1, TMPLIT_EXPR$1 ], expr => {
-                        content = stringReplace(content, expr, " ");
-                    }), currentNode.textContent !== content) && (arrayPush(DOMPurify.removed, {
-                        element: currentNode.cloneNode()
-                    }), currentNode.textContent = content), _executeHooks(hooks.afterSanitizeElements, currentNode, null), 
-                    !1);
-                    if (!FORBID_TAGS[tagName] && _isBasicCustomElement(tagName)) {
-                        if (CUSTOM_ELEMENT_HANDLING.tagNameCheck instanceof RegExp && regExpTest(CUSTOM_ELEMENT_HANDLING.tagNameCheck, tagName)) return !1;
-                        if (CUSTOM_ELEMENT_HANDLING.tagNameCheck instanceof Function && CUSTOM_ELEMENT_HANDLING.tagNameCheck(tagName)) return !1;
-                    }
-                    if (KEEP_CONTENT && !FORBID_CONTENTS[tagName]) {
-                        var parentNode = getParentNode(currentNode) || currentNode.parentNode, childNodes = getChildNodes(currentNode) || currentNode.childNodes;
-                        if (childNodes && parentNode) for (let i = childNodes.length - 1; 0 <= i; --i) {
-                            var childClone = cloneNode(childNodes[i], !0);
-                            parentNode.insertBefore(childClone, getNextSibling(currentNode));
-                        }
+            var tagName, content;
+            return _executeHooks(hooks.beforeSanitizeElements, currentNode, null), 
+            _isClobbered(currentNode) || (tagName = transformCaseFunc(getNodeName ? getNodeName(currentNode) : currentNode.nodeName), 
+            _executeHooks(hooks.uponSanitizeElement, currentNode, {
+                tagName: tagName,
+                allowedTags: ALLOWED_TAGS
+            }), function(currentNode, tagName) {
+                return SAFE_FOR_XML && currentNode.hasChildNodes() && !_isNode(currentNode.firstElementChild) && regExpTest(ELEMENT_MARKUP_PROBE, currentNode.textContent) && regExpTest(ELEMENT_MARKUP_PROBE, currentNode.innerHTML) || SAFE_FOR_XML && currentNode.namespaceURI === HTML_NAMESPACE && "style" === tagName && _isNode(currentNode.firstElementChild) || currentNode.nodeType === NODE_TYPE.processingInstruction || SAFE_FOR_XML && currentNode.nodeType === NODE_TYPE.comment && regExpTest(COMMENT_MARKUP_PROBE, currentNode.data);
+            }(currentNode, tagName)) ? (_forceRemove(currentNode), !0) : !FORBID_TAGS[tagName] && (EXTRA_ELEMENT_HANDLING.tagCheck instanceof Function && EXTRA_ELEMENT_HANDLING.tagCheck(tagName) || ALLOWED_TAGS[tagName]) ? (getNodeType ? getNodeType(currentNode) : currentNode.nodeType) === NODE_TYPE.element && !function(element) {
+                let parent = getParentNode(element);
+                parent && parent.tagName || (parent = {
+                    namespaceURI: NAMESPACE,
+                    tagName: "template"
+                });
+                var tagName = stringToLowerCase(element.tagName), parentTagName = stringToLowerCase(parent.tagName);
+                return ALLOWED_NAMESPACES[element.namespaceURI] && (element.namespaceURI === SVG_NAMESPACE ? function(tagName, parent, parentTagName) {
+                    return parent.namespaceURI === HTML_NAMESPACE ? "svg" === tagName : parent.namespaceURI === MATHML_NAMESPACE ? "svg" === tagName && ("annotation-xml" === parentTagName || MATHML_TEXT_INTEGRATION_POINTS[parentTagName]) : Boolean(ALL_SVG_TAGS[tagName]);
+                }(tagName, parent, parentTagName) : element.namespaceURI === MATHML_NAMESPACE ? function(tagName, parent, parentTagName) {
+                    return parent.namespaceURI === HTML_NAMESPACE ? "math" === tagName : parent.namespaceURI === SVG_NAMESPACE ? "math" === tagName && HTML_INTEGRATION_POINTS[parentTagName] : Boolean(ALL_MATHML_TAGS[tagName]);
+                }(tagName, parent, parentTagName) : element.namespaceURI === HTML_NAMESPACE ? function(tagName, parent, parentTagName) {
+                    return !(parent.namespaceURI === SVG_NAMESPACE && !HTML_INTEGRATION_POINTS[parentTagName] || parent.namespaceURI === MATHML_NAMESPACE && !MATHML_TEXT_INTEGRATION_POINTS[parentTagName] || ALL_MATHML_TAGS[tagName]) && (COMMON_SVG_AND_HTML_ELEMENTS[tagName] || !ALL_SVG_TAGS[tagName]);
+                }(tagName, parent, parentTagName) : "application/xhtml+xml" === PARSER_MEDIA_TYPE && ALLOWED_NAMESPACES[element.namespaceURI]);
+            }(currentNode) || ("noscript" === tagName || "noembed" === tagName || "noframes" === tagName) && regExpTest(FALLBACK_TAG_CLOSE, currentNode.innerHTML) ? (_forceRemove(currentNode), 
+            !0) : (SAFE_FOR_TEMPLATES && currentNode.nodeType === NODE_TYPE.text && (content = _stripTemplateExpressions(currentNode.textContent), 
+            currentNode.textContent !== content) && (arrayPush(DOMPurify.removed, {
+                element: currentNode.cloneNode()
+            }), currentNode.textContent = content), _executeHooks(hooks.afterSanitizeElements, currentNode, null), 
+            !1) : function(currentNode, tagName) {
+                if (!FORBID_TAGS[tagName] && _isBasicCustomElement(tagName)) {
+                    if (CUSTOM_ELEMENT_HANDLING.tagNameCheck instanceof RegExp && regExpTest(CUSTOM_ELEMENT_HANDLING.tagNameCheck, tagName)) return !1;
+                    if (CUSTOM_ELEMENT_HANDLING.tagNameCheck instanceof Function && CUSTOM_ELEMENT_HANDLING.tagNameCheck(tagName)) return !1;
+                }
+                if (KEEP_CONTENT && !FORBID_CONTENTS[tagName]) {
+                    var parentNode = getParentNode(currentNode), childNodes = getChildNodes(currentNode);
+                    if (childNodes && parentNode) for (let i = childNodes.length - 1; 0 <= i; --i) {
+                        var hoisted = IN_PLACE ? childNodes[i] : cloneNode(childNodes[i], !0);
+                        parentNode.insertBefore(hoisted, getNextSibling(currentNode));
                     }
                 }
-            }
-            return _forceRemove(currentNode), !0;
+                return _forceRemove(currentNode), !0;
+            }(currentNode, tagName);
         }, RESERVED_CUSTOM_ELEMENT_NAMES = addToSet({}, [ "annotation-xml", "color-profile", "font-face", "font-face-format", "font-face-name", "font-face-src", "font-face-uri", "missing-glyph" ]), _isBasicCustomElement = function(tagName) {
             return !RESERVED_CUSTOM_ELEMENT_NAMES[stringToLowerCase(tagName)] && regExpTest(CUSTOM_ELEMENT$1, tagName);
         }, _sanitizeAttributes = function(currentNode) {
@@ -2776,42 +2813,69 @@
                     forceKeepAttr: void 0
                 };
                 let l = attributes.length;
-                for (;l--; ) {
+                for (var lcTag = transformCaseFunc(currentNode.nodeName); l--; ) {
                     var name = (attr = attributes[l]).name, namespaceURI = attr.namespaceURI, attr = attr.value, lcName = transformCaseFunc(name);
                     let value = "value" === name ? attr : stringTrim(attr);
-                    if (hookEvent.attrName = lcName, hookEvent.attrValue = value, 
-                    hookEvent.keepAttr = !0, hookEvent.forceKeepAttr = void 0, _executeHooks(hooks.uponSanitizeAttribute, currentNode, hookEvent), 
+                    hookEvent.attrName = lcName, hookEvent.attrValue = value, hookEvent.keepAttr = !0, 
+                    hookEvent.forceKeepAttr = void 0, _executeHooks(hooks.uponSanitizeAttribute, currentNode, hookEvent), 
                     value = hookEvent.attrValue, !SANITIZE_NAMED_PROPS || "id" !== lcName && "name" !== lcName || 0 === stringIndexOf(value, "user-content-") || (_removeAttribute(name, currentNode), 
-                    value = "user-content-" + value), SAFE_FOR_XML && regExpTest(/((--!?|])>)|<\/(style|script|title|xmp|textarea|noscript|iframe|noembed|noframes)/i, value)) _removeAttribute(name, currentNode); else if ("attributename" === lcName && stringMatch(value, "href")) _removeAttribute(name, currentNode); else if (!hookEvent.forceKeepAttr) if (hookEvent.keepAttr) if (!ALLOW_SELF_CLOSE_IN_ATTR && regExpTest(/\/>/i, value)) _removeAttribute(name, currentNode); else {
-                        SAFE_FOR_TEMPLATES && arrayForEach([ MUSTACHE_EXPR$1, ERB_EXPR$1, TMPLIT_EXPR$1 ], expr => {
-                            value = stringReplace(value, expr, " ");
-                        });
-                        var lcTag = transformCaseFunc(currentNode.nodeName);
-                        if (_isValidAttribute(lcTag, lcName, value)) {
-                            if (trustedTypesPolicy && "object" == typeof trustedTypes && "function" == typeof trustedTypes.getAttributeType && !namespaceURI) switch (trustedTypes.getAttributeType(lcTag, lcName)) {
-                              case "TrustedHTML":
-                                value = trustedTypesPolicy.createHTML(value);
-                                break;
+                    value = "user-content-" + value), SAFE_FOR_XML && regExpTest(/((--!?|])>)|<\/(style|script|title|xmp|textarea|noscript|iframe|noembed|noframes)/i, value) || "attributename" === lcName && stringMatch(value, "href") ? _removeAttribute(name, currentNode) : hookEvent.forceKeepAttr || (hookEvent.keepAttr && (ALLOW_SELF_CLOSE_IN_ATTR || !regExpTest(SELF_CLOSING_TAG, value)) && _isValidAttribute(lcTag, lcName, value = SAFE_FOR_TEMPLATES ? _stripTemplateExpressions(value) : value) ? (value = function(lcTag, lcName, namespaceURI, value) {
+                        if (trustedTypesPolicy && "object" == typeof trustedTypes && "function" == typeof trustedTypes.getAttributeType && !namespaceURI) switch (trustedTypes.getAttributeType(lcTag, lcName)) {
+                          case "TrustedHTML":
+                            return _createTrustedHTML(value);
 
-                              case "TrustedScriptURL":
-                                value = trustedTypesPolicy.createScriptURL(value);
+                          case "TrustedScriptURL":
+                            var scriptUrl = value;
+                            _assertNotInTrustedTypesPolicy(), IN_TRUSTED_TYPES_POLICY++;
+                            try {
+                                return trustedTypesPolicy.createScriptURL(scriptUrl);
+                            } finally {
+                                IN_TRUSTED_TYPES_POLICY--;
                             }
-                            if (value !== attr) try {
-                                namespaceURI ? currentNode.setAttributeNS(namespaceURI, name, value) : currentNode.setAttribute(name, value), 
-                                _isClobbered(currentNode) ? _forceRemove(currentNode) : arrayPop(DOMPurify.removed);
-                            } catch (_) {
-                                _removeAttribute(name, currentNode);
-                            }
-                        } else _removeAttribute(name, currentNode);
-                    } else _removeAttribute(name, currentNode);
+                            return;
+                        }
+                        return value;
+                    }(lcTag, lcName, namespaceURI, value)) !== attr && function(currentNode, name, namespaceURI, value) {
+                        try {
+                            namespaceURI ? currentNode.setAttributeNS(namespaceURI, name, value) : currentNode.setAttribute(name, value), 
+                            _isClobbered(currentNode) ? _forceRemove(currentNode) : arrayPop(DOMPurify.removed);
+                        } catch (_) {
+                            _removeAttribute(name, currentNode);
+                        }
+                    }(currentNode, name, namespaceURI, value) : _removeAttribute(name, currentNode));
                 }
                 _executeHooks(hooks.afterSanitizeAttributes, currentNode, null);
             }
         }, _sanitizeShadowDOM2 = function(fragment) {
             var shadowNode, shadowIterator = _createNodeIterator(fragment);
             for (_executeHooks(hooks.beforeSanitizeShadowDOM, fragment, null); shadowNode = shadowIterator.nextNode(); ) _executeHooks(hooks.uponSanitizeShadowNode, shadowNode, null), 
-            _sanitizeElements(shadowNode), _sanitizeAttributes(shadowNode), _isDocumentFragment(shadowNode.content) && _sanitizeShadowDOM2(shadowNode.content);
+            _sanitizeElements(shadowNode), _sanitizeAttributes(shadowNode), _isDocumentFragment(shadowNode.content) && _sanitizeShadowDOM2(shadowNode.content), 
+            (getNodeType ? getNodeType(shadowNode) : shadowNode.nodeType) === NODE_TYPE.element && (shadowNode = getShadowRoot(shadowNode), 
+            _isDocumentFragment(shadowNode)) && (_sanitizeAttachedShadowRoots(shadowNode), 
+            _sanitizeShadowDOM2(shadowNode));
             _executeHooks(hooks.afterSanitizeShadowDOM, fragment, null);
+        }, _sanitizeAttachedShadowRoots = function(root) {
+            for (var stack = [ {
+                node: root,
+                shadow: null
+            } ]; 0 < stack.length; ) if ((item = stack.pop()).shadow) _sanitizeShadowDOM2(item.shadow); else {
+                var rootName, item = item.node, isElement = (getNodeType ? getNodeType(item) : item.nodeType) === NODE_TYPE.element, childNodes = getChildNodes(item);
+                if (childNodes) for (let i = childNodes.length - 1; 0 <= i; --i) stack.push({
+                    node: childNodes[i],
+                    shadow: null
+                });
+                isElement && "string" == typeof (rootName = getNodeName ? getNodeName(item) : null) && "template" === transformCaseFunc(rootName) && (rootName = item.content, 
+                _isDocumentFragment(rootName)) && stack.push({
+                    node: rootName,
+                    shadow: null
+                }), isElement && (rootName = getShadowRoot(item), _isDocumentFragment(rootName)) && stack.push({
+                    node: null,
+                    shadow: rootName
+                }, {
+                    node: rootName,
+                    shadow: null
+                });
+            }
         };
         return DOMPurify.sanitize = function(dirty) {
             var currentNode, cfg = 1 < arguments.length && void 0 !== arguments[1] ? arguments[1] : {};
@@ -2846,43 +2910,69 @@
                 }
             }(dirty))) throw typeErrorCreate("dirty is not a string, aborting");
             if (!DOMPurify.isSupported) return dirty;
-            if (SET_CONFIG || _parseConfig(cfg), DOMPurify.removed = [], IN_PLACE = "string" != typeof dirty && IN_PLACE) {
-                if ("string" == typeof (cfg = getNodeName ? getNodeName(dirty) : dirty.nodeName) && (cfg = transformCaseFunc(cfg), 
-                !ALLOWED_TAGS[cfg] || FORBID_TAGS[cfg])) throw typeErrorCreate("root node is forbidden and cannot be sanitized in-place");
+            if (SET_CONFIG ? (ALLOWED_TAGS = SET_CONFIG_ALLOWED_TAGS, ALLOWED_ATTR = SET_CONFIG_ALLOWED_ATTR) : _parseConfig(cfg), 
+            (0 < hooks.uponSanitizeElement.length || 0 < hooks.uponSanitizeAttribute.length) && (ALLOWED_TAGS = clone(ALLOWED_TAGS)), 
+            0 < hooks.uponSanitizeAttribute.length && (ALLOWED_ATTR = clone(ALLOWED_ATTR)), 
+            DOMPurify.removed = [], cfg = IN_PLACE && "string" != typeof dirty && _isNode(dirty)) {
+                if ("string" == typeof (nn = getNodeName ? getNodeName(dirty) : dirty.nodeName)) {
+                    var nn = transformCaseFunc(nn);
+                    if (!ALLOWED_TAGS[nn] || FORBID_TAGS[nn]) throw typeErrorCreate("root node is forbidden and cannot be sanitized in-place");
+                }
                 if (_isClobbered(dirty)) throw typeErrorCreate("root node is clobbered and cannot be sanitized in-place");
-                _sanitizeAttachedShadowRoots2(dirty);
-            } else if (_isNode(dirty)) (cfg = (body = _initDocument("\x3c!----\x3e")).ownerDocument.importNode(dirty, !0)).nodeType === NODE_TYPE.element && "BODY" === cfg.nodeName || "HTML" === cfg.nodeName ? body = cfg : body.appendChild(cfg), 
-            _sanitizeAttachedShadowRoots2(cfg); else {
-                if (!RETURN_DOM && !SAFE_FOR_TEMPLATES && !WHOLE_DOCUMENT && -1 === dirty.indexOf("<")) return trustedTypesPolicy && RETURN_TRUSTED_TYPE ? trustedTypesPolicy.createHTML(dirty) : dirty;
+                try {
+                    _sanitizeAttachedShadowRoots(dirty);
+                } catch (error) {
+                    throw _neutralizeRoot(dirty), error;
+                }
+            } else if (_isNode(dirty)) (nn = (body = _initDocument("\x3c!----\x3e")).ownerDocument.importNode(dirty, !0)).nodeType === NODE_TYPE.element && "BODY" === nn.nodeName || "HTML" === nn.nodeName ? body = nn : body.appendChild(nn), 
+            _sanitizeAttachedShadowRoots(nn); else {
+                if (!RETURN_DOM && !SAFE_FOR_TEMPLATES && !WHOLE_DOCUMENT && -1 === dirty.indexOf("<")) return trustedTypesPolicy && RETURN_TRUSTED_TYPE ? _createTrustedHTML(dirty) : dirty;
                 if (!(body = _initDocument(dirty))) return RETURN_DOM ? null : RETURN_TRUSTED_TYPE ? emptyHTML : "";
             }
             body && FORCE_BODY && _forceRemove(body.firstChild);
-            for (var nodeIterator = _createNodeIterator(IN_PLACE ? dirty : body); currentNode = nodeIterator.nextNode(); ) _sanitizeElements(currentNode), 
-            _sanitizeAttributes(currentNode), _isDocumentFragment(currentNode.content) && _sanitizeShadowDOM2(currentNode.content);
-            if (IN_PLACE) return SAFE_FOR_TEMPLATES && _scrubTemplateExpressions(dirty), 
-            dirty;
+            var nodeIterator = _createNodeIterator(cfg ? dirty : body);
+            try {
+                for (;currentNode = nodeIterator.nextNode(); ) _sanitizeElements(currentNode), 
+                _sanitizeAttributes(currentNode), _isDocumentFragment(currentNode.content) && _sanitizeShadowDOM2(currentNode.content);
+            } catch (error) {
+                throw cfg && _neutralizeRoot(dirty), error;
+            }
+            if (cfg) return arrayForEach(DOMPurify.removed, entry => {
+                if (entry.element) for (var stack = [ entry.element ]; 0 < stack.length; ) {
+                    var node = stack.pop(), childNodes = ((getNodeType ? getNodeType(node) : node.nodeType) === NODE_TYPE.element && function(element) {
+                        var attributes = getAttributes(element);
+                        if (attributes) for (let i = attributes.length - 1; 0 <= i; --i) {
+                            var attribute = (attribute = attributes[i]) && attribute.name;
+                            if ("string" == typeof attribute && !ALLOWED_ATTR[transformCaseFunc(attribute)]) try {
+                                element.removeAttribute(attribute);
+                            } catch (_) {}
+                        }
+                    }(node), getChildNodes(node));
+                    if (childNodes) for (let i = childNodes.length - 1; 0 <= i; --i) stack.push(childNodes[i]);
+                }
+            }), SAFE_FOR_TEMPLATES && _scrubTemplateExpressions2(dirty), dirty;
             if (RETURN_DOM) {
-                if (SAFE_FOR_TEMPLATES && _scrubTemplateExpressions(body), RETURN_DOM_FRAGMENT) for (returnNode = createDocumentFragment.call(body.ownerDocument); body.firstChild; ) returnNode.appendChild(body.firstChild); else returnNode = body;
+                if (SAFE_FOR_TEMPLATES && _scrubTemplateExpressions2(body), RETURN_DOM_FRAGMENT) for (returnNode = createDocumentFragment.call(body.ownerDocument); body.firstChild; ) returnNode.appendChild(body.firstChild); else returnNode = body;
                 return returnNode = ALLOWED_ATTR.shadowroot || ALLOWED_ATTR.shadowrootmode ? importNode.call(originalDocument, returnNode, !0) : returnNode;
             }
             let serializedHTML = WHOLE_DOCUMENT ? body.outerHTML : body.innerHTML;
             return WHOLE_DOCUMENT && ALLOWED_TAGS["!doctype"] && body.ownerDocument && body.ownerDocument.doctype && body.ownerDocument.doctype.name && regExpTest(DOCTYPE_NAME, body.ownerDocument.doctype.name) && (serializedHTML = "<!DOCTYPE " + body.ownerDocument.doctype.name + ">\n" + serializedHTML), 
-            SAFE_FOR_TEMPLATES && arrayForEach([ MUSTACHE_EXPR$1, ERB_EXPR$1, TMPLIT_EXPR$1 ], expr => {
-                serializedHTML = stringReplace(serializedHTML, expr, " ");
-            }), trustedTypesPolicy && RETURN_TRUSTED_TYPE ? trustedTypesPolicy.createHTML(serializedHTML) : serializedHTML;
+            SAFE_FOR_TEMPLATES && (serializedHTML = _stripTemplateExpressions(serializedHTML)), 
+            trustedTypesPolicy && RETURN_TRUSTED_TYPE ? _createTrustedHTML(serializedHTML) : serializedHTML;
         }, DOMPurify.setConfig = function() {
             _parseConfig(0 < arguments.length && void 0 !== arguments[0] ? arguments[0] : {}), 
-            SET_CONFIG = !0;
+            SET_CONFIG = !0, SET_CONFIG_ALLOWED_TAGS = ALLOWED_TAGS, SET_CONFIG_ALLOWED_ATTR = ALLOWED_ATTR;
         }, DOMPurify.clearConfig = function() {
-            CONFIG = null, SET_CONFIG = !1;
+            CONFIG = null, SET_CONFIG = !1, SET_CONFIG_ALLOWED_TAGS = null, SET_CONFIG_ALLOWED_ATTR = null, 
+            trustedTypesPolicy = defaultTrustedTypesPolicy, emptyHTML = "";
         }, DOMPurify.isValidAttribute = function(tag, attr, value) {
             return CONFIG || _parseConfig({}), _isValidAttribute(tag = transformCaseFunc(tag), attr = transformCaseFunc(attr), value);
         }, DOMPurify.addHook = function(entryPoint, hookFunction) {
-            "function" == typeof hookFunction && arrayPush(hooks[entryPoint], hookFunction);
+            "function" == typeof hookFunction && objectHasOwnProperty(hooks, entryPoint) && arrayPush(hooks[entryPoint], hookFunction);
         }, DOMPurify.removeHook = function(entryPoint, hookFunction) {
-            return void 0 !== hookFunction ? -1 === (hookFunction = arrayLastIndexOf(hooks[entryPoint], hookFunction)) ? void 0 : arraySplice(hooks[entryPoint], hookFunction, 1)[0] : arrayPop(hooks[entryPoint]);
+            if (objectHasOwnProperty(hooks, entryPoint)) return void 0 !== hookFunction ? -1 === (hookFunction = arrayLastIndexOf(hooks[entryPoint], hookFunction)) ? void 0 : arraySplice(hooks[entryPoint], hookFunction, 1)[0] : arrayPop(hooks[entryPoint]);
         }, DOMPurify.removeHooks = function(entryPoint) {
-            hooks[entryPoint] = [];
+            objectHasOwnProperty(hooks, entryPoint) && (hooks[entryPoint] = []);
         }, DOMPurify.removeAllHooks = function() {
             hooks = _createHooksMap();
         }, DOMPurify;
@@ -3033,28 +3123,34 @@
     !function(tinymce) {
         var each = tinymce.each, isDomSafe = tinymce.util.URI.isDomSafe, filteredUrlAttrs = tinymce.makeMap("src,href,data,background,action,formaction,poster,xlink:href");
         tinymce.html.Sanitizer = function(settings, schema) {
-            var special = schema.getSpecialElements(), uid = 0;
+            var self = this, special = schema.getSpecialElements(), uid = 0;
             function isBooleanAttribute(name) {
                 var boolAttrMap = schema.getBoolAttrs();
                 return boolAttrMap[name] || boolAttrMap[name.toLowerCase()];
             }
             function shouldKeepAttribute(attrName, attrValue, tagName) {
                 return attrName = attrName.toLowerCase(), tagName = tagName.toLowerCase(), 
-                !(attrName in filteredUrlAttrs && !isDomSafe(attrValue, tagName, settings) || settings.validate && !/-/.test(attrName) && (/^on[a-z]+/i.test(attrName) && !settings.allow_event_attributes || !schema.isValid(tagName, attrName)));
+                !(attrName in filteredUrlAttrs && !isDomSafe(attrValue, tagName, settings) || settings.validate && !/-/.test(attrName) && ((/^on[a-z]+/i.test(attrName) || 0 === attrName.indexOf("on")) && !settings.allow_event_attributes || !schema.isValid(tagName, attrName)));
             }
             function processNode(node, evt) {
                 if (1 === node.nodeType) {
+                    !function(node) {
+                        if (self.mode) for (var name, attrs = node.attributes, tag = node.tagName.toLowerCase(), i = attrs.length - 1; 0 <= i; i--) 0 === (name = attrs[i].name.toLowerCase()).indexOf("data-mce-on") ? ("restore" === self.mode && settings.allow_event_attributes && node.setAttribute(name.substr(9), attrs[i].value), 
+                        node.removeAttribute(name)) : "store" === self.mode && 0 === name.indexOf("on") && (settings.allow_event_attributes && schema.isValid(tag, name) && node.setAttribute("data-mce-" + name, attrs[i].value), 
+                        node.removeAttribute(name));
+                    }(node);
                     var tag = node.tagName.toLowerCase();
-                    if ("body" !== tag) if (node.hasAttribute("data-mce-root")) evt && (evt.allowedTags[tag] = !0); else if (node.hasAttribute("data-mce-type")) evt && (evt.allowedTags[tag] = !0); else if (node.hasAttribute("data-mce-bogus")) removeNode(node); else {
+                    if ("body" !== tag) if (node.hasAttribute("data-mce-root")) evt && (evt.allowedTags[tag] = !0); else if (node.hasAttribute("data-mce-type")) evt && (evt.allowedTags[tag] = !0); else if (node.hasAttribute("data-mce-bogus")) evt || removeNode(node); else {
+                        if ("IFRAME" === node.nodeName && (node.firstElementChild || /<[\/\w!]/.test(node.textContent))) for (;node.firstChild; ) node.removeChild(node.firstChild);
                         var rule = schema.getElementRule(tag);
-                        if (settings.validate && !rule) tag in special ? removeNode(node) : removeNode(node, !0); else if (evt && (evt.allowedTags[tag] = !0), 
+                        if (settings.validate && !rule) evt || (tag in special ? removeNode(node) : removeNode(node, !0)); else if (evt && (evt.allowedTags[tag] = !0), 
                         settings.validate && rule) if (each(rule.attributesForced, function(attr) {
                             node.setAttribute(attr.name, "{$uid}" === attr.value ? "mce_" + uid++ : attr.value);
                         }), each(rule.attributesDefault, function(attr) {
                             node.hasAttribute(attr.name) || node.setAttribute(attr.name, "{$uid}" === attr.value ? "mce_" + uid++ : attr.value);
                         }), rule.attributesRequired && !rule.attributesRequired.some(function(attr) {
                             return node.hasAttribute(attr.name);
-                        })) removeNode(node, !0); else if (rule.removeEmptyAttrs && 0 === node.attributes.length) removeNode(node, !0); else if (rule.outputName && rule.outputName !== tag) {
+                        })) evt ? evt.allowedTags[tag] = !1 : removeNode(node, !0); else if (rule.removeEmptyAttrs && 0 === node.attributes.length) evt ? evt.allowedTags[tag] = !1 : removeNode(node, !0); else if (rule.outputName && rule.outputName !== tag) if (evt) node.setAttribute("data-mce-rename", rule.outputName); else {
                             for (var newNode = document.createElement(rule.outputName); node.firstChild; ) newNode.appendChild(node.firstChild);
                             node.parentNode.replaceChild(newNode, node), node = newNode;
                         }
@@ -3071,9 +3167,9 @@
                     parent.removeChild(node);
                 }
             }
-            this.sanitize = function(body, mimeType) {
+            self.mode = null, this.sanitize = function(body, mimeType) {
                 if (!1 !== settings.sanitize_html) return function(body, mimeType) {
-                    var purifier = purify(), mimeType = (purifier.removeAllHooks(), 
+                    for (var purifier = purify(), mimeType = (purifier.removeAllHooks(), 
                     purifier.addHook("uponSanitizeElement", function(node, data) {
                         processNode(node, data);
                     }), purifier.addHook("uponSanitizeAttribute", function(node, data) {
@@ -3082,251 +3178,33 @@
                         data.keepAttr ? settings.allow_svg_data_urls && data.attrValue.startsWith("data:image/svg+xml") ? data.forceKeepAttr = !0 : (isBooleanAttribute(attrName) && (data.attrValue = attrName), 
                         data.allowedAttributes[attrName] = !0) : node.hasAttribute("data-mce-type") && [ "id", "class", "style" ].includes(attrName) && (data.forceKeepAttr = !0);
                     }), function(mimeType) {
-                        var config = {
+                        return mimeType = {
                             IN_PLACE: !0,
                             ALLOW_UNKNOWN_PROTOCOLS: !0,
                             ALLOWED_TAGS: [ "#comment", "#cdata-section", "body" ],
                             ALLOWED_ATTR: [],
                             PARSER_MEDIA_TYPE: mimeType,
                             SAFE_FOR_XML: !0
-                        };
-                        return settings.allow_script_urls ? config.ALLOWED_URI_REGEXP = /.*/ : settings.allow_html_data_urls && (config.ALLOWED_URI_REGEXP = /^(?!(\w+script|mhtml):)/i), 
-                        (schema.isValid("script") || schema.isValid("style")) && (config.FORCE_BODY = !0), 
-                        each(schema.getValidElements(), function(rule, tag) {
-                            config.ALLOWED_TAGS.push(tag);
-                        }), config;
-                    }(mimeType));
-                    return "string" == typeof body && (mimeType.RETURN_DOM = !1), 
-                    purifier.sanitize(body, mimeType), purifier.removed = [], body;
+                        }, settings.allow_script_urls ? mimeType.ALLOWED_URI_REGEXP = /.*/ : settings.allow_html_data_urls && (mimeType.ALLOWED_URI_REGEXP = /^(?!(\w+script|mhtml):)/i), 
+                        (schema.isValid("script") || schema.isValid("style")) && (mimeType.FORCE_BODY = !0), 
+                        mimeType;
+                    }(mimeType)), toRename = ("string" == typeof body && (mimeType.RETURN_DOM = !1), 
+                    purifier.sanitize(body, mimeType), body.querySelectorAll ? body.querySelectorAll("[data-mce-rename]") : []), r = toRename.length; r--; ) {
+                        for (var orig = toRename[r], outputName = orig.getAttribute("data-mce-rename"), renamed = (orig.removeAttribute("data-mce-rename"), 
+                        document.createElement(outputName)), attrs = orig.attributes, a = attrs.length - 1; 0 <= a; a--) renamed.setAttribute(attrs[a].name, attrs[a].value);
+                        for (;orig.firstChild; ) renamed.appendChild(orig.firstChild);
+                        orig.parentNode && orig.parentNode.replaceChild(renamed, orig);
+                    }
+                    return purifier.removed = [], body;
                 }(body, mimeType);
                 for (var node, iterator = document.createNodeIterator(body, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_COMMENT | NodeFilter.SHOW_TEXT); node = iterator.nextNode(); ) processNode(node), 
                 1 === node.nodeType && function(node) {
                     for (var attrs = node.attributes, tag = node.tagName.toLowerCase(), i = attrs.length - 1; 0 <= i; i--) {
                         var name = attrs[i].name;
-                        if (!shouldKeepAttribute(name, attrs[i].value, tag)) {
-                            if (node.hasAttribute("data-mce-type") && [ "id", "class", "style" ].includes(name)) continue;
-                            node.removeAttribute(name);
-                        }
-                        isBooleanAttribute(name) && node.setAttribute(name, name);
+                        shouldKeepAttribute(name, attrs[i].value, tag) ? isBooleanAttribute(name) && node.setAttribute(name, name) : node.hasAttribute("data-mce-type") && [ "id", "class", "style" ].includes(name) || node.removeAttribute(name);
                     }
                 }(node);
                 return body;
-            };
-        };
-    }(tinymce), function(tinymce) {
-        var Node = tinymce.html.Node, each = tinymce.each, explode = tinymce.explode, extend = tinymce.extend, makeMap = tinymce.makeMap;
-        tinymce.html.DomParser = function(settings, schema) {
-            var self = this, nodeFilters = {}, attributeFilters = [], matchedNodes = {}, matchedAttributes = {}, Sanitizer = ((settings = settings || {}).validate = !("validate" in settings) || settings.validate, 
-            settings.root_name = settings.root_name || "body", self.schema = schema = schema || new tinymce.html.Schema(), 
-            settings.sanitize_html = !("sanitize_html" in settings) || settings.sanitize_html, 
-            new tinymce.html.Sanitizer(settings, schema));
-            self.filterNode = function(node) {
-                var i, name, list;
-                name in nodeFilters && ((list = matchedNodes[name]) ? list.push(node) : matchedNodes[name] = [ node ]), 
-                i = attributeFilters.length;
-                for (;i--; ) (name = attributeFilters[i].name) in node.attributes.map && ((list = matchedAttributes[name]) ? list.push(node) : matchedAttributes[name] = [ node ]);
-                return node;
-            }, self.addNodeFilter = function(name, callback) {
-                each(explode(name), function(name) {
-                    var list = nodeFilters[name];
-                    list || (nodeFilters[name] = list = []), list.push(callback);
-                });
-            }, self.addAttributeFilter = function(name, callback) {
-                each(explode(name), function(name) {
-                    for (var i = 0; i < attributeFilters.length; i++) if (attributeFilters[i].name === name) return void attributeFilters[i].callbacks.push(callback);
-                    attributeFilters.push({
-                        name: name,
-                        callbacks: [ callback ]
-                    });
-                });
-            }, self.parse = function(html, args) {
-                var parser, rootNode, node, nodes, i, l, fi, fl, list, name, validate, blockElements, startWhiteSpaceRegExp, isInWhiteSpacePreservedElement, endWhiteSpaceRegExp, allWhiteSpaceRegExp, isAllWhiteSpaceRegExp, whiteSpaceElements, children, nonEmptyElements, rootBlockName, invalidChildren = [];
-                function createNode(name, type) {
-                    var list, type = new Node(name, type);
-                    return name in nodeFilters && ((list = matchedNodes[name]) ? list.push(type) : matchedNodes[name] = [ type ]), 
-                    type;
-                }
-                function removeWhitespaceBefore(node) {
-                    for (var textVal, blockElements = schema.getBlockElements(), textNode = node.prev; textNode && 3 === textNode.type; ) {
-                        if (0 < (textVal = textNode.value.replace(endWhiteSpaceRegExp, "")).length) return textNode.value = textVal;
-                        if (textVal = textNode.next) {
-                            if (3 == textVal.type && textVal.value.length) {
-                                textNode = textNode.prev;
-                                continue;
-                            }
-                            if (!blockElements[textVal.name] && "script" != textVal.name && "style" != textVal.name) {
-                                textNode = textNode.prev;
-                                continue;
-                            }
-                        }
-                        textVal = textNode.prev, textNode.remove(), textNode = textVal;
-                    }
-                }
-                if (args = args || {}, matchedNodes = {}, matchedAttributes = {}, 
-                blockElements = extend(makeMap("script,style,head,html,body,title,meta,param"), schema.getBlockElements()), 
-                nonEmptyElements = schema.getNonEmptyElements(), children = schema.children, 
-                validate = settings.validate, rootBlockName = ("forced_root_block" in args ? args : settings).forced_root_block, 
-                whiteSpaceElements = schema.getWhiteSpaceElements(), startWhiteSpaceRegExp = /^[ \t\r\n]+/, 
-                endWhiteSpaceRegExp = /[ \t\r\n]+$/, allWhiteSpaceRegExp = /[ \t\r\n]+/g, 
-                isAllWhiteSpaceRegExp = /^[ \t\r\n]+$/, parser = new tinymce.html.SaxParser({
-                    validate: validate,
-                    allow_script_urls: settings.allow_script_urls,
-                    allow_conditional_comments: settings.allow_conditional_comments,
-                    allow_event_attributes: settings.allow_event_attributes,
-                    self_closing_elements: function(input) {
-                        var name, output = {};
-                        for (name in input) "li" !== name && "p" != name && (output[name] = input[name]);
-                        return output;
-                    }(schema.getSelfClosingElements()),
-                    cdata: function(text) {
-                        node.append(createNode("#cdata", 4)).value = text;
-                    },
-                    text: function(text, raw) {
-                        var textNode;
-                        isInWhiteSpacePreservedElement || (text = text.replace(allWhiteSpaceRegExp, " "), 
-                        node.lastChild && blockElements[node.lastChild.name] && (text = text.replace(startWhiteSpaceRegExp, ""))), 
-                        0 !== text.length && ((textNode = createNode("#text", 3)).raw = !!raw, 
-                        node.append(textNode).value = text);
-                    },
-                    comment: function(text) {
-                        node.append(createNode("#comment", 8)).value = text;
-                    },
-                    pi: function(name, text) {
-                        node.append(createNode(name, 7)).value = text, removeWhitespaceBefore(node);
-                    },
-                    doctype: function(text) {
-                        node.append(createNode("#doctype", 10)).value = text, removeWhitespaceBefore(node);
-                    },
-                    start: function(name, attrs, empty) {
-                        var newNode, attrFiltersLen, attrName, elementRule = validate ? schema.getElementRule(name) : {};
-                        if (elementRule) {
-                            for ((newNode = createNode(elementRule.outputName || name, 1)).attributes = attrs, 
-                            newNode.shortEnded = empty, node.append(newNode), (elementRule = children[node.name]) && children[newNode.name] && !elementRule[newNode.name] && invalidChildren.push(newNode), 
-                            attrFiltersLen = attributeFilters.length; attrFiltersLen--; ) (attrName = attributeFilters[attrFiltersLen].name) in attrs.map && ((list = matchedAttributes[attrName]) ? list.push(newNode) : matchedAttributes[attrName] = [ newNode ]);
-                            blockElements[name] && removeWhitespaceBefore(newNode), 
-                            empty || (node = newNode), !isInWhiteSpacePreservedElement && whiteSpaceElements[name] && (isInWhiteSpacePreservedElement = !0);
-                        }
-                    },
-                    end: function(name) {
-                        var textNode, text, sibling, elementRule = validate ? schema.getElementRule(name) : {};
-                        if (elementRule) {
-                            if (blockElements[name] && !isInWhiteSpacePreservedElement) {
-                                if ((textNode = node.firstChild) && 3 === textNode.type) if (0 < (text = textNode.value.replace(startWhiteSpaceRegExp, "")).length) textNode.value = text, 
-                                textNode = textNode.next; else for (sibling = textNode.next, 
-                                textNode.remove(), textNode = sibling; textNode && 3 === textNode.type; ) text = textNode.value, 
-                                sibling = textNode.next, 0 !== text.length && !isAllWhiteSpaceRegExp.test(text) || (textNode.remove(), 
-                                textNode = sibling), textNode = sibling;
-                                if ((textNode = node.lastChild) && 3 === textNode.type) if (0 < (text = textNode.value.replace(endWhiteSpaceRegExp, "")).length) textNode.value = text, 
-                                textNode = textNode.prev; else for (sibling = textNode.prev, 
-                                textNode.remove(), textNode = sibling; textNode && 3 === textNode.type; ) text = textNode.value, 
-                                sibling = textNode.prev, 0 !== text.length && !isAllWhiteSpaceRegExp.test(text) || (textNode.remove(), 
-                                textNode = sibling), textNode = sibling;
-                            }
-                            if (isInWhiteSpacePreservedElement && whiteSpaceElements[name] && (isInWhiteSpacePreservedElement = !1), 
-                            (elementRule.removeEmpty || elementRule.paddEmpty) && node.isEmpty(nonEmptyElements)) if (elementRule.paddEmpty) node.empty().append(new Node("#text", "3")).value = "\xa0"; else if (!node.attributes.map.name && !node.attributes.map.id) return name = node.parent, 
-                            blockElements[node.name] ? node.empty().remove() : node.unwrap(), 
-                            void (node = name);
-                            node = node.parent;
-                        }
-                    }
-                }, schema), !1 !== settings.sanitize_html && (html = Sanitizer.sanitize(html, "text/html")), 
-                rootNode = node = new Node(args.context || settings.root_name, 11), 
-                parser.parse(html), validate && invalidChildren.length && (args.context ? args.invalid = !0 : function(nodes) {
-                    for (var node, parent, parents, newParent, currentNode, tempNode, childNode, i, sibling, nextNode, nonSplitableElements = makeMap("tr,td,th,tbody,thead,tfoot,table"), nonEmptyElements = schema.getNonEmptyElements(), textBlockElements = schema.getTextBlockElements(), specialElements = schema.getSpecialElements(), removeOrUnwrapInvalidNode = function(node, originalNodeParent) {
-                        if (specialElements[node.name]) node.empty().remove(); else {
-                            var childNode;
-                            for (childNode of node.children()) schema.isValidChild(originalNodeParent.name, childNode.name) || removeOrUnwrapInvalidNode(childNode, originalNodeParent);
-                            node.unwrap();
-                        }
-                    }, ni = 0; ni < nodes.length; ni++) if ((node = nodes[ni]).parent && !node.fixed) if (textBlockElements[node.name] && "li" == node.parent.name) {
-                        for (sibling = node.next; sibling && textBlockElements[sibling.name]; ) sibling.name = "li", 
-                        sibling.fixed = !0, node.parent.insert(sibling, node.parent), 
-                        sibling = sibling.next;
-                        node.unwrap(node);
-                    } else {
-                        for (parents = [ node ], parent = node.parent; parent && !schema.isValidChild(parent.name, node.name) && !nonSplitableElements[parent.name]; parent = parent.parent) parents.push(parent);
-                        if (parent && 1 < parents.length) if (schema.isValidChild(parent.name, node.name)) {
-                            for (parents.reverse(), newParent = currentNode = self.filterNode(parents[0].clone()), 
-                            i = 0; i < parents.length - 1; i++) {
-                                for (schema.isValidChild(currentNode.name, parents[i].name) ? (tempNode = self.filterNode(parents[i].clone()), 
-                                currentNode.append(tempNode)) : tempNode = currentNode, 
-                                childNode = parents[i].firstChild; childNode && childNode != parents[i + 1]; ) nextNode = childNode.next, 
-                                tempNode.append(childNode), childNode = nextNode;
-                                currentNode = tempNode;
-                            }
-                            newParent.isEmpty(nonEmptyElements) ? parent.insert(node, parents[0], !0) : (parent.insert(newParent, parents[0], !0), 
-                            parent.insert(node, newParent)), ((parent = parents[0]).isEmpty(nonEmptyElements) || parent.firstChild === parent.lastChild && "br" === parent.firstChild.name) && parent.empty().remove();
-                        } else removeOrUnwrapInvalidNode(node, node.parent); else node.parent && ("li" === node.name ? !(sibling = node.prev) || "ul" !== sibling.name && "ol" !== sibling.name ? !(sibling = node.next) || "ul" !== sibling.name && "ol" !== sibling.name ? node.wrap(self.filterNode(new Node("ul", 1))) : sibling.insert(node, sibling.firstChild, !0) : sibling.append(node) : schema.isValidChild(node.parent.name, "div") && schema.isValidChild("div", node.name) ? node.wrap(self.filterNode(new Node("div", 1))) : removeOrUnwrapInvalidNode(node, node.parent));
-                    }
-                }(invalidChildren)), rootBlockName && ("body" == rootNode.name || args.isRootContent) && function() {
-                    var next, rootBlockNode, node = rootNode.firstChild;
-                    function trim(rootBlockNode) {
-                        rootBlockNode && ((node = rootBlockNode.firstChild) && 3 == node.type && (node.value = node.value.replace(startWhiteSpaceRegExp, "")), 
-                        node = rootBlockNode.lastChild) && 3 == node.type && (node.value = node.value.replace(endWhiteSpaceRegExp, ""));
-                    }
-                    if (schema.isValidChild(rootNode.name, rootBlockName.toLowerCase())) {
-                        for (;node; ) next = node.next, 3 == node.type && tinymce.trim(node.value) || 1 == node.type && "p" !== node.name && !blockElements[node.name] && !node.attr("data-mce-type") ? (rootBlockNode || ((rootBlockNode = createNode(rootBlockName, 1)).attr(settings.forced_root_block_attrs), 
-                        rootNode.insert(rootBlockNode, node)), rootBlockNode.append(node)) : (trim(rootBlockNode), 
-                        rootBlockNode = null), node = next;
-                        trim(rootBlockNode);
-                    }
-                }(), !args.invalid) {
-                    for (name in matchedNodes) {
-                        for (list = nodeFilters[name], fi = (nodes = matchedNodes[name]).length; fi--; ) nodes[fi].parent || nodes.splice(fi, 1);
-                        for (i = 0, l = list.length; i < l; i++) list[i](nodes, name, args);
-                    }
-                    for (i = 0, l = attributeFilters.length; i < l; i++) if ((list = attributeFilters[i]).name in matchedAttributes) {
-                        for (fi = (nodes = matchedAttributes[list.name]).length; fi--; ) nodes[fi].parent || nodes.splice(fi, 1);
-                        for (fi = 0, fl = list.callbacks.length; fi < fl; fi++) list.callbacks[fi](nodes, list.name, args);
-                    }
-                }
-                return rootNode;
-            }, settings.remove_trailing_brs && self.addNodeFilter("br", function(nodes) {
-                var i, node, parent, lastParent, prev, prevName, elementRule, l = nodes.length, blockElements = extend({}, schema.getBlockElements()), nonEmptyElements = schema.getNonEmptyElements();
-                for (blockElements.body = 1, i = 0; i < l; i++) if (parent = (node = nodes[i]).parent, 
-                blockElements[node.parent.name] && node === parent.lastChild) {
-                    for (prev = node.prev; prev; ) {
-                        if ("span" !== (prevName = prev.name) || "bookmark" !== prev.attr("data-mce-type")) {
-                            if ("br" !== prevName) break;
-                            if ("br" === prevName) {
-                                node = null;
-                                break;
-                            }
-                        }
-                        prev = prev.prev;
-                    }
-                    !node || node.attributes.length && "data-mce-bogus" !== node.attributes[0].name || (node.remove(), 
-                    parent.isEmpty(nonEmptyElements) && (elementRule = schema.getElementRule(parent.name)) && (elementRule.removeEmpty ? parent.remove() : elementRule.paddEmpty && (parent.empty().append(new Node("#text", 3)).value = "\xa0")));
-                } else {
-                    for (lastParent = node; parent && parent.firstChild === lastParent && parent.lastChild === lastParent && !blockElements[(lastParent = parent).name]; ) parent = parent.parent;
-                    lastParent === parent && ((elementRule = new Node("#text", 3)).value = "\xa0", 
-                    node.replace(elementRule));
-                }
-            }), self.addAttributeFilter("href", function(nodes) {
-                var node, i = nodes.length;
-                if (!settings.allow_unsafe_link_target) for (;i--; ) "a" === (node = nodes[i]).name && "_blank" === node.attr("target") && /:\/\//.test(node.attr("href")) && node.attr("rel", (node = (node = node.attr("rel")) ? tinymce.trim(node) : "", 
-                /\b(noopener)\b/g.test(node) ? node : function(rel) {
-                    return rel.split(" ").filter(function(p) {
-                        return 0 < p.length;
-                    }).concat([ "noopener" ]).sort().join(" ");
-                }(node)));
-            }), settings.allow_html_in_named_anchor || self.addAttributeFilter("id,name", function(nodes) {
-                for (var sibling, prevSibling, parent, node, i = nodes.length; i--; ) if ("a" === (node = nodes[i]).name && node.firstChild && !node.attr("href")) for (parent = node.parent, 
-                sibling = node.lastChild; prevSibling = sibling.prev, parent.insert(sibling, node), 
-                sibling = prevSibling; );
-            }), settings.validate && schema.getValidClasses() && self.addAttributeFilter("class", function(nodes) {
-                for (var node, classList, ci, className, classValue, validClassesMap, valid, i = nodes.length, validClasses = schema.getValidClasses(); i--; ) {
-                    for (classList = (node = nodes[i]).attr("class").split(" "), 
-                    classValue = "", ci = 0; ci < classList.length; ci++) className = classList[ci], 
-                    valid = !1, (validClassesMap = validClasses["*"]) && validClassesMap[className] && (valid = !0), 
-                    validClassesMap = validClasses[node.name], (valid = !(valid || !validClassesMap || !validClassesMap[className]) || valid) && (classValue && (classValue += " "), 
-                    classValue += className);
-                    classValue.length || (classValue = null), node.attr("class", classValue);
-                }
-            }), self.getNodeFilters = function() {
-                return nodeFilters;
-            }, self.getAttributeFilters = function() {
-                return attributeFilters;
             };
         };
     }(tinymce), function(tinymce) {
@@ -3335,8 +3213,8 @@
             var nodeFilters = [], attributeFilters = [], Sanitizer = ((settings = settings || {}).validate = !("validate" in settings) || settings.validate, 
             settings.root_name = settings.root_name || "body", this.schema = schema = schema || new tinymce.html.Schema(), 
             settings.sanitize_html = !("sanitize_html" in settings) || settings.sanitize_html, 
-            new tinymce.html.Sanitizer(settings, schema)), DomParser = new DOMParser();
-            this.addNodeFilter = function(name, callback) {
+            new tinymce.html.Sanitizer(settings, schema)), nativeParser = new DOMParser();
+            this.sanitizer = Sanitizer, this.addNodeFilter = function(name, callback) {
                 each(explode(name), function(name) {
                     for (var i = 0; i < nodeFilters.length; i++) if (nodeFilters[i].name === name) return void nodeFilters[i].callbacks.push(callback);
                     nodeFilters.push({
@@ -3380,8 +3258,8 @@
                 }
                 args = args || {};
                 var blockElements = extend(makeMap("script,style,head,html,body,title,meta,param"), schema.getBlockElements()), nonEmptyElements = schema.getNonEmptyElements(), shortEndedElements = schema.getShortEndedElements(), validate = settings.validate, rootBlockName = ("forced_root_block" in args ? args : settings).forced_root_block, whitespaceElements = schema.getWhiteSpaceElements(), textRootBlockElements = schema.getTextRootBlockElements(), startWhiteSpaceRegExp = /^[ \t\r\n]+/, endWhiteSpaceRegExp = /[ \t\r\n]+$/, allWhiteSpaceRegExp = /[ \t\r\n]+/g, html = function(html, rootName, format) {
-                    var mimeType = "xhtml" === format ? "application/xhtml+xml" : "text/html", isSpecialRoot = !!schema.getSpecialElements()[rootName.toLowerCase()], rootName = isSpecialRoot ? `<${rootName}>${html}</${rootName}>` : html, format = DomParser.parseFromString("xhtml" === format ? `<html xmlns="http://www.w3.org/1999/xhtml"><head></head><body>${rootName}</body></html>` : /^[\s]*<head/i.test(html) || /^[\s]*<html/i.test(html) || /^[\s]*<!DOCTYPE/i.test(html) ? `<html>${rootName}</html>` : `<body>${rootName}</body>`, mimeType).body, format = Sanitizer.sanitize(format, mimeType);
-                    return isSpecialRoot ? format.firstChild : format;
+                    var mimeType = "xhtml" === format ? "application/xhtml+xml" : "text/html", isSpecialRoot = !!schema.getSpecialElements()[rootName.toLowerCase()], rootName = isSpecialRoot ? `<${rootName}>${html}</${rootName}>` : html, format = nativeParser.parseFromString("xhtml" === format ? `<html xmlns="http://www.w3.org/1999/xhtml"><head></head><body>${rootName}</body></html>` : /^[\s]*<head/i.test(html) || /^[\s]*<html/i.test(html) || /^[\s]*<!DOCTYPE/i.test(html) ? `<html>${rootName}</html>` : `<body>${rootName}</body>`, mimeType).body, format = Sanitizer.sanitize(format, mimeType);
+                    return isSpecialRoot && format.firstChild || format;
                 }(html, rootName = (args.context || settings.root_name).toLowerCase(), args.format), [ rootName, html ] = (TransparentElements.updateChildren(schema, html), 
                 function transferChildren(parent, nativeParent, specialElements) {
                     for (var parentName = parent.name, isSpecial = (parentName in specialElements && "title" !== parentName && "textarea" !== parentName && "noscript" !== parentName), childNodes = nativeParent.childNodes, ni = 0, nl = childNodes.length; ni < nl; ni++) {
@@ -3757,7 +3635,7 @@
             }(node, "previousSibling", shallow);
         };
     }, function(tinymce) {
-        var each = tinymce.each, is = tinymce.is, isWebKit = tinymce.isWebKit, isIE = tinymce.isIE, Entities = tinymce.html.Entities, simpleSelectorRe = /^([a-z0-9],?)+$/i, whiteSpaceRegExp = /^[ \t\r\n]*$/;
+        var each = tinymce.each, is = tinymce.is, isWebKit = tinymce.isWebKit, isIE = tinymce.isIE, Entities = tinymce.html.Entities, whiteSpaceRegExp = /^[ \t\r\n]*$/, Arr = tinymce.util.Arr;
         function stringToArray(value) {
             return Array.isArray(value) ? value : "string" == typeof value ? value.split(" ") : [];
         }
@@ -3867,23 +3745,50 @@
                 return this._findSib(node, selector, "previousSibling");
             },
             select: function(selector, scope) {
-                return tinymce.dom.Sizzle(selector, this.get(scope) || this.get(this.settings.root_element) || this.doc, []);
+                if (!selector) return [];
+                if (!(selector = String(selector).trim())) return [];
+                scope = !(scope = this.get(scope) || this.get(this.settings.root_element) || this.doc) || 1 !== scope.nodeType && 9 !== scope.nodeType && 11 !== scope.nodeType ? this.doc : scope, 
+                selector = selector.split(",").map(function(value) {
+                    return ":scope " + value.trim();
+                }).join(",");
+                try {
+                    return Array.from(scope.querySelectorAll(selector));
+                } catch (e) {
+                    return [];
+                }
             },
-            unique: function(arr) {
-                return tinymce.dom.Sizzle.uniqueSort(arr);
+            unique: function(nodes) {
+                for (var seen = new Set(), out = [], i = 0; i < nodes.length; i++) {
+                    var n = nodes[i];
+                    seen.has(n) || (seen.add(n), out.push(n));
+                }
+                return out.sort(function(a, b) {
+                    return a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_PRECEDING ? 1 : -1;
+                }), out;
             },
             is: function(elm, selector) {
-                var i, elms;
-                if (void 0 === elm.length) {
-                    if ("*" === selector) return 1 == elm.nodeType;
-                    if (simpleSelectorRe.test(selector)) {
-                        for (selector = selector.toLowerCase().split(/,/), elm = elm.nodeName.toLowerCase(), 
-                        i = selector.length - 1; 0 <= i; i--) if (selector[i] == elm) return !0;
+                if (!elm) return !1;
+                if ("number" != typeof elm.length || elm.nodeType) {
+                    if ("*" === selector) return 1 === elm.nodeType;
+                    if (1 !== elm.nodeType) return !1;
+                    try {
+                        return elm.matches(selector);
+                    } catch (e) {
                         return !1;
                     }
                 }
-                return (!elm.nodeType || 1 == elm.nodeType) && (elms = elm.nodeType ? [ elm ] : elm, 
-                0 < tinymce.dom.Sizzle(selector, elms[0].ownerDocument || elms[0], null, elms).length);
+                return function(selector, elms) {
+                    if (elms = Arr.toArray(elms), "*" === selector) return elms.some(function(el) {
+                        return el && 1 === el.nodeType;
+                    });
+                    try {
+                        return elms.some(function(el) {
+                            return el && 1 === el.nodeType && el.matches(selector);
+                        });
+                    } catch (e) {
+                        return !1;
+                    }
+                }(selector, elm);
             },
             closest: function(n, selector) {
                 for (var result = []; n; ) {
@@ -3900,7 +3805,7 @@
                 return result;
             },
             contains: function(context, elm) {
-                return tinymce.dom.Sizzle.contains(context, elm);
+                return !(!context || !elm) && context.contains(elm);
             },
             add: function(p, n, a, h, c) {
                 var self = this;
@@ -5475,7 +5380,7 @@
     var clipboardData = {
         "text/html": "",
         "text/plain": ""
-    };
+    }, clipboardTimestamp = (clipboardData["x-tinymce/html"] = "", 0);
     function hasData() {
         return !!clipboardData["text/html"] || !!clipboardData["text/plain"] || !!clipboardData["x-tinymce/html"];
     }
@@ -5483,17 +5388,14 @@
         return mimetype ? clipboardData[mimetype] || null : clipboardData;
     }
     function setData(mimetype, content) {
-        clipboardData[mimetype] = {
-            timestamp: Date.now(),
-            content: content
-        };
+        clipboardData[mimetype] = content, clipboardTimestamp = Date.now();
     }
     function clearData() {
         clipboardData = {
             "text/html": "",
             "text/plain": "",
             "x-tinymce/html": ""
-        };
+        }, clipboardTimestamp = 0;
     }
     function cut(editor, evt) {
         !evt.isDefaultPrevented() && hasSelectedContent(editor) && setClipboardData(evt, getData(editor), fallback(editor), function() {
@@ -5511,7 +5413,6 @@
         return styleElement.textContent = content, doc.body.appendChild(styleElement), 
         styleElement.sheet.cssRules;
     }
-    clipboardData["x-tinymce/html"] = "";
     function noop() {}
     function setClipboardData(evt, data, fallback, done) {
         !function(clipboardData, html, text) {
@@ -5563,7 +5464,16 @@
             return !!editor.dom.getParent(editor.selection.getStart(), "td.mceSelected,th.mceSelected", editor.getBody());
         }(editor);
     }
-    var DomParser$2 = tinymce.html.DomParser, Schema$1 = tinymce.html.Schema, each$6 = tinymce.each, DOM = tinymce.DOM, mceInternalUrlPrefix = "data:text/mce-internal,";
+    var tablet = Object.freeze({
+        __proto__: null,
+        clearData: clearData,
+        getData: getData$1,
+        getTimestamp: function() {
+            return clipboardTimestamp;
+        },
+        hasData: hasData,
+        setData: setData
+    }), DomParser$2 = tinymce.html.DomParser, Schema$1 = tinymce.html.Schema, each$6 = tinymce.each, DOM = tinymce.DOM, mceInternalUrlPrefix = "data:text/mce-internal,";
     function hasContentType(clipboardContent, mimeType) {
         return mimeType in clipboardContent && 0 < clipboardContent[mimeType].length;
     }
@@ -5774,7 +5684,7 @@
             !1;
         }), value.toLowerCase();
     }
-    var each$4 = tinymce.each, Schema = tinymce.html.Schema, DomParser$1 = tinymce.html.DomParser, Serializer$1 = tinymce.html.Serializer, Node$1 = tinymce.html.Node;
+    var each$4 = tinymce.each, Schema = tinymce.html.Schema, DomParser$1 = tinymce.html.DomParser, Serializer$1 = tinymce.html.Serializer, Node$2 = tinymce.html.Node;
     var each$3 = tinymce.each, isIE$1 = tinymce.isIE || tinymce.isIE12;
     function setup$2(editor) {
         editor.onPastePreProcess.add(function(editor, o) {
@@ -5870,8 +5780,8 @@
                                 !0) : 0 === name.indexOf("mso-") || (value && -1 !== tinymce.inArray(pixelStyles, name) && (value = convertToPixels(value)), 
                                 void (validStyles[name] && (outputStyles[name] = value)));
                             }), /(bold|700|800|900)/i.test(outputStyles["font-weight"]) && editor.schema.isValidChild("strong", node.name) && (delete outputStyles["font-weight"], 
-                            node.wrap(new Node$1("strong", 1))), /(italic)/i.test(outputStyles["font-style"]) && editor.schema.isValidChild("em", node.name) && (delete outputStyles["font-style"], 
-                            node.wrap(new Node$1("em", 1))), (outputStyles = editor.dom.serializeStyle(outputStyles, node.name)) || null;
+                            node.wrap(new Node$2("strong", 1))), /(italic)/i.test(outputStyles["font-style"]) && editor.schema.isValidChild("em", node.name) && (delete outputStyles["font-style"], 
+                            node.wrap(new Node$2("em", 1))), (outputStyles = editor.dom.serializeStyle(outputStyles, node.name)) || null;
                         }(node, style)), "span" == node.name && node.parent && !node.attributes.length && node.unwrap();
                     }), keepStyles.addAttributeFilter("class", function(nodes) {
                         for (var node, i = nodes.length; i--; ) {
@@ -5910,7 +5820,7 @@
                             var level = paragraphNode._listLevel || lastLevel;
                             (currentListNode = level != lastLevel ? level < lastLevel ? currentListNode && currentListNode.parent.parent : (prevListNode = currentListNode, 
                             null) : currentListNode) && currentListNode.name == listName ? currentListNode.append(paragraphNode) : (prevListNode = prevListNode || currentListNode, 
-                            currentListNode = new Node$1(listName, 1), type && /roman|alpha/.test(type) && currentListNode.attr({
+                            currentListNode = new Node$2(listName, 1), type && /roman|alpha/.test(type) && currentListNode.attr({
                                 style: listName = "list-style-type:" + type,
                                 "data-mce-style": listName
                             }), 1 < start && currentListNode.attr("start", "" + start), 
@@ -6173,10 +6083,12 @@
         }, o.content), editor.onPastePostProcess.dispatch(editor, o), o.content = o.node.innerHTML, 
         !1 !== editor.settings.paste_remove_empty_paragraphs && (o.content = o.content.replace(/<p([^>]+)>(&nbsp;|\u00a0)?<\/p>/g, "")), 
         editor.settings.paste_remove_whitespace && (o.content = o.content.replace(/(&nbsp;|\u00a0|\s| ){2,}/g, " ")), 
+        editor.settings.paste_convert_smart_quotes && (o.content = o.content.replace(/[\u201c\u201d]/g, '"').replace(/[\u2018\u2019]/g, "'")), 
         editor.settings.paste_filter && (content = editor.settings.paste_filter.split(";"), 
         each$2(content, function(s) {
-            re = /^\/.*\/(g|i|m)*$/.test(s) ? new Function("return " + s)() : new RegExp(s), 
-            o.content = o.content.replace(re, "");
+            var m;
+            re = /^\/.*\/(g|i|m)*$/.test(s) ? (m = s.match(/^\/(.*)\/([gim]*)$/), 
+            new RegExp(m[1], m[2] || "")) : new RegExp(s), o.content = o.content.replace(re, "");
         }))), editor.onPasteBeforeInsert.dispatch(editor, o), o.terminate || function(editor, content) {
             var validate = editor.settings.validate;
             editor.settings.validate = !0, editor.execCommand("mceInsertContent", !1, content), 
@@ -6231,16 +6143,10 @@
     function setup$1(editor, pasteBin) {
         var keyboardPastePlainTextState, keyboardPasteTimeStamp = 0;
         function getContentAndInsert(e) {
-            var clipboardTimer = new Date().getTime(), clipboardContent = function(editor) {
-                var eventTimestamp = e.timeStamp;
-                if (hasData()) {
-                    var data = getData$1();
-                    if (data.timeStamp && data.timeStamp > eventTimestamp) return content = data.content, 
-                    clearData(), content;
-                    clearData();
-                }
-                var content = getDataTransferItems(e.clipboardData || e.dataTransfer || editor.getDoc().dataTransfer);
-                return content;
+            var clipboardTimer = new Date().getTime(), clipboardContent = function(editor, clipboardEvent) {
+                return hasHtmlOrText(clipboardEvent = getDataTransferItems(e.clipboardData || e.dataTransfer || editor.getDoc().dataTransfer)) || "Files" in clipboardEvent ? (clearData(), 
+                clipboardEvent) : hasData() ? (editor = getData$1(), clearData(), 
+                editor) : clipboardEvent;
             }(editor), clipboardDelay = new Date().getTime() - clipboardTimer;
             function isKeyBoardPaste() {
                 return "drop" != e.type && new Date().getTime() - keyboardPasteTimeStamp - clipboardDelay < 1e3;
@@ -6286,8 +6192,8 @@
                 removePasteBinOnKeyUp(e), editor.dom.unbind(editor.getBody(), "paste", handler);
             }));
         }), editor.addCommand("mcePasteFakeClipboard", function(ui, e) {
-            var content = getData$1().content || "";
-            content && insertClipboardContent(editor, content, !0, !0 === e.isPlainText);
+            var data = getData$1();
+            insertClipboardContent(editor, data, !0, !0 === e.isPlainText);
         });
     }
     function getCaretRangeFromEvent(editor, e) {
@@ -6361,17 +6267,11 @@
             }
         };
     }
-    tinymce.clipboard.FakeClipboard = Object.freeze({
-        __proto__: null,
-        clearData: clearData,
-        getData: getData$1,
-        hasData: hasData,
-        setData: setData
-    });
+    tinymce.clipboard.FakeClipboard = tablet;
     function getEl(editor) {
         return editor.dom.get("mcepastebin");
     }
-    var AutoLinkPattern, RangeUtils = tinymce.dom.RangeUtils, Delay = tinymce.util.Delay, draggingInternallyState = !1, pasteBinDefaultContent = "%MCEPASTEBIN%", Dispatcher = tinymce.util.Dispatcher, TAGS = (tinymce.Clipboard = function(editor) {
+    var RangeUtils = tinymce.dom.RangeUtils, Delay = tinymce.util.Delay, draggingInternallyState = !1, pasteBinDefaultContent = "%MCEPASTEBIN%", Dispatcher = tinymce.util.Dispatcher, TAGS = (tinymce.Clipboard = function(editor) {
         var pasteBin = new PasteBin(editor);
         editor.onGetClipboardContent = new Dispatcher(this), editor.onPastePreProcess = new Dispatcher(this), 
         editor.onPastePostProcess = new Dispatcher(this), editor.onPasteBeforeInsert = new Dispatcher(this), 
@@ -6453,598 +6353,6 @@
             }(editor), setup$1(editor, pasteBin);
         });
     }, function(tinymce) {
-        function funescape(_, escaped, escapedWhitespace) {
-            var high = "0x" + escaped - 65536;
-            return high != high || escapedWhitespace ? escaped : high < 0 ? String.fromCharCode(65536 + high) : String.fromCharCode(high >> 10 | 55296, 1023 & high | 56320);
-        }
-        var i, support, Expr, getText, isXML, tokenize, compile, select, outermostContext, sortInput, hasDuplicate, setDocument, document, docElem, documentIsHTML, rbuggyQSA, rbuggyMatches, matches, contains, expando = "sizzle" + -new Date(), preferredDoc = window.document, dirruns = 0, done = 0, classCache = createCache(), tokenCache = createCache(), compilerCache = createCache(), sortOrder = function(a, b) {
-            return a === b && (hasDuplicate = !0), 0;
-        }, strundefined = "undefined", hasOwn = {}.hasOwnProperty, arr = [], pop = arr.pop, push_native = arr.push, push = arr.push, slice = arr.slice, indexOf = arr.indexOf || function(elem) {
-            for (var i = 0, len = this.length; i < len; i++) if (this[i] === elem) return i;
-            return -1;
-        }, booleans = "checked|selected|async|autofocus|autoplay|controls|defer|disabled|hidden|ismap|loop|multiple|open|readonly|required|scoped", whitespace = "[\\x20\\t\\r\\n\\f]", identifier = "(?:\\\\.|[\\w-]|[^\\x00-\\xa0])+", attributes = "\\[" + whitespace + "*(" + identifier + ")(?:" + whitespace + "*([*^$|!~]?=)" + whitespace + "*(?:'((?:\\\\.|[^\\\\'])*)'|\"((?:\\\\.|[^\\\\\"])*)\"|(" + identifier + "))|)" + whitespace + "*\\]", pseudos = ":(" + identifier + ")(?:\\((('((?:\\\\.|[^\\\\'])*)'|\"((?:\\\\.|[^\\\\\"])*)\")|((?:\\\\.|[^\\\\()[\\]]|" + attributes + ")*)|.*)\\)|)", rtrim = new RegExp("^" + whitespace + "+|((?:^|[^\\\\])(?:\\\\.)*)" + whitespace + "+$", "g"), rcomma = new RegExp("^" + whitespace + "*," + whitespace + "*"), rcombinators = new RegExp("^" + whitespace + "*([>+~]|" + whitespace + ")" + whitespace + "*"), rattributeQuotes = new RegExp("=" + whitespace + "*([^\\]'\"]*?)" + whitespace + "*\\]", "g"), rpseudo = new RegExp(pseudos), ridentifier = new RegExp("^" + identifier + "$"), matchExpr = {
-            ID: new RegExp("^#(" + identifier + ")"),
-            CLASS: new RegExp("^\\.(" + identifier + ")"),
-            TAG: new RegExp("^(" + identifier + "|[*])"),
-            ATTR: new RegExp("^" + attributes),
-            PSEUDO: new RegExp("^" + pseudos),
-            CHILD: new RegExp("^:(only|first|last|nth|nth-last)-(child|of-type)(?:\\(" + whitespace + "*(even|odd|(([+-]|)(\\d*)n|)" + whitespace + "*(?:([+-]|)" + whitespace + "*(\\d+)|))" + whitespace + "*\\)|)", "i"),
-            bool: new RegExp("^(?:" + booleans + ")$", "i"),
-            needsContext: new RegExp("^" + whitespace + "*[>+~]|:(even|odd|eq|gt|lt|nth|first|last)(?:\\(" + whitespace + "*((?:-\\d)?\\d*)" + whitespace + "*\\)|)(?=[^-]|$)", "i")
-        }, rinputs = /^(?:input|select|textarea|button)$/i, rheader = /^h\d$/i, rnative = /^[^{]+\{\s*\[native \w/, rquickExpr = /^(?:#([\w-]+)|(\w+)|\.([\w-]+))$/, rsibling = /[+~]/, rescape = /'|\\/g, runescape = new RegExp("\\\\([\\da-f]{1,6}" + whitespace + "?|(" + whitespace + ")|.)", "ig");
-        try {
-            push.apply(arr = slice.call(preferredDoc.childNodes), preferredDoc.childNodes), 
-            arr[preferredDoc.childNodes.length].nodeType;
-        } catch (e) {
-            push = {
-                apply: arr.length ? function(target, els) {
-                    push_native.apply(target, slice.call(els));
-                } : function(target, els) {
-                    for (var j = target.length, i = 0; target[j++] = els[i++]; );
-                    target.length = j - 1;
-                }
-            };
-        }
-        function Sizzle(selector, context, results, seed) {
-            var nodeType, i, groups, elem, nid, match, m;
-            if ((context ? context.ownerDocument || context : preferredDoc) !== document && setDocument(context), 
-            results = results || [], !selector || "string" != typeof selector) return results;
-            if (1 !== (nodeType = (context = context || document).nodeType) && 9 !== nodeType) return [];
-            if (documentIsHTML && !seed) {
-                if (match = rquickExpr.exec(selector)) if (m = match[1]) {
-                    if (9 === nodeType) {
-                        if (!(elem = context.getElementById(m)) || !elem.parentNode) return results;
-                        if (elem.id === m) return results.push(elem), results;
-                    } else if (context.ownerDocument && (elem = context.ownerDocument.getElementById(m)) && contains(context, elem) && elem.id === m) return results.push(elem), 
-                    results;
-                } else {
-                    if (match[2]) return push.apply(results, context.getElementsByTagName(selector)), 
-                    results;
-                    if ((m = match[3]) && support.getElementsByClassName) return push.apply(results, context.getElementsByClassName(m)), 
-                    results;
-                }
-                if (support.qsa && (!rbuggyQSA || !rbuggyQSA.test(selector))) {
-                    if (nid = elem = expando, match = context, m = 9 === nodeType && selector, 
-                    1 === nodeType && "object" !== context.nodeName.toLowerCase()) {
-                        for (groups = tokenize(selector), (elem = context.getAttribute("id")) ? nid = elem.replace(rescape, "\\$&") : context.setAttribute("id", nid), 
-                        nid = "[id='" + nid + "'] ", i = groups.length; i--; ) groups[i] = nid + toSelector(groups[i]);
-                        match = rsibling.test(selector) && testContext(context.parentNode) || context, 
-                        m = groups.join(",");
-                    }
-                    if (m) try {
-                        return push.apply(results, match.querySelectorAll(m)), results;
-                    } catch (qsaError) {} finally {
-                        elem || context.removeAttribute("id");
-                    }
-                }
-            }
-            return select(selector.replace(rtrim, "$1"), context, results, seed);
-        }
-        function createCache() {
-            var keys = [];
-            function cache(key, value) {
-                return keys.push(key + " ") > Expr.cacheLength && delete cache[keys.shift()], 
-                cache[key + " "] = value;
-            }
-            return cache;
-        }
-        function markFunction(fn) {
-            return fn[expando] = !0, fn;
-        }
-        function assert(fn) {
-            var div = document.createElement("div");
-            try {
-                return !!fn(div);
-            } catch (e) {
-                return !1;
-            } finally {
-                div.parentNode && div.parentNode.removeChild(div);
-            }
-        }
-        function addHandle(attrs, handler) {
-            for (var arr = attrs.split("|"), i = attrs.length; i--; ) Expr.attrHandle[arr[i]] = handler;
-        }
-        function siblingCheck(a, b) {
-            var cur = b && a, diff = cur && 1 === a.nodeType && 1 === b.nodeType && (~b.sourceIndex || 1 << 31) - (~a.sourceIndex || 1 << 31);
-            if (diff) return diff;
-            if (cur) for (;cur = cur.nextSibling; ) if (cur === b) return -1;
-            return a ? 1 : -1;
-        }
-        function createPositionalPseudo(fn) {
-            return markFunction(function(argument) {
-                return argument = +argument, markFunction(function(seed, matches) {
-                    for (var j, matchIndexes = fn([], seed.length, argument), i = matchIndexes.length; i--; ) seed[j = matchIndexes[i]] && (seed[j] = !(matches[j] = seed[j]));
-                });
-            });
-        }
-        function testContext(context) {
-            return context && typeof context.getElementsByTagName !== strundefined && context;
-        }
-        for (i in support = Sizzle.support = {}, isXML = Sizzle.isXML = function(elem) {
-            return !!(elem = elem && (elem.ownerDocument || elem).documentElement) && "HTML" !== elem.nodeName;
-        }, setDocument = Sizzle.setDocument = function(node) {
-            var doc = node ? node.ownerDocument || node : preferredDoc, node = doc.defaultView;
-            return doc !== document && 9 === doc.nodeType && doc.documentElement ? (docElem = (document = doc).documentElement, 
-            documentIsHTML = !isXML(doc), node && node !== function(win) {
-                try {
-                    return win.top;
-                } catch (ex) {}
-                return null;
-            }(node) && (node.addEventListener ? node.addEventListener("unload", function() {
-                setDocument();
-            }, !1) : node.attachEvent && node.attachEvent("onunload", function() {
-                setDocument();
-            })), support.attributes = assert(function(div) {
-                return div.className = "i", !div.getAttribute("className");
-            }), support.getElementsByTagName = assert(function(div) {
-                return div.appendChild(doc.createComment("")), !div.getElementsByTagName("*").length;
-            }), support.getElementsByClassName = rnative.test(doc.getElementsByClassName), 
-            support.getById = assert(function(div) {
-                return docElem.appendChild(div).id = expando, !doc.getElementsByName || !doc.getElementsByName(expando).length;
-            }), support.getById ? (Expr.find.ID = function(id, context) {
-                if (typeof context.getElementById !== strundefined && documentIsHTML) return (context = context.getElementById(id)) && context.parentNode ? [ context ] : [];
-            }, Expr.filter.ID = function(id) {
-                var attrId = id.replace(runescape, funescape);
-                return function(elem) {
-                    return elem.getAttribute("id") === attrId;
-                };
-            }) : (delete Expr.find.ID, Expr.filter.ID = function(id) {
-                var attrId = id.replace(runescape, funescape);
-                return function(elem) {
-                    return (elem = typeof elem.getAttributeNode !== strundefined && elem.getAttributeNode("id")) && elem.value === attrId;
-                };
-            }), Expr.find.TAG = support.getElementsByTagName ? function(tag, context) {
-                if (typeof context.getElementsByTagName !== strundefined) return context.getElementsByTagName(tag);
-            } : function(tag, context) {
-                var elem, tmp = [], i = 0, results = context.getElementsByTagName(tag);
-                if ("*" !== tag) return results;
-                for (;elem = results[i++]; ) 1 === elem.nodeType && tmp.push(elem);
-                return tmp;
-            }, Expr.find.CLASS = support.getElementsByClassName && function(className, context) {
-                if (documentIsHTML) return context.getElementsByClassName(className);
-            }, rbuggyMatches = [], rbuggyQSA = [], (support.qsa = rnative.test(doc.querySelectorAll)) && (assert(function(div) {
-                div.innerHTML = "<select msallowcapture=''><option selected=''></option></select>", 
-                div.querySelectorAll("[msallowcapture^='']").length && rbuggyQSA.push("[*^$]=" + whitespace + "*(?:''|\"\")"), 
-                div.querySelectorAll("[selected]").length || rbuggyQSA.push("\\[" + whitespace + "*(?:value|" + booleans + ")"), 
-                div.querySelectorAll(":checked").length || rbuggyQSA.push(":checked");
-            }), assert(function(div) {
-                var input = doc.createElement("input");
-                input.setAttribute("type", "hidden"), div.appendChild(input).setAttribute("name", "D"), 
-                div.querySelectorAll("[name=d]").length && rbuggyQSA.push("name" + whitespace + "*[*^$|!~]?="), 
-                div.querySelectorAll(":enabled").length || rbuggyQSA.push(":enabled", ":disabled"), 
-                div.querySelectorAll("*,:x"), rbuggyQSA.push(",.*:");
-            })), (support.matchesSelector = rnative.test(matches = docElem.matches || docElem.webkitMatchesSelector || docElem.mozMatchesSelector || docElem.oMatchesSelector || docElem.msMatchesSelector)) && assert(function(div) {
-                support.disconnectedMatch = matches.call(div, "div"), matches.call(div, "[s!='']:x"), 
-                rbuggyMatches.push("!=", pseudos);
-            }), rbuggyQSA = rbuggyQSA.length && new RegExp(rbuggyQSA.join("|")), 
-            rbuggyMatches = rbuggyMatches.length && new RegExp(rbuggyMatches.join("|")), 
-            node = rnative.test(docElem.compareDocumentPosition), contains = node || rnative.test(docElem.contains) ? function(a, b) {
-                var adown = 9 === a.nodeType ? a.documentElement : a;
-                return a === (b = b && b.parentNode) || !(!b || 1 !== b.nodeType || !(adown.contains ? adown.contains(b) : a.compareDocumentPosition && 16 & a.compareDocumentPosition(b)));
-            } : function(a, b) {
-                if (b) for (;b = b.parentNode; ) if (b === a) return !0;
-                return !1;
-            }, sortOrder = node ? function(a, b) {
-                var compare;
-                return a === b ? (hasDuplicate = !0, 0) : !a.compareDocumentPosition - !b.compareDocumentPosition || (1 & (compare = (a.ownerDocument || a) === (b.ownerDocument || b) ? a.compareDocumentPosition(b) : 1) || !support.sortDetached && b.compareDocumentPosition(a) === compare ? a === doc || a.ownerDocument === preferredDoc && contains(preferredDoc, a) ? -1 : b === doc || b.ownerDocument === preferredDoc && contains(preferredDoc, b) ? 1 : sortInput ? indexOf.call(sortInput, a) - indexOf.call(sortInput, b) : 0 : 4 & compare ? -1 : 1);
-            } : function(a, b) {
-                if (a === b) return hasDuplicate = !0, 0;
-                var cur, i = 0, aup = a.parentNode, bup = b.parentNode, ap = [ a ], bp = [ b ];
-                if (!aup || !bup) return a === doc ? -1 : b === doc ? 1 : aup ? -1 : bup ? 1 : sortInput ? indexOf.call(sortInput, a) - indexOf.call(sortInput, b) : 0;
-                if (aup === bup) return siblingCheck(a, b);
-                for (cur = a; cur = cur.parentNode; ) ap.unshift(cur);
-                for (cur = b; cur = cur.parentNode; ) bp.unshift(cur);
-                for (;ap[i] === bp[i]; ) i++;
-                return i ? siblingCheck(ap[i], bp[i]) : ap[i] === preferredDoc ? -1 : bp[i] === preferredDoc ? 1 : 0;
-            }, doc) : document;
-        }, Sizzle.matches = function(expr, elements) {
-            return Sizzle(expr, null, null, elements);
-        }, Sizzle.matchesSelector = function(elem, expr) {
-            if ((elem.ownerDocument || elem) !== document && setDocument(elem), 
-            expr = expr.replace(rattributeQuotes, "='$1']"), support.matchesSelector && documentIsHTML && (!rbuggyMatches || !rbuggyMatches.test(expr)) && (!rbuggyQSA || !rbuggyQSA.test(expr))) try {
-                var ret = matches.call(elem, expr);
-                if (ret || support.disconnectedMatch || elem.document && 11 !== elem.document.nodeType) return ret;
-            } catch (e) {}
-            return 0 < Sizzle(expr, document, null, [ elem ]).length;
-        }, Sizzle.contains = function(context, elem) {
-            return (context.ownerDocument || context) !== document && setDocument(context), 
-            contains(context, elem);
-        }, Sizzle.attr = function(elem, name) {
-            (elem.ownerDocument || elem) !== document && setDocument(elem);
-            var fn = Expr.attrHandle[name.toLowerCase()];
-            return void 0 !== (fn = fn && hasOwn.call(Expr.attrHandle, name.toLowerCase()) ? fn(elem, name, !documentIsHTML) : void 0) ? fn : support.attributes || !documentIsHTML ? elem.getAttribute(name) : (fn = elem.getAttributeNode(name)) && fn.specified ? fn.value : null;
-        }, Sizzle.error = function(msg) {
-            throw new Error("Syntax error, unrecognized expression: " + msg);
-        }, Sizzle.uniqueSort = function(results) {
-            var elem, duplicates = [], j = 0, i = 0;
-            if (hasDuplicate = !support.detectDuplicates, sortInput = !support.sortStable && results.slice(0), 
-            results.sort(sortOrder), hasDuplicate) {
-                for (;elem = results[i++]; ) elem === results[i] && (j = duplicates.push(i));
-                for (;j--; ) results.splice(duplicates[j], 1);
-            }
-            return sortInput = null, results;
-        }, getText = Sizzle.getText = function(elem) {
-            var node, ret = "", i = 0, nodeType = elem.nodeType;
-            if (nodeType) {
-                if (1 === nodeType || 9 === nodeType || 11 === nodeType) {
-                    if ("string" == typeof elem.textContent) return elem.textContent;
-                    for (elem = elem.firstChild; elem; elem = elem.nextSibling) ret += getText(elem);
-                } else if (3 === nodeType || 4 === nodeType) return elem.nodeValue;
-            } else for (;node = elem[i++]; ) ret += getText(node);
-            return ret;
-        }, (Expr = Sizzle.selectors = {
-            cacheLength: 50,
-            createPseudo: markFunction,
-            match: matchExpr,
-            attrHandle: {},
-            find: {},
-            relative: {
-                ">": {
-                    dir: "parentNode",
-                    first: !0
-                },
-                " ": {
-                    dir: "parentNode"
-                },
-                "+": {
-                    dir: "previousSibling",
-                    first: !0
-                },
-                "~": {
-                    dir: "previousSibling"
-                }
-            },
-            preFilter: {
-                ATTR: function(match) {
-                    return match[1] = match[1].replace(runescape, funescape), match[3] = (match[3] || match[4] || match[5] || "").replace(runescape, funescape), 
-                    "~=" === match[2] && (match[3] = " " + match[3] + " "), match.slice(0, 4);
-                },
-                CHILD: function(match) {
-                    return match[1] = match[1].toLowerCase(), "nth" === match[1].slice(0, 3) ? (match[3] || Sizzle.error(match[0]), 
-                    match[4] = +(match[4] ? match[5] + (match[6] || 1) : 2 * ("even" === match[3] || "odd" === match[3])), 
-                    match[5] = +(match[7] + match[8] || "odd" === match[3])) : match[3] && Sizzle.error(match[0]), 
-                    match;
-                },
-                PSEUDO: function(match) {
-                    var excess, unquoted = !match[6] && match[2];
-                    return matchExpr.CHILD.test(match[0]) ? null : (match[3] ? match[2] = match[4] || match[5] || "" : unquoted && rpseudo.test(unquoted) && (excess = (excess = tokenize(unquoted, !0)) && unquoted.indexOf(")", unquoted.length - excess) - unquoted.length) && (match[0] = match[0].slice(0, excess), 
-                    match[2] = unquoted.slice(0, excess)), match.slice(0, 3));
-                }
-            },
-            filter: {
-                TAG: function(nodeNameSelector) {
-                    var nodeName = nodeNameSelector.replace(runescape, funescape).toLowerCase();
-                    return "*" === nodeNameSelector ? function() {
-                        return !0;
-                    } : function(elem) {
-                        return elem.nodeName && elem.nodeName.toLowerCase() === nodeName;
-                    };
-                },
-                CLASS: function(className) {
-                    var pattern = classCache[className + " "];
-                    return pattern || (pattern = new RegExp("(^|" + whitespace + ")" + className + "(" + whitespace + "|$)")) && classCache(className, function(elem) {
-                        return pattern.test("string" == typeof elem.className && elem.className || typeof elem.getAttribute !== strundefined && elem.getAttribute("class") || "");
-                    });
-                },
-                ATTR: function(name, operator, check) {
-                    return function(elem) {
-                        return null == (elem = Sizzle.attr(elem, name)) ? "!=" === operator : !operator || (elem += "", 
-                        "=" === operator ? elem === check : "!=" === operator ? elem !== check : "^=" === operator ? check && 0 === elem.indexOf(check) : "*=" === operator ? check && -1 < elem.indexOf(check) : "$=" === operator ? check && elem.slice(-check.length) === check : "~=" === operator ? -1 < (" " + elem + " ").indexOf(check) : "|=" === operator && (elem === check || elem.slice(0, check.length + 1) === check + "-"));
-                    };
-                },
-                CHILD: function(type, what, argument, first, last) {
-                    var simple = "nth" !== type.slice(0, 3), forward = "last" !== type.slice(-4), ofType = "of-type" === what;
-                    return 1 === first && 0 === last ? function(elem) {
-                        return !!elem.parentNode;
-                    } : function(elem, context, xml) {
-                        var cache, outerCache, node, diff, nodeIndex, start, dir = simple != forward ? "nextSibling" : "previousSibling", parent = elem.parentNode, name = ofType && elem.nodeName.toLowerCase(), useCache = !xml && !ofType;
-                        if (parent) {
-                            if (simple) {
-                                for (;dir; ) {
-                                    for (node = elem; node = node[dir]; ) if (ofType ? node.nodeName.toLowerCase() === name : 1 === node.nodeType) return !1;
-                                    start = dir = "only" === type && !start && "nextSibling";
-                                }
-                                return !0;
-                            }
-                            if (start = [ forward ? parent.firstChild : parent.lastChild ], 
-                            forward && useCache) {
-                                for (nodeIndex = (cache = (outerCache = parent[expando] || (parent[expando] = {}))[type] || [])[0] === dirruns && cache[1], 
-                                diff = cache[0] === dirruns && cache[2], node = nodeIndex && parent.childNodes[nodeIndex]; node = ++nodeIndex && node && node[dir] || (diff = nodeIndex = 0, 
-                                start.pop()); ) if (1 === node.nodeType && ++diff && node === elem) {
-                                    outerCache[type] = [ dirruns, nodeIndex, diff ];
-                                    break;
-                                }
-                            } else if (useCache && (cache = (elem[expando] || (elem[expando] = {}))[type]) && cache[0] === dirruns) diff = cache[1]; else for (;(node = ++nodeIndex && node && node[dir] || (diff = nodeIndex = 0, 
-                            start.pop())) && ((ofType ? node.nodeName.toLowerCase() !== name : 1 !== node.nodeType) || !++diff || (useCache && ((node[expando] || (node[expando] = {}))[type] = [ dirruns, diff ]), 
-                            node !== elem)); );
-                            return (diff -= last) === first || diff % first == 0 && 0 <= diff / first;
-                        }
-                    };
-                },
-                PSEUDO: function(pseudo, argument) {
-                    var args, fn = Expr.pseudos[pseudo] || Expr.setFilters[pseudo.toLowerCase()] || Sizzle.error("unsupported pseudo: " + pseudo);
-                    return fn[expando] ? fn(argument) : 1 < fn.length ? (args = [ pseudo, pseudo, "", argument ], 
-                    Expr.setFilters.hasOwnProperty(pseudo.toLowerCase()) ? markFunction(function(seed, matches) {
-                        for (var idx, matched = fn(seed, argument), i = matched.length; i--; ) seed[idx = indexOf.call(seed, matched[i])] = !(matches[idx] = matched[i]);
-                    }) : function(elem) {
-                        return fn(elem, 0, args);
-                    }) : fn;
-                }
-            },
-            pseudos: {
-                not: markFunction(function(selector) {
-                    var input = [], results = [], matcher = compile(selector.replace(rtrim, "$1"));
-                    return matcher[expando] ? markFunction(function(seed, matches, context, xml) {
-                        for (var elem, unmatched = matcher(seed, null, xml, []), i = seed.length; i--; ) (elem = unmatched[i]) && (seed[i] = !(matches[i] = elem));
-                    }) : function(elem, context, xml) {
-                        return input[0] = elem, matcher(input, null, xml, results), 
-                        !results.pop();
-                    };
-                }),
-                has: markFunction(function(selector) {
-                    return function(elem) {
-                        return 0 < Sizzle(selector, elem).length;
-                    };
-                }),
-                contains: markFunction(function(text) {
-                    return text = text.replace(runescape, funescape), function(elem) {
-                        return -1 < (elem.textContent || elem.innerText || getText(elem)).indexOf(text);
-                    };
-                }),
-                lang: markFunction(function(lang) {
-                    return ridentifier.test(lang || "") || Sizzle.error("unsupported lang: " + lang), 
-                    lang = lang.replace(runescape, funescape).toLowerCase(), function(elem) {
-                        var elemLang;
-                        do {
-                            if (elemLang = documentIsHTML ? elem.lang : elem.getAttribute("xml:lang") || elem.getAttribute("lang")) return (elemLang = elemLang.toLowerCase()) === lang || 0 === elemLang.indexOf(lang + "-");
-                        } while ((elem = elem.parentNode) && 1 === elem.nodeType);
-                        return !1;
-                    };
-                }),
-                target: function(elem) {
-                    var hash = window.location && window.location.hash;
-                    return hash && hash.slice(1) === elem.id;
-                },
-                root: function(elem) {
-                    return elem === docElem;
-                },
-                focus: function(elem) {
-                    return elem === document.activeElement && (!document.hasFocus || document.hasFocus()) && !!(elem.type || elem.href || ~elem.tabIndex);
-                },
-                enabled: function(elem) {
-                    return !1 === elem.disabled;
-                },
-                disabled: function(elem) {
-                    return !0 === elem.disabled;
-                },
-                checked: function(elem) {
-                    var nodeName = elem.nodeName.toLowerCase();
-                    return "input" === nodeName && !!elem.checked || "option" === nodeName && !!elem.selected;
-                },
-                selected: function(elem) {
-                    return elem.parentNode && elem.parentNode.selectedIndex, !0 === elem.selected;
-                },
-                empty: function(elem) {
-                    for (elem = elem.firstChild; elem; elem = elem.nextSibling) if (elem.nodeType < 6) return !1;
-                    return !0;
-                },
-                parent: function(elem) {
-                    return !Expr.pseudos.empty(elem);
-                },
-                header: function(elem) {
-                    return rheader.test(elem.nodeName);
-                },
-                input: function(elem) {
-                    return rinputs.test(elem.nodeName);
-                },
-                button: function(elem) {
-                    var name = elem.nodeName.toLowerCase();
-                    return "input" === name && "button" === elem.type || "button" === name;
-                },
-                text: function(elem) {
-                    return "input" === elem.nodeName.toLowerCase() && "text" === elem.type && (null == (elem = elem.getAttribute("type")) || "text" === elem.toLowerCase());
-                },
-                first: createPositionalPseudo(function() {
-                    return [ 0 ];
-                }),
-                last: createPositionalPseudo(function(matchIndexes, length) {
-                    return [ length - 1 ];
-                }),
-                eq: createPositionalPseudo(function(matchIndexes, length, argument) {
-                    return [ argument < 0 ? argument + length : argument ];
-                }),
-                even: createPositionalPseudo(function(matchIndexes, length) {
-                    for (var i = 0; i < length; i += 2) matchIndexes.push(i);
-                    return matchIndexes;
-                }),
-                odd: createPositionalPseudo(function(matchIndexes, length) {
-                    for (var i = 1; i < length; i += 2) matchIndexes.push(i);
-                    return matchIndexes;
-                }),
-                lt: createPositionalPseudo(function(matchIndexes, length, argument) {
-                    for (var i = argument < 0 ? argument + length : argument; 0 <= --i; ) matchIndexes.push(i);
-                    return matchIndexes;
-                }),
-                gt: createPositionalPseudo(function(matchIndexes, length, argument) {
-                    for (var i = argument < 0 ? argument + length : argument; ++i < length; ) matchIndexes.push(i);
-                    return matchIndexes;
-                })
-            }
-        }).pseudos.nth = Expr.pseudos.eq, {
-            radio: !0,
-            checkbox: !0,
-            file: !0,
-            password: !0,
-            image: !0
-        }) Expr.pseudos[i] = function(type) {
-            return function(elem) {
-                return "input" === elem.nodeName.toLowerCase() && elem.type === type;
-            };
-        }(i);
-        for (i in {
-            submit: !0,
-            reset: !0
-        }) Expr.pseudos[i] = function(type) {
-            return function(elem) {
-                var name = elem.nodeName.toLowerCase();
-                return ("input" === name || "button" === name) && elem.type === type;
-            };
-        }(i);
-        function setFilters() {}
-        function toSelector(tokens) {
-            for (var i = 0, len = tokens.length, selector = ""; i < len; i++) selector += tokens[i].value;
-            return selector;
-        }
-        function addCombinator(matcher, combinator, base) {
-            var dir = combinator.dir, checkNonElements = base && "parentNode" === dir, doneName = done++;
-            return combinator.first ? function(elem, context, xml) {
-                for (;elem = elem[dir]; ) if (1 === elem.nodeType || checkNonElements) return matcher(elem, context, xml);
-            } : function(elem, context, xml) {
-                var oldCache, outerCache, newCache = [ dirruns, doneName ];
-                if (xml) {
-                    for (;elem = elem[dir]; ) if ((1 === elem.nodeType || checkNonElements) && matcher(elem, context, xml)) return !0;
-                } else for (;elem = elem[dir]; ) if (1 === elem.nodeType || checkNonElements) {
-                    if ((oldCache = (outerCache = elem[expando] || (elem[expando] = {}))[dir]) && oldCache[0] === dirruns && oldCache[1] === doneName) return newCache[2] = oldCache[2];
-                    if ((outerCache[dir] = newCache)[2] = matcher(elem, context, xml)) return !0;
-                }
-            };
-        }
-        function elementMatcher(matchers) {
-            return 1 < matchers.length ? function(elem, context, xml) {
-                for (var i = matchers.length; i--; ) if (!matchers[i](elem, context, xml)) return !1;
-                return !0;
-            } : matchers[0];
-        }
-        function condense(unmatched, map, filter, context, xml) {
-            for (var elem, newUnmatched = [], i = 0, len = unmatched.length, mapped = null != map; i < len; i++) !(elem = unmatched[i]) || filter && !filter(elem, context, xml) || (newUnmatched.push(elem), 
-            mapped && map.push(i));
-            return newUnmatched;
-        }
-        setFilters.prototype = Expr.filters = Expr.pseudos, Expr.setFilters = new setFilters(), 
-        tokenize = Sizzle.tokenize = function(selector, parseOnly) {
-            var matched, match, tokens, type, soFar, groups, preFilters, cached = tokenCache[selector + " "];
-            if (cached) return parseOnly ? 0 : cached.slice(0);
-            for (soFar = selector, groups = [], preFilters = Expr.preFilter; soFar; ) {
-                for (type in matched && !(match = rcomma.exec(soFar)) || (match && (soFar = soFar.slice(match[0].length) || soFar), 
-                groups.push(tokens = [])), matched = !1, (match = rcombinators.exec(soFar)) && (matched = match.shift(), 
-                tokens.push({
-                    value: matched,
-                    type: match[0].replace(rtrim, " ")
-                }), soFar = soFar.slice(matched.length)), Expr.filter) !(match = matchExpr[type].exec(soFar)) || preFilters[type] && !(match = preFilters[type](match)) || (matched = match.shift(), 
-                tokens.push({
-                    value: matched,
-                    type: type,
-                    matches: match
-                }), soFar = soFar.slice(matched.length));
-                if (!matched) break;
-            }
-            return parseOnly ? soFar.length : soFar ? Sizzle.error(selector) : tokenCache(selector, groups).slice(0);
-        }, compile = Sizzle.compile = function(selector, match) {
-            var i, setMatchers = [], elementMatchers = [], cached = compilerCache[selector + " "];
-            if (!cached) {
-                for (i = (match = match || tokenize(selector)).length; i--; ) ((cached = function matcherFromTokens(tokens) {
-                    for (var checkContext, matcher, j, len = tokens.length, leadingRelative = Expr.relative[tokens[0].type], implicitRelative = leadingRelative || Expr.relative[" "], i = leadingRelative ? 1 : 0, matchContext = addCombinator(function(elem) {
-                        return elem === checkContext;
-                    }, implicitRelative, !0), matchAnyContext = addCombinator(function(elem) {
-                        return -1 < indexOf.call(checkContext, elem);
-                    }, implicitRelative, !0), matchers = [ function(elem, context, xml) {
-                        return !leadingRelative && (xml || context !== outermostContext) || ((checkContext = context).nodeType ? matchContext : matchAnyContext)(elem, context, xml);
-                    } ]; i < len; i++) if (matcher = Expr.relative[tokens[i].type]) matchers = [ addCombinator(elementMatcher(matchers), matcher) ]; else {
-                        if ((matcher = Expr.filter[tokens[i].type].apply(null, tokens[i].matches))[expando]) {
-                            for (j = ++i; j < len && !Expr.relative[tokens[j].type]; j++);
-                            return function setMatcher(preFilter, selector, matcher, postFilter, postFinder, postSelector) {
-                                return postFilter && !postFilter[expando] && (postFilter = setMatcher(postFilter)), 
-                                postFinder && !postFinder[expando] && (postFinder = setMatcher(postFinder, postSelector)), 
-                                markFunction(function(seed, results, context, xml) {
-                                    var temp, i, elem, preMap = [], postMap = [], preexisting = results.length, elems = seed || function(selector, contexts, results) {
-                                        for (var i = 0, len = contexts.length; i < len; i++) Sizzle(selector, contexts[i], results);
-                                        return results;
-                                    }(selector || "*", context.nodeType ? [ context ] : context, []), matcherIn = !preFilter || !seed && selector ? elems : condense(elems, preMap, preFilter, context, xml), matcherOut = matcher ? postFinder || (seed ? preFilter : preexisting || postFilter) ? [] : results : matcherIn;
-                                    if (matcher && matcher(matcherIn, matcherOut, context, xml), 
-                                    postFilter) for (temp = condense(matcherOut, postMap), 
-                                    postFilter(temp, [], context, xml), i = temp.length; i--; ) (elem = temp[i]) && (matcherOut[postMap[i]] = !(matcherIn[postMap[i]] = elem));
-                                    if (seed) {
-                                        if (postFinder || preFilter) {
-                                            if (postFinder) {
-                                                for (temp = [], i = matcherOut.length; i--; ) (elem = matcherOut[i]) && temp.push(matcherIn[i] = elem);
-                                                postFinder(null, matcherOut = [], temp, xml);
-                                            }
-                                            for (i = matcherOut.length; i--; ) (elem = matcherOut[i]) && -1 < (temp = postFinder ? indexOf.call(seed, elem) : preMap[i]) && (seed[temp] = !(results[temp] = elem));
-                                        }
-                                    } else matcherOut = condense(matcherOut === results ? matcherOut.splice(preexisting, matcherOut.length) : matcherOut), 
-                                    postFinder ? postFinder(null, results, matcherOut, xml) : push.apply(results, matcherOut);
-                                });
-                            }(1 < i && elementMatcher(matchers), 1 < i && toSelector(tokens.slice(0, i - 1).concat({
-                                value: " " === tokens[i - 2].type ? "*" : ""
-                            })).replace(rtrim, "$1"), matcher, i < j && matcherFromTokens(tokens.slice(i, j)), j < len && matcherFromTokens(tokens = tokens.slice(j)), j < len && toSelector(tokens));
-                        }
-                        matchers.push(matcher);
-                    }
-                    return elementMatcher(matchers);
-                }(match[i]))[expando] ? setMatchers : elementMatchers).push(cached);
-                (cached = compilerCache(selector, function(elementMatchers, setMatchers) {
-                    function superMatcher(seed, context, xml, results, outermost) {
-                        var elem, j, matcher, matchedCount = 0, i = "0", unmatched = seed && [], setMatched = [], contextBackup = outermostContext, elems = seed || byElement && Expr.find.TAG("*", outermost), dirrunsUnique = dirruns += null == contextBackup ? 1 : Math.random() || .1, len = elems.length;
-                        for (outermost && (outermostContext = context !== document && context); i !== len && null != (elem = elems[i]); i++) {
-                            if (byElement && elem) {
-                                for (j = 0; matcher = elementMatchers[j++]; ) if (matcher(elem, context, xml)) {
-                                    results.push(elem);
-                                    break;
-                                }
-                                outermost && (dirruns = dirrunsUnique);
-                            }
-                            bySet && ((elem = !matcher && elem) && matchedCount--, 
-                            seed) && unmatched.push(elem);
-                        }
-                        if (matchedCount += i, bySet && i !== matchedCount) {
-                            for (j = 0; matcher = setMatchers[j++]; ) matcher(unmatched, setMatched, context, xml);
-                            if (seed) {
-                                if (0 < matchedCount) for (;i--; ) unmatched[i] || setMatched[i] || (setMatched[i] = pop.call(results));
-                                setMatched = condense(setMatched);
-                            }
-                            push.apply(results, setMatched), outermost && !seed && 0 < setMatched.length && 1 < matchedCount + setMatchers.length && Sizzle.uniqueSort(results);
-                        }
-                        return outermost && (dirruns = dirrunsUnique, outermostContext = contextBackup), 
-                        unmatched;
-                    }
-                    var bySet = 0 < setMatchers.length, byElement = 0 < elementMatchers.length;
-                    return bySet ? markFunction(superMatcher) : superMatcher;
-                }(elementMatchers, setMatchers))).selector = selector;
-            }
-            return cached;
-        }, select = Sizzle.select = function(selector, context, results, seed) {
-            var i, tokens, token, type, find, compiled = "function" == typeof selector && selector, match = !seed && tokenize(selector = compiled.selector || selector);
-            if (results = results || [], 1 === match.length) {
-                if (2 < (tokens = match[0] = match[0].slice(0)).length && "ID" === (token = tokens[0]).type && support.getById && 9 === context.nodeType && documentIsHTML && Expr.relative[tokens[1].type]) {
-                    if (!(context = (Expr.find.ID(token.matches[0].replace(runescape, funescape), context) || [])[0])) return results;
-                    compiled && (context = context.parentNode), selector = selector.slice(tokens.shift().value.length);
-                }
-                for (i = matchExpr.needsContext.test(selector) ? 0 : tokens.length; i-- && (token = tokens[i], 
-                !Expr.relative[type = token.type]); ) if ((find = Expr.find[type]) && (seed = find(token.matches[0].replace(runescape, funescape), rsibling.test(tokens[0].type) && testContext(context.parentNode) || context))) {
-                    if (tokens.splice(i, 1), selector = seed.length && toSelector(tokens)) break;
-                    return push.apply(results, seed), results;
-                }
-            }
-            return (compiled || compile(selector, match))(seed, context, !documentIsHTML, results, rsibling.test(selector) && testContext(context.parentNode) || context), 
-            results;
-        }, support.sortStable = expando.split("").sort(sortOrder).join("") === expando, 
-        support.detectDuplicates = !!hasDuplicate, setDocument(), support.sortDetached = assert(function(div1) {
-            return 1 & div1.compareDocumentPosition(document.createElement("div"));
-        }), assert(function(div) {
-            return div.innerHTML = "<a href='#'></a>", "#" === div.firstChild.getAttribute("href");
-        }) || addHandle("type|href|height|width", function(elem, name, isXML) {
-            if (!isXML) return elem.getAttribute(name, "type" === name.toLowerCase() ? 1 : 2);
-        }), support.attributes && assert(function(div) {
-            return div.innerHTML = "<input/>", div.firstChild.setAttribute("value", ""), 
-            "" === div.firstChild.getAttribute("value");
-        }) || addHandle("value", function(elem, name, isXML) {
-            if (!isXML && "input" === elem.nodeName.toLowerCase()) return elem.defaultValue;
-        }), assert(function(div) {
-            return null == div.getAttribute("disabled");
-        }) || addHandle(booleans, function(elem, name, isXML) {
-            if (!isXML) return !0 === elem[name] ? name.toLowerCase() : (isXML = elem.getAttributeNode(name)) && isXML.specified ? isXML.value : null;
-        }), tinymce.dom.Sizzle = Sizzle;
-    }(tinymce), function(tinymce) {
         function getPos(elm) {
             for (var x = 0, y = 0, offsetParent = elm; offsetParent && offsetParent.nodeType; ) x += offsetParent.offsetLeft || 0, 
             y += offsetParent.offsetTop || 0, offsetParent = offsetParent.offsetParent;
@@ -7470,7 +6778,7 @@
                 self[e] = new tinymce.util.Dispatcher(self);
             }), self.onBeforeSetContent.add(function(e, args) {
                 var node;
-                "raw" !== args.format && (node = new tinymce.html.DomParser(editor.settings, editor.schema).parse(args.content, extend(args, {
+                "raw" !== args.format && (node = editor.createParser().parse(args.content, extend(args, {
                     isRootContent: !0,
                     forced_root_block: !1
                 })), args.content = new tinymce.html.Serializer({
@@ -7487,7 +6795,7 @@
             getContextualFragment: function(rng, frag) {
                 var ed = this.editor, dom = this.dom, node = rng.commonAncestorContainer;
                 if (node === ed.getBody()) return frag;
-                var nodes, tableCells = dom.select("td[data-mce-selected], th[data-mce-selected], td.mceSelected, th.mceSelected", node);
+                var wrapped, tableCells = dom.select("td[data-mce-selected], th[data-mce-selected], td.mceSelected, th.mceSelected", node);
                 if (tableCells.length) {
                     var row, table = dom.getParent(node, "table");
                     if (table) return table = dom.clone(table), row = dom.create("tr"), 
@@ -7500,9 +6808,10 @@
                     return 1 === elm.nodeType && !function(elm) {
                         return dom.isBlock(elm) && !/H[1-6]/.test(elm.nodeName);
                     }(elm);
-                })).length) ? (nodes = document.createDocumentFragment(), each(table, function(elm) {
-                    (elm = dom.clone(elm)).appendChild(frag), nodes.appendChild(elm);
-                }), nodes) : frag;
+                })).length) ? (rng = document.createDocumentFragment(), wrapped = frag, 
+                each(table, function(elm) {
+                    (elm = dom.clone(elm)).appendChild(wrapped), wrapped = elm;
+                }), rng.appendChild(wrapped), rng) : frag;
             },
             getContent: function(args) {
                 var whiteSpaceAfter, rng = this.getRng(), tmpElm = this.dom.create("body"), se = this.getSel(), whiteSpaceBefore = whiteSpaceAfter = "";
@@ -7763,7 +7072,8 @@
             dom = dom || tinymce.DOM, schema = schema || new tinymce.html.Schema(settings), 
             settings.entity_encoding = settings.entity_encoding || "named", settings.remove_trailing_brs = !("remove_trailing_brs" in settings) || settings.remove_trailing_brs, 
             settings.element_format = settings.element_format || "xhtml", [ "data-mce-selected" ]), onPreProcess = new tinymce.util.Dispatcher(self), onPostProcess = new tinymce.util.Dispatcher(self);
-            return (htmlParser = new tinymce.html.DomParser(settings, schema)).addAttributeFilter("data-mce-tabindex", function(nodes, name) {
+            return (htmlParser = new tinymce.html.DomParser(settings, schema)).sanitizer.mode = "restore", 
+            htmlParser.addAttributeFilter("data-mce-tabindex", function(nodes, name) {
                 for (var node, i = nodes.length; i--; ) (node = nodes[i]).attr("tabindex", node.attributes.map["data-mce-tabindex"]), 
                 node.attr(name, null);
             }), htmlParser.addAttributeFilter("src,href,style", function(nodes, name) {
@@ -7788,13 +7098,12 @@
                 "xhtml" === settings.element_format && firstChild && 0 < value.length && (firstChild.value = "// <![CDATA[\n" + trim(value) + "\n// ]]>")) : "xhtml" === settings.element_format && firstChild && 0 < value.length && (firstChild.value = "\x3c!--\n" + trim(value) + "\n--\x3e"));
             }), htmlParser.addNodeFilter("#comment", function(nodes) {
                 for (var node, i = nodes.length; i--; ) 0 === (node = nodes[i]).value.indexOf("[CDATA[") ? (node.name = "#cdata", 
-                node.type = 4, node.value = node.value.replace(/^\[CDATA\[|\]\]$/g, "")) : 0 === node.value.indexOf("mce:protected ") && (node.name = "#text", 
-                node.type = 3, node.raw = !0, node.value = unescape(node.value).substr(14));
+                node.type = 4, node.value = node.value.replace(/^\[CDATA\[|\]\]$/g, "")) : /^\s*mce:protected\b/i.test(node.value) && node.remove();
             }), htmlParser.addNodeFilter("xml:namespace,input", function(nodes, name) {
                 for (var node, i = nodes.length; i--; ) 7 === (node = nodes[i]).type ? node.remove() : 1 !== node.type || "input" !== name || "type" in node.attributes.map || node.attr("type", "text");
             }), settings.fix_list_elements && htmlParser.addNodeFilter("ul,ol", function(nodes) {
                 for (var node, parentNode, i = nodes.length; i--; ) "ul" !== (parentNode = (node = nodes[i]).parent).name && "ol" !== parentNode.name || node.prev && "li" === node.prev.name && node.prev.append(node);
-            }), htmlParser.addAttributeFilter("data-mce-src,data-mce-href,data-mce-style,data-mce-selected,data-mce-expando,data-mce-block,data-mce-type,data-mce-resize,data-mce-placeholder", function(nodes, name) {
+            }), htmlParser.addAttributeFilter("data-mce-src,data-mce-href,data-mce-style,data-mce-selected,data-mce-expando,data-mce-block,data-mce-type,data-mce-resize,data-mce-placeholder,data-mce-contenteditable", function(nodes, name) {
                 for (var i = nodes.length; i--; ) nodes[i].attr(name, null);
             }), {
                 schema: schema,
@@ -8479,14 +7788,18 @@
                 filter && (input.value = "", input.focus(), this.clearFilteredItems());
             },
             showMenu: function(x, y, px, py) {
-                var co, w, h, mx, el, self = this, s = self.settings, vp = DOM.getViewPort(), cp = self.classPrefix;
+                var co, h, my, mx, el, trigRect, self = this, s = self.settings, vp = DOM.getViewPort(), cp = self.classPrefix, trigger = s.trigger;
                 self.collapse(1), self.isMenuVisible || (self.selected = [], self.rendered ? co = DOM.get("menu_" + self.id) : (co = DOM.add(self.settings.container, self.renderNode()), 
                 each(self.items, function(o) {
                     o.postRender();
                 }), self.postRender()), co && (DOM.show(co), self.update(), x += s.offset_x || 0, 
-                y += s.offset_y || 0, s.constrain && (w = +co.clientWidth, h = +co.clientHeight, 
-                mx = vp.x + vp.w, vp = vp.y + vp.h, x + s.vp_offset_x + w > mx && (x = px ? px - w : Math.max(0, mx - s.vp_offset_x - w)), 
-                y + s.vp_offset_y + h > vp) && (y = py ? py - h - 8 : Math.max(0, vp - s.vp_offset_y - h)), 
+                y += s.offset_y || 0, trigger && (x = (trigRect = trigger.getBoundingClientRect()).left + vp.x, 
+                y = trigRect.bottom + vp.y), s.constrain && (trigRect = +co.clientWidth, 
+                h = +co.clientHeight, mx = vp.x + vp.w, my = vp.y + vp.h, x + s.vp_offset_x + trigRect > mx && (x = px ? px - trigRect : Math.max(0, mx - s.vp_offset_x - trigRect)), 
+                y + s.vp_offset_y + h > my) && (y = py ? py - h - 8 : Math.max(0, my - s.vp_offset_y - h)), 
+                (px = document.querySelector(".mceModal")) && trigger && px.contains(trigger) && (x = (mx = trigger.getBoundingClientRect()).left, 
+                y = mx.bottom, x + co.clientWidth > vp.w && (x = Math.max(0, mx.right - co.clientWidth)), 
+                y + co.clientHeight > vp.h && (y = mx.top - co.clientHeight), DOM.setStyle(co, "position", "fixed")), 
                 DOM.setStyles(co, {
                     left: x,
                     top: y
@@ -8509,7 +7822,7 @@
                 self.onShowMenu.dispatch(self), each(self.items, function(o) {
                     o.selected && -1 === tinymce.inArray(self.selected, o) && self.selected.push(o);
                 }), self.selected.length ? (el = DOM.get(self.selected[0].id)) && self.scrollTo(el) : (el = DOM.get("menu_" + self.id + "_items")) && (el.scrollTop = 0), 
-                s.keyboard_focus && self._setupKeyboardNav(), s.filter) && (px = DOM.select("input", "menu_" + self.id + "_filter_input")) && px[0].focus());
+                s.keyboard_focus && self._setupKeyboardNav(), s.filter) && (trigRect = DOM.select("input", "menu_" + self.id + "_filter_input")) && trigRect[0].focus());
             },
             hideMenu: function(c) {
                 var co = DOM.get("menu_" + this.id);
@@ -8818,7 +8131,7 @@
                 this.isDisabled() || (this.isMenuRendered || (this.renderMenu(), 
                 this.isMenuRendered = !0), 0 !== this.items.length && (pos = DOM.getPos(elm), 
                 (menu = this.menu).settings.offset_x = pos.x, menu.settings.offset_y = pos.y, 
-                this.settings.max_width || (menu.settings.max_width = elm.offsetWidth), 
+                menu.settings.trigger = elm, this.settings.max_width || (menu.settings.max_width = elm.offsetWidth), 
                 each(this.items, function(item) {
                     menu.items[item.id] && (menu.items[item.id].setSelected(0), 
                     item.value !== self.selectedValue && !item.selected || menu.items[item.id].setSelected(1));
@@ -9208,7 +8521,7 @@
                     pos = DOM.getPos(e), (m = this.menu).settings.offset_x = pos.x, 
                     m.settings.offset_y = pos.y, m.settings.vp_offset_x = pos.x, 
                     m.settings.vp_offset_y = pos.y, m.settings.keyboard_focus = this._focused, 
-                    m.showMenu(0, e.offsetHeight), Event.add(DOM.doc, "mousedown", this.hideMenu, this), 
+                    m.settings.trigger = e, m.showMenu(0, e.offsetHeight), Event.add(DOM.doc, "mousedown", this.hideMenu, this), 
                     this.setState("Selected", 1), this.isMenuVisible = 1, this.setAriaProperty("expanded", !0);
                 }
             },
@@ -9315,16 +8628,17 @@
                 this.onHideMenu = new tinymce.util.Dispatcher(this), this.value = settings.default_color;
             },
             showMenu: function() {
-                var elm, pos, self = this;
+                var elm, rect, vp, self = this;
                 if (!this.isDisabled()) {
                     if (this.isMenuRendered || (this.renderMenu(), this.isMenuRendered = !0), 
                     this.isMenuVisible) return this.hideMenu();
                     elm = DOM.get(this.id), DOM.show(this.id + "_menu"), DOM.addClass(elm, "mceSplitButtonSelected"), 
-                    pos = DOM.getPos(elm), DOM.setStyles(this.id + "_menu", {
-                        left: pos.x,
-                        top: pos.y + elm.firstChild.clientHeight
-                    }), Event.add(DOM.doc, "mousedown", this.hideMenu, this), this.onShowMenu.dispatch(this), 
-                    this._focused && (this._keyHandler = Event.add(this.id + "_menu", "keydown", function(e) {
+                    rect = elm.getBoundingClientRect(), vp = DOM.getViewPort(), 
+                    DOM.setStyles(this.id + "_menu", {
+                        left: vp.x + rect.left,
+                        top: vp.y + rect.bottom
+                    }), elm = 0, Event.add(DOM.doc, "mousedown", this.hideMenu, this), 
+                    this.onShowMenu.dispatch(this), this._focused && (this._keyHandler = Event.add(this.id + "_menu", "keydown", function(e) {
                         27 == e.keyCode && this.hideMenu();
                     }), DOM.select("button", this.id + "_menu")[0].focus()), this.keyboardNav = new tinymce.ui.KeyboardNavigation({
                         root: this.id + "_menu",
@@ -10148,6 +9462,14 @@
             this.setupEvents(), this.execCommands = {}, this.queryStateCommands = {}, 
             this.queryValueCommands = {}, this.execCallback("setup", this);
         }, tinymce.Editor.prototype = {
+            createParser: function(settings) {
+                return (settings = new tinymce.html.DomParser(settings || this.settings, this.schema)).sanitizer.mode = "store", 
+                settings.addAttributeFilter("data-mce-src,data-mce-href,data-mce-style", function(nodes, name) {
+                    for (var i = nodes.length; i--; ) nodes[i].attr(name, null);
+                }), settings.addNodeFilter("#comment", function(nodes) {
+                    for (var i = nodes.length; i--; ) /^\s*mce:protected\b/i.test(nodes[i].value) && nodes[i].remove();
+                }), settings;
+            },
             render: function() {
                 var self = this, s = self.settings, id = self.id, sl = tinymce.ScriptLoader;
                 Event.domLoaded ? (tinymce.settings = s, !self.getElement() || tinymce.isIDevice && !tinymce.isIOS5 || (!/TEXTAREA|INPUT/i.test(self.getElement().nodeName) && s.hidden_input && DOM.getParent(id, "form") && DOM.insertAfter(DOM.create("input", {
@@ -10271,8 +9593,7 @@
                     update_styles: !0,
                     root_element: settings.content_editable ? self.id : null,
                     schema: self.schema
-                }), self.parser = new tinymce.html.DomParser(settings, self.schema), 
-                self.parser.addAttributeFilter("src,href,style", function(nodes, name) {
+                }), self.parser = self.createParser(settings), self.parser.addAttributeFilter("src,href,style", function(nodes, name) {
                     for (var node, value, internalName, i = nodes.length, dom = self.dom; i--; ) value = (node = nodes[i]).attr(name), 
                     node.attributes.map[internalName = "data-mce-" + name] || ("style" === name ? (settings.validate_styles && (value = dom.serializeStyle(dom.parseStyle(value), node.name)), 
                     node.attr(internalName, value)) : node.attr(internalName, self.convertURL(value, name, node.name)));
@@ -10297,13 +9618,7 @@
                 settings.readonly || self.bindNativeEvents(), self.controlManager.onPostRender.dispatch(self, self.controlManager), 
                 self.onPostRender.dispatch(self), self.quirks = tinymce.util.Quirks(self), 
                 settings.directionality && (body.dir = settings.directionality), 
-                settings.nowrap && (body.style.whiteSpace = "nowrap"), settings.protect && self.onBeforeSetContent.add(function(ed, o) {
-                    each(settings.protect, function(pattern) {
-                        o.content = o.content.replace(pattern, function(str) {
-                            return "\x3c!--mce:protected " + escape(str) + "--\x3e";
-                        });
-                    });
-                }), self.onSetContent.add(function() {
+                settings.nowrap && (body.style.whiteSpace = "nowrap"), self.onSetContent.add(function() {
                     self.addVisual(self.getBody());
                 }), settings.padd_empty_editor && self.onPostProcess.add(function(ed, o) {
                     o.content = o.content.replace(/^(<p[^>]*>(&nbsp;|&#160;|\s|\u00a0|)<\/p>[\r\n]*|<br \/>[\r\n]*)$/, "");
@@ -11888,9 +11203,7 @@
             function isTextBlock(name) {
                 return name.nodeType && (name = name.nodeName), !!ed.schema.getTextBlockElements()[name.toLowerCase()];
             }
-            function isTableCell(node) {
-                return /^(TH|TD)$/.test(node.nodeName);
-            }
+            var formatExcludeSelector = ed.settings.format_exclude_selector !== undef ? ed.settings.format_exclude_selector : "[data-mce-object],iframe,object,embed,video,audio,applet,map,svg";
             function getParents(node, selector) {
                 return dom.getParents(node, selector, dom.getRoot());
             }
@@ -11956,7 +11269,9 @@
                         var currentWrapElm;
                         each(nodes, function process(node) {
                             var nodeName, parentName, found, hasContentEditableState, lastContentEditable;
-                            isBogusBr(node) || isBookmarkNode(node) || (lastContentEditable = contentEditable, 
+                            isBogusBr(node) || (isBookmarkNode(node) ? currentWrapElm && currentWrapElm.appendChild(node) : format.inline && function(node) {
+                                return 1 === node.nodeType && formatExcludeSelector && dom.is(node, formatExcludeSelector);
+                            }(node) ? currentWrapElm = 0 : (lastContentEditable = contentEditable, 
                             nodeName = node.nodeName.toLowerCase(), parentName = node.parentNode.nodeName.toLowerCase(), 
                             1 === node.nodeType && getContentEditable(node) && (lastContentEditable = contentEditable, 
                             contentEditable = "true" === getContentEditable(node), 
@@ -11971,7 +11286,7 @@
                             each(tinymce.grep(node.childNodes), process), hasContentEditableState && (contentEditable = lastContentEditable), 
                             currentWrapElm = 0) : (currentWrapElm || (currentWrapElm = dom.clone(wrapElm, FALSE), 
                             node.parentNode.insertBefore(currentWrapElm, node), 
-                            newWrappers.push(currentWrapElm)), currentWrapElm.appendChild(node)));
+                            newWrappers.push(currentWrapElm)), currentWrapElm.appendChild(node))));
                         });
                     }), !0 !== format.links && !1 !== format.wrap_links || each(newWrappers, function(node) {
                         !function process(node) {
@@ -12070,17 +11385,14 @@
                 function removeRngStyle(rng) {
                     var startContainer, endContainer, commonAncestorContainer = rng.commonAncestorContainer;
                     rng = expandRng(rng, formatList, TRUE), format.split && ((startContainer = getContainer(rng, TRUE)) != (endContainer = getContainer(rng)) ? (commonAncestorContainer && /^T(HEAD|BODY|FOOT|R)$/.test(commonAncestorContainer.nodeName) && /^(TH|TD)$/.test(endContainer.nodeName) && endContainer.firstChild && (endContainer = endContainer.firstChild || endContainer), 
-                    !dom.isChildOf(startContainer, endContainer) || isBlock(endContainer) || isTableCell(startContainer) || isTableCell(endContainer) ? (startContainer = wrap(startContainer, "span", {
+                    startContainer = wrap(startContainer, "span", {
                         id: "_start",
                         "data-mce-type": "bookmark"
                     }), endContainer = wrap(endContainer, "span", {
                         id: "_end",
                         "data-mce-type": "bookmark"
                     }), splitToFormatRoot(startContainer), splitToFormatRoot(endContainer), 
-                    startContainer = unwrap(TRUE), endContainer = unwrap()) : (splitToFormatRoot(startContainer = wrap(startContainer, "span", {
-                        id: "_start",
-                        "data-mce-type": "bookmark"
-                    })), startContainer = unwrap(TRUE))) : startContainer = endContainer = splitToFormatRoot(startContainer), 
+                    startContainer = unwrap(TRUE), endContainer = unwrap()) : startContainer = endContainer = splitToFormatRoot(startContainer), 
                     rng.startContainer = startContainer.parentNode || startContainer, 
                     rng.startOffset = nodeIndex(startContainer), rng.endContainer = endContainer.parentNode || endContainer, 
                     rng.endOffset = nodeIndex(endContainer) + 1), rangeUtils.walk(rng, function(nodes) {
@@ -13175,7 +12487,7 @@
                 return isContentEditableFalse(node) ? (isContentEditableFalse(node.previousSibling) && (prevCeFalseElm = node.previousSibling), 
                 (nextCaretPosition = (prevCaretPosition = getPrevVisualCaretPosition(CaretPosition.before(node))) ? nextCaretPosition : getNextVisualCaretPosition(CaretPosition.after(node))) && isElement(nextCaretPosition.getNode()) && (nextElement = nextCaretPosition.getNode()), 
                 CaretContainerRemove.remove(node.previousSibling), CaretContainerRemove.remove(node.nextSibling), 
-                editor.dom.remove(node), editor.dom.isEmpty(editor.getBody()) ? (editor.setContent(""), 
+                editor.dom.remove(node), removeContentEditableSelection(), editor.dom.isEmpty(editor.getBody()) ? (editor.setContent(""), 
                 void editor.focus()) : prevCeFalseElm ? CaretPosition.after(prevCeFalseElm).toRange() : nextElement ? CaretPosition.before(nextElement).toRange() : prevCaretPosition ? prevCaretPosition.toRange() : nextCaretPosition ? nextCaretPosition.toRange() : null) : null;
             }
             function isTextBlock(node) {
@@ -13243,7 +12555,7 @@
             }
             function removeContentEditableSelection() {
                 selectedContentEditableNode && (selectedContentEditableNode.removeAttribute("data-mce-selected"), 
-                editor.dom.remove(realSelectionId), selectedContentEditableNode = null);
+                selectedContentEditableNode = null), editor.dom.remove(realSelectionId);
             }
             function hideFakeCaret() {
                 fakeCaret.hide();
@@ -13363,7 +12675,7 @@
             }), editor.selection.onGetSelectionRange.add(function(sel, e) {
                 var rng = e.range;
                 selectedContentEditableNode && (selectedContentEditableNode.parentNode ? ((rng = rng.cloneRange()).selectNode(selectedContentEditableNode), 
-                e.range = rng) : selectedContentEditableNode = null);
+                e.range = rng) : removeContentEditableSelection());
             }), editor.selection.onSetSelectionRange.add(function(sel, e) {
                 var rng = setContentEditableSelection(e.range);
                 rng && (e.range = rng);
@@ -13384,18 +12696,25 @@
                 showBlockCaretContainer: showBlockCaretContainer,
                 hideFakeCaret: hideFakeCaret,
                 destroy: function() {
-                    fakeCaret.destroy(), selectedContentEditableNode = null;
+                    fakeCaret.destroy(), removeContentEditableSelection();
                 }
             };
         };
     }(tinymce), function() {
-        var Entities = tinymce.html.Entities, each = tinymce.each, extend = tinymce.extend, DomParser = tinymce.html.DomParser, HtmlSerializer = tinymce.html.Serializer, Dispatcher = tinymce.util.Dispatcher, DOM = tinymce.DOM;
+        var Entities = tinymce.html.Entities, each = tinymce.each, extend = tinymce.extend, HtmlSerializer = tinymce.html.Serializer, Dispatcher = tinymce.util.Dispatcher, DOM = tinymce.DOM;
         tinymce.PluginManager.add("core", function(ed, url) {
             ed.onUpdateMedia = new Dispatcher(), ed.onWfEditorSave = new Dispatcher();
-            var store, contentLoaded = !1, elm = ed.getElement(), startup_content_html = ed.settings.startup_content_html || "", quoteMap = (ed.onBeforeRenderUI.add(function() {
+            var store, contentLoaded = !1, elm = ed.getElement();
+            var startup_content_html = ed.settings.startup_content_html || "", quoteMap = (ed.onBeforeRenderUI.add(function() {
                 if (startup_content_html && elm && !contentLoaded && ("TEXTAREA" === elm.nodeName ? "" == elm.value : "" == elm.innerHTML)) return contentLoaded = !0, 
-                (value = Entities.decode(startup_content_html)) && ("TEXTAREA" === elm.nodeName ? elm.value = value : elm.innerHTML = value), 
-                !0;
+                value = startup_content_html, (value = Entities.decode(value)) && ("TEXTAREA" === elm.nodeName ? elm.value = value : elm.innerHTML = function(value) {
+                    var div = document.implementation.createHTMLDocument("").createElement("div");
+                    return div.innerHTML = value, each(div.querySelectorAll("script,noscript"), function(node) {
+                        node.parentNode.removeChild(node);
+                    }), each(div.querySelectorAll("*"), function(node) {
+                        for (var attrs = node.attributes, i = attrs.length - 1; 0 <= i; i--) 0 === attrs[i].name.toLowerCase().indexOf("on") && node.removeAttribute(attrs[i].name);
+                    }), div.innerHTML;
+                }(value)), !0;
                 var value;
             }), {
                 en: {
@@ -13423,12 +12742,12 @@
             }), ed.onPreInit.add(function() {
                 var pb;
                 ed.onUpdateMedia.add(function(ed, o) {
-                    o.before && o.after && (each(ed.dom.select("img,poster"), function(elm) {
-                        var after, stamp, src = elm.getAttribute("src");
-                        (src = src && -1 !== src.indexOf("?") ? src.substring(0, src.indexOf("?")) : src) == o.before && (after = o.after, 
-                        stamp = "?" + new Date().getTime(), -1 !== src.indexOf("?") && -1 === after.indexOf("?") && (after += stamp), 
-                        ed.dom.setAttribs(elm, {
-                            src: after,
+                    o.before && o.after && (each(ed.dom.select("img,[poster]"), function(elm) {
+                        var stamp, src = elm.getAttribute("src"), query = !1;
+                        src && -1 !== src.indexOf("?") && (src = src.substring(0, src.indexOf("?")), 
+                        query = !0), src == o.before && (src = o.after, stamp = "?" + new Date().getTime(), 
+                        query && -1 === src.indexOf("?") && (src += stamp), ed.dom.setAttribs(elm, {
+                            src: src,
                             "data-mce-src": o.after
                         })), elm.getAttribute("srcset") && function(elm, o) {
                             var srcset = elm.getAttribute("srcset");
@@ -13449,17 +12768,25 @@
                     }));
                 }), ed.onWfEditorSave.add(function(ed, o) {
                     o.content = function(ed, content) {
-                        var args, parser, settings;
-                        return ed.settings.validate ? (args = {
+                        var args;
+                        return !1 === ed.settings.verify_html ? content : ((args = {
                             no_events: !0,
                             format: "html",
                             get: !0,
                             load: !0
-                        }, extend(settings = {}, ed.settings), args.content = content, 
-                        ed.onBeforeGetContent.dispatch(ed, args), settings.forced_root_block = !1, 
-                        settings.validate = !0, parser = new DomParser(settings, ed.schema), 
-                        settings = new HtmlSerializer(settings, ed.schema), args.content = settings.serialize(parser.parse(args.content), args), 
-                        ed.onPostProcess.dispatch(ed, args), args.content) : content;
+                        }).content = content, ed.onBeforeGetContent.dispatch(ed, args), 
+                        content = function(ed) {
+                            var settings, parser;
+                            return ed.contentValidator || (settings = extend({}, ed.settings, {
+                                forced_root_block: !1,
+                                validate: !0
+                            }), (parser = ed.createParser(settings)).sanitizer.mode = null, 
+                            ed.contentValidator = {
+                                parser: parser,
+                                serializer: new HtmlSerializer(settings, ed.schema)
+                            }), ed.contentValidator;
+                        }(ed), args.content = content.serializer.serialize(content.parser.parse(args.content), args), 
+                        ed.onPostProcess.dispatch(ed, args), args.content);
                     }(ed, o.content);
                 }), (pb = DOM.get("sp-inline-popover")) && DOM.isChildOf(ed.getElement(), pb) && ed.onGetContent.addToTop(function(ed, o) {
                     var args;
@@ -13467,9 +12794,9 @@
                         format: "html"
                     }), o.content = ed.serializer.serialize(ed.getBody(), args));
                 });
-            }), 0 == ed.settings.forced_root_block && 0 != ed.settings.editable_root && (ed.settings.editable_root = "rootblock", 
+            }), !1 === ed.settings.forced_root_block && 0 != ed.settings.editable_root && (ed.settings.editable_root = "rootblock", 
             ed.onPreInit.addToTop(function() {
-                var selection = ed.selection, dom = ed.dom;
+                var container, selection = ed.selection, dom = ed.dom;
                 dom.settings.root_element = ed.settings.editable_root, ed.schema.addValidElements("#mce:root[id|data-mce-root]"), 
                 ed.schema.children["mce:root"] = ed.schema.children.body, ed.schema.children.body["mce:root"] = {}, 
                 ed.serializer.addAttributeFilter("data-mce-root", function(nodes) {
@@ -13486,10 +12813,561 @@
                 }), ed.onSaveContent.add(function(ed, o) {
                     "&nbsp;" === o.content && (o.content = "");
                 }), ed.undoManager.onBeforeAdd.add(function(um, level) {
-                    var node, container = ed.dom.create("div", {}, level.content);
+                    var node;
+                    (container = container || document.implementation.createHTMLDocument("").createElement("div")).innerHTML = level.content, 
                     (node = container.firstChild) && 1 == node.nodeType && node.hasAttribute("data-mce-root") && (level.content = container.firstChild.innerHTML);
                 });
             }));
+        });
+    }(), [ "a", "abbr", "acronym", "address", "applet", "area", "article", "aside", "audio", "b", "base", "basefont", "bdi", "bdo", "bgsound", "big", "blink", "blockquote", "body", "br", "button", "canvas", "caption", "center", "cite", "code", "col", "colgroup", "command", "content", "data", "datalist", "dd", "del", "details", "dfn", "dialog", "dir", "div", "dl", "dt", "element", "em", "embed", "fieldset", "figcaption", "figure", "font", "footer", "form", "frame", "frameset", "h1", "h2", "h3", "h4", "h5", "h6", "head", "header", "hgroup", "hr", "html", "i", "iframe", "image", "img", "input", "ins", "isindex", "kbd", "keygen", "label", "legend", "li", "link", "listing", "main", "map", "mark", "marquee", "menu", "menuitem", "meta", "meter", "multicol", "nav", "nobr", "noembed", "noframes", "noscript", "object", "ol", "optgroup", "option", "output", "p", "param", "picture", "plaintext", "pre", "progress", "q", "rp", "rt", "rtc", "ruby", "s", "samp", "script", "section", "select", "shadow", "slot", "small", "source", "spacer", "span", "strike", "strong", "style", "sub", "summary", "sup", "table", "tbody", "td", "template", "textarea", "tfoot", "th", "thead", "time", "title", "tr", "track", "tt", "u", "ul", "var", "video", "wbr", "xmp" ]), FONT_ICON_RE = /<([a-z0-9]+)([^>]+)class="([^"]*)(glyph|uk-)?(fa|icon|bi)-([\w-]+)([^"]*)"([^>]*)><\/\1>/gi, PADDED_RX = /<(p|h1|h2|h3|h4|h5|h6|pre|div|address|caption)\b([^>]+)>(&nbsp;|\u00a0)<\/\1>/gi;
+    const explode$1 = tinymce.explode, each$1 = tinymce.each, explode = tinymce.explode;
+    function processAttributes(editor, content, stripInternal) {
+        var invalidAttribRules = editor.getParam("invalid_attributes", ""), editor = editor.getParam("invalid_attribute_values", "");
+        if (!stripInternal && !invalidAttribRules && !editor) return content;
+        var rules, doc = document.implementation.createHTMLDocument("").createElement("div"), nodes = (doc.innerHTML = content, 
+        doc.querySelectorAll("*")), i = nodes.length, attrRules = [], valueRules = [];
+        for (invalidAttribRules && (attrRules = function(list) {
+            for (var s, rx, items = explode$1(list), matchers = [], i = 0; i < items.length; i++) if (s = (items[i] || "").trim()) try {
+                rx = new RegExp("^(?:" + s + ")$", "i"), matchers.push(rx);
+            } catch (e) {
+                s = s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), matchers.push(new RegExp("^" + s + "$", "i"));
+            }
+            return matchers;
+        }(invalidAttribRules)), editor && (content = editor, rules = [], content = explode(content), 
+        each$1(content, function(item) {
+            var m;
+            (item = (item || "").trim()) && ((m = /([a-z0-9\*]+)\[([a-z0-9\-]+)([\^\$\!~\*]?=)?["']?([^"']+)?["']?\]/i.exec(item)) && 5 === m.length ? rules.push({
+                type: "bracket",
+                tag: m[1].toLowerCase(),
+                attrib: m[2].toLowerCase(),
+                expr: void 0 === m[3] ? null : m[3] || "",
+                check: m[4] || ""
+            }) : rules.push({
+                type: "pattern",
+                tag: "*",
+                pattern: item
+            }));
+        }), valueRules = rules); i--; ) for (var node, attrValue, nodeName = (node = nodes[i]).tagName.toLowerCase(), attributes = node.attributes || [], x = attributes.length - 1; 0 <= x; x--) {
+            var attr = attributes[x];
+            attr && attr.name && (attr = attr.name.toLowerCase(), attrValue = node.getAttribute(attr), 
+            stripInternal && 0 === attr.indexOf("data-mce-") ? node.removeAttribute(attr) : (function(name, rules) {
+                var i;
+                if (name) for (i = 0; i < rules.length; i++) if (rules[i].test(name)) return 1;
+            }(attr, attrRules) || function(tag, name, value, rules) {
+                for (var r, rx, k = 0; k < rules.length; k++) if ("pattern" === (r = rules[k]).type) {
+                    try {
+                        rx = new RegExp("^" + r.pattern + "$", "i");
+                    } catch (e) {
+                        rx = null;
+                    }
+                    if (rx && rx.test(name) || r.pattern.toLowerCase() === name) return 1;
+                } else if ("bracket" === r.type && ("*" === r.tag || tag === r.tag) && name === r.attrib && (!r.expr || function(value, expr, check) {
+                    return expr ? "=" === expr ? value === check : "*=" === expr ? 0 <= value.indexOf(check) : "~=" === expr ? 0 <= (" " + value + " ").indexOf(" " + check + " ") : "!=" === expr ? value != check : "^=" === expr ? 0 === value.indexOf(check) : "$=" === expr && value.substr(value.length - check.length) === check : check;
+                }(value, r.expr, r.check))) return 1;
+            }(nodeName, attr, attrValue, valueRules)) && (node.removeAttribute(attr), 
+            node.removeAttribute("data-mce-" + attr)));
+        }
+        return doc.innerHTML;
+    }
+    function convertFromGeshi(h) {
+        return (h || "").replace(/<pre xml:lang="([^"]+)"([^>]*)>(.*?)<\/pre>/g, function(a, b, c, d) {
+            return '<pre data-geshi-lang="' + b + '"' + (c && /\w/.test(c) ? c.split(" ").join(" data-geshi-") : "") + ">" + d + "</pre>";
+        });
+    }
+    var AutoLinkPattern, each = tinymce.each, Node$1 = tinymce.html.Node;
+    tinymce.PluginManager.add("cleanup", function(ed, url) {
+        !1 === ed.settings.verify_html && (ed.settings.validate = !1);
+        Node = Node$1;
+        var Node, padding = {
+            paddEmptyTags: function(content) {
+                return (content = (content = content.replace(FONT_ICON_RE, '<$1$2class="$3$4$5-$6$7"$8 data-mce-empty="1">&nbsp;</$1>')).replace(/<(a|i|span)\b([^>]+)><\/\1>/gi, '<$1$2 data-mce-empty="1">&nbsp;</$1>')).replace(/<li><\/li>/, '<li data-mce-empty="1">&nbsp;</li>');
+            },
+            ensureEmptyInlineNodes: function(nodes, name) {
+                for (var node, i = nodes.length; i--; ) !(node = nodes[i]).attr("class") && "li" !== name || node.firstChild || (node.attr("data-mce-empty", "1"), 
+                node.append(new Node("#text", "3")).value = "\xa0");
+            },
+            cleanupEmptyInlineNodes: function(nodes) {
+                for (var node, fc, i = nodes.length; i--; ) fc = (node = nodes[i]).firstChild, 
+                node.attr("data-mce-empty", null), !fc || "\xa0" !== fc.value && "&nbsp;" !== fc.value || fc.remove();
+            }
+        };
+        ed.onPreInit.add(function() {
+            var elements;
+            ed.serializer.addAttributeFilter("data-mce-caret", function(nodes) {
+                for (var i = nodes.length; i--; ) nodes[i].remove();
+            }), !1 === ed.settings.remove_trailing_brs && ed.serializer.addAttributeFilter("data-mce-bogus", function(nodes) {
+                for (var node, textNode, i = nodes.length; i--; ) "br" === (node = nodes[i]).name && (node.prev || node.next ? node.remove() : ((textNode = new Node$1("#text", 3)).value = "\xa0", 
+                node.replace(textNode)));
+            }), ed.serializer.addAttributeFilter("data-mce-tmp", function(nodes, name) {
+                for (var i = nodes.length; i--; ) nodes[i].attr("data-mce-tmp", null);
+            }), ed.parser.addAttributeFilter("data-mce-tmp", function(nodes, name) {
+                for (var i = nodes.length; i--; ) nodes[i].attr("data-mce-tmp", null);
+            }), !1 !== ed.settings.verify_html && (elements = ed.schema.elements, 
+            each("ol ul sub sup blockquote font table tbody tr strong b".split(","), function(name) {
+                elements[name] && (elements[name].removeEmpty = !1);
+            }), ed.getParam("pad_empty_tags", !0) || each(elements, function(v, k) {
+                v.paddEmpty && (v.paddEmpty = !1);
+            }), each(elements, function(v, k) {
+                if (0 === k.indexOf("mce:")) return !0;
+                -1 === tinymce.inArray(TAGS, k) && ed.schema.addCustomElements(k);
+            })), ed.parser.addNodeFilter("a,i,span,li", function(nodes, name) {
+                padding.ensureEmptyInlineNodes(nodes, name);
+            }), ed.serializer.addAttributeFilter("data-mce-empty", function(nodes) {
+                padding.cleanupEmptyInlineNodes(nodes);
+            });
+        }), !1 === ed.settings.verify_html && ed.addCommand("mceCleanup", function() {
+            var s = ed.settings, se = ed.selection, bm = se.getBookmark(), content = ed.getContent({
+                cleanup: !0
+            }), s = (s.verify_html = !0, new tinymce.html.Schema(s)), content = new tinymce.html.Serializer({
+                validate: !0
+            }, s).serialize(new tinymce.html.DomParser({
+                validate: !0,
+                allow_event_attributes: !!ed.settings.allow_event_attributes
+            }, s).parse(content));
+            ed.setContent(content, {
+                cleanup: !0
+            }), se.moveToBookmark(bm);
+        }), ed.onBeforeSetContent.add(function(ed, o) {
+            o.content = o.content.replace(/^<br>/, ""), o.content = convertFromGeshi(o.content), 
+            o.content = padding.paddEmptyTags(o.content), o.content = processAttributes(ed, o.content, !!o.load);
+        }), ed.onPostProcess.add(function(ed, o) {
+            o.set && (o.content = convertFromGeshi(o.content)), o.get && (o.content = (o.content || "").replace(/<pre([^>]+)data-geshi-lang="([^"]+)"([^>]*)>(.*?)<\/pre>/g, function(a, b, c, d, e) {
+                return '<pre xml:lang="' + c + '"' + (b + d).replace(/data-geshi-/gi, "").replace(/\s+/g, " ").replace(/\s$/, "") + ">" + e + "</pre>";
+            }), o.content = o.content.replace(/<a([^>]*)class="jce(box|popup|lightbox|tooltip|_tooltip)"([^>]*)><\/a>/gi, ""), 
+            o.content = o.content.replace(/<span class="jce(box|popup|lightbox|tooltip|_tooltip)">(.*?)<\/span>/gi, "$2"), 
+            o.content = o.content.replace(/_mce_(src|href|style|coords|shape)="([^"]+)"\s*?/gi, ""), 
+            !1 === ed.settings.validate && (o.content = o.content.replace(/<body([^>]*)>([\s\S]*)<\/body>/, "$2"), 
+            ed.getParam("remove_tag_padding") || (o.content = o.content.replace(/<(p|h1|h2|h3|h4|h5|h6|th|td|pre|div|address|caption)\b([^>]*)><\/\1>/gi, "<$1$2>&nbsp;</$1>"))), 
+            o.content = o.content.replace(/<(a|i|span)([^>]+)>(&nbsp;|\u00a0)<\/\1>/gi, function(match, tag, attribs) {
+                return attribs = attribs.replace('data-mce-empty="1"', ""), "<" + tag + " " + tinymce.trim(attribs) + "></" + tag + ">";
+            }), o.content = o.content.replace(/<li data-mce-empty="1">(&nbsp;|\u00a0)<\/li>/gi, "<li></li>"), 
+            ed.getParam("remove_div_padding") && (o.content = o.content.replace(/<div([^>]*)>(&nbsp;|\u00a0)<\/div>/g, "<div$1></div>")), 
+            !1 === ed.getParam("pad_empty_tags", !0) && (o.content = o.content.replace(PADDED_RX, "<$1$2></$1>")), 
+            ed.getParam("keep_nbsp", !0) && "raw" === ed.settings.entity_encoding && (o.content = o.content.replace(/\u00a0/g, "&nbsp;")), 
+            o.content = o.content.replace(/(uk|v|ng|data)-([\w-]+)=""(\s|>)/gi, "$1-$2$3"), 
+            ed.settings.padd_empty_editor && (o.content = o.content.replace(/^(<div>(&nbsp;|&#160;|\s|\u00a0|)<\/div>[\r\n]*|<br(\s*\/)?>[\r\n]*)$/, "")), 
+            o.content = o.content.replace(/<hr(.*)class="system-pagebreak"(.*?)\/?>/gi, '<hr$1class="system-pagebreak"$2/>'), 
+            o.content = o.content.replace(/<hr id="system-readmore"(.*?)>/gi, '<hr id="system-readmore" />'));
+        }), ed.onSaveContent.add(function(ed, o) {
+            var entities;
+            ed.getParam("cleanup_pluginmode") && (entities = {
+                "&#39;": "'",
+                "&amp;": "&",
+                "&quot;": '"',
+                "&apos;": "'"
+            }, o.content = o.content.replace(/&(#39|apos|amp|quot);/gi, function(a) {
+                return entities[a];
+            }));
+        }), ed.addButton("cleanup", {
+            title: "advanced.cleanup_desc",
+            cmd: "mceCleanup"
+        }), this.paddEmptyTags = padding.paddEmptyTags;
+    }), function() {
+        const Node$1 = tinymce.html.Node;
+        var Content_createTextNode = function(value, raw) {
+            var text = new Node$1("#text", 3);
+            return text.raw = !1 !== raw, text.value = value, text;
+        }, Content_createShortcodeHtml = function(editor, data, tag) {
+            return data = (data = editor.dom.decode(data)).replace(/[\n\r]/gi, "<br />"), 
+            editor.dom.createHTML(tag || "pre", {
+                "data-mce-code": "shortcode"
+            }, editor.dom.encode(data));
+        }, Content_createHtml = function(editor, data, type, tag) {
+            return type = type || "script", tag = tag || "pre", !1 !== editor.settings.code_use_blocks ? editor.dom.createHTML(tag, {
+                "data-mce-code": type
+            }, editor.dom.encode(data)) : (data = data.replace(/<br[^>]*?>/gi, "\n"), 
+            editor.dom.createHTML("img", {
+                src: "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7",
+                "data-mce-resize": "false",
+                "data-mce-code": type,
+                "data-mce-type": "placeholder",
+                "data-mce-value": escape(data)
+            }));
+        };
+        const each$1 = tinymce.each;
+        function getState(editor) {
+            return editor._codeState || {
+                shortEndedElements: {},
+                booleanAttributes: {}
+            };
+        }
+        function canKeepCode(editor, type) {
+            return !1 === editor.settings.validate || editor.getParam("code_allow_" + type);
+        }
+        function isXmlElement(editor, name) {
+            var htmlSchema = getState(editor).htmlSchema;
+            return htmlSchema && !htmlSchema.isValid(name) && !function(editor, name) {
+                return editor = (editor.settings.invalid_elements || "").split(","), 
+                -1 !== tinymce.inArray(editor, name);
+            }(editor, name);
+        }
+        function isValid(editor, tag, attr) {
+            return isXmlElement(editor, tag) || !1 === editor.settings.validate || editor.schema.isValid(tag, attr);
+        }
+        function processXML(editor, content) {
+            return content.replace(/<([a-z0-9\-_\:\.]+)(?:[^>]*?)\/?>((?:[\s\S]*?)<\/\1>)?/gi, function(match, tag) {
+                if ("svg" === (tag = tag.toLowerCase()) && !1 === editor.settings.code_allow_svg_in_xml) return match;
+                if ("math" === tag && !1 === editor.settings.code_allow_mathml_in_xml) return match;
+                if (!isXmlElement(editor, tag)) return match;
+                if (!1 !== editor.settings.code_validate_xml) {
+                    if (null === (tag = function(editor, xml) {
+                        return !(xml = new DOMParser().parseFromString(xml, "text/xml")).documentElement || xml.getElementsByTagName("parsererror").length ? null : function sanitizeNode(editor, node) {
+                            var html = [];
+                            switch (node.nodeType) {
+                              case 1:
+                                var name, value, tagName = node.nodeName.toLowerCase();
+                                if (("script" === tagName || "style" === tagName || "link" === tagName) && !canKeepCode(editor, "link" === tagName ? "style" : tagName)) return "";
+                                if (!isValid(editor, tagName)) return "";
+                                html.push("<", tagName);
+                                for ({
+                                    name,
+                                    value
+                                } of Array.from(node.attributes)) !isValid(editor, tagName, name) || !editor.settings.allow_event_attributes && name.startsWith("on") || (!getState(editor).booleanAttributes[name] || "" !== value && "true" !== value && value !== name ? html.push(" ", name, '="', editor.dom.encode(value, !0), '"') : html.push(" ", name));
+                                if (getState(editor).shortEndedElements[tagName]) "html5-strict" === editor.settings.schema ? html.push(">") : html.push(" />"); else {
+                                    html.push(">");
+                                    for (var child of Array.from(node.childNodes)) html.push(sanitizeNode(editor, child));
+                                    html.push("</", tagName, ">");
+                                }
+                                break;
+
+                              case 3:
+                                var text = node.nodeValue;
+                                html.push(text);
+                                break;
+
+                              case 5:
+                                html.push("<![CDATA[", editor.dom.encode(node.nodeValue, !0), "]]>");
+                                break;
+
+                              case 8:
+                                html.push("\x3c!--", editor.dom.encode(node.nodeValue, !0), "--\x3e");
+                            }
+                            return html.join("");
+                        }(editor, xml.documentElement);
+                    }(editor, match))) return match;
+                    match = tag;
+                }
+                return Content_createHtml(editor, match, "xml");
+            });
+        }
+        function processShortcode(editor, html, tagName) {
+            var attrPlaceholders, token;
+            return -1 === html.indexOf("{") || "{" == html.charAt(0) && html.length < 3 || (-1 != html.indexOf("{/source}") && (html = function(editor, html) {
+                return -1 === html.indexOf("{/source}") ? html : html.replace(/(?:(<(code|pre|samp|span)[^>]*(data-mce-type="code")?>|")?)\{source(.*?)\}([\s\S]+?)\{\/source\}/g, function(match) {
+                    return "<" === match.charAt(0) || '"' === match.charAt(0) ? match : (match = editor.dom.decode(match), 
+                    '<pre data-mce-code="shortcode" data-mce-label="sourcerer">' + editor.dom.encode(match) + "</pre>");
+                });
+            }(editor, html)), tagName = tagName || "span", attrPlaceholders = [], 
+            token = "__shortcode_attr_" + Math.random().toString(36).slice(2) + "_", 
+            html = (html = html.replace(/=("[^"]*\{[^"]*"|'[^']*\{[^']*')/g, function(match) {
+                return attrPlaceholders.push(match), '="' + token + (attrPlaceholders.length - 1) + '__"';
+            })).replace(/(?:(<(code|pre|samp|span)[^>]*(data-mce-type="code")?>)?)(?:\{)([\w-]+)(.*?)(?:\/?\})(?:([\s\S]+?)\{\/\4\})?/g, function(match) {
+                return "<" === match.charAt(0) ? match : Content_createShortcodeHtml(editor, match, tagName);
+            }), attrPlaceholders.length && (html = html.replace(new RegExp('="' + token + '(\\d+)__"', "g"), function(match, index) {
+                return (index = parseInt(index, 10)) < attrPlaceholders.length ? attrPlaceholders[index] : match;
+            }))), html;
+        }
+        function processPhp(editor, content) {
+            return canKeepCode(editor, "php") ? (content = content.replace(/\="([^"]+?)"/g, function(_a, b) {
+                return '="' + b.replace(/<\?(php)?(.+?)\?>/gi, function(_x, _y, z) {
+                    return "__php_start__" + editor.dom.encode(z) + "__php_end__";
+                }) + '"';
+            }), (content = (content = /<textarea/.test(content) ? content.replace(/<textarea([^>]*)>([\s\S]*?)<\/textarea>/gi, function(_a, b, c) {
+                return "<textarea" + b + ">" + c.replace(/<\?(php)?(.+?)\?>/gi, function(_x, _y, z) {
+                    return "__php_start__" + editor.dom.encode(z) + "__php_end__";
+                }) + "</textarea>";
+            }) : content).replace(/<([^>]+)<\?(php)?(.+?)\?>([^>]*?)>/gi, function(_a, b, _c, d, e) {
+                return " " !== b.charAt(b.length) && (b += " "), "<" + b + 'data-mce-php="' + d + '" ' + e + ">";
+            })).replace(/<\?(php)?([\s\S]+?)\?>/gi, function(match) {
+                return match = match.replace(/\n/g, "<br />"), Content_createHtml(editor, match, "php");
+            })) : content.replace(/<\?(php)?([\s\S]*?)\?>/gi, "");
+        }
+        var Process = {
+            init: function(editor) {
+                var state = {
+                    htmlSchema: new tinymce.html.Schema({
+                        schema: "mixed",
+                        invalid_elements: editor.settings.invalid_elements || ""
+                    }),
+                    shortEndedElements: {},
+                    booleanAttributes: {}
+                };
+                each$1(editor.schema.getShortEndedElements(), function(_shortEnded, name) {
+                    state.shortEndedElements[name.toLowerCase()] = !0;
+                }), each$1(editor.schema.getBoolAttrs(), function(_boolAttr, name) {
+                    state.booleanAttributes[name.toLowerCase()] = !0;
+                }), editor._codeState = state;
+            },
+            processOnInsert: function(editor, value, _node) {
+                return /\{.+\}/gi.test(value) && editor.settings.code_protect_shortcode && (value = processShortcode(editor, value, void 0)), 
+                canKeepCode(editor, "custom_xml") && (value = processXML(editor, value)), 
+                /<(\?|script|style)/.test(value) && (value = value.replace(/<(script|style)([^>]*?)>([\s\S]*?)<\/\1>/gi, function(match, type) {
+                    return canKeepCode(editor, type) ? (match = match.replace(/<br[^>]*?>/gi, "\n"), 
+                    Content_createHtml(editor, match, type)) : "";
+                }), value = processPhp(editor, value)), /<link[^>]*?rel="stylesheet"[^>]*?>/gi.test(value) ? value.replace(/<link[^>]*?rel="stylesheet"[^>]*?>/gi, function(match) {
+                    return canKeepCode(editor, "style") ? Content_createHtml(editor, match, "link") : "";
+                }) : value;
+            },
+            processShortcode: processShortcode,
+            processPhp: processPhp,
+            processXML: processXML
+        };
+        const each = tinymce.each, Node = tinymce.html.Node, VK = tinymce.VK, DomParser = tinymce.html.DomParser, Serializer = tinymce.html.Serializer;
+        function isOnlyChild(node) {
+            var child = node.parent.firstChild, count = 0;
+            if (child) do {
+                if (1 === child.type) {
+                    if (child.attributes.map["data-mce-type"] || child.attributes.map["data-mce-bogus"]) continue;
+                    if (child === node) continue;
+                    count++;
+                }
+                8 === child.type && count++, 3 !== child.type || /^[ \t\r\n]*$/.test(child.value) || count++;
+            } while (child = child.next);
+            return 0 === count;
+        }
+        tinymce.PluginManager.add("code", function(editor, url) {
+            function canKeepCode(type) {
+                return !1 === editor.settings.validate || editor.getParam("code_allow_" + type);
+            }
+            var blockElements = [], inlineElements = [], code_blocks = !1 !== editor.settings.code_use_blocks;
+            function handleEnterInPre(ed, node, before) {
+                var node = ed.dom.getParents(node, blockElements.join(",")), newBlockName = ed.settings.forced_root_block || "p";
+                !1 === ed.settings.force_block_newlines && (newBlockName = "br"), 
+                (node = node.shift()) !== ed.getBody() && (newBlockName = ed.dom.create(newBlockName, {}, "\xa0"), 
+                before ? node.parentNode.insertBefore(newBlockName, node) : ed.dom.insertAfter(newBlockName, node), 
+                (before = ed.selection.getRng()).setStart(newBlockName, 0), before.setEnd(newBlockName, 0), 
+                ed.selection.setRng(before), ed.selection.scrollIntoView(newBlockName));
+            }
+            editor.settings.code_allow_script && !1 !== editor.settings.code_allow_script_urls && (editor.settings.allow_script_urls = !0), 
+            editor.addCommand("InsertShortCode", function(ui, html) {
+                return editor.settings.code_protect_shortcode && (html = Process.processShortcode(editor, html, "pre"), 
+                tinymce.is(html)) && editor.execCommand("mceReplaceContent", !1, html), 
+                !1;
+            }), editor.onKeyDown.add(function(ed, e) {
+                var node;
+                if (e.keyCode == VK.ENTER) {
+                    if ("PRE" === (node = ed.selection.getNode()).nodeName && "shortcode" === node.getAttribute("data-mce-code")) return void (e.shiftKey || (ed.execCommand("InsertLineBreak", !1, e), 
+                    e.preventDefault()));
+                    "SPAN" === node.nodeName && node.getAttribute("data-mce-code") && (handleEnterInPre(ed, node), 
+                    e.preventDefault());
+                }
+                e.keyCode == VK.UP && e.altKey && "PRE" == (node = ed.selection.getNode()).nodeName && (handleEnterInPre(ed, node, !0), 
+                e.preventDefault()), 9 != e.keyCode || VK.metaKeyPressed(e) || "PRE" === (node = ed.selection.getNode()).nodeName && node.getAttribute("data-mce-code") && (ed.selection.setContent("\t", {
+                    no_events: !0
+                }), e.preventDefault()), e.keyCode !== VK.BACKSPACE && e.keyCode !== VK.DELETE || "SPAN" === (node = ed.selection.getNode()).nodeName && node.getAttribute("data-mce-code") && "placeholder" === node.getAttribute("data-mce-type") && (ed.undoManager.add(), 
+                ed.dom.remove(node), e.preventDefault());
+            }), editor.onPreInit.add(function() {
+                function isCodePlaceholder(node) {
+                    return "SPAN" === node.nodeName && node.getAttribute("data-mce-code") && "placeholder" == node.getAttribute("data-mce-type");
+                }
+                function onSetContent() {
+                    each(editor.dom.select("pre[data-mce-code]", editor.getBody()), function(elm) {
+                        var clone, clonedElm;
+                        (elm = editor.dom.getParent(elm, "p")) && ((clonedElm = (clone = elm.cloneNode(!0)).querySelector("[data-mce-code]")) && clone.removeChild(clonedElm), 
+                        editor.dom.isEmpty(clone)) && editor.dom.remove(elm, 1);
+                    });
+                }
+                Process.init(editor), editor.dom.bind(editor.getDoc(), "keyup click", function(e) {
+                    var node = e.target, sel = editor.selection.getNode();
+                    editor.dom.removeClass(editor.dom.select(".mce-item-selected"), "mce-item-selected"), 
+                    node === editor.getBody() && isCodePlaceholder(sel) ? sel.parentNode !== node || sel.nextSibling || editor.dom.insertAfter(editor.dom.create("br", {
+                        "data-mce-bogus": 1
+                    }), sel) : isCodePlaceholder(node) && (e.preventDefault(), e.stopImmediatePropagation(), 
+                    editor.selection.select(node), window.setTimeout(function() {
+                        editor.dom.addClass(node, "mce-item-selected");
+                    }, 10), e.preventDefault());
+                });
+                var ctrl = editor.controlManager.get("formatselect");
+                ctrl && each([ "script", "style", "php", "shortcode", "xml" ], function(key) {
+                    var title = editor.getLang("code." + key, key);
+                    if ("shortcode" === key && editor.settings.code_protect_shortcode) return ctrl.add(title, key, {
+                        class: "mce-code-" + key
+                    }), editor.formatter.register("shortcode", {
+                        block: "pre",
+                        attributes: {
+                            "data-mce-code": "shortcode"
+                        }
+                    }), !0;
+                    "xml" === key && (editor.settings.code_allow_xml = !!editor.settings.code_allow_custom_xml), 
+                    canKeepCode(key) && code_blocks && (ctrl.add(title, key, {
+                        class: "mce-code-" + key
+                    }), editor.formatter.register(key, {
+                        block: "pre",
+                        attributes: {
+                            "data-mce-code": key
+                        },
+                        onformat: function(elm) {
+                            each(editor.dom.select("br", elm), function(br) {
+                                editor.dom.replace(editor.dom.doc.createTextNode("\n"), br);
+                            });
+                        }
+                    }));
+                }), each(editor.schema.getBlockElements(), function(_block, blockName) {
+                    blockElements.push(blockName);
+                }), each(editor.schema.getTextInlineElements(), function(_inline, name) {
+                    inlineElements.push(name);
+                }), editor.settings.code_protect_shortcode && editor.textpattern && (editor.textpattern.addPattern({
+                    start: "{",
+                    end: "}",
+                    cmd: "InsertShortCode",
+                    remove: !0
+                }), editor.textpattern.addPattern({
+                    start: " {",
+                    end: "}",
+                    format: "inline-shortcode",
+                    remove: !1
+                })), editor.formatter.register("inline-shortcode", {
+                    inline: "span",
+                    attributes: {
+                        "data-mce-code": "shortcode"
+                    }
+                }), editor.selection.onBeforeSetContent.addToTop(function(sel, o) {
+                    (sel = sel.getNode()) && "PRE" === sel.nodeName || (o.content = Process.processOnInsert(editor, o.content, sel));
+                }), editor.onSetContent.add(onSetContent), editor.selection.onSetContent.add(onSetContent), 
+                editor.parser.addNodeFilter("script,style,link", function(nodes) {
+                    for (var i = nodes.length; i--; ) {
+                        var node, text, value, placeholder, parent = (node = nodes[i]).parent;
+                        parent && "pre" === parent.name || ("link" == node.name && "stylesheet" != node.attr("rel") ? node.remove() : (node.attr("data-mce-fragment", null), 
+                        node.firstChild && (node.firstChild.value = node.firstChild.value.replace(/<span([^>]+)>([\s\S]+?)<\/span>/gi, function(match, attr, content) {
+                            return -1 === attr.indexOf("data-mce-code") ? match : editor.dom.decode(content);
+                        })), code_blocks ? (value = new Serializer({
+                            validate: !1
+                        }).serialize(node), value = tinymce.trim(value), (parent = new Node("pre", 1)).attr({
+                            "data-mce-code": node.name
+                        }), text = Content_createTextNode(value, !1), parent.append(text), 
+                        node.replace(parent)) : (value = "", node.firstChild && (value = tinymce.trim(node.firstChild.value)), 
+                        placeholder = Node.create("img", {
+                            src: "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7",
+                            "data-mce-code": node.name,
+                            "data-mce-type": "placeholder",
+                            "data-mce-resize": "false",
+                            title: editor.dom.encode(value)
+                        }), each(node.attributes, function(attr) {
+                            placeholder.attr("data-mce-p-" + attr.name, attr.value);
+                        }), value && placeholder.attr("data-mce-value", escape(value)), 
+                        node.replace(placeholder))));
+                    }
+                }), editor.parser.addAttributeFilter("data-mce-code", function(nodes, name) {
+                    var node, i = nodes.length;
+                    function isBlockNode(node) {
+                        return -1 != tinymce.inArray(blockElements, node.name);
+                    }
+                    for (;i--; ) {
+                        var type, parent = (node = nodes[i]).parent;
+                        "placeholder" == node.attr("data-mce-type") || "shortcode" !== (type = node.attr(name)) && "php" !== type || ((type = node.firstChild ? node.firstChild.value : "") && (node.firstChild.value = type.replace(/<br[\s\/]*>/g, "\n")), 
+                        parent && (parent.attr(name) ? node.unwrap() : ("body" !== parent.name && !isOnlyChild(node) && function(node) {
+                            return "span" == node.name && (node.next && ("#text" == node.next.type || !isBlockNode(node.next)) || node.prev && ("#text" == node.prev.type || !isBlockNode(node.prev)) || node.parent && !isBlockNode(node.parent));
+                        }(node) || (node.name = "pre", node.parent && function(node) {
+                            return -1 != tinymce.inArray(inlineElements, node.name);
+                        }(node.parent) && (node.name = "span"), "pre" == node.name && parent && "p" == parent.name && isOnlyChild(node) && parent.parent && parent.replace(node)), 
+                        "span" == node.name && node === parent.lastChild && (type = Content_createTextNode("\xa0"), 
+                        parent.append(type)))));
+                    }
+                }), editor.serializer.addAttributeFilter("data-mce-code", function(nodes, name) {
+                    for (var i = nodes.length; i--; ) {
+                        var node, root_block = !1, type = (node = nodes[i]).attr(name);
+                        if ("img" === node.name) {
+                            var key, elm = new Node(type, 1);
+                            for (key in node.attributes.map) {
+                                var val = node.attributes.map[key];
+                                -1 !== key.indexOf("data-mce-p-") ? key = key.substr(11) : val = null, 
+                                elm.attr(key, val);
+                            }
+                            (imgValue = node.attr("data-mce-value")) && (imgValue = Content_createTextNode(unescape(imgValue)), 
+                            "php" == type || "shortcode" == type ? elm = imgValue : elm.append(imgValue)), 
+                            node.replace(elm);
+                        } else if (node.isEmpty()) node.remove(); else if ("xml" !== type) {
+                            "script" !== type && "style" !== type || (root_block = type);
+                            var childVal, parser, child = node.firstChild, imgValue = node.clone(!0), text = "";
+                            if (child) for (;/(shortcode|php)/.test(node.attr("data-mce-code")) || (childVal = "br" == child.name ? "\n" : child.value) && (text += childVal), 
+                            child = child.next; );
+                            text && (imgValue.empty(), parser = new DomParser({
+                                validate: !1
+                            }), "script" !== type && "style" !== type || parser.addNodeFilter(type, function(items, filterName) {
+                                for (var n = items.length; n--; ) for (var item = items[n], a = item.attributes.length; a--; ) {
+                                    var attr = item.attributes[a];
+                                    !attr || 0 === attr.name.indexOf("data-") && -1 === attr.name.indexOf("data-mce-") || !1 === editor.schema.isValid(filterName, attr.name) && item.attr(attr.name, null);
+                                }
+                            }), parser = parser.parse(text, {
+                                forced_root_block: root_block
+                            }), imgValue.append(parser)), node.replace(imgValue), 
+                            "shortcode" === type && "pre" === imgValue.name && (root_block = Content_createTextNode("\n"), 
+                            imgValue.append(root_block), imgValue.unwrap());
+                        }
+                    }
+                }), editor.onContextMenu.addToTop(function(ed, e) {
+                    if ((ed = ed.selection.getNode()) && ed.hasAttribute("data-mce-code")) return !1;
+                });
+            }), editor.onInit.add(function() {
+                editor.theme && editor.theme.onResolveName && editor.theme.onResolveName.add(function(theme, o) {
+                    var node = o.node;
+                    node.getAttribute("data-mce-code") && (o.name = node.getAttribute("data-mce-code"));
+                });
+            }), editor.onMouseDown.add(function(ed, e) {
+                var clientY, top, right, pre = e.target.closest("pre[data-mce-code]");
+                pre && ({
+                    clientX: e,
+                    clientY
+                } = e, {
+                    top,
+                    right
+                } = pre.getBoundingClientRect(), right - 32 <= e) && clientY <= top + 32 && ed.dom.toggleClass(pre, "mce-code-toggle");
+            }), editor.onBeforeSetContent.addToTop(function(ed, o) {
+                editor.settings.code_protect_shortcode && -1 === o.content.indexOf('data-mce-code="shortcode"') && (o.content = Process.processShortcode(editor, o.content)), 
+                canKeepCode("custom_xml") && o.content && o.load && (o.content = Process.processXML(editor, o.content)), 
+                /<(\?|script|style|link)/.test(o.content) && (canKeepCode("script") || (o.content = o.content.replace(/<script[^>]*>([\s\S]*?)<\/script>/gi, "")), 
+                canKeepCode("style") || (o.content = o.content.replace(/<style[^>]*>([\s\S]*?)<\/style>/gi, ""), 
+                o.content = o.content.replace(/<link[^>]*?rel="stylesheet"[^>]*?>/gi, "")), 
+                o.content = Process.processPhp(editor, o.content));
+            }), editor.onPostProcess.add(function(ed, o) {
+                o.get && (/(data-mce-php|__php_start__)/.test(o.content) && (o.content = o.content.replace(/({source})?__php_start__(.*?)__php_end__/g, function(match, pre, code) {
+                    return (pre || "") + "<?php" + ed.dom.decode(code) + "?>";
+                }), o.content = o.content.replace(/<textarea([^>]*)>([\s\S]*?)<\/textarea>/gi, function(a, b, c) {
+                    return "<textarea" + b + ">" + (/&lt;\?php/.test(c) ? ed.dom.decode(c) : c) + "</textarea>";
+                }), o.content = o.content.replace(/data-mce-php="([^"]+?)"/g, function(a, b) {
+                    return "<?php" + ed.dom.decode(b) + "?>";
+                })), editor.settings.code_protect_shortcode && (o.content = o.content.replace(/\{([\w-][\s\S]*?)\}/gi, function(match, content) {
+                    return "{" + ed.dom.decode(content) + "}";
+                }), o.content = o.content.replace(/\{source([^\}]*?)\}([\s\S]+?)\{\/source\}/gi, function(match, start, content) {
+                    return "{source" + start + "}" + ed.dom.decode(content) + "{/source}";
+                }), o.content = o.content.replace(/\{([\w-]+)(.*?)\}([\s\S]+)\{\/\1\}/gi, function(match, start, attr, content) {
+                    return "{" + start + attr + "}" + ed.dom.decode(content) + "{/" + start + "}";
+                })), o.content = o.content.replace(/<(pre|span)([^>]+?)>([\s\S]*?)<\/\1>/gi, function(match, tag, attr, content) {
+                    return -1 === attr.indexOf("data-mce-code") ? match : (content = tinymce.trim(content), 
+                    "script" != (attr = ed.dom.create("div", {}, match).firstChild.getAttribute("data-mce-code")) && (content = content.replace(/<br[^>]*?>/gi, "\n")), 
+                    content = ed.dom.decode(content), "php" == attr && (content = content.replace(/<\?(php)?/gi, "").replace(/\?>/g, ""), 
+                    content = "<?php\n" + tinymce.trim(content) + "\n?>"), content);
+                }));
+            });
+        });
+    }(), function() {
+        var each = tinymce.each;
+        tinymce.PluginManager.add("effects", function(ed, url) {
+            function getSrcSwapUrl(value) {
+                return (value = /^\s*this\.src\s*=\s*'([^']+)';?\s*$/.exec(tinymce.trim(value))) ? tinymce.trim(value[1]) : "";
+            }
+            function bindMouseoverEvent(ed) {
+                each(ed.dom.select("img"), function(elm) {
+                    var src = elm.getAttribute("src");
+                    if (elm.onmouseover = elm.onmouseout = null, !src || !getSrcSwapUrl(elm.getAttribute("data-mce-onmouseover"))) return !0;
+                    elm.onmouseover = function() {
+                        elm.setAttribute("src", getSrcSwapUrl(elm.getAttribute("data-mce-onmouseover")));
+                    }, elm.onmouseout = function() {
+                        elm.setAttribute("src", getSrcSwapUrl(elm.getAttribute("data-mce-onmouseout")) || src);
+                    };
+                });
+            }
+            ed.settings.allow_event_attributes && (ed.onPreInit.add(function() {
+                ed.onSetContent.add(function() {
+                    bindMouseoverEvent(ed);
+                }), ed.onUpdateMedia.add(function(ed, o) {
+                    bindMouseoverEvent(ed), o.before && o.after && each(ed.dom.select("img[data-mce-onmouseover]"), function(elm) {
+                        each([ "data-mce-onmouseover", "data-mce-onmouseout" ], function(name) {
+                            getSrcSwapUrl(elm.getAttribute(name)) === o.before && elm.setAttribute(name, "this.src='" + o.after + "';");
+                        });
+                    });
+                });
+            }), this.getSrcSwapUrl = getSrcSwapUrl);
         });
     }(), tinymce.PluginManager.add("help", function(ed, url) {
         ed.addCommand("mceHelp", function() {
@@ -13559,573 +13437,7 @@
                 parseCurrentLine(ed, 0, "");
             }(ed);
         })));
-    }), [ "a", "abbr", "acronym", "address", "applet", "area", "article", "aside", "audio", "b", "base", "basefont", "bdi", "bdo", "bgsound", "big", "blink", "blockquote", "body", "br", "button", "canvas", "caption", "center", "cite", "code", "col", "colgroup", "command", "content", "data", "datalist", "dd", "del", "details", "dfn", "dialog", "dir", "div", "dl", "dt", "element", "em", "embed", "fieldset", "figcaption", "figure", "font", "footer", "form", "frame", "frameset", "h1", "h2", "h3", "h4", "h5", "h6", "head", "header", "hgroup", "hr", "html", "i", "iframe", "image", "img", "input", "ins", "isindex", "kbd", "keygen", "label", "legend", "li", "link", "listing", "main", "map", "mark", "marquee", "menu", "menuitem", "meta", "meter", "multicol", "nav", "nobr", "noembed", "noframes", "noscript", "object", "ol", "optgroup", "option", "output", "p", "param", "picture", "plaintext", "pre", "progress", "q", "rp", "rt", "rtc", "ruby", "s", "samp", "script", "section", "select", "shadow", "slot", "small", "source", "spacer", "span", "strike", "strong", "style", "sub", "summary", "sup", "table", "tbody", "td", "template", "textarea", "tfoot", "th", "thead", "time", "title", "tr", "track", "tt", "u", "ul", "var", "video", "wbr", "xmp" ]), FONT_ICON_RE = /<([a-z0-9]+)([^>]+)class="([^"]*)(glyph|uk-)?(fa|icon|bi)-([\w-]+)([^"]*)"([^>]*)><\/\1>/gi, PADDED_RX = /<(p|h1|h2|h3|h4|h5|h6|pre|div|address|caption)\b([^>]+)>(&nbsp;|\u00a0)<\/\1>/gi;
-    const explode$1 = tinymce.explode, each$1 = tinymce.each, explode = tinymce.explode;
-    function processAttributes(editor, content) {
-        var invalidAttribRules = editor.getParam("invalid_attributes", ""), editor = editor.getParam("invalid_attribute_values", "");
-        if (!invalidAttribRules && !editor) return content;
-        for (var rules, doc = document.implementation.createHTMLDocument("").createElement("div"), nodes = (doc.innerHTML = content, 
-        doc.querySelectorAll("*")), i = nodes.length, attrRules = function(list) {
-            for (var s, rx, items = explode$1(list), matchers = [], i = 0; i < items.length; i++) if (s = (items[i] || "").trim()) try {
-                rx = new RegExp("^(?:" + s + ")$", "i"), matchers.push(rx);
-            } catch (e) {
-                s = s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), matchers.push(new RegExp("^" + s + "$", "i"));
-            }
-            return matchers;
-        }(invalidAttribRules), valueRules = (content = editor, rules = [], content = explode(content), 
-        each$1(content, function(item) {
-            var m;
-            (item = (item || "").trim()) && ((m = /([a-z0-9\*]+)\[([a-z0-9\-]+)([\^\$\!~\*]?=)?["']?([^"']+)?["']?\]/i.exec(item)) && 5 === m.length ? rules.push({
-                type: "bracket",
-                tag: m[1].toLowerCase(),
-                attrib: m[2].toLowerCase(),
-                expr: void 0 === m[3] ? null : m[3] || "",
-                check: m[4] || ""
-            }) : rules.push({
-                type: "pattern",
-                tag: "*",
-                pattern: item
-            }));
-        }), rules); i--; ) for (var node, attrValue, nodeName = (node = nodes[i]).tagName.toLowerCase(), attributes = node.attributes || [], x = attributes.length - 1; 0 <= x; x--) {
-            var attr = attributes[x];
-            attr && attr.name && (attr = attr.name.toLowerCase(), attrValue = node.getAttribute(attr), 
-            function(name, rules) {
-                var i;
-                if (name) for (i = 0; i < rules.length; i++) if (rules[i].test(name)) return 1;
-            }(attr, attrRules) || function(tag, name, value, rules) {
-                for (var r, rx, k = 0; k < rules.length; k++) if ("pattern" === (r = rules[k]).type) {
-                    try {
-                        rx = new RegExp("^" + r.pattern + "$", "i");
-                    } catch (e) {
-                        rx = null;
-                    }
-                    if (rx && rx.test(name) || r.pattern.toLowerCase() === name) return 1;
-                } else if ("bracket" === r.type && ("*" === r.tag || tag === r.tag) && name === r.attrib && (!r.expr || function(value, expr, check) {
-                    return expr ? "=" === expr ? value === check : "*=" === expr ? 0 <= value.indexOf(check) : "~=" === expr ? 0 <= (" " + value + " ").indexOf(" " + check + " ") : "!=" === expr ? value != check : "^=" === expr ? 0 === value.indexOf(check) : "$=" === expr && value.substr(value.length - check.length) === check : check;
-                }(value, r.expr, r.check))) return 1;
-            }(nodeName, attr, attrValue, valueRules)) && (node.removeAttribute(attr), 
-            node.removeAttribute("data-mce-" + attr));
-        }
-        return doc.innerHTML;
-    }
-    function convertFromGeshi(h) {
-        return (h || "").replace(/<pre xml:lang="([^"]+)"([^>]*)>(.*?)<\/pre>/g, function(a, b, c, d) {
-            return '<pre data-geshi-lang="' + b + '"' + (c && /\w/.test(c) ? c.split(" ").join(" data-geshi-") : "") + ">" + d + "</pre>";
-        });
-    }
-    var each = tinymce.each, Node = tinymce.html.Node;
-    tinymce.PluginManager.add("cleanup", function(ed, url) {
-        !1 === ed.settings.verify_html && (ed.settings.validate = !1);
-        var padding = function(Node) {
-            return {
-                paddEmptyTags: function(content) {
-                    return (content = (content = content.replace(FONT_ICON_RE, '<$1$2class="$3$4$5-$6$7"$8 data-mce-empty="1">&nbsp;</$1>')).replace(/<(a|i|span)\b([^>]+)><\/\1>/gi, '<$1$2 data-mce-empty="1">&nbsp;</$1>')).replace(/<li><\/li>/, '<li data-mce-empty="1">&nbsp;</li>');
-                },
-                ensureEmptyInlineNodes: function(nodes, name) {
-                    for (var node, i = nodes.length; i--; ) !(node = nodes[i]).attr("class") && "li" !== name || node.firstChild || (node.attr("data-mce-empty", "1"), 
-                    node.append(new Node("#text", "3")).value = "\xa0");
-                },
-                cleanupEmptyInlineNodes: function(nodes) {
-                    for (var node, fc, i = nodes.length; i--; ) fc = (node = nodes[i]).firstChild, 
-                    node.attr("data-mce-empty", null), !fc || "\xa0" !== fc.value && "&nbsp;" !== fc.value || fc.remove();
-                }
-            };
-        }(Node);
-        ed.onPreInit.add(function() {
-            var elements;
-            ed.serializer.addAttributeFilter("data-mce-caret", function(nodes) {
-                for (var i = nodes.length; i--; ) nodes[i].remove();
-            }), !1 === ed.settings.remove_trailing_brs && ed.serializer.addAttributeFilter("data-mce-bogus", function(nodes) {
-                for (var node, textNode, i = nodes.length; i--; ) "br" === (node = nodes[i]).name && (node.prev || node.next ? node.remove() : ((textNode = new Node("#text", 3)).value = "\xa0", 
-                node.replace(textNode)));
-            }), ed.serializer.addAttributeFilter("data-mce-tmp", function(nodes, name) {
-                for (var i = nodes.length; i--; ) nodes[i].attr("data-mce-tmp", null);
-            }), ed.parser.addAttributeFilter("data-mce-tmp", function(nodes, name) {
-                for (var i = nodes.length; i--; ) nodes[i].attr("data-mce-tmp", null);
-            }), !1 !== ed.settings.verify_html && (ed.settings.allow_event_attributes || each(ed.schema.elements, function(elm) {
-                if (!elm.attributesOrder || 0 === elm.attributesOrder.length) return !0;
-                each(elm.attributes, function(obj, name) {
-                    0 === name.indexOf("on") && (delete elm.attributes[name], elm.attributesOrder.splice(tinymce.inArray(elm, elm.attributesOrder, name), 1));
-                });
-            }), elements = ed.schema.elements, each("ol ul sub sup blockquote font table tbody tr strong b".split(","), function(name) {
-                elements[name] && (elements[name].removeEmpty = !1);
-            }), ed.getParam("pad_empty_tags", !0) || each(elements, function(v, k) {
-                v.paddEmpty && (v.paddEmpty = !1);
-            }), each(elements, function(v, k) {
-                if (0 === k.indexOf("mce:")) return !0;
-                -1 === tinymce.inArray(TAGS, k) && ed.schema.addCustomElements(k);
-            })), ed.parser.addNodeFilter("a,i,span,li", function(nodes, name) {
-                padding.ensureEmptyInlineNodes(nodes, name);
-            }), ed.serializer.addAttributeFilter("data-mce-empty", function(nodes) {
-                padding.cleanupEmptyInlineNodes(nodes);
-            });
-        }), !1 === ed.settings.verify_html && ed.addCommand("mceCleanup", function() {
-            var s = ed.settings, se = ed.selection, bm = se.getBookmark(), content = ed.getContent({
-                cleanup: !0
-            }), s = (s.verify_html = !0, new tinymce.html.Schema(s)), content = new tinymce.html.Serializer({
-                validate: !0
-            }, s).serialize(new tinymce.html.DomParser({
-                validate: !0,
-                allow_event_attributes: !!ed.settings.allow_event_attributes
-            }, s).parse(content));
-            ed.setContent(content, {
-                cleanup: !0
-            }), se.moveToBookmark(bm);
-        }), ed.onBeforeSetContent.add(function(ed, o) {
-            o.content = o.content.replace(/^<br>/, ""), o.content = convertFromGeshi(o.content), 
-            o.content = padding.paddEmptyTags(o.content), o.content = processAttributes(ed, o.content);
-        }), ed.onPostProcess.add(function(ed, o) {
-            o.set && (o.content = convertFromGeshi(o.content)), o.get && (o.content = (o.content || "").replace(/<pre([^>]+)data-geshi-lang="([^"]+)"([^>]*)>(.*?)<\/pre>/g, function(a, b, c, d, e) {
-                return '<pre xml:lang="' + c + '"' + (b + d).replace(/data-geshi-/gi, "").replace(/\s+/g, " ").replace(/\s$/, "") + ">" + e + "</pre>";
-            }), o.content = o.content.replace(/<a([^>]*)class="jce(box|popup|lightbox|tooltip|_tooltip)"([^>]*)><\/a>/gi, ""), 
-            o.content = o.content.replace(/<span class="jce(box|popup|lightbox|tooltip|_tooltip)">(.*?)<\/span>/gi, "$2"), 
-            o.content = o.content.replace(/_mce_(src|href|style|coords|shape)="([^"]+)"\s*?/gi, ""), 
-            !1 === ed.settings.validate && (o.content = o.content.replace(/<body([^>]*)>([\s\S]*)<\/body>/, "$2"), 
-            ed.getParam("remove_tag_padding") || (o.content = o.content.replace(/<(p|h1|h2|h3|h4|h5|h6|th|td|pre|div|address|caption)\b([^>]*)><\/\1>/gi, "<$1$2>&nbsp;</$1>"))), 
-            o.content = o.content.replace(/<(a|i|span)([^>]+)>(&nbsp;|\u00a0)<\/\1>/gi, function(match, tag, attribs) {
-                return attribs = attribs.replace('data-mce-empty="1"', ""), "<" + tag + " " + tinymce.trim(attribs) + "></" + tag + ">";
-            }), o.content = o.content.replace(/<li data-mce-empty="1">(&nbsp;|\u00a0)<\/li>/gi, "<li></li>"), 
-            ed.getParam("remove_div_padding") && (o.content = o.content.replace(/<div([^>]*)>(&nbsp;|\u00a0)<\/div>/g, "<div$1></div>")), 
-            !1 === ed.getParam("pad_empty_tags", !0) && (o.content = o.content.replace(PADDED_RX, "<$1$2></$1>")), 
-            ed.getParam("keep_nbsp", !0) && "raw" === ed.settings.entity_encoding && (o.content = o.content.replace(/\u00a0/g, "&nbsp;")), 
-            o.content = o.content.replace(/(uk|v|ng|data)-([\w-]+)=""(\s|>)/gi, "$1-$2$3"), 
-            ed.settings.padd_empty_editor && (o.content = o.content.replace(/^(<div>(&nbsp;|&#160;|\s|\u00a0|)<\/div>[\r\n]*|<br(\s*\/)?>[\r\n]*)$/, "")), 
-            o.content = o.content.replace(/<hr(.*)class="system-pagebreak"(.*?)\/?>/gi, '<hr$1class="system-pagebreak"$2/>'), 
-            o.content = o.content.replace(/<hr id="system-readmore"(.*?)>/gi, '<hr id="system-readmore" />'));
-        }), ed.onSaveContent.add(function(ed, o) {
-            var entities;
-            ed.getParam("cleanup_pluginmode") && (entities = {
-                "&#39;": "'",
-                "&amp;": "&",
-                "&quot;": '"',
-                "&apos;": "'"
-            }, o.content = o.content.replace(/&(#39|apos|amp|quot);/gi, function(a) {
-                return entities[a];
-            }));
-        }), ed.addButton("cleanup", {
-            title: "advanced.cleanup_desc",
-            cmd: "mceCleanup"
-        }), this.paddEmptyTags = padding.paddEmptyTags;
     }), function() {
-        const Node$1 = tinymce.html.Node;
-        var Content_createTextNode = function(value, raw) {
-            var text = new Node$1("#text", 3);
-            return text.raw = !1 !== raw, text.value = value, text;
-        }, Content_createShortcodeHtml = function(editor, data, tag) {
-            return data = (data = editor.dom.decode(data)).replace(/[\n\r]/gi, "<br />"), 
-            editor.dom.createHTML(tag || "pre", {
-                "data-mce-code": "shortcode"
-            }, editor.dom.encode(data));
-        }, Content_createHtml = function(editor, data, type, tag) {
-            return type = type || "script", tag = tag || "pre", !1 !== editor.settings.code_use_blocks ? editor.dom.createHTML(tag, {
-                "data-mce-code": type
-            }, editor.dom.encode(data)) : (data = data.replace(/<br[^>]*?>/gi, "\n"), 
-            editor.dom.createHTML("img", {
-                src: "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7",
-                "data-mce-resize": "false",
-                "data-mce-code": type,
-                "data-mce-type": "placeholder",
-                "data-mce-value": escape(data)
-            }));
-        };
-        const each$1 = tinymce.each;
-        let htmlSchema, shortEndedElements = {}, booleanAttributes = {};
-        function canKeepCode(editor, type) {
-            return !1 === editor.settings.validate || editor.getParam("code_allow_" + type);
-        }
-        function isXmlElement(editor, name) {
-            return !htmlSchema.isValid(name) && !function(editor, name) {
-                return editor = editor.settings.invalid_elements.split(","), -1 !== tinymce.inArray(editor, name);
-            }(editor, name);
-        }
-        function isValid(editor, tag, attr) {
-            return isXmlElement(editor, tag) || !1 === editor.settings.validate || editor.schema.isValid(tag, attr);
-        }
-        function processXML(editor, content) {
-            return content.replace(/<([a-z0-9\-_\:\.]+)(?:[^>]*?)\/?>((?:[\s\S]*?)<\/\1>)?/gi, function(match, tag) {
-                return "svg" === (tag = tag.toLowerCase()) && !1 === editor.settings.code_allow_svg_in_xml || "math" === tag && !1 === editor.settings.code_allow_mathml_in_xml || !isXmlElement(editor, tag) ? match : (!1 !== editor.settings.code_validate_xml && (match = function(editor, xml) {
-                    return function sanitizeNode(editor, node) {
-                        var html = [];
-                        switch (node.nodeType) {
-                          case 1:
-                            var name, value, tagName = node.nodeName.toLowerCase();
-                            if (!isValid(editor, tagName)) return "";
-                            html.push("<", tagName);
-                            for ({
-                                name,
-                                value
-                            } of Array.from(node.attributes)) !isValid(editor, tagName, name) || !editor.settings.allow_event_attributes && name.startsWith("on") || (!booleanAttributes[name] || "" !== value && "true" !== value && value !== name ? html.push(" ", name, '="', editor.dom.encode(value, !0), '"') : html.push(" ", name));
-                            if (shortEndedElements[tagName]) "html5-strict" === editor.settings.schema ? html.push(">") : html.push(" />"); else {
-                                html.push(">");
-                                for (var child of Array.from(node.childNodes)) html.push(sanitizeNode(editor, child));
-                                html.push("</", tagName, ">");
-                            }
-                            break;
-
-                          case 3:
-                            var text = node.nodeValue;
-                            html.push(text);
-                            break;
-
-                          case 5:
-                            html.push("<![CDATA[", editor.dom.encode(node.nodeValue, !0), "]]>");
-                            break;
-
-                          case 8:
-                            html.push("\x3c!--", editor.dom.encode(node.nodeValue, !0), "--\x3e");
-                        }
-                        return html.join("");
-                    }(editor, new DOMParser().parseFromString(xml, "text/xml").documentElement);
-                }(editor, match)), Content_createHtml(editor, match, "xml"));
-            });
-        }
-        function processShortcode(editor, html, tagName) {
-            var attrPlaceholders;
-            return -1 === html.indexOf("{") || "{" == html.charAt(0) && html.length < 3 || (-1 != html.indexOf("{/source}") && (html = function(editor, html) {
-                return -1 === html.indexOf("{/source}") ? html : html.replace(/(?:(<(code|pre|samp|span)[^>]*(data-mce-type="code")?>|")?)\{source(.*?)\}([\s\S]+?)\{\/source\}/g, function(match) {
-                    return "<" === match.charAt(0) || '"' === match.charAt(0) ? match : (match = editor.dom.decode(match), 
-                    '<pre data-mce-code="shortcode" data-mce-label="sourcerer">' + editor.dom.encode(match) + "</pre>");
-                });
-            }(editor, html)), tagName = tagName || "span", attrPlaceholders = [], 
-            html = (html = html.replace(/=("[^"]*\{[^"]*"|'[^']*\{[^']*')/g, function(match) {
-                return attrPlaceholders.push(match), '="__SHORTCODE_ATTR_' + (attrPlaceholders.length - 1) + '__"';
-            })).replace(/(?:(<(code|pre|samp|span)[^>]*(data-mce-type="code")?>)?)(?:\{)([\w-]+)(.*?)(?:\/?\})(?:([\s\S]+?)\{\/\4\})?/g, function(match) {
-                return "<" === match.charAt(0) ? match : Content_createShortcodeHtml(editor, match, tagName);
-            }), attrPlaceholders.length && (html = html.replace(/="__SHORTCODE_ATTR_(\d+)__"/g, function(_match, index) {
-                return attrPlaceholders[parseInt(index, 10)];
-            }))), html;
-        }
-        function processPhp(editor, content) {
-            return canKeepCode(editor, "php") ? (content = content.replace(/\="([^"]+?)"/g, function(_a, b) {
-                return '="' + b.replace(/<\?(php)?(.+?)\?>/gi, function(_x, _y, z) {
-                    return "__php_start__" + editor.dom.encode(z) + "__php_end__";
-                }) + '"';
-            }), (content = (content = /<textarea/.test(content) ? content.replace(/<textarea([^>]*)>([\s\S]*?)<\/textarea>/gi, function(_a, b, c) {
-                return "<textarea" + b + ">" + c.replace(/<\?(php)?(.+?)\?>/gi, function(_x, _y, z) {
-                    return "__php_start__" + editor.dom.encode(z) + "__php_end__";
-                }) + "</textarea>";
-            }) : content).replace(/<([^>]+)<\?(php)?(.+?)\?>([^>]*?)>/gi, function(_a, b, _c, d, e) {
-                return " " !== b.charAt(b.length) && (b += " "), "<" + b + 'data-mce-php="' + d + '" ' + e + ">";
-            })).replace(/<\?(php)?([\s\S]+?)\?>/gi, function(match) {
-                return match = match.replace(/\n/g, "<br />"), Content_createHtml(editor, match, "php");
-            })) : content.replace(/<\?(php)?([\s\S]*?)\?>/gi, "");
-        }
-        var Process = {
-            init: function(editor) {
-                htmlSchema = new tinymce.html.Schema({
-                    schema: "mixed",
-                    invalid_elements: editor.settings.invalid_elements
-                }), each$1(editor.schema.getShortEndedElements(), function(_shortEnded, name) {
-                    shortEndedElements[name.toLowerCase()] = !0;
-                }), each$1(editor.schema.getBoolAttrs(), function(_boolAttr, name) {
-                    booleanAttributes[name.toLowerCase()] = !0;
-                });
-            },
-            processOnInsert: function(editor, value, _node) {
-                return /\{.+\}/gi.test(value) && editor.settings.code_protect_shortcode && (value = processShortcode(editor, value, void 0)), 
-                canKeepCode(editor, "custom_xml") && (value = processXML(editor, value)), 
-                /<(\?|script|style)/.test(value) && (value = value.replace(/<(script|style)([^>]*?)>([\s\S]*?)<\/\1>/gi, function(match, type) {
-                    return canKeepCode(editor, type) ? (match = match.replace(/<br[^>]*?>/gi, "\n"), 
-                    Content_createHtml(editor, match, type)) : "";
-                }), value = processPhp(editor, value)), /<link[^>]*?rel="stylesheet"[^>]*?>/gi.test(value) ? value.replace(/<link[^>]*?rel="stylesheet"[^>]*?>/gi, function(match) {
-                    return canKeepCode(editor, "style") ? Content_createHtml(editor, match, "link") : "";
-                }) : value;
-            },
-            processShortcode: processShortcode,
-            processPhp: processPhp,
-            processXML: processXML
-        };
-        const each = tinymce.each, Node = tinymce.html.Node, VK = tinymce.VK, DomParser = tinymce.html.DomParser, Serializer = tinymce.html.Serializer;
-        function isOnlyChild(node) {
-            var child = node.parent.firstChild, count = 0;
-            if (child) do {
-                if (1 === child.type) {
-                    if (child.attributes.map["data-mce-type"] || child.attributes.map["data-mce-bogus"]) continue;
-                    if (child === node) continue;
-                    count++;
-                }
-                8 === child.type && count++, 3 !== child.type || /^[ \t\r\n]*$/.test(child.value) || count++;
-            } while (child = child.next);
-            return 0 === count;
-        }
-        tinymce.PluginManager.add("code", function(editor, url) {
-            function canKeepCode(type) {
-                return !1 === editor.settings.validate || editor.getParam("code_allow_" + type);
-            }
-            var blockElements = [], inlineElements = [], code_blocks = !1 !== editor.settings.code_use_blocks;
-            function handleEnterInPre(ed, node, before) {
-                var node = ed.dom.getParents(node, blockElements.join(",")), newBlockName = ed.settings.forced_root_block || "p";
-                !1 === ed.settings.force_block_newlines && (newBlockName = "br"), 
-                (node = node.shift()) !== ed.getBody() && (newBlockName = ed.dom.create(newBlockName, {}, "\xa0"), 
-                before ? node.parentNode.insertBefore(newBlockName, node) : ed.dom.insertAfter(newBlockName, node), 
-                (before = ed.selection.getRng()).setStart(newBlockName, 0), before.setEnd(newBlockName, 0), 
-                ed.selection.setRng(before), ed.selection.scrollIntoView(newBlockName));
-            }
-            editor.settings.code_allow_script && (editor.settings.allow_script_urls = !0), 
-            editor.addCommand("InsertShortCode", function(ui, html) {
-                return editor.settings.code_protect_shortcode && (html = Process.processShortcode(editor, html, "pre"), 
-                tinymce.is(html)) && editor.execCommand("mceReplaceContent", !1, html), 
-                !1;
-            }), editor.onKeyDown.add(function(ed, e) {
-                var node;
-                if (e.keyCode == VK.ENTER) {
-                    if ("PRE" === (node = ed.selection.getNode()).nodeName && "shortcode" === node.getAttribute("data-mce-code")) return void (e.shiftKey || (ed.execCommand("InsertLineBreak", !1, e), 
-                    e.preventDefault()));
-                    "SPAN" === node.nodeName && node.getAttribute("data-mce-code") && (handleEnterInPre(ed, node), 
-                    e.preventDefault());
-                }
-                e.keyCode == VK.UP && e.altKey && "PRE" == (node = ed.selection.getNode()).nodeName && (handleEnterInPre(ed, node, !0), 
-                e.preventDefault()), 9 != e.keyCode || VK.metaKeyPressed(e) || "PRE" === (node = ed.selection.getNode()).nodeName && node.getAttribute("data-mce-code") && (ed.selection.setContent("\t", {
-                    no_events: !0
-                }), e.preventDefault()), e.keyCode !== VK.BACKSPACE && e.keyCode !== VK.DELETE || "SPAN" === (node = ed.selection.getNode()).nodeName && node.getAttribute("data-mce-code") && "placeholder" === node.getAttribute("data-mce-type") && (ed.undoManager.add(), 
-                ed.dom.remove(node), e.preventDefault());
-            }), editor.onPreInit.add(function() {
-                function isCodePlaceholder(node) {
-                    return "SPAN" === node.nodeName && node.getAttribute("data-mce-code") && "placeholder" == node.getAttribute("data-mce-type");
-                }
-                function onSetContent() {
-                    each(editor.dom.select("pre[data-mce-code]", editor.getBody()), function(elm) {
-                        var clone, clonedElm;
-                        (elm = editor.dom.getParent(elm, "p")) && ((clonedElm = (clone = elm.cloneNode(!0)).querySelector("[data-mce-code]")) && clone.removeChild(clonedElm), 
-                        editor.dom.isEmpty(clone)) && editor.dom.remove(elm, 1);
-                    });
-                }
-                Process.init(editor), editor.dom.bind(editor.getDoc(), "keyup click", function(e) {
-                    var node = e.target, sel = editor.selection.getNode();
-                    editor.dom.removeClass(editor.dom.select(".mce-item-selected"), "mce-item-selected"), 
-                    node === editor.getBody() && isCodePlaceholder(sel) ? sel.parentNode !== node || sel.nextSibling || editor.dom.insertAfter(editor.dom.create("br", {
-                        "data-mce-bogus": 1
-                    }), sel) : isCodePlaceholder(node) && (e.preventDefault(), e.stopImmediatePropagation(), 
-                    editor.selection.select(node), window.setTimeout(function() {
-                        editor.dom.addClass(node, "mce-item-selected");
-                    }, 10), e.preventDefault());
-                });
-                var ctrl = editor.controlManager.get("formatselect");
-                ctrl && each([ "script", "style", "php", "shortcode", "xml" ], function(key) {
-                    var title = editor.getLang("code." + key, key);
-                    if ("shortcode" === key && editor.settings.code_protect_shortcode) return ctrl.add(title, key, {
-                        class: "mce-code-" + key
-                    }), editor.formatter.register("shortcode", {
-                        block: "pre",
-                        attributes: {
-                            "data-mce-code": "shortcode"
-                        }
-                    }), !0;
-                    "xml" === key && (editor.settings.code_allow_xml = !!editor.settings.code_allow_custom_xml), 
-                    canKeepCode(key) && code_blocks && (ctrl.add(title, key, {
-                        class: "mce-code-" + key
-                    }), editor.formatter.register(key, {
-                        block: "pre",
-                        attributes: {
-                            "data-mce-code": key
-                        },
-                        onformat: function(elm) {
-                            each(editor.dom.select("br", elm), function(br) {
-                                editor.dom.replace(editor.dom.doc.createTextNode("\n"), br);
-                            });
-                        }
-                    }));
-                }), each(editor.schema.getBlockElements(), function(_block, blockName) {
-                    blockElements.push(blockName);
-                }), each(editor.schema.getTextInlineElements(), function(_inline, name) {
-                    inlineElements.push(name);
-                }), editor.settings.code_protect_shortcode && (editor.textpattern.addPattern({
-                    start: "{",
-                    end: "}",
-                    cmd: "InsertShortCode",
-                    remove: !0
-                }), editor.textpattern.addPattern({
-                    start: " {",
-                    end: "}",
-                    format: "inline-shortcode",
-                    remove: !1
-                })), editor.formatter.register("inline-shortcode", {
-                    inline: "span",
-                    attributes: {
-                        "data-mce-code": "shortcode"
-                    }
-                }), editor.selection.onBeforeSetContent.addToTop(function(sel, o) {
-                    (sel = sel.getNode()) && "PRE" === sel.nodeName || (o.content = Process.processOnInsert(editor, o.content, sel));
-                }), editor.onSetContent.add(onSetContent), editor.selection.onSetContent.add(onSetContent), 
-                editor.parser.addNodeFilter("script,style,link", function(nodes) {
-                    for (var i = nodes.length; i--; ) {
-                        var node, text, value, placeholder, parent = (node = nodes[i]).parent;
-                        parent && "pre" === parent.name || ("link" == node.name && "stylesheet" != node.attr("rel") ? node.remove() : (node.attr("data-mce-fragment", null), 
-                        node.firstChild && (node.firstChild.value = node.firstChild.value.replace(/<span([^>]+)>([\s\S]+?)<\/span>/gi, function(match, attr, content) {
-                            return -1 === attr.indexOf("data-mce-code") ? match : editor.dom.decode(content);
-                        })), code_blocks ? (value = new Serializer({
-                            validate: !1
-                        }).serialize(node), value = tinymce.trim(value), (parent = new Node("pre", 1)).attr({
-                            "data-mce-code": node.name
-                        }), text = Content_createTextNode(value, !1), parent.append(text), 
-                        node.replace(parent)) : (value = "", node.firstChild && (value = tinymce.trim(node.firstChild.value)), 
-                        placeholder = Node.create("img", {
-                            src: "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7",
-                            "data-mce-code": node.name,
-                            "data-mce-type": "placeholder",
-                            "data-mce-resize": "false",
-                            title: editor.dom.encode(value)
-                        }), each(node.attributes, function(attr) {
-                            placeholder.attr("data-mce-p-" + attr.name, attr.value);
-                        }), value && placeholder.attr("data-mce-value", escape(value)), 
-                        node.replace(placeholder))));
-                    }
-                }), editor.parser.addAttributeFilter("data-mce-code", function(nodes, name) {
-                    var node, i = nodes.length;
-                    function isBlockNode(node) {
-                        return -1 != tinymce.inArray(blockElements, node.name);
-                    }
-                    for (;i--; ) {
-                        var type, parent = (node = nodes[i]).parent;
-                        "placeholder" == node.attr("data-mce-type") || "shortcode" !== (type = node.attr(name)) && "php" !== type || ((type = node.firstChild.value) && (node.firstChild.value = type.replace(/<br[\s\/]*>/g, "\n")), 
-                        parent && (parent.attr(name) ? node.unwrap() : ("body" !== parent.name && !isOnlyChild(node) && function(node) {
-                            return "span" == node.name && (node.next && ("#text" == node.next.type || !isBlockNode(node.next)) || node.prev && ("#text" == node.prev.type || !isBlockNode(node.prev)) || node.parent && !isBlockNode(node.parent));
-                        }(node) || (node.name = "pre", node.parent && function(node) {
-                            return -1 != tinymce.inArray(inlineElements, node.name);
-                        }(node.parent) && (node.name = "span"), "pre" == node.name && parent && "p" == parent.name && isOnlyChild(node) && parent.parent && parent.replace(node)), 
-                        "span" == node.name && node === parent.lastChild && (type = Content_createTextNode("\xa0"), 
-                        parent.append(type)))));
-                    }
-                }), editor.serializer.addAttributeFilter("data-mce-code", function(nodes, name) {
-                    for (var i = nodes.length; i--; ) {
-                        var node, root_block = !1, type = (node = nodes[i]).attr(name);
-                        if ("img" === node.name) {
-                            var key, elm = new Node(type, 1);
-                            for (key in node.attributes.map) {
-                                var val = node.attributes.map[key];
-                                -1 !== key.indexOf("data-mce-p-") ? key = key.substr(11) : val = null, 
-                                elm.attr(key, val);
-                            }
-                            (imgValue = node.attr("data-mce-value")) && (imgValue = Content_createTextNode(unescape(imgValue)), 
-                            "php" == type || "shortcode" == type ? elm = imgValue : elm.append(imgValue)), 
-                            node.replace(elm);
-                        } else if (node.isEmpty() && node.remove(), "xml" !== type) {
-                            "script" !== type && "style" !== type || (root_block = type);
-                            var childVal, parser, child = node.firstChild, imgValue = node.clone(!0), text = "";
-                            if (child) for (;/(shortcode|php)/.test(node.attr("data-mce-code")) || (childVal = "br" == child.name ? "\n" : child.value) && (text += childVal), 
-                            child = child.next; );
-                            text && (imgValue.empty(), parser = new DomParser({
-                                validate: !1
-                            }), "script" !== type && "style" !== type || parser.addNodeFilter(type, function(items, filterName) {
-                                for (var n = items.length; n--; ) {
-                                    var item = items[n];
-                                    each(item.attributes, function(attr) {
-                                        return !attr || 0 === attr.name.indexOf("data-") && -1 === attr.name.indexOf("data-mce-") || void (!1 === editor.schema.isValid(filterName, attr.name) && item.attr(attr.name, null));
-                                    });
-                                }
-                            }), parser = parser.parse(text, {
-                                forced_root_block: root_block
-                            }), imgValue.append(parser)), node.replace(imgValue), 
-                            "shortcode" === type && "pre" === imgValue.name && (root_block = Content_createTextNode("\n"), 
-                            imgValue.append(root_block), imgValue.unwrap());
-                        }
-                    }
-                }), editor.onContextMenu.addToTop(function(ed, e) {
-                    if ((ed = ed.selection.getNode()) && ed.hasAttribute("data-mce-code")) return !1;
-                });
-            }), editor.onInit.add(function() {
-                editor.theme && editor.theme.onResolveName && editor.theme.onResolveName.add(function(theme, o) {
-                    var node = o.node;
-                    node.getAttribute("data-mce-code") && (o.name = node.getAttribute("data-mce-code"));
-                });
-            }), editor.onMouseDown.add(function(ed, e) {
-                var clientY, top, right, pre = e.target.closest("pre[data-mce-code]");
-                pre && ({
-                    clientX: e,
-                    clientY
-                } = e, {
-                    top,
-                    right
-                } = pre.getBoundingClientRect(), right - 32 <= e) && clientY <= top + 32 && ed.dom.toggleClass(pre, "mce-code-toggle");
-            }), editor.onBeforeSetContent.addToTop(function(ed, o) {
-                editor.settings.code_protect_shortcode && -1 === o.content.indexOf('data-mce-code="shortcode"') && (o.content = Process.processShortcode(editor, o.content)), 
-                canKeepCode("custom_xml") && o.content && o.load && (o.content = Process.processXML(editor, o.content)), 
-                /<(\?|script|style|link)/.test(o.content) && (canKeepCode("script") || (o.content = o.content.replace(/<script[^>]*>([\s\S]*?)<\/script>/gi, "")), 
-                canKeepCode("style") || (o.content = o.content.replace(/<style[^>]*>([\s\S]*?)<\/style>/gi, ""), 
-                o.content = o.content.replace(/<link[^>]*?rel="stylesheet"[^>]*?>/gi, "")), 
-                o.content = Process.processPhp(editor, o.content));
-            }), editor.onPostProcess.add(function(ed, o) {
-                o.get && (/(data-mce-php|__php_start__)/.test(o.content) && (o.content = o.content.replace(/({source})?__php_start__(.*?)__php_end__/g, function(match, pre, code) {
-                    return (pre || "") + "<?php" + ed.dom.decode(code) + "?>";
-                }), o.content = o.content.replace(/<textarea([^>]*)>([\s\S]*?)<\/textarea>/gi, function(a, b, c) {
-                    return "<textarea" + b + ">" + (/&lt;\?php/.test(c) ? ed.dom.decode(c) : c) + "</textarea>";
-                }), o.content = o.content.replace(/data-mce-php="([^"]+?)"/g, function(a, b) {
-                    return "<?php" + ed.dom.decode(b) + "?>";
-                })), editor.settings.code_protect_shortcode && (o.content = o.content.replace(/\{([\s\S]+?)\}/gi, function(match, content) {
-                    return "{" + ed.dom.decode(content) + "}";
-                }), o.content = o.content.replace(/\{source([^\}]*?)\}([\s\S]+?)\{\/source\}/gi, function(match, start, content) {
-                    return "{source" + start + "}" + ed.dom.decode(content) + "{/source}";
-                }), o.content = o.content.replace(/\{([\w-]+)(.*?)\}([\s\S]+)\{\/\1\}/gi, function(match, start, attr, content) {
-                    return "{" + start + attr + "}" + ed.dom.decode(content) + "{/" + start + "}";
-                })), o.content = o.content.replace(/<(pre|span)([^>]+?)>([\s\S]*?)<\/\1>/gi, function(match, tag, attr, content) {
-                    return -1 === attr.indexOf("data-mce-code") ? match : (content = tinymce.trim(content), 
-                    "script" != (attr = ed.dom.create("div", {}, match).firstChild.getAttribute("data-mce-code")) && (content = content.replace(/<br[^>]*?>/gi, "\n")), 
-                    content = ed.dom.decode(content), "php" == attr && (content = content.replace(/<\?(php)?/gi, "").replace(/\?>/g, ""), 
-                    content = "<?php\n" + tinymce.trim(content) + "\n?>"), content);
-                }), o.content = o.content.replace(/<!--mce:protected ([\s\S]+?)-->/gi, function(match, content) {
-                    return unescape(content);
-                }));
-            });
-        });
-    }(), function() {
-        var each = tinymce.each;
-        tinymce.PluginManager.add("effects", function(ed, url) {
-            function cleanEventAttribute(val) {
-                return val ? val.replace(/^\s*this.src\s*=\s*\'([^\']+)\';?\s*$/, "$1").replace(/^\s*|\s*$/g, "") : "";
-            }
-            function bindMouseoverEvent(ed) {
-                each(ed.dom.select("img"), function(elm) {
-                    var src = elm.getAttribute("src"), mouseover = elm.getAttribute("data-mouseover"), mouseout = elm.getAttribute("data-mouseout");
-                    if (elm.onmouseover = elm.onmouseout = null, !src || !mouseover || !mouseout) return !0;
-                    elm.onmouseover = function() {
-                        elm.setAttribute("src", elm.getAttribute("data-mouseover"));
-                    }, elm.onmouseout = function() {
-                        elm.setAttribute("src", elm.getAttribute("data-mouseout") || src);
-                    };
-                });
-            }
-            ed.onPreInit.add(function() {
-                ed.onBeforeSetContent.add(function(ed, o) {
-                    var div;
-                    -1 !== o.content.indexOf("onmouseover=") && (div = ed.dom.create("div", {}, o.content), 
-                    each(ed.dom.select("img[onmouseover]", div), function(node) {
-                        var mouseover = node.getAttribute("onmouseover"), mouseout = node.getAttribute("onmouseout");
-                        return !mouseover || 0 !== mouseover.indexOf("this.src") || (mouseover = cleanEventAttribute(mouseover), 
-                        node.removeAttribute("onmouseover"), !mouseover) || (node.setAttribute("data-mouseover", mouseover), 
-                        void (mouseout && 0 === mouseout.indexOf("this.src") && (mouseout = cleanEventAttribute(mouseout), 
-                        node.removeAttribute("onmouseout"), mouseout) && node.setAttribute("data-mouseout", mouseout)));
-                    }), o.content = div.innerHTML);
-                }), ed.parser.addAttributeFilter("onmouseover", function(nodes) {
-                    for (var i = nodes.length; i--; ) {
-                        var mouseover, mouseout, node = nodes[i];
-                        "img" === node.name && (mouseover = node.attr("onmouseover"), 
-                        mouseout = node.attr("onmouseout"), mouseover) && 0 === mouseover.indexOf("this.src") && (mouseover = cleanEventAttribute(mouseover), 
-                        node.attr("data-mouseover", mouseover), node.attr("onmouseover", null), 
-                        mouseout) && 0 === mouseout.indexOf("this.src") && (mouseout = cleanEventAttribute(mouseout), 
-                        node.attr("data-mouseout", mouseout), node.attr("onmouseout", null));
-                    }
-                }), ed.serializer.addAttributeFilter("data-mouseover", function(nodes) {
-                    for (var i = nodes.length; i--; ) {
-                        var mouseout, mouseover, node = nodes[i];
-                        "img" === node.name && (mouseover = node.attr("data-mouseover"), 
-                        mouseout = node.attr("data-mouseout"), mouseover = cleanEventAttribute(mouseover), 
-                        node.attr("data-mouseover", null), node.attr("data-mouseout", null), 
-                        mouseover) && (node.attr("onmouseover", "this.src='" + mouseover + "';"), 
-                        mouseout = cleanEventAttribute(mouseout)) && node.attr("onmouseout", "this.src='" + mouseout + "';");
-                    }
-                }), ed.onSetContent.add(function() {
-                    bindMouseoverEvent(ed);
-                }), ed.onUpdateMedia.add(function(ed, o) {
-                    bindMouseoverEvent(ed), o.before && o.after && each(ed.dom.select("img[data-mouseover]"), function(elm) {
-                        var mouseover = elm.getAttribute("data-mouseover"), mouseout = elm.getAttribute("data-mouseout");
-                        if (!mouseover) return !0;
-                        mouseover == o.before && elm.setAttribute("data-mouseover", o.after), 
-                        mouseout == o.before && elm.setAttribute("data-mouseout", o.after);
-                    });
-                });
-            });
-        });
-    }(), function() {
         var VK = tinymce.VK, each = tinymce.each, blocks = [];
         tinymce.PluginManager.add("format", function(ed, url) {
             var keyCode;
@@ -14291,8 +13603,8 @@
         tinymce.PluginManager.add("importcss", function(ed, url) {
             var self = this;
             function setGuideLinesColor() {
-                var gray = [ "#000000", "#080808", "#101010", "#181818", "#202020", "#282828", "#303030", "#383838", "#404040", "#484848", "#505050", "#585858", "#606060", "#686868", "#696969", "#707070", "#787878", "#808080", "#888888", "#909090", "#989898", "#a0a0a0", "#a8a8a8", "#a9a9a9", "#b0b0b0", "#b8b8b8", "#bebebe", "#c0c0c0", "#c8c8c8", "#d0d0d0", "#d3d3d3", "#d8d8d8", "#dcdcdc", "#e0e0e0", "#e8e8e8", "#f0f0f0", "#f5f5f5", "#f8f8f8", "#ffffff" ], blue = [ "#0d47a1", "#1565c0", "#1976d2", "#1e88e5", "#2196f3", "#42a5f5", "#64b5f6", "#90caf9", "#bbdefb", "#e3f2fd" ], guidelines = "#787878", control = "#1e88e5", bodybg = ed.dom.getStyle(ed.getBody(), "background-color", !0), color = ed.dom.getStyle(ed.getBody(), "color", !0);
-                if (bodybg) {
+                var gray = [ "#000000", "#080808", "#101010", "#181818", "#202020", "#282828", "#303030", "#383838", "#404040", "#484848", "#505050", "#585858", "#606060", "#686868", "#696969", "#707070", "#787878", "#808080", "#888888", "#909090", "#989898", "#a0a0a0", "#a8a8a8", "#a9a9a9", "#b0b0b0", "#b8b8b8", "#bebebe", "#c0c0c0", "#c8c8c8", "#d0d0d0", "#d3d3d3", "#d8d8d8", "#dcdcdc", "#e0e0e0", "#e8e8e8", "#f0f0f0", "#f5f5f5", "#f8f8f8", "#ffffff" ], blue = [ "#0d47a1", "#1565c0", "#1976d2", "#1e88e5", "#2196f3", "#42a5f5", "#64b5f6", "#90caf9", "#bbdefb", "#e3f2fd" ], guidelines = "#787878", control = "#1e88e5", caret = "", bodybg = ed.dom.getStyle(ed.getBody(), "background-color", !0), color = ed.dom.getStyle(ed.getBody(), "color", !0);
+                if (bodybg && "transparent" !== bodybg && !/,\s*0\s*\)$/.test(bodybg)) {
                     ed._hasGuidelines = !0;
                     for (var i = 0; i < gray.length; i++) if (isReadable(gray[i], bodybg, 4.5, 5) && ed.dom.toHex(color) !== ed.dom.toHex(gray[i])) {
                         guidelines = gray[i];
@@ -14302,9 +13614,10 @@
                         control = blue[i];
                         break;
                     }
+                    color && !isReadable(color, bodybg, 4.5) && (caret = isReadable("#ffffff", bodybg, 4.5) ? "#ffffff" : "#000000"), 
                     (guidelines || control) && (css = ":root{", guidelines && (css = css + "--mce-guidelines: " + guidelines + ";--mce-visualchars: #a8a8a8;"), 
                     css += "--mce-placeholder: #efefef;", control && (css = css + "--mce-control-selection: " + control + ";--mce-control-selection-bg: #b4d7ff;"), 
-                    ed.dom.addStyle(css += "}"));
+                    caret && (css += "--mce-caret-color: " + caret + ";"), ed.dom.addStyle(css += "}"));
                 }
             }
             ed.onImportCSS = new tinymce.util.Dispatcher(), ed.onImportCSS.add(function() {
@@ -14405,14 +13718,18 @@
         });
     }), function() {
         var each = tinymce.each, JSON = tinymce.util.JSON, RangeUtils = tinymce.dom.RangeUtils, Uuid = tinymce.util.Uuid, Env = tinymce.util.Env;
-        tinymce.PluginManager.add("upload", function(ed, url) {
-            var plugins = [], files = [], noop = (ed.onPreInit.add(function() {
+        tinymce.PluginManager.add("upload", function(ed) {
+            var plugins = [], files = [];
+            function hasFiles(e) {
+                return (e = e.dataTransfer) && e.files && e.files.length;
+            }
+            ed.onPreInit.add(function() {
                 function bindUploadEvents(ed) {
                     each(ed.dom.select(".mce-item-upload-marker", ed.getBody()), function(n) {
                         0 == plugins.length ? ed.dom.remove(n) : bindUploadMarkerEvents(n);
                     });
                 }
-                each(ed.plugins, function(plg, name) {
+                each(ed.plugins, function(plg) {
                     var data;
                     tinymce.is(plg.getUploadConfig, "function") && (data = plg.getUploadConfig()).inline && data.filetypes && plugins.push(plg);
                 }), ed.onBeforeSetContent.add(function(ed, o) {
@@ -14420,15 +13737,15 @@
                 }), ed.onPostProcess.add(function(ed, o) {
                     o.content = o.content.replace(/(&nbsp;|\u00a0)<\/media>/g, "</media>");
                 }), ed.schema.addValidElements("+media[type|width|height|class|style|title|*]"), 
-                ed.serializer.addAttributeFilter("data-mce-marker", function(nodes, name, args) {
+                ed.serializer.addAttributeFilter("data-mce-marker", function(nodes) {
                     for (var i = nodes.length; i--; ) nodes[i].remove();
                 }), ed.parser.addNodeFilter("img,media", function(nodes) {
                     for (var node, i = nodes.length; i--; ) !function(node) {
                         return "media" === node.name || "img" === node.name && (node.attr("data-mce-upload-marker") || !(!(node = node.attr("class")) || -1 == node.indexOf("upload-placeholder")));
                     }(node = nodes[i]) || (0 == plugins.length ? node.remove() : function(node) {
                         var src = node.attr("src") || "", style = {}, cls = [];
-                        node.attr("alt") || /data:image/.test(src) || (src = src.substring(src.length, src.lastIndexOf("/") + 1), 
-                        node.attr("alt", src)), node.attr("style") && (style = ed.dom.styles.parse(node.attr("style"))), 
+                        node.attr("alt") || /data:image/.test(src) || node.attr("alt", src.slice(src.lastIndexOf("/") + 1)), 
+                        node.attr("style") && (style = ed.dom.styles.parse(node.attr("style"))), 
                         node.attr("hspace") && (style["margin-left"] = style["margin-right"] = node.attr("hspace")), 
                         node.attr("vspace") && (style["margin-top"] = style["margin-bottom"] = node.attr("vspace")), 
                         node.attr("align") && (style.float = node.attr("align")), 
@@ -14461,27 +13778,24 @@
                 function cancelEvent(e) {
                     e.preventDefault(), e.stopPropagation();
                 }
-                0 == plugins.length ? (ed.dom.bind(ed.getBody(), "dragover", function(e) {
-                    var dataTransfer = e.dataTransfer;
-                    dataTransfer && dataTransfer.files && dataTransfer.files.length && e.preventDefault();
-                }), ed.dom.bind(ed.getBody(), "drop", function(e) {
-                    var dataTransfer = e.dataTransfer;
-                    dataTransfer && dataTransfer.files && dataTransfer.files.length && e.preventDefault();
-                })) : (ed.theme && ed.theme.onResolveName && ed.theme.onResolveName.add(function(theme, o) {
+                0 == plugins.length ? ed.dom.bind(ed.getBody(), "dragover drop", function(e) {
+                    hasFiles(e) && e.preventDefault();
+                }) : (ed.theme && ed.theme.onResolveName && ed.theme.onResolveName.add(function(theme, o) {
                     var n = o.node;
                     n && "IMG" === n.nodeName && /mce-item-upload/.test(n.className) && (o.name = "placeholder");
                 }), ed.dom.bind(ed.getBody(), "dragover", function(e) {
                     e.dataTransfer.dropEffect = tinymce.VK.metaKeyPressed(e) ? "copy" : "move";
                 }), ed.dom.bind(ed.getBody(), "drop", function(e) {
-                    var rng, dataTransfer = e.dataTransfer;
-                    dataTransfer && dataTransfer.files && dataTransfer.files.length && (each(dataTransfer.files, function(file) {
-                        rng || (rng = RangeUtils.getCaretRangeFromPoint(e.clientX, e.clientY, ed.getDoc())) && ed.selection.setRng(rng), 
+                    var rng;
+                    hasFiles(e) && ((rng = RangeUtils.getCaretRangeFromPoint(e.clientX, e.clientY, ed.getDoc())) && ed.selection.setRng(rng), 
+                    ed.undoManager.add(), each(e.dataTransfer.files, function(file) {
                         addFile(file);
-                    }), cancelEvent(e)), files.length && each(files, function(file) {
+                    }), cancelEvent(e)), each(files.slice(0), function(file) {
                         uploadFile(file);
                     }), tinymce.isGecko && "IMG" == e.target.nodeName && cancelEvent(e);
                 }));
-            }), function() {});
+            });
+            var noop = function() {};
             function uploadHandler(file, success, failure, progress) {
                 success = success || noop, failure = failure || noop, progress = progress || noop;
                 var xhr, formData, args = {
@@ -14497,48 +13811,53 @@
                     failure("Image upload failed due to a XHR Transport error. Code: " + xhr.status);
                 }, xhr.onload = function() {
                     var json;
-                    xhr.status < 200 || 300 <= xhr.status ? failure("HTTP Error: " + xhr.status) : ((json = JSON.parse(xhr.responseText)) || failure("Invalid JSON response!"), 
-                    json.error || !json.result ? failure(json.error.message || "Invalid JSON response!") : success(json.result));
+                    if (xhr.status < 200 || 300 <= xhr.status) failure("HTTP Error: " + xhr.status); else {
+                        try {
+                            json = JSON.parse(xhr.responseText);
+                        } catch (e) {
+                            json = null;
+                        }
+                        json && !json.error && json.result ? success(json.result) : failure(json && json.error && json.error.message ? json.error.message : "Invalid JSON response!");
+                    }
                 }, formData = new FormData(), each(args, function(value, name) {
                     formData.append(name, value);
                 }), formData.append("file", file, file.name), xhr.send(formData);
             }
+            function showUploadError(text) {
+                ed.windowManager.alert({
+                    text: text,
+                    title: ed.getLang("upload.error", "Upload Error")
+                });
+            }
+            function showFileTypeError() {
+                showUploadError(ed.getLang("upload.file_extension_error", "File type not supported"));
+            }
             function addFile(file) {
-                if (!/\.(php([0-9]*)|phtml|pl|py|jsp|asp|htm|html|shtml|sh|cgi)\./i.test(file.name) && (each(plugins, function(plg) {
-                    if (!file.upload_url) {
+                if (!/\.(php([0-9]*)|phtml|pl|py|jsp|asp|htm|html|shtml|sh|cgi)\./i.test(file.name) && function(file) {
+                    return each(plugins, function(plg) {
                         var url = plg.getUploadURL(file);
                         if (url) return file.upload_url = url, file.uploader = plg, 
                         !1;
-                    }
-                }), file.upload_url)) {
-                    if (tinymce.is(file.uploader.getUploadConfig, "function")) {
-                        var config = file.uploader.getUploadConfig(), name = file.target_name || file.name;
-                        if (file.filename = name.replace(/[\+\\\/\?\#%&<>"\'=\[\]\{\},;@\^\(\)\xa3\u20ac$~]/g, ""), 
-                        !new RegExp(".(" + config.filetypes.join("|") + ")$", "i").test(file.name)) return ed.windowManager.alert({
-                            text: ed.getLang("upload.file_extension_error", "File type not supported"),
-                            title: ed.getLang("upload.error", "Upload Error")
-                        }), 0;
-                        if (file.size && (name = parseInt(config.max_size, 10) || 1024, 
-                        file.size > 1024 * name)) return ed.windowManager.alert({
-                            text: ed.getLang("upload.file_size_error", "File size exceeds maximum allowed size"),
-                            title: ed.getLang("upload.error", "Upload Error")
-                        }), 0;
-                    }
-                    var w;
-                    return file.marker || !1 === ed.settings.upload_use_placeholder || (config = Uuid.uuid("wf-tmp-"), 
-                    ed.execCommand("mceInsertContent", !1, '<span data-mce-marker="1" id="' + config + '">\ufeff</span>', {
+                    }), file.upload_url;
+                }(file)) return function(file) {
+                    var config;
+                    return !tinymce.is(file.uploader.getUploadConfig, "function") || (config = file.uploader.getUploadConfig(), 
+                    new RegExp("\\.(" + config.filetypes.join("|") + ")$", "i").test(file.name) ? !(file.size && (config = parseInt(config.max_size, 10) || 1024, 
+                    file.size > 1024 * config)) || (showUploadError(ed.getLang("upload.file_size_error", "File size exceeds maximum allowed size")), 
+                    0) : void showFileTypeError());
+                }(file) && (file.filename = (file.target_name || file.name).replace(/[\+\\\/\?\#%&<>"\'=\[\]\{\},;@\^\(\)\xa3\u20ac$~]/g, ""), 
+                file.marker || !1 === ed.settings.upload_use_placeholder || (file.marker = function(file) {
+                    var uid = Uuid.uuid("wf-tmp-"), uid = (ed.execCommand("mceInsertContent", !1, '<span data-mce-marker="1" id="' + uid + '">\ufeff</span>', {
                         skip_undo: 1
-                    }), name = ed.dom.get(config), /image\/(gif|png|jpeg|jpg)/.test(file.type) && file.size ? (config = Math.round(Math.sqrt(file.size)), 
-                    w = Math.max(300, config), config = Math.max(300, config), ed.dom.setStyles(name, {
-                        width: w,
-                        height: config
-                    }), ed.dom.addClass(name, "mce-item-upload")) : ed.setProgressState(!0), 
-                    file.marker = name), files.push(file), 1;
-                }
-                ed.windowManager.alert({
-                    text: ed.getLang("upload.file_extension_error", "File type not supported"),
-                    title: ed.getLang("upload.error", "Upload Error")
-                });
+                    }), ed.dom.get(uid));
+                    return /image\/(gif|png|jpeg|jpg)/.test(file.type) && file.size ? (file = Math.max(300, Math.round(Math.sqrt(file.size))), 
+                    ed.dom.setStyles(uid, {
+                        width: file,
+                        height: file
+                    }), ed.dom.addClass(uid, "mce-item-upload")) : ed.setProgressState(!0), 
+                    uid;
+                }(file)), files.push(file), 1);
+                showFileTypeError();
             }
             function bindUploadMarkerEvents(marker) {
                 var dom = tinymce.DOM;
@@ -14562,26 +13881,22 @@
                     type: "file",
                     id: "wf_upload_input"
                 })), ed.dom.bind(marker, "mouseover", function(e) {
-                    var p2, x, p1, vp;
+                    var vp, p1, p2, x, y, zIndex;
                     ed.dom.getAttrib(marker, "data-mce-selected") || (vp = ed.dom.getViewPort(ed.getWin()), 
                     p1 = dom.getRect(ed.getContentAreaContainer()), p2 = ed.dom.getRect(marker), 
                     vp.y > p2.y + p2.h / 2 - 25) || vp.y < p2.y + p2.h / 2 + 25 - p1.h || (x = Math.max(p2.x - vp.x, 0) + p1.x, 
-                    p1 = Math.max(p2.y - vp.y, 0) + p1.y - Math.max(vp.y - p2.y, 0), 
-                    vp = "mce_fullscreen" == ed.id ? dom.get("mce_fullscreen_container").style.zIndex : 0, 
-                    dom.setStyles("wf_upload_button", {
-                        top: p1 + p2.h / 2 - 16,
-                        left: x + p2.w / 2 - 50,
-                        display: "block",
-                        zIndex: vp + 1
-                    }), dom.setStyles("wf_select_button", {
-                        top: p1 + p2.h / 2 - 16,
-                        left: x + p2.w / 2 - 50,
-                        display: "block",
-                        zIndex: vp + 1
+                    y = Math.max(p2.y - vp.y, 0) + p1.y - Math.max(vp.y - p2.y, 0), 
+                    zIndex = "mce_fullscreen" == ed.id ? dom.get("mce_fullscreen_container").style.zIndex : 0, 
+                    each([ "wf_upload_button", "wf_select_button" ], function(id) {
+                        dom.setStyles(id, {
+                            top: y + p2.h / 2 - 16,
+                            left: x + p2.w / 2 - 50,
+                            display: "block",
+                            zIndex: zIndex + 1
+                        });
                     }), input.onchange = function() {
-                        var file;
-                        input.files && (file = input.files[0]) && (file.marker = marker, 
-                        addFile(file)) && (each([ "width", "height" ], function(key) {
+                        var file = input.files ? input.files[0] : null;
+                        file && (file.marker = marker, ed.undoManager.add(), addFile(file)) && (each([ "width", "height" ], function(key) {
                             ed.dom.setStyle(marker, key, ed.dom.getAttrib(marker, key));
                         }), file.marker = ed.dom.rename(marker, "span"), uploadFile(file), 
                         removeUpload());
@@ -14590,32 +13905,30 @@
                     !e.relatedTarget && 0 < e.clientY || removeUpload();
                 });
             }
-            function removeFile(file) {
-                for (var i = 0; i < files.length; i++) files[i] === file && files.splice(i, 1);
-                files.splice(tinymce.inArray(files, file), 1);
-            }
             function uploadFile(file) {
+                function cleanup() {
+                    !function(file) {
+                        -1 !== (file = tinymce.inArray(files, file)) && files.splice(file, 1);
+                    }(file), file.marker && ed.dom.remove(file.marker), ed.setProgressState(!1);
+                }
                 uploadHandler(file, function(response) {
-                    response = (response = response.files || []).length ? response[0] : {};
-                    file.uploader && (response = tinymce.extend({
+                    response = (response = response.files || []).length ? response[0] : {}, 
+                    file.uploader && function(file, data) {
+                        var marker = file.marker;
+                        ed.selection.select(marker), (file = file.uploader.insertUploadedFile(data)) && ("object" == typeof file && file.nodeType && (ed.dom.hasClass(marker, "mce-item-upload-marker") && function(marker, elm) {
+                            var styles = ed.dom.getAttrib(marker, "data-mce-style"), w = marker.width || 0, marker = marker.height || 0;
+                            styles && ((styles = ed.dom.styles.parse(styles)).width && (w = styles.width, 
+                            delete styles.width), styles.height && (marker = styles.height, 
+                            delete styles.height), ed.dom.setStyles(elm, styles)), 
+                            w && ed.dom.setAttrib(elm, "width", w), marker && ed.dom.setAttrib(elm, "height", w ? "" : marker);
+                        }(marker, file), ed.execCommand("mceInsertContent", !1, ed.dom.getOuterHTML(file))), 
+                        ed.nodeChanged());
+                    }(file, tinymce.extend({
                         type: file.type,
                         name: file.name
-                    }, response), function(file, data) {
-                        var w, h, marker = file.marker, file = file.uploader;
-                        ed.selection.select(marker), (file = file.insertUploadedFile(data)) && ("object" == typeof file && file.nodeType && (ed.dom.hasClass(marker, "mce-item-upload-marker") && (data = ed.dom.getAttrib(marker, "data-mce-style"), 
-                        w = marker.width || 0, h = marker.height || 0, data && ((data = ed.dom.styles.parse(data)).width && (w = data.width, 
-                        delete data.width), data.height && (h = data.height, delete data.height), 
-                        ed.dom.setStyles(file, data)), w && ed.dom.setAttrib(file, "width", w), 
-                        h) && ed.dom.setAttrib(file, "height", h = w ? "" : h), 
-                        ed.undoManager.add(), ed.dom.replace(file, marker)), ed.nodeChanged());
-                    }(file, response)), removeFile(file), file.marker && ed.dom.remove(file.marker), 
-                    ed.setProgressState(!1);
+                    }, response)), cleanup();
                 }, function(message) {
-                    ed.windowManager.alert({
-                        text: message,
-                        title: ed.getLang("upload.error", "Upload Error")
-                    }), removeFile(file), file.marker && ed.dom.remove(file.marker), 
-                    ed.setProgressState(!1);
+                    showUploadError(message), cleanup();
                 }, function(value) {
                     file.marker && ed.dom.setAttrib(file.marker, "data-progress", value);
                 });
@@ -14794,32 +14107,51 @@
             }));
         });
     }(), function() {
-        function uniqueId(prefix) {
-            return "blobid" + count++;
+        var each = tinymce.each, BlobCache = tinymce.file.BlobCache, Conversions = tinymce.file.Conversions, Uuid = tinymce.util.Uuid, DOM = tinymce.DOM, invalidCharacters = /[\+\\\/\?\#%&<>"\'=\[\]\{\},;@\^\(\)\xa3\u20ac$~]/g, invalidExtensions = /\.(php([0-9]*)|phtml|pl|py|jsp|asp|htm|html|shtml|sh|cgi)\b/i, count = 0;
+        function createBlobInfo(blob, base64) {
+            return blob = BlobCache.create("blobid" + count++, blob, base64), BlobCache.add(blob), 
+            blob;
         }
-        var each = tinymce.each, BlobCache = tinymce.file.BlobCache, Conversions = tinymce.file.Conversions, Uuid = tinymce.util.Uuid, DOM = tinymce.DOM, count = 0;
-        tinymce.PluginManager.add("blobupload", function(ed, url) {
-            var uploaders = [];
+        function isUploadableImage(img) {
+            var src = img.getAttribute("src");
+            return !(img.hasAttribute("data-mce-bogus") || img.hasAttribute("data-mce-placeholder") || img.hasAttribute("data-mce-upload-marker") || !src || "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" == src || 0 !== src.indexOf("blob:") && 0 !== src.indexOf("data:"));
+        }
+        tinymce.PluginManager.add("blobupload", function(ed) {
+            var uploaders = [], pending = {};
+            function getMarkerImages(marker) {
+                return tinymce.grep(ed.dom.select("img[src]"), function(image) {
+                    return image.src == marker.src;
+                });
+            }
             function findMarker(marker) {
-                var found;
-                return each(ed.dom.select("img[src]"), function(image) {
-                    if (image.src == marker.src) return found = image, !1;
-                }), found;
+                return getMarkerImages(marker)[0];
             }
             function removeMarker(marker) {
-                each(ed.dom.select("img[src]"), function(image) {
-                    image.src == marker.src && (ed.selection.select(image), ed.execCommand("mceRemoveNode"), 
-                    "P" == (image = ed.selection.getNode()).nodeName) && ed.dom.isEmpty(image) && ed.dom.add(image, "br", {
+                each(getMarkerImages(marker), function(image) {
+                    ed.selection.select(image), ed.execCommand("mceRemoveNode"), 
+                    "P" == (image = ed.selection.getNode()).nodeName && ed.dom.isEmpty(image) && ed.dom.add(image, "br", {
                         "data-mce-bogus": 1
                     });
                 });
             }
+            function showUploadError(message) {
+                ed.windowManager.alert({
+                    text: message,
+                    title: ed.getLang("upload.error", "Upload Error")
+                });
+            }
             function uploadPastedImage(marker, blobInfo) {
-                return new Promise(function(resolve, reject) {
+                return new Promise(function(resolve) {
                     if (!uploaders.length) return removeMarker(marker), resolve();
-                    var html = '<div class="mceForm"><p>' + ed.getLang("upload.name_description", "Please supply a name for this file") + '</p><div class="mceModalRow">   <label for="' + ed.id + '_blob_input">' + ed.getLang("dlg.name", "Name") + '</label>   <div class="mceModalControl mceModalControlAppend">       <input type="text" id="' + ed.id + '_blob_input" autofocus />       <select id="' + ed.id + '_blob_mimetype">           <option value="jpeg">jpeg</option>           <option value="png">png</option>       </select>   </div></div><div class="mceModalRow">   <label for="' + ed.id + '_blob_input">' + ed.getLang("dlg.quality", "Quality") + '</label>   <div class="mceModalControl">       <select id="' + ed.id + '_blob_quality" class="mce-flex-25">           <option value="100">100</option>           <option value="90">90</option>           <option value="80">80</option>           <option value="70">70</option>           <option value="60">60</option>           <option value="50">50</option>           <option value="40">40</option>           <option value="30">30</option>           <option value="20">20</option>           <option value="10">10</option>       </select>       <span role="presentation">%</span>   </div></div></div>', win = ed.windowManager.open({
+                    function cancel() {
+                        removeMarker(marker), resolve();
+                    }
+                    var html, win = ed.windowManager.open({
                         title: ed.getLang("dlg.name", "Name"),
-                        content: html,
+                        content: (html = '<div class="mceForm"><p>' + ed.getLang("upload.name_description", "Please supply a name for this file") + '</p><div class="mceModalRow">   <label for="' + ed.id + '_blob_input">' + ed.getLang("dlg.name", "Name") + '</label>   <div class="mceModalControl mceModalControlAppend">       <input type="text" id="' + ed.id + '_blob_input" autofocus />       <select id="' + ed.id + '_blob_mimetype">           <option value="jpeg">jpeg</option>           <option value="png">png</option>       </select>   </div></div><div class="mceModalRow">   <label for="' + ed.id + '_blob_quality">' + ed.getLang("dlg.quality", "Quality") + '</label>   <div class="mceModalControl">       <select id="' + ed.id + '_blob_quality" class="mce-flex-25">', 
+                        each([ 100, 90, 80, 70, 60, 50, 40, 30, 20, 10 ], function(value) {
+                            html += '<option value="' + value + '">' + value + "</option>";
+                        }), html += '       </select>       <span role="presentation">%</span>   </div></div></div>'),
                         size: "mce-modal-landscape-small",
                         buttons: [ {
                             title: ed.getLang("cancel", "Cancel"),
@@ -14827,53 +14159,87 @@
                         }, {
                             title: ed.getLang("submit", "Submit"),
                             id: "submit",
-                            onclick: function(e) {
-                                var url, uploader, quality, value, images, filename = DOM.getValue(ed.id + "_blob_input");
-                                return filename ? (filename = filename.replace(/[\+\\\/\?\#%&<>"\'=\[\]\{\},;@\^\(\)\xa3\u20ac$~]/g, ""), 
-                                /\.(php([0-9]*)|phtml|pl|py|jsp|asp|htm|html|shtml|sh|cgi)\b/i.test(filename) ? (ed.windowManager.alert({
-                                    text: ed.getLang("upload.file_extension_error", "File type not supported"),
-                                    title: ed.getLang("upload.error", "Upload Error")
-                                }), removeMarker(marker), resolve()) : (each(uploaders, function(instance) {
-                                    if (!url && (url = instance.getUploadURL({
-                                        name: blobInfo.filename()
-                                    }))) return uploader = instance, !1;
-                                }), url ? (value = blobInfo.filename(), value = (/\.(jpg|jpeg|png|gif|webp|avif)$/.test(value) ? value.substring(value.length, value.lastIndexOf(".") + 1) : "") || "jpeg", 
-                                quality = DOM.getValue(ed.id + "_blob_quality") || 100, 
-                                value = DOM.getValue(ed.id + "_blob_mimetype") || value, 
-                                filename = {
-                                    method: "upload",
-                                    id: Uuid.uuid("wf_"),
-                                    inline: 1,
-                                    name: filename,
-                                    url: url + "&" + ed.settings.query,
-                                    mimetype: "image/" + value,
-                                    quality: quality
-                                }, images = tinymce.grep(ed.dom.select("img[src]"), function(image) {
-                                    return image.src == marker.src;
-                                }), ed.setProgressState(!0), void function(settings, blobInfo, failure) {
-                                    var formData, xhr = new XMLHttpRequest();
-                                    xhr.open("POST", settings.url), xhr.upload.onprogress = function(e) {
-                                        e.loaded, e.total;
-                                    }, xhr.onerror = function() {
-                                        failure("Image upload failed due to a XHR Transport error. Code: " + xhr.status);
-                                    }, xhr.onload = function() {
-                                        var json, data;
-                                        xhr.status < 200 || 300 <= xhr.status ? failure("HTTP Error: " + xhr.status) : (json = JSON.parse(xhr.responseText)) && !json.error && json.result && json.result.files ? ((data = json.result.files[0]).marker = images[0], 
-                                        (data = uploader.insertUploadedFile(data)) && (ed.undoManager.add(), 
-                                        ed.dom.replace(data, images[0]), ed.selection.select(data)), 
-                                        ed.setProgressState(!1), win.close(), resolve()) : failure(json.error.message || "Invalid JSON response!");
-                                    }, (formData = new FormData()).append("file", blobInfo.blob(), blobInfo.filename()), 
-                                    each(settings, function(value, name) {
-                                        if ("url" == name || "multipart" == name) return !0;
-                                        formData.append(name, value);
-                                    }), xhr.send(formData);
-                                }(filename, blobInfo, function(error) {
-                                    ed.windowManager.alert({
-                                        text: error,
-                                        title: ed.getLang("upload.error", "Upload Error")
-                                    }), ed.setProgressState(!1), resolve();
-                                })) : (removeMarker(marker), resolve()))) : (removeMarker(marker), 
-                                resolve());
+                            onclick: function() {
+                                var uploader, mimetype, value, image, filename = DOM.getValue(ed.id + "_blob_input");
+                                return filename ? (filename = filename.replace(invalidCharacters, ""), 
+                                invalidExtensions.test(filename) ? (showUploadError(ed.getLang("upload.file_extension_error", "File type not supported")), 
+                                cancel()) : (uploader = function(blobInfo) {
+                                    var found;
+                                    return each(uploaders, function(instance) {
+                                        var url = instance.getUploadURL({
+                                            name: blobInfo.filename()
+                                        });
+                                        if (url) return !(found = {
+                                            instance: instance,
+                                            url: url
+                                        });
+                                    }), found;
+                                }(blobInfo)) ? (mimetype = DOM.getValue(ed.id + "_blob_mimetype") || (value = blobInfo.filename(), 
+                                /\.(jpg|jpeg|png|gif|webp|avif)$/i.test(value) ? value.slice(value.lastIndexOf(".") + 1) : "") || "jpeg", 
+                                value = DOM.getValue(ed.id + "_blob_quality") || 100, 
+                                image = findMarker(marker), ed.setProgressState(!0), 
+                                void function(blob, mimetype, quality) {
+                                    return new Promise(function(resolve) {
+                                        var type = "image/" + mimetype;
+                                        if (blob.type === type) return resolve(blob);
+                                        var url = URL.createObjectURL(blob), image = new Image();
+                                        image.onload = function() {
+                                            var canvas = document.createElement("canvas");
+                                            canvas.width = image.naturalWidth, canvas.height = image.naturalHeight, 
+                                            canvas.getContext("2d").drawImage(image, 0, 0), 
+                                            URL.revokeObjectURL(url), canvas.toBlob(function(converted) {
+                                                resolve(converted || blob);
+                                            }, type, (parseInt(quality, 10) || 100) / 100);
+                                        }, image.onerror = function() {
+                                            URL.revokeObjectURL(url), resolve(blob);
+                                        }, image.src = url;
+                                    });
+                                }(blobInfo.blob(), mimetype, value).then(function(blob) {
+                                    !function(settings, blobInfo, success, failure, progress) {
+                                        var xhr = new XMLHttpRequest(), formData = new FormData();
+                                        xhr.open("POST", settings.url), xhr.upload.onprogress = function(e) {
+                                            progress(e.loaded / e.total * 100);
+                                        }, xhr.onerror = function() {
+                                            failure("Image upload failed due to a XHR Transport error. Code: " + xhr.status);
+                                        }, xhr.onload = function() {
+                                            var json;
+                                            if (xhr.status < 200 || 300 <= xhr.status) failure("HTTP Error: " + xhr.status); else {
+                                                try {
+                                                    json = JSON.parse(xhr.responseText);
+                                                } catch (e) {
+                                                    json = null;
+                                                }
+                                                json && !json.error && json.result && json.result.files && json.result.files.length ? success(json.result.files[0]) : failure(function(json) {
+                                                    return json && json.error && json.error.message ? json.error.message : "Invalid JSON response!";
+                                                }(json));
+                                            }
+                                        }, formData.append("file", settings.blob || blobInfo.blob(), settings.name || blobInfo.filename()), 
+                                        each(settings, function(value, name) {
+                                            if ("url" == name || "multipart" == name || "blob" == name) return !0;
+                                            formData.append(name, value);
+                                        }), xhr.send(formData);
+                                    }({
+                                        method: "upload",
+                                        id: Uuid.uuid("wf_"),
+                                        inline: 1,
+                                        name: filename + "." + mimetype,
+                                        url: uploader.url + "&" + ed.settings.query,
+                                        blob: blob
+                                    }, blobInfo, function(data) {
+                                        image && (data.marker = image, function(uploader, data) {
+                                            (uploader = uploader.insertUploadedFile(data)) && "IMG" === uploader.nodeName && (ed.selection.select(data.marker), 
+                                            uploader.setAttribute("data-mce-tmp", "1"), 
+                                            ed.execCommand("mceInsertContent", !1, ed.dom.getOuterHTML(uploader)), 
+                                            each(ed.dom.select("[data-mce-tmp]"), function(node) {
+                                                ed.selection.select(node), node.removeAttribute("data-mce-tmp");
+                                            }));
+                                        }(uploader.instance, data), ed.dom.remove(image)), 
+                                        ed.setProgressState(!1), win.close(), resolve();
+                                    }, function(error) {
+                                        showUploadError(error), ed.setProgressState(!1), 
+                                        resolve();
+                                    }, function() {});
+                                })) : cancel()) : cancel();
                             },
                             classes: "primary"
                         } ],
@@ -14882,78 +14248,81 @@
                                 DOM.get(ed.id + "_blob_input").focus();
                             }, 10);
                         },
-                        close: function() {
-                            return removeMarker(marker), resolve();
-                        }
+                        close: cancel
                     });
                 });
             }
             ed.onPreInit.add(function() {
-                each(ed.plugins, function(plg, name) {
+                each(ed.plugins, function(plg) {
                     var data;
                     tinymce.is(plg.getUploadConfig, "function") && (data = plg.getUploadConfig()).inline && data.filetypes && uploaders.push(plg);
                 });
             }), ed.onInit.add(function() {
-                ed.onPasteBeforeInsert.add(function(ed, o) {
-                    var promises, images, cachedPromises, o = ed.dom.create("div", 0, o.content);
-                    (o = tinymce.grep(ed.dom.select("img[src]", o), function(img) {
-                        var src = img.getAttribute("src");
-                        return !(img.hasAttribute("data-mce-bogus") || img.hasAttribute("data-mce-placeholder") || img.hasAttribute("data-mce-upload-marker") || !src || "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" == src || 0 !== src.indexOf("blob:") && 0 !== src.indexOf("data:"));
-                    })).length && (promises = [], images = o, cachedPromises = {}, 
-                    images = tinymce.map(o, function(img) {
-                        var newPromise;
-                        return cachedPromises[img.src] ? new Promise(function(resolve) {
-                            cachedPromises[img.src].then(function(imageInfo) {
-                                if ("string" == typeof imageInfo) return imageInfo;
-                                resolve({
-                                    image: img,
-                                    blobInfo: imageInfo.blobInfo
-                                });
-                            });
-                        }) : (newPromise = new Promise(function(resolve, reject) {
-                            !function(blobCache, img, resolve, reject) {
-                                var base64, blobInfo;
-                                0 === img.src.indexOf("blob:") ? (blobInfo = blobCache.getByUri(img.src)) ? resolve({
-                                    image: img,
-                                    blobInfo: blobInfo
-                                }) : Conversions.uriToBlob(img.src).then(function(blob) {
-                                    Conversions.blobToDataUri(blob).then(function(dataUri) {
-                                        base64 = Conversions.parseDataUri(dataUri).data, 
-                                        blobInfo = blobCache.create(uniqueId(), blob, base64), 
-                                        blobCache.add(blobInfo), resolve({
-                                            image: img,
-                                            blobInfo: blobInfo
-                                        });
-                                    });
-                                }, function(err) {
-                                    reject(err);
-                                }) : (base64 = Conversions.parseDataUri(img.src).data, 
-                                (blobInfo = blobCache.findFirst(function(cachedBlobInfo) {
-                                    return cachedBlobInfo.base64() === base64;
-                                })) ? resolve({
-                                    image: img,
-                                    blobInfo: blobInfo
-                                }) : Conversions.uriToBlob(img.src).then(function(blob) {
-                                    blobInfo = blobCache.create(uniqueId(), blob, base64), 
-                                    blobCache.add(blobInfo), resolve({
+                ed.undoManager.onBeforeAdd.add(function(um, level) {
+                    level.content = (level = level.content, function() {
+                        for (var src in pending) return 1;
+                    }() ? level.replace(/<img(?:[^>"']|"[^"]*"|'[^']*')*>/gi, function(image) {
+                        var match = /\ssrc="([^"]*)"/i.exec(image);
+                        return match && pending[match[1]] ? "" : image;
+                    }) : level);
+                }), ed.onPasteBeforeInsert.add(function(ed, o) {
+                    var o = ed.dom.create("div", 0, o.content), images = tinymce.grep(ed.dom.select("img[src]", o), isUploadableImage);
+                    images.length && (each(images, function(img) {
+                        pending[img.getAttribute("src")] = !0;
+                    }), function(images) {
+                        var cache = {}, images = tinymce.map(images, function(img) {
+                            return cache[img.src] || (cache[img.src] = function(img) {
+                                return new Promise(function(resolve, reject) {
+                                    var base64, blobInfo;
+                                    if (0 === img.src.indexOf("blob:")) return (blobInfo = BlobCache.getByUri(img.src)) ? void resolve({
                                         image: img,
                                         blobInfo: blobInfo
-                                    });
-                                }, function(err) {
-                                    reject(err);
-                                }));
-                            }(BlobCache, img, resolve, reject);
-                        }).then(function(result) {
-                            return delete cachedPromises[result.image.src], result;
-                        }).catch(function(error) {
-                            return delete cachedPromises[img.src], error;
-                        }), cachedPromises[img.src] = newPromise);
-                    }), Promise.all(images).then(function(result) {
-                        each(result, function(item) {
-                            "string" != typeof item && (ed.selection.select(findMarker(item.image)), 
-                            ed.selection.scrollIntoView(), promises.push(uploadPastedImage(item.image, item.blobInfo)));
+                                    }) : void Conversions.uriToBlob(img.src).then(function(blob) {
+                                        return Conversions.blobToDataUri(blob).then(function(dataUri) {
+                                            dataUri = Conversions.parseDataUri(dataUri).data, 
+                                            resolve({
+                                                image: img,
+                                                blobInfo: createBlobInfo(blob, dataUri)
+                                            });
+                                        });
+                                    }, reject);
+                                    base64 = Conversions.parseDataUri(img.src).data, 
+                                    (blobInfo = BlobCache.findFirst(function(cachedBlobInfo) {
+                                        return cachedBlobInfo.base64() === base64;
+                                    })) ? resolve({
+                                        image: img,
+                                        blobInfo: blobInfo
+                                    }) : Conversions.uriToBlob(img.src).then(function(blob) {
+                                        resolve({
+                                            image: img,
+                                            blobInfo: createBlobInfo(blob, base64)
+                                        });
+                                    }, reject);
+                                });
+                            }(img).catch(function() {
+                                return null;
+                            })), cache[img.src].then(function(result) {
+                                return result ? {
+                                    image: img,
+                                    blobInfo: result.blobInfo
+                                } : null;
+                            });
                         });
-                    }), Promise.all(promises).then());
+                        return Promise.all(images);
+                    }(images).then(function(result) {
+                        return result.reduce(function(promise, item, index) {
+                            function done() {
+                                delete pending[images[index].getAttribute("src")];
+                            }
+                            return promise.then(function() {
+                                if (item) {
+                                    var image = findMarker(item.image);
+                                    if (image) return ed.selection.select(image), 
+                                    ed.selection.scrollIntoView(), uploadPastedImage(item.image, item.blobInfo);
+                                }
+                            }).then(done, done);
+                        }, Promise.resolve());
+                    }));
                 });
             });
         });

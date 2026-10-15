@@ -5,7 +5,7 @@
  * @subpackage  Editor
  *
  * @copyright   Copyright (C) 2005 - 2020 Open Source Matters, Inc. All rights reserved.
- * @copyright   Copyright (c) 2009-2024 Ryan Demmer. All rights reserved
+ * @copyright   Copyright (c) 2009-2026 Ryan Demmer. All rights reserved
  * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
 
@@ -17,12 +17,11 @@ use Joomla\Filesystem\File;
 use Joomla\Filesystem\Folder;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Uri\Uri;
-use Joomla\Registry\Registry;
 
 class WFJoomlaFileSystem extends WFFileSystem
 {
     /**
-     * A list of restricted directories if allowroot is set to true.
+     * Directories that are never accessible as a root or browseable path.
      *
      * @var array
      */
@@ -38,7 +37,6 @@ class WFJoomlaFileSystem extends WFFileSystem
         'layouts',
         'libraries',
         'logs',
-        'media',
         'modules',
         'plugins',
         'templates',
@@ -47,45 +45,10 @@ class WFJoomlaFileSystem extends WFFileSystem
     );
 
     /**
-     * Allow root access to the filesystem.
-     *
-     * @var boolean
-     */
-    protected $allowroot = false;
-
-    /**
      * Constructor activating the default information of the class.
      */
     public function __construct($config = array())
     {
-        // normalize allow_root as boolean to "allowroot"
-        if (isset($config['allow_root'])) {
-            $this->allowroot = (bool) $config['allow_root'];
-            
-            // remove allow_root from config
-            unset($config['allow_root']);
-        }
-
-        if (isset($config['restrict_dir'])) {
-            $restricted = $config['restrict_dir'];
-
-            // Normalize $restricted to array
-            if (is_string($restricted)) {
-                $restricted = array_map('trim', explode(',', $restricted));
-            }
-
-            // Clean empty values
-            $restricted = array_filter($restricted);
-
-            // update class property
-            $this->restricted = $restricted;
-        }
-
-        // remove root folder restrictions
-        if ($this->allowroot === false) {
-            $this->restricted = [];
-        }
-
         if (!isset($config['root'])) {
             $config['root'] = 'images';
         }
@@ -95,7 +58,7 @@ class WFJoomlaFileSystem extends WFFileSystem
         }
 
         // this is a "local" filesystem
-        $config['local'] = true;        
+        $config['local'] = true;   
 
         parent::__construct($config);
     }
@@ -123,19 +86,19 @@ class WFJoomlaFileSystem extends WFFileSystem
     /**
      * Return the full user directory path. Create if required.
      *
-     * @param string    The base path
-     *
-     * @return Full path to folder
+     * @return string path to folder
      */
     public function getRootDir()
-    {        
-        if ($this->get('allowroot')) {
-            return ''; // return a blank value for allowroot
-        }
-
+    {
         return $this->get('root', 'images');
     }
 
+    /**
+     * Convert a relative path to an absolute path.
+     *
+     * @param string $path Relative path
+     * @return string Absolute path
+     */
     public function toAbsolute($path)
     {
         if (empty($path)) {
@@ -145,6 +108,13 @@ class WFJoomlaFileSystem extends WFFileSystem
         return WFUtility::makePath($this->getBaseDir(), $path);
     }
 
+    /**
+     * Convert an absolute path to a relative path.
+     *
+     * @param string $path The path to convert
+     * @param boolean $isabsolute Whether the input path is absolute
+     * @return string Relative path
+     */
     public function toRelative($path, $isabsolute = true)
     {
         // path is absolute
@@ -179,6 +149,13 @@ class WFJoomlaFileSystem extends WFFileSystem
         return $FTPOptions['enabled'] == 1;
     }
 
+    /**
+     * Get the total size of a folder in bytes.
+     *
+     * @param string $path Folder path
+     * @param boolean $recurse Whether to include subfolders
+     * @return int Total size in bytes
+     */
     public function getTotalSize($path, $recurse = true)
     {
         $total = 0;
@@ -201,9 +178,9 @@ class WFJoomlaFileSystem extends WFFileSystem
     /**
      * Count the number of files in a folder.
      *
-     * @return int File total
-     *
      * @param string $path Absolute path to folder
+     * @param boolean $recurse Whether to include subfolders
+     * @return int File total
      */
     public function countFiles($path, $recurse = false)
     {
@@ -223,9 +200,8 @@ class WFJoomlaFileSystem extends WFFileSystem
     /**
      * Count the number of folders in a folder.
      *
-     * @return int Folder total
-     *
      * @param string $path Absolute path to folder
+     * @return int Folder total
      */
     public function countFolders($path)
     {
@@ -242,6 +218,17 @@ class WFJoomlaFileSystem extends WFFileSystem
         return 0;
     }
 
+    /**
+     * Get a list of folders in a directory.
+     *
+     * @param string $relative Relative directory path
+     * @param string $filter Folder name filter pattern
+     * @param string $sort Sort order
+     * @param integer $limit Maximum number of results
+     * @param integer $start Starting index
+     * @param integer $depth Recursion depth
+     * @return array List of folder data arrays
+     */
     public function getFolders($relative, $filter = '', $sort = '', $limit = 25, $start = 0, $depth = 0)
     {
         // trim to remove leading and trailing slashes
@@ -263,16 +250,6 @@ class WFJoomlaFileSystem extends WFFileSystem
 
         $folders = array();
 
-        $restrictedPaths = array_map(function ($val) use ($relative) {
-            $absolute = $this->toAbsolute($val);
-            $absolute = WFUtility::makePath($absolute, $relative);
-
-            // trim trailing slashes
-            $absolute = rtrim($absolute, '/');
-
-            return $absolute;
-        }, $this->restricted);
-
         if (!empty($list)) {
             // Sort alphabetically by default
             natcasesort($list);
@@ -285,10 +262,6 @@ class WFJoomlaFileSystem extends WFFileSystem
 
                 $name = WFUtility::mb_basename($item);
                 $name = WFUtility::convertEncoding($name);
-
-                if (in_array($item, $restrictedPaths, true)) {
-                    continue;
-                }
 
                 $id = WFUtility::makePath($relative, $name, '/');
 
@@ -320,6 +293,17 @@ class WFJoomlaFileSystem extends WFFileSystem
         return $folders;
     }
 
+    /**
+     * Get a list of files in a directory.
+     *
+     * @param string $relative Relative directory path
+     * @param string $filter File name filter pattern
+     * @param string $sort Sort order
+     * @param integer $limit Maximum number of results
+     * @param integer $start Starting index
+     * @param integer $depth Recursion depth
+     * @return array List of file data arrays
+     */
     public function getFiles($relative, $filter = '', $sort = '', $limit = 25, $start = 0, $depth = 0)
     {
         // trim to remove leading and trailing slashes
@@ -402,6 +386,16 @@ class WFJoomlaFileSystem extends WFFileSystem
         return $files;
     }
 
+    /**
+     * Search for files and folders matching a query.
+     *
+     * @param string $relative Relative directory path to search within
+     * @param string $query Search query string
+     * @param array $filetypes File extensions to include
+     * @param string $sort Sort order
+     * @param integer $depth Recursion depth
+     * @return array Matching folders and files
+     */
     public function searchItems($relative, $query = '', $filetypes = array(), $sort = '', $depth = 3)
     {
         $result = array(
@@ -428,12 +422,10 @@ class WFJoomlaFileSystem extends WFFileSystem
     }
 
     /**
-     * Get a folders properties.
+     * Get a folder's properties.
      *
+     * @param string $dir Folder relative path
      * @return array Array of properties
-     *
-     * @param string $dir   Folder relative path
-     * @param string $types File Types
      */
     public function getFolderDetails($dir)
     {
@@ -455,6 +447,8 @@ class WFJoomlaFileSystem extends WFFileSystem
 
     /**
      * Get the source directory of a file path.
+     * 
+     * @param string $path File path
      */
     public function getSourceDir($path)
     {
@@ -476,6 +470,13 @@ class WFJoomlaFileSystem extends WFFileSystem
         return '';
     }
 
+    /**
+     * Check if two values match.
+     *
+     * @param string $needle The value to find
+     * @param string $haystack The value to match against
+     * @return boolean
+     */
     public function isMatch($needle, $haystack)
     {
         return $needle == $haystack;
@@ -484,7 +485,7 @@ class WFJoomlaFileSystem extends WFFileSystem
     /**
      * Return constituent parts of a file path eg: base directory, file name.
      *
-     * @param $path Relative or absolute path
+     * @param string $path Relative or absolute path
      */
     public function pathinfo($path)
     {
@@ -492,11 +493,11 @@ class WFJoomlaFileSystem extends WFFileSystem
     }
 
     /**
-     * Get a files properties.
-     *
-     * @return array Array of properties
+     * Get a file's properties.
      *
      * @param string $file File relative path
+     * @param int $count Total number of files in the listing
+     * @return array Array of properties
      */
     public function getFileDetails($file, $count = 1)
     {
@@ -542,7 +543,12 @@ class WFJoomlaFileSystem extends WFFileSystem
                         }
                     }
                 } else {
-                    list($image['width'], $image['height']) = @getimagesize($path);
+                    $dimensions = @getimagesize($path);
+                    
+                    if ($dimensions) {
+                        $image['width'] = $dimensions[0];
+                        $image['height'] = $dimensions[1];
+                    }
                 }
             }
 
@@ -554,23 +560,26 @@ class WFJoomlaFileSystem extends WFFileSystem
         return $data;
     }
 
-    private function checkRestrictedDirectory($path)
+    /**
+     * Throw an exception if the path contains traversal sequences or resolves within a restricted directory.
+     *
+     * @param string $path Absolute path to check
+     * @return boolean
+     * @throws \Exception
+     */
+    protected function checkRestrictedDirectory($path)
     {
-        if ($this->allowroot) {
-            foreach ($this->restricted as $name) {
-                $restricted = $this->toAbsolute($name);
+        // Name-only safety (null/traversal/backslash). The charset whitelist is intentionally
+        // NOT applied here: this guards an already-resolved filesystem path for traversal and
+        // the restricted-folder boundary, and must not reject legitimate filenames (e.g. with
+        // "$", "&", "+") that the listing now permits. See WFUtility::checkName().
+        WFUtility::checkName($path);
 
-                $match = false;
+        foreach ($this->restricted as $name) {
+            $restricted = rtrim($this->toAbsolute($name), '/') . '/';
 
-                if (function_exists('mb_substr')) {
-                    $match = (mb_substr($path, 0, mb_strlen($restricted)) === $restricted);
-                } else {
-                    $match = (substr($path, 0, strlen($restricted)) === $restricted);
-                }
-
-                if ($match === true) {
-                    throw new Exception('Access to the target directory is restricted');
-                }
+            if (strpos(rtrim($path, '/') . '/', $restricted) === 0) {
+                throw new Exception('Access to the target directory is restricted');
             }
         }
 
@@ -580,11 +589,11 @@ class WFJoomlaFileSystem extends WFFileSystem
     /**
      * Delete the relative file(s).
      *
-     * @param $files the relative path to the file name or comma seperated list of multiple paths
+     * @param string $src the relative path to the file name or comma seperated list of multiple paths
      *
-     * @return string $error on failure
+     * @return WFFileSystemResult $result
      */
-    public function delete($src)
+    public function delete($src): WFFileSystemResult
     {
         $path = $this->toAbsolute($src);
 
@@ -627,7 +636,14 @@ class WFJoomlaFileSystem extends WFFileSystem
         $src = $this->toAbsolute(rawurldecode($src));
         $dir = WFUtility::mb_dirname($src);
 
+        $this->checkRestrictedDirectory($src);
+
         Factory::getApplication()->triggerEvent('onWfFileSystemBeforeRename', array(&$src, &$dest));
+
+        // fail closed on an empty or dotfile destination.
+        if ((string) $dest === '' || strpos($dest, '.') === 0) {
+            throw new InvalidArgumentException('Rename Failed: Invalid destination name.');
+        }
 
         $result = new WFFileSystemResult();
 
@@ -636,10 +652,17 @@ class WFJoomlaFileSystem extends WFFileSystem
             $file = $dest . '.' . $ext;
             $path = WFUtility::makePath($dir, $file);
 
-            // check path does not fall within a restricted folder
             $this->checkRestrictedDirectory($path);
 
             $result->type = 'files';
+
+            // check if the file exists
+            if (file_exists($path) && realpath($path) !== realpath($src)) {
+                $result->message = Text::sprintf('WF_MANAGER_FILE_EXISTS', WFUtility::mb_basename($path));
+
+                return $result;
+            }
+
             $result->state = File::move($src, $path);
             $result->path = $path;
             // include original source path
@@ -647,7 +670,16 @@ class WFJoomlaFileSystem extends WFFileSystem
         } elseif (is_dir($src)) {
             $path = WFUtility::makePath($dir, $dest);
 
+            $this->checkRestrictedDirectory($path);
+
             $result->type = 'folders';
+
+            if (file_exists($path) && realpath($path) !== realpath($src)) {
+                $result->message = Text::sprintf('WF_MANAGER_FOLDER_EXISTS', WFUtility::mb_basename($path));
+
+                return $result;
+            }
+
             $result->state = Folder::move($src, $path);
             $result->path = $path;
             // include original source path
@@ -662,8 +694,8 @@ class WFJoomlaFileSystem extends WFFileSystem
     /**
      * Copy a file.
      *
-     * @param string $files The relative file or comma seperated list of files
-     * @param string $dest  The relative path of the destination dir
+     * @param string $file The relative file or comma seperated list of files
+     * @param string $destination  The relative path of the destination dir
      *
      * @return string $error on failure
      */
@@ -680,7 +712,7 @@ class WFJoomlaFileSystem extends WFFileSystem
         // destination full path
         $dest = $this->toAbsolute($dest);
 
-        // check destination path does not fall within a restricted folder
+        $this->checkRestrictedDirectory($src);
         $this->checkRestrictedDirectory($dest);
 
         Factory::getApplication()->triggerEvent('onWfFileSystemBeforeCopy', array(&$src, &$dest));
@@ -718,12 +750,12 @@ class WFJoomlaFileSystem extends WFFileSystem
     }
 
     /**
-     * Copy a file.
+     * Move a file or folder.
      *
-     * @param string $files The relative file or comma seperated list of files
-     * @param string $dest  The relative path of the destination dir
+     * @param string $file The relative file or folder path
+     * @param string $destination The relative path of the destination dir
      *
-     * @return string $error on failure
+     * @return WFFileSystemResult
      */
     public function move($file, $destination)
     {
@@ -738,7 +770,7 @@ class WFJoomlaFileSystem extends WFFileSystem
         // destination full path
         $dest = $this->toAbsolute($dest);
 
-        // check destination path does not fall within a restricted folder
+        $this->checkRestrictedDirectory($src);
         $this->checkRestrictedDirectory($dest);
 
         Factory::getApplication()->triggerEvent('onWfFileSystemBeforeMove', array(&$src, &$dest));
@@ -797,8 +829,8 @@ class WFJoomlaFileSystem extends WFFileSystem
     /**
      * New folder.
      *
-     * @param string $dir     The base dir
-     * @param string $new_dir The folder to be created
+     * @param string $dir The base dir
+     * @param string $new The folder to be created
      *
      * @return string $error on failure
      */
@@ -823,9 +855,17 @@ class WFJoomlaFileSystem extends WFFileSystem
         return $result;
     }
 
+    /**
+     * Get the pixel dimensions of an image file.
+     *
+     * @param string $file Relative path to the image
+     * @return array Width and height values
+     */
     public function getDimensions($file)
     {
-        $path = $this->toAbsolute(utf8_decode(rawurldecode($file)));
+        $path = $this->toAbsolute(rawurldecode($file));
+
+        $this->checkRestrictedDirectory($path);
 
         $data = array(
             'width' => '',
@@ -843,6 +883,14 @@ class WFJoomlaFileSystem extends WFFileSystem
         return $data;
     }
 
+    /**
+     * Resolve a filename conflict by generating a unique destination path.
+     *
+     * @param string $destination Full destination path
+     * @param string $name Original filename
+     * @param boolean $createCopy Force a copy rather than overwriting
+     * @return string Resolved destination path
+     */
     protected function resolveFilenameConflict($destination, $name, $createCopy = false)
     {
         // get overwrite state
@@ -863,7 +911,8 @@ class WFJoomlaFileSystem extends WFFileSystem
 
             $x = 1;
 
-            while (is_file($destination)) {
+            // file_exists (not is_file) so a directory of the same name is also treated as a conflict
+            while (file_exists($destination)) {
                 if (strpos($suffix, '$') !== false) {
                     $tmpname = $name . str_replace('$', $x, $suffix);
                 } else {
@@ -879,7 +928,16 @@ class WFJoomlaFileSystem extends WFFileSystem
         return $destination;
     }
 
-    public function upload($method, $src, $dir, $name, $chunks = 1, $chunk = 0)
+    /**
+     * Upload a file to the filesystem.
+     *
+     * @param string $method Upload method
+     * @param string $src Temporary source file path
+     * @param string $dir Destination directory (relative)
+     * @param string $name Destination filename
+     * @return WFFileSystemResult
+     */
+    public function upload($method, $src, $dir, $name)
     {
         $app = Factory::getApplication();
 
@@ -890,15 +948,6 @@ class WFJoomlaFileSystem extends WFFileSystem
 
         // check destination path does not fall within a restricted folder
         $this->checkRestrictedDirectory($dest);
-
-        // check for safe mode
-        $safe_mode = false;
-
-        if (function_exists('ini_get')) {
-            $safe_mode = ini_get('safe_mode');
-        } else {
-            $safe_mode = true;
-        }
 
         $result = new WFFileSystemResult();
 
@@ -919,9 +968,14 @@ class WFJoomlaFileSystem extends WFFileSystem
         // trigger Joomla event before upload
         $app->triggerEvent('onContentBeforeSave', $vars);
 
-        if (File::upload($src, $dest, false, true)) {
-            $result->state = true;
-            $result->path = $dest;
+        // run the Joomla safe file scan, with its content checks limited to the same file types as WFUtility::isSafeFile
+        try {
+            if (File::upload($src, $dest, false, false, WFUtility::getSafeFileOptions($dest))) {
+                $result->state = true;
+                $result->path = $dest;
+            }
+        } catch (\RuntimeException $e) {
+            $result->state = false;
         }
 
         $app->triggerEvent('onWfFileSystemAfterUpload', array(&$result));
@@ -936,20 +990,41 @@ class WFJoomlaFileSystem extends WFFileSystem
         return $result;
     }
 
+    /**
+     * Check if a file or directory exists at the given path.
+     *
+     * @param string $path Relative path
+     * @return boolean
+     */
     public function exists($path)
     {
         return $this->is_dir($path) || $this->is_file($path);
     }
 
+    /**
+     * Read the contents of a file.
+     *
+     * @param string $file Relative file path
+     * @return string File contents
+     */
     public function read($file)
     {
         $file = rawurldecode($file);
 
         $path = $this->toAbsolute($file);
 
+        $this->checkRestrictedDirectory($path);
+
         return file_get_contents($path);
     }
 
+    /**
+     * Write content to a file.
+     *
+     * @param string $file Relative file path
+     * @param string $content Content to write
+     * @return boolean True on success
+     */
     public function write($file, $content)
     {
         $file = rawurldecode($file);
@@ -968,15 +1043,29 @@ class WFJoomlaFileSystem extends WFFileSystem
         return $result;
     }
 
+    /**
+     * Check if a path resolves to a file.
+     *
+     * @param string $path Relative path
+     * @return boolean
+     */
     public function is_file($path)
     {
         $path = $this->toAbsolute($path);
+        $this->checkRestrictedDirectory($path);
         return is_file($path);
     }
 
+    /**
+     * Check if a path resolves to a directory.
+     *
+     * @param string $path Relative path
+     * @return boolean
+     */
     public function is_dir($path)
     {
         $path = $this->toAbsolute($path);
+        $this->checkRestrictedDirectory($path);
         return is_dir($path);
     }
 }

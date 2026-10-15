@@ -1,4 +1,4 @@
-/* jce - 2.9.99.5 | 2026-06-03 | https://www.joomlacontenteditor.net | Source: https://github.com/widgetfactory/jce | Copyright (C) 2006 - 2026 Ryan Demmer. All rights reserved | GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html */
+/* jce - 2.9.99.12 | 2026-10-07 | https://www.joomlacontenteditor.net | Source: https://github.com/widgetfactory/jce | Copyright (C) 2006 - 2026 Ryan Demmer. All rights reserved | GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html; see LICENSE.txt */
 import split from "./src/utils/split";
 
 import {
@@ -33,12 +33,7 @@ tinymce.PluginManager.add("cleanup", function(ed, url) {
             for (var i = nodes.length; i--; ) nodes[i].attr("data-mce-tmp", null);
         }), ed.parser.addAttributeFilter("data-mce-tmp", function(nodes, name) {
             for (var i = nodes.length; i--; ) nodes[i].attr("data-mce-tmp", null);
-        }), !1 !== ed.settings.verify_html && (ed.settings.allow_event_attributes || each(ed.schema.elements, function(elm) {
-            if (!elm.attributesOrder || 0 === elm.attributesOrder.length) return !0;
-            each(elm.attributes, function(obj, name) {
-                0 === name.indexOf("on") && (delete elm.attributes[name], elm.attributesOrder.splice(tinymce.inArray(elm, elm.attributesOrder, name), 1));
-            });
-        }), elements = ed.schema.elements, each(split("ol ul sub sup blockquote font table tbody tr strong b"), function(name) {
+        }), !1 !== ed.settings.verify_html && (elements = ed.schema.elements, each(split("ol ul sub sup blockquote font table tbody tr strong b"), function(name) {
             elements[name] && (elements[name].removeEmpty = !1);
         }), ed.getParam("pad_empty_tags", !0) || each(elements, function(v, k) {
             v.paddEmpty && (v.paddEmpty = !1);
@@ -64,7 +59,7 @@ tinymce.PluginManager.add("cleanup", function(ed, url) {
         }), se.moveToBookmark(bm);
     }), ed.onBeforeSetContent.add(function(ed, o) {
         o.content = o.content.replace(/^<br>/, ""), o.content = convertFromGeshi(o.content), 
-        o.content = padding.paddEmptyTags(o.content), o.content = processAttributes(ed, o.content);
+        o.content = padding.paddEmptyTags(o.content), o.content = processAttributes(ed, o.content, !!o.load);
     }), ed.onPostProcess.add(function(ed, o) {
         o.set && (o.content = convertFromGeshi(o.content)), o.get && (o.content = convertToGeshi(o.content), 
         o.content = o.content.replace(/<a([^>]*)class="jce(box|popup|lightbox|tooltip|_tooltip)"([^>]*)><\/a>/gi, ""), 

@@ -1,8 +1,8 @@
 <?php
 
 /**
- * @copyright     Copyright (c) 2009-2024 Ryan Demmer. All rights reserved
- * @license       GNU/GPL 2 or later - http://www.gnu.org/copyleft/gpl.html
+ * @copyright     Copyright (c) 2009-2026 Ryan Demmer. All rights reserved
+ * @license       GNU General Public License version 2 or later; see LICENSE.txt
  * JCE is free software. This version may have been modified pursuant
  * to the GNU General Public License, and as distributed it includes or
  * is derivative of works licensed under the GNU General Public License or
@@ -15,10 +15,11 @@ require_once JPATH_SITE . '/components/com_jce/editor/libraries/classes/applicat
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\Controller\BaseController;
 use Joomla\CMS\Session\Session;
-use Joomla\CMS\Factory;
 
 class JceControllerEditor extends BaseController
 {
+    private const ALLOWED_TASKS = ['loadlanguages', 'pack', 'compileless'];
+
     public function execute($task)
     {
         // check for session token
@@ -36,7 +37,15 @@ class JceControllerEditor extends BaseController
             list($name, $task) = explode('.', $task);
         }
 
-        if (in_array($task, array('loadlanguages', 'pack'))) {
+        if (in_array($task, self::ALLOWED_TASKS, true)) {
+            if ($task === 'pack') {
+                $type = $this->input->getWord('type', 'javascript');
+
+                if (!in_array($type, ['javascript', 'css', 'language'], true)) {
+                    jexit();
+                }
+            }
+
             if (method_exists($editor, $task)) {
                 $editor->$task();
             }

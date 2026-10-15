@@ -4,7 +4,7 @@
  * @package     JCE
  * @subpackage  Editor
  *
- * @copyright   Copyright (c) 2009-2024 Ryan Demmer. All rights reserved
+ * @copyright   Copyright (c) 2009-2026 Ryan Demmer. All rights reserved
  * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
 
@@ -14,6 +14,7 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Session\Session;
 use Joomla\CMS\Uri\Uri;
+use Joomla\CMS\Component\ComponentHelper;
 
 class WFBrowserPlugin extends WFMediaManager
 {
@@ -22,10 +23,17 @@ class WFBrowserPlugin extends WFMediaManager
      */
     protected $_filetypes = 'doc,docx,dot,dotx,ppt,pps,pptx,ppsx,xls,xlsx,gif,jpeg,jpg,png,webp,apng,avif,pdf,zip,tar,gz,swf,rar,mov,mp4,m4a,flv,mkv,webm,ogg,ogv,qt,wmv,asx,asf,avi,wav,mp3,aiff,oga,odt,odg,odp,ods,odf,rtf,txt,csv';
 
+    // identifies a media field request for routing only, the profile determines access
     private function isMediaField()
     {
         $app = Factory::getApplication();
-        return $app->input->getInt('standalone') && $app->input->getString('mediatype') && $app->input->getCmd('fieldid', $app->input->getCmd('element', ''));
+
+        // asset requests from a media field only carry the mediafield flag
+        if ($app->input->getInt('mediafield') && in_array($app->input->getCmd('task'), array('pack', 'loadlanguages'), true)) {
+            return true;
+        }
+
+        return $app->input->getString('mediatype') && $app->input->getCmd('fieldid', $app->input->getCmd('element', ''));
     }
 
     /**
@@ -61,6 +69,49 @@ class WFBrowserPlugin extends WFMediaManager
         return $value;
     }
 
+    private function hasFileBrowser()
+    {
+        $app = Factory::getApplication();
+
+        // the standalone File Browser is only available in the Control Panel, but media fields are also standalone
+        if ($app->input->getInt('standalone') && !$this->isMediaField()) {
+            return Factory::getUser()->authorise('jce.browser', 'com_jce');
+        }
+
+        // the caller is only set when it is assigned to the active profile
+        $caller = $this->get('caller');
+
+        if ($caller) {
+            // these plugins have no file browser of their own, so it can be disabled
+            $map = array('link', 'iframe', 'table', 'style');
+
+            if (in_array($caller, $map, true)) {
+                return (int) $this->getParam($caller . '.file_browser', 1) !== 0;
+            }
+
+            return true;
+        }
+
+        // media field usage: element present with a mediatype, standalone or not
+        if ($this->isMediaField()) {
+            if ((int) $this->getParam('mediafield_enable', 1)) {
+                if ($app->input->getInt('converted')) {
+                    if ((int) ComponentHelper::getParams('com_jce')->get('replace_media_manager', 1)) {
+                        return (int) $this->getParam('mediafield_conversion', 1);
+                    }
+
+                    return false;
+                }
+
+                return true;
+            }
+
+            return false;
+        }
+
+        return false;
+    }
+
     public function __construct($config = array())
     {
         $app = Factory::getApplication();
@@ -73,32 +124,39 @@ class WFBrowserPlugin extends WFMediaManager
 
         parent::__construct($config);
 
+        if (!$this->hasFileBrowser()) {
+            throw new Exception(Text::_('JERROR_ALERTNOAUTHOR'), 403);
+        }
+
+        $standalone = $app->input->getInt('standalone');
         $browser = $this->getFileBrowser();
 
-        // get mediatype from xml
-        $mediatypes = $app->input->getString('mediatype', $app->input->getString('filter', 'files'));
+        // add upload event
+        $browser->addEvent('onUpload', array($this, 'onUpload'));
 
-        if ($mediatypes) {
-            // add upload event
-            $browser->addEvent('onUpload', array($this, 'onUpload'));
+        // standalone shows all configured extensions with no mediatype filter
+        // but media fields always apply their mediatype filter, even when standalone=1
+        if (!$standalone || $this->isMediaField()) {
+            // use mediatype from input; default to 'images' if not set
+            $mediatype = $app->input->getString('mediatype', $app->input->getString('filter', 'images'));
 
-            // clean and lowercase filter value
-            $mediatypes = (string) preg_replace('/[^\w_,]/i', '', strtolower($mediatypes));
+            // clean and lowercase
+            $mediatype = (string) preg_replace('/[^\w_,]/i', '', strtolower($mediatype));
 
             // get filetypes from params
             $filetypes = $this->getParam('extensions', $this->get('_filetypes'));
 
-            // map to comma seperated list
+            // map to comma-separated list
             $filetypes = $browser->getFileTypes('list', $filetypes);
 
             $accept = explode(',', $filetypes);
 
             $map = array(
-                'images' => array('jpg', 'jpeg', 'png', 'apng', 'gif', 'webp', 'avif'),
-                'media' => array('avi', 'wmv', 'wm', 'asf', 'asx', 'wmx', 'wvx', 'mov', 'qt', 'mpg', 'mpeg', 'm4a', 'm4v', 'swf', 'dcr', 'rm', 'ra', 'ram', 'divx', 'mp4', 'ogv', 'ogg', 'webm', 'flv', 'f4v', 'mp3', 'ogg', 'wav', 'xap'),
+                'images'    => array('jpg', 'jpeg', 'png', 'apng', 'gif', 'webp', 'avif'),
+                'media'     => array('avi', 'wmv', 'wm', 'asf', 'asx', 'wmx', 'wvx', 'mov', 'qt', 'mpg', 'mpeg', 'm4a', 'm4v', 'swf', 'dcr', 'rm', 'ra', 'ram', 'divx', 'mp4', 'ogv', 'ogg', 'webm', 'flv', 'f4v', 'mp3', 'ogg', 'wav', 'xap'),
                 'documents' => array('doc', 'docx', 'odg', 'odp', 'ods', 'odt', 'pdf', 'ppt', 'pptx', 'txt', 'xcf', 'xls', 'xlsx', 'csv'),
-                'html' => array('html', 'htm', 'txt', 'md'),
-                'files' => $accept, // “files” == everything allowed
+                'html'      => array('html', 'htm', 'txt', 'md'),
+                'files'     => $accept, // “files” == everything allowed
             );
 
             // add svg support to images if it is allowed in filetypes
@@ -106,43 +164,19 @@ class WFBrowserPlugin extends WFMediaManager
                 $map['images'][] = 'svg';
             }
 
-            // explode the mediatypes
-            $mediatypes = explode(',', $mediatypes);
-
-            // selected filetypes
             $selected = array();
 
-            foreach ($mediatypes as $mediatype) {
-                // trim the value
-                $mediatype = trim($mediatype);
+            foreach (explode(',', $mediatype) as $type) {
+                $type = trim($type);
 
-                // strtolower the value
-                $mediatype = strtolower($mediatype);
-
-                // mediaypes contains a mapped type
-                if (array_key_exists($mediatype, $map)) {
-                    // process the map to filter permitted extensions
-                    /*array_walk($map, function (&$items, $key) use ($accept) {
-                        $values = array_intersect($items, $accept);
-                        $items = empty($values) ? [] : $values;
-                    });*/
-
-                    //$selected = $map[$mediatype];
-
-                    $selected = array_values(array_intersect($map[$mediatype], $accept));
-                } else {
-                    if (in_array($mediatype, $accept, true)) {
-                        // add the mediatype to the selected filetypes
-                        $selected[] = $mediatype;
-                    }
+                if (array_key_exists($type, $map)) {
+                    $selected = array_merge($selected, array_values(array_intersect($map[$type], $accept)));
+                } elseif (in_array($type, $accept, true)) {
+                    $selected[] = $type;
                 }
             }
 
-            // remove duplicates
-            $selected = array_values(array_unique($selected));
-
-            // set updated filetypes
-            $this->setFileTypes(implode(',', $selected));
+            $this->setFileTypes(implode(',', array_values(array_unique($selected))));
         }
 
         $folder = $this->getMediaFolder();
@@ -163,6 +197,12 @@ class WFBrowserPlugin extends WFMediaManager
         $app = Factory::getApplication();
 
         $folder = $app->input->getString('mediafolder', '');
+
+        // for a converted Joomla Media Field, use the field path (a configured "Directory" or the folder of the existing value) as the initial folder
+        if (empty($folder) && $app->input->getInt('converted', 0) === 1) {
+            $converted = $app->input->getString('path', $app->input->getString('folder', '')); // include "folder" for Joomla 3
+            $folder = $this->normalizeLocalJoomlaFolder($converted);
+        }
 
         if ($folder) {
             // trim the path of leading : if any
@@ -335,28 +375,34 @@ class WFBrowserPlugin extends WFMediaManager
             }
 
             if ($app->input->getInt('converted', 0) === 1) {
-                // get the path from a converted media field
-                $folder = $app->input->getString('path', $app->input->getString('folder', '')); // include "folder" for Joomla 3
+                // a converted media field "path" only ever refers to the folder of an existing value;
+                // a configured "Directory" is passed as a ":"-prefixed "mediafolder" and is handled by the root-folder logic above
+                $convertedFolder = $app->input->getString('path', $app->input->getString('folder', '')); // include "folder" for Joomla 3
 
                 // normalize the Joomla Media Field path, eg: local-images:/folder/subfolder => images/folder/subfolder, local-media:/cache => media/cache
-                $folder = $this->normalizeLocalJoomlaFolder($folder);
+                $convertedFolder = $this->normalizeLocalJoomlaFolder($convertedFolder);
 
-                if ($folder) {
-                    $tmpPath = $folder . '/';
+                if ($convertedFolder) {
+                    $tmpPath = $convertedFolder . '/';
 
-                    foreach ($config['dir'] as $store) {
+                    foreach ($config['dir'] as $key => $store) {
                         $base = trim($store['path'], '/');
 
-                        // check if the normalized path is within any profile-allowed directory store
+                        // check if the value folder is within a profile-allowed directory store, and select that store as the root
+                        // (the store keeps its full path so navigation up to the store root is allowed; the value folder is set
+                        // as the initial "source" folder in the constructor)
                         if ($tmpPath === $base . '/' || strpos($tmpPath, $base . '/') === 0) {
-                            $root['path'] = $folder;
+                            $prefix = $key;
+                            $root = $store;
                             break;
                         }
                     }
-                }
 
-                // reset folder so it is not appended again below
-                $folder = '';
+                    // a value folder has been handled as the root above, so don't append it again below.
+                    // NB: only reset when a value was actually present - a relative "mediafolder" directory that fell
+                    // through the root-folder match above still needs $folder to be appended to the store root here.
+                    $folder = '';
+                }
             }
 
             $path = WFUtility::makePath($root['path'], $folder);
@@ -405,6 +451,11 @@ class WFBrowserPlugin extends WFMediaManager
         $document->setTitle(Text::_('WF_BROWSER_TITLE'));
 
         if ($document->get('standalone') == 1) {
+            // flag media field mode so asset request urls pass the access check
+            if ($this->isMediaField()) {
+                $document->set('mediafield', 1);
+            }
+
             if ($slot === 'plugin') {
                 $document->addScript(array('window.min'));
 

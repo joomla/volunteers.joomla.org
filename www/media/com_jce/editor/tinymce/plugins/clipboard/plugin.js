@@ -1,4 +1,4 @@
-/* jce - 2.9.99.5 | 2026-06-03 | https://www.joomlacontenteditor.net | Source: https://github.com/widgetfactory/jce | Copyright (C) 2006 - 2026 Ryan Demmer. All rights reserved | GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html */
+/* jce - 2.9.99.12 | 2026-10-07 | https://www.joomlacontenteditor.net | Source: https://github.com/widgetfactory/jce | Copyright (C) 2006 - 2026 Ryan Demmer. All rights reserved | GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html; see LICENSE.txt */
 !function() {
     "use strict";
     var DOM = tinymce.DOM, each$1 = tinymce.each;
@@ -108,11 +108,15 @@
                 }).setDisabled(c), pasteHtml && m.add({
                     title: "clipboard.paste_desc",
                     icon: "paste",
-                    cmd: "mcePaste"
+                    onclick: function() {
+                        ed.execCommand("mcePaste", !0);
+                    }
                 }), pasteText && m.add({
                     title: "clipboard.paste_text_desc",
                     icon: "pastetext",
-                    cmd: "mcePasteText"
+                    onclick: function() {
+                        ed.execCommand("mcePasteText", !0);
+                    }
                 });
             });
         }), tinymce.clipboard.FakeClipboard);

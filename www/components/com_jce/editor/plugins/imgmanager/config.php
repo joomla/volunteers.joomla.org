@@ -3,7 +3,7 @@
  * @package     JCE
  * @subpackage  Editor
  *
- * @copyright   Copyright (c) 2009-2024 Ryan Demmer. All rights reserved
+ * @copyright   Copyright (c) 2009-2026 Ryan Demmer. All rights reserved
  * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
 
@@ -29,11 +29,15 @@ class WFImgmanagerPluginConfig
             );
         }
 
+        // the file browser is a plugin in its own right, and may not be enabled
+        if (!in_array('browser', $settings['plugins']) || (int) $plugin->getParam('basic_dialog_filebrowser', 1) == 0) {
+            $config['basic_dialog_filebrowser'] = false;
+        }
+
         if ($plugin->getParam('basic_dialog', 0) == 1) {
             $config['basic_dialog'] = true;
 
-            if ($plugin->getParam('basic_dialog_filebrowser', 1) == 1) {
-                $config['basic_dialog_filebrowser'] = true;
+            if (!isset($config['basic_dialog_filebrowser'])) {
                 $config['filetypes'] = $filetypes;
             }
 

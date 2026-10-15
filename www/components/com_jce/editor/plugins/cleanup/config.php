@@ -4,7 +4,7 @@
  * @package     JCE
  * @subpackage  Editor
  *
- * @copyright   Copyright (c) 2009-2024 Ryan Demmer. All rights reserved
+ * @copyright   Copyright (c) 2009-2026 Ryan Demmer. All rights reserved
  * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
 
@@ -142,30 +142,23 @@ class WFCleanupPluginConfig
      */
     public static function processValue($values, $seperator = ',')
     {
-        if (is_array($values)) {
-            $values = array_filter($values, 'trim');
-
-            foreach ($values as $key => $value) {
-                $value = trim($value);
-
-                if (is_string($value) && strpos($value, $seperator) !== false) {
-                    $values = array_merge($values, explode($seperator, $value));
-                    unset($values[$key]);
-                }
-            }
-        } elseif (is_string($values)) {
-            $values = explode($seperator, $values);
-        } else {
-            $values = [];
+        if (is_string($values)) {
+            $values = [$values];
         }
 
-        $values = array_values(
-            array_filter(
-                array_map('trim', $values),
-                'strlen'
-            )
-        );
+        if (!is_array($values)) {
+            return [];
+        }
 
-        return $values;
+        $items = [];
+
+        foreach ($values as $value) {
+            // skip nested arrays / objects
+            if (is_scalar($value)) {
+                $items = array_merge($items, explode($seperator, (string) $value));
+            }
+        }
+
+        return array_values(array_filter(array_map('trim', $items), 'strlen'));
     }
 }

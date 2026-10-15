@@ -1,4 +1,4 @@
-/* jce - 2.9.99.5 | 2026-06-03 | https://www.joomlacontenteditor.net | Source: https://github.com/widgetfactory/jce | Copyright (C) 2006 - 2026 Ryan Demmer. All rights reserved | GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html */
+/* jce - 2.9.99.12 | 2026-10-07 | https://www.joomlacontenteditor.net | Source: https://github.com/widgetfactory/jce | Copyright (C) 2006 - 2026 Ryan Demmer. All rights reserved | GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html; see LICENSE.txt */
 WFAggregator.add("audio", {
     params: {},
     props: {
@@ -25,7 +25,7 @@ WFAggregator.add("audio", {
         return "audio";
     },
     isSupported: function(v) {
-        return !!v && (v = v.split("?")[0], !!/\.(mp3|oga|webm|wav|m4a|aiff)$/.test(v)) && "audio";
+        return !!v && (v = v.split("?")[0], !!/\.(mp3|ogg|oga|opus|webm|wav|m4a|aac|flac|aiff)$/.test(v)) && "audio";
     },
     getValues: function(data) {
         var self = this, sources = [], agent = ($("input[id], select[id]", ".media_option.audio").each(function() {

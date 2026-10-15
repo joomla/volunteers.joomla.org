@@ -1,15 +1,42 @@
-/* jce - 2.9.99.5 | 2026-06-03 | https://www.joomlacontenteditor.net | Source: https://github.com/widgetfactory/jce | Copyright (C) 2006 - 2026 Ryan Demmer. All rights reserved | GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html */
+/* jce - 2.9.99.12 | 2026-10-07 | https://www.joomlacontenteditor.net | Source: https://github.com/widgetfactory/jce | Copyright (C) 2006 - 2026 Ryan Demmer. All rights reserved | GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html; see LICENSE.txt */
 !function() {
-    var Entities = tinymce.html.Entities, each = tinymce.each, extend = tinymce.extend, DomParser = tinymce.html.DomParser, HtmlSerializer = tinymce.html.Serializer, Dispatcher = tinymce.util.Dispatcher, DOM = tinymce.DOM;
+    var Entities = tinymce.html.Entities, each = tinymce.each, extend = tinymce.extend, HtmlSerializer = tinymce.html.Serializer, Dispatcher = tinymce.util.Dispatcher, DOM = tinymce.DOM;
+    function validateContent(ed, content) {
+        var args;
+        return !1 === ed.settings.verify_html ? content : ((args = {
+            no_events: !0,
+            format: "html",
+            get: !0,
+            load: !0
+        }).content = content, ed.onBeforeGetContent.dispatch(ed, args), content = function(ed) {
+            var settings, parser;
+            return ed.contentValidator || (settings = extend({}, ed.settings, {
+                forced_root_block: !1,
+                validate: !0
+            }), (parser = ed.createParser(settings)).sanitizer.mode = null, ed.contentValidator = {
+                parser: parser,
+                serializer: new HtmlSerializer(settings, ed.schema)
+            }), ed.contentValidator;
+        }(ed), args.content = content.serializer.serialize(content.parser.parse(args.content), args), 
+        ed.onPostProcess.dispatch(ed, args), args.content);
+    }
     tinymce.PluginManager.add("core", function(ed, url) {
         var store;
         ed.onUpdateMedia = new Dispatcher(), ed.onWfEditorSave = new Dispatcher();
         var contentLoaded = !1, elm = ed.getElement();
+        function insertContent(value) {
+            return (value = Entities.decode(value)) && ("TEXTAREA" === elm.nodeName ? elm.value = value : elm.innerHTML = function(value) {
+                var div = document.implementation.createHTMLDocument("").createElement("div");
+                return div.innerHTML = value, each(div.querySelectorAll("script,noscript"), function(node) {
+                    node.parentNode.removeChild(node);
+                }), each(div.querySelectorAll("*"), function(node) {
+                    for (var attrs = node.attributes, i = attrs.length - 1; 0 <= i; i--) 0 === attrs[i].name.toLowerCase().indexOf("on") && node.removeAttribute(attrs[i].name);
+                }), div.innerHTML;
+            }(value)), !0;
+        }
         var startup_content_html = ed.settings.startup_content_html || "", quoteMap = (ed.onBeforeRenderUI.add(function() {
             if (startup_content_html && elm && !contentLoaded && ("TEXTAREA" === elm.nodeName ? "" == elm.value : "" == elm.innerHTML)) return contentLoaded = !0, 
-            value = startup_content_html, (value = Entities.decode(value)) && ("TEXTAREA" === elm.nodeName ? elm.value = value : elm.innerHTML = value), 
-            !0;
-            var value;
+            insertContent(startup_content_html);
         }), {
             en: {
                 '"': "&ldquo;{$selection}&rdquo;",
@@ -22,7 +49,7 @@
         });
         function fakeRootBlock() {
             ed.settings.editable_root = "rootblock", ed.onPreInit.addToTop(function() {
-                var selection = ed.selection, dom = ed.dom;
+                var container, selection = ed.selection, dom = ed.dom;
                 dom.settings.root_element = ed.settings.editable_root, ed.schema.addValidElements("#mce:root[id|data-mce-root]"), 
                 ed.schema.children["mce:root"] = ed.schema.children.body, ed.schema.children.body["mce:root"] = {}, 
                 ed.serializer.addAttributeFilter("data-mce-root", function(nodes) {
@@ -39,7 +66,8 @@
                 }), ed.onSaveContent.add(function(ed, o) {
                     "&nbsp;" === o.content && (o.content = "");
                 }), ed.undoManager.onBeforeAdd.add(function(um, level) {
-                    var node, container = ed.dom.create("div", {}, level.content);
+                    var node;
+                    (container = container || document.implementation.createHTMLDocument("").createElement("div")).innerHTML = level.content, 
                     (node = container.firstChild) && 1 == node.nodeType && node.hasAttribute("data-mce-root") && (level.content = container.firstChild.innerHTML);
                 });
             });
@@ -60,12 +88,12 @@
         }), ed.onPreInit.add(function() {
             var pb;
             ed.onUpdateMedia.add(function(ed, o) {
-                o.before && o.after && (each(ed.dom.select("img,poster"), function(elm) {
-                    var after, stamp, src = elm.getAttribute("src");
-                    (src = src && -1 !== src.indexOf("?") ? src.substring(0, src.indexOf("?")) : src) == o.before && (after = o.after, 
-                    stamp = "?" + new Date().getTime(), -1 !== src.indexOf("?") && -1 === after.indexOf("?") && (after += stamp), 
-                    ed.dom.setAttribs(elm, {
-                        src: after,
+                o.before && o.after && (each(ed.dom.select("img,[poster]"), function(elm) {
+                    var stamp, src = elm.getAttribute("src"), query = !1;
+                    src && -1 !== src.indexOf("?") && (src = src.substring(0, src.indexOf("?")), 
+                    query = !0), src == o.before && (src = o.after, stamp = "?" + new Date().getTime(), 
+                    query && -1 === src.indexOf("?") && (src += stamp), ed.dom.setAttribs(elm, {
+                        src: src,
                         "data-mce-src": o.after
                     })), elm.getAttribute("srcset") && function(elm, o) {
                         var srcset = elm.getAttribute("srcset");
@@ -85,25 +113,13 @@
                     });
                 }));
             }), ed.onWfEditorSave.add(function(ed, o) {
-                o.content = function(ed, content) {
-                    var args, parser, settings;
-                    return ed.settings.validate ? (args = {
-                        no_events: !0,
-                        format: "html",
-                        get: !0,
-                        load: !0
-                    }, extend(settings = {}, ed.settings), args.content = content, 
-                    ed.onBeforeGetContent.dispatch(ed, args), settings.forced_root_block = !1, 
-                    settings.validate = !0, parser = new DomParser(settings, ed.schema), 
-                    settings = new HtmlSerializer(settings, ed.schema), args.content = settings.serialize(parser.parse(args.content), args), 
-                    ed.onPostProcess.dispatch(ed, args), args.content) : content;
-                }(ed, o.content);
+                o.content = validateContent(ed, o.content);
             }), (pb = DOM.get("sp-inline-popover")) && DOM.isChildOf(ed.getElement(), pb) && ed.onGetContent.addToTop(function(ed, o) {
                 var args;
                 -1 != ed.id.indexOf("sppbeditor-") && "raw" == o.format && (args = tinymce.extend(o, {
                     format: "html"
                 }), o.content = ed.serializer.serialize(ed.getBody(), args));
             });
-        }), 0 == ed.settings.forced_root_block && 0 != ed.settings.editable_root && fakeRootBlock();
+        }), !1 === ed.settings.forced_root_block && 0 != ed.settings.editable_root && fakeRootBlock();
     });
 }();

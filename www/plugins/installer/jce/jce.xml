@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <extension type="plugin" group="installer" method="upgrade">
   <name>plg_installer_jce</name>
-  <version>2.9.99.5</version>
-  <creationDate>03-06-2026</creationDate>
-  <author>Ryan Demmer</author>
+  <version>2.9.99.12</version>
+  <creationDate>07-10-2026</creationDate>
+  <author>@@author@@</author>
   <authorEmail>info@joomlacontenteditor.net</authorEmail>
   <authorUrl>http://www.joomlacontenteditor.net</authorUrl>
   <copyright>Copyright (C) 2006 - 2026 Ryan Demmer. All rights reserved</copyright>
-  <license>GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html</license>
+  <license>GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html; see LICENSE.txt</license>
   <description>PLG_INSTALLER_JCE_XML_DESCRIPTION</description>
 
   <namespace path="src">Joomla\Plugin\Installer\Jce</namespace>

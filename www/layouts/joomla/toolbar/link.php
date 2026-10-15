@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @package     Joomla.Site
  * @subpackage  Layout
@@ -9,12 +10,31 @@
 
 defined('_JEXEC') or die;
 
-$doTask = $displayData['doTask'];
-$class  = $displayData['class'];
-$text   = $displayData['text'];
+extract($displayData, EXTR_OVERWRITE);
 
+/**
+ * Layout variables
+ * -----------------
+ * @var   int     $id
+ * @var   string  $name
+ * @var   string  $class
+ * @var   string  $text
+ * @var   string  $btnClass
+ * @var   string  $tagName
+ * @var   string  $htmlAttributes
+ */
+
+$margin = (strpos($url ?? '', 'index.php?option=com_config') === false) ? '' : 'ms-auto';
+$target = empty($target) ? '' : 'target="' . $target . '"';
 ?>
-<button onclick="location.href='<?php echo $doTask; ?>';" class="btn btn-small">
-	<span class="<?php echo $class; ?>" aria-hidden="true"></span>
-	<?php echo $text; ?>
-</button>
+<joomla-toolbar-button class="<?php echo $margin; ?>">
+    <a
+        id="<?php echo htmlspecialchars($id, ENT_QUOTES, 'UTF-8', false); ?>"
+        class="<?php echo htmlspecialchars($btnClass, ENT_QUOTES, 'UTF-8', false); ?>"
+        href="<?php echo htmlspecialchars($url, ENT_QUOTES, 'UTF-8', false); ?>"
+        <?php echo $target; ?>
+        <?php echo $htmlAttributes; ?>>
+        <span class="<?php echo $class; ?> icon-fw" aria-hidden="true"></span>
+        <?php echo $text ?: ''; ?>
+    </a>
+</joomla-toolbar-button>

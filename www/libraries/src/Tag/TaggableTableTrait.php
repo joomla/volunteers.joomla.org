@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Joomla! Content Management System
  *
@@ -8,14 +9,64 @@
 
 namespace Joomla\CMS\Tag;
 
-defined('JPATH_PLATFORM') or die;
+use Joomla\CMS\Helper\TagsHelper;
+
+// phpcs:disable PSR1.Files.SideEffects
+\defined('_JEXEC') or die;
+// phpcs:enable PSR1.Files.SideEffects
 
 /**
  * Defines the trait for a Taggable Table Class.
- * Note: This is a placeholder to ease transition to the new system in 4.0
  *
  * @since  3.10.0
  */
 trait TaggableTableTrait
 {
+    /**
+     * The tags helper property
+     *
+     * @var    TagsHelper
+     * @since  4.0.0
+     * @note   The tags helper property is set to public for backwards compatibility for Joomla 4.0. It will be made a
+     *         protected property in Joomla 7.0
+     */
+    public $tagsHelper;
+
+    /**
+     * Get the tags helper
+     *
+     * @return  TagsHelper  The tags helper object
+     *
+     * @since   4.0.0
+     */
+    public function getTagsHelper(): ?TagsHelper
+    {
+        return $this->tagsHelper;
+    }
+
+    /**
+     * Set the tags helper
+     *
+     * @param   TagsHelper   $tagsHelper  The tags helper to be set
+     *
+     * @return  void
+     *
+     * @since   4.0.0
+     */
+    public function setTagsHelper(TagsHelper $tagsHelper): void
+    {
+        $this->tagsHelper = $tagsHelper;
+    }
+
+    /**
+     * Clears the tags helper
+     *
+     * @return  void
+     *
+     * @since   4.0.0
+     */
+    public function clearTagsHelper(): void
+    {
+        $this->tagsHelper = null;
+    }
 }

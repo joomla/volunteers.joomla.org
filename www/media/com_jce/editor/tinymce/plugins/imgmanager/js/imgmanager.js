@@ -1,5 +1,8 @@
-/* jce - 2.9.99.5 | 2026-06-03 | https://www.joomlacontenteditor.net | Source: https://github.com/widgetfactory/jce | Copyright (C) 2006 - 2026 Ryan Demmer. All rights reserved | GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html */
+/* jce - 2.9.99.12 | 2026-10-07 | https://www.joomlacontenteditor.net | Source: https://github.com/widgetfactory/jce | Copyright (C) 2006 - 2026 Ryan Demmer. All rights reserved | GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html; see LICENSE.txt */
 !function($) {
+    function toSrcSwap(ed, value) {
+        return value = ed.convertURL(value), /['"<>\\]/.test(value) ? "" : "this.src='" + value + "';";
+    }
     var ImageManagerDialog = {
         settings: {},
         init: function() {
@@ -47,11 +50,11 @@
             $("#lang").val(ed.dom.getAttrib(n, "lang")), $("#usemap").val(ed.dom.getAttrib(n, "usemap")), 
             $("#loading").val(ed.dom.getAttrib(n, "loading")), $("#insert").button("option", "label", ed.getLang("update", "Update")), 
             $("#longdesc").val(ed.convertURL(ed.dom.getAttrib(n, "longdesc"))), 
-            $.each([ "mouseover", "mouseout" ], function(i, key) {
-                var val = ed.dom.getAttrib(n, "data-" + key);
+            $.each([ "onmouseover", "onmouseout" ], function(i, key) {
+                var val = ed.dom.getAttrib(n, "data-mce-" + key);
                 val = (val = $.trim(val)).replace(/^\s*this.src\s*=\s*\'([^\']+)\';?\s*$/, "$1").replace(/^\s*|\s*$/g, ""), 
-                val = ed.convertURL(val), "mouseout" == key && (val = val || src), 
-                $("#on" + key).val(val);
+                val = ed.convertURL(val), "onmouseout" == key && (val = val || src), 
+                $("#" + key).val(val);
             }), (params = n.nextSibling) && "BR" == params.nodeName && params.style.clear && $("#clear").val(params.style.clear), 
             x = 0, params = function(ed, node) {
                 for (var attrs = node.attributes, attribs = {}, i = attrs.length - 1; 0 <= i; i--) {
@@ -60,7 +63,8 @@
                 }
                 return attribs;
             }(ed, n), $.each(params, function(key, val) {
-                if ("data-mouseover" === key || "data-mouseout" === key || 0 === key.indexOf("on")) return !0;
+                if ("data-mce-onmouseover" === key || "data-mce-onmouseout" === key) return !0;
+                if (0 === key.indexOf("data-mce-on") || 0 === key.indexOf("on")) return !0;
                 if (document.getElementById(key) || "class" == key) return !0;
                 try {
                     val = decodeURIComponent(val);
@@ -109,8 +113,8 @@
                 args[k = "classes" == k ? "class" : k] = v;
             }), args.onmouseover = args.onmouseout = "", $("#onmouseover").val()), out = $("#onmouseout").val();
             over || (out = ""), args = $.extend(args, {
-                "data-mouseover": over ? ed.convertURL(over) : "",
-                "data-mouseout": out ? ed.convertURL(out) : ""
+                "data-mce-onmouseover": over ? toSrcSwap(ed, over) : "",
+                "data-mce-onmouseout": out ? toSrcSwap(ed, out) : ""
             }), br = (over = ed.selection.getNode()).nextSibling, $(".uk-repeatable").each(function() {
                 var elements = $("input, select", this), key = $(elements).eq(0).val(), elements = $(elements).eq(1).val();
                 key && (args[key] = elements);

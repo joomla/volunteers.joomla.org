@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Joomla! Content Management System
  *
@@ -8,18 +9,58 @@
 
 namespace Joomla\CMS\Tag;
 
-defined('JPATH_PLATFORM') or die;
-
+use Joomla\CMS\Helper\TagsHelper;
 use Joomla\CMS\Table\TableInterface;
 
+// phpcs:disable PSR1.Files.SideEffects
+\defined('_JEXEC') or die;
+// phpcs:enable PSR1.Files.SideEffects
+
 /**
- * Empty Interface for a taggable Table class as a placeholder for extensions that need compatibility between Joomla
- * Note: This is an empty placeholder to ease transition to the new system in 4.0. In 4.x this interface will contain
- * 4 methods (these aren't included as they contain return typehints which would unncessarily increase the minimum PHP
- * version required to use this interface).
+ * Interface for a taggable Table class
  *
  * @since  3.10.0
  */
 interface TaggableTableInterface extends TableInterface
 {
+    /**
+     * Get the type alias for the tags mapping table
+     *
+     * The type alias generally is the internal component name with the
+     * content type. Ex.: com_content.article
+     *
+     * @return  string  The alias as described above
+     *
+     * @since   4.0.0
+     */
+    public function getTypeAlias();
+
+    /**
+     * Get the tags helper
+     *
+     * @return  ?TagsHelper  The tags helper object
+     *
+     * @since   4.0.0
+     */
+    public function getTagsHelper(): ?TagsHelper;
+
+    /**
+     * Set the tags helper
+     *
+     * @param   TagsHelper  $tagsHelper  The tags helper object
+     *
+     * @return  void
+     *
+     * @since   4.0.0
+     */
+    public function setTagsHelper(TagsHelper $tagsHelper): void;
+
+    /**
+     * Clears a set tags helper
+     *
+     * @return  void
+     *
+     * @since   4.0.0
+     */
+    public function clearTagsHelper(): void;
 }

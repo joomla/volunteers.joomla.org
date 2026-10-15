@@ -4,7 +4,7 @@
  * @subpackage  Editor
  *
  * @copyright   Copyright (C) 2005 - 2020 Open Source Matters, Inc. All rights reserved.
- * @copyright   Copyright (c) 2009-2024 Ryan Demmer. All rights reserved
+ * @copyright   Copyright (c) 2009-2026 Ryan Demmer. All rights reserved
  * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
 
@@ -25,11 +25,15 @@ class WFEditorPlugin extends CMSObject
     // Editor Plugin instance
     private static $instance;
 
-    // array of alerts
-    private $_alerts = array();
-
     // plugin name
     protected $name = '';
+
+    /**
+     * Request methods that remain available when the plugin is restricted.
+     *
+     * @var array
+     */
+    protected $core_methods = array();
 
     /**
      * Constructor activating the default information of the class.
@@ -174,7 +178,6 @@ class WFEditorPlugin extends CMSObject
 
     protected function initialize()
     {
-        $app = Factory::getApplication();
         $wf = WFApplication::getInstance();
 
         $version = $this->getVersion();
@@ -204,6 +207,7 @@ class WFEditorPlugin extends CMSObject
             'version' => $version,
             'title' => Text::_('WF_' . strtoupper($this->getName() . '_TITLE')),
             'name' => $name,
+            'caller' => $this->get('caller'),
             'language' => WFLanguage::getTag(),
             'direction' => $this->isRtl() ? 'rtl' : 'ltr',
             'compress_javascript' => $this->getParam('editor.compress_javascript', 0),
@@ -217,8 +221,59 @@ class WFEditorPlugin extends CMSObject
         Factory::getApplication()->triggerEvent('onWfPluginInit', array($this));
     }
 
+    /**
+     * Check whether this plugin instance is restricted.
+     *
+     * A plugin is restricted when its own dialog is not used: replaced by one the editor
+     * renders itself, eg: a basic dialog, or not shown at all. Only the methods listed in
+     * getCoreMethods() remain available. Plugins opt in by overriding this method.
+     *
+     * @return bool
+     */
+    protected function isRestricted()
+    {
+        return false;
+    }
+
+    /**
+     * Get the request methods that remain available when the plugin is restricted.
+     *
+     * @return array
+     */
+    protected function getCoreMethods()
+    {
+        return $this->core_methods;
+    }
+
+    /**
+     * Restrict the request to the plugin's core methods.
+     *
+     * @return void
+     *
+     * @throws Exception If the requested method is not allowed
+     */
+    private function checkRestricted()
+    {
+        if ($this->isRestricted() === false) {
+            return;
+        }
+
+        $method = WFRequest::getInstance()->getMethod();
+
+        // a task with no method, eg: display, is never available when restricted
+        if (!in_array($method, $this->getCoreMethods(), true)) {
+            throw new Exception(Text::_('JERROR_ALERTNOAUTHOR'), 403);
+        }
+    }
+
     public function execute($task)
     {
+        // check session on get request
+        Session::checkToken('request') or jexit(Text::_('JINVALID_TOKEN'));
+
+        // a restricted plugin only allows the methods it declares
+        $this->checkRestricted();
+
         if ($task == 'loadlanguages') {
             return $this->loadlanguages();
         }
@@ -421,10 +476,15 @@ class WFEditorPlugin extends CMSObject
 
                 // json associative array
                 if (is_array($attribute) && array_key_exists('name', $attribute)) {
-                    extract($attribute);
+                    $name = $attribute['name'];
+                    $value = $attribute['value'] ?? '';
                 }
 
                 if ($name && $value !== '') {
+                    if (!preg_match('#^[a-zA-Z][a-zA-Z0-9_-]*$#', $name)) {
+                        continue;
+                    }
+
                     $value = trim($value, " \t\n\r\0\x0B'\"");
                     $value = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
                     $defaults[$name] = $value;

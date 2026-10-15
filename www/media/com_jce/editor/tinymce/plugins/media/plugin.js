@@ -1,16 +1,14 @@
-/* jce - 2.9.99.5 | 2026-06-03 | https://www.joomlacontenteditor.net | Source: https://github.com/widgetfactory/jce | Copyright (C) 2006 - 2026 Ryan Demmer. All rights reserved | GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html */
+/* jce - 2.9.99.12 | 2026-10-07 | https://www.joomlacontenteditor.net | Source: https://github.com/widgetfactory/jce | Copyright (C) 2006 - 2026 Ryan Demmer. All rights reserved | GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html; see LICENSE.txt */
 !function() {
-    var each = tinymce.each, extend = tinymce.extend, Node = tinymce.html.Node, VK = tinymce.VK, Serializer = tinymce.html.Serializer, DomParser = tinymce.html.DomParser, SaxParser = tinymce.html.SaxParser, DOM = tinymce.DOM;
-    function indexOf(array, item) {
-        for (var i = 0; i < array.length; i++) if (array[i] === item) return i;
-        return -1;
-    }
-    String.prototype.startsWith || (String.prototype.startsWith = function(search, pos) {
-        return this.substring(pos = pos || 0, pos + search.length) === search;
-    });
-    var htmlSchema = new tinymce.html.Schema({
+    var each = tinymce.each, extend = tinymce.extend, Node = tinymce.html.Node, VK = tinymce.VK, Serializer = tinymce.html.Serializer, DomParser = tinymce.html.DomParser, DOM = tinymce.DOM, htmlSchema = new tinymce.html.Schema({
         schema: "mixed"
-    }), transparentSrc = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+    }), sanitizeSettings = {
+        schema: "mixed",
+        invalid_elements: "script,noscript,svg",
+        forced_root_block: !1,
+        verify_html: !0,
+        validate: !0
+    }, sanitizeSchema = new tinymce.html.Schema(sanitizeSettings), transparentSrc = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
     function isNonEditable(ed, node) {
         ed = ed.settings.noneditable_noneditable_class || "mceNonEditable";
         return node.attr ? node.hasClass(ed) : DOM.hasClass(node, ed);
@@ -212,7 +210,7 @@
         if (!node.attr("sandbox")) {
             var defaultAttributes = getMediaProps(0, {
                 src: src
-            }, isSupportedMedia(editor, src));
+            }, isSupportedMedia(editor, src, "", node.name));
             if (!1 === defaultAttributes.sandbox ? node.attr("sandbox", null) : node.attr("sandbox", defaultAttributes.sandbox || ""), 
             isLocalUrl(editor, src)) node.attr("sandbox", null); else if (!1 === editor.getParam("media_iframes_sandbox", !0)) node.attr("sandbox", null); else try {
                 var url = new URL(src), host = url.host.toLowerCase(), path = url.pathname.toLowerCase(), cleanHost = 0 === host.indexOf("www.") ? host.substring(4) : host, site = cleanHost + path;
@@ -259,17 +257,10 @@
     function isSupportedUrl(editor, tag, url) {
         return !editor.settings["media_" + tag + "_allow_local"] || isLocalUrl(editor, url);
     }
-    function isSupportedMedia(editor, url, type) {
-        var ext = (url = stripQuery(url = url || "")).split(".").pop().toLowerCase(), audioExts = [ "mp3", "ogg", "webm", "wav", "m4a", "aiff" ], videoExts = [ "mp4", "ogv", "ogg", "webm", "mov", "qt", "mpg", "mpeg", "divx" ];
-        if ((type = (type || "").toLowerCase()).startsWith("audio/")) {
-            if (-1 === indexOf(audioExts, ext)) return !1;
-            if (isValidElement(editor, "audio") && isSupportedUrl(editor, "audio", url)) return "audio";
-        }
-        if (type.startsWith("video/")) {
-            if (-1 === indexOf(videoExts, ext)) return !1;
-            if (isValidElement(editor, "video") && isSupportedUrl(editor, "video", url)) return "video";
-        }
-        return -1 !== indexOf(videoExts, ext) && isValidElement(editor, "video") && isSupportedUrl(editor, "video", url) ? "video" : -1 !== indexOf(audioExts, ext) && isValidElement(editor, "audio") && isSupportedUrl(editor, "audio", url) ? "audio" : -1 !== indexOf([ "swf", "pdf" ], ext) && isValidElement(editor, "object") && isSupportedUrl(editor, "object", url) ? "object" : !!isSupportedIframe(editor, url) && "iframe";
+    function isSupportedMedia(editor, url, type, name) {
+        var ext = (url = stripQuery(url = url || "")).split(".").pop().toLowerCase(), audioExts = (type = (type || "").toLowerCase(), 
+        [ "mp3", "ogg", "oga", "opus", "webm", "wav", "m4a", "aac", "flac", "aiff" ]), videoExts = [ "mp4", "m4v", "ogg", "ogv", "webm", "mov", "qt", "mpg", "mpeg", "divx" ];
+        return ("audio" === (name = (name || "").toLowerCase()) || "video" === name) && audioExts.includes(ext) && videoExts.includes(ext) ? !(!isValidElement(editor, name) || !isSupportedUrl(editor, name, url)) && name : type.startsWith("audio/") ? !(!isValidElement(editor, "audio") || !isSupportedUrl(editor, "audio", url)) && "audio" : type.startsWith("video/") ? !(!isValidElement(editor, "video") || !isSupportedUrl(editor, "video", url)) && "video" : [ "application/x-shockwave-flash", "application/pdf" ].includes(type) && isValidElement(editor, "object") && isSupportedUrl(editor, "object", url) ? "object" : videoExts.includes(ext) && isValidElement(editor, "video") && isSupportedUrl(editor, "video", url) ? "video" : audioExts.includes(ext) && isValidElement(editor, "audio") && isSupportedUrl(editor, "audio", url) ? "audio" : [ "swf", "pdf" ].includes(ext) && isValidElement(editor, "object") && isSupportedUrl(editor, "object", url) ? "object" : !!isSupportedIframe(editor, url) && "iframe";
     }
     var isAbsoluteUrl = function(url) {
         return !!url && (0 === url.indexOf("//") || 0 < url.indexOf("://"));
@@ -279,53 +270,39 @@
     }, validateIframe = function(editor, node) {
         var src = node.attr("src");
         return !!isNonEditable(editor, node) || 0 !== node.attributes.length && isSupportedIframe(editor, src);
-    }, sanitize = function(editor, html) {
-        var blocked, writer = new tinymce.html.Writer();
-        return new tinymce.html.SaxParser({
-            validate: !1,
-            allow_conditional_comments: !1,
-            special: "script,noscript",
-            comment: function(text) {
-                writer.comment(text);
-            },
-            cdata: function(text) {
-                writer.cdata(text);
-            },
-            text: function(text, raw) {
-                writer.text(text, raw);
-            },
-            start: function(name, attrs, empty) {
-                if (blocked = !0, "script" !== name && "noscript" !== name && "svg" !== name && !(attrs.map && "bookmark" == attrs.map["data-mce-type"] || attrs.map["data-mce-bogus"])) {
-                    for (var i = attrs.length - 1; 0 <= i; i--) {
-                        var attrName = attrs[i].name;
-                        0 === attrName.indexOf("on") && (delete attrs.map[attrName], 
-                        attrs.splice(i, 1)), "style" === attrName && (attrs[i].value = editor.dom.serializeStyle(editor.dom.parseStyle(attrs[i].value), name));
-                    }
-                    writer.start(name, attrs, empty), blocked = !1;
-                }
-            },
-            end: function(name) {
-                blocked || writer.end(name);
-            }
-        }, htmlSchema).parse(html), writer.getContent();
+    };
+    var sanitize = function(editor, html, context) {
+        html = new DomParser(sanitizeSettings, sanitizeSchema).parse(html, {
+            context: context || "div"
+        });
+        return function eachNode(node, callback) {
+            each(node.children(), function(child) {
+                eachNode(child, callback), callback(child);
+            });
+        }(html, function(node) {
+            var style;
+            "bookmark" === node.attr("data-mce-type") || node.attr("data-mce-bogus") ? node.remove() : (style = node.attr("style")) && node.attr("style", editor.dom.serializeStyle(editor.dom.parseStyle(style), node.name) || null);
+        }), new Serializer(sanitizeSettings, sanitizeSchema).serialize(html);
     };
     function parseHTML(value) {
-        var nodes = [], settings = (new SaxParser({
-            start: function(name, attrs) {
-                ("source" !== name || !attrs.map) && "param" !== name && "embed" !== name && "track" !== name || nodes.push({
-                    name: name,
-                    value: attrs.map
-                });
-            }
-        }).parse(value), {
+        var nodes = [], template = document.createElement("template"), value = (template.innerHTML = value, 
+        each(template.content.querySelectorAll("source,param,embed,track"), function(elm) {
+            var attribs = {};
+            each(elm.attributes, function(attr) {
+                attribs[attr.name] = attr.value;
+            }), nodes.push({
+                name: elm.nodeName.toLowerCase(),
+                value: attribs
+            }), elm.remove();
+        }), {
             invalid_elements: "source,param,embed,track",
             forced_root_block: !1,
             verify_html: !0,
             validate: !0
-        }), schema = new tinymce.html.Schema(settings), settings = new Serializer(settings, schema).serialize(new DomParser(settings, schema).parse(value));
+        }), schema = new tinymce.html.Schema(value), value = new Serializer(value, schema).serialize(new DomParser(value, schema).parse(template.innerHTML));
         return nodes.push({
             name: "html",
-            value: settings
+            value: value
         }), nodes;
     }
     function stripQuery(value) {
@@ -370,6 +347,14 @@
     function createReplacementNode(editor, node) {
         node = new tinymce.html.Serializer().serialize(node);
         return editor.dom.create("div", {}, node).firstChild;
+    }
+    function findMediaNode(parent, tag) {
+        return parent && tag ? (tag = tag.toLowerCase(), parent.firstChild && parent.firstChild.name === tag ? parent.firstChild : parent.getAll(tag)[0] || null) : null;
+    }
+    function previewToPlaceholder(editor, node) {
+        var obj = new tinymce.html.DomParser({}, editor.schema).parse(node.innerHTML);
+        return (obj = findMediaNode(obj, node.getAttribute("data-mce-object")) || obj.firstChild) ? (obj = createReplacementNode(editor, createPlaceholderNode(editor, obj)), 
+        editor.dom.replace(obj, node), obj) : node;
     }
     var createPreviewNode = function(editor, node) {
         var name = node.name, msg = (msg = editor.getLang("media.preview_hint", "Click to activate, ALT + Click to toggle placeholder")).replace(/%s/g, "ALT"), src = (node.attr("autoplay") && (node.attr("data-mce-p-autoplay", node.attr("autoplay")), 
@@ -422,23 +407,31 @@
         params.remove()), attribs;
     }
     function nodeToMedia(editor, node) {
-        var elm, parent, embed, tag = node.attr("data-mce-object"), node = (isResponsiveMedia(node) && ((parent = node.parent).attr("contenteditable", null), 
+        var elm, parent, tag = node.attr("data-mce-object");
+        if (!tag) return null;
+        if (tag = tag.toLowerCase(), ![ "object", "embed", "video", "audio", "iframe" ].includes(tag)) return null;
+        isResponsiveMedia(node) && ((parent = node.parent).attr("contenteditable", null), 
         parent.attr("data-mce-contenteditable", null)), elm = new Node(tag, 1), 
-        parent = processNodeAttributes(editor, tag, node), /\s*mce-object-preview\s*/.test(node.attr("class")) && node.firstChild && node.firstChild.name === tag && (node = node.firstChild), 
-        parent = extend(parent, processNodeAttributes(editor, tag, node)), elm.attr(parent), 
-        node.attr("data-mce-html"));
-        return node && (node = parseHTML(unescape(node)), each(node, function(child) {
+        parent = processNodeAttributes(editor, tag, node), /\s*mce-object-preview\s*/.test(node.attr("class")) && (media = findMediaNode(node, tag)) && (node = media), 
+        parent = extend(parent, processNodeAttributes(editor, tag, node)), elm.attr(parent);
+        (media = node.attr("data-mce-html")) && (node = parseHTML(unescape(media)), 
+        each(node, function(child) {
             var inner;
-            "html" === child.name ? ((inner = new Node("#text", 3)).raw = !0, inner.value = sanitize(editor, child.value), 
+            "html" === child.name ? ((inner = new Node("#text", 3)).raw = !0, inner.value = sanitize(editor, child.value, tag), 
             elm.append(inner)) : ((inner = new Node(child.name, 1)).shortEnded = !0, 
             each(child.value, function(val, key) {
                 htmlSchema.isValid(inner.name, key) && inner.attr(key, val);
             }), elm.append(inner), "source" == inner.name && inner.attr("src") == elm.attr("src") && elm.attr("src", null));
-        })), elm.attr("data-mce-html", null), "object" === tag && 0 === elm.getAll("embed").length && "application/x-shockwave-flash" != (node = elm.attr("type")) && "application/pdf" != node && ((embed = new Node("embed", 1)).shortEnded = !0, 
+        })), elm.attr("data-mce-html", null), "object" === tag && 0 === elm.getAll("embed").length && "application/x-shockwave-flash" != (node = elm.attr("type")) && "application/pdf" != node && elm.attributes.length && ((embed = new Node("embed", 1)).shortEnded = !0, 
         each(parent, function(value, name) {
             "data" === name && embed.attr("src", value), htmlSchema.isValid("embed", name) && embed.attr(name, value);
-        }), elm.append(embed)), "iframe" === tag && updateSandbox(editor, elm), 
-        elm;
+        }), elm.append(embed)), "iframe" === tag && updateSandbox(editor, elm);
+        var embed, node = {
+            validate: editor.settings.validate,
+            sanitize_html: editor.settings.sanitize_html,
+            allow_event_attributes: !!editor.settings.allow_event_attributes
+        }, media = new Serializer(node, editor.schema).serialize(elm);
+        return new DomParser(node, editor.schema).parse(media).getAll(tag)[0] || elm;
     }
     function convertMediaToPlaceholder(editor, node) {
         var media_live_embed = editor.settings.media_live_embed, strict_embed = !1 !== editor.settings.media_strict_embed;
@@ -464,16 +457,16 @@
                     var params = node.getAll("param");
                     if (params.length) for (j = 0; j < params.length; j++) {
                         var param = params[j];
-                        param.attr("movie") && (src = param.attr("value"));
+                        "movie" === param.attr("name") && (src = param.attr("value"));
                     }
-                    src || (embed = node.getAll("embed")).length && (src = embed[0].attr("src"), 
-                    type = embed[0].attr("type") || type);
+                    var embed = node.getAll("embed");
+                    embed.length && (src = src || embed[0].attr("src"), type = type || embed[0].attr("type"));
                 }
             }
             if (!src) return media_live_embed = !1;
             if (!isSupportedUrl(editor, node.name, src)) return node.remove(), !1;
             if (strict_embed) {
-                var embed, newName = isSupportedMedia(editor, src, type);
+                var newName = isSupportedMedia(editor, src, type, node.name);
                 if (!newName) return node.remove(), !1;
                 if ("iframe" == newName && !isSupportedProvider(editor, src)) return node.remove(), 
                 !1;
@@ -481,7 +474,7 @@
                     editor.schema.isValidChild(newName, elm.name) || elm.remove();
                 }), node.name = newName, node.attr("src", src), "object" == newName && (node.attr("data", src), 
                 node.attr("src", null), embed = stripQuery(src).split(".").pop(), 
-                node.attr("type", mimes[embed] || "application/octet-stream"));
+                node.attr("type", mimes[embed] || type || "application/octet-stream"));
             }
         }
         !media_live_embed || isObjectEmbed(node.name) || isResponsiveMedia(node) || isNonEditable(editor, node) ? isWithinEmbed(node) || (isResponsiveMedia(node) && node.parent.attr({
@@ -492,7 +485,7 @@
     var retainAttributesAndInnerHtml = function(editor, sourceNode, targetNode) {
         var attrName, attrValue, attribs, ai, innerHtml, boolAttrs = editor.schema.getBoolAttrs(), src = sourceNode.attr("src"), style = (src && (defaultAttributes = getMediaProps(0, {
             src: src
-        }, isSupportedMedia(editor, src)), each(defaultAttributes, function(val, name) {
+        }, isSupportedMedia(editor, src, "", sourceNode.name)), each(defaultAttributes, function(val, name) {
             tinymce.is(sourceNode.attr(name)) || name in boolAttrs || ("style" === name && tinymce.is(val, "object") && (val = editor.dom.serializeStyle(val)), 
             sourceNode.attr(name, val));
         }), updateSandbox(editor, sourceNode)), editor.dom.parseStyle(sourceNode.attr("style"))), defaultAttributes = sourceNode.attr("width") || style.width || "", height = sourceNode.attr("height") || style.height || "", style = editor.dom.parseStyle(sourceNode.attr("style"));
@@ -522,13 +515,13 @@
                 sourceNode.attr(na, null);
             }
         }), ai = (attribs = sourceNode.attributes).length; ai--; ) if (attrName = attribs[ai].name, 
-        attrValue = attribs[ai].value, "data-mce-html" === attrName) targetNode.attr(attrName, attrValue); else if ("data-mce-clipboard-media" === attrName) targetNode.attr(attrName, attrValue); else if (-1 === attrName.indexOf("data-mce") || -1 !== attrName.indexOf("data-mce-p-")) {
+        attrValue = attribs[ai].value, "data-mce-html" === attrName) targetNode.attr(attrName, attrValue); else if ("data-mce-clipboard-media" === attrName) targetNode.attr(attrName, attrValue); else if (0 === attrName.indexOf("data-mce-on") && editor.settings.allow_event_attributes) targetNode.attr("data-mce-p-" + attrName.substring(9), attrValue); else if (-1 === attrName.indexOf("data-mce") || -1 !== attrName.indexOf("data-mce-p-")) {
             if ("img" === targetNode.name) {
                 if ("data-mce-p-autoplay" === attrName) {
                     targetNode.attr(attrName, attrValue);
                     continue;
                 }
-                htmlSchema.isValid("img", attrName) && "src" != attrName || (attrName = "data-mce-p-" + attrName);
+                0 === attrName.indexOf("data-mce-p-") || htmlSchema.isValid("img", attrName) && "src" != attrName || (attrName = "data-mce-p-" + attrName);
             }
             -1 !== (attrName = 0 === attrName.indexOf("on") && editor.settings.allow_event_attributes ? "data-mce-p-" + attrName : attrName).indexOf("-") ? targetNode.attr(attrName, attrValue) : (htmlSchema.isValid(targetNode.name, attrName) && targetNode.attr(attrName, attrValue), 
             tinymce.is(boolAttrs[attrName]) && "false" == attrValue && targetNode.attr(attrName, null), 
@@ -551,7 +544,7 @@
             }), !1;
         })), targetNode.attr("data-mce-p-type", height.type)), (innerHtml = sourceNode.firstChild ? new tinymce.html.Serializer({
             inner: !0
-        }).serialize(sourceNode) : innerHtml) && (targetNode.attr("data-mce-html", escape(sanitize(editor, innerHtml))), 
+        }).serialize(sourceNode) : innerHtml) && (targetNode.attr("data-mce-html", escape(sanitize(editor, innerHtml, sourceNode.name))), 
         targetNode.empty());
     }, isWithinEmbed = function(node) {
         for (;node = node.parent; ) if (node.attr("data-mce-object")) return !0;
@@ -617,10 +610,8 @@
         function objectActivate(ed, e) {
             var node = isMediaObject(e.target);
             node && !isNonEditable(ed, node) && (ed.selection.select(node), ed.dom.getAttrib(node, "data-mce-selected") && node.setAttribute("data-mce-selected", "2"), 
-            "mousedown" === e.type && e.altKey && "IMG" !== node.nodeName && (e.target = function(editor, node) {
-                var ifr = new tinymce.html.DomParser({}, editor.schema).parse(node.innerHTML).firstChild, ifr = createReplacementNode(editor, createPlaceholderNode(editor, ifr));
-                return editor.dom.replace(ifr, node), ifr;
-            }(ed, node)), e.stopImmediatePropagation(), e.preventDefault());
+            "mousedown" === e.type && e.altKey && "IMG" !== node.nodeName && (e.target = previewToPlaceholder(ed, node)), 
+            e.stopImmediatePropagation(), e.preventDefault());
         }
         function setClipboardData(ed, e) {
             var node, e = e.clipboardData;
@@ -667,8 +658,8 @@
             })), ed.serializer.addAttributeFilter("data-mce-object", function(nodes, name) {
                 for (var node, i = nodes.length; i--; ) (node = nodes[i]).parent && !function(editor, node) {
                     editor = nodeToMedia(editor, node);
-                    isObjectEmbed(editor.name) || node.empty(), node.replace(editor), 
-                    node.empty();
+                    editor ? (isObjectEmbed(editor.name) || node.empty(), node.replace(editor), 
+                    node.empty()) : node.remove();
                 }(ed, node);
             }), ed.dom.bind(ed.getDoc(), "touchstart", function(e) {
                 objectActivate(ed, e);

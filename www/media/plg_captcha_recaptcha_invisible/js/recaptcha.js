@@ -1,37 +1,31 @@
 /**
- * @package		Joomla.JavaScript
- * @copyright	(C) 2018 Open Source Matters, Inc. <https://www.joomla.org>
- * @license		GNU General Public License version 2 or later; see LICENSE.txt
+ * @package     Joomla.JavaScript
+ * @copyright   (C) 2019 Open Source Matters, Inc. <https://www.joomla.org>
+ * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
-window.JoomlaInitReCaptchaInvisible = function() {
-	'use strict';
 
-	var items = document.getElementsByClassName('g-recaptcha'),
-	    item,
-	    option_keys = ['sitekey', 'badge', 'size', 'tabindex', 'callback', 'expired-callback', 'error-callback'],
-	    options = {},
-	    option_key_fq
-	;
+((window, document) => {
 
-	for (var i = 0, l = items.length; i < l; i++) {
-		item = items[i];
-		if (item.dataset) {
-			options = item.dataset;
-		} else {
-			for (var j = 0; j < option_keys.length; j++) {
-				option_key_fq = ('data-' + option_keys[j]);
-				if (item.hasAttribute(option_key_fq)) {
-					options[option_keys[j]] = item.getAttribute(option_key_fq);
-				}
-			}
-		}
+  window.JoomlainitReCaptchaInvisible = () => {
+    const optionKeys = ['sitekey', 'badge', 'size', 'tabindex', 'callback', 'expired-callback', 'error-callback'];
+    document.querySelectorAll('.g-recaptcha').forEach(element => {
+      let options = {};
+      if (element.dataset) {
+        options = element.dataset;
+      } else {
+        optionKeys.forEach(key => {
+          const optionKeyFq = `data-${optionKeys[key]}`;
+          if (element.hasAttribute(optionKeyFq)) {
+            options[optionKeys[key]] = element.getAttribute(optionKeyFq);
+          }
+        });
+      }
 
-		// Set the widget id of the recaptcha item
-		item.setAttribute(
-			'data-recaptcha-widget-id',
-			grecaptcha.render(item, options)
-		);
-		// Execute the invisible reCAPTCHA
-		grecaptcha.execute(item.getAttribute('data-recaptcha-widget-id'));
-	}
-};
+      // Set the widget id of the recaptcha item
+      element.setAttribute('data-recaptcha-widget-id', window.grecaptcha.render(element, options));
+
+      // Execute the invisible reCAPTCHA
+      window.grecaptcha.execute(element.getAttribute('data-recaptcha-widget-id'));
+    });
+  };
+})(window, document);

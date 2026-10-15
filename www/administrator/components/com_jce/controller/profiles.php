@@ -5,7 +5,7 @@
  * @subpackage  Admin
  *
  * @copyright   Copyright (C) 2005 - 2023 Open Source Matters, Inc. All rights reserved.
- * @copyright   Copyright (c) 2009-2024 Ryan Demmer. All rights reserved
+ * @copyright   Copyright (c) 2009-2026 Ryan Demmer. All rights reserved
  * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
 \defined('_JEXEC') or die;
@@ -20,6 +20,70 @@ use Joomla\CMS\Session\Session;
 class JceControllerProfiles extends AdminController
 {
     /**
+     * Throw unless the current user holds the given com_jce action.
+     *
+     * Mirrors AuthoriseTrait::assertAuthorised() in 3.0, which is a trait because more
+     * than one controller uses it there.
+     *
+     * @param string $action The com_jce access action, eg: "jce.profiles"
+     *
+     * @return void
+     *
+     * @throws Exception
+     */
+    private function assertAuthorised($action)
+    {
+        if (!Factory::getUser()->authorise($action, 'com_jce')) {
+            throw new Exception(Text::_('JERROR_ALERTNOAUTHOR'), 403);
+        }
+    }
+
+    public function publish()
+    {
+        Session::checkToken() or jexit(Text::_('JINVALID_TOKEN'));
+
+        $this->assertAuthorised('jce.profiles');
+
+        return parent::publish();
+    }
+
+    public function delete()
+    {
+        Session::checkToken() or jexit(Text::_('JINVALID_TOKEN'));
+
+        $this->assertAuthorised('jce.profiles');
+
+        return parent::delete();
+    }
+
+    public function saveorder()
+    {
+        Session::checkToken() or jexit(Text::_('JINVALID_TOKEN'));
+
+        $this->assertAuthorised('jce.profiles');
+
+        return parent::saveorder();
+    }
+
+    public function reorder()
+    {
+        Session::checkToken() or jexit(Text::_('JINVALID_TOKEN'));
+
+        $this->assertAuthorised('jce.profiles');
+
+        return parent::reorder();
+    }
+
+    public function checkin()
+    {
+        Session::checkToken() or jexit(Text::_('JINVALID_TOKEN'));
+
+        $this->assertAuthorised('jce.profiles');
+
+        return parent::checkin();
+    }
+
+    /**
      * Method to import profile data from an XML file.
      *
      * @since   3.0
@@ -29,11 +93,7 @@ class JceControllerProfiles extends AdminController
         // Check for request forgeries
         Session::checkToken() or jexit(Text::_('JINVALID_TOKEN'));
 
-        $user = Factory::getUser();
-
-        if (!$user->authorise('core.manage', 'com_jce')) {
-            throw new Exception(Text::_('JERROR_ALERTNOAUTHOR'), 403);
-        }
+        $this->assertAuthorised('jce.profiles');
 
         $app = Factory::getApplication();
 
@@ -60,11 +120,7 @@ class JceControllerProfiles extends AdminController
         // Check for request forgeries
         Session::checkToken('get') or jexit(Text::_('JINVALID_TOKEN'));
 
-        $user = Factory::getUser();
-
-        if (!$user->authorise('core.manage', 'com_jce')) {
-            throw new Exception(Text::_('JERROR_ALERTNOAUTHOR'), 403);
-        }
+        $this->assertAuthorised('jce.profiles');
 
         $model = $this->getModel('profiles');
 
@@ -82,18 +138,9 @@ class JceControllerProfiles extends AdminController
         // Check for request forgeries
         Session::checkToken() or jexit(Text::_('JINVALID_TOKEN'));
 
-        $user = Factory::getUser();
-
-        if (!$user->authorise('core.manage', 'com_jce')) {
-            throw new Exception(Text::_('JERROR_ALERTNOAUTHOR'), 403);
-        }
+        $this->assertAuthorised('jce.profiles');
 
         $cid = (array) $this->input->get('cid', array(), 'int');
-
-        // Access checks.
-        if (!$user->authorise('core.create', 'com_jce')) {
-            throw new Exception(Text::_('JLIB_APPLICATION_ERROR_CREATE_NOT_PERMITTED'));
-        }
 
         if (empty($cid)) {
             throw new Exception(Text::_('No Item Selected'));
@@ -117,18 +164,9 @@ class JceControllerProfiles extends AdminController
         // Check for request forgeries
         Session::checkToken() or jexit(Text::_('JINVALID_TOKEN'));
 
-        $user = Factory::getUser();
-
-        if (!$user->authorise('core.manage', 'com_jce')) {
-            throw new Exception(Text::_('JERROR_ALERTNOAUTHOR'), 403);
-        }
+        $this->assertAuthorised('jce.profiles');
         
         $ids = (array) $this->input->get('cid', array(), 'int');
-
-        // Access checks.
-        if (!$user->authorise('core.create', 'com_jce')) {
-            throw new Exception(Text::_('JLIB_APPLICATION_ERROR_CREATE_NOT_PERMITTED'));
-        }
 
         if (empty($ids)) {
             throw new Exception(Text::_('No Item Selected'));

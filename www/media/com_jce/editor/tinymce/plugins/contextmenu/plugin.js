@@ -1,4 +1,4 @@
-/* jce - 2.9.99.5 | 2026-06-03 | https://www.joomlacontenteditor.net | Source: https://github.com/widgetfactory/jce | Copyright (C) 2006 - 2026 Ryan Demmer. All rights reserved | GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html */
+/* jce - 2.9.99.12 | 2026-10-07 | https://www.joomlacontenteditor.net | Source: https://github.com/widgetfactory/jce | Copyright (C) 2006 - 2026 Ryan Demmer. All rights reserved | GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html; see LICENSE.txt */
 !function() {
     var Event = tinymce.dom.Event, DOM = tinymce.DOM;
     tinymce.PluginManager.add("contextmenu", function(ed) {
@@ -16,7 +16,8 @@
         if (self.onContextMenu = new tinymce.util.Dispatcher(this), tinymce.isAndroid || tinymce.isIOS) return !1;
         function hide(ed, e) {
             e && 2 == e.button || self._menu && (self._menu.removeAll(), self._menu.destroy(), 
-            Event.remove(ed.getDoc(), "click", hideMenu), self._menu = null);
+            Event.remove(ed.getDoc(), "click", hideMenu), Event.remove(DOM.doc, "mousedown", hideMenu), 
+            self._menu = null);
         }
         hideMenu = function(e) {
             hide(ed, e);
@@ -51,9 +52,12 @@
                     title: "contextmenu.full",
                     icon: "justifyfull",
                     cmd: "JustifyFull"
-                }), self.onContextMenu.dispatch(self, m, e, col), m;
+                }), m.addSeparator(), self.onContextMenu.dispatch(self, m, e, col), 
+                m;
             }(ed, e).showMenu(e.clientX || e.pageX, e.clientY || e.pageY), Event.add(ed.getDoc(), "click", hideMenu), 
-            ed.nodeChanged());
+            Event.add(DOM.doc, "mousedown", function(e) {
+                e.target && e.target.closest(".mceMenu") || hideMenu(e);
+            }), ed.nodeChanged());
         }), ed.onRemove.add(function() {
             self._menu && self._menu.removeAll();
         }), ed.onMouseDown.add(hide), ed.onKeyDown.add(hide), ed.onKeyDown.add(function(ed, e) {

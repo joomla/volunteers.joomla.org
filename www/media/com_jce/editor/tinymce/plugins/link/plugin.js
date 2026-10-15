@@ -1,4 +1,4 @@
-/* jce - 2.9.99.5 | 2026-06-03 | https://www.joomlacontenteditor.net | Source: https://github.com/widgetfactory/jce | Copyright (C) 2006 - 2026 Ryan Demmer. All rights reserved | GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html */
+/* jce - 2.9.99.12 | 2026-10-07 | https://www.joomlacontenteditor.net | Source: https://github.com/widgetfactory/jce | Copyright (C) 2006 - 2026 Ryan Demmer. All rights reserved | GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html; see LICENSE.txt */
 !function() {
     function isAnchor(elm) {
         return elm && "a" === elm.nodeName.toLowerCase();
@@ -25,18 +25,24 @@
             return 1 === elm.nodeType && !isAnchor(elm) && !inlineTextElements[elm.nodeName.toLowerCase()];
         }).length;
     }
-    function getAnchorText(selection, anchorElm) {
+    function updateTextContent(elm, text) {
+        getAnchorText(null, elm) !== text && (elm = getTextNodes(elm)).length && (elm[0].nodeValue = text, 
+        tinymce.each(elm.slice(1), function(node) {
+            node.nodeValue = "";
+        }));
+    }
+    var getAnchorText = function(selection, anchorElm) {
         return (anchorElm ? anchorElm.innerText || anchorElm.textContent : selection.getContent({
             format: "text"
         })).replace(/\uFEFF/g, "");
-    }
-    function updateTextContent(elm, text) {
-        tinymce.each(elm.childNodes, function(node) {
-            3 == node.nodeType && "" !== node.nodeValue.trim() && (node.textContent = text);
-        });
-    }
+    }, getTextNodes = function(elm) {
+        var nodes = [], node = elm.firstChild;
+        if (node) for (var walker = new tinymce.dom.TreeWalker(node, elm); node; ) 3 == node.nodeType && "" !== node.nodeValue.trim() && nodes.push(node), 
+        node = walker.next();
+        return nodes;
+    };
     function createLink(ed, data) {
-        var text, node = ed.selection.getNode(), anchor = ed.dom.getParent(node, "a[href]"), params = ed.getParam("link", {});
+        var elms, text, node = ed.selection.getNode(), params = ed.getParam("link", {});
         (data = "string" == typeof data ? {
             url: data,
             text: data
@@ -48,9 +54,9 @@
             title: data.title || "",
             target: data.target || ""
         }, text = tinymce.extend(text, params.attributes || {}), ed.selection.isCollapsed() ? ed.execCommand("mceInsertContent", !1, ed.dom.createHTML("a", text, data.text)) : (text["data-mce-tmp"] = "1", 
-        ed.execCommand("mceInsertLink", !1, text), isAnchor(anchor) && updateTextContent(node, data.text), 
-        params = ed.dom.select('[data-mce-tmp="1"]'), each(params, function(elm) {
-            elm.removeAttribute("data-mce-tmp"), updateTextContent(elm, data.text);
+        ed.execCommand("mceInsertLink", !1, text), elms = ed.dom.select('[data-mce-tmp="1"]'), 
+        each(elms, function(elm) {
+            elm.removeAttribute("data-mce-tmp"), 1 === elms.length && updateTextContent(elm, data.text);
         })), ed.undoManager.add(), ed.nodeChanged()) : isAnchor(node) && ed.execCommand("unlink", !1);
     }
     tinymce.PluginManager.add("link", function(ed, url) {

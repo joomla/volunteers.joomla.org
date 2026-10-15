@@ -1,4 +1,4 @@
-/* jce - 2.9.99.5 | 2026-06-03 | https://www.joomlacontenteditor.net | Source: https://github.com/widgetfactory/jce | Copyright (C) 2006 - 2026 Ryan Demmer. All rights reserved | GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html */
+/* jce - 2.9.99.12 | 2026-10-07 | https://www.joomlacontenteditor.net | Source: https://github.com/widgetfactory/jce | Copyright (C) 2006 - 2026 Ryan Demmer. All rights reserved | GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html; see LICENSE.txt */
 !function() {
     var each = tinymce.each, DOM = tinymce.DOM, counter = 0;
     tinymce.PluginManager.add("spellchecker", function(ed, url) {
@@ -152,9 +152,9 @@
                 params: p
             };
             tinymce.util.XHR.send({
-                url: ed.getParam("site_url") + "index.php?option=com_jce&task=plugin.rpc&plugin=spellchecker&" + ed.settings.query,
-                data: "json=" + JSON.stringify(m),
-                content_type: "application/x-www-form-urlencoded",
+                url: ed.getParam("site_url") + "index.php?option=com_jce&task=plugin.xhr&plugin=spellchecker&" + ed.settings.query,
+                data: JSON.stringify(m),
+                content_type: "application/json",
                 success: function(o) {
                     var c, e;
                     try {

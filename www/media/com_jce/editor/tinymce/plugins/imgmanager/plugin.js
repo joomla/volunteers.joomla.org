@@ -1,4 +1,4 @@
-/* jce - 2.9.99.5 | 2026-06-03 | https://www.joomlacontenteditor.net | Source: https://github.com/widgetfactory/jce | Copyright (C) 2006 - 2026 Ryan Demmer. All rights reserved | GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html */
+/* jce - 2.9.99.12 | 2026-10-07 | https://www.joomlacontenteditor.net | Source: https://github.com/widgetfactory/jce | Copyright (C) 2006 - 2026 Ryan Demmer. All rights reserved | GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html; see LICENSE.txt */
 !function() {
     var DOM = tinymce.DOM, Event = tinymce.dom.Event, extend = tinymce.extend;
     function isMediaObject(node) {
@@ -12,7 +12,7 @@
     }
     function getUploadURL(ed, file) {
         var data = getUploadConfig(ed);
-        return !!(data && data.filetypes && new RegExp(".(" + data.filetypes.join("|") + ")$", "i").test(file.name)) && ed.getParam("site_url") + "index.php?option=com_jce&task=plugin.display&plugin=image";
+        return !!(data && data.filetypes && new RegExp(".(" + data.filetypes.join("|") + ")$", "i").test(file.name)) && ed.getParam("site_url") + "index.php?option=com_jce&task=plugin.xhr&plugin=image";
     }
     tinymce.PluginManager.add("imgmanager", function(ed, url) {
         var self = this;
@@ -70,13 +70,13 @@
             n = isImage(n);
             cm.setDisabled("imgmanager", !n && !collapsed), cm.setActive("imgmanager", n);
         }), ed.onPreInit.add(function() {
-            var cm, form, urlCtrl, descriptionCtrl, stylesListCtrl, args, uploader, params = ed.getParam("imgmanager", {}), isMobile = window.matchMedia("(max-width: 600px)").matches;
-            !0 === (!0 === params.basic_dialog || isMobile) && (cm = ed.controlManager, 
-            form = cm.createForm("image_form"), !(args = {
+            var form, urlCtrl, descriptionCtrl, stylesListCtrl, args, uploader, params = ed.getParam("imgmanager", {}), isMobile = window.matchMedia("(max-width: 600px)").matches;
+            !0 === (!0 === params.basic_dialog || isMobile) && (isMobile = ed.controlManager, 
+            form = isMobile.createForm("image_form"), !(args = {
                 label: ed.getLang("dlg.url", "URL"),
                 name: "url",
                 clear: !0
-            }) !== params.basic_dialog_filebrowser && (params.basic_dialog_filebrowser || isMobile) && extend(args, {
+            }) !== params.basic_dialog_filebrowser && extend(args, {
                 picker: !0,
                 picker_label: "browse",
                 picker_icon: "image",
@@ -126,12 +126,12 @@
                         });
                     }
                 }
-            }), urlCtrl = cm.createUrlBox("image_url", args), form.add(urlCtrl), 
-            descriptionCtrl = cm.createTextBox("image_description", {
+            }), urlCtrl = isMobile.createUrlBox("image_url", args), form.add(urlCtrl), 
+            descriptionCtrl = isMobile.createTextBox("image_description", {
                 label: ed.getLang("dlg.description", "Description"),
                 name: "alt",
                 clear: !0
-            }), form.add(descriptionCtrl), !1 !== params.basic_dialog_classes && (stylesListCtrl = cm.createStylesBox("image_class", {
+            }), form.add(descriptionCtrl), !1 !== params.basic_dialog_classes && (stylesListCtrl = isMobile.createStylesBox("image_class", {
                 label: ed.getLang("image.class", "Classes"),
                 onselect: function() {},
                 name: "classes",

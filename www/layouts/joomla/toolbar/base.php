@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @package     Joomla.Site
  * @subpackage  Layout
@@ -9,7 +10,13 @@
 
 defined('_JEXEC') or die;
 
-?>
-<div class="btn-wrapper" <?php echo $displayData['id']; ?>>
-	<?php echo $displayData['action']; ?>
-</div>
+extract($displayData, EXTR_OVERWRITE);
+
+/**
+ * Layout variables
+ * -----------------
+ * @var  string  $action
+ * @var  array   $options
+ */
+
+echo $action;

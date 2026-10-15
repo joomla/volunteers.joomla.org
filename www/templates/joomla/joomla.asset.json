@@ -1,0 +1,142 @@
+{
+  "$schema": "https://developer.joomla.org/schemas/json-schema/web_assets.json",
+  "name": "joomla",
+  "version": "4.0.0",
+  "description": "This file contains details of the assets used by Joomla dot org template.",
+  "license": "GPL-2.0-or-later",
+  "assets": [
+    {
+      "name": "template.joomla.ltr",
+      "description": "The css file to be used when the site is left to right (LTR).",
+      "type": "style",
+      "uri": "template.min.css",
+      "version": "4.0.10",
+      "dependencies": [
+        "fontawesome"
+      ]
+    },
+    {
+      "name": "cdn.template.joomla.ltr",
+      "description": "The css file to be used when the site is left to right (LTR).",
+      "type": "style",
+      "uri": "https://cdn.joomla.org/template/css/template_4.0.10.min.css",
+      "dependencies": [
+        "fontawesome"
+      ]
+    },
+    {
+      "name": "template.joomla.rtl",
+      "description": "The css file to be used when the site is right to left (RTL).",
+      "type": "style",
+      "uri": "template-rtl.min.css",
+      "version": "4.0.10",
+      "dependencies": [
+        "fontawesome"
+      ]
+    },
+    {
+      "name": "cdn.template.joomla.rtl",
+      "description": "The CSS file to be used when the site is right to left (RTL).",
+      "type": "style",
+      "uri": "https://cdn.joomla.org/template/css/template-rtl_4.0.10.min.css",
+      "dependencies": [
+        "fontawesome"
+      ]
+    },
+    {
+      "name": "template.joomla.custom.ltr",
+      "description": "Custom CSS file for individual sites to override styles or inject extra styles when in LTR.",
+      "type": "style",
+      "uri": "custom.css",
+      "weight": 500,
+      "dependencies": [
+        "template.active",
+        "template.active.language"
+      ]
+    },
+    {
+      "name": "template.joomla.custom.rtl",
+      "description": "Custom CSS file for individual sites to override styles or inject extra styles when in RTL.",
+      "type": "style",
+      "uri": "custom-rtl.css",
+      "weight": 500,
+      "dependencies": [
+        "template.active",
+        "template.active.language"
+      ]
+    },
+    {
+      "name": "template.active.language",
+      "description": "An asset to allow language specific css, eg 'language/[lang-CODE]/[lang-CODE].css', to use it as a dependency to the active template",
+      "type": "style",
+      "uri": "",
+      "class": "LangActiveAssetItem",
+      "dependencies": [
+        "template.active"
+      ]
+    },
+    {
+      "name": "template.joomla",
+      "description": "The file containing the javascript for this template.",
+      "type": "script",
+      "uri": "media/templates/site/joomla/js/template.js",
+      "attributes" : {
+        "defer": true
+      },
+      "dependencies": [
+        "template.joomla.jscookie",
+        "template.joomla.blockadblock"
+      ]
+    },
+    {
+      "name": "template.active",
+      "description": "A dummy asset to allow extensions to use it as a dependency to the active template.",
+      "type": "script",
+      "uri": "",
+      "dependencies": [
+        "template.joomla"
+      ]
+    },
+    {
+      "name": "template.joomla.ltr",
+      "type": "preset",
+      "dependencies": [
+        "template.joomla.ltr#style",
+        "template.joomla#script"
+      ]
+    },
+    {
+      "name": "template.joomla.rtl",
+      "type": "preset",
+      "dependencies": [
+        "template.joomla.rtl#style",
+        "template.joomla#script"
+      ]
+    },
+    {
+      "name": "fontawesome",
+      "type": "style",
+      "uri": "system/joomla-fontawesome.min.css"
+    },
+    {
+      "name": "template.joomla.blockadblock",
+      "description": "The file containing the javascript for BlockAdBlock.",
+      "type": "script",
+      "uri": "media/templates/site/joomla/js/blockadblock.js",
+      "version": "3.2.1",
+      "attributes" : {
+        "defer": true
+      }
+    },
+    {
+      "name": "template.joomla.jscookie",
+      "description": "The file containing the javascript for JavaScript Cookie.",
+      "type": "script",
+      "uri": "media/templates/site/joomla/js/js.cookie.js",
+      "version": "2.1.4",
+      "attributes" : {
+        "defer": true
+      }
+    }
+  ]
+}

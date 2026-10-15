@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Joomla! Content Management System
  *
@@ -8,53 +9,52 @@
 
 namespace Joomla\CMS\Form\Field;
 
-defined('JPATH_PLATFORM') or die;
-
 use Joomla\CMS\Factory;
 use Joomla\CMS\Form\Form;
-use Joomla\CMS\Form\FormHelper;
 
-FormHelper::loadFieldClass('predefinedlist');
+// phpcs:disable PSR1.Files.SideEffects
+\defined('_JEXEC') or die;
+// phpcs:enable PSR1.Files.SideEffects
 
 /**
  * Field to show a list of available user active statuses
  *
  * @since  3.2
  */
-class UseractiveField extends \JFormFieldPredefinedList
+class UseractiveField extends PredefinedlistField
 {
-	/**
-	 * The form field type.
-	 *
-	 * @var		string
-	 * @since   3.2
-	 */
-	protected $type = 'UserActive';
+    /**
+     * The form field type.
+     *
+     * @var     string
+     * @since   3.2
+     */
+    protected $type = 'UserActive';
 
-	/**
-	 * Available statuses
-	 *
-	 * @var  array
-	 * @since  3.2
-	 */
-	protected $predefinedOptions = array(
-		'0'  => 'COM_USERS_ACTIVATED',
-		'1'  => 'COM_USERS_UNACTIVATED',
-	);
+    /**
+     * Available statuses
+     *
+     * @var  string[]
+     * @since  3.2
+     */
+    protected $predefinedOptions = [
+        '0' => 'COM_USERS_ACTIVATED',
+        '1' => 'COM_USERS_UNACTIVATED',
+    ];
 
-	/**
-	 * Method to instantiate the form field object.
-	 *
-	 * @param   Form  $form  The form to attach to the form field object.
-	 *
-	 * @since   1.7.0
-	 */
-	public function __construct($form = null)
-	{
-		parent::__construct($form);
+    /**
+     * Method to instantiate the form field object.
+     *
+     * @param   Form  $form  The form to attach to the form field object.
+     *
+     * @since   1.7.0
+     */
+    public function __construct($form = null)
+    {
+        parent::__construct($form);
 
-		// Load the required language
-		$lang = Factory::getLanguage();
-		$lang->load('com_users', JPATH_ADMINISTRATOR);
-	}
+        // Load the required language
+        $lang = Factory::getLanguage();
+        $lang->load('com_users', JPATH_ADMINISTRATOR);
+    }
 }

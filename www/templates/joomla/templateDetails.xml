@@ -1,34 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE install PUBLIC "-//Joomla! 2.5//DTD template 1.0//EN" "https://www.joomla.org/xml/dtd/2.5/template-install.dtd">
-<extension version="3.9" type="template" client="site" method="upgrade">
+<!DOCTYPE extension PUBLIC "-//Joomla! 2.5//DTD template 1.0//EN" "https://developer.joomla.org/xsd/v1/templateDetails.xsd">
+<extension type="template" client="site" method="upgrade">
 	<name>joomla</name>
-	<version>3.1.2-dev</version>
+	<version>4.0.10</version>
 	<creationDate>30-Aug-2016</creationDate>
-	<author>Kyle Ledbetter</author>
-	<authorEmail>kyle@kyleledbetter.com</authorEmail>
-	<copyright>Copyright (C) 2005 - 2021 Open Source Matters, Inc. All rights reserved.</copyright>
+	<author>Joomla Project</author>
+	<authorEmail>admin@joomla.org</authorEmail>
+	<copyright>Copyright (C) 2005 - 2023 Open Source Matters, Inc. All rights reserved.</copyright>
 	<description>TPL_JOOMLA_XML_DESCRIPTION</description>
 	<scriptfile>script.php</scriptfile>
+	<inheritable>1</inheritable>
 	<files>
 		<filename>LICENSE.txt</filename>
 		<filename>component.php</filename>
 		<filename>error.php</filename>
 		<filename>favicon.ico</filename>
+		<filename>joomla.asset.json</filename>
 		<filename>index.php</filename>
 		<filename>templateDetails.xml</filename>
 		<filename>template_preview.png</filename>
 		<filename>template_thumbnail.png</filename>
 		<folder>cdn</folder>
-		<folder>css</folder>
-		<folder>fonts</folder>
 		<folder>helpers</folder>
 		<folder>html</folder>
 		<folder>images</folder>
-		<folder>img</folder>
-		<folder>js</folder>
 		<folder>language</folder>
-		<folder>less</folder>
 	</files>
+	<media destination="templates/site/joomla" folder="media">
+		<folder>js</folder>
+		<folder>fonts</folder>
+		<folder>css</folder>
+	</media>
 	<positions>
 		<position>banner</position>
 		<position>debug</position>
@@ -71,19 +73,6 @@
 					type="radio"
 					label="TPL_JOOMLA_COOKIE_CONTROL_ACTIVE_LABEL"
 					description="TPL_JOOMLA_COOKIE_CONTROL_ACTIVE_DESC"
-					class="btn-group btn-group-yesno"
-					default="0"
-					filter="int"
-					>
-					<option value="0">JNO</option>
-					<option value="1">JYES</option>
-				</field>
-
-				<field
-					name="bs3Grid"
-					type="radio"
-					label="TPL_JOOMLA_BS3_GRID_LABEL"
-					description="TPL_JOOMLA_BS3_GRID_DESC"
 					class="btn-group btn-group-yesno"
 					default="0"
 					filter="int"
@@ -159,6 +148,23 @@
 					description="TPL_JOOMLA_OPENGRAPH_IMAGE_DESC"
 					default="https://cdn.joomla.org/images/joomla-org-og.jpg"
 					filter="url"
+				/>
+
+				<field
+					name="headerLogo"
+					type="url"
+					label="TPL_JOOMLA_HEADER_LOGO_LABEL"
+					description="TPL_JOOMLA_HEADER_LOGO_DESC"
+					default="https://cdn.joomla.org/images/joomla-colours-logo.svg"
+					filter="url"
+				/>
+
+				<field
+					name="customHeaderTitle"
+					type="text"
+					label="TPL_JOOMLA_CUSTOM_HEADER_TITLE_LABEL"
+					description="TPL_JOOMLA_CUSTOM_HEADER_TITLE_DESC"
+					default=""
 				/>
 
 				<field

@@ -1,10 +1,11 @@
 <?php
+
 /**
  * @package     JCE
  * @subpackage  Editor
  *
  * @copyright   Copyright (C) 2005 - 2020 Open Source Matters, Inc. All rights reserved.
- * @copyright   Copyright (c) 2009-2024 Ryan Demmer. All rights reserved
+ * @copyright   Copyright (c) 2009-2026 Ryan Demmer. All rights reserved
  * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
 
@@ -466,13 +467,19 @@ class WFDocument extends CMSObject
         $app = Factory::getApplication();
 
         // get plugin name and assign to query
-        $name = $this->get('name');
+        $name   = $this->get('name');
+
+        $caller = $this->get('caller');
 
         // re-map plugin name
         if (array_key_exists($name, self::$queryMap)) {
             $name = self::$queryMap[$name];
         }
 
+        if ($caller) {
+            $name .= '.' . $caller;
+        }
+        
         $query['plugin'] = $name;
 
         // set slot
@@ -480,6 +487,9 @@ class WFDocument extends CMSObject
 
         // set standalone mode (for File Browser etc)
         $query['standalone'] = $this->get('standalone', 0);
+
+        // set media field mode (for File Browser asset requests)
+        $query['mediafield'] = $this->get('mediafield', 0);
 
         // set context id
         $query['context'] = $app->input->getInt('context', 0);
@@ -498,7 +508,7 @@ class WFDocument extends CMSObject
             return !empty($value);
         });
 
-       return http_build_query($query);
+        return http_build_query($query);
     }
 
     private function getHash($files)

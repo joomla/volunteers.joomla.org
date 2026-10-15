@@ -1,30 +1,35 @@
 /**
- * @copyright  (C) 2017 Open Source Matters, Inc. <https://www.joomla.org>
+ * @copyright  (C) 2018 Open Source Matters, Inc. <https://www.joomla.org>
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
+(Joomla => {
 
-Joomla = window.Joomla || {};
-
-(function(Joomla) {
-	Joomla.fieldIns = function(id, editor) {
-		/** Use the API, if editor supports it **/
-		if (window.parent.Joomla && window.parent.Joomla.editors && window.parent.Joomla.editors.instances && window.parent.Joomla.editors.instances.hasOwnProperty(editor)) {
-			window.parent.Joomla.editors.instances[editor].replaceSelection("{field " + id + "}")
-		} else {
-			window.parent.jInsertEditorText("{field " + id + "}", editor);
-		}
-
-		window.parent.jModalClose();
-	};
-
-	Joomla.fieldgroupIns = function(id, editor) {
-		/** Use the API, if editor supports it **/
-		if (window.parent.Joomla && window.parent.Joomla.editors && window.parent.Joomla.editors.instances && window.parent.Joomla.editors.instances.hasOwnProperty(editor)) {
-			window.parent.Joomla.editors.instances[editor].replaceSelection("{fieldgroup " + id + "}")
-		} else {
-			window.parent.jInsertEditorText("{fieldgroup " + id + "}", editor);
-		}
-
-		window.parent.jModalClose();
-	};
+  if (!window.parent.Joomla) {
+    throw new Error('core.js was not properly initialised');
+  }
+  if (!Joomla) {
+    window.Joomla = {};
+  }
+  Joomla.fieldIns = (id, editor) => {
+    // Use a JoomlaExpectingPostMessage flag to be able to distinct legacy methods
+    if (window.parent.JoomlaExpectingPostMessage) {
+      return;
+    }
+    console.warn('Method Joomla.fieldIns() is deprecated. Use postMessage() instead.');
+    window.parent.Joomla.editors.instances[editor].replaceSelection(`{field ${id}}`);
+    if (window.parent.Joomla.Modal) {
+      window.parent.Joomla.Modal.getCurrent().close();
+    }
+  };
+  Joomla.fieldgroupIns = (id, editor) => {
+    // Use a JoomlaExpectingPostMessage flag to be able to distinct legacy methods
+    if (window.parent.JoomlaExpectingPostMessage) {
+      return;
+    }
+    console.warn('Method Joomla.fieldgroupIns() is deprecated. Use postMessage() instead.');
+    window.parent.Joomla.editors.instances[editor].replaceSelection(`{fieldgroup ${id}}`);
+    if (window.parent.Joomla.Modal) {
+      window.parent.Joomla.Modal.getCurrent().close();
+    }
+  };
 })(Joomla);

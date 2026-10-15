@@ -1,4 +1,4 @@
-/* jce - 2.9.99.5 | 2026-06-03 | https://www.joomlacontenteditor.net | Source: https://github.com/widgetfactory/jce | Copyright (C) 2006 - 2026 Ryan Demmer. All rights reserved | GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html */
+/* jce - 2.9.99.12 | 2026-10-07 | https://www.joomlacontenteditor.net | Source: https://github.com/widgetfactory/jce | Copyright (C) 2006 - 2026 Ryan Demmer. All rights reserved | GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html; see LICENSE.txt */
 !function() {
     "use strict";
     const Node$1 = tinymce.html.Node;
@@ -27,31 +27,40 @@
         }
     };
     const each$1 = tinymce.each;
-    let htmlSchema, shortEndedElements = {}, booleanAttributes = {};
+    function getState(editor) {
+        return editor._codeState || {
+            shortEndedElements: {},
+            booleanAttributes: {}
+        };
+    }
     function canKeepCode(editor, type) {
         return !1 === editor.settings.validate || editor.getParam("code_allow_" + type);
     }
     function isXmlElement(editor, name) {
-        return !htmlSchema.isValid(name) && !function(editor, name) {
-            return editor = editor.settings.invalid_elements.split(","), -1 !== tinymce.inArray(editor, name);
+        var htmlSchema = getState(editor).htmlSchema;
+        return htmlSchema && !htmlSchema.isValid(name) && !function(editor, name) {
+            return editor = (editor.settings.invalid_elements || "").split(","), 
+            -1 !== tinymce.inArray(editor, name);
         }(editor, name);
     }
     function isValid(editor, tag, attr) {
         return isXmlElement(editor, tag) || !1 === editor.settings.validate || editor.schema.isValid(tag, attr);
     }
     function validateXml(editor, xml) {
-        return function sanitizeNode(editor, node) {
+        xml = new DOMParser().parseFromString(xml, "text/xml");
+        return !xml.documentElement || xml.getElementsByTagName("parsererror").length ? null : function sanitizeNode(editor, node) {
             var html = [];
             switch (node.nodeType) {
               case 1:
                 var name, value, tagName = node.nodeName.toLowerCase();
+                if (("script" === tagName || "style" === tagName || "link" === tagName) && !canKeepCode(editor, "link" === tagName ? "style" : tagName)) return "";
                 if (!isValid(editor, tagName)) return "";
                 html.push("<", tagName);
                 for ({
                     name,
                     value
-                } of Array.from(node.attributes)) !isValid(editor, tagName, name) || !editor.settings.allow_event_attributes && name.startsWith("on") || (!booleanAttributes[name] || "" !== value && "true" !== value && value !== name ? html.push(" ", name, '="', editor.dom.encode(value, !0), '"') : html.push(" ", name));
-                if (shortEndedElements[tagName]) "html5-strict" === editor.settings.schema ? html.push(">") : html.push(" />"); else {
+                } of Array.from(node.attributes)) !isValid(editor, tagName, name) || !editor.settings.allow_event_attributes && name.startsWith("on") || (!getState(editor).booleanAttributes[name] || "" !== value && "true" !== value && value !== name ? html.push(" ", name, '="', editor.dom.encode(value, !0), '"') : html.push(" ", name));
+                if (getState(editor).shortEndedElements[tagName]) "html5-strict" === editor.settings.schema ? html.push(">") : html.push(" />"); else {
                     html.push(">");
                     for (var child of Array.from(node.childNodes)) html.push(sanitizeNode(editor, child));
                     html.push("</", tagName, ">");
@@ -71,27 +80,35 @@
                 html.push("\x3c!--", editor.dom.encode(node.nodeValue, !0), "--\x3e");
             }
             return html.join("");
-        }(editor, new DOMParser().parseFromString(xml, "text/xml").documentElement);
+        }(editor, xml.documentElement);
     }
     function processXML(editor, content) {
         return content.replace(/<([a-z0-9\-_\:\.]+)(?:[^>]*?)\/?>((?:[\s\S]*?)<\/\1>)?/gi, function(match, tag) {
-            return ("svg" !== (tag = tag.toLowerCase()) || !1 !== editor.settings.code_allow_svg_in_xml) && ("math" !== tag || !1 !== editor.settings.code_allow_mathml_in_xml) && isXmlElement(editor, tag) ? (!1 !== editor.settings.code_validate_xml && (match = validateXml(editor, match)), 
-            Content.createHtml(editor, match, "xml")) : match;
+            if ("svg" === (tag = tag.toLowerCase()) && !1 === editor.settings.code_allow_svg_in_xml) return match;
+            if ("math" === tag && !1 === editor.settings.code_allow_mathml_in_xml) return match;
+            if (!isXmlElement(editor, tag)) return match;
+            if (!1 !== editor.settings.code_validate_xml) {
+                tag = validateXml(editor, match);
+                if (null === tag) return match;
+                match = tag;
+            }
+            return Content.createHtml(editor, match, "xml");
         });
     }
     function processShortcode(editor, html, tagName) {
-        var attrPlaceholders;
+        var attrPlaceholders, token;
         return -1 === html.indexOf("{") || "{" == html.charAt(0) && html.length < 3 || (-1 != html.indexOf("{/source}") && (html = function(editor, html) {
             return -1 === html.indexOf("{/source}") ? html : html.replace(/(?:(<(code|pre|samp|span)[^>]*(data-mce-type="code")?>|")?)\{source(.*?)\}([\s\S]+?)\{\/source\}/g, function(match) {
                 return "<" === match.charAt(0) || '"' === match.charAt(0) ? match : (match = editor.dom.decode(match), 
                 '<pre data-mce-code="shortcode" data-mce-label="sourcerer">' + editor.dom.encode(match) + "</pre>");
             });
-        }(editor, html)), tagName = tagName || "span", attrPlaceholders = [], html = (html = html.replace(/=("[^"]*\{[^"]*"|'[^']*\{[^']*')/g, function(match) {
-            return attrPlaceholders.push(match), '="__SHORTCODE_ATTR_' + (attrPlaceholders.length - 1) + '__"';
+        }(editor, html)), tagName = tagName || "span", attrPlaceholders = [], token = "__shortcode_attr_" + Math.random().toString(36).slice(2) + "_", 
+        html = (html = html.replace(/=("[^"]*\{[^"]*"|'[^']*\{[^']*')/g, function(match) {
+            return attrPlaceholders.push(match), '="' + token + (attrPlaceholders.length - 1) + '__"';
         })).replace(/(?:(<(code|pre|samp|span)[^>]*(data-mce-type="code")?>)?)(?:\{)([\w-]+)(.*?)(?:\/?\})(?:([\s\S]+?)\{\/\4\})?/g, function(match) {
             return "<" === match.charAt(0) ? match : Content.createShortcodeHtml(editor, match, tagName);
-        }), attrPlaceholders.length && (html = html.replace(/="__SHORTCODE_ATTR_(\d+)__"/g, function(_match, index) {
-            return attrPlaceholders[parseInt(index, 10)];
+        }), attrPlaceholders.length && (html = html.replace(new RegExp('="' + token + '(\\d+)__"', "g"), function(match, index) {
+            return (index = parseInt(index, 10)) < attrPlaceholders.length ? attrPlaceholders[index] : match;
         }))), html;
     }
     function processPhp(editor, content) {
@@ -111,14 +128,19 @@
     }
     var Process = {
         init: function(editor) {
-            htmlSchema = new tinymce.html.Schema({
-                schema: "mixed",
-                invalid_elements: editor.settings.invalid_elements
-            }), each$1(editor.schema.getShortEndedElements(), function(_shortEnded, name) {
-                shortEndedElements[name.toLowerCase()] = !0;
+            var state = {
+                htmlSchema: new tinymce.html.Schema({
+                    schema: "mixed",
+                    invalid_elements: editor.settings.invalid_elements || ""
+                }),
+                shortEndedElements: {},
+                booleanAttributes: {}
+            };
+            each$1(editor.schema.getShortEndedElements(), function(_shortEnded, name) {
+                state.shortEndedElements[name.toLowerCase()] = !0;
             }), each$1(editor.schema.getBoolAttrs(), function(_boolAttr, name) {
-                booleanAttributes[name.toLowerCase()] = !0;
-            });
+                state.booleanAttributes[name.toLowerCase()] = !0;
+            }), editor._codeState = state;
         },
         processOnInsert: function(editor, value, _node) {
             return /\{.+\}/gi.test(value) && editor.settings.code_protect_shortcode && (value = processShortcode(editor, value, void 0)), 
@@ -160,7 +182,7 @@
             (before = ed.selection.getRng()).setStart(newBlockName, 0), before.setEnd(newBlockName, 0), 
             ed.selection.setRng(before), ed.selection.scrollIntoView(newBlockName));
         }
-        editor.settings.code_allow_script && (editor.settings.allow_script_urls = !0), 
+        editor.settings.code_allow_script && !1 !== editor.settings.code_allow_script_urls && (editor.settings.allow_script_urls = !0), 
         editor.addCommand("InsertShortCode", function(ui, html) {
             return editor.settings.code_protect_shortcode && (html = Process.processShortcode(editor, html, "pre"), 
             tinymce.is(html)) && editor.execCommand("mceReplaceContent", !1, html), 
@@ -228,7 +250,7 @@
                 blockElements.push(blockName);
             }), each(editor.schema.getTextInlineElements(), function(_inline, name) {
                 inlineElements.push(name);
-            }), editor.settings.code_protect_shortcode && (editor.textpattern.addPattern({
+            }), editor.settings.code_protect_shortcode && editor.textpattern && (editor.textpattern.addPattern({
                 start: "{",
                 end: "}",
                 cmd: "InsertShortCode",
@@ -278,7 +300,7 @@
                 }
                 for (;i--; ) {
                     var type, parent = (node = nodes[i]).parent;
-                    "placeholder" == node.attr("data-mce-type") || "shortcode" !== (type = node.attr(name)) && "php" !== type || ((type = node.firstChild.value) && (node.firstChild.value = type.replace(/<br[\s\/]*>/g, "\n")), 
+                    "placeholder" == node.attr("data-mce-type") || "shortcode" !== (type = node.attr(name)) && "php" !== type || ((type = node.firstChild ? node.firstChild.value : "") && (node.firstChild.value = type.replace(/<br[\s\/]*>/g, "\n")), 
                     parent && (parent.attr(name) ? node.unwrap() : ("body" !== parent.name && !isOnlyChild(node) && function(node) {
                         return "span" == node.name && (node.next && ("#text" == node.next.type || !isBlockNode(node.next)) || node.prev && ("#text" == node.prev.type || !isBlockNode(node.prev)) || !(!node.parent || isBlockNode(node.parent)));
                     }(node) || (node.name = "pre", node.parent && function(node) {
@@ -302,7 +324,7 @@
                         imgValue && (imgValue = Content.createTextNode(unescape(imgValue)), 
                         "php" == type || "shortcode" == type ? elm = imgValue : elm.append(imgValue)), 
                         node.replace(elm);
-                    } else if (node.isEmpty() && node.remove(), "xml" !== type) {
+                    } else if (node.isEmpty()) node.remove(); else if ("xml" !== type) {
                         "script" !== type && "style" !== type || (root_block = type);
                         var childVal, parser, child = node.firstChild, imgValue = node.clone(!0), text = "";
                         if (child) do {} while (/(shortcode|php)/.test(node.attr("data-mce-code")) || (childVal = "br" == child.name ? "\n" : child.value) && (text += childVal), 
@@ -310,11 +332,9 @@
                         text && (imgValue.empty(), parser = new DomParser({
                             validate: !1
                         }), "script" !== type && "style" !== type || parser.addNodeFilter(type, function(items, filterName) {
-                            for (var n = items.length; n--; ) {
-                                var item = items[n];
-                                each(item.attributes, function(attr) {
-                                    return !attr || 0 === attr.name.indexOf("data-") && -1 === attr.name.indexOf("data-mce-") || void (!1 === editor.schema.isValid(filterName, attr.name) && item.attr(attr.name, null));
-                                });
+                            for (var n = items.length; n--; ) for (var item = items[n], a = item.attributes.length; a--; ) {
+                                var attr = item.attributes[a];
+                                !attr || 0 === attr.name.indexOf("data-") && -1 === attr.name.indexOf("data-mce-") || !1 === editor.schema.isValid(filterName, attr.name) && item.attr(attr.name, null);
                             }
                         }), parser = parser.parse(text, {
                             forced_root_block: root_block
@@ -355,7 +375,7 @@
                 return "<textarea" + b + ">" + (c = /&lt;\?php/.test(c) ? ed.dom.decode(c) : c) + "</textarea>";
             }), o.content = o.content.replace(/data-mce-php="([^"]+?)"/g, function(a, b) {
                 return "<?php" + ed.dom.decode(b) + "?>";
-            })), editor.settings.code_protect_shortcode && (o.content = o.content.replace(/\{([\s\S]+?)\}/gi, function(match, content) {
+            })), editor.settings.code_protect_shortcode && (o.content = o.content.replace(/\{([\w-][\s\S]*?)\}/gi, function(match, content) {
                 return "{" + ed.dom.decode(content) + "}";
             }), o.content = o.content.replace(/\{source([^\}]*?)\}([\s\S]+?)\{\/source\}/gi, function(match, start, content) {
                 return "{source" + start + "}" + ed.dom.decode(content) + "{/source}";
@@ -368,8 +388,6 @@
                 return "script" != attr && (content = content.replace(/<br[^>]*?>/gi, "\n")), 
                 content = ed.dom.decode(content), "php" == attr && (content = content.replace(/<\?(php)?/gi, "").replace(/\?>/g, ""), 
                 content = "<?php\n" + tinymce.trim(content) + "\n?>"), content;
-            }), o.content = o.content.replace(/<!--mce:protected ([\s\S]+?)-->/gi, function(match, content) {
-                return unescape(content);
             }));
         });
     });

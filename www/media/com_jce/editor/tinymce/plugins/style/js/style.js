@@ -1,4 +1,4 @@
-/* jce - 2.9.99.5 | 2026-06-03 | https://www.joomlacontenteditor.net | Source: https://github.com/widgetfactory/jce | Copyright (C) 2006 - 2026 Ryan Demmer. All rights reserved | GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html */
+/* jce - 2.9.99.12 | 2026-10-07 | https://www.joomlacontenteditor.net | Source: https://github.com/widgetfactory/jce | Copyright (C) 2006 - 2026 Ryan Demmer. All rights reserved | GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html; see LICENSE.txt */
 !function(tinymce, tinyMCEPopup, $) {
     function selectByValue(field_name, value, add_custom, ignore_case) {
         value = value || "";
@@ -52,6 +52,7 @@
         },
         init: function() {
             var self = this, ed = tinyMCEPopup.editor, ce = document.getElementById("container");
+            this.settings.file_browser = ed.getParam("style_file_browser", !0), 
             this.settings.file_browser || $(".browser").removeClass("browser"), 
             this.existingStyles = this.aggregateStyles(tinyMCEPopup.getWindowArg("styles")), 
             ce.style.cssText = ed.dom.serializeStyle(this.existingStyles), this.applyActionIsInsert = ed.getParam("edit_css_style_insert_span", !1), 

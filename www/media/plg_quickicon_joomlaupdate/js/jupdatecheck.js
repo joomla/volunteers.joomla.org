@@ -1,53 +1,55 @@
 /**
- * @copyright	(C) 2011 Open Source Matters, Inc. <https://www.joomla.org>
- * @license		GNU General Public License version 2 or later; see LICENSE.txt
+ * @copyright  (C) 2018 Open Source Matters, Inc. <https://www.joomla.org>
+ * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
-var plg_quickicon_jupdatecheck_ajax_structure = {};
+if (Joomla && Joomla.getOptions('js-joomla-update')) {
+  const update = (type, text) => {
+    const link = document.getElementById('plg_quickicon_joomlaupdate');
+    if (link) {
+      link.classList.add(type);
+    }
+    link.querySelectorAll('span.j-links-link').forEach(span => {
+      span.innerHTML = Joomla.sanitizeHtml(text);
+    });
+  };
+  const fetchUpdate = () => {
+    const options = Joomla.getOptions('js-joomla-update');
 
-jQuery(document).ready(function() {
-	plg_quickicon_jupdatecheck_ajax_structure = {
-		success: function(data, textStatus, jqXHR) {
-			var link = jQuery('#plg_quickicon_joomlaupdate').find('span.j-links-link');
+    /**
+     * DO NOT use fetch() for QuickIcon requests. They must be queued.
+     *
+     * @see https://github.com/joomla/joomla-cms/issues/38001
+     */
+    Joomla.enqueueRequest({
+      url: options.ajaxUrl,
+      method: 'GET',
+      promise: true
+    }).then(xhr => {
+      const response = xhr.responseText;
+      const updateInfoList = JSON.parse(response);
+      if (Array.isArray(updateInfoList)) {
+        if (updateInfoList.length === 0) {
+          // No updates
+          update('success', Joomla.Text._('PLG_QUICKICON_JOOMLAUPDATE_UPTODATE'));
+        } else {
+          const updateInfo = updateInfoList.shift();
+          if (updateInfo.version !== options.version) {
+            update('danger', Joomla.Text._('PLG_QUICKICON_JOOMLAUPDATE_UPDATEFOUND').replace('%s', `<span class="badge text-dark bg-light"> \u200E ${updateInfo.version}</span>`));
+          } else {
+            update('success', Joomla.Text._('PLG_QUICKICON_JOOMLAUPDATE_UPTODATE'));
+          }
+        }
+      } else {
+        // An error occurred
+        update('danger', Joomla.Text._('PLG_QUICKICON_JOOMLAUPDATE_ERROR'));
+      }
+    }).catch(() => {
+      // An error occurred
+      update('danger', Joomla.Text._('PLG_QUICKICON_JOOMLAUPDATE_ERROR'));
+    });
+  };
 
-			try {
-				var updateInfoList = jQuery.parseJSON(data);
-			} catch (e) {
-				// An error occurred
-				link.html(plg_quickicon_joomlaupdate_text.ERROR);
-			}
-
-			if (updateInfoList instanceof Array) {
-				if (updateInfoList.length < 1) {
-					// No updates
-					link.replaceWith(plg_quickicon_joomlaupdate_text.UPTODATE);
-				} else {
-					var updateInfo = updateInfoList.shift();
-					if (updateInfo.version != plg_quickicon_jupdatecheck_jversion) {
-						var updateString = plg_quickicon_joomlaupdate_text.UPDATEFOUND.replace("%s", '\u200E' + updateInfo.version + "");
-						jQuery('#plg_quickicon_joomlaupdate').find('.j-links-link').html(updateString);
-						var updateString = plg_quickicon_joomlaupdate_text.UPDATEFOUND_MESSAGE.replace("%s", '\u200E' + updateInfo.version + "");
-						jQuery('#system-message-container').prepend(
-							'<div class="alert alert-error alert-joomlaupdate">'
-							+ updateString
-							+ ' <button class="btn btn-primary" onclick="document.location=\'' + plg_quickicon_joomlaupdate_url + '\'">'
-							+ plg_quickicon_joomlaupdate_text.UPDATEFOUND_BUTTON + '</button>'
-							+ '</div>'
-						);
-					} else {
-						link.html(plg_quickicon_joomlaupdate_text.UPTODATE);
-					}
-				}
-			} else {
-				// An error occurred
-				link.html(plg_quickicon_joomlaupdate_text.ERROR);
-			}
-		},
-		error: function(jqXHR, textStatus, errorThrown) {
-			// An error occurred
-			jQuery('#plg_quickicon_joomlaupdate').find('span.j-links-link').html(plg_quickicon_joomlaupdate_text.ERROR);
-		},
-		url: plg_quickicon_joomlaupdate_ajax_url
-	};
-	setTimeout("ajax_object = new jQuery.ajax(plg_quickicon_jupdatecheck_ajax_structure);", 2000);
-});
+  // Give some times to the layout and other scripts to settle their stuff
+  window.addEventListener('load', () => setTimeout(fetchUpdate, 300));
+}

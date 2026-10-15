@@ -5,7 +5,7 @@
  * @subpackage  Editor
  *
  * @copyright   Copyright (C) 2005 - 2020 Open Source Matters, Inc. All rights reserved.
- * @copyright   Copyright (c) 2009-2024 Ryan Demmer. All rights reserved
+ * @copyright   Copyright (c) 2009-2026 Ryan Demmer. All rights reserved
  * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
 
@@ -38,7 +38,7 @@ class WFMediaManagerBase extends WFEditorPlugin
         parent::__construct($config);
 
         // initialize the browser
-        $browser = $this->getFileBrowser();
+        $_browser = $this->getFileBrowser();
         $request = WFRequest::getInstance();
 
         // Setup plugin XHR callback functions
@@ -87,6 +87,46 @@ class WFMediaManagerBase extends WFEditorPlugin
         return $this->getFileBrowser();
     }
 
+    protected function isRestricted()
+    {
+        if ((int) $this->getParam('basic_dialog', 0) === 0) {
+            return false;
+        }
+
+        // the file browser is a dialog in its own right, and may still be allowed
+        if ((string) $this->getName() === 'browser') {
+            $caller = (string) $this->get('caller');
+
+            if ($caller) {
+                // Image Manager etc. - enabled by default, as the manifest and config
+                if ((int) $this->getParam($caller . '.basic_dialog_filebrowser', 1) === 1) {
+                    return false;
+                }
+
+                // Link
+                if ($caller === 'link') {
+                    if ((int) $this->getParam($caller . '.file_browser', 1) === 1) {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
+
+    protected function getCoreMethods()
+    {
+        $methods = parent::getCoreMethods();
+
+        // allow uploading if it is enabled, eg: inline uploading
+        if ((int) $this->getParam('upload', 1) && (int) $this->getParam('inline_upload', 1)) {
+            $methods[] = 'upload';
+        }
+
+        return $methods;
+    }
+
     /**
      * Display the plugin.
      */
@@ -122,28 +162,45 @@ class WFMediaManagerBase extends WFEditorPlugin
 
     public function onUpload($file, $relative = '') {}
 
+    /**
+     * Get the dimensions of an image file.
+     *
+     * @param string $file Relative path to the image file.
+     * @return array Array with 'width' and 'height' keys.
+     */
     public function getDimensions($file)
     {
-        $browser = $this->getFileBrowser();
+        $browser    = $this->getFileBrowser();
+        $path       = $browser->preparePath($file, true);
 
         $data = array();
 
-        $extension = WFUtility::getExtension($file, true);
+        $extension = WFUtility::getExtension($path, true);
 
-        // images and flash
-        if (in_array($extension, array('jpg', 'jpeg', 'png', 'apng', 'gif', 'bmp', 'wbmp', 'tif', 'tiff', 'psd', 'ico', 'webp', 'swf'))) {
-            list($data['width'], $data['height']) = $browser->getDimensions($file);
-            return $data;
+        // images, the browser validates the path and returns a width/height array
+        if (in_array($extension, array('jpg', 'jpeg', 'png', 'apng', 'gif', 'bmp', 'wbmp', 'tif', 'tiff', 'psd', 'ico', 'webp'))) {
+            return $browser->getDimensions($file);
         }
-
-        $path = $browser->toAbsolute($file);
 
         // svg
         if ($extension == 'svg') {
-            $svg = @simplexml_load_file($path);
+            // readFile validates the name, the file type and directory access
+            $svg = $browser->readFile($path);
 
-            if ($svg && isset($svg['viewBox'])) {
-                list($start_x, $start_y, $end_x, $end_y) = explode(' ', $svg['viewBox']);
+            if ($svg === false) {
+                return $data;
+            }
+
+            // Strip DOCTYPE to prevent entity-based XXE (local file:// and network) on all PHP versions
+            $svg = preg_replace('/<!DOCTYPE[^[>]*(\[[^\]]*\])?>/is', '', $svg);
+
+            libxml_use_internal_errors(true);
+            $xml = simplexml_load_string($svg, 'SimpleXMLElement', LIBXML_NONET);
+            libxml_clear_errors();
+            libxml_use_internal_errors(false);
+
+            if ($xml && isset($xml['viewBox'])) {
+                list($start_x, $start_y, $end_x, $end_y) = explode(' ', $xml['viewBox']);
 
                 $width = (int) $end_x;
                 $height = (int) $end_y;
@@ -266,11 +323,8 @@ class WFMediaManagerBase extends WFEditorPlugin
             $dir = $this->getParam($this->get('caller') . '.dir', $dir);
         }
 
-        // allow root: accept both spellings just in case
-        $allowRoot = (bool) ($filesystem->get('allowroot', $filesystem->get('allow_root', 0)));
-
-        // if the filesystem name matches the base filesystem name, use the base directory if no directory is set and allowRoot is false
-        if ($baseFs['name'] === $filesystem->get('name') && $allowRoot === false) {
+        // if the filesystem name matches the base filesystem name, use the base directory if no directory is set
+        if ($baseFs['name'] === $filesystem->get('name')) {
             // if no directory is set, or it is an empty array, use the base directory
             if (empty($dir)) {
                 $dir = $baseDir;
@@ -307,29 +361,19 @@ class WFMediaManagerBase extends WFEditorPlugin
 
         // If no usable entries exist (all blank or effectively empty after normalization)
         if (count($nonBlank) === 0) {
-            if ($allowRoot === false) {
-                $root = $filesystem->get('root', 'images'); // get the default root for the filesystem
+            $root = $filesystem->get('root', 'images'); // get the default root for the filesystem
 
-                if (empty($root)) {
-                    $root = 'images';
-                }
-
-                // Default ONLY here to "images"
-                $hash = md5($root);
-
-                $dirStore[$hash] = [
-                    'path'  => $root,
-                    'label' => '' // no label required for a single path
-                ];
-            } else {
-                // Root allowed: a single blank/root entry
-                $hash = md5('');
-
-                $dirStore[$hash] = [
-                    'path' => '',
-                    'label' => '',
-                ];
+            if (empty($root)) {
+                $root = 'images';
             }
+
+            // Default ONLY here to "images"
+            $hash = md5($root);
+
+            $dirStore[$hash] = [
+                'path'  => $root,
+                'label' => '' // no label required for a single path
+            ];
 
             return $dirStore;
         }
@@ -338,9 +382,13 @@ class WFMediaManagerBase extends WFEditorPlugin
         foreach ($nonBlank as $item) {
             $hash = md5($item['path']);
 
+            if (empty($item['label'])) {
+                $item['label'] = basename($item['path']) ?: $item['path'];
+            }
+
             $dirStore[$hash] = [
-                'path' => $item['path'],
-                'label' => $item['label'],
+                'path'  => $item['path'],
+                'label' => $item['label']
             ];
         }
 
@@ -444,6 +492,7 @@ class WFMediaManagerBase extends WFEditorPlugin
                 'max_size' => $this->getParam('max_size', 1024),
                 'validate_mimetype' => (int) $this->getParam('editor.validate_mimetype', 1),
                 'add_random' => (int) $this->getParam('editor.upload_add_random', 0),
+                'random_length' => (int) $this->getParam('editor.upload_random_length', 16),
                 'total_files' => (float) $this->getParam('editor.total_files', 0),
                 'total_size' => (float) $this->getParam('editor.total_size', 0),
                 'remove_exif' => (int) $this->getParam('editor.upload_remove_exif', 0),

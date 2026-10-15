@@ -2,7 +2,7 @@
 /**
  * Joomla.org site template
  *
- * @copyright   Copyright (C) 2005 - 2020 Open Source Matters, Inc. All rights reserved.
+ * @copyright   Copyright (C) 2005 - 2023 Open Source Matters, Inc. All rights reserved.
  * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
 
@@ -15,39 +15,26 @@ use Joomla\CMS\HTML\HTMLHelper;
 // Declare the template as HTML5
 $this->setHtml5(true);
 
-// Add Stylesheets - if the site is in debug mode or has explicitly chosen to not use the CDN, load the local media
-if (JDEBUG || !$this->params->get('useCdn', '1'))
-{
-    HTMLHelper::_('stylesheet', 'template.min.css', ['relative' => true, 'detectDebug' => (bool) JDEBUG, 'version' => '3.1.2-dev']);
-}
-else
-{
-	$this->addStyleSheet('https://cdn.joomla.org/template/css/template_3.1.1.min.css');
-}
+$wa = $this->getWebAssetManager();
 
-// Bootstrap 3 polyfill
-if ($this->params->get('bs3Grid', '0'))
-{
-    HTMLHelper::_('stylesheet', 'bs3-polyfill.css', ['version' => 'auto', 'relative' => true, 'detectDebug' => false], []);
-}
+// Add Bootstrap Javascript Frameworks
+HTMLHelper::_('bootstrap.collapse');
+HTMLHelper::_('bootstrap.dropdown');
 
-// Optional site specific CSS override
-HTMLHelper::_('stylesheet', 'custom.css', ['version' => 'auto', 'relative' => true, 'detectDebug' => false], []);
+// Load template stylesheet
+$wa->useStyle('template.joomla.custom.' . ($this->direction === 'rtl' ? 'rtl' : 'ltr'));
 
-// Load optional RTL Bootstrap CSS
-if ($this->direction === 'rtl')
-{
-	HTMLHelper::_('stylesheet', 'template-rtl.min.css', ['version' => 'auto', 'relative' => true, 'detectDebug' => (bool) JDEBUG], []);
+// Override 'template.active' asset to set correct ltr/rtl dependency and with CDN Dependency
+$wa->registerStyle('template.active', '', [], [], [((!JDEBUG && $this->params->get('useCdn', '1')) ? 'cdn.' : '') . 'template.joomla.' . ($this->direction === 'rtl' ? 'rtl' : 'ltr')]);
 
-	// Optional support for custom RTL CSS rules
-	HTMLHelper::_('stylesheet', 'custom-rtl.css', ['version' => 'auto', 'relative' => true, 'detectDebug' => false], []);
-}
+$fontName = 'Open Sans';
+$escapedFontName = str_replace(' ', '+', $fontName);
 
-// Load Google Font
-$this->addHeadLink('https://fonts.googleapis.com/css?family=Open+Sans&display=swap', 'preload', 'rel', ['as' => 'style']);
-
-// Load the HTML5 shim with optional override
-HTMLHelper::_('script', 'jui/html5.js', ['version' => 'auto', 'relative' => true, 'detectDebug' => (bool) JDEBUG, 'conditional' => 'lt IE 9'], []);
+$this->getPreloadManager()->preconnect('https://fonts.googleapis.com/', ['crossorigin' => 'anonymous']);
+$this->getPreloadManager()->preconnect('https://fonts.gstatic.com/', ['crossorigin' => 'anonymous']);
+$paramsFontScheme = 'https://fonts.googleapis.com/css2?family=' . $escapedFontName . ':wght@300;400;700&display=swap';
+$this->getPreloadManager()->preload($paramsFontScheme, ['as' => 'style', 'crossorigin' => 'anonymous']);
+$this->getWebAssetManager()->registerAndUseStyle('googlefonts', $paramsFontScheme, [], ['crossorigin' => 'anonymous']);
 
 // Set template metadata
 $this->setMetaData('viewport', 'width=device-width, initial-scale=1.0');
@@ -57,7 +44,7 @@ $this->setMetaData('viewport', 'width=device-width, initial-scale=1.0');
 <head>
 	<jdoc:include type="head" />
 </head>
-<body class="contentpane modal">
+<body class="contentpane">
 	<jdoc:include type="message" />
 	<jdoc:include type="component" />
 </body>

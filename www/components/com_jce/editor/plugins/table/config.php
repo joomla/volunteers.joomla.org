@@ -3,7 +3,7 @@
  * @package     JCE
  * @subpackage  Editor
  *
- * @copyright   Copyright (c) 2009-2024 Ryan Demmer. All rights reserved
+ * @copyright   Copyright (c) 2009-2026 Ryan Demmer. All rights reserved
  * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
 
@@ -45,5 +45,6 @@ class WFTablePluginConfig
         $settings['table_buttons'] = $wf->getParam('table.show_buttons', 1, 1);
 
         $settings['table_basic_dialog'] = $wf->getParam('table.basic_dialog', 0, 0);
+        $settings['table_file_browser'] = $wf->getParam('table.file_browser', 1, 1);
     }
 }

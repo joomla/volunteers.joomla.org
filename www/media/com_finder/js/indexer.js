@@ -1,104 +1,177 @@
-var FinderIndexer = function(){
-	var totalItems= null;
-	var batchSize= null;
-	var offset= null;
-	var progress= null;
-	var optimized= false;
-	var path = 'index.php?option=com_finder&tmpl=component&format=json';
+/**
+ * @copyright  (C) 2018 Open Source Matters, Inc. <https://www.joomla.org>
+ * @license    GNU General Public License version 2 or later; see LICENSE.txt
+ */
+// eslint-disable no-alert
+((Joomla, document) => {
 
-	var initialize = function () {
-		offset = 0;
-		progress = 0;
-		path = path + '&' + jQuery('#finder-indexer-token').attr('name') + '=1';
-		getRequest('indexer.start');
-	};
+  if (!Joomla) {
+    throw new Error('core.js was not properly initialised');
+  }
+  Joomla.finderIndexer = () => {
+    let getRequest;
+    let totalItems = null;
+    let offset = null;
+    let progress = null;
+    let optimized = false;
+    const path = 'index.php?option=com_finder&tmpl=component&format=json';
+    const token = `&${document.getElementById('finder-indexer-token').getAttribute('name')}=1`;
+    const removeElement = id => {
+      const element = document.getElementById(id);
+      if (element) {
+        return element.parentNode.removeChild(element);
+      }
+      return null;
+    };
+    const updateProgress = (header, message) => {
+      progress = offset / totalItems * 100;
+      const progressBar = document.getElementById('progress-bar');
+      const progressHeader = document.getElementById('finder-progress-header');
+      const progressMessage = document.getElementById('finder-progress-message');
+      if (progressHeader) {
+        progressHeader.innerText = header;
+      }
+      if (progressMessage) {
+        progressMessage.innerHTML = Joomla.sanitizeHtml(message);
+      }
+      if (progressBar) {
+        if (progress < 100) {
+          progressBar.style.width = `${progress}%`;
+          progressBar.setAttribute('aria-valuenow', progress);
+        } else {
+          progressBar.classList.remove('bar-success');
+          progressBar.classList.add('bar-warning');
+          progressBar.setAttribute('aria-valuemin', 100);
+          progressBar.setAttribute('aria-valuemax', 200);
+          progressBar.style.width = `${progress}%`;
+          progressBar.setAttribute('aria-valuenow', progress);
+        }
 
-	var getRequest= function (task) {
-		jQuery.ajax({
-			type : "GET",
-			url : path,
-			data :  'task=' + task,
-			dataType : 'json',
-			success : handleResponse,
-			error : handleFailure
-		});
-	};
+        // Auto close the window
+        if (message === Joomla.Text._('COM_FINDER_INDEXER_MESSAGE_COMPLETE')) {
+          removeElement('progress');
+          window.parent.location.reload();
+        }
+      }
+    };
+    const handleResponse = (json, resp) => {
+      const progressHeader = document.getElementById('finder-progress-header');
+      const progressMessage = document.getElementById('finder-progress-message');
+      try {
+        if (json === null) {
+          throw new Error(resp);
+        }
+        if (json.error) {
+          throw new Error(json);
+        }
+        if (json.start) {
+          totalItems = json.totalItems;
+          if (document.getElementById('finder-debug-data')) {
+            const debuglist = document.getElementById('finder-debug-data');
+            Object.entries(json.pluginState).forEach(context => {
+              let item = `<dt class="col-sm-3">${context[0]}</dt>`;
+              item += `<dd id="finder-${context[0].replace(/\s+/g, '-').toLowerCase()}" class="col-sm-9"></dd>`;
+              debuglist.insertAdjacentHTML('beforeend', Joomla.sanitizeHtml(item, {
+                dd: ['class', 'id'],
+                dt: ['class']
+              }));
+            });
+          }
+        }
+        offset += json.batchOffset;
+        updateProgress(json.header, json.message);
+        if (document.getElementById('finder-debug-data')) {
+          Object.entries(json.pluginState).forEach(context => {
+            document.getElementById(`finder-${context[0].replace(/\s+/g, '-').toLowerCase()}`).innerHTML = Joomla.sanitizeHtml(`${json.pluginState[context[0]].offset} of ${json.pluginState[context[0]].total}`);
+          });
+        }
+        if (offset < totalItems) {
+          getRequest('indexer.batch');
+        } else if (!optimized) {
+          optimized = true;
+          getRequest('indexer.optimize');
+        }
+      } catch (error) {
+        removeElement('progress');
+        try {
+          if (json.error) {
+            if (progressHeader) {
+              progressHeader.innerText = json.header;
+              progressHeader.classList.add('finder-error');
+            }
+            if (progressMessage) {
+              progressMessage.innerHTML = Joomla.sanitizeHtml(json.message);
+              progressMessage.classList.add('finder-error');
+            }
+          }
+        } catch (ignore) {
+          if (error === '') {
+            error = Joomla.Text._('COM_FINDER_NO_ERROR_RETURNED');
+          }
+          if (progressHeader) {
+            progressHeader.innerText = Joomla.Text._('COM_FINDER_AN_ERROR_HAS_OCCURRED');
+            progressHeader.classList.add('finder-error');
+          }
+          if (progressMessage) {
+            progressMessage.innerHTML = Joomla.sanitizeHtml(error);
+            progressMessage.classList.add('finder-error');
+          }
+        }
+      }
+      return true;
+    };
+    const handleFailure = error => {
+      const progressHeader = document.getElementById('finder-progress-header');
+      const progressMessage = document.getElementById('finder-progress-message');
+      let data;
+      if (error instanceof Error) {
+        // Encode any html in the message
+        const div = document.createElement('div');
+        div.textContent = error.message;
+        data = div.innerHTML;
+        if (error instanceof SyntaxError) {
+          data = Joomla.Text._('JLIB_JS_AJAX_ERROR_PARSE').replace('%s', data);
+        }
+      } else if (typeof error === 'object' && error.responseText) {
+        data = error.responseText;
+        try {
+          data = JSON.parse(data);
+        } catch (e) {
+          data = Joomla.Text._('JLIB_JS_AJAX_ERROR_OTHER').replace('%s', error.status);
+        }
+      }
+      removeElement('progress');
+      const header = data && data.header ? data.header : Joomla.Text._('COM_FINDER_AN_ERROR_HAS_OCCURRED');
+      const message = data && data.message ? data.message : `${Joomla.Text._('COM_FINDER_MESSAGE_RETURNED')}<br>${data}`;
+      if (progressHeader) {
+        progressHeader.innerText = header;
+        progressHeader.classList.add('finder-error');
+      }
+      if (progressMessage) {
+        progressMessage.innerHTML = Joomla.sanitizeHtml(message);
+        progressMessage.classList.add('finder-error');
+      }
+    };
+    getRequest = task => {
+      Joomla.request({
+        url: `${path}&task=${task}${token}`,
+        promise: true
+      }).then(xhr => {
+        handleResponse(JSON.parse(xhr.responseText));
+      }).catch(error => {
+        handleFailure(error);
+      });
+    };
+    const initialize = () => {
+      offset = 0;
+      progress = 0;
+      getRequest('indexer.start');
+    };
+    initialize();
+  };
+})(Joomla, document);
 
-	var handleResponse = function (json, resp) {
-		try {
-			if (json === null) {
-				throw resp;
-			}
-			if (json.error) {
-				throw json;
-			}
-			if (json.start) {
-				totalItems = json.totalItems;
-			}
-			offset += json.batchOffset;
-			updateProgress(json.header, json.message);
-			if (offset < totalItems) {
-				getRequest('indexer.batch');
-			} else if (!optimized) {
-				optimized = true;
-				getRequest('indexer.optimize');
-			}
-		} catch (error) {
-			jQuery('#progress').remove();
-			try {
-				if (json.error) {
-					jQuery('#finder-progress-header').text(json.header).addClass('finder-error');
-					jQuery('#finder-progress-message').html(json.message).addClass('finder-error');
-				}
-			} catch (ignore) {
-				if (error === '') {
-					error = Joomla.JText._('COM_FINDER_NO_ERROR_RETURNED');
-				}
-				jQuery('#finder-progress-header').text(Joomla.JText._('COM_FINDER_AN_ERROR_HAS_OCCURRED')).addClass('finder-error');
-				jQuery('#finder-progress-message').html(error).addClass('finder-error');
-			}
-		}
-		return true;
-	};
-
-	var handleFailure= function (xhr) {
-		json = (typeof xhr == 'object' && xhr.responseText) ? xhr.responseText : null;
-		json = json ? jQuery.parseJSON(json) : null;
-		jQuery('#progress').remove();
-		if (json) {
-			json = json.responseText != null ? Json.evaluate(json.responseText, true) : json;
-		}
-		var header = json ? json.header : Joomla.JText._('COM_FINDER_AN_ERROR_HAS_OCCURRED');
-		var message = json ? json.message : Joomla.JText._('COM_FINDER_MESSAGE_RETURNED') + ' <br />' + json;
-		jQuery('#finder-progress-header').text(header).addClass('finder-error');
-		jQuery('#finder-progress-message').html(message).addClass('finder-error');
-	};
-
-	var updateProgress = function (header, message) {
-		progress = (offset / totalItems) * 100;
-		jQuery('#finder-progress-header').text(header);
-		jQuery('#finder-progress-message').html(message);
-		if (progress < 100) {
-			jQuery('#progress-bar').css('width', progress + '%').attr('aria-valuenow', progress);
-		}
-		else {
-			jQuery('#progress-bar').removeClass('bar-success').addClass('bar-warning').attr('aria-valuemin', 100).attr('aria-valuemax', 200);
-			jQuery('#progress-bar').css('width', progress + '%').attr('aria-valuenow', progress);
-		}
-		if (message == msg) {
-			jQuery('#progress').remove();
-			window.parent.jQuery('#modal-archive', parent.document).modal('hide');
-		}
-	};
-
-	initialize();
-};
-
-jQuery(function () {
-	Indexer = new FinderIndexer();
-	if (typeof window.parent.SqueezeBox == 'object') {
-		jQuery(window.parent.SqueezeBox).on('close', function () {
-			window.parent.location.reload(true);
-		});
-	}
+// @todo use directly the Joomla.finderIndexer() instead of the Indexer()!!!
+document.addEventListener('DOMContentLoaded', () => {
+  window.Indexer = Joomla.finderIndexer();
 });

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @package     Joomla.Site
  * @subpackage  mod_articles_archive
@@ -8,15 +9,18 @@
  */
 
 defined('_JEXEC') or die;
+
+if (!$list) {
+    return;
+}
+
 ?>
-<?php if (!empty($list)) : ?>
-	<ul class="archive-module<?php echo $moduleclass_sfx; ?> mod-list">
-	<?php foreach ($list as $item) : ?>
-	<li>
-		<a href="<?php echo $item->link; ?>">
-			<?php echo $item->text; ?>
-		</a>
-	</li>
-	<?php endforeach; ?>
+<ul class="mod-articlesarchive archive-module mod-list">
+    <?php foreach ($list as $item) : ?>
+    <li>
+        <a href="<?php echo $item->link; ?>">
+            <?php echo $item->text; ?>
+        </a>
+    </li>
+    <?php endforeach; ?>
 </ul>
-<?php endif; ?>

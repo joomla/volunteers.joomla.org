@@ -4,11 +4,11 @@
  * @subpackage  Admin
  *
  * @copyright   Copyright (C) 2005 - 2020 Open Source Matters, Inc. All rights reserved.
- * @copyright   Copyright (c) 2009-2024 Ryan Demmer. All rights reserved
+ * @copyright   Copyright (c) 2009-2026 Ryan Demmer. All rights reserved
  * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
 
-defined('JPATH_PLATFORM') or die;
+\defined('_JEXEC') or die;
 
 use Joomla\CMS\Form\FormHelper;
 
@@ -40,6 +40,12 @@ if (!class_exists('\\Joomla\\CMS\\Form\\Field\\FilelistField')) {
 if (!class_exists('\\Joomla\\CMS\\Form\\Field\\ListField')) {
     FormHelper::loadFieldClass('list');
     class_alias('JFormFieldList', '\\Joomla\\CMS\\Form\\Field\\ListField');
+}
+
+// For UsergroupList
+if (!class_exists('\\Joomla\\CMS\\Form\\Field\\UsergrouplistField')) {
+    FormHelper::loadFieldClass('usergroups');
+    class_alias('JFormFieldUsergroups', '\\Joomla\\CMS\\Form\\Field\\UsergrouplistField');
 }
 
 // For Number
@@ -78,4 +84,4 @@ if (!class_exists('\\Joomla\\CMS\\HTML\\Helpers\\Sidebar')) {
     class_alias('JHtmlSidebar', '\\Joomla\\CMS\\HTML\\Helpers\\Sidebar');
 }
 
-JLoader::register('JceHelperAdmin', JPATH_COMPONENT_ADMINISTRATOR . '/helpers/admin.php');
+JLoader::register('JceHelperAdmin', JPATH_ADMINISTRATOR . '/components/com_jce/helpers/admin.php');

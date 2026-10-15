@@ -1,17 +1,14 @@
-#finder-indexer-container {
-	text-align: center;
-}
-
+@charset "UTF-8";
 #finder-progress-container {
-	width: 350px;
-	margin: 0 auto;
+  width: 350px;
+  margin: 0 auto;
 }
 
 h1.finder-error {
-	color: #FF0000;
+  color: red;
 }
 
 p.finder-error {
-	color: #FF0000;
-	font-weight:bold;
+  color: red;
+  font-weight: bold;
 }

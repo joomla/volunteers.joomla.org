@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Joomla! Content Management System
  *
@@ -8,127 +9,131 @@
 
 namespace Joomla\CMS\Http;
 
-defined('JPATH_PLATFORM') or die;
+use Joomla\CMS\Version;
+use Joomla\Http\TransportInterface;
 
-use Joomla\Registry\Registry;
-use Joomla\CMS\Http\Http;
-use Joomla\CMS\Http\TransportInterface;
-use Joomla\CMS\Uri\Uri;
+// phpcs:disable PSR1.Files.SideEffects
+\defined('_JEXEC') or die;
+// phpcs:enable PSR1.Files.SideEffects
 
 /**
  * HTTP factory class.
  *
  * @since  3.0.0
+ * @deprecated  6.0 will be removed in 8.0
+ *              Use Joomla\Http\HttpFactory instead
  */
 class HttpFactory
 {
-	/**
-	 * method to receive Http instance.
-	 *
-	 * @param   Registry  $options   Client options object.
-	 * @param   mixed     $adapters  Adapter (string) or queue of adapters (array) to use for communication.
-	 *
-	 * @return  Http      Joomla Http class
-	 *
-	 * @throws  \RuntimeException
-	 *
-	 * @since   3.0.0
-	 */
-	public static function getHttp(Registry $options = null, $adapters = null)
-	{
-		if (empty($options))
-		{
-			$options = new Registry;
-		}
+    /**
+     * Method to create a JHttp instance.
+     *
+     * @param   array|\ArrayAccess  $options   Client options array.
+     * @param   array|string        $adapters  Adapter (string) or queue of adapters (array) to use for communication.
+     *
+     * @return  Http
+     *
+     * @throws  \RuntimeException
+     * @since   3.0.0
+     * @deprecated  6.0 will be removed in 8.0
+     *              Use Joomla\Http\HttpFactory::getHttp() instead
+     */
+    public static function getHttp($options = [], $adapters = null)
+    {
+        if (!\is_array($options) && !($options instanceof \ArrayAccess)) {
+            throw new \InvalidArgumentException(
+                'The options param must be an array or implement the ArrayAccess interface.'
+            );
+        }
 
-		if (!$driver = self::getAvailableDriver($options, $adapters))
-		{
-			throw new \RuntimeException('No transport driver available.');
-		}
+        // Set default userAgent if nothing else is set
+        if (!isset($options['userAgent'])) {
+            $version              = new Version();
+            $options['userAgent'] = $version->getUserAgent('Joomla', true, false);
+        }
 
-		return new Http($options, $driver);
-	}
+        if (!$driver = static::getAvailableDriver($options, $adapters)) {
+            throw new \RuntimeException('No transport driver available.');
+        }
 
-	/**
-	 * Finds an available http transport object for communication
-	 *
-	 * @param   Registry  $options  Option for creating http transport object
-	 * @param   mixed     $default  Adapter (string) or queue of adapters (array) to use
-	 *
-	 * @return  TransportInterface Interface sub-class
-	 *
-	 * @since   3.0.0
-	 */
-	public static function getAvailableDriver(Registry $options, $default = null)
-	{
-		if (is_null($default))
-		{
-			$availableAdapters = self::getHttpTransports();
-		}
-		else
-		{
-			settype($default, 'array');
-			$availableAdapters = $default;
-		}
+        return new Http($options, $driver);
+    }
 
-		// Check if there is at least one available http transport adapter
-		if (!count($availableAdapters))
-		{
-			return false;
-		}
+    /**
+     * Finds an available http transport object for communication
+     *
+     * @param   array|\ArrayAccess  $options  Options for creating TransportInterface object
+     * @param   array|string        $default  Adapter (string) or queue of adapters (array) to use
+     *
+     * @return  TransportInterface|boolean  Interface sub-class or boolean false if no adapters are available
+     *
+     * @since   3.0.0
+     * @deprecated  6.0 will be removed in 8.0
+     *              Use Joomla\Http\HttpFactory::getAvailableDriver() instead
+     */
+    public static function getAvailableDriver($options = [], $default = null)
+    {
+        if (\is_null($default)) {
+            $availableAdapters = static::getHttpTransports();
+        } else {
+            settype($default, 'array');
+            $availableAdapters = $default;
+        }
 
-		foreach ($availableAdapters as $adapter)
-		{
-			$class = __NAMESPACE__ . '\\Transport\\' . ucfirst($adapter) . 'Transport';
+        // Check if there is at least one available http transport adapter
+        if (!\count($availableAdapters)) {
+            return false;
+        }
 
-			if (!class_exists($class))
-			{
-				$class = 'JHttpTransport' . ucfirst($adapter);
-			}
+        foreach ($availableAdapters as $adapter) {
+            /** @var $class TransportInterface */
+            $class = __NAMESPACE__ . '\\Transport\\' . ucfirst($adapter) . 'Transport';
 
-			if (class_exists($class) && $class::isSupported())
-			{
-				return new $class($options);
-			}
-		}
+            if (!class_exists($class)) {
+                $class = 'JHttpTransport' . ucfirst($adapter);
+            }
 
-		return false;
-	}
+            if (class_exists($class) && $class::isSupported()) {
+                return new $class($options);
+            }
+        }
 
-	/**
-	 * Get the http transport handlers
-	 *
-	 * @return  array  An array of available transport handlers
-	 *
-	 * @since   3.0.0
-	 */
-	public static function getHttpTransports()
-	{
-		$names = array();
-		$iterator = new \DirectoryIterator(__DIR__ . '/Transport');
+        return false;
+    }
 
-		/** @type  $file  \DirectoryIterator */
-		foreach ($iterator as $file)
-		{
-			$fileName = $file->getFilename();
+    /**
+     * Get the http transport handlers
+     *
+     * @return  array  An array of available transport handlers
+     *
+     * @since   3.0.0
+     * @deprecated  6.0 will be removed in 8.0
+     *              Use Joomla\Http\HttpFactory::getHttpTransports() instead
+     */
+    public static function getHttpTransports()
+    {
+        $names    = [];
+        $iterator = new \DirectoryIterator(__DIR__ . '/Transport');
 
-			// Only load for php files.
-			if ($file->isFile() && $file->getExtension() == 'php')
-			{
-				$names[] = substr($fileName, 0, strrpos($fileName, 'Transport.'));
-			}
-		}
+        /** @type  $file  \DirectoryIterator */
+        foreach ($iterator as $file) {
+            $fileName = $file->getFilename();
 
-		// Keep alphabetical order across all environments
-		sort($names);
+            // Only load for php files.
+            if ($file->isFile() && $file->getExtension() === 'php') {
+                $names[] = substr($fileName, 0, strrpos($fileName, 'Transport.'));
+            }
+        }
 
-		// If curl is available set it to the first position
-		if ($key = array_search('Curl', $names))
-		{
-			unset($names[$key]);
-			array_unshift($names, 'Curl');
-		}
+        // Keep alphabetical order across all environments
+        sort($names);
 
-		return $names;
-	}
+        // If curl is available set it to the first position
+        if ($key = array_search('Curl', $names)) {
+            unset($names[$key]);
+            array_unshift($names, 'Curl');
+        }
+
+        return $names;
+    }
 }

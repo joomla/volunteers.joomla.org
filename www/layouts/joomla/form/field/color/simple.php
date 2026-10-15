@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @package     Joomla.Site
  * @subpackage  Layout
@@ -8,6 +9,10 @@
  */
 
 defined('_JEXEC') or die;
+
+use Joomla\CMS\Factory;
+use Joomla\CMS\Language\Text;
+use Joomla\Utilities\ArrayHelper;
 
 extract($displayData);
 
@@ -41,28 +46,40 @@ extract($displayData);
  * @var   boolean  $hasValue        Has this field a value assigned?
  * @var   array    $options         Options available for this field.
  * @var   array    $checked         Is this field checked?
- * @var   array    $position        Is this field checked?
- * @var   array    $control         Is this field checked?
+ * @var   array    $position        Position of input.
+ * @var   array    $control         The forms control.
+ * @var   array    $colors          The specified colors
+ * @var   string   $dataAttribute   Miscellaneous data attributes preprocessed for HTML output
+ * @var   array    $dataAttributes  Miscellaneous data attribute for eg, data-*.
  */
+Factory::getDocument()->getWebAssetManager()
+    ->useStyle('webcomponent.field-simple-color')
+    ->useScript('webcomponent.field-simple-color');
 
-$class    = ' class="' . trim('simplecolors chzn-done ' . $class) . '"';
-$disabled = $disabled ? ' disabled' : '';
-$readonly = $readonly ? ' readonly' : '';
+Text::script('JCLOSE');
+Text::script('JNONE');
 
-// Include jQuery
-JHtml::_('jquery.framework');
-JHtml::_('script', 'system/html5fallback.js', array('version' => 'auto', 'relative' => true, 'conditional' => 'lt IE 9'));
-JHtml::_('script', 'jui/jquery.simplecolors.min.js', array('version' => 'auto', 'relative' => true));
-JHtml::_('stylesheet', 'jui/jquery.simplecolors.css', array('version' => 'auto', 'relative' => true));
-JHtml::_('script', 'system/color-field-init.min.js', array('version' => 'auto', 'relative' => true));
+$slots = [];
+$attr  = [
+    'name'  => $name,
+    'id'    => $id,
+    'class' => trim($class),
+    'value' => trim($color),
+];
+
+if ($disabled) {
+    $attr['disabled'] = '';
+}
+
+if ($readonly) {
+    $attr['readonly'] = '';
+}
+
+foreach ($colors as $val) {
+    $slots[] = '<button slot="colors" value="' . trim($val) . '" aria-pressed="' . (trim($val) === $color ? 'true' : 'false') . '" type="button"></button>';
+}
 ?>
-<select data-chosen="true" name="<?php echo $name; ?>" id="<?php echo $id; ?>"<?php
-echo $disabled; ?><?php echo $readonly; ?><?php echo $required; ?><?php echo $class; ?><?php echo $position; ?><?php
-echo $onchange; ?><?php echo $autofocus; ?> style="visibility:hidden;width:22px;height:1px">
-	<?php foreach ($colors as $i => $c) : ?>
-		<option<?php echo ($c == $color ? ' selected="selected"' : ''); ?>><?php echo $c; ?></option>
-		<?php if (($i + 1) % $split == 0) : ?>
-			<option>-</option>
-		<?php endif; ?>
-	<?php endforeach; ?>
-</select>
+<joomla-field-simple-color <?php echo ArrayHelper::toString($attr); ?>>
+    <?php echo implode('', $slots); ?>
+    <input type="hidden" name="<?php echo $name; ?>" value="<?php echo $color; ?>" />
+</joomla-field-simple-color>

@@ -1,8 +1,8 @@
 <?php
 
 /**
- * @copyright     Copyright (c) 2009-2024 Ryan Demmer. All rights reserved
- * @license       GNU/GPL 3 - http://www.gnu.org/copyleft/gpl.html
+ * @copyright     Copyright (c) 2009-2026 Ryan Demmer. All rights reserved
+ * @license       GNU General Public License version 2 or later; see LICENSE.txt
  * JCE is free software. This version may have been modified pursuant
  * to the GNU General Public License, and as distributed it includes or
  * is derivative of works licensed under the GNU General Public License or
@@ -20,6 +20,8 @@ use Joomla\Filesystem\Path;
 
 class JceControllerPlugin extends BaseController
 {
+    private const ALLOWED_TASKS = ['display', 'xhr', 'loadlanguages', 'pack'];
+
     private static $map = array(
         'image' => 'imgmanager',
         'imagepro' => 'imgmanager_ext',
@@ -39,17 +41,77 @@ class JceControllerPlugin extends BaseController
         return $className;
     }
 
+    /**
+     * Check that a resolved plugin file is a php file inside a directory plugins live in.
+     *
+     * The path can come from an onWfPluginExecute handler, which is free to set anything,
+     * so it is confined here rather than trusted. Roots are permitted in full: any third
+     * party serving its own file from its own plugin folder is allowed.
+     *
+     * @param string $filepath The resolved plugin file path
+     *
+     * @return bool
+     */
+    private function isPluginPath($filepath)
+    {
+        // normalise separators without resolving symlinks
+        $filepath = Path::clean($filepath);
+
+        if (strpos($filepath, '..') !== false || !is_file($filepath)) {
+            return false;
+        }
+
+        if (strtolower(pathinfo($filepath, PATHINFO_EXTENSION)) !== 'php') {
+            return false;
+        }
+
+        $roots = array(JPATH_PLUGINS, WF_EDITOR_PLUGINS);
+
+        // only defined when the pro plugin is installed
+        if (defined('WF_EDITOR_PRO_PLUGINS')) {
+            $roots[] = WF_EDITOR_PRO_PLUGINS;
+        }
+
+        $realpath = realpath($filepath);
+
+        foreach ($roots as $root) {
+            if (strpos($filepath, Path::clean($root . '/')) === 0) {
+                return true;
+            }
+
+            $realroot = realpath($root);
+
+            if ($realroot && $realpath && strpos($realpath, Path::clean($realroot . '/')) === 0) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public function execute($task)
     {
         // check for session token
         Session::checkToken('request') or jexit(Text::_('JINVALID_TOKEN'));
+
+        // accept the "controller.task" form too, in case the caller has not stripped the
+        // prefix, as JceControllerEditor::execute() already does
+        if (strpos($task, '.') !== false) {
+            list($name, $task) = explode('.', $task);
+        }
+
+        // validate the task against allowed tasks
+        if (!in_array($task, self::ALLOWED_TASKS, true)) {
+            throw new \Exception(Text::_('JERROR_ALERTNOAUTHOR'), 403);
+        }
         
         $wf = WFApplication::getInstance();
 
         $app = Factory::getApplication();
         $language = Factory::getLanguage();
 
-        $plugin = $this->input->get('plugin');
+        $plugin = $this->input->get('plugin', '', 'cmd');
+        $caller = '';
 
         // get plugin name
         if (strpos($plugin, '.') !== false) {
@@ -118,8 +180,9 @@ class JceControllerPlugin extends BaseController
             );
         }
 
-        if (false === $filepath) {
-            jexit('Invalid Plugin');
+        // an event handler can set any path, so confine it before including
+        if (false === $filepath || !$this->isPluginPath($filepath)) {
+            throw new Exception(Text::_('JERROR_ALERTNOAUTHOR'), 403);
         }
 
         include_once $filepath;

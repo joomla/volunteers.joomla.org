@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @package     Joomla.Plugin
  * @subpackage  System.privacyconsent
@@ -17,7 +18,6 @@ extract($displayData);
  * @var   string   $autocomplete           Autocomplete attribute for the field.
  * @var   boolean  $autofocus              Is autofocus enabled?
  * @var   string   $class                  Classes for the input.
- * @var   string   $description            Description of the field.
  * @var   boolean  $disabled               Is this field disabled?
  * @var   string   $group                  Group the field belongs to. <fields> section in form XML.
  * @var   boolean  $hidden                 Is this field hidden in the form?
@@ -38,12 +38,10 @@ extract($displayData);
  * @var   string   $validate               Validation rules to apply.
  * @var   string   $value                  Value attribute of the field.
  * @var   array    $options                Options available for this field.
- * @var   array    $privacynote            The privacy note that needs to be displayed
+ * @var   string   $privacynote            The privacy note that needs to be displayed
  * @var   array    $translateLabel         Should the label be translated?
- * @var   array    $translateDescription   Should the description be translated?
  * @var   array    $translateHint          Should the hint be translated?
  * @var   array    $privacyArticle         The Article ID holding the Privacy Article
  */
 
 echo '<div class="alert alert-info">' . $privacynote . '</div>';
-

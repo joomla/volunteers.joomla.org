@@ -5,7 +5,7 @@
  * @subpackage  Admin
  *
  * @copyright   Copyright (C) 2005 - 2023 Open Source Matters, Inc. All rights reserved.
- * @copyright   Copyright (c) 2009-2024 Ryan Demmer. All rights reserved
+ * @copyright   Copyright (c) 2009-2026 Ryan Demmer. All rights reserved
  * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
 \defined('_JEXEC') or die;
@@ -13,18 +13,12 @@
 use Joomla\CMS\Uri\Uri;
 
 // Some shortcuts to make life easier
-define('WF_VERSION', '2.9.99.5');
+define('WF_VERSION', '2.9.99.12');
 
 // JCE Administration Component
 define('WF_ADMINISTRATOR', JPATH_ADMINISTRATOR . '/components/com_jce');
 // JCE Site Component
 define('WF_SITE', JPATH_SITE . '/components/com_jce');
-// JCE Plugin
-if (defined('JPATH_PLATFORM')) {
-    define('WF_PLUGIN', JPATH_SITE . '/plugins/editors/jce');
-} else {
-    define('WF_PLUGIN', JPATH_SITE . '/plugins/editors');
-}
 // JCE Editor
 define('WF_EDITOR', WF_SITE . '/editor');
 // JCE Editor Media

@@ -1,4 +1,4 @@
-/* jce - 2.9.99.5 | 2026-06-03 | https://www.joomlacontenteditor.net | Source: https://github.com/widgetfactory/jce | Copyright (C) 2006 - 2026 Ryan Demmer. All rights reserved | GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html */
+/* jce - 2.9.99.12 | 2026-10-07 | https://www.joomlacontenteditor.net | Source: https://github.com/widgetfactory/jce | Copyright (C) 2006 - 2026 Ryan Demmer. All rights reserved | GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html; see LICENSE.txt */
 !function($, tinyMCEPopup) {
     var anchorElm, currNode, emailRex = /(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})/;
     var LinkDialog = {
@@ -88,7 +88,7 @@
                 return attribs;
             }(anchorElm), $repeatable = $(".uk-repeatable", "#custom_attributes"), 
             $.each(start, function(key, val) {
-                if ("data-mouseover" === key || "data-mouseout" === key || 0 === key.indexOf("on")) return !0;
+                if (0 === key.indexOf("data-mce-on") || 0 === key.indexOf("on")) return !0;
                 if (document.getElementById(key) || "class" == key) return !0;
                 try {
                     val = decodeURIComponent(val);
@@ -140,7 +140,7 @@
         },
         insertAndClose: function() {
             tinyMCEPopup.restoreSelection();
-            var el, rel, rules, ed = tinyMCEPopup.editor, se = ed.selection, node = se.getNode(), args = {}, api = ed.plugins.link;
+            var el, rel, isUnsafe, rules, ed = tinyMCEPopup.editor, se = ed.selection, node = se.getNode(), args = {}, api = ed.plugins.link;
             function removeTargetRules(rel) {
                 return rel.filter(function(val) {
                     return -1 === $.inArray(val, rules);
@@ -160,7 +160,7 @@
             } : removeTargetRules)(rel)).length ? function(rel) {
                 return $.trim(rel.sort().join(" "));
             }(rel) : null));
-            var isUnsafe, txt = $("#text").val();
+            var elms, txt = $("#text").val();
             se.isCollapsed() ? (ed.execCommand("mceInsertContent", !1, '<a href="' + args.href + '" id="__mce_tmp">' + txt + "</a>", {
                 skip_undo: 1
             }), el = ed.dom.get("__mce_tmp"), ed.dom.setAttribs(el, args)) : (api.isAnchor(node) ? ed.dom.setAttribs(node, {
@@ -172,11 +172,11 @@
             }, {
                 skip_undo: 1
             }), ed.dom.setAttrib(node, "style", ed.dom.getAttrib(node, "data-mce-style")), 
-            isUnsafe = ed.dom.select("a[data-mce-tmp]"), args["data-mce-tmp"] = null, 
-            tinymce.each(isUnsafe, function(elm, i) {
+            elms = ed.dom.select("a[data-mce-tmp]"), args["data-mce-tmp"] = null, 
+            tinymce.each(elms, function(elm, i) {
                 ed.dom.setAttribs(elm, args), 0 < i && args.id && ed.dom.setAttrib(elm, "id", ""), 
-                txt && api.updateTextContent(elm, txt);
-            }), isUnsafe.length && (el = isUnsafe[0])), txt && (ed.selection.select(el), 
+                txt && 1 === elms.length && api.updateTextContent(elm, txt);
+            }), elms.length && (el = elms[0])), txt && (ed.selection.select(el), 
             ed.selection.collapse(0)), el = el || node, WFPopups.createPopup(el), 
             ed.undoManager.add(), ed.nodeChanged(), tinyMCEPopup.close();
         },

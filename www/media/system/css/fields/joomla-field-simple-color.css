@@ -1,0 +1,50 @@
+@charset "UTF-8";
+joomla-field-simple-color {
+  display: block;
+}
+
+joomla-field-simple-color button {
+  appearance: none;
+  border: var(--border-width, 1px) solid var(--input-border-color, #ccc);
+  border-radius: var(--border-radius, .25rem);
+  background: none;
+  width: 2rem;
+  height: 2rem;
+  margin-block-end: .24rem;
+  margin-inline: .5rem;
+}
+
+joomla-field-simple-color::part(close) {
+  appearance: none;
+  background: none;
+  border: 0;
+  margin-block-end: .2rem;
+  margin-inline: .5rem;
+}
+
+joomla-field-simple-color::part(opener) {
+  vertical-align: middle;
+  border: var(--border-width, 1px) solid var(--input-border-color, #ccc);
+  border-radius: var(--border-radius, .25rem);
+  appearance: none;
+  width: 2rem;
+  height: 2rem;
+  margin-block: .7rem;
+  overflow: hidden;
+}
+
+joomla-field-simple-color::part(opener):focus, joomla-field-simple-color::part(opener):hover, joomla-field-simple-color button[aria-pressed="true"] {
+  border: 2px solid var(--template-link-color, #52a8eccc);
+  box-shadow: 0 0 0 .25rem #2a69b740;
+}
+
+joomla-field-simple-color::part(panel) {
+  float: inline-start;
+  background-color: var(--body-bg, #fff);
+  border: var(--border-width, 1px) solid var(--input-border-color, #ccc);
+  border-radius: var(--border-radius, .25rem);
+  background-clip: padding-box;
+  flex-flow: wrap;
+  padding: .64rem 0 .4rem;
+  box-shadow: 0 5px 10px #0003;
+}

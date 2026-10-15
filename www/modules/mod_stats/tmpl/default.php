@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @package     Joomla.Site
  * @subpackage  mod_stats
@@ -7,11 +8,13 @@
  * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
 
-defined('_JEXEC') or die;
+\defined('_JEXEC') or die;
 ?>
-<dl class="stats-module<?php echo $moduleclass_sfx; ?>">
+<ul class="mod-stats list-group">
 <?php foreach ($list as $item) : ?>
-	<dt><?php echo $item->title; ?></dt>
-	<dd><?php echo $item->data; ?></dd>
+    <li class="list-group-item">
+        <?php echo $item->title; ?>
+        <span class="badge bg-secondary float-end rounded-pill"><?php echo $item->data; ?></span>
+    </li>
 <?php endforeach; ?>
-</dl>
+</ul>

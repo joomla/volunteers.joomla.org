@@ -4,11 +4,19 @@
  * @subpackage  Editor
  *
  * @copyright   Copyright (C) 2005 - 2020 Open Source Matters, Inc. All rights reserved.
- * @copyright   Copyright (c) 2009-2024 Ryan Demmer. All rights reserved
+ * @copyright   Copyright (c) 2009-2026 Ryan Demmer. All rights reserved
  * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
 
 \defined('_JEXEC') or die;
+
+$theme 	= $this->get('theme');
+$caller = $this->get('caller');
+$name   = $this->get('name');
+
+if ($caller) {
+	$name .= '.' . $caller;
+}
 
 ?>
 <!DOCTYPE html>
@@ -18,7 +26,7 @@
 		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 		<!-- [head] -->
 	</head>
-	<body lang="<?php echo $this->language; ?>" id="jce" class="uk-jce <?php echo $this->theme; ?> uk-form uk-form-horizontal" data-plugin="<?php echo $this->getName(); ?>">
+	<body lang="<?php echo $this->language; ?>" id="jce" class="uk-jce <?php echo $theme; ?> uk-form uk-form-horizontal" data-plugin="<?php echo $name; ?>">
 		<!-- [body] -->
 	</body>
 </html>

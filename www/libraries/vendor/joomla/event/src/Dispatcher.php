@@ -1,499 +1,506 @@
 <?php
+
 /**
  * Part of the Joomla Framework Event Package
  *
- * @copyright  Copyright (C) 2005 - 2019 Open Source Matters, Inc. All rights reserved.
+ * @copyright  Copyright (C) 2005 - 2021 Open Source Matters, Inc. All rights reserved.
  * @license    GNU General Public License version 2 or later; see LICENSE
  */
 
 namespace Joomla\Event;
 
-use Closure;
-use InvalidArgumentException;
-
 /**
- * Implementation of a DispatcherInterface supporting
- * prioritized listeners.
+ * Implementation of a DispatcherInterface supporting prioritized listeners.
  *
  * @since  1.0
  */
 class Dispatcher implements DispatcherInterface
 {
-	/**
-	 * An array of registered events indexed by
-	 * the event names.
-	 *
-	 * @var    EventInterface[]
-	 *
-	 * @since  1.0
-	 */
-	protected $events = array();
+    /**
+     * An array of registered events indexed by the event names.
+     *
+     * @var    EventInterface[]
+     * @since  1.0
+     * @deprecated  2.0 will be removed in 5.0 Default event objects will no longer be supported
+     */
+    protected $events = [];
 
-	/**
-	 * A regular expression that will filter listener method names.
-	 *
-	 * @var    string
-	 * @since  1.0
-	 * @deprecated  1.1.0
-	 */
-	protected $listenerFilter;
+    /**
+     * An array of ListenersPriorityQueue indexed by the event names.
+     *
+     * @var    ListenersPriorityQueue[]
+     * @since  1.0
+     */
+    protected $listeners = [];
 
-	/**
-	 * An array of ListenersPriorityQueue indexed
-	 * by the event names.
-	 *
-	 * @var    ListenersPriorityQueue[]
-	 *
-	 * @since  1.0
-	 */
-	protected $listeners = array();
+    /**
+     * Set an event to the dispatcher. It will replace any event with the same name.
+     *
+     * @param   EventInterface  $event  The event.
+     *
+     * @return  $this
+     *
+     * @since   1.0
+     * @deprecated  2.0 will be removed in 5.0 Default event objects will no longer be supported
+     */
+    public function setEvent(EventInterface $event)
+    {
+        trigger_deprecation(
+            'joomla/event',
+            '2.0.0',
+            '%s() is deprecated and will be removed in 5.0.',
+            __METHOD__
+        );
 
-	/**
-	 * Set an event to the dispatcher.
-	 * It will replace any event with the same name.
-	 *
-	 * @param   EventInterface  $event  The event.
-	 *
-	 * @return  Dispatcher  This method is chainable.
-	 *
-	 * @since   1.0
-	 */
-	public function setEvent(EventInterface $event)
-	{
-		$this->events[$event->getName()] = $event;
+        $this->events[$event->getName()] = $event;
 
-		return $this;
-	}
+        return $this;
+    }
 
-	/**
-	 * Sets a regular expression to filter the class methods when adding a listener.
-	 *
-	 * @param   string  $regex  A regular expression (for example '^on' will only register methods starting with "on").
-	 *
-	 * @return  Dispatcher  This method is chainable.
-	 *
-	 * @since       1.0
-	 * @deprecated  1.1.0  Incorporate a method in your listener object such as `getEvents` to feed into the `setListener` method.
-	 */
-	public function setListenerFilter($regex)
-	{
-		$this->listenerFilter = $regex;
+    /**
+     * Add an event to this dispatcher, only if it is not existing.
+     *
+     * @param   EventInterface  $event  The event.
+     *
+     * @return  $this
+     *
+     * @since   1.0
+     * @deprecated  2.0 will be removed in 5.0 Default event objects will no longer be supported
+     */
+    public function addEvent(EventInterface $event)
+    {
+        trigger_deprecation(
+            'joomla/event',
+            '2.0.0',
+            '%s() is deprecated and will be removed in 5.0.',
+            __METHOD__
+        );
 
-		return $this;
-	}
+        if (!isset($this->events[$event->getName()])) {
+            $this->events[$event->getName()] = $event;
+        }
 
-	/**
-	 * Add an event to this dispatcher, only if it is not existing.
-	 *
-	 * @param   EventInterface  $event  The event.
-	 *
-	 * @return  Dispatcher  This method is chainable.
-	 *
-	 * @since   1.0
-	 */
-	public function addEvent(EventInterface $event)
-	{
-		if (!isset($this->events[$event->getName()]))
-		{
-			$this->events[$event->getName()] = $event;
-		}
+        return $this;
+    }
 
-		return $this;
-	}
+    /**
+     * Tell if the given event has been added to this dispatcher.
+     *
+     * @param   EventInterface|string  $event  The event object or name.
+     *
+     * @return  boolean  True if the listener has the given event, false otherwise.
+     *
+     * @since   1.0
+     * @deprecated  2.0 will be removed in 5.0 Default event objects will no longer be supported
+     */
+    public function hasEvent($event)
+    {
+        trigger_deprecation(
+            'joomla/event',
+            '2.0.0',
+            '%s() is deprecated and will be removed in 5.0.',
+            __METHOD__
+        );
 
-	/**
-	 * Tell if the given event has been added to this dispatcher.
-	 *
-	 * @param   EventInterface|string  $event  The event object or name.
-	 *
-	 * @return  boolean  True if the listener has the given event, false otherwise.
-	 *
-	 * @since   1.0
-	 */
-	public function hasEvent($event)
-	{
-		if ($event instanceof EventInterface)
-		{
-			$event = $event->getName();
-		}
+        if ($event instanceof EventInterface) {
+            $event = $event->getName();
+        }
 
-		return isset($this->events[$event]);
-	}
+        return isset($this->events[$event]);
+    }
 
-	/**
-	 * Get the event object identified by the given name.
-	 *
-	 * @param   string  $name     The event name.
-	 * @param   mixed   $default  The default value if the event was not registered.
-	 *
-	 * @return  EventInterface|mixed  The event of the default value.
-	 *
-	 * @since   1.0
-	 */
-	public function getEvent($name, $default = null)
-	{
-		if (isset($this->events[$name]))
-		{
-			return $this->events[$name];
-		}
+    /**
+     * Get the event object identified by the given name.
+     *
+     * @param   string  $name     The event name.
+     * @param   mixed   $default  The default value if the event was not registered.
+     *
+     * @return  EventInterface|mixed  The event of the default value.
+     *
+     * @since   1.0
+     * @deprecated  2.0 will be removed in 5.0 Default event objects will no longer be supported
+     */
+    public function getEvent($name, $default = null)
+    {
+        trigger_deprecation(
+            'joomla/event',
+            '2.0.0',
+            '%s() is deprecated and will be removed in 5.0.',
+            __METHOD__
+        );
 
-		return $default;
-	}
+        if (isset($this->events[$name])) {
+            return $this->events[$name];
+        }
 
-	/**
-	 * Remove an event from this dispatcher.
-	 * The registered listeners will remain.
-	 *
-	 * @param   EventInterface|string  $event  The event object or name.
-	 *
-	 * @return  Dispatcher  This method is chainable.
-	 *
-	 * @since   1.0
-	 */
-	public function removeEvent($event)
-	{
-		if ($event instanceof EventInterface)
-		{
-			$event = $event->getName();
-		}
+        return $default;
+    }
 
-		if (isset($this->events[$event]))
-		{
-			unset($this->events[$event]);
-		}
+    /**
+     * Remove an event from this dispatcher. The registered listeners will remain.
+     *
+     * @param   EventInterface|string  $event  The event object or name.
+     *
+     * @return  $this
+     *
+     * @since   1.0
+     * @deprecated  2.0 will be removed in 5.0 Default event objects will no longer be supported
+     */
+    public function removeEvent($event)
+    {
+        trigger_deprecation(
+            'joomla/event',
+            '2.0.0',
+            '%s() is deprecated and will be removed in 5.0.',
+            __METHOD__
+        );
 
-		return $this;
-	}
+        if ($event instanceof EventInterface) {
+            $event = $event->getName();
+        }
 
-	/**
-	 * Get the registered events.
-	 *
-	 * @return  EventInterface[]  The registered event.
-	 *
-	 * @since   1.0
-	 */
-	public function getEvents()
-	{
-		return $this->events;
-	}
+        if (isset($this->events[$event])) {
+            unset($this->events[$event]);
+        }
 
-	/**
-	 * Clear all events.
-	 *
-	 * @return  EventInterface[]  The old events.
-	 *
-	 * @since   1.0
-	 */
-	public function clearEvents()
-	{
-		$events       = $this->events;
-		$this->events = array();
+        return $this;
+    }
 
-		return $events;
-	}
+    /**
+     * Get the registered events.
+     *
+     * @return  EventInterface[]  The registered event.
+     *
+     * @since   1.0
+     * @deprecated  2.0 will be removed in 5.0 Default event objects will no longer be supported
+     */
+    public function getEvents()
+    {
+        trigger_deprecation(
+            'joomla/event',
+            '2.0.0',
+            '%s() is deprecated and will be removed in 5.0.',
+            __METHOD__
+        );
 
-	/**
-	 * Count the number of registered event.
-	 *
-	 * @return  integer  The numer of registered events.
-	 *
-	 * @since   1.0
-	 */
-	public function countEvents()
-	{
-		return \count($this->events);
-	}
+        return $this->events;
+    }
 
-	/**
-	 * Add a listener to this dispatcher, only if not already registered to these events.
-	 * If no events are specified, it will be registered to all events matching it's methods name.
-	 * In the case of a closure, you must specify at least one event name.
-	 *
-	 * @param   object|Closure  $listener  The listener
-	 * @param   array           $events    An associative array of event names as keys
-	 *                                     and the corresponding listener priority as values.
-	 *
-	 * @return  Dispatcher  This method is chainable.
-	 *
-	 * @throws  InvalidArgumentException
-	 *
-	 * @since   1.0
-	 */
-	public function addListener($listener, array $events = array())
-	{
-		if (!\is_object($listener))
-		{
-			throw new InvalidArgumentException('The given listener is not an object.');
-		}
+    /**
+     * Clear all events.
+     *
+     * @return  EventInterface[]  The old events.
+     *
+     * @since   1.0
+     * @deprecated  2.0 will be removed in 5.0 Default event objects will no longer be supported
+     */
+    public function clearEvents()
+    {
+        trigger_deprecation(
+            'joomla/event',
+            '2.0.0',
+            '%s() is deprecated and will be removed in 5.0.',
+            __METHOD__
+        );
 
-		// We deal with a closure.
-		if ($listener instanceof Closure)
-		{
-			if (empty($events))
-			{
-				throw new InvalidArgumentException('No event name(s) and priority specified for the Closure listener.');
-			}
+        $events       = $this->events;
+        $this->events = [];
 
-			foreach ($events as $name => $priority)
-			{
-				if (!isset($this->listeners[$name]))
-				{
-					$this->listeners[$name] = new ListenersPriorityQueue;
-				}
+        return $events;
+    }
 
-				$this->listeners[$name]->add($listener, $priority);
-			}
+    /**
+     * Count the number of registered event.
+     *
+     * @return  integer  The number of registered events.
+     *
+     * @since   1.0
+     * @deprecated  2.0 will be removed in 5.0 Default event objects will no longer be supported
+     */
+    public function countEvents()
+    {
+        trigger_deprecation(
+            'joomla/event',
+            '2.0.0',
+            '%s() is deprecated and will be removed in 5.0.',
+            __METHOD__
+        );
 
-			return $this;
-		}
+        return \count($this->events);
+    }
 
-		// We deal with a "normal" object.
-		$methods = get_class_methods($listener);
+    /**
+     * Attaches a listener to an event
+     *
+     * @param   string    $eventName  The event to listen to.
+     * @param   callable  $callback   A callable function
+     * @param   integer   $priority   The priority at which the $callback executed
+     *
+     * @return  boolean
+     *
+     * @since   1.0
+     */
+    public function addListener(string $eventName, callable $callback, int $priority = 0): bool
+    {
+        if (!isset($this->listeners[$eventName])) {
+            $this->listeners[$eventName] = new ListenersPriorityQueue();
+        }
 
-		if (!empty($events))
-		{
-			$methods = array_intersect($methods, array_keys($events));
-		}
+        $this->listeners[$eventName]->add($callback, $priority);
 
-		// @deprecated
-		$regex = $this->listenerFilter ?: '.*';
+        return true;
+    }
 
-		foreach ($methods as $event)
-		{
-			// @deprecated - this outer `if` is deprecated.
-			if (preg_match("#$regex#", $event))
-			{
-				// Retain this inner code after removal of the outer `if`.
-				if (!isset($this->listeners[$event]))
-				{
-					$this->listeners[$event] = new ListenersPriorityQueue;
-				}
+    /**
+     * Get the priority of the given listener for the given event.
+     *
+     * @param   string    $eventName  The event to listen to.
+     * @param   callable  $callback   A callable function
+     *
+     * @return  mixed  The listener priority or null if the listener doesn't exist.
+     *
+     * @since   1.0
+     */
+    public function getListenerPriority($eventName, callable $callback)
+    {
+        if (isset($this->listeners[$eventName])) {
+            return $this->listeners[$eventName]->getPriority($callback);
+        }
+    }
 
-				$priority = isset($events[$event]) ? $events[$event] : Priority::NORMAL;
+    /**
+     * Get the listeners registered to the given event.
+     *
+     * @param   string|null  $event  The event to fetch listeners for or null to fetch all listeners
+     *
+     * @return  callable[]  An array of registered listeners sorted according to their priorities.
+     *
+     * @since   1.0
+     */
+    public function getListeners(?string $event = null)
+    {
+        if ($event !== null) {
+            if (isset($this->listeners[$event])) {
+                return $this->listeners[$event]->getAll();
+            }
 
-				$this->listeners[$event]->add($listener, $priority);
-			}
-		}
+            return [];
+        }
 
-		return $this;
-	}
+        $dispatcherListeners = [];
 
-	/**
-	 * Get the priority of the given listener for the given event.
-	 *
-	 * @param   object|Closure         $listener  The listener.
-	 * @param   EventInterface|string  $event     The event object or name.
-	 *
-	 * @return  mixed  The listener priority or null if the listener doesn't exist.
-	 *
-	 * @since   1.0
-	 */
-	public function getListenerPriority($listener, $event)
-	{
-		if ($event instanceof EventInterface)
-		{
-			$event = $event->getName();
-		}
+        foreach ($this->listeners as $registeredEvent => $listeners) {
+            $dispatcherListeners[$registeredEvent] = $listeners->getAll();
+        }
 
-		if (isset($this->listeners[$event]))
-		{
-			return $this->listeners[$event]->getPriority($listener);
-		}
-	}
+        return $dispatcherListeners;
+    }
 
-	/**
-	 * Get the listeners registered to the given event.
-	 *
-	 * @param   EventInterface|string  $event  The event object or name.
-	 *
-	 * @return  object[]  An array of registered listeners sorted according to their priorities.
-	 *
-	 * @since   1.0
-	 */
-	public function getListeners($event)
-	{
-		if ($event instanceof EventInterface)
-		{
-			$event = $event->getName();
-		}
+    /**
+     * Tell if the given listener has been added.
+     *
+     * If an event is specified, it will tell if the listener is registered for that event.
+     *
+     * @param   callable  $callback   The callable to check is listening to the event.
+     * @param   ?string   $eventName  An optional event name to check a listener is subscribed to.
+     *
+     * @return  boolean  True if the listener is registered, false otherwise.
+     *
+     * @since   1.0
+     */
+    public function hasListener(callable $callback, ?string $eventName = null)
+    {
+        if ($eventName) {
+            if (isset($this->listeners[$eventName])) {
+                return $this->listeners[$eventName]->has($callback);
+            }
+        } else {
+            foreach ($this->listeners as $queue) {
+                if ($queue->has($callback)) {
+                    return true;
+                }
+            }
+        }
 
-		if (isset($this->listeners[$event]))
-		{
-			return $this->listeners[$event]->getAll();
-		}
+        return false;
+    }
 
-		return array();
-	}
+    /**
+     * Removes an event listener from the specified event.
+     *
+     * @param   string    $eventName  The event to remove a listener from.
+     * @param   callable  $listener   The listener to remove.
+     *
+     * @return  void
+     *
+     * @since   2.0.0
+     */
+    public function removeListener(string $eventName, callable $listener): void
+    {
+        if (isset($this->listeners[$eventName])) {
+            $this->listeners[$eventName]->remove($listener);
+        }
+    }
 
-	/**
-	 * Tell if the given listener has been added.
-	 * If an event is specified, it will tell if the listener is registered for that event.
-	 *
-	 * @param   object|Closure         $listener  The listener.
-	 * @param   EventInterface|string  $event     The event object or name.
-	 *
-	 * @return  boolean  True if the listener is registered, false otherwise.
-	 *
-	 * @since   1.0
-	 */
-	public function hasListener($listener, $event = null)
-	{
-		if ($event)
-		{
-			if ($event instanceof EventInterface)
-			{
-				$event = $event->getName();
-			}
+    /**
+     * Clear the listeners in this dispatcher.
+     *
+     * If an event is specified, the listeners will be cleared only for that event.
+     *
+     * @param   string  $event  The event name.
+     *
+     * @return  $this
+     *
+     * @since   1.0
+     */
+    public function clearListeners($event = null)
+    {
+        if ($event) {
+            if (isset($this->listeners[$event])) {
+                unset($this->listeners[$event]);
+            }
+        } else {
+            $this->listeners = [];
+        }
 
-			if (isset($this->listeners[$event]))
-			{
-				return $this->listeners[$event]->has($listener);
-			}
-		}
-		else
-		{
-			foreach ($this->listeners as $queue)
-			{
-				if ($queue->has($listener))
-				{
-					return true;
-				}
-			}
-		}
+        return $this;
+    }
 
-		return false;
-	}
+    /**
+     * Count the number of registered listeners for the given event.
+     *
+     * @param   string  $event  The event name.
+     *
+     * @return  integer
+     *
+     * @since   1.0
+     */
+    public function countListeners($event)
+    {
+        return isset($this->listeners[$event]) ? \count($this->listeners[$event]) : 0;
+    }
 
-	/**
-	 * Remove the given listener from this dispatcher.
-	 * If no event is specified, it will be removed from all events it is listening to.
-	 *
-	 * @param   object|Closure         $listener  The listener to remove.
-	 * @param   EventInterface|string  $event     The event object or name.
-	 *
-	 * @return  Dispatcher  This method is chainable.
-	 *
-	 * @since   1.0
-	 */
-	public function removeListener($listener, $event = null)
-	{
-		if ($event)
-		{
-			if ($event instanceof EventInterface)
-			{
-				$event = $event->getName();
-			}
+    /**
+     * Adds an event subscriber.
+     *
+     * @param   SubscriberInterface  $subscriber  The subscriber.
+     *
+     * @return  void
+     *
+     * @since   2.0.0
+     */
+    public function addSubscriber(SubscriberInterface $subscriber): void
+    {
+        foreach ($subscriber->getSubscribedEvents() as $eventName => $params) {
+            if (\is_array($params)) {
+                $this->addListener($eventName, [$subscriber, $params[0]], $params[1] ?? Priority::NORMAL);
+            } else {
+                $this->addListener($eventName, [$subscriber, $params]);
+            }
+        }
+    }
 
-			if (isset($this->listeners[$event]))
-			{
-				$this->listeners[$event]->remove($listener);
-			}
-		}
-		else
-		{
-			foreach ($this->listeners as $queue)
-			{
-				$queue->remove($listener);
-			}
-		}
+    /**
+     * Removes an event subscriber.
+     *
+     * @param   SubscriberInterface  $subscriber  The subscriber.
+     *
+     * @return  void
+     *
+     * @since   2.0.0
+     */
+    public function removeSubscriber(SubscriberInterface $subscriber): void
+    {
+        foreach ($subscriber->getSubscribedEvents() as $eventName => $params) {
+            if (\is_array($params)) {
+                $this->removeListener($eventName, [$subscriber, $params[0]]);
+            } else {
+                $this->removeListener($eventName, [$subscriber, $params]);
+            }
+        }
+    }
 
-		return $this;
-	}
+    /**
+     * Dispatches an event to all registered listeners.
+     *
+     * @param   string           $name   The name of the event to dispatch.
+     * @param   ?EventInterface  $event  The event to pass to the event handlers/listeners.
+     *                                   If not supplied, an empty EventInterface instance is created.
+     *                                   Note, not passing an event is deprecated and will be required as of 3.0.
+     *
+     * @return  EventInterface
+     *
+     * @since   2.0.0
+     */
+    public function dispatch(string $name, ?EventInterface $event = null): EventInterface
+    {
+        if (!($event instanceof EventInterface)) {
+            trigger_deprecation(
+                'joomla/event',
+                '2.0.0',
+                'Not passing an event object to %s() is deprecated, as of 5.0 the $event argument will be required.',
+                __METHOD__
+            );
 
-	/**
-	 * Clear the listeners in this dispatcher.
-	 * If an event is specified, the listeners will be cleared only for that event.
-	 *
-	 * @param   EventInterface|string  $event  The event object or name.
-	 *
-	 * @return  Dispatcher  This method is chainable.
-	 *
-	 * @since   1.0
-	 */
-	public function clearListeners($event = null)
-	{
-		if ($event)
-		{
-			if ($event instanceof EventInterface)
-			{
-				$event = $event->getName();
-			}
+            $event = $this->getDefaultEvent($name);
+        }
 
-			if (isset($this->listeners[$event]))
-			{
-				unset($this->listeners[$event]);
-			}
-		}
-		else
-		{
-			$this->listeners = array();
-		}
+        if (isset($this->listeners[$event->getName()])) {
+            foreach ($this->listeners[$event->getName()] as $listener) {
+                if ($event->isStopped()) {
+                    return $event;
+                }
 
-		return $this;
-	}
+                $listener($event);
+            }
+        }
 
-	/**
-	 * Count the number of registered listeners for the given event.
-	 *
-	 * @param   EventInterface|string  $event  The event object or name.
-	 *
-	 * @return  integer  The number of registered listeners for the given event.
-	 *
-	 * @since   1.0
-	 */
-	public function countListeners($event)
-	{
-		if ($event instanceof EventInterface)
-		{
-			$event = $event->getName();
-		}
+        return $event;
+    }
 
-		return isset($this->listeners[$event]) ? \count($this->listeners[$event]) : 0;
-	}
+    /**
+     * Trigger an event.
+     *
+     * @param   EventInterface|string  $event  The event object or name.
+     *
+     * @return  EventInterface  The event after being passed through all listeners.
+     *
+     * @since   1.0
+     * @deprecated  2.0 will be removed in 5.0 Use dispatch() instead.
+     */
+    public function triggerEvent($event)
+    {
+        trigger_deprecation(
+            'joomla/event',
+            '2.0.0',
+            '%s() is deprecated and will be removed in 5.0, use %s::dispatch() instead.',
+            __METHOD__,
+            DispatcherInterface::class
+        );
 
-	/**
-	 * Trigger an event.
-	 *
-	 * @param   EventInterface|string  $event  The event object or name.
-	 *
-	 * @return  EventInterface  The event after being passed through all listeners.
-	 *
-	 * @since   1.0
-	 */
-	public function triggerEvent($event)
-	{
-		if (!($event instanceof EventInterface))
-		{
-			if (isset($this->events[$event]))
-			{
-				$event = $this->events[$event];
-			}
-			else
-			{
-				$event = new Event($event);
-			}
-		}
+        if (!($event instanceof EventInterface)) {
+            $event = $this->getDefaultEvent($event);
+        }
 
-		if (isset($this->listeners[$event->getName()]))
-		{
-			foreach ($this->listeners[$event->getName()] as $listener)
-			{
-				if ($event->isStopped())
-				{
-					return $event;
-				}
+        return $this->dispatch($event->getName(), $event);
+    }
 
-				if ($listener instanceof Closure)
-				{
-					\call_user_func($listener, $event);
-				}
-				else
-				{
-					\call_user_func(array($listener, $event->getName()), $event);
-				}
-			}
-		}
+    /**
+     * Get an event object for the specified event name
+     *
+     * @param   string  $name  The event name to get an EventInterface object for
+     *
+     * @return  EventInterface
+     *
+     * @since   2.0.0
+     * @deprecated  2.0 will be removed in 5.0 Default event objects will no longer be supported
+     */
+    private function getDefaultEvent(string $name): EventInterface
+    {
+        if (isset($this->events[$name])) {
+            return $this->events[$name];
+        }
 
-		return $event;
-	}
+        return new Event($name);
+    }
 }

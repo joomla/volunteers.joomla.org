@@ -1,0 +1,12 @@
+@charset "UTF-8";
+div.phpdebugbar-widgets-mails span.phpdebugbar-widgets-subject {
+  display: block;
+}
+
+div.phpdebugbar-widgets-mails li.phpdebugbar-widgets-list-item pre.phpdebugbar-widgets-headers {
+  border: 1px solid var(--debugbar-border);
+  font-family: var(--debugbar-font-mono);
+  margin: 10px;
+  padding: 5px;
+  display: none;
+}

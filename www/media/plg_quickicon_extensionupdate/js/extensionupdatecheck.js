@@ -1,46 +1,56 @@
 /**
- * @copyright	(C) 2011 Open Source Matters, Inc. <https://www.joomla.org>
- * @license		GNU General Public License version 2 or later; see LICENSE.txt
+ * @copyright  (C) 2018 Open Source Matters, Inc. <https://www.joomla.org>
+ * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
-jQuery(document).ready(function() {
-	var ajax_structure = {
-		success: function(data, textStatus, jqXHR) {
-			var link = jQuery('#plg_quickicon_extensionupdate').find('span.j-links-link');
+(() => {
 
-			try {
-				var updateInfoList = jQuery.parseJSON(data);
-			} catch (e) {
-				// An error occurred
-				link.html(plg_quickicon_extensionupdate_text.ERROR);
-			}
+  // Ajax call to get the update status of the installed extensions
+  const fetchUpdate = () => {
+    if (Joomla.getOptions('js-extensions-update')) {
+      const options = Joomla.getOptions('js-extensions-update');
+      const update = (type, text) => {
+        const link = document.getElementById('plg_quickicon_extensionupdate');
+        if (link) {
+          link.classList.add(type);
+        }
+        link.querySelectorAll('span.j-links-link').forEach(span => {
+          span.innerHTML = Joomla.sanitizeHtml(text);
+        });
+      };
 
-			if (updateInfoList instanceof Array) {
-				if (updateInfoList.length == 0) {
-					// No updates
-					link.html(plg_quickicon_extensionupdate_text.UPTODATE);
-				} else {
-					var updateString = plg_quickicon_extensionupdate_text.UPDATEFOUND_MESSAGE.replace("%s", updateInfoList.length);
-					jQuery('#system-message-container').prepend(
-						'<div class="alert alert-error alert-joomlaupdate">'
-						+ updateString
-						+ ' <button class="btn btn-primary" onclick="document.location=\'' + plg_quickicon_extensionupdate_url + '\'">'
-						+ plg_quickicon_extensionupdate_text.UPDATEFOUND_BUTTON + '</button>'
-						+ '</div>'
-					);
-					var updateString = plg_quickicon_extensionupdate_text.UPDATEFOUND.replace("%s", updateInfoList.length);
-					link.html(updateString);
-				}
-			} else {
-				// An error occurred
-				link.html(plg_quickicon_extensionupdate_text.ERROR);
-			}
-		},
-		error: function(jqXHR, textStatus, errorThrown) {
-			// An error occurred
-			jQuery('#plg_quickicon_extensionupdate').find('span.j-links-link').html(plg_quickicon_extensionupdate_text.ERROR);
-		},
-		url: plg_quickicon_extensionupdate_ajax_url + '&eid=0&skip=700'
-	};
-	ajax_object = new jQuery.ajax(ajax_structure);
-});
+      /**
+       * DO NOT use fetch() for QuickIcon requests. They must be queued.
+       *
+       * @see https://github.com/joomla/joomla-cms/issues/38001
+       */
+      Joomla.enqueueRequest({
+        url: options.ajaxUrl,
+        method: 'GET',
+        promise: true
+      }).then(xhr => {
+        const response = xhr.responseText;
+        const updateInfoList = JSON.parse(response);
+        if (Array.isArray(updateInfoList)) {
+          if (updateInfoList.length === 0) {
+            // No updates
+            update('success', Joomla.Text._('PLG_QUICKICON_EXTENSIONUPDATE_UPTODATE'));
+          } else {
+            let text = Joomla.Text._('PLG_QUICKICON_EXTENSIONUPDATE_UPDATEFOUND').replace('%s', `<span class="badge text-dark bg-light">${updateInfoList.length}</span>`);
+            updateInfoList.filter(u => u.security > 0).forEach(update => text += '<div>' + Joomla.Text._('PLG_QUICKICON_EXTENSIONUPDATE_SECURITY_UPDATEFOUND').replace('%s', update.name) + '</div>');
+            update('danger', text);
+          }
+        } else {
+          // An error occurred
+          update('danger', Joomla.Text._('PLG_QUICKICON_EXTENSIONUPDATE_ERROR'));
+        }
+      }).catch(() => {
+        // An error occurred
+        update('danger', Joomla.Text._('PLG_QUICKICON_EXTENSIONUPDATE_ERROR'));
+      });
+    }
+  };
+
+  // Give some times to the layout and other scripts to settle their stuff
+  window.addEventListener('load', () => setTimeout(fetchUpdate, 330));
+})();

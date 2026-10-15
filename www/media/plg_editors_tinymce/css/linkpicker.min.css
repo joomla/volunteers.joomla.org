@@ -1,0 +1,5 @@
+@charset "UTF-8";/*!
+ * @copyright  (C) 2026 Open Source Matters, Inc. <https://www.joomla.org>
+ * @license    GNU General Public License version 2 or later; see LICENSE.txt
+ */
+.editor-link-picker{block-size:100%;min-block-size:60vh;display:flex}.editor-link-picker-nav{border-inline-end:1px solid var(--border-color,#dee2e6);flex:0 0 220px;overflow:auto}.editor-link-picker-frame{flex:auto;position:relative}.editor-link-picker-frame iframe{border:0;block-size:100%;inline-size:100%}.editor-link-picker-item{text-align:start;cursor:pointer;background:0 0;border:0;align-items:center;gap:.5rem;inline-size:100%;padding:.5rem .75rem;display:flex}.editor-link-picker-item:hover,.editor-link-picker-item:focus-visible{background:#7f7f7f26}.editor-link-picker-item.active{background:#7f7f7f40;font-weight:600}

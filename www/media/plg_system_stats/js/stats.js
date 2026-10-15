@@ -1,93 +1,27 @@
 /**
- * @copyright   (C) 2015 Open Source Matters, Inc. <https://www.joomla.org>
- * @license     GNU General Public License version 2 or later; see LICENSE.txt
+ * @copyright  (C) 2018 Open Source Matters, Inc. <https://www.joomla.org>
+ * @license    GNU General Public License version 2 or later; see LICENSE.txt
+ * @since      3.5.0
  */
+(document => {
 
-/**
- * stats javascript behavior
- *
- * To allow users to accept & configure stats sending
- *
- * @package     Joomla
- * @since       3.5.0
- * @version  1.0
- */
+  // Selectors used by this script
+  const resetId = 'js-pstats-reset-uid';
+  const uniqueIdFieldId = 'jform_params_unique_id';
+  const onReset = event => {
+    event.preventDefault();
+    document.getElementById(uniqueIdFieldId).value = '';
+    Joomla.submitbutton('plugin.apply');
+  };
+  const onBoot = () => {
+    // Reset the unique id
+    const reset = document.getElementById(resetId);
+    if (reset) {
+      reset.addEventListener('click', onReset);
+    }
 
-(function ($) {
-	$(document).ready(function () {
-		var ajaxData = {
-			'option' : 'com_ajax',
-			'group'  : 'system',
-			'plugin' : 'renderStatsMessage',
-			'format' : 'raw'
-			},
-			messageContainer = $('#system-message-container');
-
-		/**
-		 * Initialise events for the message container
-		 *
-		 * @return  void
-		 */
-		function initStatsEvents()
-		{
-			var globalContainer = messageContainer.find('.js-pstats-alert'),
-				detailsContainer = messageContainer.find('.js-pstats-data-details');
-
-			// Show details about the information being sent
-			messageContainer.on('click', '.js-pstats-btn-details', function(e){
-				detailsContainer.toggle(200);
-				e.preventDefault();
-			});
-
-			// Always allow
-			messageContainer.on('click', '.js-pstats-btn-allow-always', function(e){
-
-				// Remove message
-				globalContainer.hide(200);
-				detailsContainer.remove();
-				ajaxData.plugin = 'sendAlways';
-
-				$.getJSON('index.php', ajaxData, function(response){});
-				e.preventDefault();
-			});
-
-			// Allow once
-			messageContainer.on('click', '.js-pstats-btn-allow-once', function(e){
-
-				// Remove message
-				globalContainer.hide(200);
-				detailsContainer.remove();
-
-				ajaxData.plugin = 'sendOnce';
-
-				$.getJSON('index.php', ajaxData, function(response){});
-				e.preventDefault();
-			});
-
-			// Never allow
-			messageContainer.on('click', '.js-pstats-btn-allow-never', function(e){
-
-				// Remove message
-				globalContainer.hide(200);
-				detailsContainer.remove();
-
-				ajaxData.plugin = 'sendNever';
-
-				$.getJSON('index.php', ajaxData, function(response){});
-				e.preventDefault();
-			});
-		}
-
-		ajaxData.plugin = 'sendStats';
-
-		$.getJSON('index.php', ajaxData, function(response){
-			if (response && response.html) {
-				messageContainer
-					.append(response.html)
-					.find('.js-pstats-alert').show(200);
-
-				initStatsEvents();
-			}
-		});
-	});
-})(jQuery);
+    // Cleanup
+    document.removeEventListener('DOMContentLoaded', onBoot);
+  };
+  document.addEventListener('DOMContentLoaded', onBoot);
+})(document, Joomla);

@@ -1,0 +1,309 @@
+<?php
+
+/**
+ * @package     Joomla.API
+ * @subpackage  com_content
+ *
+ * @copyright   (C) 2019 Open Source Matters, Inc. <https://www.joomla.org>
+ * @license     GNU General Public License version 2 or later; see LICENSE.txt
+ */
+
+namespace Joomla\Component\Content\Api\View\Articles;
+
+use Joomla\CMS\Event\Content\ContentPrepareEvent;
+use Joomla\CMS\Event\Model\PrepareDataEvent;
+use Joomla\CMS\Helper\TagsHelper;
+use Joomla\CMS\Language\Multilanguage;
+use Joomla\CMS\MVC\View\JsonApiView as BaseApiView;
+use Joomla\CMS\Plugin\PluginHelper;
+use Joomla\Component\Content\Api\Helper\ContentHelper;
+use Joomla\Component\Content\Api\Serializer\ContentSerializer;
+use Joomla\Component\Fields\Administrator\Helper\FieldsHelper;
+use Joomla\Registry\Registry;
+
+// phpcs:disable PSR1.Files.SideEffects
+\defined('_JEXEC') or die;
+// phpcs:enable PSR1.Files.SideEffects
+
+/**
+ * The article view
+ *
+ * @since  4.0.0
+ */
+class JsonapiView extends BaseApiView
+{
+    /**
+     * The fields to render item in the documents
+     *
+     * @var  array
+     * @since  4.0.0
+     */
+    protected $fieldsToRenderItem = [
+        'id',
+        'typeAlias',
+        'asset_id',
+        'title',
+    /**
+     * @deprecated  6.2.0 will be removed in 8.0
+     *              Will be removed without replacement.
+     */
+        'text',
+        'introtext',
+        'fulltext',
+        'tags',
+        'language',
+        'state',
+        'category',
+        'images',
+        'metakey',
+        'metadesc',
+        'metadata',
+        'access',
+        'featured',
+        'alias',
+        'note',
+        'publish_up',
+        'publish_down',
+        'urls',
+        'created',
+        'created_by',
+        'created_by_alias',
+        'modified',
+        'modified_by',
+        'hits',
+        'version',
+        'featured_up',
+        'featured_down',
+        'schemaorg',
+    ];
+
+    /**
+     * The fields to render items in the documents
+     *
+     * @var  array
+     * @since  4.0.0
+     */
+    protected $fieldsToRenderList = [
+        'id',
+        'typeAlias',
+        'asset_id',
+        'title',
+    /**
+     * @deprecated  6.2.0 will be removed in 8.0
+     *              Will be removed without replacement.
+     */
+        'text',
+        'introtext',
+        'fulltext',
+        'tags',
+        'language',
+        'state',
+        'category',
+        'images',
+        'metakey',
+        'metadesc',
+        'metadata',
+        'access',
+        'featured',
+        'alias',
+        'note',
+        'publish_up',
+        'publish_down',
+        'urls',
+        'created',
+        'created_by',
+        'created_by_alias',
+        'modified',
+        'hits',
+        'version',
+        'featured_up',
+        'featured_down',
+        'schemaorg',
+    ];
+
+    /**
+     * The relationships the item has
+     *
+     * @var    array
+     * @since  4.0.0
+     */
+    protected $relationship = [
+        'category',
+        'created_by',
+        'tags',
+    ];
+
+    /**
+     * Constructor.
+     *
+     * @param   array  $config  A named configuration array for object construction.
+     *                          contentType: the name (optional) of the content type to use for the serialization
+     *
+     * @since   4.0.0
+     */
+    public function __construct($config = [])
+    {
+        if (\array_key_exists('contentType', $config)) {
+            $this->serializer = new ContentSerializer($config['contentType']);
+        }
+
+        parent::__construct($config);
+    }
+
+    /**
+     * Execute and display a template script.
+     *
+     * @param   ?array  $items  Array of items
+     *
+     * @return  string
+     *
+     * @since   4.0.0
+     */
+    public function displayList(?array $items = null)
+    {
+        foreach (FieldsHelper::getFields('com_content.article') as $field) {
+            $this->fieldsToRenderList[] = $field->name;
+        }
+
+        return parent::displayList();
+    }
+
+    /**
+     * Execute and display a template script.
+     *
+     * @param   object  $item  Item
+     *
+     * @return  string
+     *
+     * @since   4.0.0
+     */
+    public function displayItem($item = null)
+    {
+        $this->relationship[] = 'modified_by';
+
+        foreach (FieldsHelper::getFields('com_content.article') as $field) {
+            $this->fieldsToRenderItem[] = $field->name;
+        }
+
+        if (Multilanguage::isEnabled()) {
+            $this->fieldsToRenderItem[] = 'languageAssociations';
+            $this->relationship[]       = 'languageAssociations';
+        }
+
+        return parent::displayItem();
+    }
+
+    /**
+     * Prepare item before render.
+     *
+     * @param   object  $item  The model item
+     *
+     * @return  object
+     *
+     * @since   4.0.0
+     */
+    protected function prepareItem($item)
+    {
+        if (!$item) {
+            return $item;
+        }
+
+        /**
+         * @deprecated  6.2.0 will be removed in 8.0
+         *              Will be removed without replacement.
+         */
+        $item->text = $item->introtext . ' ' . $item->fulltext;
+
+        $params = new Registry($item->params ?? '{}');
+
+        // Process the content plugins.
+        $dispatcher = $this->getDispatcher();
+        PluginHelper::importPlugin('content', null, true, $dispatcher);
+        $dispatcher->dispatch(
+            'onContentPrepare',
+            new ContentPrepareEvent(
+                'onContentPrepare',
+                ['context' => 'com_content.article', 'subject' => $item, 'params' => $params, 'page' => 0]
+            )
+        );
+
+        foreach (FieldsHelper::getFields('com_content.article', $item, true) as $field) {
+            $item->{$field->name} = $field->apivalue ?? $field->rawvalue;
+        }
+
+        if (Multilanguage::isEnabled() && !empty($item->associations)) {
+            $associations = [];
+
+            foreach ($item->associations as $language => $association) {
+                $itemId = explode(':', $association)[0];
+
+                $associations[] = (object) [
+                    'id'       => $itemId,
+                    'language' => $language,
+                ];
+            }
+
+            $item->associations = $associations;
+        }
+
+        if (!empty($item->tags->tags)) {
+            $tagsIds    = explode(',', $item->tags->tags);
+            $item->tags = $item->tagsHelper->getTags($tagsIds);
+        } else {
+            $item->tags = [];
+            $tags       = new TagsHelper();
+            $tagsIds    = $tags->getTagIds($item->id, 'com_content.article');
+
+            if (!empty($tagsIds)) {
+                $tagsIds    = explode(',', $tagsIds);
+                $item->tags = $tags->getTags($tagsIds);
+            }
+        }
+
+        if (isset($item->images)) {
+            $registry     = new Registry($item->images);
+            $item->images = $registry->toArray();
+
+            if (!empty($item->images['image_intro'])) {
+                $item->images['image_intro'] = ContentHelper::resolve($item->images['image_intro']);
+            }
+
+            if (!empty($item->images['image_fulltext'])) {
+                $item->images['image_fulltext'] = ContentHelper::resolve($item->images['image_fulltext']);
+            }
+        }
+
+        // Add schema.org data using existing plugin system
+        if (PluginHelper::isEnabled('system', 'schemaorg')) {
+            $item->schemaorg = $this->getSchemaOrg($item);
+        }
+
+        return parent::prepareItem($item);
+    }
+
+    /**
+     * Get schema.org structured data for an article using the plugin system
+     *
+     * @param   object  $item  The article item
+     *
+     * @return  array|null
+     *
+     * @since   6.1.0
+     */
+    protected function getSchemaOrg($item)
+    {
+        $context = 'com_content.article';
+        $event   = new PrepareDataEvent('onContentPrepareData', ['context' => $context, 'data' => $item]);
+
+        $dispatcher = $this->getDispatcher();
+        PluginHelper::importPlugin('system', 'schemaorg', true, $dispatcher);
+        $dispatcher->dispatch('onContentPrepareData', $event);
+
+        if (isset($item->schema) && !empty($item->schema['schemaType'])) {
+            $schemaType = $item->schema['schemaType'];
+            return $item->schema[$schemaType] ?? null;
+        }
+
+        return null;
+    }
+}

@@ -1,1 +1,788 @@
-Joomla=window.Joomla||{},Joomla.editors=Joomla.editors||{},Joomla.editors.instances=Joomla.editors.instances||{},function(e,t){"use strict";e.submitform=function(e,o,n){o||(o=t.getElementById("adminForm")),e&&(o.task.value=e),o.noValidate=!n,n?o.hasAttribute("novalidate")&&o.removeAttribute("novalidate"):o.setAttribute("novalidate","");var r=t.createElement("input");r.style.display="none",r.type="submit",o.appendChild(r).click(),o.removeChild(r)},e.submitbutton=function(t){e.submitform(t)},e.Text={strings:{},_:function(t,o){var n=e.getOptions("joomla.jtext");return n&&(this.load(n),e.loadOptions({"joomla.jtext":null})),o=void 0===o?"":o,t=t.toUpperCase(),void 0!==this.strings[t]?this.strings[t]:o},load:function(e){for(var t in e)e.hasOwnProperty(t)&&(this.strings[t.toUpperCase()]=e[t]);return this}},e.JText=e.Text,e.optionsStorage=e.optionsStorage||null,e.getOptions=function(t,o){return e.optionsStorage||e.loadOptions(),void 0!==e.optionsStorage[t]?e.optionsStorage[t]:o},e.loadOptions=function(o){if(!o){for(var n,r,a,i=t.querySelectorAll(".joomla-script-options.new"),s=0,l=0,d=i.length;l<d;l++)n=(r=i[l]).text||r.textContent,(a=JSON.parse(n))&&(e.loadOptions(a),s++),r.className=r.className.replace(" new"," loaded");if(s)return}if(e.optionsStorage){if(o)for(var c in o)o.hasOwnProperty(c)&&(e.optionsStorage[c]=o[c])}else e.optionsStorage=o||{}},e.replaceTokens=function(e){if(/^[0-9A-F]{32}$/i.test(e)){var o,n,r,a=t.getElementsByTagName("input");for(o=0,r=a.length;o<r;o++)"hidden"==(n=a[o]).type&&"1"==n.value&&32==n.name.length&&(n.name=e)}},e.isEmail=function(e){console.warn("Joomla.isEmail() is deprecated, use the formvalidator instead");return/^[\w.!#$%&‚Äô*+\/=?^`{|}~-]+@[a-z0-9-]+(?:\.[a-z0-9-]{2,})+$/i.test(e)},e.checkAll=function(e,t){if(!e.form)return!1;t=t||"cb";var o,n,r,a=0;for(o=0,r=e.form.elements.length;o<r;o++)(n=e.form.elements[o]).type==e.type&&0===n.id.indexOf(t)&&(n.checked=e.checked,a+=n.checked?1:0);return e.form.boxchecked&&(e.form.boxchecked.value=a),!0},e.renderMessages=function(o){e.removeMessages();var n,r,a,i,s,l,d,c=t.getElementById("system-message-container");for(n in o)if(o.hasOwnProperty(n)){r=o[n],a=t.createElement("div"),d="notice"===n?"alert-info":"alert-"+n,d="message"===n?"alert-success":d,d="error"===n?"alert-error alert-danger":d,a.className="alert "+d;var u=t.createElement("button");for(u.setAttribute("type","button"),u.setAttribute("data-dismiss","alert"),u.className="close",u.innerHTML="×",a.appendChild(u),void 0!==e.JText._(n)&&((i=t.createElement("h4")).className="alert-heading",i.innerHTML=e.JText._(n),a.appendChild(i)),s=r.length-1;s>=0;s--)(l=t.createElement("div")).innerHTML=r[s],a.appendChild(l);c.appendChild(a)}},e.removeMessages=function(){for(var e=t.getElementById("system-message-container");e.firstChild;)e.removeChild(e.firstChild);e.style.display="none",e.offsetHeight,e.style.display=""},e.ajaxErrorsMessages=function(t,o,n){var r={};if("parsererror"===o){for(var a=t.responseText.trim(),i=[],s=a.length-1;s>=0;s--)i.unshift(["&#",a[s].charCodeAt(),";"].join(""));a=i.join(""),r.error=[e.JText._("JLIB_JS_AJAX_ERROR_PARSE").replace("%s",a)]}else"nocontent"===o?r.error=[e.JText._("JLIB_JS_AJAX_ERROR_NO_CONTENT")]:"timeout"===o?r.error=[e.JText._("JLIB_JS_AJAX_ERROR_TIMEOUT")]:"abort"===o?r.error=[e.JText._("JLIB_JS_AJAX_ERROR_CONNECTION_ABORT")]:t.responseJSON&&t.responseJSON.message?r.error=[e.JText._("JLIB_JS_AJAX_ERROR_OTHER").replace("%s",t.status)+" <em>"+t.responseJSON.message+"</em>"]:t.statusText?r.error=[e.JText._("JLIB_JS_AJAX_ERROR_OTHER").replace("%s",t.status)+" <em>"+t.statusText+"</em>"]:r.error=[e.JText._("JLIB_JS_AJAX_ERROR_OTHER").replace("%s",t.status)];return r},e.isChecked=function(e,o){if(void 0===o&&(o=t.getElementById("adminForm")),o.boxchecked.value=e?parseInt(o.boxchecked.value)+1:parseInt(o.boxchecked.value)-1,o.elements["checkall-toggle"]){var n,r,a,i=!0;for(n=0,a=o.elements.length;n<a;n++)if("checkbox"==(r=o.elements[n]).type&&"checkall-toggle"!=r.name&&!r.checked){i=!1;break}o.elements["checkall-toggle"].checked=i}},e.popupWindow=function(e,t,o,n,r){var a=(screen.width-o)/2,i="height="+n+",width="+o+",top="+(screen.height-n)/2+",left="+a+",scrollbars="+r+",resizable";window.open(e,t,i).window.focus()},e.tableOrdering=function(o,n,r,a){void 0===a&&(a=t.getElementById("adminForm")),a.filter_order.value=o,a.filter_order_Dir.value=n,e.submitform(r,a)},window.writeDynaList=function(e,o,n,r,a,i){console.warn("window.writeDynaList() is deprecated without a replacement!");for(var s=t.createElement("select"),l=e.split(" "),d=0;d<l.length;d++){var c=l[d].split("=");"on"!==c[0].trim().substr(0,2).toLowerCase()&&"href"!==c[0].trim().toLowerCase()&&s.setAttribute(c[0],c[1].replace(/\"/g,""))}var u,m,p,h=n==r;for(u=0;u<o.length;u++)if((p=o[u])[0]==n){m=h?a==p[1]:0===u;var f=t.createElement("option");f.setAttribute("value",p[1]),f.innerText=p[2],m&&f.setAttribute("selected","selected"),s.appendChild(f)}i?i.appendChild(s):t.body.appendChild(s)},window.changeDynaList=function(e,o,n,r,a){console.warn("window.changeDynaList() is deprecated without a replacement!");for(var i,s,l,d,c=t.adminForm[e],u=n==r;c.firstChild;)c.removeChild(c.firstChild);i=0;for(s in o)o.hasOwnProperty(s)&&(l=o[s])[0]==n&&((d=new Option).value=l[1],d.text=l[2],(u&&a==d.value||!u&&0===i)&&(d.selected=!0),c.options[i++]=d);c.length=i},window.radioGetCheckedValue=function(e){if(console.warn("window.radioGetCheckedValue() is deprecated without a replacement!"),!e)return"";var t,o=e.length;if(void 0===o)return e.checked?e.value:"";for(t=0;t<o;t++)if(e[t].checked)return e[t].value;return""},window.getSelectedValue=function(e,o){console.warn("window.getSelectedValue() is deprecated without a replacement!");var n=t[e][o],r=n.selectedIndex;return null!==r&&r>-1?n.options[r].value:null},window.listItemTask=function(t,o){return console.warn("window.listItemTask() is deprecated use Joomla.listItemTask() instead"),e.listItemTask(t,o)},e.listItemTask=function(e,o){var n,r=t.adminForm,a=0,i=r[e];if(!i)return!1;for(;n=r["cb"+a];)n.checked=!1,a++;return i.checked=!0,r.boxchecked.value=1,window.submitform(o),!1},window.submitbutton=function(t){console.warn("window.submitbutton() is deprecated use Joomla.submitbutton() instead"),e.submitbutton(t)},window.submitform=function(t){console.warn("window.submitform() is deprecated use Joomla.submitform() instead"),e.submitform(t)},window.saveorder=function(e,t){console.warn("window.saveorder() is deprecated without a replacement!"),window.checkAll_button(e,t)},window.checkAll_button=function(o,n){var r,a;for(console.warn("window.checkAll_button() is deprecated without a replacement!"),n=n||"saveorder",r=0;r<=o;r++){if(!(a=t.adminForm["cb"+r]))return void alert("You cannot change the order of items, as an item in the list is `Checked Out`");a.checked=!0}e.submitform(n)},e.loadingLayer=function(o,n){if(o=o||"show",n=n||t.body,"load"===o){var r=(e.getOptions("system.paths")||{}).root||"",a=t.createElement("div");a.id="loading-logo",a.style.position="fixed",a.style.top="0",a.style.left="0",a.style.width="100%",a.style.height="100%",a.style.opacity="0.8",a.style.filter="alpha(opacity=80)",a.style.overflow="hidden",a.style["z-index"]="10000",a.style.display="none",a.style["background-color"]="#fff",a.style["background-image"]='url("'+r+'/media/jui/images/ajax-loader.gif")',a.style["background-position"]="center",a.style["background-repeat"]="no-repeat",a.style["background-attachment"]="fixed",n.appendChild(a)}else t.getElementById("loading-logo")||e.loadingLayer("load",n),t.getElementById("loading-logo").style.display="show"==o?"block":"none";return t.getElementById("loading-logo")},e.extend=function(e,t){for(var o in t)t.hasOwnProperty(o)&&(e[o]=t[o]);return e},e.request=function(t){(t=e.extend({url:"",method:"GET",data:null,perform:!0},t)).method=t.data?"POST":t.method.toUpperCase();try{var o=window.XMLHttpRequest?new XMLHttpRequest:new ActiveXObject("MSXML2.XMLHTTP.3.0");if(o.open(t.method,t.url,!0),o.setRequestHeader("X-Requested-With","XMLHttpRequest"),o.setRequestHeader("X-Ajax-Engine","Joomla!"),"POST"===t.method){var n=e.getOptions("csrf.token","");n&&o.setRequestHeader("X-CSRF-Token",n),t.headers&&t.headers["Content-Type"]||o.setRequestHeader("Content-Type","application/x-www-form-urlencoded")}if(t.headers)for(var r in t.headers)t.headers.hasOwnProperty(r)&&o.setRequestHeader(r,t.headers[r]);if(o.onreadystatechange=function(){4===o.readyState&&(200===o.status?t.onSuccess&&t.onSuccess.call(window,o.responseText,o):t.onError&&t.onError.call(window,o))},t.perform){if(t.onBefore&&!1===t.onBefore.call(window,o))return o;o.send(t.data)}}catch(e){return window.console&&console.log(e),!1}return o}}(Joomla,document);
+(function () {
+  'use strict';
+
+  function _extends() {
+    return _extends = Object.assign ? Object.assign.bind() : function (n) {
+      for (var e = 1; e < arguments.length; e++) {
+        var t = arguments[e];
+        for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]);
+      }
+      return n;
+    }, _extends.apply(null, arguments);
+  }
+
+  /**
+   * --------------------------------------------------------------------------
+   * Bootstrap util/sanitizer.js
+   * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
+   * --------------------------------------------------------------------------
+   */
+
+  // js-docs-end allow-list
+
+  const uriAttributes = new Set(['background', 'cite', 'href', 'itemtype', 'longdesc', 'poster', 'src', 'xlink:href']);
+
+  /**
+   * A pattern that recognizes URLs that are safe wrt. XSS in URL navigation
+   * contexts.
+   *
+   * Shout-out to Angular https://github.com/angular/angular/blob/15.2.8/packages/core/src/sanitization/url_sanitizer.ts#L38
+   */
+  const SAFE_URL_PATTERN = /^(?!javascript:)(?:[a-z0-9+.-]+:|[^&:/?#]*(?:[/?#]|$))/i;
+  const allowedAttribute = (attribute, allowedAttributeList) => {
+    const attributeName = attribute.nodeName.toLowerCase();
+    if (allowedAttributeList.includes(attributeName)) {
+      if (uriAttributes.has(attributeName)) {
+        return Boolean(SAFE_URL_PATTERN.test(attribute.nodeValue));
+      }
+      return true;
+    }
+
+    // Check if a regular expression validates the attribute.
+    return allowedAttributeList.filter(attributeRegex => attributeRegex instanceof RegExp).some(regex => regex.test(attributeName));
+  };
+  function sanitizeHtml(unsafeHtml, allowList, sanitizeFunction) {
+    if (!unsafeHtml.length) {
+      return unsafeHtml;
+    }
+    if (sanitizeFunction && typeof sanitizeFunction === 'function') {
+      return sanitizeFunction(unsafeHtml);
+    }
+    const domParser = new window.DOMParser();
+    const createdDocument = domParser.parseFromString(unsafeHtml, 'text/html');
+    const elements = [].concat(...createdDocument.body.querySelectorAll('*'));
+    for (const element of elements) {
+      const elementName = element.nodeName.toLowerCase();
+      if (!Object.keys(allowList).includes(elementName)) {
+        element.remove();
+        continue;
+      }
+      const attributeList = [].concat(...element.attributes);
+      const allowedAttributes = [].concat(allowList['*'] || [], allowList[elementName] || []);
+      for (const attribute of attributeList) {
+        if (!allowedAttribute(attribute, allowedAttributes)) {
+          element.removeAttribute(attribute.nodeName);
+        }
+      }
+    }
+    return createdDocument.body.innerHTML;
+  }
+
+  /**
+   * @copyright  (C) 2018 Open Source Matters, Inc. <https://www.joomla.org>
+   * @license    GNU General Public License version 2 or later; see LICENSE.txt
+   */
+
+  const ARIA_ATTRIBUTE_PATTERN = /^aria-[\w-]*$/i;
+  const DATA_ATTRIBUTE_PATTERN = /^data-[\w-]*$/i;
+  const DefaultAllowlist = {
+    // Global attributes allowed on any supplied element below.
+    '*': ['class', 'dir', 'id', 'lang', 'role', ARIA_ATTRIBUTE_PATTERN, DATA_ATTRIBUTE_PATTERN],
+    a: ['target', 'href', 'title', 'rel'],
+    area: [],
+    b: [],
+    br: [],
+    col: [],
+    code: [],
+    div: [],
+    em: [],
+    hr: [],
+    h1: [],
+    h2: [],
+    h3: [],
+    h4: [],
+    h5: [],
+    h6: [],
+    i: [],
+    img: ['src', 'srcset', 'alt', 'title', 'width', 'height'],
+    li: [],
+    ol: [],
+    p: [],
+    pre: [],
+    s: [],
+    small: [],
+    span: [],
+    sub: [],
+    sup: [],
+    strong: [],
+    u: [],
+    ul: [],
+    button: ['type'],
+    input: ['accept', 'alt', 'autocomplete', 'autofocus', 'capture', 'checked', 'dirname', 'disabled', 'height', 'list', 'max', 'maxlength', 'min', 'minlength', 'multiple', 'type', 'name', 'pattern', 'placeholder', 'readonly', 'required', 'size', 'src', 'step', 'value', 'width', 'inputmode'],
+    select: ['name'],
+    textarea: ['name'],
+    option: ['value', 'selected'],
+    details: ['open'],
+    summary: []
+  };
+
+  // Only define the Joomla namespace if not defined.
+  window.Joomla = window.Joomla || {};
+
+  // Only define editors if not defined
+  Joomla.editors = Joomla.editors || {};
+
+  // An object to hold each editor instance on page, only define if not defined.
+  Joomla.editors.instances = Joomla.editors.instances || {
+    /**
+     * *****************************************************************
+     * All Editors MUST register, per instance, the following callbacks:
+     * *****************************************************************
+     *
+     * getValue         Type  Function  Should return the complete data from the editor
+     *                                  Example: () => { return this.element.value; }
+     * setValue         Type  Function  Should replace the complete data of the editor
+     *                                  Example: (text) => { return this.element.value = text; }
+     * getSelection     Type  Function  Should return the selected text from the editor
+     *                                  Example: function () { return this.selectedText; }
+     * disable          Type  Function  Toggles the editor into disabled mode. When the editor is
+     *                                  active then everything should be usable. When inactive the
+     *                                  editor should be unusable AND disabled for form validation
+     *                                  Example: (bool) => { return this.disable = value; }
+     * replaceSelection Type  Function  Should replace the selected text of the editor
+     *                                  If nothing selected, will insert the data at the cursor
+     *                                  Example:
+     *                                  (text) => {
+     *                                    return insertAtCursor(this.element, text);
+     *                                    }
+     *
+     * USAGE (assuming that jform_articletext is the textarea id)
+     * {
+     * To get the current editor value:
+     *  Joomla.editors.instances['jform_articletext'].getValue();
+     * To set the current editor value:
+     *  Joomla.editors.instances['jform_articletext'].setValue('Joomla! rocks');
+     * To replace(selection) or insert a value at  the current editor cursor (replaces the J3
+     * jInsertEditorText API):
+     *  replaceSelection:
+     *  Joomla.editors.instances['jform_articletext'].replaceSelection('Joomla! rocks')
+     * }
+     *
+     * *********************************************************
+     * ANY INTERACTION WITH THE EDITORS SHOULD USE THE ABOVE API
+     * *********************************************************
+     */
+  };
+  Joomla.Modal = Joomla.Modal || {
+    /**
+     * *****************************************************************
+     * Modals should implement
+     * *****************************************************************
+     *
+     * getCurrent  Type  Function  Should return the modal element
+     * setCurrent  Type  Function  Should set the modal element
+     * current     Type  {node}    The modal element
+     *
+     * USAGE (assuming that exampleId is the modal id)
+     * To get the current modal element:
+     *   Joomla.Modal.getCurrent(); // Returns node element, eg: document.getElementById('exampleId')
+     * To set the current modal element:
+     *   Joomla.Modal.setCurrent(document.getElementById('exampleId'));
+     *
+     * *************************************************************
+     * Joomla's UI modal uses `element.close();` to close the modal
+     * and `element.open();` to open the modal
+     * If you are using another modal make sure the same
+     * functionality is bound to the modal element
+     * @see media/legacy/bootstrap.init.js
+     * *************************************************************
+     */
+    current: '',
+    setCurrent: element => {
+      Joomla.Modal.current = element;
+    },
+    getCurrent: () => Joomla.Modal.current
+  };
+
+  /**
+   * Method to Extend Objects
+   *
+   * @param  {Object}  destination
+   * @param  {Object}  source
+   *
+   * @return Object
+   */
+  Joomla.extend = (destination, source) => {
+    let newDestination = destination;
+    /**
+     * Technically null is an object, but trying to treat the destination as one in this
+     * context will error out.
+     * So emulate jQuery.extend(), and treat a destination null as an empty object.
+     */
+    if (destination === null) {
+      newDestination = {};
+    }
+    Object.keys(source).forEach(key => {
+      newDestination[key] = source[key];
+    });
+    return destination;
+  };
+
+  /**
+   * Joomla options storage
+   *
+   * @type {{}}
+   *
+   * @since 3.7.0
+   */
+  Joomla.optionsStorage = Joomla.optionsStorage || null;
+
+  /**
+   * Get script(s) options
+   *
+   * @param  {String}  key  Name in Storage
+   * @param  {mixed}   def  Default value if nothing found
+   *
+   * @return {mixed}
+   *
+   * @since 3.7.0
+   */
+  Joomla.getOptions = (key, def) => {
+    // Load options if they not exists
+    if (!Joomla.optionsStorage) {
+      Joomla.loadOptions();
+    }
+    return Joomla.optionsStorage[key] !== undefined ? Joomla.optionsStorage[key] : def;
+  };
+
+  /**
+   * Load new options from given options object or from Element
+   *
+   * @param  {Object|undefined}  options  The options object to load.
+   * Eg {"com_foobar" : {"option1": 1, "option2": 2}}
+   *
+   * @since 3.7.0
+   */
+  Joomla.loadOptions = options => {
+    // Load form the script container
+    if (!options) {
+      let counter = 0;
+      document.querySelectorAll('.joomla-script-options.new').forEach(element => {
+        const str = element.text || element.textContent;
+        const option = JSON.parse(str);
+        if (option) {
+          Joomla.loadOptions(option);
+          counter += 1;
+        }
+        element.className = element.className.replace(' new', ' loaded');
+      });
+      if (counter) {
+        return;
+      }
+    }
+
+    // Initial loading
+    if (!Joomla.optionsStorage) {
+      Joomla.optionsStorage = options || {};
+    } else if (options) {
+      // Merge with existing
+      Object.keys(options).forEach(key => {
+        /**
+         * If both existing and new options are objects, merge them with Joomla.extend().
+         * But test for new option being null, as null is an object, but we want to allow
+         * clearing of options with ...
+         *
+         * Joomla.loadOptions({'joomla.jtext': null});
+         */
+        if (options[key] !== null && typeof Joomla.optionsStorage[key] === 'object' && typeof options[key] === 'object') {
+          Joomla.optionsStorage[key] = Joomla.extend(Joomla.optionsStorage[key], options[key]);
+        } else {
+          Joomla.optionsStorage[key] = options[key];
+        }
+      });
+    }
+  };
+
+  /**
+   * Custom behavior for JavaScript I18N in Joomla! 1.6
+   *
+   * @type {{}}
+   *
+   * Allows you to call Joomla.Text._() to get a translated JavaScript string
+   * pushed in with Text::script() in Joomla.
+   */
+  Joomla.Text = {
+    strings: {},
+    /**
+     * Translates a string into the current language.
+     *
+     * @param {String} key   The string to translate
+     * @param {String} def   Default string
+     *
+     * @returns {String}
+     */
+    _: (key, def) => {
+      let newKey = key;
+      let newDef = def;
+      // Check for new strings in the optionsStorage, and load them
+      const newStrings = Joomla.getOptions('joomla.jtext');
+      if (newStrings) {
+        Joomla.Text.load(newStrings);
+
+        // Clean up the optionsStorage from useless data
+        Joomla.loadOptions({
+          'joomla.jtext': null
+        });
+      }
+      newDef = newDef === undefined ? newKey : newDef;
+      newKey = newKey.toUpperCase();
+      return Joomla.Text.strings[newKey] !== undefined ? Joomla.Text.strings[newKey] : newDef;
+    },
+    /**
+     * Load new strings in to Joomla.Text
+     *
+     * @param {Object} object  Object with new strings
+     * @returns {Joomla.Text}
+     */
+    load: object => {
+      Object.keys(object).forEach(key => {
+        Joomla.Text.strings[key.toUpperCase()] = object[key];
+      });
+      return Joomla.Text;
+    }
+  };
+
+  /**
+   * For B/C we still support Joomla.JText
+   *
+   * @type {{}}
+   *
+   * @deprecated   4.0 will be removed in 7.0
+   *               Example: Joomla.Text._('...');
+   *                        Joomla.Text.load(...);
+   */
+  Joomla.JText = Joomla.Text;
+
+  /**
+   * Generic submit form
+   *
+   * @param  {String}  task      The given task
+   * @param  {node}    form      The form element
+   * @param  {bool}    validate  The form element
+   *
+   * @returns  {void}
+   */
+  Joomla.submitform = (task, form, validate) => {
+    let newForm = form;
+    const newTask = task;
+    if (!newForm) {
+      newForm = document.getElementById('adminForm');
+    }
+    if (newTask) {
+      newForm.task.value = newTask;
+    }
+
+    // Toggle HTML5 validation
+    newForm.noValidate = !validate;
+    if (!validate) {
+      newForm.setAttribute('novalidate', '');
+    } else if (newForm.hasAttribute('novalidate')) {
+      newForm.removeAttribute('novalidate');
+    }
+
+    // Submit the form.
+    // Create the input type="submit"
+    const button = document.createElement('input');
+    button.classList.add('hidden');
+    button.type = 'submit';
+
+    // Append it and click it
+    newForm.appendChild(button).click();
+
+    // If "submit" was prevented, make sure we don't get a build up of buttons
+    newForm.removeChild(button);
+  };
+
+  /**
+   * Default function. Can be overridden by the component to add custom logic
+   *
+   * @param  {String}  task            The given task
+   * @param  {String}  formSelector    The form selector eg '#adminForm'
+   * @param  {bool}    validate        The form element
+   *
+   * @returns {void}
+   */
+  Joomla.submitbutton = (task, formSelector, validate) => {
+    let form = document.querySelector(formSelector || 'form.form-validate');
+    let newValidate = validate;
+    if (typeof formSelector === 'string' && form === null) {
+      form = document.querySelector(`#${formSelector}`);
+    }
+    if (form) {
+      if (newValidate === undefined || newValidate === null) {
+        const pressbutton = task.split('.');
+        let cancelTask = form.getAttribute('data-cancel-task');
+        if (!cancelTask) {
+          cancelTask = `${pressbutton[0]}.cancel`;
+        }
+        newValidate = task !== cancelTask;
+      }
+      if (!newValidate || document.formvalidator.isValid(form)) {
+        Joomla.submitform(task, form);
+      }
+    } else {
+      Joomla.submitform(task);
+    }
+  };
+
+  /**
+   * USED IN: all list forms.
+   *
+   * Toggles the check state of a group of boxes
+   *
+   * Checkboxes must have an id attribute in the form cb0, cb1...
+   *
+   * @param {mixed}  checkbox The number of box to 'check', for a checkbox element
+   * @param {string} stub     An alternative field name
+   *
+   * @return {boolean}
+   */
+  Joomla.checkAll = (checkbox, stub) => {
+    if (!checkbox.form) {
+      return false;
+    }
+    const currentStab = stub || 'cb';
+    const elements = [].slice.call(checkbox.form.elements);
+    let state = 0;
+    elements.forEach(element => {
+      if (element.type === checkbox.type && element.id.indexOf(currentStab) === 0) {
+        element.checked = checkbox.checked;
+        state += element.checked ? 1 : 0;
+      }
+    });
+    if (checkbox.form.boxchecked) {
+      checkbox.form.boxchecked.value = state;
+      checkbox.form.boxchecked.dispatchEvent(new CustomEvent('change', {
+        bubbles: true,
+        cancelable: true
+      }));
+    }
+    return true;
+  };
+
+  /**
+   * USED IN: administrator/components/com_cache/views/cache/tmpl/default.php
+   * administrator/components/com_installer/views/discover/tmpl/default_item.php
+   * administrator/components/com_installer/views/update/tmpl/default_item.php
+   * administrator/components/com_languages/helpers/html/languages.php
+   * libraries/joomla/html/html/grid.php
+   *
+   * @param  {boolean}  isitchecked  Flag for checked
+   * @param  {node}     form         The form
+   *
+   * @return  {void}
+   */
+  Joomla.isChecked = (isitchecked, form) => {
+    let newForm = form;
+    if (typeof newForm === 'undefined') {
+      newForm = document.getElementById('adminForm');
+    } else if (typeof form === 'string') {
+      newForm = document.getElementById(form);
+    }
+    newForm.boxchecked.value = isitchecked ? parseInt(newForm.boxchecked.value, 10) + 1 : parseInt(newForm.boxchecked.value, 10) - 1;
+    newForm.boxchecked.dispatchEvent(new CustomEvent('change', {
+      bubbles: true,
+      cancelable: true
+    }));
+
+    // If we don't have a checkall-toggle, done.
+    if (!newForm.elements['checkall-toggle']) {
+      return;
+    }
+
+    // Toggle main toggle checkbox depending on checkbox selection
+    let c = true;
+    let i;
+    let e;
+    let n;
+    for (i = 0, n = newForm.elements.length; i < n; i++) {
+      e = newForm.elements[i];
+      if (e.type === 'checkbox' && e.name !== 'checkall-toggle' && !e.checked) {
+        c = false;
+        break;
+      }
+    }
+    newForm.elements['checkall-toggle'].checked = c;
+  };
+
+  /**
+   * USED IN: libraries/joomla/html/html/grid.php
+   * In other words, on any reorderable table
+   *
+   * @param  {string}  order  The order value
+   * @param  {string}  dir    The direction
+   * @param  {string}  task   The task
+   * @param  {node}    form   The form
+   *
+   * return  {void}
+   */
+  Joomla.tableOrdering = (order, dir, task, form) => {
+    let newForm = form;
+    if (typeof newForm === 'undefined') {
+      newForm = document.getElementById('adminForm');
+    } else if (typeof form === 'string') {
+      newForm = document.getElementById(form);
+    }
+    newForm.filter_order.value = order;
+    newForm.filter_order_Dir.value = dir;
+    Joomla.submitform(task, newForm);
+  };
+
+  /**
+   * USED IN: all over :)
+   *
+   * @param  {string}  id    The id
+   * @param  {string}  task  The task
+   * @param  {string}  form  The optional form
+   *
+   * @return {boolean}
+   */
+  Joomla.listItemTask = (id, task, form = null) => {
+    let newForm = form;
+    if (form !== null) {
+      newForm = document.getElementById(form);
+    } else {
+      newForm = document.adminForm;
+    }
+    const cb = newForm[id];
+    let i = 0;
+    let cbx;
+    if (!cb) {
+      return false;
+    }
+    while (true) {
+      cbx = newForm[`cb${i}`];
+      if (!cbx) {
+        break;
+      }
+      cbx.checked = false;
+      i += 1;
+    }
+    cb.checked = true;
+    newForm.boxchecked.value = 1;
+    Joomla.submitform(task, newForm);
+    return false;
+  };
+
+  /**
+   * Method to replace all request tokens on the page with a new one.
+   *
+   * @param {String}  newToken  The token
+   *
+   * Used in Joomla Installation
+   */
+  Joomla.replaceTokens = newToken => {
+    if (!/^[0-9A-F]{32}$/i.test(newToken)) {
+      return;
+    }
+    document.querySelectorAll('input[type="hidden"]').forEach(element => {
+      if (element.value === '1' && element.name.length === 32) {
+        element.name = newToken;
+      }
+    });
+  };
+
+  /**
+   * Method to perform AJAX request
+   *
+   * @param {Object} options   Request options:
+   * {
+   *    url:     'index.php', Request URL
+   *    method:  'GET',       Request method GET (default), POST
+   *    data:    null,        Data to be sent, see
+   *                https://developer.mozilla.org/docs/Web/API/XMLHttpRequest/send
+   *    perform: true,        Perform the request immediately
+   *              or return XMLHttpRequest instance and perform it later
+   *    headers: null,        Object of custom headers, eg {'X-Foo': 'Bar', 'X-Bar': 'Foo'}
+   *    promise: false        Whether return a Promise instance.
+   *              When true then next options is ignored: perform, onSuccess, onError, onComplete
+   *
+   *    onBefore:  (xhr) => {}            // Callback on before the request
+   *    onSuccess: (response, xhr) => {}, // Callback on the request success
+   *    onError:   (xhr) => {},           // Callback on the request error
+   *    onComplete: (xhr) => {},          // Callback on the request completed, with/without error
+   * }
+   *
+   * @return XMLHttpRequest|Boolean
+   *
+   * @example
+   *
+   *   Joomla.request({
+   *    url: 'index.php?option=com_example&view=example',
+   *    onSuccess: (response, xhr) => {
+   *     JSON.parse(response);
+   *    }
+   *   })
+   *
+   * @see    https://developer.mozilla.org/docs/Web/API/XMLHttpRequest
+   */
+  Joomla.request = options => {
+    // Prepare the options
+    const newOptions = Joomla.extend({
+      url: '',
+      method: 'GET',
+      data: null,
+      perform: true,
+      promise: false
+    }, options);
+
+    // Setup XMLHttpRequest instance
+    const createRequest = (onSuccess, onError) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open(newOptions.method, newOptions.url, true);
+
+      // Set the headers
+      xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+      xhr.setRequestHeader('X-Ajax-Engine', 'Joomla!');
+      if (newOptions.method !== 'GET') {
+        const token = Joomla.getOptions('csrf.token', '');
+
+        // Use the CSRF only on the site's domain
+        if (token && (!newOptions.url.startsWith('http:') && !newOptions.url.startsWith('https:') || newOptions.url.startsWith(window.location.origin))) {
+          xhr.setRequestHeader('X-CSRF-Token', token);
+        }
+        if (typeof newOptions.data === 'string' && (!newOptions.headers || !newOptions.headers['Content-Type'])) {
+          xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        }
+      }
+
+      // Custom headers
+      if (newOptions.headers) {
+        Object.keys(newOptions.headers).forEach(key => {
+          // Allow request without Content-Type
+          if (key === 'Content-Type' && newOptions.headers['Content-Type'] === 'false') ; else {
+            xhr.setRequestHeader(key, newOptions.headers[key]);
+          }
+        });
+      }
+      xhr.onreadystatechange = () => {
+        // Request not finished
+        if (xhr.readyState !== 4) {
+          return;
+        }
+
+        // Request finished and response is ready
+        if (xhr.status === 200) {
+          if (newOptions.promise) {
+            // A Promise accepts only one argument
+            onSuccess.call(window, xhr);
+          } else {
+            onSuccess.call(window, xhr.responseText, xhr);
+          }
+        } else {
+          onError.call(window, xhr);
+        }
+        if (newOptions.onComplete && !newOptions.promise) {
+          newOptions.onComplete.call(window, xhr);
+        }
+      };
+
+      // Do request
+      if (newOptions.perform) {
+        if (newOptions.onBefore && newOptions.onBefore.call(window, xhr) === false) {
+          // Request interrupted
+          if (newOptions.promise) {
+            onSuccess.call(window, xhr);
+          }
+          return xhr;
+        }
+        xhr.send(newOptions.data);
+      }
+      return xhr;
+    };
+
+    // Return a Promise
+    if (newOptions.promise) {
+      return new Promise((resolve, reject) => {
+        newOptions.perform = true;
+        createRequest(resolve, reject);
+      });
+    }
+
+    // Return a Request
+    try {
+      return createRequest(newOptions.onSuccess || (() => {}), newOptions.onError || (() => {}));
+    } catch (error) {
+      console.error(error);
+      return false;
+    }
+  };
+  let lastRequestPromise;
+
+  /**
+   * Joomla Request queue.
+   *
+   * A FIFO queue of requests to execute serially. Used to prevent simultaneous execution of
+   * multiple requests against the server which could trigger its Denial of Service protection.
+   *
+   * @param {object} options Options for Joomla.request()
+   * @returns {Promise}
+   */
+  Joomla.enqueueRequest = options => {
+    if (!options.promise) {
+      throw new Error('Joomla.enqueueRequest supports only Joomla.request as Promise');
+    }
+    if (!lastRequestPromise) {
+      lastRequestPromise = Joomla.request(options);
+    } else {
+      lastRequestPromise = lastRequestPromise.then(() => Joomla.request(options));
+    }
+    return lastRequestPromise;
+  };
+
+  /**
+   *
+   * @param {string} unsafeHtml The html for sanitization
+   * @param {object} allowList The list of HTMLElements with an array of allowed attributes
+   * @param {function} sanitizeFn A custom sanitization function
+   *
+   * @return string
+   */
+  Joomla.sanitizeHtml = (unsafeHtml, allowList, sanitizeFn) => {
+    const allowed = allowList === undefined || allowList === null ? DefaultAllowlist : _extends({}, DefaultAllowlist, allowList);
+    return sanitizeHtml(unsafeHtml, allowed, sanitizeFn);
+  };
+
+  /**
+   * Treat AJAX errors.
+   * Used by some javascripts such as sendtestmail.js and permissions.js
+   *
+   * @param   {object}  xhr         XHR object.
+   * @param   {string}  textStatus  Type of error that occurred.
+   * @param   {string}  error       Textual portion of the HTTP status.
+   *
+   * @return  {object}  JavaScript object containing the system error message.
+   *
+   * @since  3.6.0
+   */
+  Joomla.ajaxErrorsMessages = (xhr, textStatus) => {
+    const msg = {};
+    if (textStatus === 'parsererror') {
+      // For jQuery jqXHR
+      const buf = [];
+
+      // Html entity encode.
+      let encodedJson = xhr.responseText.trim();
+      for (let i = encodedJson.length - 1; i >= 0; i--) {
+        buf.unshift(['&#', encodedJson[i].charCodeAt(), ';'].join(''));
+      }
+      encodedJson = buf.join('');
+      msg.error = [Joomla.Text._('JLIB_JS_AJAX_ERROR_PARSE').replace('%s', encodedJson)];
+    } else if (textStatus === 'nocontent') {
+      msg.error = [Joomla.Text._('JLIB_JS_AJAX_ERROR_NO_CONTENT')];
+    } else if (textStatus === 'timeout') {
+      msg.error = [Joomla.Text._('JLIB_JS_AJAX_ERROR_TIMEOUT')];
+    } else if (textStatus === 'abort') {
+      msg.error = [Joomla.Text._('JLIB_JS_AJAX_ERROR_CONNECTION_ABORT')];
+    } else if (xhr.responseJSON && xhr.responseJSON.message) {
+      // For vanilla XHR
+      msg.error = [`${Joomla.Text._('JLIB_JS_AJAX_ERROR_OTHER').replace('%s', xhr.status)} <em>${xhr.responseJSON.message}</em>`];
+    } else if (xhr.statusText) {
+      msg.error = [`${Joomla.Text._('JLIB_JS_AJAX_ERROR_OTHER').replace('%s', xhr.status)} <em>${xhr.statusText}</em>`];
+    } else {
+      msg.error = [Joomla.Text._('JLIB_JS_AJAX_ERROR_OTHER').replace('%s', xhr.status)];
+    }
+    return msg;
+  };
+
+})();

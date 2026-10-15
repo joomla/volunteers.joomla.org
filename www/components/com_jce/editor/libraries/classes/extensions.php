@@ -5,7 +5,7 @@
  * @subpackage  Editor
  *
  * @copyright   Copyright (C) 2005 - 2020 Open Source Matters, Inc. All rights reserved.
- * @copyright   Copyright (c) 2009-2024 Ryan Demmer. All rights reserved
+ * @copyright   Copyright (c) 2009-2026 Ryan Demmer. All rights reserved
  * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
 
@@ -303,7 +303,8 @@ class WFExtension extends CMSObject
 
             // json associative array
             if (is_array($attribute) && array_key_exists('name', $attribute)) {
-                extract($attribute);
+                $name = $attribute['name'];
+                $value = $attribute['value'] ?? '';
             }
 
             if ($name && $value !== '') {

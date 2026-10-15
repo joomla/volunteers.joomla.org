@@ -1,8 +1,9 @@
 <?php
+
 /**
  * Part of the Joomla Framework Uri Package
  *
- * @copyright  Copyright (C) 2005 - 2018 Open Source Matters, Inc. All rights reserved.
+ * @copyright  Copyright (C) 2005 - 2022 Open Source Matters, Inc. All rights reserved.
  * @license    GNU General Public License version 2 or later; see LICENSE
  */
 
@@ -17,40 +18,53 @@ namespace Joomla\Uri;
  */
 class UriHelper
 {
-	/**
-	 * Does a UTF-8 safe version of PHP parse_url function
-	 *
-	 * @param   string  $url  URL to parse
-	 *
-	 * @return  array|boolean  Associative array or false if badly formed URL.
-	 *
-	 * @link    https://www.php.net/manual/en/function.parse-url.php
-	 * @since   1.0
-	 */
-	public static function parse_url($url)
-	{
-		$result = array();
+    /**
+     * Does a UTF-8 safe version of PHP parse_url function
+     *
+     * @param   string   $url        URL to parse
+     * @param   integer  $component  Retrieve just a specific URL component
+     *
+     * @return  array|boolean  Associative array or false if badly formed URL.
+     *
+     * @link    https://www.php.net/manual/en/function.parse-url.php
+     * @since   1.0
+     */
+    public static function parse_url($url, $component = -1)
+    {
+        $result = [];
 
-		// Build arrays of values we need to decode before parsing
-		$entities     = array('%21', '%2A', '%27', '%28', '%29', '%3B', '%3A', '%40', '%26', '%3D', '%24', '%2C', '%2F', '%3F', '%23', '%5B', '%5D');
-		$replacements = array('!', '*', "'", '(', ')', ';', ':', '@', '&', '=', '$', ',', '/', '?', '#', '[', ']');
+        // If no UTF-8 chars in the url just parse it using php native parse_url which is faster.
+        if (extension_loaded('mbstring') && mb_convert_encoding($url, 'ISO-8859-1', 'UTF-8') === $url) {
+            return parse_url($url, $component);
+        }
 
-		// Create encoded URL with special URL characters decoded so it can be parsed
-		// All other characters will be encoded
-		$encodedURL = str_replace($entities, $replacements, urlencode($url));
+        // URL with UTF-8 chars in the url.
 
-		// Parse the encoded URL
-		$encodedParts = parse_url($encodedURL);
+        // Build the reserved uri encoded characters map.
+        $reservedUriCharactersMap = [
+            '%21' => '!',
+            '%2A' => '*',
+            '%27' => "'",
+            '%28' => '(',
+            '%29' => ')',
+            '%3B' => ';',
+            '%3A' => ':',
+            '%40' => '@',
+            '%26' => '&',
+            '%3D' => '=',
+            '%24' => '$',
+            '%2C' => ',',
+            '%2F' => '/',
+            '%3F' => '?',
+            '%23' => '#',
+            '%5B' => '[',
+            '%5D' => ']',
+        ];
 
-		// Now, decode each value of the resulting array
-		if ($encodedParts)
-		{
-			foreach ($encodedParts as $key => $value)
-			{
-				$result[$key] = urldecode(str_replace($replacements, $entities, $value));
-			}
-		}
+        // Encode the URL (so UTF-8 chars are encoded), revert the encoding in the reserved uri characters and parse the url.
+        $parts = parse_url(strtr(urlencode($url), $reservedUriCharactersMap), $component);
 
-		return count($result) > 0 ? $result : false;
-	}
+        // With a well formed url decode the url (so UTF-8 chars are decoded).
+        return $parts ? array_map('urldecode', $parts) : $parts;
+    }
 }

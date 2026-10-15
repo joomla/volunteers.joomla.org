@@ -1,73 +1,91 @@
 <?php
+
 /**
  * @package     Joomla.Site
  * @subpackage  Layout
  *
- * @copyright   Copyright (C) 2005 - 2020 Open Source Matters, Inc. All rights reserved.
+ * @copyright   (C) 2014 Open Source Matters, Inc. <https://www.joomla.org>
  * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
 
-defined('JPATH_BASE') or die;
+defined('_JEXEC') or die;
 
-use Joomla\CMS\HTML\HTMLHelper;
+use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 
-/** @var \Joomla\CMS\Pagination\PaginationObject $item */
-$item = $displayData['data'];
-
+$item    = $displayData['data'];
 $display = $item->text;
-$icon    = null;
+$app = Factory::getApplication();
 
-switch ((string) $item->text)
-{
-	// Check for "Start" item
-	case Text::_('JLIB_HTML_START') :
-		$icon = 'icon-first';
-		break;
+switch ((string) $item->text) {
+    // Check for "Start" item
+    case Text::_('JLIB_HTML_START'):
+        $icon = $app->getLanguage()->isRtl() ? 'icon-angle-double-right' : 'icon-angle-double-left';
+        $aria = Text::_('JLIB_HTML_GOTO_POSITION_START');
+        break;
 
-	// Check for "Prev" item
-	case Text::_('JPREV') :
-		$icon = 'icon-previous';
-		break;
+    // Check for "Prev" item
+    case $item->text === Text::_('JPREV'):
+        $icon = $app->getLanguage()->isRtl() ? 'icon-angle-right' : 'icon-angle-left';
+        $aria = Text::_('JLIB_HTML_GOTO_POSITION_PREVIOUS');
+        break;
 
-	// Check for "Next" item
-	case Text::_('JNEXT') :
-		$icon = 'icon-next';
-		break;
+    // Check for "Next" item
+    case Text::_('JNEXT'):
+        $icon = $app->getLanguage()->isRtl() ? 'icon-angle-left' : 'icon-angle-right';
+        $aria = Text::_('JLIB_HTML_GOTO_POSITION_NEXT');
+        break;
 
-	// Check for "End" item
-	case Text::_('JLIB_HTML_END') :
-		$icon = 'icon-last';
-		break;
+    // Check for "End" item
+    case Text::_('JLIB_HTML_END'):
+        $icon = $app->getLanguage()->isRtl() ? 'icon-angle-double-left' : 'icon-angle-double-right';
+        $aria = Text::_('JLIB_HTML_GOTO_POSITION_END');
+        break;
+
+    default:
+        $icon = null;
+        $aria = Text::sprintf('JLIB_HTML_GOTO_PAGE', strtolower($item->text));
+        break;
 }
 
-if ($icon !== null)
-{
-	$display = '<span class="' . $icon . '"></span>';
+if ($icon !== null) {
+    $display = '<span class="' . $icon . '" aria-hidden="true"></span>';
 }
 
-if ($displayData['active'])
-{
-	$attribs = ['class' => 'pagenav'];
+if ($displayData['active']) {
+    if ($item->base > 0) {
+        $limit = 'limitstart.value=' . $item->base;
+    } else {
+        $limit = 'limitstart.value=0';
+    }
 
-	if (!is_numeric($item->text))
-	{
-		HTMLHelper::_('bootstrap.tooltip');
-		$attribs['class'] .= ' hasTooltip';
-		$attribs['title'] = $item->text;
-	}
-	else
-	{
-		$attribs['class'] .= ' hidden-phone';
-	}
+    $class = 'active';
+
+    if ($app->isClient('administrator')) {
+        $link = 'href="#" onclick="document.adminForm.' . $item->prefix . $limit . '; Joomla.submitform();return false;"';
+    } elseif ($app->isClient('site')) {
+        $link = 'href="' . $item->link . '"';
+    }
+} else {
+    $class = (property_exists($item, 'active') && $item->active) ? 'active' : 'disabled';
 }
+
 ?>
 <?php if ($displayData['active']) : ?>
-	<li>
-		<?php echo HTMLHelper::_('link', $item->link, $display, $attribs); ?>
-	</li>
+    <?php // JUI CHANGE: Hide numbers (except active page) on mobiles so page numbers don't overflow ?>
+    <li class="page-item<?php echo ($icon === null) ? ' d-none d-sm-block' : '' ?>">
+        <?php // END JUI CHANGE ?>
+        <a aria-label="<?php echo $aria; ?>" <?php echo $link; ?> class="page-link">
+            <?php echo $display; ?>
+        </a>
+    </li>
+<?php elseif (isset($item->active) && $item->active) : ?>
+    <?php $aria = Text::sprintf('JLIB_HTML_PAGE_CURRENT', strtolower($item->text)); ?>
+    <li class="<?php echo $class; ?> page-item">
+        <a aria-current="true" aria-label="<?php echo $aria; ?>" href="#" class="page-link"><?php echo $display; ?></a>
+    </li>
 <?php else : ?>
-	<li class="<?php echo (property_exists($item, 'active') && $item->active) ? 'active' : 'disabled'; ?><?php echo $icon === null ? ' hidden-phone' : ''; ?>">
-		<span><?php echo $display; ?></span>
-	</li>
-<?php endif;
+    <li class="<?php echo $class; ?> page-item">
+        <span class="page-link" aria-hidden="true"><?php echo $display; ?></span>
+    </li>
+<?php endif; ?>

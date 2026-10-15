@@ -1,32 +1,29 @@
+import { JoomlaEditor, JoomlaEditorButton } from 'editor-api';
+import JoomlaDialog from 'joomla.dialog';
+
 /**
- * @copyright  (C) 2017 Open Source Matters, Inc. <https://www.joomla.org>
+ * @copyright  (C) 2018 Open Source Matters, Inc. <https://www.joomla.org>
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
-window.insertReadmore = function(editor) {
-	"use strict";
-	if (!Joomla.getOptions('xtd-readmore')) {
-		// Something went wrong!
-		return false;
-	}
-
-	var content, options = window.Joomla.getOptions('xtd-readmore');
-
-	if (window.Joomla && window.Joomla.editors && window.Joomla.editors.instances && window.Joomla.editors.instances.hasOwnProperty(editor)) {
-		content = window.Joomla.editors.instances[editor].getValue();
-	} else {
-		content = (new Function('return ' + options.editor))();
-	}
-
-	if (content.match(/<hr\s+id=("|')system-readmore("|')\s*\/*>/i)) {
-		alert(options.exists);
-		return false;
-	} else {
-		/** Use the API, if editor supports it **/
-		if (window.Joomla && window.Joomla.editors && window.Joomla.editors.instances && window.Joomla.editors.instances.hasOwnProperty(editor)) {
-			window.Joomla.editors.instances[editor].replaceSelection('<hr id="system-readmore" />');
-		} else {
-			window.jInsertEditorText('<hr id="system-readmore" />', editor);
-		}
-	}
+const insertReadmoreHandler = editor => {
+  const content = editor.getValue();
+  if (!content) {
+    editor.replaceSelection('<hr id="system-readmore">');
+  } else if (content && !content.match(/<hr\s+id=("|')system-readmore("|')\s*\/*>/i)) {
+    editor.replaceSelection('<hr id="system-readmore">');
+  } else {
+    JoomlaDialog.alert(Joomla.Text._('PLG_READMORE_ALREADY_EXISTS'));
+  }
 };
+
+// @TODO: Remove in Joomla 6
+window.insertReadmore = () => {
+  console.warn('Method window.insertReadmore() is deprecated, use button action "insert-readmore."');
+  const editor = JoomlaEditor.getActive();
+  if (!editor) {
+    throw new Error('An active editor are not available');
+  }
+  insertReadmoreHandler(editor);
+};
+JoomlaEditorButton.registerAction('insert-readmore', insertReadmoreHandler);

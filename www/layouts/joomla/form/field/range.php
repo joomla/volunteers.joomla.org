@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @package     Joomla.Site
  * @subpackage  Layout
@@ -42,29 +43,30 @@ extract($displayData);
  * @var   array    $options         Options available for this field.
  * @var   array    $inputType       Options available for this field.
  * @var   string   $accept          File types that are accepted.
+ * @var   string   $dataAttribute   Miscellaneous data attributes preprocessed for HTML output
+ * @var   array    $dataAttributes  Miscellaneous data attribute for eg, data-*.
  */
 
-// Including fallback code for HTML5 non supported browsers.
-JHtml::_('jquery.framework');
-JHtml::_('script', 'system/html5fallback.js', array('version' => 'auto', 'relative' => true, 'conditional' => 'lt IE 9'));
-
 // Initialize some field attributes.
-$attributes = array(
-	$class ? 'class="' . $class . '"' : '',
-	$disabled ? 'disabled' : '',
-	$readonly ? 'readonly' : '',
-	!empty($onchange) ? 'onchange="' . $onchange . '"' : '',
-	!empty($max) ? 'max="' . $max . '"' : '',
-	!empty($step) ? 'step="' . $step . '"' : '',
-	!empty($min) ? 'min="' . $min . '"' : '',
-	$autofocus ? 'autofocus' : '',
-);
+$attributes = [
+    $class ? 'class="form-range ' . $class . '"' : 'class="form-range"',
+    !empty($description) ? 'aria-describedby="' . ($id ?: $name) . '-desc"' : '',
+    $disabled ? 'disabled' : '',
+    $readonly ? 'readonly' : '',
+    !empty($onchange) ? 'onchange="' . $onchange . '"' : '',
+    !empty($max) ? 'max="' . $max . '"' : '',
+    !empty($step) ? 'step="' . $step . '"' : '',
+    !empty($min) ? 'min="' . $min . '"' : '',
+    $autofocus ? 'autofocus' : '',
+    $dataAttribute,
+];
 
 $value = is_numeric($value) ? (float) $value : $min;
 
 ?>
-<input type="range" name="<?php
-echo $name; ?>" id="<?php
-echo $id; ?>" value="<?php
-echo htmlspecialchars($value, ENT_COMPAT, 'UTF-8'); ?>" <?php
-echo implode(' ', $attributes); ?> />
+<input
+    type="range"
+    name="<?php echo $name; ?>"
+    id="<?php echo $id; ?>"
+    value="<?php echo htmlspecialchars($value, ENT_COMPAT, 'UTF-8'); ?>"
+    <?php echo implode(' ', $attributes); ?>>

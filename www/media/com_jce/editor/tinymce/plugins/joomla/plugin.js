@@ -1,4 +1,4 @@
-/* jce - 2.9.99.5 | 2026-06-03 | https://www.joomlacontenteditor.net | Source: https://github.com/widgetfactory/jce | Copyright (C) 2006 - 2026 Ryan Demmer. All rights reserved | GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html */
+/* jce - 2.9.99.12 | 2026-10-07 | https://www.joomlacontenteditor.net | Source: https://github.com/widgetfactory/jce | Copyright (C) 2006 - 2026 Ryan Demmer. All rights reserved | GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html; see LICENSE.txt */
 !function() {
     var Joomla = window.Joomla || null, each = tinymce.each, DOM = tinymce.DOM;
     tinymce.PluginManager.add("joomla", function(ed, url) {
@@ -37,7 +37,11 @@
                                 title: plg.options.confirmText || ed.getLang("insert", "Insert"),
                                 classes: "primary",
                                 onsubmit: function(e) {
-                                    new Function(plg.options.confirmCallback).apply();
+                                    var cb = plg.options.confirmCallback, fn = "function" == typeof cb ? cb : function() {
+                                        for (var parts = String(cb).trim().split("."), obj = window, i = 0; i < parts.length && obj; i++) obj = obj[parts[i]];
+                                        return "function" == typeof obj ? obj : null;
+                                    }();
+                                    fn && fn.call(window);
                                 }
                             }), plg.action) {
                                 try {

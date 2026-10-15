@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @package     Joomla.Site
  * @subpackage  Layout
@@ -10,4 +11,4 @@
 defined('_JEXEC') or die;
 
 ?>
-	</ul>
+</ul>

@@ -5,7 +5,7 @@
  * @subpackage  Editor
  *
  * @copyright   Copyright (C) 2005 - 2020 Open Source Matters, Inc. All rights reserved.
- * @copyright   Copyright (c) 2009-2024 Ryan Demmer. All rights reserved
+ * @copyright   Copyright (c) 2009-2026 Ryan Demmer. All rights reserved
  * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
 
@@ -20,6 +20,14 @@ use Joomla\CMS\Uri\Uri;
 
 abstract class WFUtility
 {
+    /**
+     * Multi-byte-safe strpos replacement.
+     *
+     * @param string  $string The input string.
+     * @param string  $needle The substring to search for.
+     * @param integer $offset The search offset.
+     * @return int|false The position of the first occurrence of the substring, or false if not found.
+     */
     public static function safe_strpos($string, $needle, $offset = 0)
     {
         if (function_exists('mb_strpos')) {
@@ -29,6 +37,14 @@ abstract class WFUtility
         }
     }
 
+    /**
+     * Multi-byte-safe substr replacement.
+     *
+     * @param string  $string The input string.
+     * @param int     $start  The starting position.
+     * @param int|null $length The length of the substring.
+     * @return string The extracted substring.
+     */
     public static function safe_substr($string, $start, $length = null)
     {
         if (function_exists('mb_substr')) {
@@ -38,6 +54,12 @@ abstract class WFUtility
         }
     }
 
+    /**
+     * Multi-byte-safe strlen replacement.
+     *
+     * @param string $string The input string.
+     * @return int The length of the string.
+     */
     public static function safe_strlen($string)
     {
         if (function_exists('mb_strlen')) {
@@ -113,7 +135,7 @@ abstract class WFUtility
      * From libraries/vendor/joomla/filesystem/src/File.php
      * @copyright  Copyright (C) 2005 - 2021 Open Source Matters, Inc. All rights reserved.
      *
-     * @param  string $path The file path
+     * @param  string $file The file path
      * @param  bool   $lowercase Convert the extension to lowercase
      * @return string The file extension
      */
@@ -153,6 +175,36 @@ abstract class WFUtility
     }
 
     /**
+     * Truncate a file name so the name and its extension fit within a maximum byte length
+     *
+     * @param  string $name The file name without the extension
+     * @param  string $ext The file extension
+     * @param  int $limit The maximum length in bytes of the complete file name
+     * @return string The truncated file name without the extension
+     */
+    public static function truncateName($name, $ext = '', $limit = 255)
+    {
+        // the space available for the name, allowing for the extension and separator
+        $available = $limit - strlen($ext) - ($ext === '' ? 0 : 1);
+
+        if ($available < 1 || strlen($name) <= $available) {
+            return $name;
+        }
+
+        // cut on a character boundary so multibyte characters are not split
+        if (function_exists('mb_strcut')) {
+            $name = mb_strcut($name, 0, $available, 'UTF-8');
+        } else {
+            $name = substr($name, 0, $available);
+        }
+
+        // remove any separator left at the end of the truncated name
+        $trimmed = rtrim($name, '._- ');
+
+        return $trimmed === '' ? $name : $trimmed;
+    }
+
+    /**
      * Get the file name
      *
      * @param  string $path The file path
@@ -174,6 +226,14 @@ abstract class WFUtility
         return self::stripExtension($path);
     }
 
+    /**
+     * Clean a file path by normalizing directory separators and adding a prefix if needed.
+     *
+     * @param string $path   The file path to clean.
+     * @param string $ds     The directory separator to normalize to (default '/').
+     * @param string $prefix Optional prefix to prepend to the result.
+     * @return string The cleaned path.
+     */
     public static function cleanPath($path, $ds = '/', $prefix = '')
     {
         $path = trim(rawurldecode($path));
@@ -192,6 +252,12 @@ abstract class WFUtility
         return $prefix . $path;
     }
 
+    /**
+     * Convert a site-root-relative URI to an absolute filesystem path.
+     *
+     * @param string $url The site-root-relative URL to convert.
+     * @return string The absolute filesystem path, or the original URL if it does not start with the site root.
+     */
     public static function uriToAbsolutePath($url)
     {
         // Get the relative root URL
@@ -217,7 +283,6 @@ abstract class WFUtility
      * Append a DIRECTORY_SEPARATOR to the path if required.
      *
      * @param string $path the path
-     * @param string $ds   optional directory seperator
      *
      * @return string path with trailing DIRECTORY_SEPARATOR
      */
@@ -229,12 +294,20 @@ abstract class WFUtility
     /**
      * Validates a string for use as a file or folder name or path, ensuring it contains only safe characters.
      *
-     * - Disallows null bytes and control characters.
-     * - Accepts valid UTF-8 strings with letters, digits, combining marks, and common safe punctuation.
-     * - Allows characters: Unicode letters (L), numbers (N), marks (M), space, dot (.), dash (-),
-     *   underscore (_), colon (:), forward slash (/), parentheses (), and square brackets [].
-     * - Provides a fallback byte-level ASCII check if the string is not valid UTF-8.
-     * - Safe for use with both multibyte and legacy ASCII inputs, even if mbstring is not available.
+     * Uses a deny-list rather than a narrow allow-list so that legitimately named files - created via
+     * FTP, migrations or other tools and containing characters such as ' $ & + , ; = @ # - can still be
+     * listed and operated on. This is safe because names/paths are always URL- and HTML-encoded on output
+     * and are never passed to a shell.
+     *
+     * Rejects:
+     * - Null bytes and control characters (0x00–0x1F, 0x7F).
+     * - Invalid UTF-8 (guards against malformed/overlong sequences that could disguise a "/" or ".." and
+     *   slip past the traversal check in checkPath()).
+     * - Characters reserved or unsafe across filesystems, URLs and markup: \ < > " | ? * %
+     *   ("%" is the percent-encoding escape - a literal one breaks URL encode/decode round-trips.)
+     *
+     * Everything else - all Unicode letters, marks, numbers and the remaining printable punctuation,
+     * plus ":" and "/" - is permitted.
      *
      * @param string $string The input string to validate.
      *
@@ -248,58 +321,23 @@ abstract class WFUtility
             return false;
         }
 
-        // Try UTF-8 validation if mb_check_encoding() is available
+        // Require valid UTF-8. Malformed or overlong byte sequences are rejected so they cannot be used
+        // to disguise a "/" or ".." and bypass the traversal check that runs against this string.
         $isUtf8 = function_exists('mb_check_encoding')
-        ? mb_check_encoding($string, 'UTF-8')
-        : (bool) preg_match('//u', $string); // minimal UTF-8 validity test
+            ? mb_check_encoding($string, 'UTF-8')
+            : (bool) preg_match('//u', $string); // minimal UTF-8 validity test
 
-        if ($isUtf8) {
-            // Use mb_* if available
-            if (function_exists('mb_strlen') && function_exists('mb_substr')) {
-                $length = mb_strlen($string, 'UTF-8');
+        if (!$isUtf8) {
+            return false;
+        }
 
-                for ($i = 0; $i < $length; $i++) {
-                    $char = mb_substr($string, $i, 1, 'UTF-8');
-
-                    if (!preg_match('#^[\p{L}\p{N}\p{M}\.\-_\:/\(\)\[\] ]$#u', $char)) {
-                        return false;
-                    }
-                }
-            } else {
-                // No mbstring: use preg_match_all to split into characters
-                if (!preg_match_all('/./u', $string, $matches)) {
-                    return false;
-                }
-
-                foreach ($matches[0] as $char) {
-                    if (!preg_match('#^[\p{L}\p{N}\p{M}\.\-_\:/\(\)\[\] ]$#u', $char)) {
-                        return false;
-                    }
-                }
-            }
-        } else {
-            // Fallback: raw byte-level ASCII check
-            $length = strlen($string);
-
-            for ($i = 0; $i < $length; $i++) {
-                $ord = ord($string[$i]);
-
-                if (
-                    $ord < 32 || $ord > 126 ||
-                    in_array($ord, [34, 42, 60, 62, 63, 92, 124]) // " * < > ? \ |
-                ) {
-                    return false;
-                }
-
-                if (!(
-                    ($ord >= 48 && $ord <= 57) || // 0–9
-                    ($ord >= 65 && $ord <= 90) || // A–Z
-                    ($ord >= 97 && $ord <= 122) || // a–z
-                    in_array($ord, [32, 45, 46, 95, 58, 47, 40, 41, 91, 93]) // allowed symbols
-                )) {
-                    return false;
-                }
-            }
+        // Reject control characters and the reserved/unsafe set: \ < > " | ? * %
+        // "%" is the URL percent-encoding escape; a literal one breaks client encode/decode
+        // round-trips (see checkName). This runs after checkPath() urldecodes, so legitimate
+        // "%20"-style encoding is already resolved and only a literal "%" reaches here.
+        // (byte-wise: valid UTF-8 multibyte characters are bytes >= 0x80 and never match this range).
+        if (preg_match('#[\x00-\x1F\x7F\\\\<>"|?*%]#', $string)) {
+            return false;
         }
 
         return true;
@@ -332,6 +370,103 @@ abstract class WFUtility
 
         if (self::checkCharValue($path) === false) {
             throw new InvalidArgumentException('Invalid path');
+        }
+
+        return true;
+    }
+
+    /**
+     * Validate a folder name supplied by the user.
+     *
+     * @param string $name The name to validate.
+     *
+     * @return bool True if the value is a single name.
+     *
+     * @throws InvalidArgumentException If the value is a path, or fails checkPath().
+     */
+    public static function checkFolderName($name)
+    {
+        self::checkPath($name);
+
+        // fold compatibility characters first, so the checks cannot be evaded by encoding,
+        // eg: a fullwidth full stop U+FF0E in place of "."
+        if (class_exists('Normalizer')) {
+            $normalized = \Normalizer::normalize($name, \Normalizer::FORM_KC);
+
+            if ($normalized !== false) {
+                $name = $normalized;
+            }
+        } else {
+            $name = self::foldFullwidthAscii($name);
+        }
+
+        // ":" is valid in a path as the store prefix separator, but never in a name.
+        // consecutive dots are stripped by makeSafe, so reject them rather than reduce the name
+        if (self::mb_basename($name) !== $name || strpos($name, ':') !== false || strpos($name, '..') !== false) {
+            throw new InvalidArgumentException('Invalid folder name');
+        }
+
+        return true;
+    }
+
+    /**
+     * Validates a file or folder name for safe listing/display.
+     *
+     * Unlike checkPath(), this does NOT restrict the character set, so that legitimate
+     * files containing characters such as &, +, ',' or non-Latin scripts remain visible
+     * in the file browser (matching Joomla's own media listing behaviour). Output safety
+     * (XSS) is handled by HTML-encoding names at the point of rendering on the client.
+     *
+     * It still rejects the genuinely dangerous constructs:
+     * - Null bytes.
+     * - Directory traversal sequences (../).
+     * - Backslashes (Windows path separator / escape character).
+     *
+     * Intended for filtering items returned by the filesystem during listing, where the
+     * name is only used as data and never to build a filesystem path without a further
+     * checkPath()/checkPathAccess() guard at the point of use.
+     *
+     * @param string $name The file or folder name to validate.
+     *
+     * @return bool True if the name is safe to list.
+     *
+     * @throws InvalidArgumentException If the name contains a null byte, traversal or backslash.
+     */
+
+    public static function checkName($name)
+    {
+        // Reject the URL percent-encoding escape character before decoding. A literal "%" in a
+        // filename is ambiguous with an encoded sequence and breaks client-side encode/decode
+        // round-trips: decodeURIComponent() throws "URI malformed" (and the server 400s) on an
+        // invalid sequence such as "100% off.jpg". makeSafe strips "%", so JCE never creates such
+        // names - they only arrive via FTP/migration.
+        if (strpos($name, '%') !== false) {
+            throw new InvalidArgumentException('Invalid name');
+        }
+
+        $name = urldecode($name);
+
+        // Disallow null byte
+        if (strpos($name, "\x00") !== false) {
+            throw new InvalidArgumentException('Invalid name');
+        }
+
+        // Reject directory traversal
+        if (preg_match('#(^|/)\.\.(/|$)#', $name)) {
+            throw new InvalidArgumentException('Invalid path traversal');
+        }
+
+        // Reject backslashes (Windows path separator / escape character)
+        if (strpos($name, '\\') !== false) {
+            throw new InvalidArgumentException('Invalid name');
+        }
+
+        // Reject characters that cannot be used as a URL value in HTML without breaking out of the
+        // attribute/tag context (XSS). Names ultimately become src/href values. urldecode above also
+        // covers the encoded forms (eg. %22, %3C). Note: "&", "+", "$" and "'" are allowed
+        // Only "<", ">" and '"' are blocked as a server-side backstop - these never occur in valid filenames.
+        if (preg_match('#[<>"]#', $name)) {
+            throw new InvalidArgumentException('Invalid name');
         }
 
         return true;
@@ -657,9 +792,9 @@ abstract class WFUtility
      * Cleans a UTF-8 string by removing disallowed characters.
      *
      * - Strips common punctuation, symbols, brackets, and currency characters.
-     * - Preserves only Unicode letters (\p{L}), numbers (\p{N}), space, dot (.), dash (-), and underscore (_).
-     * - Returns a cleaned string consisting of readable alphanumeric and structural characters.
-     * - Intended for safe output in filenames, slugs, or sanitized text fields.
+     * - Preserves Unicode letters (\p{L}), numbers (\p{N}), Unicode other-symbols (\p{So} — ©, ®, ™),
+     *   space, dot (.), dash (-), and underscore (_).
+     * - Returns a cleaned string suitable for filenames or sanitized text fields.
      *
      * @param string $string The UTF-8 encoded input string to clean.
      * @return string The sanitized UTF-8 string with disallowed characters removed.
@@ -676,8 +811,8 @@ abstract class WFUtility
         for ($i = 0; $i < $length; $i++) {
             $char = mb_substr($string, $i, 1, 'UTF-8');
 
-            // Keep: Unicode letters, numbers, space, dash, underscore, dot
-            if (preg_match('#[\p{L}\p{N}\s\.\-_]#u', $char)) {
+            // Keep: Unicode letters, numbers, other-symbols (©, ®, ™), space, dash, underscore, dot
+            if (preg_match('#[\p{L}\p{N}\p{So}\s\.\-_]#u', $char)) {
                 $result .= $char;
             }
 
@@ -690,7 +825,10 @@ abstract class WFUtility
     /**
      * Makes file name safe to use.
      *
-     * @param mixed The name of the file (not full path)
+     * @param mixed $subject The name of the file (not full path)
+     * @param string $mode The encoding mode: 'utf-8' or 'ascii'
+     * @param string $spaces The character to replace spaces with
+     * @param string $case The case transformation: 'lowercase' or 'uppercase'
      *
      * @return mixed The sanitised string or array
      */
@@ -843,9 +981,10 @@ abstract class WFUtility
     /**
      * Get the modified date of a file.
      *
-     * @return Formatted modified date
+     * @return string Formatted modified date
      *
      * @param string $file Absolute path to file
+     * @return string Formatted modified date
      */
     public static function getDate($file)
     {
@@ -855,7 +994,7 @@ abstract class WFUtility
     /**
      * Get the size of a file.
      *
-     * @return Formatted filesize value
+     * @return string Formatted filesize value
      *
      * @param string $file Absolute path to file
      */
@@ -869,7 +1008,6 @@ abstract class WFUtility
      * https://gist.github.com/tcyrus/257a1ed93c5e115b7b33426d029b5c5f
      *
      * @param string $path A Path
-     * @param int $levels The number of parent directories to go up.
      * @return string The path of a parent directory.
      */
     public static function mb_dirname($path)
@@ -895,7 +1033,14 @@ abstract class WFUtility
 
         return $dir;
     }
-
+    
+    /**
+     * Get the basename of a file path, optionally stripping a given extension.
+     *
+     * @param string $path The file path.
+     * @param string $ext  The extension to strip, including leading dot (e.g. '.jpg').
+     * @return string The basename of the file.
+     */
     public static function mb_basename($path, $ext = '')
     {
         // clean
@@ -934,8 +1079,8 @@ abstract class WFUtility
             |  \xE0[\xA0-\xBF][\x80-\xBF]          # excluding overlongs
             | [\xE1-\xEC\xEE\xEF][\x80-\xBF]{2}    # straight 3-byte
             |  \xED[\x80-\x9F][\x80-\xBF]          # excluding surrogates
-            |  \xF0[\x90-\xBF][\x80-\xBF]{2}       # planes 1–3
-            | [\xF1-\xF3][\x80-\xBF]{3}            # planes 4–15
+            |  \xF0[\x90-\xBF][\x80-\xBF]{2}       # planes 1-3
+            | [\xF1-\xF3][\x80-\xBF]{3}            # planes 4-15
             |  \xF4[\x80-\x8F][\x80-\xBF]{2}       # plane 16
         )*$%xs', $string);
 
@@ -1028,9 +1173,47 @@ abstract class WFUtility
     }
 
     /**
-     * Checks an upload for suspicious naming, potential PHP contents, valid image and HTML tags.
+     * Text-based file types that are scanned for PHP content.
+     *
+     * @var array
      */
-    public static function isSafeFile($file)
+    private static $textExtensions = array('svg', 'html', 'htm', 'xml', 'xhtml', 'txt');
+
+    /**
+     * Get the options for the Joomla safe file scan run by File::upload, limiting its
+     * PHP content checks to the same file types as isSafeFile.
+     *
+     * @param string $name The file name or path.
+     * @return array Options for Joomla\Filesystem\File::isSafeFile.
+     */
+    public static function getSafeFileOptions($name)
+    {
+        $extension = self::getExtension($name, true);
+
+        $options = array(
+            // archives are never extracted, and their compressed bytes can match an executable extension
+            'fobidden_ext_in_content' => false,
+        );
+
+        // binary files can contain <?php or __HALT_COMPILER() as coincidental byte sequences
+        if (!in_array($extension, self::$textExtensions, true)) {
+            $options['php_tag_in_content'] = false;
+            $options['phar_stub_in_content'] = false;
+        }
+
+        return $options;
+    }
+
+    /**
+     * Defence-in-depth upload guard. The primary control is the extension allow-list;
+     * this function adds secondary checks for known-dangerous content patterns and image validity.
+     *
+     * @param array $file              The uploaded file array ($_FILES entry).
+     * @param array $allowedExtensions Extensions explicitly permitted by the profile.
+     * @return bool True if the file passes all checks.
+     * @throws InvalidArgumentException If the file is unsafe or cannot be read for inspection.
+     */
+    public static function isSafeFile($file, $allowedExtensions = [])
     {
         // null byte check
         if (strstr($file['name'], "\x00")) {
@@ -1039,44 +1222,59 @@ abstract class WFUtility
         }
 
         // check name for invalid extensions
-        if (self::validateFileName($file['name']) === false) {
+        if (self::validateFileName($file['name'], $allowedExtensions) === false) {
             @unlink($file['tmp_name']);
             throw new InvalidArgumentException('Invalid file: The file name contains an invalid extension.');
-        }
-
-        // check file for <?php tags
-        $fp = @fopen($file['tmp_name'], 'r');
-
-        if ($fp !== false) {
-            $data = '';
-
-            while (!feof($fp)) {
-                $data .= @fread($fp, 131072);
-                // we can only reliably check for the full <?php tag here (short tags conflict with valid exif xml data), so users are reminded to disable short_open_tag
-                if (stripos($data, '<?php') !== false) {
-                    @unlink($file['tmp_name']);
-                    throw new InvalidArgumentException('Invalid file: The file contains PHP code.');
-                }
-
-                // check for `__HALT_COMPILER()` phar stub
-                if (stripos($data, '__HALT_COMPILER()') !== false) {
-                    @unlink($file['tmp_name']);
-                    throw new InvalidArgumentException('Invalid file: The file contains PHP code.');
-                }
-
-                $data = substr($data, -10);
-            }
-
-            fclose($fp);
         }
 
         // Get the file extension
         $extension = self::getExtension($file['name'], true);
 
-        // Check if the file extension is a common image
-        $isImage = in_array($extension, ['jpeg', 'jpg', 'jpe', 'png', 'apng', 'gif', 'bmp', 'tiff', 'tif', 'webp', 'psd', 'ico', 'xcf', 'odg'], true);
+        // PHP content scan applies to text-based formats only. Binary formats (images, pdf, office
+        // documents etc.) can contain <?php or __HALT_COMPILER() as coincidental byte sequences.
+        if (in_array($extension, self::$textExtensions, true)) {
+            $fp = @fopen($file['tmp_name'], 'r');
 
-        // validate image
+            if ($fp === false) {
+                @unlink($file['tmp_name']);
+                throw new InvalidArgumentException('Invalid file: The file could not be read for inspection.');
+            }
+
+            $data = '';
+
+            while (!feof($fp)) {
+                $data .= @fread($fp, 131072);
+
+                // <?php requires a whitespace token to open; <?= is the short echo tag.
+                // short <? alone is skipped: it conflicts with <?xml and <?xpacket processing instructions.
+                if (preg_match('#<\?php(?:\s|$)|<\?=#i', $data)) {
+                    @unlink($file['tmp_name']);
+                    fclose($fp);
+                    throw new InvalidArgumentException('Invalid file: The file contains PHP code.');
+                }
+
+                // __HALT_COMPILER() is the phar stub header (17 chars; carryover covers it)
+                if (stripos($data, '__HALT_COMPILER()') !== false) {
+                    @unlink($file['tmp_name']);
+                    fclose($fp);
+                    throw new InvalidArgumentException('Invalid file: The file contains PHP code.');
+                }
+
+                // carry over enough bytes to catch tokens that span a chunk boundary
+                $data = substr($data, -32);
+            }
+
+            fclose($fp);
+        }
+
+        if ($extension === 'svg') {
+            self::validateSvg($file['tmp_name']);
+        }
+
+        // getimagesize validates raster images structurally. xcf and odg are not supported
+        // by getimagesize and rely on the extension allow-list alone.
+        $isImage = in_array($extension, ['jpeg', 'jpg', 'jpe', 'png', 'apng', 'gif', 'bmp', 'tiff', 'tif', 'webp', 'psd', 'ico'], true);
+
         if ($isImage && @getimagesize($file['tmp_name']) === false) {
             @unlink($file['tmp_name']);
             throw new InvalidArgumentException('Invalid file: The file is not a valid image.');
@@ -1086,17 +1284,154 @@ abstract class WFUtility
     }
 
     /**
+     * Check an SVG file for XSS vectors. Uses enshrined\svgSanitize\Sanitizer when available,
+     * falls back to a DOMDocument-based check. Deletes the temp file and throws on failure.
+     *
+     * @param  string $tmpPath Absolute path to the uploaded temp file.
+     * @return void
+     * @throws InvalidArgumentException If the SVG contains unsafe content.
+     */
+    private static function validateSvg($tmpPath)
+    {
+        $svgContent = @file_get_contents($tmpPath);
+
+        if ($svgContent === false) {
+            @unlink($tmpPath);
+            throw new InvalidArgumentException('Invalid file: The SVG file could not be read for inspection.');
+        }
+
+        if (class_exists('enshrined\\svgSanitize\\Sanitizer')) {
+            $sanitizer = new \enshrined\svgSanitize\Sanitizer();
+            $result    = $sanitizer->sanitize($svgContent);
+            $errors    = $sanitizer->getXmlIssues();
+
+            // Filter known false positives (mirrors Joomla's MediaHelper::isValidSvg)
+            foreach ($errors as $i => $error) {
+                if (
+                    ($error['message'] === 'Suspicious node \'#comment\'')
+                    || ($error['message'] === 'Suspicious attribute \'space\'')
+                    || ($error['message'] === 'Suspicious attribute \'enable-background\'')
+                    || ($error['message'] === 'Suspicious node \'svg\'')
+                ) {
+                    unset($errors[$i]);
+                }
+            }
+
+            if ($result === false || !empty($errors)) {
+                @unlink($tmpPath);
+                throw new InvalidArgumentException('Invalid file: The SVG file contains unsafe content.');
+            }
+        } else {
+            // DOMDocument fallback for environments without enshrined/svg-sanitize
+            $dom = new \DOMDocument();
+            libxml_use_internal_errors(true);
+            $loaded = $dom->loadXML($svgContent, LIBXML_NONET);
+            libxml_clear_errors();
+            libxml_use_internal_errors(false);
+
+            if (!$loaded) {
+                @unlink($tmpPath);
+                throw new InvalidArgumentException('Invalid file: The SVG file could not be parsed.');
+            }
+
+            $dangerousTags  = ['script', 'foreignobject'];
+            $dangerousAttrs = ['href', 'src', 'action', 'formaction', 'data', 'to', 'from'];
+
+            foreach ($dom->getElementsByTagName('*') as $element) {
+                $tag = strtolower($element->localName);
+
+                if (in_array($tag, $dangerousTags, true)) {
+                    @unlink($tmpPath);
+                    throw new InvalidArgumentException('Invalid file: The SVG file contains an unsafe element.');
+                }
+
+                if ($tag === 'style') {
+                    $text = strtolower($element->textContent);
+                    if (strpos($text, 'javascript:') !== false || strpos($text, '@import') !== false) {
+                        @unlink($tmpPath);
+                        throw new InvalidArgumentException('Invalid file: The SVG file contains unsafe CSS.');
+                    }
+                }
+
+                if ($element->hasAttributes()) {
+                    foreach ($element->attributes as $attr) {
+                        $attrName = strtolower($attr->localName);
+
+                        if (strncmp($attrName, 'on', 2) === 0) {
+                            @unlink($tmpPath);
+                            throw new InvalidArgumentException('Invalid file: The SVG file contains event handler attributes.');
+                        }
+
+                        if (in_array($attrName, $dangerousAttrs, true)) {
+                            $value = strtolower(trim($attr->value));
+                            if (strpos($value, 'javascript:') === 0 || strpos($value, 'data:') === 0) {
+                                @unlink($tmpPath);
+                                throw new InvalidArgumentException('Invalid file: The SVG file contains unsafe URL references.');
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Fold the fullwidth ASCII block (U+FF01-U+FF5E) to plain ASCII.
+     *
+     * A minimal fallback for the NFKC normalisation in validateFileName() when the intl extension
+     * (Normalizer) is unavailable.
+     *
+     * @param string $string The string to fold.
+     *
+     * @return string The folded string.
+     */
+    private static function foldFullwidthAscii($string)
+    {
+        // U+FF01-U+FF5E encode as EF BC 81 .. EF BD 9E; skip the work when none are present
+        if (strpos($string, "\xEF\xBC") === false && strpos($string, "\xEF\xBD") === false) {
+            return $string;
+        }
+
+        $folded = preg_replace_callback('/[\x{FF01}-\x{FF5E}]/u', function ($m) {
+            // decode the 3 utf-8 bytes inline - mbstring may be absent on the same builds as intl
+            $bytes = $m[0];
+            $code = ((ord($bytes[0]) & 0x0F) << 12) | ((ord($bytes[1]) & 0x3F) << 6) | (ord($bytes[2]) & 0x3F);
+
+            // fullwidth codepoint - 0xFEE0 gives the ASCII codepoint (0x21-0x7E)
+            return chr($code - 0xFEE0);
+        }, $string);
+
+        return $folded !== null ? $folded : $string;
+    }
+
+    /**
      * Check file name for extensions.
      *
-     * @param type $name
+     * @param string $name               The file name to validate.
+     * @param array  $allowedExtensions  Extensions explicitly allowed by the profile (may lift the SVG block on the final extension).
      *
-     * @return bool
+     * @return bool True if the file name is valid, false otherwise.
      */
-    public static function validateFileName($name)
+    public static function validateFileName($name, $allowedExtensions = [])
     {
         if (empty($name) && (string) $name !== "0") {
             return false;
         }
+
+        // fold unicode compatibility characters to their ascii form for the checks below
+        if (class_exists('Normalizer')) {
+            $normalized = \Normalizer::normalize($name, \Normalizer::FORM_KC);
+
+            if ($normalized !== false) {
+                $name = $normalized;
+            }
+        } else {
+            // intl unavailable - fold the fullwidth ascii block as a minimal fallback
+            $name = self::foldFullwidthAscii($name);
+        }
+
+        // fold latin accents to ascii.
+        $name = self::utf8_latin_to_ascii($name);
 
         // first character is a dot
         if ($name[0] === '.') {
@@ -1109,75 +1444,67 @@ abstract class WFUtility
         // remove multiple . characters
         $name = preg_replace('#(\.){2,}#', '.', $name);
 
-        // list of invalid extensions
+        // Extensions that must never appear in an uploaded file name, in any position.
+        // None of these have a legitimate function in a CMS media library. Grouped by
+        // category for readability; the checks below treat the list as flat.
         $executable = array(
-            'php',
-            'php3',
-            'php4',
-            'php5',
-            'php6',
-            'php7',
-            'phar',
-            'js',
-            'exe',
-            'phtml',
-            'java',
-            'perl',
-            'py',
-            'asp',
-            'dll',
-            'go',
-            'ade',
-            'adp',
-            'bat',
-            'chm',
-            'cmd',
-            'com',
-            'cpl',
-            'hta',
-            'ins',
-            'isp',
-            'jse',
-            'lib',
-            'mde',
-            'msc',
-            'msp',
-            'mst',
-            'pif',
-            'scr',
-            'sct',
-            'shb',
-            'sys',
-            'vb',
-            'vbe',
-            'vbs',
-            'vxd',
-            'wsc',
-            'wsf',
-            'wsh',
-            'svg',
+            // PHP, covering every handler mapping seen in the wild
+            'php', 'php3', 'php4', 'php5', 'php6', 'php7', 'php8', 'php9', 'pht', 'phtm', 'phtml', 'phps', 'phpt', 'phar', 'pgif',
+            // other server-side languages and script hosts
+            'asp', 'aspx', 'asa', 'asax', 'cer', 'jsp', 'jspx', 'cgi', 'fcgi', 'pl', 'perl', 'py', 'java', 'jar', 'go', 'js', 'jse',
+            'vb', 'vbe', 'vbs', 'wsc', 'wsf', 'wsh', 'sct', 'inc',
+            // server-parsed pages / SSI
+            'shtml', 'shtm', 'sht', 'stm',
+            // native executables and libraries
+            'exe', 'dll', 'com', 'bat', 'cmd', 'scr', 'pif', 'cpl', 'msc', 'msi', 'msp', 'mst', 'hta', 'chm', 'sys', 'vxd',
+            'lib', 'shb', 'ade', 'adp', 'ins', 'isp', 'mde',
+            // server configuration
+            'htaccess', 'htpasswd', 'ini',
+            // blocked by default, but allowed as the final extension if the profile permits it
+            'svg', 'html', 'htm',
         );
 
         // get file parts, eg: ['image', 'php', 'jpg']
         $parts = explode('.', $name);
 
-        // remove extension
-        array_pop($parts);
+        // normalise each part before comparison
+        $normalise = static function ($part) {
+            return trim($part, " \t\n\r\0\x0B.:;");
+        };
+
+        // check and remove the final extension
+        $finalExt = $normalise(array_pop($parts));
+
+        // svg, html, and htm are blocked by default but have legitimate CMS uses;
+        // allow them as the final extension only if the profile has explicitly permitted them
+        $profileBlockedButAllowable = ['svg', 'html', 'htm'];
+        $profileAllowed = in_array($finalExt, $profileBlockedButAllowable, true) && !empty($allowedExtensions) && in_array($finalExt, $allowedExtensions, true);
+
+        if ((!$profileAllowed && in_array($finalExt, $executable)) || preg_match('/^php\d+$/i', $finalExt)) {
+            return false;
+        }
 
         // remove name
         array_shift($parts);
 
-        // trim each $parts
-        $parts = array_map('trim', $parts);
+        // normalise each part the same way as the final extension
+        $parts = array_map($normalise, $parts);
 
-        // no extensions in file name
+        // no intermediate extensions in file name
         if (empty($parts)) {
             return true;
         }
 
-        // check for extension in file name, eg: image.php.jpg
+        // check for executable extension embedded in file name, eg: image.php.jpg
         foreach ($executable as $extension) {
             if (in_array($extension, $parts)) {
+                return false;
+            }
+        }
+
+        // catch any phpN variant not in the explicit list (php9, php10, etc.)
+        foreach ($parts as $part) {
+            if (preg_match('/^php\d+$/i', $part)) {
                 return false;
             }
         }
@@ -1188,7 +1515,7 @@ abstract class WFUtility
     /**
      * Method to determine if an array is an associative array.
      *
-     * @param    array        An array to test
+     * @param array $array An array to test
      *
      * @return bool True if the array is an associative array
      *
@@ -1210,7 +1537,13 @@ abstract class WFUtility
 
         return false;
     }
-
+    
+    /**
+     * Method to determine if a value is a valid JSON string.
+     *
+     * @param mixed $value The value to check
+     * @return boolean True if the value is a valid JSON string, false otherwise
+     */
     public static function isJson($value)
     {
         // value must be a string

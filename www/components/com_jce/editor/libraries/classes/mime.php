@@ -1,8 +1,8 @@
 <?php
 
 /**
- * @copyright     Copyright (c) 2009-2022 Ryan Demmer. All rights reserved
- * @license       GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+ * @copyright     Copyright (c) 2009-2026 Ryan Demmer. All rights reserved
+ * @license       GNU General Public License version 2 or later; see LICENSE.txt
  * JCE is free software. This version may have been modified pursuant
  * to the GNU General Public License, and as distributed it includes or
  * is derivative of works licensed under the GNU General Public License or
@@ -521,9 +521,9 @@ abstract class WFMimeType
         'audio/adpcm' => 'adp',
         'audio/basic' => 'au snd',
         'audio/midi' => 'mid midi kar rmi',
-        'audio/mp4' => 'mp4a',
+        'audio/mp4' => 'mp4a m4a',
         'audio/mpeg' => 'mpga mp2 mp2a mp3 m2a m3a',
-        'audio/ogg' => 'oga ogg spx',
+        'audio/ogg' => 'oga ogg spx opus',
         'audio/vnd.digital-winds' => 'eol',
         'audio/vnd.dra' => 'dra',
         'audio/vnd.dts' => 'dts',
@@ -634,7 +634,7 @@ abstract class WFMimeType
         'video/jpeg' => 'jpgv',
         'video/jpm' => 'jpm jpgm',
         'video/mj2' => 'mj2 mjp2',
-        'video/mp4' => 'mp4 mp4v mpg4',
+        'video/mp4' => 'mp4 mp4v mpg4 m4v',
         'video/mpeg' => 'mpeg mpg mpe m1v m2v',
         'video/ogg' => 'ogg ogv',
         'video/quicktime' => 'qt mov',

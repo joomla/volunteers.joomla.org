@@ -1,0 +1,112 @@
+{
+  "$schema": "https://developer.joomla.org/schemas/json-schema/web_assets.json",
+  "name": "com_volunteers",
+  "version": "5.0.0",
+  "description": "Joomla Volunteers Portal",
+  "license": "GPL-2.0-or-later",
+  "assets": [
+    {
+      "name": "com_volunteers.frontend",
+      "type": "style",
+      "uri": "media/com_volunteers/css/frontend.css",
+      "package": "volunteers",
+      "version": "5.0.0"
+    },
+    {
+      "name": "com_volunteers.icons",
+      "type": "style",
+      "uri": "media/com_volunteers/css/icons.css"
+    },
+    {
+      "name": "com_volunteers.jquery-gmaps-latlon-picker",
+      "type": "script",
+      "uri": "media/com_volunteers/js/jquery-gmaps-latlon-picker.js",
+      "attributes": {
+        "defer": true
+      },
+      "package": "volunteers",
+      "version": "5.0.0"
+    },
+    {
+      "name": "com_volunteers.markerclusterer",
+      "type": "script",
+      "uri": "media/com_volunteers/js/markerclusterer.js",
+      "attributes": {
+        "defer": true
+      },
+      "package": "volunteers",
+      "version": "5.0.0"
+    },
+    {
+      "name": "com_volunteers.oms",
+      "type": "script",
+      "uri": "media/com_volunteers/js/oms.js",
+      "attributes": {
+        "defer": true
+      },
+      "package": "volunteers",
+      "version": "5.0.0"
+    },
+    {
+      "name": "com_volunteers.google_maps",
+      "type": "script",
+      "uri": "https://maps.googleapis.com/maps/api/js?key=AIzaSyC04czYnPuPFkO6eDAKX-j_lfrpanAAo-U",
+      "attributes": {
+        "defer": true
+      },
+      "package": "volunteers",
+      "version": "5.0.0"
+    },
+    {
+      "name": "com_volunteers.leaflet-css",
+      "type": "style",
+      "uri": "media/com_volunteers/css/leaflet.css",
+      "package": "volunteers",
+      "version": "1.9.4"
+    },
+    {
+      "name": "com_volunteers.leaflet-js",
+      "type": "script",
+      "uri": "media/com_volunteers/js/leaflet.js",
+      "attributes": {
+        "defer": true
+      },
+      "package": "volunteers",
+      "version": "1.9.4"
+    },
+    {
+      "name": "com_volunteers.home-page-map-js",
+      "type": "script",
+      "uri": "media/com_volunteers/js/home-page-map.js",
+      "attributes": {
+        "defer": true
+      },
+      "package": "volunteers",
+      "version": "5.0.0"
+    },
+    {
+      "name": "com_volunteers.marker-cluster-css",
+      "type": "style",
+      "uri": "media/com_volunteers/css/MarkerCluster.css",
+      "package": "volunteers",
+      "version": "1.4.1"
+    },
+    {
+      "name": "com_volunteers.marker-cluster-default-css",
+      "type": "style",
+      "uri": "media/com_volunteers/css/MarkerCluster.Default.css",
+      "package": "volunteers",
+      "version": "1.4.1"
+    },
+    {
+      "name": "com_volunteers.marker-cluster-js",
+      "type": "script",
+      "uri": "media/com_volunteers/js/leaflet.markercluster.js",
+      "attributes": {
+        "defer": true
+      },
+      "package": "volunteers",
+      "version": "1.4.1"
+    }
+  ]
+}

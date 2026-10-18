@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form addfieldprefix="Joomla\Component\Volunteers\Administrator\Field">
+	<field
+		name="title"
+		type="text"
+		label="COM_VOLUNTEERS_FIELD_ROLE"
+		required="true"
+	/>
+
+	<fieldset
+		name="item"
+		addfieldpath="/administrator/components/com_volunteers/models/fields"
+	>
+		<field
+			name="department"
+			type="departments"
+			label="COM_VOLUNTEERS_FIELD_DEPARTMENTS"
+		/>
+		<field
+			name="team"
+			type="teams"
+			label="COM_VOLUNTEERS_FIELD_TEAM"
+		/>
+		<field
+			name="open"
+			type="list"
+			label="COM_VOLUNTEERS_FIELD_POSITION_OPEN"
+			default="1"
+			>
+			<option value="1">JYES</option>
+			<option value="0">JNO</option>
+		</field>
+
+		<field
+			name="description"
+			type="textarea"
+			label="JGLOBAL_DESCRIPTION"
+			rows="6"
+		/>
+	</fieldset>
+
+	<fieldset name="details">
+		<field
+			name="id"
+			type="text"
+			label="JGLOBAL_FIELD_ID_LABEL"
+			default="0"
+			readonly="true"
+			class="readonly"
+		/>
+		<field
+			name="state"
+			type="list"
+			label="JSTATUS"
+			class="form-select-color-state"
+			default="1"
+			>
+			<option value="1">JPUBLISHED</option>
+			<option value="0">JUNPUBLISHED</option>
+			<option value="2">JARCHIVED</option>
+			<option value="-2">JTRASHED</option>
+		</field>
+		<field
+			name="created"
+			type="calendar"
+			label="JGLOBAL_FIELD_CREATED_LABEL"
+			format="%Y-%m-%d %H:%M:%S"
+			filter="user_utc"
+		/>
+		<field
+			name="created_by"
+			type="user"
+			label="JGLOBAL_FIELD_CREATED_BY_LABEL"
+		/>
+		<field
+			name="modified"
+			type="calendar"
+			label="JGLOBAL_FIELD_MODIFIED_LABEL"
+			class="readonly"
+			readonly="true"
+			format="%Y-%m-%d %H:%M:%S"
+			filter="user_utc"
+		/>
+		<field
+			name="modified_by"
+			type="user"
+			label="JGLOBAL_FIELD_MODIFIED_BY_LABEL"
+			class="readonly"
+			readonly="true"
+			filter="unset"
+		/>
+		<field
+			name="checked_out"
+			type="hidden"
+			filter="unset"
+		/>
+		<field
+			name="checked_out_time"
+			type="hidden"
+			filter="unset"
+		/>
+		<field
+			name="notes"
+			type="textarea"
+			label="COM_VOLUNTEERS_FIELD_NOTES_INTERNAL"
+			rows="6"
+		/>
+	</fieldset>
+</form>

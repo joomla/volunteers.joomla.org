@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form>
+	<fields name="filter" addfieldprefix="Joomla\Component\Volunteers\Administrator\Field">
+		<field
+			name="search"
+			type="text"
+			label="COM_VOLUNTEERS_FILTER_SEARCH"
+			description="COM_VOLUNTEERS_FILTER_SEARCH_DESC"
+			hint="JSEARCH_FILTER"
+		/>
+
+		<field
+			name="departmentTeam"
+			type="departments"
+			label="COM_VOLUNTEERS_FIELD_DEPARTMENT"
+			description="COM_VOLUNTEERS_FIELD_DEPARTMENT_DESC"
+			class="js-select-submit-on-change"
+		/>
+
+		<field
+			name="team"
+			type="teams"
+			label="COM_VOLUNTEERS_FIELD_TEAM"
+			description="COM_VOLUNTEERS_FIELD_TEAM_DESC"
+			class="js-select-submit-on-change"
+		/>
+
+		<field
+			name="volunteer"
+			type="volunteers"
+			label="COM_VOLUNTEERS_FIELD_VOLUNTEER"
+			description="COM_VOLUNTEERS_FIELD_VOLUNTEER_DESC"
+			class="js-select-submit-on-change"
+			>
+			<option value="">COM_VOLUNTEERS_SELECT_VOLUNTEER</option>
+		</field>
+
+		<field
+			name="teamStatus"
+			type="list"
+			label="COM_VOLUNTEERS_FIELD_TEAMSTATUS"
+			class="js-select-submit-on-change"
+			>
+			<option value="">COM_VOLUNTEERS_SELECT_TEAMSTATUS</option>
+			<option value="0">COM_VOLUNTEERS_FIELD_STATUS_INFORMATION</option>
+			<option value="1">COM_VOLUNTEERS_FIELD_STATUS_OFFICIAL</option>
+			<option value="2">COM_VOLUNTEERS_FIELD_STATUS_UNOFFICIAL</option>
+		</field>
+
+		<field
+			name="active"
+			type="list"
+			label="COM_VOLUNTEERS_FIELD_ACTIVE"
+			class="js-select-submit-on-change"
+			>
+			<option value="">COM_VOLUNTEERS_SELECT_MEMBERSTATE</option>
+			<option value="1">COM_VOLUNTEERS_FIELD_MEMBERSTATE_ACTIVE</option>
+			<option value="0">COM_VOLUNTEERS_FIELD_MEMBERSTATE_INACTIVE</option>
+		</field>
+
+		<field
+			name="osmStatus"
+			type="list"
+			label="COM_VOLUNTEERS_FIELD_OSMSTATUS"
+			class="js-select-submit-on-change"
+			>
+			<option value="">COM_VOLUNTEERS_SELECT_OSMSTATUS</option>
+			<option value="contributor">COM_VOLUNTEERS_FIELD_OSMSTATUS_CONTRIBUTOR</option>
+			<option value="member">COM_VOLUNTEERS_FIELD_OSMSTATUS_MEMBER</option>
+			<option value="teamleaders">COM_VOLUNTEERS_FIELD_OSMSTATUS_TEAMLEADERS</option>
+			<option value="directors">COM_VOLUNTEERS_FIELD_OSMSTATUS_DIRECTORS</option>
+			<option value="officers">COM_VOLUNTEERS_FIELD_OSMSTATUS_OFFICERS</option>
+		</field>
+	</fields>
+	<fields name="list">
+		<field
+			name="limit"
+			type="limitbox"
+			label="COM_VOLUNTEERS_LIST_LIMIT"
+			description="COM_VOLUNTEERS_LIST_LIMIT_DESC"
+			default="25"
+			class="js-select-submit-on-change"
+		/>
+	</fields>
+</form>

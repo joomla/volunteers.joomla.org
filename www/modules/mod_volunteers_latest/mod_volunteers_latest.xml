@@ -1,17 +1,75 @@
-<?xml version="1.0" encoding="utf-8"?>
-<extension type="module" version="3.1" client="site" method="upgrade">
-    <name>mod_volunteers_latest</name>
+<?xml version="1.0" encoding="UTF-8"?>
+<extension type="module" client="site" method="upgrade">
+    <name>MOD_VOLUNTEERS_LATEST</name>
     <author>Joomla! Project</author>
-    <creationDate>February 2018</creationDate>
-    <copyright>Copyright (C) 2005 - 2018 Open Source Matters. All rights reserved.</copyright>
+    <creationDate>February 2018 / December 2022</creationDate>
+    <copyright>Copyright (C) 2005 - 2024 Open Source Matters. All rights reserved.</copyright>
     <license>GNU General Public License version 2 or later; see LICENSE.txt</license>
+    <history>Original Joomla 3 code 2018 - 2022 Sander Potjer|Convert to Joomla 4 Code 2022-2023 Mark Fleeson|Convert to Joomla 6 Code 2024 Mark Fleeson</history>
     <authorEmail>admin@joomla.org</authorEmail>
     <authorUrl>www.joomla.org</authorUrl>
-    <version>1.0.0</version>
-    <description>Volunteers - Latest Joomlers</description>
-
+    <version>6.0.0</version>
+    <description>MOD_VOLUNTEERS_LATEST_XML_DESCRIPTION</description>
+    <namespace path="src">Joomla\Module\VolunteersLatest</namespace>
     <files>
-        <filename module="mod_volunteers_latest">mod_volunteers_latest.php</filename>
+        <folder module="mod_volunteers_latest">services</folder>
+        <folder>src</folder>
         <folder>tmpl</folder>
     </files>
+    <languages>
+        <language tag="en-GB">language/en-GB/en-GB.mod_volunteers_latest.ini</language>
+        <language tag="en-GB">language/en-GB/en-GB.mod_volunteers_latest.sys.ini</language>
+    </languages>
+    <config>
+        <fields name="params">
+            <fieldset name="basic">
+                <field
+                    name="count"
+                    type="number"
+                    label="MOD_VOLUNTEERS_LATEST_FIELD_COUNT_LABEL"
+                    default="5"
+                    filter="integer"
+                    min="1"
+                    validate="number"
+                />
+            </fieldset>
+            <fieldset name="advanced">
+                <field
+                    name="layout"
+                    type="modulelayout"
+                    label="JFIELD_ALT_LAYOUT_LABEL"
+                    class="form-select"
+                    validate="moduleLayout"
+                />
+                <field
+                    name="moduleclass_sfx"
+                    type="textarea"
+                    label="COM_MODULES_FIELD_MODULECLASS_SFX_LABEL"
+                    rows="3"
+                    validate="CssIdentifier"
+                />
+                <field
+                    name="cache"
+                    type="list"
+                    label="COM_MODULES_FIELD_CACHING_LABEL"
+                    default="1"
+                    filter="integer"
+                    validate="options"
+                >
+                    <option value="1">JGLOBAL_USE_GLOBAL</option>
+                    <option value="0">COM_MODULES_FIELD_VALUE_NOCACHING</option>
+                </field>
+                <field
+                    name="cache_time"
+                    type="number"
+                    label="COM_MODULES_FIELD_CACHE_TIME_LABEL"
+                    default="900"
+                    filter="integer"
+                />
+                <field name="cachemode" type="hidden" default="static">
+                    <option value="static"></option>
+                </field>
+            </fieldset>
+        </fields>
+    </config>
 </extension>

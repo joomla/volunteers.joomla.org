@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form>
+	<fields name="filter" addfieldprefix="Joomla\Component\Volunteers\Administrator\Field">
+		<field
+			name="search"
+			type="text"
+			label="COM_VOLUNTEERS_FILTER_SEARCH"
+			description="COM_VOLUNTEERS_FILTER_SEARCH_DESC"
+			hint="JSEARCH_FILTER"
+		/>
+
+		<field
+			name="state"
+			type="status"
+			label="COM_VOLUNTEERS_FILTER_PUBLISHED"
+			description="COM_VOLUNTEERS_FILTER_PUBLISHED_DESC"
+			class="js-select-submit-on-change"
+			>
+			<option value="">JOPTION_SELECT_PUBLISHED</option>
+		</field>
+
+		<field
+			name="department"
+			type="departments"
+			label="COM_VOLUNTEERS_FIELD_DEPARTMENT"
+			description="COM_VOLUNTEERS_FIELD_DEPARTMENT_DESC"
+			class="js-select-submit-on-change"
+			>
+			<option value="">COM_VOLUNTEERS_SELECT_DEPARTMENT</option>
+		</field>
+	</fields>
+	<fields name="list">
+		<field
+			name="limit"
+			type="limitbox"
+			label="COM_VOLUNTEERS_LIST_LIMIT"
+			description="COM_VOLUNTEERS_LIST_LIMIT_DESC"
+			default="25"
+			class="js-select-submit-on-change"
+		/>
+	</fields>
+</form>

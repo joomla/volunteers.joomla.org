@@ -1,31 +1,94 @@
 <?xml version="1.0" encoding="utf-8"?>
 <config>
-    <fieldset
-            name="component"
-            label="COM_VOLUNTEERS_COMPONENT_LABEL"
-            description="COM_VOLUNTEERS_COMPONENT_DESC"
-    >
-        <field
-                name="yourlsapikey"
-                type="text"
-                label="COM_VOLUNTEERS_OPTIONS_YOURLSAPIKEY"
-        />
-    </fieldset>
+	<fieldset label="COM_VOLUNTEERS3_CONFIGURATION" name="jed">
+		<field
+			name="jed3_db_host"
+			type="text"
+			label="COM_VOLUNTEERS_MIGRATE_VOLUNTEERS3_DB_HOST_LABEL"
+			description="COM_VOLUNTEERS_MIGRATE_VOLUNTEERS3_DB_HOST_DESCR"
+			default="localhost"
+			hint="COM_VOLUNTEERS_MIGRATE_VOLUNTEERS3_DB_HOST_LABEL"
+			filter="safehtml"
+		/>
+		<field
+			name="jed3_db_user"
+			type="text"
+			label="COM_VOLUNTEERS_MIGRATE_VOLUNTEERS3_DB_USER_LABEL"
+			description="COM_VOLUNTEERS_MIGRATE_VOLUNTEERS3_DB_USER_DESCR"
+			filter="safehtml"
+			hint="COM_VOLUNTEERS_MIGRATE_VOLUNTEERS3_DB_USER_LABEL"
+		/>
+		<field
+			name="jed3_db_password"
+			type="text"
+			label="COM_VOLUNTEERS_MIGRATE_VOLUNTEERS3_DB_PASSWORD_LABEL"
+			description="COM_VOLUNTEERS_MIGRATE_VOLUNTEERS3_DB_PASSWORD_DESCR"
+			hint="COM_VOLUNTEERS_MIGRATE_VOLUNTEERS3_DB_PASSWORD_LABEL"
+			filter="safehtml"
+		/>
+		<field
+			name="jed3_db_database_name"
+			type="text"
+			label="COM_VOLUNTEERS_MIGRATE_VOLUNTEERS3_DB_NAME_LABEL"
+			description="COM_VOLUNTEERS_MIGRATE_VOLUNTEERS3_DB_NAME_DESCR"
+			hint="COM_VOLUNTEERS_MIGRATE_VOLUNTEERS3_DB_NAME_LABEL"
+			filter="safehtml"
+			default="bl_j3_mar22"
+		/>
+		<field
+			name="jed3_db_prefix"
+			type="text"
+			label="COM_VOLUNTEERS_MIGRATE_VOLUNTEERS3_DB_PREFIX_LABEL"
+			description="COM_VOLUNTEERS_MIGRATE_VOLUNTEERS3_DB_PREFIX_DESCR"
+			hint="COM_VOLUNTEERS_MIGRATE_VOLUNTEERS3_DB_PREFIX_LABEL"
+			filter="safehtml"
+			default="wqyh6"
+		/>
+	</fieldset>
+	<fieldset name="permissions" description="JCONFIG_PERMISSIONS_DESC" label="JCONFIG_PERMISSIONS_LABEL">
+		<field
+			name="rules"
+			type="rules"
+			label="JCONFIG_PERMISSIONS_LABEL"
+			component="com_volunteers"
+			class="inputbox"
+			filter="rules"
+			validate="rules"
+			section="component"
+		/>
+	</fieldset>
 
-    <fieldset
-            name="permissions"
-            description="JCONFIG_PERMISSIONS_DESC"
-            label="JCONFIG_PERMISSIONS_LABEL"
-    >
-
-        <field
-                name="rules"
-                type="rules"
-                component="com_volunteers"
-                filter="rules"
-                validate="rules"
-                label="JCONFIG_PERMISSIONS_LABEL"
-                section="component"
-        />
-    </fieldset>
+	<fieldset name="component">
+		<field
+			name="save_history"
+			type="radio"
+			label="JGLOBAL_SAVE_HISTORY_OPTIONS_LABEL"
+			description="JGLOBAL_SAVE_HISTORY_OPTIONS_DESC"
+			layout="joomla.form.field.radio.switcher"
+			default="0"
+			>
+			<option value="0">JNO</option>
+			<option value="1">JYES</option>
+		</field>
+		<field
+			name="history_limit"
+			type="text"
+			label="JGLOBAL_HISTORY_LIMIT_OPTIONS_LABEL"
+			description="JGLOBAL_HISTORY_LIMIT_OPTIONS_DESC"
+			filter="integer"
+			default="5"
+		/>
+		<field
+			name="sef_ids"
+			type="radio"
+			label="JGLOBAL_SEF_NOIDS_LABEL"
+			description="JGLOBAL_SEF_NOIDS_DESC"
+			layout="joomla.form.field.radio.switcher"
+			filter="integer"
+			default="0"
+			>
+			<option value="0">JNO</option>
+			<option value="1">JYES</option>
+		</field>
+	</fieldset>
 </config>

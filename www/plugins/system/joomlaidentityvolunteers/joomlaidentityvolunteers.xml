@@ -1,18 +1,23 @@
-<?xml version="1.0" encoding="utf-8"?>
-<extension version="3.0" type="plugin" group="system" method="upgrade">
+<?xml version="1.0" encoding="UTF-8"?>
+<extension type="plugin" group="system" method="upgrade">
     <name>PLG_SYSTEM_JOOMLAIDENTITYVOLUNTEERS</name>
     <author>Joomla! Project</author>
-    <creationDate>March 2018</creationDate>
-    <copyright>(C) 2005 - 2018 Open Source Matters. All rights reserved.</copyright>
+    <creationDate>March 2018 / December 2022</creationDate>
+    <copyright>(C) 2005 - 2023 Open Source Matters. All rights reserved.</copyright>
     <license>GNU General Public License version 2 or later; see LICENSE.txt</license>
+    <history>Original Joomla 3 code 2018 - 2022 Sander Potjer|Convert to Joomla 4 Code 2022-2023 Mark Fleeson</history>
     <authorEmail>admin@joomla.org</authorEmail>
     <authorUrl>www.joomla.org</authorUrl>
-    <version>1.0.0</version>
+    <version>4.0.0</version>
     <description>PLG_SYSTEM_JOOMLAIDENTITYVOLUNTEERS_XML_DESCRIPTION</description>
-
+    <namespace path="src">Joomla\Plugin\System\JoomlaIdentityVolunteers</namespace>
     <files>
-        <filename plugin="joomlaidentityvolunteers">joomlaidentityvolunteers.php</filename>
-        <filename>joomlaidentityvolunteers.xml</filename>
+        <folder plugin="joomlaidentityvolunteers">services</folder>
+        <folder>src</folder>
         <folder>language</folder>
     </files>
+    <config>
+        <fields name="params">
+        </fields>
+    </config>
 </extension>

@@ -1,15 +1,27 @@
-<?xml version="1.0" encoding="utf-8"?>
-<extension version="3.1" type="plugin" group="user">
-	<name>plg_user_volunteer</name>
-	<author>Joomla! Project</author>
-	<creationDate>August 2009</creationDate>
-	<copyright>(C) 2005 - 2014 Open Source Matters. All rights reserved.</copyright>
-	<license>GNU General Public License version 2 or later; see LICENSE.txt</license>
-	<authorEmail>admin@joomla.org</authorEmail>
-	<authorUrl>www.joomla.org</authorUrl>
-	<version>3.0.0</version>
-	<description>Delete Volunteer Profile on User Delete</description>
-	<files>
-		<filename plugin="volunteer">volunteer.php</filename>
-	</files>
+<?xml version="1.0" encoding="UTF-8"?>
+<extension type="plugin" group="user" method="upgrade">
+    <name>PLG_USER_VOLUNTEERS</name>
+    <author>Joomla! Project</author>
+    <creationDate>August 2009 / December 2022</creationDate>
+    <copyright>(C) 2005 - 2023 Open Source Matters. All rights reserved.</copyright>
+    <license>GNU General Public License version 2 or later; see LICENSE.txt</license>
+    <history>Original Joomla 3 code 2018 - 2022 Sander Potjer|Convert to Joomla 4 Code 2022-2023 Mark Fleeson</history>
+    <authorEmail>admin@joomla.org</authorEmail>
+    <authorUrl>www.joomla.org</authorUrl>
+    <version>4.0.0</version>
+    <description>PLG_USER_VOLUNTEERS_XML_DESCRIPTION</description>
+    <namespace path="src">Joomla\Plugin\User\Volunteer</namespace>
+    <files>
+        <folder plugin="volunteer">services</folder>
+        <folder>src</folder>
+        <folder>language</folder>
+    </files>
+    <languages>
+        <language tag="en-GB">language/en-GB/plg_user_volunteer.ini</language>
+        <language tag="en-GB">language/en-GB/plg_user_volunteer.sys.ini</language>
+    </languages>
+    <config>
+        <fields name="params">
+        </fields>
+    </config>
 </extension>

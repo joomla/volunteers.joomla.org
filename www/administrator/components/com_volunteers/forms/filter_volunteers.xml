@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form>
+	<fields name="filter">
+		<field
+			name="search"
+			type="text"
+			label="COM_VOLUNTEERS_FILTER_SEARCH"
+			hint="JSEARCH_FILTER"
+		/>
+		<field
+			name="state"
+			type="status"
+			label="COM_VOLUNTEERS_FILTER_PUBLISHED"
+			description="COM_VOLUNTEERS_FILTER_PUBLISHED_DESC"
+			class="js-select-submit-on-change"
+			>
+			<option value="">JOPTION_SELECT_PUBLISHED</option>
+		</field>
+		<field
+			name="coc"
+			type="list"
+			label="COM_VOLUNTEERS_FIELD_COC"
+			class="js-select-submit-on-change"
+			>
+			<option value="">COM_VOLUNTEERS_SELECT_COC</option>
+			<option value="0">JNO</option>
+			<option value="1">JYES</option>
+		</field>
+	</fields>
+	<fields name="list">
+		<field
+			name="limit"
+			type="limitbox"
+			label="COM_VOLUNTEERS_LIST_LIMIT"
+			default="25"
+			class="js-select-submit-on-change"
+		/>
+	</fields>
+</form>

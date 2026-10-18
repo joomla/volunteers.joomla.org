@@ -1,36 +1,100 @@
 <?xml version="1.0" encoding="utf-8"?>
-<extension type="component" version="3.0" method="upgrade">
-    <name>com_volunteers</name>
+<extension type="component" method="upgrade">
+    <name>COM_VOLUNTEERS</name>
     <author>Joomla! Project</author>
-    <creationDate>February 2016</creationDate>
-    <copyright>(C) 2005 - 2015 Open Source Matters. All rights reserved.</copyright>
+    <creationDate>December 2022</creationDate>
+    <copyright>(C) 2022 Open Source Matters, Inc.</copyright>
     <license>GNU General Public License version 2 or later; see LICENSE.txt</license>
     <authorEmail>admin@joomla.org</authorEmail>
     <authorUrl>www.joomla.org</authorUrl>
-    <version>2.0.0</version>
+    <version>6.1.0</version>
     <description>COM_VOLUNTEERS_XML_DESCRIPTION</description>
-
-    <files folder="components/com_volunteers">
-
+    <namespace path="src">Joomla\Component\Volunteers</namespace>
+        <files folder="components/com_volunteers">
+        <folder>forms</folder>
+        <folder>layouts</folder>
+        <folder>src</folder>
+        <folder>tmpl</folder>
     </files>
 
-    <languages folder="language">
+    <languages folder="components/com_volunteers/language">
+
+        <language tag="en-GB">en-GB/com_volunteers.ini</language>
 
     </languages>
 
     <administration>
-        <menu img="class:volunteers">com_volunteers</menu>
-
+        <menu view="volunteers">COM_VOLUNTEERS</menu>
         <submenu>
+            <!-- Menu entries -->
+            <menu link="option=com_volunteers&amp;view=departments" view="departments" alt="Volunteers/Departments">
+                COM_VOLUNTEERS_TITLE_DEPARTMENTS
+            </menu>
+            <menu link="option=com_volunteers&amp;view=members" view="members" alt="Volunteers/Members">
+                COM_VOLUNTEERS_TITLE_MEMBERS
+            </menu>
 
-        </submenu>
+            <menu link="option=com_volunteers&amp;view=positions" view="positions" alt="Volunteers/Positions">
+                COM_VOLUNTEERS_TITLE_POSITIONS
+            </menu>
+
+            <menu link="option=com_volunteers&amp;view=reports" view="reports" alt="Volunteers/Reports">
+                COM_VOLUNTEERS_TITLE_REPORTS
+            </menu>
+
+            <menu link="option=com_volunteers&amp;view=roles" view="roles" alt="Volunteers/Roles">
+                COM_VOLUNTEERS_TITLE_ROLES
+            </menu>
+
+            <menu link="option=com_volunteers&amp;view=teams" view="teams" alt="Volunteers/Teams">
+                COM_VOLUNTEERS_TITLE_TEAMS
+            </menu>
+
+            <menu link="option=com_volunteers&amp;view=volunteers" view="volunteers" alt="Volunteers/Volunteers">
+                COM_VOLUNTEERS_TITLE_VOLUNTEERS
+            </menu>
+            </submenu>
 
         <files folder="administrator/components/com_volunteers">
-
+            <folder>forms</folder>
+            <folder>layouts</folder>
+            <folder>services</folder>
+            <folder>sql</folder>
+            <folder>src</folder>
+            <folder>tmpl</folder>
+            <file>access.xml</file>
+            <file>config.xml</file>
         </files>
-        <languages folder="administrator/language">
 
+        <languages folder="administrator/components/com_volunteers/language">
+            <language tag="en-GB">en-GB/com_volunteers.ini</language>
+            <language tag="en-GB">en-GB/com_volunteers.sys.ini</language>
         </languages>
     </administration>
-</extension>
 
+    <media destination="com_volunteers" folder="media/com_volunteers">
+        <folder>images</folder>
+        <folder>css</folder>
+        <folder>js</folder>
+
+        <filename>joomla.asset.json</filename>
+    </media>
+
+    <api>
+        <files folder="api/components/com_volunteers">
+            <folder>src</folder>
+        </files>
+    </api>
+
+    <install>
+        <sql>
+            <file driver="mysql" charset="utf8">sql/install.mysql.utf8.sql</file>
+        </sql>
+    </install>
+
+    <uninstall>
+        <sql>
+            <file driver="mysql" charset="utf8">sql/uninstall.mysql.utf8.sql</file>
+        </sql>
+    </uninstall>
+</extension>

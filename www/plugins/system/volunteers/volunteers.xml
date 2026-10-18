@@ -1,17 +1,22 @@
-<?xml version="1.0" encoding="utf-8"?>
-<extension version="3.0" type="plugin" group="system" method="upgrade">
-    <name>plg_system_volunteers</name>
+<?xml version="1.0" encoding="UTF-8"?>
+<extension type="plugin" group="system" method="upgrade">
+    <name>PLG_SYSTEM_VOLUNTEERS</name>
     <author>Joomla! Project</author>
-    <creationDate>July 2016</creationDate>
-    <copyright>(C) 2005 - 2015 Open Source Matters. All rights reserved.</copyright>
+    <creationDate>July 2016 / December 2022</creationDate>
+    <copyright>(C) 2005 - 2023 Open Source Matters. All rights reserved.</copyright>
     <license>GNU General Public License version 2 or later; see LICENSE.txt</license>
     <authorEmail>admin@joomla.org</authorEmail>
     <authorUrl>www.joomla.org</authorUrl>
-    <version>1.0.0</version>
-    <description>Volunteers System Plugin</description>
-
+    <version>4.0.0</version>
+    <description>PLG_SYSTEM_VOLUNTEERS_XML_DESCRIPTION</description>
+    <namespace path="src">Joomla\Plugin\System\Volunteers</namespace>
     <files>
-        <filename plugin="volunteers">volunteers.php</filename>
-        <filename>volunteers.xml</filename>
+        <folder plugin="volunteers">services</folder>
+        <folder>src</folder>
+        <folder>language</folder>
     </files>
+    <config>
+        <fields name="params">
+        </fields>
+    </config>
 </extension>

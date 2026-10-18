@@ -215,7 +215,12 @@ class MembersModel extends ListModel
         $team = $this->getState('filter.team');
 
         if (is_array($team)) {
-            $query->whereIn($db->quoteName('a.team'), (array) $team);
+            if ($team) {
+                $query->whereIn($db->quoteName('a.team'), $team);
+            } else {
+                // An empty list of teams matches no members
+                $query->where('0 = 1');
+            }
         }
 
         if (is_numeric($team) && ($team > 0)) {
@@ -291,11 +296,12 @@ class MembersModel extends ListModel
 
         if (is_numeric($active)) {
             if ($active == 1) {
-                $query->where($db->quoteName('a.date_ended') . ' IS NULL');
+                // Not ended is stored as 0000-00-00 (NOT NULL column), so compare against a real date
+                $query->where('(' . $db->quoteName('a.date_ended') . ' IS NULL OR ' . $db->quoteName('a.date_ended') . ' < ' . $db->quote('1000-01-01') . ')');
             }
 
             if ($active == 0) {
-                $query->where($db->quoteName('a.date_ended') . ' IS NOT NULL');
+                $query->where($db->quoteName('a.date_ended') . ' >= ' . $db->quote('1000-01-01'));
             }
         }
 

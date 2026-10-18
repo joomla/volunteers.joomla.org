@@ -87,8 +87,8 @@ $active = $this->state->get('filter.active', 1);
             ?>
         </div>
 
-        <div class="pagination">
-            <p class="counter float-end">
+        <div class="w-100">
+            <p class="counter float-end pt-3 pe-2">
                 <?php echo $this->pagination->getPagesCounter(); ?>
             </p>
 

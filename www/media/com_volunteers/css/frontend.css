@@ -287,3 +287,35 @@ div#toolbar-cancel.btn-group a {
     text-decoration: underline;
 }
 
+
+/* Team list: headings in the description and the status badge stay small, as on the Joomla 3 site */
+.team-description h2,
+.team-description h3 {
+    font-size: 22px;
+    font-weight: bold;
+    margin: 1rem 0 .5rem;
+}
+
+.team .vol_h2 .badge {
+    font-size: 11px;
+    vertical-align: middle;
+}
+
+/* Read more buttons on the team and department cards get a visible outline */
+.team .btn-light {
+    --bs-btn-border-color: var(--bs-border-color);
+    --bs-btn-hover-border-color: var(--bs-border-color);
+}
+
+/* Status filter: neutral until selected, then green (active) or red (archived) */
+#filter_active1:checked + .btn {
+    --bs-btn-active-bg: var(--bs-success);
+    --bs-btn-active-border-color: var(--bs-success);
+    --bs-btn-active-color: #fff;
+}
+
+#filter_active0:checked + .btn {
+    --bs-btn-active-bg: var(--bs-danger);
+    --bs-btn-active-border-color: var(--bs-danger);
+    --bs-btn-active-color: #fff;
+}

@@ -121,8 +121,8 @@ try {
         </a>
     </div>
 
-    <div class="pagination">
-        <p class="counter float-end">
+    <div class="w-100">
+        <p class="counter float-end pt-3 pe-2">
             <?php echo $this->pagination->getPagesCounter(); ?>
         </p>
 

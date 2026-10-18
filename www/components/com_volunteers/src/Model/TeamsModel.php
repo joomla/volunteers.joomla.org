@@ -210,11 +210,12 @@ class TeamsModel extends ListModel
 
         if (is_numeric($active)) {
             if ($active == 1) {
-                $query->where($db->quoteName('a.date_ended') . ' IS NULL');
+                // Not ended is stored as 0000-00-00 (NOT NULL column), so compare against a real date
+                $query->where('(' . $db->quoteName('a.date_ended') . ' IS NULL OR ' . $db->quoteName('a.date_ended') . ' < ' . $db->quote('1000-01-01') . ')');
             }
 
             if ($active == 0) {
-                $query->where($db->quoteName('a.date_ended') . ' IS NOT NULL');
+                $query->where($db->quoteName('a.date_ended') . ' >= ' . $db->quote('1000-01-01'));
             }
         }
 
@@ -259,6 +260,11 @@ class TeamsModel extends ListModel
     public function getItems()
     {
         $items = parent::getItems();
+
+        // Nothing matched the filters, so there are no members or subteams to load
+        if (empty($items)) {
+            return [];
+        }
 
         $teams   = [];
         $teamIds = [];

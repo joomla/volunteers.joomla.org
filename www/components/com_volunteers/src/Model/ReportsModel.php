@@ -15,6 +15,7 @@ namespace Joomla\Component\Volunteers\Site\Model;
 
 use Exception;
 use Joomla\CMS\Component\ComponentHelper;
+use Joomla\CMS\Factory;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\CMS\MVC\Model\ListModel;
 use Joomla\CMS\Router\Route;
@@ -93,6 +94,14 @@ class ReportsModel extends ListModel
 
         // List state information.
         parent::populateState($ordering, $direction);
+
+        // The frontend always shows 30 reports per page, whatever limit is in the request or session
+        if (Factory::getApplication()->isClient('site')) {
+            $limit = 30;
+            $start = Factory::getApplication()->getInput()->getUint('limitstart', 0);
+            $this->setState('list.limit', $limit);
+            $this->setState('list.start', (int) (floor($start / $limit) * $limit));
+        }
     }
 
     /**

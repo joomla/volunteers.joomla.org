@@ -313,10 +313,9 @@ class VolunteersService
         $query = $this->db->getQuery(true);
 
         if ($prefix) {
-            $query->select($this->db->quoteName('id', 'value'), $this->db->quoteName('title', 'text'))
-                ->select('CONCAT(\'d.\', id) AS value');
+            $query->select(['CONCAT(\'d.\', ' . $this->db->quoteName('id') . ') AS value', $this->db->quoteName('title', 'text')]);
         } else {
-            $query->select($this->db->quoteName('id', 'value'), $this->db->quoteName('title', 'text'));
+            $query->select([$this->db->quoteName('id', 'value'), $this->db->quoteName('title', 'text')]);
         }
 
         $query->from($this->db->quoteName('#__volunteers_departments'))

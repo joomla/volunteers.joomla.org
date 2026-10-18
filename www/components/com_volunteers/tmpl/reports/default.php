@@ -51,12 +51,7 @@ try {
         </div>
         <div class="border-bottom pb-2 mb-3">
             <h1 class="vol_h1">
-                <?php echo Text::_('COM_VOLUNTEERS_TITLE_REPORTS') ?>
-                <?php if ($this->category) :
-                    ?>:
-                    <?php echo $this->category; ?>
-                    <?php
-                endif; ?>
+                <?php echo Text::_('COM_VOLUNTEERS_TITLE_REPORTS') . ($this->category ? ': ' . $this->category : ''); ?>
             </h1>
         </div>
     </div>
@@ -97,9 +92,7 @@ try {
                     </p>
                     <a href="<?php echo Route::_('index.php?option=com_volunteers&view=report&id=' . $item->id) ?>" class="btn btn-light">
                         <span class="icon-chevron-right" aria-hidden="true"></span>
-                        <?php echo Text::_('COM_VOLUNTEERS_READ_MORE') ?>
-                        &nbsp;
-                        <?php echo $item->title; ?>
+                        <?php echo Text::_('COM_VOLUNTEERS_READ_MORE') . ' ' . $item->title; ?>
                     </a>
                 </div>
             </div>
@@ -113,8 +106,8 @@ try {
         </div>
     <?php endif; ?>
 
-    <div class="row">
-        <a class="btn btn-warning float-end"
+    <div class="text-end">
+        <a class="btn btn-warning"
             href="<?php echo Route::_('index.php?option=com_volunteers&view=reports&filter_category=' . $this->state->get('filter.category') . '&format=feed&type=rss') ?>">
             <span class="icon-feed" aria-hidden="true"></span>
             <?php echo Text::_('COM_VOLUNTEERS_RSSFEED') ?>

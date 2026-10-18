@@ -165,11 +165,15 @@ class VolunteersModel extends ListModel
         // Group by ID
         $query->group('a.id');
 
-        // Add the list ordering clause.
-        $orderCol  = $this->state->get('list.ordering', 'user.name');
-        $orderDirn = $this->state->get('list.direction', 'asc');
+        // Add the list ordering clause, the frontend shows the volunteers in a random order
+        if ($frontend) {
+            $query->order('RAND()');
+        } else {
+            $orderCol  = $this->state->get('list.ordering', 'user.name');
+            $orderDirn = $this->state->get('list.direction', 'asc');
 
-        $query->order($db->escape($orderCol . ' ' . $orderDirn));
+            $query->order($db->escape($orderCol . ' ' . $orderDirn));
+        }
 
         return $query;
     }
@@ -228,6 +232,11 @@ class VolunteersModel extends ListModel
 
         // List state information.
         parent::populateState($ordering, $direction);
+
+        // The frontend shows a grid of 6 by 5 volunteers per page
+        if (Factory::getApplication()->isClient('site')) {
+            $this->setState('list.limit', 30);
+        }
     }
 
     /**

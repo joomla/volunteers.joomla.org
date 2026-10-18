@@ -36,6 +36,14 @@ $active = $this->state->get('filter.active', 1);
     <div class="volunteers">
         <div class="row">
             <div class="filter-bar d-flex flex-wrap justify-content-end gap-2">
+                <div class="btn-group" role="group" aria-label="<?php echo Text::_('JSTATUS'); ?>">
+                    <input type="radio" class="btn-check" name="filter_active" id="filter_active1" value="1"
+                        autocomplete="off" onchange="this.form.submit();"<?php echo $active == 1 ? ' checked' : ''; ?>>
+                    <label class="btn btn-outline-secondary" for="filter_active1"><?php echo Text::_('COM_VOLUNTEERS_ACTIVE'); ?></label>
+                    <input type="radio" class="btn-check" name="filter_active" id="filter_active2" value="2"
+                        autocomplete="off" onchange="this.form.submit();"<?php echo $active == 2 ? ' checked' : ''; ?>>
+                    <label class="btn btn-outline-secondary" for="filter_active2"><?php echo Text::_('COM_VOLUNTEERS_ALL'); ?></label>
+                </div>
                 <div class="input-group w-auto">
                     <label class="visually-hidden" for="filter-search"><?php echo Text::_('COM_VOLUNTEERS_SEARCH_VOLUNTEER'); ?></label>
                     <input type="search" name="filter_search" id="filter-search" class="form-control"
@@ -51,14 +59,6 @@ $active = $this->state->get('filter.active', 1);
                         </button>
                     <?php endif; ?>
                 </div>
-                <div class="btn-group" role="group" aria-label="<?php echo Text::_('JSTATUS'); ?>">
-                    <input type="radio" class="btn-check" name="filter_active" id="filter_active1" value="1"
-                        autocomplete="off" onchange="this.form.submit();"<?php echo $active == 1 ? ' checked' : ''; ?>>
-                    <label class="btn btn-outline-success" for="filter_active1"><?php echo Text::_('COM_VOLUNTEERS_ACTIVE'); ?></label>
-                    <input type="radio" class="btn-check" name="filter_active" id="filter_active2" value="2"
-                        autocomplete="off" onchange="this.form.submit();"<?php echo $active == 2 ? ' checked' : ''; ?>>
-                    <label class="btn btn-outline-dark" for="filter_active2"><?php echo Text::_('COM_VOLUNTEERS_ALL'); ?></label>
-                </div>
             </div>
             <div class="border-bottom pb-2 mb-3">
                 <h1 class="vol_h1">
@@ -67,21 +67,14 @@ $active = $this->state->get('filter.active', 1);
             </div>
         </div>
 
-        <div class="row">
-            <?php $i = 0; ?>
+        <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-6">
             <?php if (!empty($this->items)) {
                 foreach ($this->items as $item) : ?>
-                    <div class="col-2">
+                    <div class="col">
                         <div class="card card-body p-2 mb-3">
                             <?php VolunteersHelper::outputHorizontalVolunteer($item); ?>
                         </div>
                     </div>
-                    <?php $i++; ?>
-                    <?php if ($i == 6) : ?>
-                    </div>
-                    <div class="row">
-                        <?php $i = 0; ?>
-                    <?php endif; ?>
                 <?php endforeach;
             }
             ?>

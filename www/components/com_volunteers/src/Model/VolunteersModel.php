@@ -165,9 +165,9 @@ class VolunteersModel extends ListModel
         // Group by ID
         $query->group('a.id');
 
-        // Add the list ordering clause, the frontend shows the volunteers in a random order
+        // Add the list ordering clause, the frontend shows the volunteers in a random order that stays the same while paging
         if ($frontend) {
-            $query->order('RAND()');
+            $query->order('MD5(CONCAT(' . $db->quoteName('a.id') . ', ' . (int) $this->getState('list.seed') . '))');
         } else {
             $orderCol  = $this->state->get('list.ordering', 'user.name');
             $orderDirn = $this->state->get('list.direction', 'asc');
@@ -233,9 +233,28 @@ class VolunteersModel extends ListModel
         // List state information.
         parent::populateState($ordering, $direction);
 
-        // The frontend shows a grid of 6 by 5 volunteers per page
-        if (Factory::getApplication()->isClient('site')) {
-            $this->setState('list.limit', 30);
+        $app = Factory::getApplication();
+
+        if ($app->isClient('site')) {
+            // The frontend shows a grid of 6 by 5 volunteers per page
+            $limit = 30;
+            $this->setState('list.limit', $limit);
+
+            // Pagination links always carry limitstart, a fresh visit to the page does not
+            $input  = $app->getInput();
+            $paging = $input->exists('limitstart');
+            $start  = $paging ? $input->getUint('limitstart', 0) : 0;
+            $this->setState('list.start', (int) (floor($start / $limit) * $limit));
+
+            // Shuffle the volunteers on a fresh visit, keep the same order while paging
+            $seed = (int) $app->getUserState($this->context . '.seed', 0);
+
+            if (!$paging || !$seed) {
+                $seed = random_int(1, PHP_INT_MAX);
+                $app->setUserState($this->context . '.seed', $seed);
+            }
+
+            $this->setState('list.seed', $seed);
         }
     }
 

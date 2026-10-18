@@ -70,8 +70,8 @@ $active = $this->state->get('filter.active', 1);
         <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-6">
             <?php if (!empty($this->items)) {
                 foreach ($this->items as $item) : ?>
-                    <div class="col">
-                        <div class="card card-body p-2 mb-3">
+                    <div class="col mb-3">
+                        <div class="card card-body p-2 h-100">
                             <?php VolunteersHelper::outputHorizontalVolunteer($item); ?>
                         </div>
                     </div>

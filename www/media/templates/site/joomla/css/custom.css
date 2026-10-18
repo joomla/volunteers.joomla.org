@@ -1,0 +1,11 @@
+/* Site-specific overrides for the jdotorg template (loaded via template.joomla.custom.ltr) */
+
+/* Breadcrumb background, as on the Joomla 3 site */
+.mod-breadcrumbs__wrapper {
+    margin-top: 1.5rem;
+}
+
+.mod-breadcrumbs {
+    --bs-breadcrumb-bg: var(--bs-tertiary-bg);
+    --bs-breadcrumb-border-radius: var(--bs-border-radius);
+}

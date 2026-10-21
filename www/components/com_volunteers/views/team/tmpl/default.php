@@ -319,7 +319,7 @@ defined('_JEXEC') or die;
 									<div class="row-fluid">
 										<div class="span8">
 											<?php if ($this->acl->edit): ?>
-												<a class="btn btn-small pull-right" href="<?php echo JRoute::_('index.php?option=com_volunteers&task=role.delete&id=' . $role->id) ?>">
+												<a class="btn btn-small pull-right" href="<?php echo JRoute::_('index.php?option=com_volunteers&task=role.delete&id=' . $role->id . '&' . JSession::getFormToken() . '=1') ?>">
 													<span class="icon-delete"></span> <?php echo JText::_('COM_VOLUNTEERS_DELETE') ?>
 												</a>
 												<a class="btn btn-small pull-right" href="<?php echo JRoute::_('index.php?option=com_volunteers&task=role.edit&id=' . $role->id) ?>">

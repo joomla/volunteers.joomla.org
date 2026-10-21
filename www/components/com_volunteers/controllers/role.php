@@ -80,6 +80,9 @@ class VolunteersControllerRole extends JControllerForm
 	 */
 	public function delete($key = null, $urlVar = null)
 	{
+		// Check for request forgeries.
+		JSession::checkToken('get') or jexit(JText::_('JINVALID_TOKEN'));
+
 		// Get variables
 		$roleId = $this->input->getInt('id');
 		$teamId = (int) $this->getModel()->getItem($roleId)->team;

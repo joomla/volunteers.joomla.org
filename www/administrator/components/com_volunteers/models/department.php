@@ -349,11 +349,22 @@ class VolunteersModelDepartment extends JModelAdmin
 			$teamsById[$team->id] = $team;
 		}
 
+		// No teams, an empty list would make getDepartmentTeamLeads() fall back to the department id as a team id
+		if (empty($teamsById))
+		{
+			return $teamsById;
+		}
+
 		// Get the department team leads
 		$teamLeads = $this->getDepartmentTeamLeads(array_keys($teamsById));
 
 		foreach ($teamLeads as $lead)
 		{
+			if (!isset($teamsById[$lead->team]))
+			{
+				continue;
+			}
+
 			if (strpos($lead->position_title, 'Assistant') === false)
 			{
 				$teamsById[$lead->team]->leader[] = $lead;

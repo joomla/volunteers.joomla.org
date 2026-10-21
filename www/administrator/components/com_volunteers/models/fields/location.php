@@ -10,7 +10,7 @@ defined('_JEXEC') or die;
 
 JHtml::_('jquery.framework');
 JHtml::script('//maps.googleapis.com/maps/api/js?key=AIzaSyC04czYnPuPFkO6eDAKX-j_lfrpanAAo-U');
-JHtml::script('com_volunteers/jquery-gmaps-latlon-picker.js', false, true);
+JHtml::script('com_volunteers/jquery-gmaps-latlon-picker.js', array('relative' => true));
 
 /**
  * Volunteers Field class.

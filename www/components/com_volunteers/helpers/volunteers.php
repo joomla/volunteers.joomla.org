@@ -99,7 +99,7 @@ abstract class VolunteersHelper
 		}
 
 		// Admin
-		if ($user->authorise('code.admin', 'com_volunteers'))
+		if ($user->authorise('core.admin', 'com_volunteers'))
 		{
 			$acl->edit_department = true;
 			$acl->edit            = true;

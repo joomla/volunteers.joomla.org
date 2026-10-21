@@ -169,16 +169,14 @@ class VolunteersModelTeams extends JModelList
 
 		if (is_numeric($active))
 		{
-			$nullDate = $db->quote($db->getNullDate());
-
 			if ($active == 1)
 			{
-				$query->where('a.date_ended = ' . $nullDate);
+				$query->where('a.date_ended IS NULL');
 			}
 
 			if ($active == 0)
 			{
-				$query->where('a.date_ended != ' . $nullDate);
+				$query->where('a.date_ended IS NOT NULL');
 			}
 		}
 
@@ -297,8 +295,7 @@ class VolunteersModelTeams extends JModelList
 		}
 
 		// Only active teams
-		$nullDate = $db->quote($db->getNullDate());
-		$query->where('date_ended = ' . $nullDate);
+		$query->where('date_ended IS NULL');
 
 		$query->order('title ASC');
 

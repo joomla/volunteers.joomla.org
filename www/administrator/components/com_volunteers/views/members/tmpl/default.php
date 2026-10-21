@@ -88,7 +88,7 @@ if ($saveOrder)
 						$canCheckin = $user->authorise('core.manage', 'com_checkin') || $item->checked_out == $user->get('id') || $item->checked_out == 0;
 						$canChange = $user->authorise('core.edit.state', 'com_volunteers') && $canCheckin;
 						?>
-						<tr class="row<?php echo $i % 2; ?><?php if ($item->date_ended == '0000-00-00'): ?> success<?php else: ?> error<?php endif; ?>" sortable-volunteer-id="<?php echo $item->id ?>">
+						<tr class="row<?php echo $i % 2; ?><?php if (!$item->date_ended): ?> success<?php else: ?> error<?php endif; ?>" sortable-volunteer-id="<?php echo $item->id ?>">
 							<td>
 								<a class="btn btn-small" href="<?php echo JRoute::_('index.php?option=com_volunteers&task=member.edit&id=' . (int) $item->id); ?>">
 									<span class="icon-edit"></span>Edit

@@ -59,7 +59,7 @@ $active = $this->state->get('filter.active', 1);
                             <a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=team&id=' . $item->id) ?>">
 								<?php echo($item->title); ?><?php if ($item->acronym): ?> (<?php echo($item->acronym) ?>)<?php endif; ?>
                             </a>
-							<?php if ($item->date_ended != '0000-00-00'): ?>
+							<?php if ($item->date_ended): ?>
                                 <small><?php echo JText::_('COM_VOLUNTEERS_ARCHIVED') ?></small>
 							<?php endif; ?>
                             <span class="badge bg-info badge-sm">

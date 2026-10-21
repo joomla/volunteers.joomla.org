@@ -14,6 +14,13 @@ defined('_JEXEC') or die;
 class VolunteersTableTeam extends JTable
 {
 	/**
+	 * Indicates that columns fully support the NULL value in the database
+	 *
+	 * @var  boolean
+	 */
+	protected $_supportNullValue = true;
+
+	/**
 	 * Constructor
 	 *
 	 * @param   JDatabaseDriver &$db A database connector object
@@ -33,7 +40,7 @@ class VolunteersTableTeam extends JTable
 	 *
 	 * @return  boolean  True on success, false on failure.
 	 */
-	public function store($updateNulls = false)
+	public function store($updateNulls = true)
 	{
 		$date = JFactory::getDate();
 		$user = JFactory::getUser();
@@ -116,6 +123,28 @@ class VolunteersTableTeam extends JTable
 		if (trim(str_replace('-', '', $this->alias)) == '')
 		{
 			$this->alias = JFactory::getDate()->format("Y-m-d-H-i-s");
+		}
+
+		// Empty selections are posted as '', which strict SQL mode rejects for integer columns
+		$this->department = (int) $this->department;
+		$this->parent_id  = (int) $this->parent_id;
+
+		// Set date_started to null if not set
+		if (!$this->date_started)
+		{
+			$this->date_started = null;
+		}
+
+		// Set date_ended to null if not set
+		if (!$this->date_ended)
+		{
+			$this->date_ended = null;
+		}
+
+		// Set ready_transition to null if not set
+		if (!$this->ready_transition)
+		{
+			$this->ready_transition = null;
 		}
 
 		return true;

@@ -189,7 +189,7 @@ class VolunteersControllerTeam extends JControllerForm
 			->join('LEFT', $db->quoteName('#__users', 'user') . ' ON ' . $db->qn('volunteer.user_id') . ' = ' . $db->qn('user.id'))
 			->where($db->quoteName('member.department') . ' = ' . (int) $team->department)
 			->where($db->quoteName('member.position') . ' = ' . (int) 11)
-			->where($db->quoteName('member.date_ended') . ' = ' . $db->quote('0000-00-00'));
+			->where($db->quoteName('member.date_ended') . ' IS NULL');
 
 		try
 		{

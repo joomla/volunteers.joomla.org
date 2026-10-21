@@ -62,18 +62,14 @@ abstract class VolunteersHelper
 
 	public static function date($date, $format)
 	{
-		if ($date == '0000-00-00')
+		if (!$date)
 		{
-			$date = '';
+			return '';
 		}
 
-		if ($date !== '0000-00-00')
-		{
-			$date = new JDate($date);
-			$date = $date->format($format);
-		}
+		$date = new JDate($date);
 
-		return $date;
+		return $date->format($format);
 	}
 
 	public static function acl($type, $id)

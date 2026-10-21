@@ -176,7 +176,7 @@ class VolunteersModelVolunteers extends JModelList
 		{
 			if ($active == 1)
 			{
-				$query->where($db->quoteName('member.date_ended') . ' = ' . $db->quote('0000-00-00'));
+				$query->where($db->quoteName('member.date_ended') . ' IS NULL');
 			}
 		}
 

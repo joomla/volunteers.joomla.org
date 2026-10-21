@@ -143,13 +143,11 @@ class VolunteersModelMember extends JModelAdmin
 
 		$db = $this->getDbo();
 
-		$nullDate = $db->quote($db->getNullDate());
-
 		$query = $db->getQuery(true)
 			->select('position')
 			->from('#__volunteers_members')
 			->where($db->quoteName('volunteer') . ' = ' . (int) $volunteerId)
-			->where('date_ended = ' . $nullDate);;
+			->where('date_ended IS NULL');
 
 		if ($department)
 		{

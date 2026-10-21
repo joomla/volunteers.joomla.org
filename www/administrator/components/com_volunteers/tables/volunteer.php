@@ -14,6 +14,13 @@ defined('_JEXEC') or die;
 class VolunteersTableVolunteer extends JTable
 {
 	/**
+	 * Indicates that columns fully support the NULL value in the database
+	 *
+	 * @var  boolean
+	 */
+	protected $_supportNullValue = true;
+
+	/**
 	 * Constructor
 	 *
 	 * @param   JDatabaseDriver &$db A database connector object
@@ -58,7 +65,7 @@ class VolunteersTableVolunteer extends JTable
 	 *
 	 * @return  boolean  True on success, false on failure.
 	 */
-	public function store($updateNulls = false)
+	public function store($updateNulls = true)
 	{
 		$date = JFactory::getDate();
 		$user = JFactory::getUser();
@@ -86,12 +93,28 @@ class VolunteersTableVolunteer extends JTable
 		}
 
 		// Birthday format
-		if ($this->birthday && $this->birthday != '0000-00-00 00:00:00')
+		if ($this->birthday)
 		{
 			$this->birthday = JFactory::getDate('0000-' . $this->birthday)->format('Y-m-d');
 		}
 
 		return parent::store($updateNulls);
+	}
+
+	/**
+	 * Overloaded check method to ensure data integrity.
+	 *
+	 * @return  boolean  True on success.
+	 */
+	public function check()
+	{
+		// Set birthday to null if not set
+		if (!$this->birthday)
+		{
+			$this->birthday = null;
+		}
+
+		return true;
 	}
 
 	/**

@@ -9,6 +9,7 @@
 
 use Joomla\CMS\Application\ApplicationHelper;
 use Joomla\CMS\Application\CMSApplication;
+use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Plugin\CMSPlugin;
 
@@ -167,9 +168,14 @@ class PlgSystemJoomlaIdentityVolunteers extends CMSPlugin
 
 		JLog::add(json_encode($volunteer), JLog::INFO, 'idpjvp');
 
+		// New volunteers need created and modified dates, which have no database default
+		$newVolunteer           = clone $volunteer;
+		$newVolunteer->created  = Factory::getDate()->toSql();
+		$newVolunteer->modified = $newVolunteer->created;
+
 		try
 		{
-			$this->db->insertObject('#__volunteers_volunteers', $volunteer, 'user_id');
+			$this->db->insertObject('#__volunteers_volunteers', $newVolunteer, 'user_id');
 		}
 		catch (Exception $e)
 		{

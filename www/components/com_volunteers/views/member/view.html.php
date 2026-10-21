@@ -85,7 +85,7 @@ class VolunteersViewMember extends JViewLegacy
 		$this->form->setFieldAttribute('team', 'readonly', 'true');
 
 		// Clear date ended field if not set
-		if ($this->item->date_ended == '0000-00-00')
+		if (!$this->item->date_ended)
 		{
 			$this->form->setValue('date_ended', null, null);
 		}

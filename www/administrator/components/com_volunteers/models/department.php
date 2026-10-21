@@ -251,7 +251,7 @@ class VolunteersModelDepartment extends JModelAdmin
 		// Check for active or inactive members
 		foreach ($groupmembers as $item)
 		{
-			if ($item->date_ended == '0000-00-00')
+			if (!$item->date_ended)
 			{
 				$members->active[] = $item;
 			}

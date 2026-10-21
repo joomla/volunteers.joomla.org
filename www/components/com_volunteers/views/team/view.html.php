@@ -46,7 +46,7 @@ class VolunteersViewTeam extends JViewLegacy
 		JFactory::getSession()->set('team', $this->item->id);
 
 		// Active / inactive
-		$this->item->active = ($this->item->date_ended == '0000-00-00');
+		$this->item->active = !$this->item->date_ended;
 
 		// Check for errors.
 		if (count($errors = $this->get('Errors')))
@@ -135,7 +135,7 @@ class VolunteersViewTeam extends JViewLegacy
 		$teamId = $app->input->getInt('id');
 
 		// Clear date ended field if not set
-		if ($this->item->date_ended == '0000-00-00')
+		if (!$this->item->date_ended)
 		{
 			$this->form->setValue('date_ended', null, null);
 		}

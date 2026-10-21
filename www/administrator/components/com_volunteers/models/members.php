@@ -286,16 +286,14 @@ class VolunteersModelMembers extends JModelList
 
 		if (is_numeric($active))
 		{
-			$nullDate = $db->quote($db->getNullDate());
-
 			if ($active == 1)
 			{
-				$query->where('a.date_ended = ' . $nullDate);
+				$query->where('a.date_ended IS NULL');
 			}
 
 			if ($active == 0)
 			{
-				$query->where('a.date_ended != ' . $nullDate);
+				$query->where('a.date_ended IS NOT NULL');
 			}
 		}
 

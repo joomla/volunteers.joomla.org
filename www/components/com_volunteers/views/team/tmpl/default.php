@@ -61,7 +61,7 @@ JHtml::_('bootstrap.tab', '#tab-container')
 			</dd>
 		<?php endif; ?>
 
-		<?php if ($this->item->date_started != '0000-00-00'): ?>
+		<?php if ($this->item->date_started): ?>
 			<dt><?php echo JText::_('COM_VOLUNTEERS_FIELD_DATE_STARTED') ?></dt>
 			<dd><?php echo VolunteersHelper::date($this->item->date_started, 'F Y'); ?></dd>
 		<?php endif; ?>
@@ -268,7 +268,7 @@ JHtml::_('bootstrap.tab', '#tab-container')
 											<a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=team&id=' . $item->id) ?>">
 												<?php echo($item->title); ?><?php if ($item->acronym): ?> (<?php echo($item->acronym) ?>)<?php endif; ?>
 											</a>
-											<?php if ($item->date_ended != '0000-00-00'): ?>
+											<?php if ($item->date_ended): ?>
 												<small><?php echo JText::_('COM_VOLUNTEERS_ARCHIVED') ?></small>
 											<?php endif; ?>
 										</h2>

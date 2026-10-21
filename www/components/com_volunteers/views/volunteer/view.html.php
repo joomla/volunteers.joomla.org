@@ -102,7 +102,7 @@ class VolunteersViewVolunteer extends JViewLegacy
 	protected function _manipulateForm()
 	{
 		// Clear birthday field if not set
-		if ($this->item->birthday == '0000-00-00')
+		if (!$this->item->birthday)
 		{
 			$this->form->setValue('birthday', null, null);
 		}

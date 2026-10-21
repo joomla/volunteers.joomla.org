@@ -33,6 +33,14 @@ class VolunteersRouter extends RouterView
     private $db;
 
     /**
+     * Routes of existing reports, keyed by report id
+     *
+     * @var    array
+     * @since  4.0.0
+     */
+    private $reportRoutes = [];
+
+    /**
      * @param   SiteApplication           $app
      * @param   AbstractMenu              $menu
      *
@@ -121,6 +129,11 @@ class VolunteersRouter extends RouterView
             }
         }
 
+        // Reports live under the menu item of their team, department or the board
+        if (isset($query['view'], $query['id']) && $query['view'] === 'report' && ($route = $this->getReportRoute((int) $query['id']))) {
+            $query['Itemid'] = $route['Itemid'];
+        }
+
         return $query;
     }
 
@@ -137,13 +150,135 @@ class VolunteersRouter extends RouterView
     {
         $views = $this->getViews();
 
+        // Reports: {team}/reports/{id}-{alias}, {department}/reports/{id}-{alias} or reports/{id}-{alias} on the board
+        if (isset($query['view'], $query['id']) && $query['view'] === 'report' && ($route = $this->getReportRoute((int) $query['id']))) {
+            unset($query['view'], $query['id']);
+
+            return $route['segments'];
+        }
+
         // A new item form (e.g. view=report&layout=edit without an id) has no segment of its own. Keep the view in the
         // query string, otherwise the standard rules drop it and the URL resolves to the parent list view instead.
         if (isset($query['view'], $views[$query['view']]) && $views[$query['view']]->key && empty($query[$views[$query['view']]->key])) {
             return [];
         }
 
+        // The teams view has no key, so drop an id that the menu item (e.g. groups, view=teams&id=58) already carries
+        if (isset($query['Itemid'], $query['view'], $query['id']) && $query['view'] === 'teams') {
+            $item = $this->menu->getItem($query['Itemid']);
+
+            if ($item && ($item->query['view'] ?? null) === 'teams' && (int) ($item->query['id'] ?? 0) === (int) $query['id']) {
+                unset($query['id']);
+            }
+        }
+
         return parent::build($query);
+    }
+
+    /**
+     * Parse method for URLs
+     *
+     * @param   array  &$segments  Array of URL segments
+     *
+     * @return  array  The URL attributes
+     *
+     * @since   4.0.0
+     */
+    public function parse(&$segments)
+    {
+        $active = $this->menu->getActive();
+        $view   = $active->query['view'] ?? null;
+        $offset = null;
+
+        // Reports: teams/{team}/reports/..., departments/{department}/reports/... or board-of-directors/reports/...
+        if (\in_array($view, ['teams', 'departments'], true) && ($segments[1] ?? null) === 'reports') {
+            $offset = 2;
+        } elseif ($view === 'board' && ($segments[0] ?? null) === 'reports') {
+            $offset = 1;
+        }
+
+        // The report segment is {id}-{alias}
+        $id = $offset === null ? 0 : (int) explode('-', str_replace(':', '-', $segments[$offset] ?? ''), 2)[0];
+
+        if ($id > 0) {
+            $segments = \array_slice($segments, $offset + 1);
+
+            return ['view' => 'report', 'id' => $id];
+        }
+
+        return parent::parse($segments);
+    }
+
+    /**
+     * Method to get the menu item and segments for a report URL
+     *
+     * @param   integer  $id  ID of the report
+     *
+     * @return  array|null  Array with Itemid and segments, or null to use the standard routing
+     *
+     * @since   4.0.0
+     */
+    private function getReportRoute(int $id)
+    {
+        if (\array_key_exists($id, $this->reportRoutes)) {
+            return $this->reportRoutes[$id];
+        }
+
+        $dbQuery = $this->db->getQuery(true)
+            ->select($this->db->quoteName(['r.alias', 't.alias', 'd.alias', 'd.parent_id'], ['alias', 'team', 'department', 'parent_id']))
+            ->from($this->db->quoteName('#__volunteers_reports', 'r'))
+            ->join('LEFT', $this->db->quoteName('#__volunteers_teams', 't'), $this->db->quoteName('t.id') . ' = ' . $this->db->quoteName('r.team'))
+            ->join('LEFT', $this->db->quoteName('#__volunteers_departments', 'd'), $this->db->quoteName('d.id') . ' = ' . $this->db->quoteName('r.department'))
+            ->where($this->db->quoteName('r.id') . ' = :id')
+            ->bind(':id', $id, ParameterType::INTEGER);
+        $this->db->setQuery($dbQuery);
+        $report = $this->db->loadObject();
+        $route  = null;
+
+        if ($report && $report->team) {
+            $route = ['Itemid' => $this->getMenuItemId('teams'), 'segments' => [$report->team, 'reports']];
+        } elseif ($report && $report->department && (int) $report->parent_id === 0) {
+            // Reports of the board itself
+            $route = ['Itemid' => $this->getMenuItemId('board'), 'segments' => ['reports']];
+        } elseif ($report && $report->department) {
+            $route = ['Itemid' => $this->getMenuItemId('departments'), 'segments' => [$report->department, 'reports']];
+        }
+
+        if ($route && $route['Itemid']) {
+            $route['segments'][] = $id . '-' . $report->alias;
+        } else {
+            $route = null;
+        }
+
+        return $this->reportRoutes[$id] = $route;
+    }
+
+    /**
+     * Method to get the menu item for a view, preferring one without an id
+     *
+     * @param   string  $view  The view of the menu item
+     *
+     * @return  integer|null  The menu item id
+     *
+     * @since   4.0.0
+     */
+    private function getMenuItemId(string $view)
+    {
+        $itemId = null;
+
+        foreach ($this->menu->getItems('component', 'com_volunteers') as $item) {
+            if (($item->query['view'] ?? null) !== $view) {
+                continue;
+            }
+
+            if (!isset($item->query['id'])) {
+                return (int) $item->id;
+            }
+
+            $itemId = $itemId ?? (int) $item->id;
+        }
+
+        return $itemId;
     }
 
     /**

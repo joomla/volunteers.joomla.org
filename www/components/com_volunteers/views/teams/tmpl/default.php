@@ -13,7 +13,7 @@ $active = $this->state->get('filter.active', 1);
 
 <form action="<?php echo htmlspecialchars(JUri::getInstance()->toString()); ?>" method="post" name="adminForm" id="adminForm">
 
-    <div class="row-fluid">
+    <div class="row">
         <div class="filter-bar">
             <div class="btn-group float-end">
                 <label class="filter-search-lbl sr-only" for="filter-search">
@@ -76,12 +76,12 @@ $active = $this->state->get('filter.active', 1);
 
 						<?php if (count($item->subteams)): ?>
                             <h3><?php echo JText::_('COM_VOLUNTEERS_SUBTEAMS') ?></h3>
-                            <ul class="nav nav-tabs nav-stacked">
+                            <ul class="nav flex-column">
 								<?php foreach ($item->subteams as $subteam): ?>
                                     <li>
                                         <a href="<?php echo JRoute::_('index.php?option=com_volunteers&view=team&id=' . $subteam->id) ?>">
 											<?php echo($subteam->title); ?><?php if ($subteam->acronym): ?> (<?php echo($subteam->acronym) ?>)<?php endif; ?>
-                                            <span class="label label-info">
+                                            <span class="badge bg-info">
                                                 <?php if ($subteam->status == '0'): ?>
 	                                                <?php echo JText::_('COM_VOLUNTEERS_FIELD_STATUS_INFORMATION') ?>
                                                 <?php elseif ($subteam->status == '1'): ?>

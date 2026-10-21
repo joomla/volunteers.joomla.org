@@ -29,7 +29,7 @@ JHtml::_('bootstrap.tab', '#tab-container')
 		<?php if ($this->item->certification): ?>
             <div class="volunteer-certificated">
                 <a href="https://certification.joomla.org/certified-user-directory/<?php echo($this->item->certification) ?>" target="_blank">
-                    <img src="https://certification.joomla.org/images/Badges/3x_certified_administrator_badge.png" class="img-responsive"/>
+                    <img src="https://certification.joomla.org/images/Badges/3x_certified_administrator_badge.png" class="img-fluid"/>
                 </a>
             </div>
 		<?php endif; ?>
@@ -242,28 +242,28 @@ JHtml::_('bootstrap.tab', '#tab-container')
                             <div class="control-group">
                                 <label class="control-label" for="to_name"><?php echo JText::_('COM_VOLUNTEERS_MESSAGE_TO') ?></label>
                                 <div class="controls">
-                                    <input type="text" name="to_name" id="to_name" value="<?php echo $this->escape($this->item->name); ?>" class="input-block-level" disabled="disabled"/>
+                                    <input type="text" name="to_name" id="to_name" value="<?php echo $this->escape($this->item->name); ?>" class="form-control" disabled="disabled"/>
                                 </div>
                             </div>
                             <div class="control-group">
                                 <label class="control-label" for="from_name"><?php echo JText::_('COM_VOLUNTEERS_MESSAGE_FROM') ?></label>
                                 <div class="controls">
-                                    <input type="text" name="from_name" id="from_name" value="<?php echo $this->escape($this->user->name); ?> <<?php echo $this->escape($this->user->email); ?>>" class="input-block-level" disabled="disabled"/>
+                                    <input type="text" name="from_name" id="from_name" value="<?php echo $this->escape($this->user->name); ?> <<?php echo $this->escape($this->user->email); ?>>" class="form-control" disabled="disabled"/>
                                 </div>
                             </div>
                             <div class="control-group">
-                                <div class="controls span12">
-                                    <input type="text" name="subject" id="subject" class="input-block-level" placeholder="<?php echo JText::_('COM_VOLUNTEERS_MESSAGE_SUBJECT') ?>" required/>
+                                <div class="controls">
+                                    <input type="text" name="subject" id="subject" class="form-control" placeholder="<?php echo JText::_('COM_VOLUNTEERS_MESSAGE_SUBJECT') ?>" required/>
                                 </div>
                             </div>
                             <div class="control-group">
-                                <textarea rows="10" name="message" id="message" class="input-block-level" placeholder="<?php echo JText::sprintf('COM_VOLUNTEERS_MESSAGE_BODY', $this->escape($this->item->name)) ?>" required></textarea>
+                                <textarea rows="10" name="message" id="message" class="form-control" placeholder="<?php echo JText::sprintf('COM_VOLUNTEERS_MESSAGE_BODY', $this->escape($this->item->name)) ?>" required></textarea>
                             </div>
                             <div class="alert alert-info">
 								<?php echo JText::sprintf('COM_VOLUNTEERS_MESSAGE_NOTICE', $this->escape($this->item->name)) ?>
                             </div>
                             <div class="control-group">
-                                <input type="submit" value="<?php echo JText::_('COM_VOLUNTEERS_MESSAGE_SUBMIT') ?>" name="submit" id="submitButton" class="btn btn-success pull-right"/>
+                                <input type="submit" value="<?php echo JText::_('COM_VOLUNTEERS_MESSAGE_SUBMIT') ?>" name="submit" id="submitButton" class="btn btn-success float-end"/>
                             </div>
 
                             <input type="hidden" name="option" value="com_volunteers"/>

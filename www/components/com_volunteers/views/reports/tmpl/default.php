@@ -14,7 +14,7 @@ JHtml::_('formbehavior.chosen', 'select');
 
 <form action="<?php echo htmlspecialchars(JUri::getInstance()->toString()); ?>" method="post" name="adminForm" id="adminForm">
 
-	<div class="row-fluid">
+	<div class="row">
 		<div class="filter-bar">
 			<div class="btn-group float-end">
 				<?php echo JHtmlVolunteers::reportcategories($this->state->get('filter.category')); ?>

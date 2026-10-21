@@ -57,8 +57,8 @@ JHtml::_('bootstrap.tab', '#tab-container')
         <div class="tab-content">
             <div class="tab-pane fade" id="members">
 				<?php if ($this->acl->edit): ?>
-                    <div class="row">
-                        <a class="btn btn-secondary float-end" href="<?php echo JRoute::_('index.php?option=com_volunteers&task=member.add&department=' . $this->item->id) ?>">
+                    <div class="d-flex justify-content-end">
+                        <a class="btn btn-secondary" href="<?php echo JRoute::_('index.php?option=com_volunteers&task=member.add&department=' . $this->item->id) ?>">
                             <span class="icon-new"></span> <?php echo JText::_('COM_VOLUNTEERS_MEMBER_ADD') ?>
                         </a>
                     </div>
@@ -118,8 +118,8 @@ JHtml::_('bootstrap.tab', '#tab-container')
 			<?php if ($this->item->members->honorroll): ?>
                 <div class="tab-pane fade" id="honorroll">
 					<?php if ($this->acl->edit): ?>
-                        <div class="row">
-                            <a class="btn btn-secondary float-end" href="<?php echo JRoute::_('index.php?option=com_volunteers&task=member.add&department=' . $this->item->id) ?>">
+                        <div class="d-flex justify-content-end">
+                            <a class="btn btn-secondary" href="<?php echo JRoute::_('index.php?option=com_volunteers&task=member.add&department=' . $this->item->id) ?>">
                                 <span class="icon-new"></span> <?php echo JText::_('COM_VOLUNTEERS_MEMBER_ADD') ?>
                             </a>
                         </div>
@@ -181,8 +181,8 @@ JHtml::_('bootstrap.tab', '#tab-container')
 
             <div class="tab-pane fade" id="reports">
 				<?php if ($this->acl->create_report): ?>
-                    <div class="row">
-                        <a class="btn btn-secondary float-end" href="<?php echo JRoute::_('index.php?option=com_volunteers&task=report.add&department=' . $this->item->id) ?>">
+                    <div class="d-flex justify-content-end">
+                        <a class="btn btn-secondary" href="<?php echo JRoute::_('index.php?option=com_volunteers&task=report.add&department=' . $this->item->id) ?>">
                             <span class="icon-new"></span> <?php echo JText::_('COM_VOLUNTEERS_REPORT_ADD') ?>
                         </a>
                     </div>
@@ -231,7 +231,7 @@ JHtml::_('bootstrap.tab', '#tab-container')
                         <span class="icon-feed"></span> <?php echo JText::_('COM_VOLUNTEERS_RSSFEED') ?>
                     </a>
 				<?php else: ?>
-                    <div class="row-fluid">
+                    <div>
                         <p class="alert alert-info">
 							<?php echo JText::_('COM_VOLUNTEERS_NOTE_NO_REPORTS') ?>
                         </p>
@@ -249,28 +249,28 @@ JHtml::_('bootstrap.tab', '#tab-container')
                         <div class="control-group">
                             <label class="control-label" for="to_name"><?php echo JText::_('COM_VOLUNTEERS_MESSAGE_TO') ?></label>
                             <div class="controls">
-                                <input type="text" name="to_name" id="to_name" value="<?php echo $this->item->title ?>" class="input-block-level" disabled="disabled"/>
+                                <input type="text" name="to_name" id="to_name" value="<?php echo $this->item->title ?>" class="form-control" disabled="disabled"/>
                             </div>
                         </div>
                         <div class="control-group">
                             <label class="control-label" for="from_name"><?php echo JText::_('COM_VOLUNTEERS_MESSAGE_FROM') ?></label>
                             <div class="controls">
-                                <input type="text" name="from_name" id="from_name" value="<?php echo($this->user->name); ?> <<?php echo($this->user->email); ?>>" class="input-block-level" disabled="disabled"/>
+                                <input type="text" name="from_name" id="from_name" value="<?php echo($this->user->name); ?> <<?php echo($this->user->email); ?>>" class="form-control" disabled="disabled"/>
                             </div>
                         </div>
                         <div class="control-group">
-                            <div class="controls span12">
-                                <input type="text" name="subject" id="subject" class="input-block-level" placeholder="<?php echo JText::_('COM_VOLUNTEERS_MESSAGE_SUBJECT') ?>" required/>
+                            <div class="controls">
+                                <input type="text" name="subject" id="subject" class="form-control" placeholder="<?php echo JText::_('COM_VOLUNTEERS_MESSAGE_SUBJECT') ?>" required/>
                             </div>
                         </div>
                         <div class="control-group">
-                            <textarea rows="10" name="message" id="message" class="input-block-level" placeholder="<?php echo JText::sprintf('COM_VOLUNTEERS_MESSAGE_BODY', $this->item->title) ?>" required></textarea>
+                            <textarea rows="10" name="message" id="message" class="form-control" placeholder="<?php echo JText::sprintf('COM_VOLUNTEERS_MESSAGE_BODY', $this->item->title) ?>" required></textarea>
                         </div>
                         <div class="alert alert-info">
 							<?php echo JText::sprintf('COM_VOLUNTEERS_MESSAGE_NOTICE', $this->item->title) ?>
                         </div>
                         <div class="control-group">
-                            <input type="submit" value="<?php echo JText::_('COM_VOLUNTEERS_MESSAGE_SUBMIT') ?>" name="submit" id="submitButton" class="btn btn-success pull-right"/>
+                            <input type="submit" value="<?php echo JText::_('COM_VOLUNTEERS_MESSAGE_SUBMIT') ?>" name="submit" id="submitButton" class="btn btn-success float-end"/>
                         </div>
 
                         <input type="hidden" name="option" value="com_volunteers"/>

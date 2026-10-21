@@ -61,8 +61,8 @@ JFactory::getDocument()->addScriptDeclaration("
 
 		<hr>
 
-		<div class="row">
-			<div class="btn-toolbar float-end">
+		<div class="d-flex justify-content-end">
+			<div class="btn-toolbar">
 				<div id="toolbar-cancel" class="btn-group">
 					<a class="btn btn-danger" href="<?php echo JRoute::_('index.php?option=com_volunteers&view=department&id=' . $this->item->id) ?>">
 						<span class="icon-cancel"></span> <?php echo JText::_('JCANCEL') ?>

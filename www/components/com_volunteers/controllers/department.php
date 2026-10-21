@@ -38,7 +38,7 @@ class VolunteersControllerDepartment extends JControllerForm
 		// Check if the user is authorized to edit this department
 		if (!$acl->edit)
 		{
-			return JError::raiseError(403, JText::sprintf('JLIB_APPLICATION_ERROR_UNHELD_ID', $departmentId));
+			throw new Exception(JText::sprintf('JLIB_APPLICATION_ERROR_UNHELD_ID', $departmentId), 403);
 		}
 
 		// Use parent edit method
@@ -62,7 +62,7 @@ class VolunteersControllerDepartment extends JControllerForm
 		// Check if the user is authorized to edit this department
 		if (!$acl->edit)
 		{
-			return JError::raiseError(403, JText::sprintf('JLIB_APPLICATION_ERROR_UNHELD_ID', $departmentId));
+			throw new Exception(JText::sprintf('JLIB_APPLICATION_ERROR_UNHELD_ID', $departmentId), 403);
 		}
 
 		// Use parent save method

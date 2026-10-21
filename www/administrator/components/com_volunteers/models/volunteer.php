@@ -310,13 +310,13 @@ class VolunteersModelVolunteer extends JModelAdmin
 
 				if (empty($data))
 				{
-					JError::raiseError(404, JText::_('COM_VOLUNTEERS_ERROR_VOLUNTEER_NOT_FOUND'));
+					throw new Exception(JText::_('COM_VOLUNTEERS_ERROR_VOLUNTEER_NOT_FOUND'), 404);
 				}
 
 				// Check for published state if filter set.
 				if (((is_numeric($published)) || (is_numeric($archived))) && (($data->published != $published) && ($data->published != $archived)))
 				{
-					JError::raiseError(404, JText::_('COM_VOLUNTEERS_ERROR_VOLUNTEER_NOT_FOUND'));
+					throw new Exception(JText::_('COM_VOLUNTEERS_ERROR_VOLUNTEER_NOT_FOUND'), 404);
 				}
 
 				// Make sure we have http:// or https://
@@ -329,6 +329,11 @@ class VolunteersModelVolunteer extends JModelAdmin
 			}
 			catch (Exception $e)
 			{
+				if ($e->getCode() == 404)
+				{
+					throw $e;
+				}
+
 				$this->setError($e);
 
 				return false;
@@ -336,7 +341,7 @@ class VolunteersModelVolunteer extends JModelAdmin
 		}
 		else
 		{
-			JError::raiseError(404, JText::_('COM_VOLUNTEERS_ERROR_VOLUNTEER_NOT_FOUND'));
+			throw new Exception(JText::_('COM_VOLUNTEERS_ERROR_VOLUNTEER_NOT_FOUND'), 404);
 		}
 
 		// Convert to the JObject before adding other data.

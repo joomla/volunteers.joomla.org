@@ -38,7 +38,7 @@ class VolunteersControllerRole extends JControllerForm
 		// Check if the user is authorized to edit this team
 		if (!$acl->edit)
 		{
-			return JError::raiseError(403, JText::sprintf('JLIB_APPLICATION_ERROR_UNHELD_ID', $teamId));
+			throw new Exception(JText::sprintf('JLIB_APPLICATION_ERROR_UNHELD_ID', $teamId), 403);
 		}
 
 		// Set team
@@ -63,7 +63,7 @@ class VolunteersControllerRole extends JControllerForm
 		// Check if the user is authorized to edit this team
 		if (!$acl->edit)
 		{
-			return JError::raiseError(403, JText::sprintf('JLIB_APPLICATION_ERROR_UNHELD_ID', $teamId));
+			throw new Exception(JText::sprintf('JLIB_APPLICATION_ERROR_UNHELD_ID', $teamId), 403);
 		}
 
 		// Set team
@@ -91,7 +91,7 @@ class VolunteersControllerRole extends JControllerForm
 		// Check if the user is authorized to edit this team
 		if (!$acl->edit)
 		{
-			return JError::raiseError(403, JText::sprintf('JLIB_APPLICATION_ERROR_UNHELD_ID', $teamId));
+			throw new Exception(JText::sprintf('JLIB_APPLICATION_ERROR_UNHELD_ID', $teamId), 403);
 		}
 
 		// Delete role
@@ -125,7 +125,7 @@ class VolunteersControllerRole extends JControllerForm
 		// Check if the user is authorized to edit this team
 		if (!$acl->edit)
 		{
-			return JError::raiseError(403, JText::sprintf('JLIB_APPLICATION_ERROR_UNHELD_ID', $teamId));
+			throw new Exception(JText::sprintf('JLIB_APPLICATION_ERROR_UNHELD_ID', $teamId), 403);
 		}
 
 		// Reset team

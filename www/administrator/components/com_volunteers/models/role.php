@@ -166,7 +166,9 @@ class VolunteersModelRole extends JModelAdmin
 		}
 		catch (RuntimeException $e)
 		{
-			JError::raiseError(500, $e->getMessage());
+			$this->setError($e->getMessage());
+
+			return false;
 		}
 
 		parent::delete($pks);

@@ -40,42 +40,42 @@ $checkEditId = function($context, $id) {
 if ($vName == 'department' && $lName == 'edit' && $id && !$checkEditId('com_volunteers.edit.department', $id))
 {
 	// Somehow the person just went to the form - we don't allow that.
-	return JError::raiseError(403, JText::sprintf('JLIB_APPLICATION_ERROR_UNHELD_ID', $id));
+	throw new Exception(JText::sprintf('JLIB_APPLICATION_ERROR_UNHELD_ID', $id), 403);
 }
 
 // Check for edit member form.
 if ($vName == 'member' && $lName == 'edit' && $id && !$checkEditId('com_volunteers.edit.member', $id))
 {
 	// Somehow the person just went to the form - we don't allow that.
-	return JError::raiseError(403, JText::sprintf('JLIB_APPLICATION_ERROR_UNHELD_ID', $id));
+	throw new Exception(JText::sprintf('JLIB_APPLICATION_ERROR_UNHELD_ID', $id), 403);
 }
 
 // Check for edit report form.
 if ($vName == 'report' && $lName == 'edit' && $id && !$checkEditId('com_volunteers.edit.report', $id))
 {
 	// Somehow the person just went to the form - we don't allow that.
-	return JError::raiseError(403, JText::sprintf('JLIB_APPLICATION_ERROR_UNHELD_ID', $id));
+	throw new Exception(JText::sprintf('JLIB_APPLICATION_ERROR_UNHELD_ID', $id), 403);
 }
 
 // Check for edit role form.
 if ($vName == 'role' && $lName == 'edit' && $id && !$checkEditId('com_volunteers.edit.role', $id))
 {
 	// Somehow the person just went to the form - we don't allow that.
-	return JError::raiseError(403, JText::sprintf('JLIB_APPLICATION_ERROR_UNHELD_ID', $id));
+	throw new Exception(JText::sprintf('JLIB_APPLICATION_ERROR_UNHELD_ID', $id), 403);
 }
 
 // Check for edit team form.
 if ($vName == 'team' && $lName == 'edit' && $id && !$checkEditId('com_volunteers.edit.team', $id))
 {
 	// Somehow the person just went to the form - we don't allow that.
-	return JError::raiseError(403, JText::sprintf('JLIB_APPLICATION_ERROR_UNHELD_ID', $id));
+	throw new Exception(JText::sprintf('JLIB_APPLICATION_ERROR_UNHELD_ID', $id), 403);
 }
 
 // Check for edit volunteer form.
 if ($vName == 'volunteer' && $lName == 'edit' && $id && !$checkEditId('com_volunteers.edit.volunteer', $id))
 {
 	// Somehow the person just went to the form - we don't allow that.
-	return JError::raiseError(403, JText::sprintf('JLIB_APPLICATION_ERROR_UNHELD_ID', $id));
+	throw new Exception(JText::sprintf('JLIB_APPLICATION_ERROR_UNHELD_ID', $id), 403);
 }
 
 $controller = JControllerLegacy::getInstance('Volunteers');

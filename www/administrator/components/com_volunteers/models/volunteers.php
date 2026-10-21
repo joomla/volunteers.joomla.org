@@ -248,7 +248,7 @@ $query->order('rand()');
 		}
 		catch (JDatabaseExceptionExecuting $e)
 		{
-			JError::raiseError(500, $e->getMessage());
+			$this->setError($e->getMessage());
 
 			return false;
 		}

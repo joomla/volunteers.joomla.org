@@ -8,17 +8,19 @@
 // No direct access.
 defined('_JEXEC') or die;
 
+use Joomla\CMS\Factory;
+
 if (version_compare(JVERSION, '4.0.0', '<')) {
     JHtml::_('behavior.tabstate');
 }
 
-if (!JFactory::getUser()->authorise('core.manage', 'com_volunteers'))
+if (!Factory::getUser()->authorise('core.manage', 'com_volunteers'))
 {
-	return JError::raiseWarning(404, JText::_('JERROR_ALERTNOAUTHOR'));
+	throw new JAccessExceptionNotallowed(JText::_('JERROR_ALERTNOAUTHOR'), 403);
 }
 
 JLoader::register('JHtmlVolunteers', JPATH_ADMINISTRATOR . '/components/com_volunteers/helpers/html/volunteers.php');
 
 $controller = JControllerLegacy::getInstance('Volunteers');
-$controller->execute(JFactory::getApplication()->input->get('task'));
+$controller->execute(Factory::getApplication()->input->get('task'));
 $controller->redirect();

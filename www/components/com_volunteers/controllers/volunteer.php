@@ -39,7 +39,7 @@ class VolunteersControllerVolunteer extends JControllerForm
 		// Check if the volunteer is editing own data
 		if ($volunteerUserId != $userId)
 		{
-			return JError::raiseError(403, JText::sprintf('JLIB_APPLICATION_ERROR_UNHELD_ID', $volunteerId));
+			throw new Exception(JText::sprintf('JLIB_APPLICATION_ERROR_UNHELD_ID', $volunteerId), 403);
 		}
 
 		// Get the model.
@@ -68,7 +68,7 @@ class VolunteersControllerVolunteer extends JControllerForm
 		// Check if the volunteer is saving own data
 		if ($volunteerUserId != $userId)
 		{
-			return JError::raiseError(403, JText::sprintf('JLIB_APPLICATION_ERROR_UNHELD_ID', $volunteerId));
+			throw new Exception(JText::sprintf('JLIB_APPLICATION_ERROR_UNHELD_ID', $volunteerId), 403);
 		}
 
 		// Use parent save method

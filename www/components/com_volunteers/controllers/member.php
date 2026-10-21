@@ -50,7 +50,7 @@ class VolunteersControllerMember extends JControllerForm
 		// Check if the user is authorized to edit this team
 		if (!$acl->edit)
 		{
-			return JError::raiseError(403, JText::sprintf('JLIB_APPLICATION_ERROR_UNHELD_ID', $memberId));
+			throw new Exception(JText::sprintf('JLIB_APPLICATION_ERROR_UNHELD_ID', $memberId), 403);
 		}
 
 		// Use parent add method
@@ -83,7 +83,7 @@ class VolunteersControllerMember extends JControllerForm
 		// Check if the user is authorized to edit this team
 		if (!$acl->edit)
 		{
-			return JError::raiseError(403, JText::sprintf('JLIB_APPLICATION_ERROR_UNHELD_ID', $memberId));
+			throw new Exception(JText::sprintf('JLIB_APPLICATION_ERROR_UNHELD_ID', $memberId), 403);
 		}
 
 		// Use parent edit method
@@ -122,7 +122,7 @@ class VolunteersControllerMember extends JControllerForm
 		// Check if the user is authorized to edit this team
 		if (!$acl->edit)
 		{
-			return JError::raiseError(403, JText::sprintf('JLIB_APPLICATION_ERROR_UNHELD_ID', $memberId));
+			throw new Exception(JText::sprintf('JLIB_APPLICATION_ERROR_UNHELD_ID', $memberId), 403);
 		}
 
 		// Use parent save method

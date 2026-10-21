@@ -7,7 +7,6 @@
 
 defined('_JEXEC') or die;
 
-use Exception;
 use Joomla\CMS\Application\SiteApplication;
 use Joomla\CMS\Component\Router\RouterView;
 use Joomla\CMS\Component\Router\RouterViewConfiguration;
@@ -47,9 +46,6 @@ class VolunteersRouter extends RouterView
         $ccDepartment = new RouterViewConfiguration('department');
         $ccDepartment->setKey('id')->setParent($departments);
         $this->registerView($ccDepartment);
-        $ccMember = new RouterViewConfiguration('member');
-        $ccMember->setKey('id');
-        $this->registerView($ccMember);
         $reports = new RouterViewConfiguration('reports');
         $this->registerView($reports);
         $ccReport = new RouterViewConfiguration('report');
@@ -65,12 +61,17 @@ class VolunteersRouter extends RouterView
         $ccTeam = new RouterViewConfiguration('team');
         $ccTeam->setKey('id')->setParent($teams);
         $this->registerView($ccTeam);
+        // Members have no menu item of their own, so hang them off teams. Registered after team so team aliases are matched first.
+        $ccMember = new RouterViewConfiguration('member');
+        $ccMember->setKey('id')->setParent($teams);
+        $this->registerView($ccMember);
         $volunteers = new RouterViewConfiguration('volunteers');
         $this->registerView($volunteers);
         $ccVolunteer = new RouterViewConfiguration('volunteer');
         $ccVolunteer->setKey('id')->setParent($volunteers);
         $this->registerView($ccVolunteer);
         $board = new RouterViewConfiguration('board');
+        $board->setKey('id');
         $this->registerView($board);
         $home = new RouterViewConfiguration('home');
         $this->registerView($home);
@@ -87,36 +88,59 @@ class VolunteersRouter extends RouterView
     }
 
     /**
-     * Build method for URLs
+     * Preprocess method for URLs. The Itemid must be chosen here, the site router has already
+     * resolved the menu item by the time build() is called.
      *
-     * @param   array  &$query Array of query elements
+     * @param   array  $query  An associative array of URL arguments
      *
-     * @return  array  Array of URL segments
+     * @return  array  The URL arguments to use to assemble the subsequent URL.
      *
-     * @since   3.5
+     * @since   4.0.0
      */
-    public function build(&$query) {
-        $view = isset($query['view']) ? $query['view'] : null;
+    public function preprocess($query)
+    {
+        $query = parent::preprocess($query);
 
-        if ($view === 'team' && isset($query['id'])) {
+        // Teams of the board live under the board's teams menu item
+        if (isset($query['view'], $query['id']) && $query['view'] === 'team') {
             $dbQuery = $this->db->getQuery(true)
-                ->select($this->db->quoteName(['alias', 'department']))
+                ->select($this->db->quoteName('department'))
                 ->from($this->db->quoteName('#__volunteers_teams'))
-                ->where('id = :id')
+                ->where($this->db->quoteName('id') . ' = :id')
                 ->bind(':id', $query['id'], ParameterType::INTEGER);
             $this->db->setQuery($dbQuery);
-            $team = $this->db->loadObject();
+            $department = (int) $this->db->loadResult();
 
-            if ($team->department == 58) {
-                $items = $this->menu->getItems('component', 'com_volunteers');
-
-                foreach ($items as $item) {
-                    if (isset($item->query['view']) && isset($item->query['id']) && $item->query['view'] == 'teams' && $item->query['id'] === (string) $team->department)
-                    {
+            if ($department === 58) {
+                foreach ($this->menu->getItems('component', 'com_volunteers') as $item) {
+                    if (isset($item->query['view'], $item->query['id']) && $item->query['view'] === 'teams' && (int) $item->query['id'] === $department) {
                         $query['Itemid'] = $item->id;
+                        break;
                     }
                 }
             }
+        }
+
+        return $query;
+    }
+
+    /**
+     * Build method for URLs
+     *
+     * @param   array  &$query  Array of query elements
+     *
+     * @return  array  Array of URL segments
+     *
+     * @since   4.0.0
+     */
+    public function build(&$query)
+    {
+        $views = $this->getViews();
+
+        // A new item form (e.g. view=report&layout=edit without an id) has no segment of its own. Keep the view in the
+        // query string, otherwise the standard rules drop it and the URL resolves to the parent list view instead.
+        if (isset($query['view'], $views[$query['view']]) && $views[$query['view']]->key && empty($query[$views[$query['view']]->key])) {
+            return [];
         }
 
         return parent::build($query);
@@ -140,7 +164,7 @@ class VolunteersRouter extends RouterView
             $dbquery->select($this->db->quoteName('alias'))
                 ->from($this->db->quoteName('#__volunteers_departments'))
                 ->where($this->db->quoteName('id') . ' = :id')
-                ->bind(':id', $query['id'], ParameterType::INTEGER);
+                ->bind(':id', $id, ParameterType::INTEGER);
             $this->db->setQuery($dbquery);
 
             $id .= ':' . $this->db->loadResult();
@@ -149,6 +173,21 @@ class VolunteersRouter extends RouterView
         list($void, $segment) = explode(':', $id, 2);
 
         return [$void => $segment];
+    }
+
+    /**
+     * Method to get the segment(s) for the board
+     *
+     * @param   string  $id     ID of the board department to retrieve the segments for
+     * @param   array   $query  The request that is built right now
+     *
+     * @return  array  The segments of this item
+     *
+     * @since 4.0.0
+     */
+    public function getBoardSegment(string $id, array $query)
+    {
+        return [(int) $id => $id];
     }
 
     /**
@@ -184,7 +223,7 @@ class VolunteersRouter extends RouterView
             $dbquery->select($this->db->quoteName('alias'))
                 ->from($this->db->quoteName('#__volunteers_reports'))
                 ->where($this->db->quoteName('id') . ' = :id')
-                ->bind(':id', $query['id'], ParameterType::INTEGER);
+                ->bind(':id', $id, ParameterType::INTEGER);
             $this->db->setQuery($dbquery);
 
             $id .= ':' . $this->db->loadResult();
@@ -226,7 +265,7 @@ class VolunteersRouter extends RouterView
             $dbquery->select($this->db->quoteName('alias'))
                 ->from($this->db->quoteName('#__volunteers_teams'))
                 ->where($this->db->quoteName('id') . ' = :id')
-                ->bind(':id', $query['id'], ParameterType::INTEGER);
+                ->bind(':id', $id, ParameterType::INTEGER);
             $this->db->setQuery($dbquery);
 
             $id .= ':' . $this->db->loadResult();
@@ -255,7 +294,7 @@ class VolunteersRouter extends RouterView
             $dbquery->select($this->db->quoteName('alias'))
                 ->from($this->db->quoteName('#__volunteers_volunteers'))
                 ->where($this->db->quoteName('id') . ' = :id')
-                ->bind(':id', $query['id'], ParameterType::INTEGER);
+                ->bind(':id', $id, ParameterType::INTEGER);
             $this->db->setQuery($dbquery);
 
             $id .= ':' . $this->db->loadResult();
@@ -291,6 +330,21 @@ class VolunteersRouter extends RouterView
     }
 
     /**
+     * Method to get the segment(s) for the board
+     *
+     * @param   string  $segment  Segment of the board department to retrieve the ID for
+     * @param   array   $query    The request that is parsed right now
+     *
+     * @return  int   The id of this item or false
+     *
+     * @since 4.0.0
+     */
+    public function getBoardId(string $segment, array $query)
+    {
+        return (int) $segment;
+    }
+
+    /**
      * Method to get the segment(s) for an member
      *
      * @param   string  $segment  Segment of the member to retrieve the ID for
@@ -302,7 +356,7 @@ class VolunteersRouter extends RouterView
      */
     public function getMemberId(string $segment, array $query)
     {
-        return (int) $segment;
+        return ctype_digit($segment) ? (int) $segment : false;
     }
 
     /**

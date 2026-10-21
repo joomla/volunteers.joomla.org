@@ -38,7 +38,11 @@ class VolunteersController extends JControllerLegacy
 		if ($layout == 'edit' && !$this->checkEditId('com_volunteers.edit.' . $view, $id))
 		{
 			// Somehow the person just went to the form - we don't allow that.
-			$this->setMessage(JText::sprintf('JLIB_APPLICATION_ERROR_UNHELD_ID', $id), 'error');
+			if (!\count($this->app->getMessageQueue()))
+			{
+				$this->setMessage(Text::sprintf('JLIB_APPLICATION_ERROR_UNHELD_ID', $id), 'error');
+			}
+
 			$this->setRedirect(JRoute::_('index.php?option=com_volunteers&view=' . $view . 's', false));
 
 			return false;

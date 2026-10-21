@@ -171,7 +171,9 @@ class VolunteersModelTeam extends JModelAdmin
 		if ($data['date_ended'])
 		{
 			$members    = $this->getTeamMembers($data['id']);
-			$membersIds = array_map(create_function('$member', 'return $member->id;'), $members->active);
+			$membersIds = array_map(function ($member) {
+				return $member->id;
+			}, $members->active);
 
 			if (count($membersIds))
 			{

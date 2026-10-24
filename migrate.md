@@ -24,6 +24,7 @@ The following extensions must be uninstalled:
 - Captcha - Invisible reCAPTCHA (`plg_captcha_recaptcha_invisible`), a Joomla 3 core plugin that is no longer part of Joomla 6
 - FOF (`lib_fof`), the Joomla 3 version 2 of the Akeeba framework
 - Copy Me (`plg_content_copyme`), run `database/updates/2026-10-24-copy-code.sql` first, see [Banners page](#banners-page)
+- Authentication - Email package (`pkg_email`), this removes the Authentication - Email and System - Email plugins. Joomlers log in through RO Single Sign On.
 
 ### Update Extensions
 - Joomla Volunteer Portal package, this installs the Smart Search plugins:

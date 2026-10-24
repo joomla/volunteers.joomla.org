@@ -59,6 +59,8 @@ class ReportsModel extends ListModel
                 'a.created_by',
                 'featured',
                 'a.featured',
+                'user.name',
+                'published',
                 'department',
                 'team',
             ];
@@ -85,8 +87,8 @@ class ReportsModel extends ListModel
         parent::populateState($ordering, $direction);
 
         // Without a selected status the list shows published and unpublished, the models loaded with ignore_request keep the published default
-        if ($this->state->get('filter.state') === null) {
-            $this->setState('filter.state', '');
+        if ($this->state->get('filter.published') === null) {
+            $this->setState('filter.published', '');
         }
     }
 
@@ -106,7 +108,7 @@ class ReportsModel extends ListModel
     {
         // Compile the store id.
         $id .= ':' . $this->getState('filter.search');
-        $id .= ':' . $this->getState('filter.state');
+        $id .= ':' . $this->getState('filter.published');
         $id .= ':' . implode(',', (array) $this->getState('filter.team'));
         $id .= ':' . $this->getState('filter.department');
         $id .= ':' . $this->getState('filter.category');
@@ -148,7 +150,7 @@ class ReportsModel extends ListModel
             ->select('user.name AS volunteer_name, user.email AS volunteer_email')
             ->join('LEFT', '#__users AS ' . $db->quoteName('user') . ' ON user.id = a.created_by');
         // Filter by published state
-        $state = $this->getState('filter.state', 1);
+        $state = $this->getState('filter.published', 1);
         if (is_numeric($state)) {
             $query->where('a.state = ' . (int) $state);
         } elseif ($state === '') {

@@ -50,6 +50,14 @@ HTMLHelper::_('bootstrap.dropdown');
 $wa->useStyle('template.joomla.custom.' . ($this->direction === 'rtl' ? 'rtl' : 'ltr'))
     ->useScript('template.joomla');
 
+// Add a copy button to the code blocks of the content, like the banner code of the Banners page
+if (str_contains($this->getBuffer('component') ?? '', 'copy-code'))
+{
+    $wa->useScript('template.joomla.copycode');
+    Text::script('TPL_JOOMLA_COPY_CODE');
+    Text::script('TPL_JOOMLA_COPY_CODE_COPIED');
+}
+
 // Override 'template.active' asset to set correct ltr/rtl dependency and with CDN Dependency
 $wa->registerStyle('template.active', '', [], [], [((!JDEBUG && $this->params->get('useCdn', '1')) ? 'cdn.' : '') . 'template.joomla.' . ($this->direction === 'rtl' ? 'rtl' : 'ltr')]);
 

@@ -23,6 +23,7 @@ The following extensions must be uninstalled:
 - Perfect Image Form Field (`plg_content_perfectimage`), the Joomla 3 image cropper of the profile edit and the registration form. Joomlers edit their profile and photo on the Joomla! Identity portal.
 - Captcha - Invisible reCAPTCHA (`plg_captcha_recaptcha_invisible`), a Joomla 3 core plugin that is no longer part of Joomla 6
 - FOF (`lib_fof`), the Joomla 3 version 2 of the Akeeba framework
+- Copy Me (`plg_content_copyme`), run `database/updates/2026-10-24-copy-code.sql` first, see [Banners page](#banners-page)
 
 ### Update Extensions
 - Joomla Volunteer Portal package, this installs the Smart Search plugins:
@@ -53,3 +54,10 @@ The "E-mail current selection" button of the members list sends its mail through
    - adds the mail template
    - sets the Mail Format of System > Mail Templates > Options to "Both", so the message from the editor is sent as HTML. This applies to all mail templates of the site.
 2. Check that "Volunteers: Email to Members" is listed in System > Mail Templates and that the Mail Format is "Both"
+
+## Banners page
+The banner code on the Banners page (`/banners`) used the Copy Me plugin for its copy buttons. The `joomla` template now adds a copy button to every `<pre class="copy-code">` block.
+
+1. Run `database/updates/2026-10-24-copy-code.sql`, replace `#__` with the table prefix. This replaces the `{copyme}` tags in the "Spread the Joomla! love" article with `<pre class="copy-code">` blocks
+2. Uninstall the Copy Me plugin (`plg_content_copyme`), this also removes `media/hepta`
+3. Check that each banner code on `/banners` has a Copy button that copies the code

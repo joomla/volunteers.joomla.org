@@ -16,6 +16,7 @@ use Joomla\CMS\Date\Date;
 use Joomla\CMS\MVC\Controller\AdminController;
 use Joomla\CMS\Router\Route;
 use Joomla\Component\Volunteers\Administrator\Model\MembersModel;
+use Joomla\Utilities\ArrayHelper;
 
 // phpcs:disable PSR1.Files.SideEffects
 \defined('_JEXEC') or die;
@@ -52,7 +53,7 @@ class MembersController extends AdminController
      * @return  object  The model.
      * @since 1.0.0
      */
-    public function getModel($name = 'Member', $prefix = 'VolunteersModel', $config = ['ignore_request' => true])
+    public function getModel($name = 'Member', $prefix = 'Administrator', $config = ['ignore_request' => true])
     {
         return parent::getModel($name, $prefix, $config);
     }
@@ -71,10 +72,7 @@ class MembersController extends AdminController
         // Check for request forgeries.
         $this->checkToken();
 
-        /** @var MembersModel $model */
-        $model = $this->getModel('Members', 'VolunteersModel', ['ignore_request' => false]);
-        //$model = JModelLegacy::getInstance('Members', 'VolunteersModel', array('ignore_request' => false));
-        $items = $model->getItems();
+        $items = $this->getSelectedItems();
 
         // Output the data in csv format
         $date     = new Date('now', new DateTimeZone('UTC'));
@@ -116,9 +114,7 @@ class MembersController extends AdminController
         // Check for request forgeries.
         $this->checkToken();
 
-        /** @var MembersModel $model */
-        $model = $this->getModel('Members', 'VolunteersModel', ['ignore_request' => false]);
-        $items = $model->getItems();
+        $items = $this->getSelectedItems();
 
         $members = [];
 
@@ -134,5 +130,37 @@ class MembersController extends AdminController
         $this->app->getSession()->set('volunteers.recipients', $members);
 
         $this->setRedirect(Route::_('index.php?option=com_volunteers&view=contact', false));
+    }
+
+    /**
+     * Get the members selected in the list, in the order of the list
+     *
+     * @return  array  The selected members
+     *
+     * @since   4.0.0
+     * @throws  Exception
+     */
+    private function getSelectedItems(): array
+    {
+        $ids = array_filter(ArrayHelper::toInteger((array) $this->input->get('cid', [], 'array')));
+
+        if (!$ids) {
+            return [];
+        }
+
+        /** @var MembersModel $model */
+        $model = $this->getModel('Members', 'Administrator', ['ignore_request' => false]);
+
+        // Load the list state first, so the selection is not limited by the filters or the page
+        $model->getState();
+        $model->setState('filter.ids', $ids);
+        $model->setState('list.start', 0);
+        $model->setState('list.limit', 0);
+
+        foreach (['search', 'state', 'department', 'departmentTeam', 'team', 'volunteer', 'position', 'active', 'type', 'teamStatus', 'osmStatus'] as $filter) {
+            $model->setState('filter.' . $filter, null);
+        }
+
+        return $model->getItems() ?: [];
     }
 }

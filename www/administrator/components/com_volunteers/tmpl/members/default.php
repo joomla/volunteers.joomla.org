@@ -28,9 +28,21 @@ if ($saveOrder) {
     HTMLHelper::_('draggablelist.draggable');
 }
 
-$wa = $this->getDocument()->
-getWebAssetManager();
-$wa->useScript('table.columns');
+$wa = $this->getDocument()->getWebAssetManager();
+$wa->useScript('table.columns')
+    ->useScript('multiselect')
+    ->addInlineScript(<<<'JS'
+// The export is a download that keeps the page open, clear its task so the next search or filter does not export again
+const membersSubmitbutton = Joomla.submitbutton;
+
+Joomla.submitbutton = (task) => {
+    membersSubmitbutton(task);
+
+    if (task === 'members.export') {
+        document.getElementById('adminForm').task.value = '';
+    }
+};
+JS, [], [], ['core']);
 ?>
 
 <form action="<?php echo Route::_('index.php?option=com_volunteers&view=members'); ?>" method="post" name="adminForm" id="adminForm">
@@ -48,17 +60,20 @@ $wa->useScript('table.columns');
                 <table class="table table-striped" id="itemsList">
                     <thead>
                     <tr>
+                        <td class="w-1 text-center">
+                            <?php echo HTMLHelper::_('grid.checkall'); ?>
+                        </td>
                         <th scope="col">
-                            <?php echo HTMLHelper::_('searchtools.sort', 'COM_VOLUNTEERS_FIELD_POSITION', 'a.position', $listDirn, $listOrder); ?>
+                            <?php echo HTMLHelper::_('searchtools.sort', 'COM_VOLUNTEERS_FIELD_POSITION', 'position_title', $listDirn, $listOrder); ?>
                         </th>
                         <th width="15%" class="team">
-                            <?php echo HTMLHelper::_('searchtools.sort', 'COM_VOLUNTEERS_FIELD_DEPARTMENT', 'a.department', $listDirn, $listOrder); ?>
+                            <?php echo HTMLHelper::_('searchtools.sort', 'COM_VOLUNTEERS_FIELD_DEPARTMENT', 'department_name', $listDirn, $listOrder); ?>
                         </th>
                         <th width="15%" class="team">
-                            <?php echo HTMLHelper::_('searchtools.sort', 'COM_VOLUNTEERS_FIELD_TEAM', 'a.team', $listDirn, $listOrder); ?>
+                            <?php echo HTMLHelper::_('searchtools.sort', 'COM_VOLUNTEERS_FIELD_TEAM', 'team_title', $listDirn, $listOrder); ?>
                         </th>
                         <th width="15%" class="name">
-                            <?php echo HTMLHelper::_('searchtools.sort', 'COM_VOLUNTEERS_FIELD_VOLUNTEER', 'a.volunteer', $listDirn, $listOrder); ?>
+                            <?php echo HTMLHelper::_('searchtools.sort', 'COM_VOLUNTEERS_FIELD_VOLUNTEER', 'volunteer_name', $listDirn, $listOrder); ?>
                         </th>
                         <th width="8%">
                             <?php echo HTMLHelper::_('searchtools.sort', 'COM_VOLUNTEERS_FIELD_DATE_STARTED', 'a.date_started', $listDirn, $listOrder); ?>
@@ -81,32 +96,38 @@ $wa->useScript('table.columns');
                         $canEdit = $user->authorise('core.edit', 'com_volunteers');
                         $canCheckin = $user->authorise('core.manage', 'com_checkin') || $item->checked_out == $user->id || $item->checked_out == 0;
                         $canChange = $user->authorise('core.edit.state', 'com_volunteers') && $canCheckin;
+
+                        // A member without a position still needs a title to link to the member form
+                        $positionTitle = $item->position_title ?: Text::_('COM_VOLUNTEERS_NO_POSITION');
                         ?>
                             <tr class="row<?php echo $i % 2; ?><?php if ($item->date_ended == '0000-00-00') :
                                 ?> success<?php
                                           else :
                                                 ?> error<?php
                                           endif; ?>" sortable-volunteer-id="<?php echo $item->id ?>">
-                                <th scope="row" class="text-nowrap has-context">
+                                <td class="text-center">
+                                    <?php echo HTMLHelper::_('grid.id', $i, $item->id, false, 'cid', 'cb', $item->volunteer_name); ?>
+                                </td>
+                                <th scope="row" class="has-context">
                                     <?php if ($item->checked_out) : ?>
                                         <?php echo HTMLHelper::_('jgrid.checkedout', $i, $item->editor, $item->checked_out_time, 'members.', $canCheckin); ?>
                                     <?php endif; ?>
                                     <?php if ($canEdit) : ?>
                                         <a href="<?php echo Route::_('index.php?option=com_volunteers&task=member.edit&id=' . (int) $item->id); ?>"
                                             title="<?php echo Text::_('JACTION_EDIT'); ?>">
-                                            <?php echo $this->escape($item->position_title); ?></a>
+                                            <?php echo $this->escape($positionTitle); ?></a>
                                     <?php else : ?>
-                                        <?php echo $this->escape($item->position_title); ?>
+                                        <?php echo $this->escape($positionTitle); ?>
                                     <?php endif; ?>
                                     <?php if ($item->role_title) : ?>
                                         <div class="small"><?php echo $this->escape($item->role_title); ?></div>
                                     <?php endif; ?>
                                 </th>
-                                <td class="text-nowrap">
+                                <td>
                                     <?php echo $item->department_title; ?>
                                     <?php echo $item->teamdepartment_title; ?>
                                 </td>
-                                <td class="text-nowrap">
+                                <td>
                                     <?php if ($item->team_title) :
                                         ?>
                                             <?php echo $item->team_title; ?>
@@ -132,7 +153,7 @@ $wa->useScript('table.columns');
                                             <?php
                                     endif; ?>
                                 </td>
-                                <td class="text-nowrap">
+                                <td>
                                     <?php if ($canEdit) :
                                         ?>
                                             <a href="<?php echo Route::_('index.php?option=com_volunteers&task=volunteer.edit&id=' . (int) $item->volunteer); ?>">

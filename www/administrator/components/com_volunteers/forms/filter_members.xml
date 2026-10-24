@@ -74,6 +74,10 @@
 	</fields>
 	<fields name="list">
 		<field
+			name="fullordering"
+			type="hidden"
+		/>
+		<field
 			name="limit"
 			type="limitbox"
 			label="COM_VOLUNTEERS_LIST_LIMIT"

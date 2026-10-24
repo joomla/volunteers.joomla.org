@@ -39,9 +39,12 @@ class ContactController extends FormController
      */
     public function send()
     {
+        // Check for request forgeries.
+        $this->checkToken();
+
         $mailer  = Factory::getContainer()->get(MailerFactoryInterface::class)->createMailer();
         $session = $this->app->getSession();
-        $user    = $session->get('user');
+        $user    = $this->app->getIdentity();
         $canDo   = ContentHelper::getActions('com_volunteers');
 
         // Super users access only
@@ -52,9 +55,15 @@ class ContactController extends FormController
         $mailData   = $this->app->input->get('jform', [], 'Array');
         //$from       = $app->get('mailfrom');
         //$fromName   = $app->get('fromname');
-        $subject    = trim($mailData['subject']);
-        $body       = trim($mailData['message']);
-        $recipients = $session->get('volunteers.recipients');
+        $subject    = trim($mailData['subject'] ?? '');
+        $body       = trim($mailData['message'] ?? '');
+        $recipients = $session->get('volunteers.recipients', []);
+
+        if (!$recipients || $subject === '' || $body === '') {
+            $this->setRedirect(Route::_('index.php?option=com_volunteers&view=contact', false), Text::_('COM_VOLUNTEERS_MESSAGE_CONTACT_INCOMPLETE'), 'warning');
+
+            return;
+        }
 
         // Collect the emails for the recipients
         $emails = [];
@@ -68,28 +77,41 @@ class ContactController extends FormController
         $emails = array_unique($emails);
 
         // Send mail
-        $success = $mailer->sendMail(
-            $this->app->get('mailfrom'),
-            $this->app->get('fromname'),
-            $user->email,
-            $subject,
-            $body,
-            true,
-            null,
-            $emails,
-            null,
-            $user->email,
-            $user->name
-        );
+        try {
+            $success = $mailer->sendMail(
+                $this->app->get('mailfrom'),
+                $this->app->get('fromname'),
+                $user->email,
+                $subject,
+                $body,
+                true,
+                null,
+                $emails,
+                null,
+                $user->email,
+                $user->name
+            );
+        } catch (Exception $exception) {
+            $success = false;
+        }
 
+        // Keep the message and the recipients when sending fails, so it can be sent again
         if (!$success) {
-            $this->app->enqueueMessage(Text::_('COM_VOLUNTEERS_MESSAGE_SENDING_FAILED'), 'warning');
+            $this->app->setUserState('com_volunteers.edit.contact.data', $mailData);
+            $this->setRedirect(
+                Route::_('index.php?option=com_volunteers&view=contact', false),
+                Text::sprintf('COM_VOLUNTEERS_MESSAGE_SENDING_FAILED', implode(', ', $emails)),
+                'error'
+            );
+
+            return;
         }
 
         // Clear recipients
         $session->remove('volunteers.recipients');
+        $this->app->setUserState('com_volunteers.edit.contact.data', null);
 
-        $this->setRedirect('index.php?option=com_volunteers&view=members', Text::_('COM_VOLUNTEERS_MESSAGE_SEND_SUCCESS'));
+        $this->setRedirect(Route::_('index.php?option=com_volunteers&view=members', false), Text::_('COM_VOLUNTEERS_MESSAGE_SEND_SUCCESS'));
     }
 
     /**
@@ -102,6 +124,8 @@ class ContactController extends FormController
      */
     public function cancel($key = null)
     {
+        $this->app->getSession()->remove('volunteers.recipients');
+        $this->app->setUserState('com_volunteers.edit.contact.data', null);
         $this->setRedirect(Route::_('index.php?option=com_volunteers&view=members', false));
 
         return true;

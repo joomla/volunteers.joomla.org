@@ -71,7 +71,7 @@ class HtmlView extends BaseHtmlView
         
         /** @var Form form */
         $this->form       = $model->getForm();
-        $this->recipients = $this->app->getSession()->get('volunteers.recipients');
+        $this->recipients = $this->app->getSession()->get('volunteers.recipients', []);
 
         $this->addToolbar();
         parent::display($tpl);
@@ -96,7 +96,8 @@ class HtmlView extends BaseHtmlView
         $toolbar = $this->getDocument()->getToolbar();
 
         if ($canDo->get('core.manage')) {
-            $toolbar->custom('contact.send', 'mail', 'mail', 'COM_VOLUNTEERS_CONTACT_SEND', false);
+            $toolbar->standardButton('mail', 'COM_VOLUNTEERS_CONTACT_SEND', 'contact.send')
+                ->formValidation(true);
         }
 
         $toolbar->cancel('contact.cancel');

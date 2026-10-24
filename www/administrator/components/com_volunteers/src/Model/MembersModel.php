@@ -74,6 +74,10 @@ class MembersModel extends ListModel
                 'a.date_ended',
                 'volunteer',
                 'a.volunteer',
+                'position_title',
+                'department_name',
+                'team_title',
+                'volunteer_name',
             ];
         }
 
@@ -147,6 +151,7 @@ class MembersModel extends ListModel
 
         // Join over the teams.
         $query->select('teamdepartment.title AS teamdepartment_title')
+            ->select('COALESCE(department.title, teamdepartment.title) AS department_name')
             ->join('LEFT', '#__volunteers_departments AS ' . $db->quoteName('teamdepartment') . ' ON teamdepartment.id = team.department');
 
         // Join over the positions.
@@ -166,6 +171,13 @@ class MembersModel extends ListModel
         $query
             ->select('checked_out.name AS editor')
             ->join('LEFT', '#__users AS ' . $db->quoteName('checked_out') . ' ON checked_out.id = a.checked_out');
+
+        // Filter by the selected members
+        $ids = $this->getState('filter.ids');
+
+        if ($ids) {
+            $query->whereIn($db->quoteName('a.id'), $ids);
+        }
 
         // Filter by published state
         $state = $this->getState('filter.state');
@@ -349,6 +361,7 @@ class MembersModel extends ListModel
         $id .= ':' . $this->getState('filter.type');
         $id .= ':' . $this->getState('filter.teamStatus');
         $id .= ':' . $this->getState('filter.osmStatus');
+        $id .= ':' . implode(',', (array) $this->getState('filter.ids'));
 
         return parent::getStoreId($id);
     }

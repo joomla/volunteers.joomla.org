@@ -9,6 +9,7 @@
 namespace Joomla\Component\Volunteers\Administrator\Model;
 
 use Exception;
+use Joomla\CMS\Factory;
 use Joomla\CMS\Form\Form;
 use Joomla\CMS\MVC\Model\AdminModel;
 
@@ -59,7 +60,7 @@ class ContactModel extends AdminModel
      * @since 4.0.0
      * @throws Exception
      */
-    public function getForm($data = [], $loadData = false)
+    public function getForm($data = [], $loadData = true)
     {
         // Get the form.
         $form = $this->loadForm('com_volunteers.contact', 'contact', ['control' => 'jform', 'load_data' => $loadData]);
@@ -69,5 +70,18 @@ class ContactModel extends AdminModel
         }
 
         return $form;
+    }
+
+    /**
+     * Get the message of a failed send, so it does not have to be written again
+     *
+     * @return  array  The subject and message
+     *
+     * @since 4.0.0
+     * @throws Exception
+     */
+    protected function loadFormData()
+    {
+        return (array) Factory::getApplication()->getUserState('com_volunteers.edit.contact.data', []);
     }
 }

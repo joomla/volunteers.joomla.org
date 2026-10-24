@@ -107,8 +107,10 @@ class HtmlView extends BaseHtmlView
         }
 
         if ($user->authorise('core.admin', 'com_volunteers')) {
-            ToolbarHelper::custom('members.export', 'download', 'download', 'Export current selection (CSV)', false);
-            ToolbarHelper::custom('members.mail', 'mail', 'mail', 'E-mail current selection', false);
+            $toolbar->standardButton('download', 'Export current selection (CSV)', 'members.export')
+                ->listCheck(true);
+            $toolbar->standardButton('mail', 'E-mail current selection', 'members.mail')
+                ->listCheck(true);
         }
 
         if ($user->authorise('core.admin', 'com_volunteers') || $user->authorise('core.options', 'com_volunteers')) {

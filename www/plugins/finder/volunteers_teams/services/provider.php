@@ -1,0 +1,44 @@
+<?php
+
+/**
+ * @package    Joomla! Volunteers
+ * @copyright  Copyright (C) 2016 Open Source Matters, Inc. All rights reserved.
+ * @license    GNU General Public License version 2 or later; see LICENSE.txt
+ */
+
+// phpcs:disable PSR1.Files.SideEffects
+\defined('_JEXEC') or die;
+// phpcs:enable PSR1.Files.SideEffects
+
+use Joomla\CMS\Extension\PluginInterface;
+use Joomla\CMS\Factory;
+use Joomla\CMS\Plugin\PluginHelper;
+use Joomla\Database\DatabaseInterface;
+use Joomla\DI\Container;
+use Joomla\DI\ServiceProviderInterface;
+use Joomla\Plugin\Finder\VolunteersTeams\Extension\VolunteersTeams;
+
+return new class () implements ServiceProviderInterface {
+    /**
+     * Registers the service provider with a DI container.
+     *
+     * @param   Container  $container  The DI container.
+     *
+     * @return  void
+     *
+     * @since   6.1.0
+     */
+    public function register(Container $container)
+    {
+        $container->set(
+            PluginInterface::class,
+            $container->lazy(VolunteersTeams::class, function (Container $container) {
+                $plugin = new VolunteersTeams((array) PluginHelper::getPlugin('finder', 'volunteers_teams'));
+                $plugin->setApplication(Factory::getApplication());
+                $plugin->setDatabase($container->get(DatabaseInterface::class));
+
+                return $plugin;
+            })
+        );
+    }
+};

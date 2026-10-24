@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<extension type="plugin" group="finder" method="upgrade">
+    <name>PLG_FINDER_VOLUNTEERS_TEAMS</name>
+    <author>Joomla! Project</author>
+    <creationDate>October 2026</creationDate>
+    <copyright>(C) 2005 - 2026 Open Source Matters. All rights reserved.</copyright>
+    <license>GNU General Public License version 2 or later; see LICENSE.txt</license>
+    <authorEmail>admin@joomla.org</authorEmail>
+    <authorUrl>www.joomla.org</authorUrl>
+    <version>6.1.0</version>
+    <description>PLG_FINDER_VOLUNTEERS_TEAMS_XML_DESCRIPTION</description>
+    <namespace path="src">Joomla\Plugin\Finder\VolunteersTeams</namespace>
+    <files>
+        <folder plugin="volunteers_teams">services</folder>
+        <folder>src</folder>
+        <folder>language</folder>
+    </files>
+</extension>

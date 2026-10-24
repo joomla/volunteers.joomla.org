@@ -130,3 +130,9 @@ body.site {
         --bs-btn-active-border-color: #d9d9d9;
     }
 }
+
+/* Intro text uses the same font as the rest of the page instead of a thin Open Sans */
+.lead {
+    font-family: inherit;
+    font-weight: 400;
+}

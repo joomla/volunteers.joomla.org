@@ -296,9 +296,37 @@ div#toolbar-cancel.btn-group a {
     margin: 1rem 0 .5rem;
 }
 
-.team .vol_h2 .badge {
+.team .vol_h2 .badge,
+.vol_h1 .badge {
     font-size: 11px;
     vertical-align: middle;
+}
+
+/* Headings in the description on a team page */
+.team-page-description h2 {
+    font-size: 1.5rem;
+}
+
+/* Label and value lists with the labels in a narrow right aligned column, as on the Joomla 3 site */
+.dl-horizontal {
+    --bs-gutter-x: 20px;
+}
+
+.dl-horizontal > dd {
+    margin-bottom: 0;
+}
+
+@media (min-width: 576px) {
+    .dl-horizontal > dt {
+        flex: 0 0 auto;
+        width: 180px;
+        text-align: end;
+    }
+
+    .dl-horizontal > dd {
+        flex: 0 0 auto;
+        width: calc(100% - 180px);
+    }
 }
 
 /* Status filter: neutral until selected, then green (active) or red (archived) */

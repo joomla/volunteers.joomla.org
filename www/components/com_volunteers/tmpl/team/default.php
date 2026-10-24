@@ -41,15 +41,12 @@ try {
         <h1 class="vol_h1">
             <?php echo $this->escape($this->item->title) ?>
             <?php if ($this->item->acronym) { ?>
-                (
-                <?php echo ($this->item->acronym) ?>)
+                (<?php echo $this->escape($this->item->acronym) ?>)
             <?php } ?>
             <?php if (!$this->item->active) { ?>
-                <small>
-                    <?php echo Text::_('COM_VOLUNTEERS_ARCHIVED') ?>
-                </small>
+                <span class="badge text-bg-secondary"><?php echo Text::_('COM_VOLUNTEERS_ARCHIVED') ?></span>
             <?php } ?>
-            <span class="badge text-bg-info">
+            <span class="badge text-bg-primary">
                 <?php if ($this->item->status == '0') {
                     echo Text::_('COM_VOLUNTEERS_FIELD_STATUS_INFORMATION');
                 } elseif ($this->item->status == '1') {
@@ -61,51 +58,51 @@ try {
         </h1>
     </div>
 
-    <div class="lead">
+    <div class="lead team-page-description">
         <?php echo $this->item->description; ?>
     </div>
 
-    <dl class="row">
+    <dl class="row dl-horizontal">
         <?php if ($this->item->website) { ?>
-            <dt class="col-sm-3">
+            <dt class="col-sm-auto">
                 <?php echo Text::_('COM_VOLUNTEERS_FIELD_WEBSITE') ?>
             </dt>
-            <dd class="col-sm-9"><a href="<?php echo ($this->item->website) ?>"><?php echo ($this->item->website) ?></a></dd>
+            <dd class="col-sm"><a href="<?php echo ($this->item->website) ?>"><?php echo ($this->item->website) ?></a></dd>
         <?php } ?>
 
         <?php if (($this->item->department_title) && ($this->item->department != 58)) { ?>
-            <dt class="col-sm-3">
+            <dt class="col-sm-auto">
                 <?php echo Text::_('COM_VOLUNTEERS_FIELD_DEPARTMENT') ?>
             </dt>
-            <dd class="col-sm-9">
+            <dd class="col-sm">
                 <a
                     href="<?php echo Route::_('index.php?option=com_volunteers&view=department&id=' . $this->item->department); ?>"><?php echo $this->item->department_title; ?></a>
             </dd>
         <?php } ?>
 
         <?php if ($this->item->parent_id) { ?>
-            <dt class="col-sm-3">
+            <dt class="col-sm-auto">
                 <?php echo Text::_('COM_VOLUNTEERS_FIELD_TEAM_PARENT') ?>
             </dt>
-            <dd class="col-sm-9">
+            <dd class="col-sm">
                 <a href="<?php echo Route::_('index.php?option=com_volunteers&view=team&id=' . $this->item->parent_id); ?>"><?php echo $this->item->parent_title; ?></a>
             </dd>
         <?php } ?>
 
         <?php if ($this->item->date_started != '0000-00-00') { ?>
-            <dt class="col-sm-3">
+            <dt class="col-sm-auto">
                 <?php echo Text::_('COM_VOLUNTEERS_FIELD_DATE_STARTED') ?>
             </dt>
-            <dd class="col-sm-9">
+            <dd class="col-sm">
                 <?php echo VolunteersHelper::date($this->item->date_started, 'F Y'); ?>
             </dd>
         <?php } ?>
 
         <?php if (!$this->item->active) { ?>
-            <dt class="col-sm-3">
+            <dt class="col-sm-auto">
                 <?php echo Text::_('COM_VOLUNTEERS_FIELD_DATE_ENDED') ?>
             </dt>
-            <dd class="col-sm-9">
+            <dd class="col-sm">
                 <?php echo VolunteersHelper::date($this->item->date_ended, 'F Y'); ?>
             </dd>
         <?php } ?>

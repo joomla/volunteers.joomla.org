@@ -29,6 +29,7 @@
 		<field
 				name="description"
 				type="editor"
+				editor="tinymce|none"
 				label="COM_VOLUNTEERS_FIELD_REPORT"
 				buttons="false"
 				filter="\Joomla\CMS\Component\ComponentHelper::filterText"

@@ -25,97 +25,77 @@ try {
     exit();
 }
 $wa->useScript('keepalive');
-$wa->useScript('form.validate');
-//HTMLHelper::_('formbehavior.chosen', 'select');;
+$wa->useScript('com_volunteers.form-edit');
 ?>
 
 <div class="report-edit">
 
     <form id="report"
-          action="<?php
-            echo Route::_('index.php?option=com_volunteers&task=report.save&id=' . (int)$this->item->id); ?>"
-          method="post" class="form-validate" enctype="multipart/form-data">
-        <div class="row">
-            <div class="filter-bar">
-                <div class="btn-bottom-toolbar float-end">
-                    <div id="toolbar-cancel" class="btn-group">
-                        <button class="btn btn-danger" type="button" onclick="history.back();return false;">
-                            <span class="icon-cancel" aria-hidden="true"></span>
-                            <?php
-                            echo Text::_('JCANCEL') ?>
-                        </button>
-                    </div>
-                    <div id="toolbar-apply" class="btn-group">
-                        <button class="btn btn-success" type="submit">
-                            <span class="icon-pencil" aria-hidden="true"></span>
-                            <?php
-                            echo Text::_('JSAVE') ?>
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <div class="border-bottom pb-2 mb-3">
-                <h1 class="vol_h1">
-                    <?php
-                    echo Text::_('COM_VOLUNTEERS_TITLE_REPORTS_EDIT') ?>
-                </h1>
-            </div>
-        </div>
-
-        <?php
-        if ($this->item->department) : ?>
-            <?php
-            echo $this->form->renderField('department'); ?>
-            <?php
-        endif; ?>
-        <?php
-        if ($this->item->team) : ?>
-            <?php
-            echo $this->form->renderField('team'); ?>
-            <?php
-        endif; ?>
-
-        <hr>
-
-        <?php
-        echo $this->form->renderField('title'); ?>
-        <?php
-        echo $this->form->renderField('alias'); ?>
-
-        <hr>
-
-        <?php
-        echo $this->form->renderField('created'); ?>
-
-        <hr>
-
-        <?php
-        echo $this->form->renderField('description'); ?>
-
-        <hr>
-        <p><br/><br/><br/></p>
-        <div class="filter-bar">
-            <div class="btn-bottom-toolbar float-end">
+        action="<?php echo Route::_('index.php?option=com_volunteers&task=report.save&id=' . (int) $this->item->id); ?>"
+        method="post" class="form-validate" enctype="multipart/form-data">
+        <div class="filter-bar clearfix">
+            <div class="btn-toolbar float-end gap-2">
                 <div id="toolbar-cancel" class="btn-group">
-                    <button class="btn btn-danger" type="button" onclick="history.back();return false;">
+                    <button class="btn btn-danger" type="button" data-task="report.cancel">
                         <span class="icon-cancel" aria-hidden="true"></span>
-                        <?php
-                        echo Text::_('JCANCEL') ?>
+                        <?php echo Text::_('JCANCEL') ?>
                     </button>
                 </div>
                 <div id="toolbar-apply" class="btn-group">
-                    <button class="btn btn-success" type="submit">
+                    <button class="btn btn-success" type="button" data-task="report.save">
                         <span class="icon-pencil" aria-hidden="true"></span>
-                        <?php
-                        echo Text::_('JSAVE') ?>
+                        <?php echo Text::_('JSAVE') ?>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="border-bottom pb-2 mb-3">
+            <h1 class="vol_h1">
+                <?php echo Text::_('COM_VOLUNTEERS_TITLE_REPORTS_EDIT') ?>
+            </h1>
+        </div>
+
+        <?php if ($this->item->department) : ?>
+            <?php echo $this->form->renderField('department'); ?>
+        <?php endif; ?>
+        <?php if ($this->item->team) : ?>
+            <?php echo $this->form->renderField('team'); ?>
+        <?php endif; ?>
+
+        <hr>
+
+        <?php echo $this->form->renderField('title'); ?>
+        <?php echo $this->form->renderField('alias'); ?>
+
+        <hr>
+
+        <?php echo $this->form->renderField('created'); ?>
+
+        <hr>
+
+        <?php echo $this->form->renderField('description'); ?>
+
+        <hr>
+
+        <div class="filter-bar clearfix">
+            <div class="btn-toolbar float-end gap-2">
+                <div id="toolbar-cancel" class="btn-group">
+                    <button class="btn btn-danger" type="button" data-task="report.cancel">
+                        <span class="icon-cancel" aria-hidden="true"></span>
+                        <?php echo Text::_('JCANCEL') ?>
+                    </button>
+                </div>
+                <div id="toolbar-apply" class="btn-group">
+                    <button class="btn btn-success" type="button" data-task="report.save">
+                        <span class="icon-pencil" aria-hidden="true"></span>
+                        <?php echo Text::_('JSAVE') ?>
                     </button>
                 </div>
             </div>
         </div>
 
-        <input type="hidden" name="option" value="com_volunteers"/>
-        <input type="hidden" name="task" value="report.save"/>
-        <?php
-        echo HtmlHelper::_('form.token'); ?>
+        <input type="hidden" name="option" value="com_volunteers" />
+        <input type="hidden" name="task" value="report.save" />
+        <?php echo HTMLHelper::_('form.token'); ?>
     </form>
 </div>

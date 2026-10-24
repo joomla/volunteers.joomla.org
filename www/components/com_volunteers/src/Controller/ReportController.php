@@ -15,9 +15,12 @@ namespace Joomla\Component\Volunteers\Site\Controller;
 // phpcs:enable PSR1.Files.SideEffects
 
 use Exception;
+use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\Controller\FormController;
 use Joomla\CMS\Router\Route;
+use Joomla\Database\DatabaseInterface;
+use Joomla\Database\ParameterType;
 use Joomla\Component\Volunteers\Administrator\Service\AclService;
 use stdClass;
 
@@ -46,12 +49,16 @@ class ReportController extends FormController
 
         // Department or team?
         if ($departmentId) {
-            $acl = $aclService->getAcl('department', $departmentId);
-            $this->app->setUserState('com_volunteers.edit.report.departmentid', $departmentId);
+            $acl    = $aclService->getAcl('department', $departmentId);
+            $teamId = null;
         } elseif ($teamId) {
-            $acl = $aclService->getAcl('team', $teamId);
-            $this->app->setUserState('com_volunteers.edit.report.teamid', $teamId);
+            $acl          = $aclService->getAcl('team', $teamId);
+            $departmentId = null;
         }
+
+        // Always set both, so a previous report does not leave its department or team behind
+        $this->app->setUserState('com_volunteers.edit.report.departmentid', $departmentId);
+        $this->app->setUserState('com_volunteers.edit.report.teamid', $teamId);
 
         // Check if the user is authorized to edit this team
         if (!$acl->create_report) {
@@ -80,13 +87,11 @@ class ReportController extends FormController
         // Use parent save method
         $return = parent::cancel($key);
 
-        // Department or team?
-        if ($departmentId) {
-            $this->app->setUserState('com_volunteers.edit.report.departmentid', null);
-            $this->setRedirect(Route::_('index.php?option=com_volunteers&view=department&id=' . $departmentId . '#reports', false));
-        } elseif ($teamId) {
-            $this->app->setUserState('com_volunteers.edit.report.teamid', null);
-            $this->setRedirect(Route::_('index.php?option=com_volunteers&view=team&id=' . $teamId . '#reports', false));
+        $this->app->setUserState('com_volunteers.edit.report.departmentid', null);
+        $this->app->setUserState('com_volunteers.edit.report.teamid', null);
+
+        if ($departmentId || $teamId) {
+            $this->setRedirect($this->getReportsUrl((int) $departmentId, (int) $teamId));
         }
 
         return $return;
@@ -117,11 +122,13 @@ class ReportController extends FormController
         // Department or team?
         if ($report->department) {
             $acl = $aclService->getAcl('department', (int) $report->department);
-            $this->app->setUserState('com_volunteers.edit.report.departmentid', $report->department);
         } elseif ($report->team) {
             $acl = $aclService->getAcl('team', (int) $report->team);
-            $this->app->setUserState('com_volunteers.edit.report.teamid', $report->team);
         }
+
+        // Always set both, so a previous report does not leave its department or team behind
+        $this->app->setUserState('com_volunteers.edit.report.departmentid', $report->department ? (int) $report->department : null);
+        $this->app->setUserState('com_volunteers.edit.report.teamid', $report->department ? null : (int) $report->team);
 
         // Check if the user is authorized to edit this team
         if (!$acl->edit && ($userId != $report->created_by)) {
@@ -159,10 +166,8 @@ class ReportController extends FormController
 
         // Department or team?
         if ($departmentId) {
-            $this->app->setUserState('com_volunteers.edit.report.departmentid', null);
             $acl = $aclService->getAcl('department', (int) $departmentId);
         } elseif ($teamId) {
-            $this->app->setUserState('com_volunteers.edit.report.teamid', null);
             $acl = $aclService->getAcl('team', (int) $teamId);
         }
 
@@ -174,16 +179,50 @@ class ReportController extends FormController
         // Use parent save method
         $return = parent::save($key, $urlVar);
 
+        // Stay on the form when the data does not validate
+        if (!$return) {
+            return $return;
+        }
+
+        $this->app->setUserState('com_volunteers.edit.report.departmentid', null);
+        $this->app->setUserState('com_volunteers.edit.report.teamid', null);
+
         // Redirect to the team
         $this->setMessage(Text::_('COM_VOLUNTEERS_LBL_REPORT_SAVED'));
 
-        // Department or team?
-        if ($departmentId) {
-            $this->setRedirect(Route::_('index.php?option=com_volunteers&view=department&id=' . $departmentId . '#reports', false));
-        } elseif ($teamId) {
-            $this->setRedirect(Route::_('index.php?option=com_volunteers&view=team&id=' . $teamId . '#reports', false));
+        if ($departmentId || $teamId) {
+            $this->setRedirect($this->getReportsUrl((int) $departmentId, (int) $teamId));
         }
 
         return $return;
+    }
+
+    /**
+     * Get the URL of the reports tab of the department, board or team the report belongs to.
+     *
+     * @param   integer  $departmentId  The department of the report.
+     * @param   integer  $teamId        The team of the report.
+     *
+     * @return  string  The URL.
+     *
+     * @since   6.1.0
+     */
+    private function getReportsUrl(int $departmentId, int $teamId): string
+    {
+        if (!$departmentId) {
+            return Route::_('index.php?option=com_volunteers&view=team&id=' . $teamId . '#reports', false);
+        }
+
+        // A department without a parent is the board
+        $db    = Factory::getContainer()->get(DatabaseInterface::class);
+        $query = $db->createQuery()
+            ->select($db->quoteName('parent_id'))
+            ->from($db->quoteName('#__volunteers_departments'))
+            ->where($db->quoteName('id') . ' = :id')
+            ->bind(':id', $departmentId, ParameterType::INTEGER);
+
+        $view = ((int) $db->setQuery($query)->loadResult() === 0) ? 'board' : 'department';
+
+        return Route::_('index.php?option=com_volunteers&view=' . $view . '&id=' . $departmentId . '#viewreports', false);
     }
 }

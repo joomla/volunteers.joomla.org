@@ -361,9 +361,12 @@ class ReportModel extends AdminModel
 
                 return $data;
             } catch (Exception $e) {
-                throw new Exception($e->getMessage(), 500);
+                // Keep the 404 of a missing report, anything else is a server error
+                throw new Exception($e->getMessage(), $e->getCode() === 404 ? 404 : 500, $e);
             }
         }
-        return null;
+
+        // A new report starts with the empty fields of the table
+        return parent::getItem($pk);
     }
 }

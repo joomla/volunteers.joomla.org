@@ -140,6 +140,20 @@ class PositionModel extends AdminModel
     }
 
     /**
+     * The positions are ordered within their type.
+     *
+     * @param   Table  $table  A Table object.
+     *
+     * @return  array  An array of conditions to add to the ordering queries.
+     *
+     * @since   4.0.0
+     */
+    protected function getReorderConditions($table)
+    {
+        return [$this->getDatabase()->quoteName('type') . ' = ' . (int) $table->get('type')];
+    }
+
+    /**
      * Prepare and sanitise the table data prior to saving.
      *
      * @param   Table  $table  A reference to a Table object.
@@ -168,7 +182,8 @@ class PositionModel extends AdminModel
                 $db    = $this->getDatabase();
                 $query = $db->getQuery(true)
                     ->select('MAX(ordering)')
-                    ->from($db->quoteName('#__volunteers_positions'));
+                    ->from($db->quoteName('#__volunteers_positions'))
+                    ->where($db->quoteName('type') . ' = ' . (int) $table->get('type'));
 
                 $db->setQuery($query);
                 $max = $db->loadResult();

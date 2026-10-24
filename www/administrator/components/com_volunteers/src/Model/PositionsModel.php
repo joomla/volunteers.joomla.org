@@ -95,6 +95,11 @@ class PositionsModel extends ListModel
         $orderCol  = $this->state->get('list.ordering', 'a.title');
         $orderDirn = $this->state->get('list.direction', 'asc');
 
+        // The positions are ordered within their type, keep the rows of a type together
+        if ($orderCol === 'a.ordering') {
+            $query->order($db->quoteName('a.type') . ' ASC');
+        }
+
         $query->order($db->escape($orderCol . ' ' . $orderDirn));
 
         return $query;
@@ -170,6 +175,7 @@ class PositionsModel extends ListModel
                 'created_by', 'a.created_by',
                 'ordering', 'a.ordering',
                 'featured', 'a.featured',
+                'type', 'a.type',
             ];
         }
 

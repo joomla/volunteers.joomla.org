@@ -328,7 +328,7 @@ class VolunteersHelper
         $options      = null;
         $db           = Factory::getContainer()->get('DatabaseDriver');
         $query        = $db->getQuery(true)
-            ->select('id AS value, title AS text')
+            ->select('id AS value, title AS text, type')
             ->from('#__volunteers_positions')
             ->where('state = 1');
         if ($departmentId) {
@@ -339,7 +339,7 @@ class VolunteersHelper
             $query->where('type = 2');
         }
 
-        $query->order('ordering asc');
+        $query->order('type asc, ordering asc');
         // Get the options.
         $db->setQuery($query);
         try {

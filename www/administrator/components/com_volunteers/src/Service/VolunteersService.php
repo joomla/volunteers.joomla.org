@@ -383,7 +383,7 @@ class VolunteersService
         $teamId       = $this->app->getUserState('com_volunteers.edit.member.teamid');
 
         $query = $this->db->getQuery(true)
-            ->select('id AS value, title AS text')
+            ->select('id AS value, title AS text, type')
             ->from($this->db->quoteName('#__volunteers_positions'))
             ->where($this->db->quoteName('state') . ' = 1');
 
@@ -395,7 +395,8 @@ class VolunteersService
             $query->where($this->db->quoteName('type') . ' = 2');
         }
 
-        $query->order($this->db->quoteName('ordering') . ' ASC');
+        $query->order($this->db->quoteName('type') . ' ASC')
+            ->order($this->db->quoteName('ordering') . ' ASC');
 
         $this->db->setQuery($query);
 

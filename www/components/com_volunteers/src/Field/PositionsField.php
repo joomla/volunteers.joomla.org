@@ -9,7 +9,7 @@
 namespace Joomla\Component\Volunteers\Site\Field;
 
 use Exception;
-use Joomla\CMS\Form\Field\ListField;
+use Joomla\CMS\Form\Field\GroupedlistField;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Language\Text;
 use Joomla\Component\Volunteers\Site\Helper\VolunteersHelper;
@@ -24,7 +24,7 @@ use Joomla\Component\Volunteers\Site\Helper\VolunteersHelper;
  * Positions Field class.
  * @since 4.0.0
  */
-class PositionsField extends ListField
+class PositionsField extends GroupedlistField
 {
     /**
      * The form field type.
@@ -35,18 +35,21 @@ class PositionsField extends ListField
     protected $type = 'Positions';
 
     /**
-     * Method to get the field options.
+     * Method to get the field options, grouped by the type of the position.
      *
-     * @return  array  The field option objects.
+     * @return  array  The field option objects, grouped by type.
      * @since 4.0.0
      * @throws Exception
      */
-    public function getOptions()
+    protected function getGroups()
     {
+        $types  = [0 => 'JNONE', 1 => 'COM_VOLUNTEERS_FIELD_DEPARTMENT', 2 => 'COM_VOLUNTEERS_FIELD_TEAM'];
+        $groups = [[HTMLHelper::_('select.option', '', Text::_('COM_VOLUNTEERS_SELECT_POSITION'))]];
 
-        $options   = VolunteersHelper::positions();
-        $default[] = HTMLHelper::_('select.option', '', Text::_('COM_VOLUNTEERS_SELECT_POSITION'));
+        foreach (VolunteersHelper::positions() ?? [] as $position) {
+            $groups[Text::_($types[(int) $position->type] ?? 'JNONE')][] = HTMLHelper::_('select.option', $position->value, $position->text);
+        }
 
-        return array_merge($default, $options);
+        return $groups;
     }
 }

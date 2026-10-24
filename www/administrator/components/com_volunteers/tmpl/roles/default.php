@@ -83,7 +83,7 @@ if ($saveOrder) {
                         </thead>
                         <tbody <?php if ($saveOrder) :
                             ?> class="js-draggable" data-url="<?php echo $saveOrderingUrl; ?>"
-                                data-direction="<?php echo strtolower((string) $listDirn); ?>" data-nested="true" <?php
+                                data-direction="<?php echo strtolower((string) $listDirn); ?>" <?php
                                endif; ?>>
                             <?php foreach ($this->items as $i => $item) :
                                 $ordering = ($listOrder == 'a.ordering');
@@ -92,7 +92,7 @@ if ($saveOrder) {
                                 $canCheckin = $user->authorise('core.manage', 'com_checkin') || $item->checked_out == $user->id || $item->checked_out == 0;
                                 $canChange = $user->authorise('core.edit.state', 'com_volunteers') && $canCheckin;
                                 ?>
-                                <tr class="row<?php echo $i % 2; ?>" data-draggable-group="<?php echo $item->id ?>">
+                                <tr class="row<?php echo $i % 2; ?>">
                                     <td class="text-center">
                                         <?php echo HTMLHelper::_('grid.id', $i, $item->id, false, 'cid', 'cb', $item->title); ?>
                                     </td>

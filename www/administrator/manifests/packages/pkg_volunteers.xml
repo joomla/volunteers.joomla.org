@@ -21,7 +21,6 @@
 		<file type="plugin" id="volunteers" group="system">plg_system_volunteers.zip</file>
 		<file type="plugin" id="volunteer" group="user">plg_user_volunteer.zip</file>
 		<file type="plugin" id="reportspam" group="ajax">plg_ajax_reportspam.zip</file>
-		<file type="plugin" id="jvp" group="sampledata">plg_sampledata_jvp.zip</file>
 		<file type="plugin" id="volunteers_departments" group="finder">plg_finder_volunteers_departments.zip</file>
 		<file type="plugin" id="volunteers_reports" group="finder">plg_finder_volunteers_reports.zip</file>
 		<file type="plugin" id="volunteers_teams" group="finder">plg_finder_volunteers_teams.zip</file>

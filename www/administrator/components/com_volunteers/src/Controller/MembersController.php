@@ -157,7 +157,7 @@ class MembersController extends AdminController
         $model->setState('list.start', 0);
         $model->setState('list.limit', 0);
 
-        foreach (['search', 'state', 'department', 'departmentTeam', 'team', 'volunteer', 'position', 'active', 'type', 'teamStatus', 'osmStatus'] as $filter) {
+        foreach (['search', 'published', 'department', 'departmentTeam', 'team', 'volunteer', 'position', 'active', 'type', 'teamStatus', 'osmStatus'] as $filter) {
             $model->setState('filter.' . $filter, null);
         }
 

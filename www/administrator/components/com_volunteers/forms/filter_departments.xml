@@ -8,8 +8,9 @@
 			description="COM_VOLUNTEERS_FILTER_SEARCH_DESC"
 			hint="JSEARCH_FILTER"
 		/>
+
 		<field
-			name="state"
+			name="published"
 			type="status"
 			label="COM_VOLUNTEERS_FILTER_PUBLISHED"
 			description="COM_VOLUNTEERS_FILTER_PUBLISHED_DESC"
@@ -19,6 +20,11 @@
 		</field>
 	</fields>
 	<fields name="list">
+		<field
+			name="fullordering"
+			type="hidden"
+		/>
+
 		<field
 			name="limit"
 			type="limitbox"

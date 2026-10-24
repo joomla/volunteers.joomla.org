@@ -12,80 +12,58 @@ namespace Joomla\Component\Volunteers\Administrator\View\Members;
 \defined('_JEXEC') or die;
 // phpcs:enable PSR1.Files.SideEffects
 
-use Exception;
-use Joomla\CMS\Application\CMSApplicationInterface;
-use Joomla\CMS\Factory;
-use Joomla\CMS\Form\Form;
 use Joomla\CMS\Helper\ContentHelper;
 use Joomla\CMS\Language\Text;
-use Joomla\CMS\MVC\View\GenericDataException;
-use Joomla\CMS\MVC\View\HtmlView as BaseHtmlView;
-
-use Joomla\CMS\Pagination\Pagination;
-use Joomla\CMS\Toolbar\ToolbarHelper;
-use Joomla\Component\Volunteers\Administrator\Model\MembersModel;
+use Joomla\CMS\MVC\View\ListView;
+use Joomla\CMS\Toolbar\ToolbarButton;
 
 /**
  * View class for a list of members.
  *
  * @since  4.0.0
  */
-class HtmlView extends BaseHtmlView
+class HtmlView extends ListView
 {
-    protected array $items;
-    protected Pagination $pagination;
-    protected mixed $state;
-    public Form $filterForm;
-    public array $activeFilters;
-
     /**
-     * @var CMSApplicationInterface
+     * The view supports archiving items
+     *
+     * @var    boolean
      * @since  6.1.0
      */
-    protected $app;
+    protected $supportsArchive = true;
 
     /**
      * Constructor
      *
-     * @param   array  $config  A named configuration array for object construction.
+     * @param   array  $config  An optional associative array of configuration settings.
      *
      * @since   4.0.0
      */
-    public function __construct($config = [])
+    public function __construct(array $config)
     {
-        parent::__construct($config);
+        if (empty($config['option'])) {
+            $config['option'] = 'com_volunteers';
+        }
 
-        $this->app = \Joomla\CMS\Factory::getApplication();
+        $config['toolbar_title']  = Text::_('COM_VOLUNTEERS') . ': ' . Text::_('COM_VOLUNTEERS_TITLE_MEMBERS');
+        $config['toolbar_icon']   = 'joomla';
+        $config['supports_batch'] = false;
+
+        parent::__construct($config);
     }
+
     /**
-     * Display the view
-     *
-     * @param   string  $tpl  Template name
+     * Prepare view data
      *
      * @return  void
      *
-     * @throws Exception
-     *
-     * @since 4.0.0
+     * @since   6.1.0
      */
-    public function display($tpl = null)
+    protected function initializeView()
     {
-        /** @var MembersModel $model */
-        $model               = $this->getModel();
-        $model->setUseExceptions(true);
-        
-        $this->state         = $model->getState();
-        $this->items         = $model->getItems();
-        $this->pagination    = $model->getPagination();
-        $this->filterForm    = $model->getFilterForm();
-        $this->activeFilters = $model->getActiveFilters();
-        $errors              = $model->getErrors();
-        if ($errors && count($errors) > 0) {
-            throw new GenericDataException(implode("\n", $errors));
-        }
+        parent::initializeView();
 
-        $this->addToolbar();
-        parent::display($tpl);
+        $this->canDo = ContentHelper::getActions('com_volunteers');
     }
 
     /**
@@ -93,28 +71,26 @@ class HtmlView extends BaseHtmlView
      *
      * @return  void
      *
-     * @since   4.0.0
-     * @throws Exception
+     * @since   6.1.0
      */
-    private function addToolbar()
+    protected function addToolbar()
     {
-        $canDo = ContentHelper::getActions('com_volunteers');
-        $user  = $this->getCurrentUser();
-        ToolbarHelper::title(Text::_('COM_VOLUNTEERS') . ': ' . Text::_('COM_VOLUNTEERS_TITLE_MEMBERS'), 'joomla');
-        $toolbar = $this->getDocument()->getToolbar();
-        if ($canDo->get('core.create')) {
-            $toolbar->addNew('member.add');
-        }
+        parent::addToolbar();
 
-        if ($user->authorise('core.admin', 'com_volunteers')) {
-            $toolbar->standardButton('download', 'Export current selection (CSV)', 'members.export')
-                ->listCheck(true);
-            $toolbar->standardButton('mail', 'E-mail current selection', 'members.mail')
-                ->listCheck(true);
-        }
+        if ($this->getCurrentUser()->authorise('core.admin', 'com_volunteers')) {
+            $toolbar = $this->getDocument()->getToolbar();
 
-        if ($user->authorise('core.admin', 'com_volunteers') || $user->authorise('core.options', 'com_volunteers')) {
-            $toolbar->preferences('com_volunteers');
+            // Take the options button off, so the export and e-mail buttons show before it
+            $items   = $toolbar->getItems();
+            $options = array_filter($items, static fn ($button) => $button instanceof ToolbarButton && $button->getName() === 'options');
+            $toolbar->setItems(array_diff_key($items, $options));
+
+            $toolbar->standardButton('download', 'COM_VOLUNTEERS_TOOLBAR_EXPORT', 'members.export')
+                ->listCheck(true);
+            $toolbar->standardButton('mail', 'COM_VOLUNTEERS_TOOLBAR_MAIL', 'members.mail')
+                ->listCheck(true);
+
+            $toolbar->setItems(array_merge($toolbar->getItems(), array_values($options)));
         }
     }
 }

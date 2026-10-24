@@ -8,6 +8,7 @@
 
 namespace Joomla\Component\Volunteers\Administrator\Model;
 
+use Joomla\CMS\Application\CMSApplicationInterface;
 use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Factory;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
@@ -26,7 +27,7 @@ use Joomla\Database\QueryInterface;
 class MembersModel extends ListModel
 {
     /**
-     * @var \Joomla\CMS\Application\CMSApplicationInterface
+     * @var CMSApplicationInterface
      * @since  6.1.0
      */
     protected $app;
@@ -40,7 +41,7 @@ class MembersModel extends ListModel
      * @since   4.0.0
      * @throws  Exception
      */
-    public function __construct($config = [], MVCFactoryInterface $factory = null)
+    public function __construct($config = [], ?MVCFactoryInterface $factory = null)
     {
         if (empty($config['filter_fields'])) {
             $config['filter_fields'] = [
@@ -83,6 +84,7 @@ class MembersModel extends ListModel
                 'teamStatus',
                 'active',
                 'osmStatus',
+                'published',
             ];
         }
 
@@ -185,11 +187,13 @@ class MembersModel extends ListModel
         }
 
         // Filter by published state
-        $state = $this->getState('filter.state');
+        $state = $this->getState('filter.published');
 
         if (is_numeric($state)) {
             $query->where($db->quoteName('a.state') . ' = :state')
                 ->bind(':state', $state, ParameterType::INTEGER);
+        } elseif ($state === '') {
+            $query->whereIn($db->quoteName('a.state'), [0, 1]);
         }
 
         // Filter by search in title
@@ -358,7 +362,7 @@ class MembersModel extends ListModel
     {
         // Compile the store id.
         $id .= ':' . $this->getState('filter.search');
-        $id .= ':' . $this->getState('filter.state');
+        $id .= ':' . $this->getState('filter.published');
         $id .= ':' . $this->getState('filter.department');
         $id .= ':' . $this->getState('filter.departmentTeam');
         $id .= ':' . implode(',', (array) $this->getState('filter.team'));
@@ -390,6 +394,10 @@ class MembersModel extends ListModel
 
         // List state information.
         parent::populateState($ordering, $direction);
-    }
 
+        // Without a selected status the list shows published and unpublished, the models loaded with ignore_request show all members
+        if ($this->state->get('filter.published') === null) {
+            $this->setState('filter.published', '');
+        }
+    }
 }

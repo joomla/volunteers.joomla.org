@@ -103,7 +103,7 @@ class BoardModel extends AdminModel
 
         $model = $this->getMVCFactory()->createModel('Members', 'Administrator', ['ignore_request' => true]);
         $model->setState('filter.position', [11, 13]);
-        $model->setState('filter.state', 1);
+        $model->setState('filter.published', 1);
 
         $items = $model->getItems();
 

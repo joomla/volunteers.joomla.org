@@ -10,7 +10,7 @@
 		/>
 
 		<field
-			name="state"
+			name="published"
 			type="status"
 			label="COM_VOLUNTEERS_FILTER_PUBLISHED"
 			description="COM_VOLUNTEERS_FILTER_PUBLISHED_DESC"
@@ -18,8 +18,24 @@
 			>
 			<option value="">JOPTION_SELECT_PUBLISHED</option>
 		</field>
+
+		<field
+			name="type"
+			type="list"
+			label="COM_VOLUNTEERS_FIELD_TYPE"
+			class="js-select-submit-on-change"
+			>
+			<option value="">COM_VOLUNTEERS_SELECT_TYPE</option>
+			<option value="1">COM_VOLUNTEERS_FIELD_DEPARTMENT</option>
+			<option value="2">COM_VOLUNTEERS_FIELD_TEAM</option>
+		</field>
 	</fields>
 	<fields name="list">
+		<field
+			name="fullordering"
+			type="hidden"
+		/>
+
 		<field
 			name="limit"
 			type="limitbox"

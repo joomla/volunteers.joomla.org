@@ -35,9 +35,7 @@ class DepartmentsModel extends ListModel
      */
     protected function populateState($ordering = 'a.ordering', $direction = 'asc')
     {
-        // Load the filter state.
-        $this->setState('filter.search', $this->getUserStateFromRequest($this->context . '.filter.search', 'filter_search'));
-        $this->setState('filter.state', $this->getUserStateFromRequest($this->context . '.filter.state', 'filter_state'));
+        // The filters come from the filter form through the parent, a filter outside the form would stick in the session without a way to clear it
 
         // Load the parameters.
         $params = ComponentHelper::getParams('com_volunteers');
@@ -45,6 +43,11 @@ class DepartmentsModel extends ListModel
 
         // List state information.
         parent::populateState($ordering, $direction);
+
+        // Without a selected status the list shows published and unpublished, the models loaded with ignore_request keep their default
+        if ($this->state->get('filter.published') === null) {
+            $this->setState('filter.published', '');
+        }
     }
 
     /**
@@ -63,7 +66,7 @@ class DepartmentsModel extends ListModel
     {
         // Compile the store id.
         $id .= ':' . $this->getState('filter.search');
-        $id .= ':' . $this->getState('filter.state');
+        $id .= ':' . $this->getState('filter.published');
 
         return parent::getStoreId($id);
     }
@@ -93,10 +96,12 @@ class DepartmentsModel extends ListModel
             ->join('LEFT', '#__users AS ' . $db->quoteName('checked_out') . ' ON checked_out.id = a.checked_out');
 
         // Filter by published state
-        $state = $this->getState('filter.state', 1);
+        $state = $this->getState('filter.published', 1);
 
         if (is_numeric($state)) {
             $query->where('a.state = ' . (int) $state);
+        } elseif ($state === '') {
+            $query->whereIn($db->quoteName('a.state'), [0, 1]);
         }
 
         // Filter by search in title
@@ -177,7 +182,7 @@ class DepartmentsModel extends ListModel
      * @since   4.0.0
      * @throws Exception
      */
-    public function __construct($config = [], MVCFactoryInterface $factory = null)
+    public function __construct($config = [], ?MVCFactoryInterface $factory = null)
     {
         if (empty($config['filter_fields'])) {
             $config['filter_fields'] = [
@@ -191,6 +196,7 @@ class DepartmentsModel extends ListModel
                 'created_by', 'a.created_by',
                 'ordering', 'a.ordering',
                 'featured', 'a.featured',
+                'published',
             ];
         }
 

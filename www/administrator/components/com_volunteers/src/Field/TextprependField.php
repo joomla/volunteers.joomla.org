@@ -13,7 +13,6 @@ namespace Joomla\Component\Volunteers\Administrator\Field;
 // phpcs:enable PSR1.Files.SideEffects
 
 use Joomla\CMS\Form\Field\TextField;
-use Joomla\CMS\Language\Text;
 
 /**
  * Volunteers Field class.
@@ -28,25 +27,21 @@ class TextprependField extends TextField
      * @since 4.0.0
      */
     protected $type = 'Textprepend';
-    /**
-     * @var
-     * @since version
-     */
-    protected $element;
 
     /**
-     * Method to get the field options.
+     * Method to get the data to be passed to the layout for rendering.
      *
-     * @return  string  The field input markup.
+     * @return  array
      *
-     * @since 4.0.0
+     * @since   6.1.0
      */
-    public function getInput()
+    protected function getLayoutData()
     {
-        $html[] = '<div class="input-prepend"><span class="add-on">' . Text::_($this->element['prepend']) . '</span>';
-        $html[] = parent::getInput();
-        $html[] = '</div>';
+        $data = parent::getLayoutData();
 
-        return implode('', $html);
+        // The start of the link shows in front of the field as a core input group
+        $data['addonBefore'] = $data['addonBefore'] ?: (string) $this->element['prepend'];
+
+        return $data;
     }
 }

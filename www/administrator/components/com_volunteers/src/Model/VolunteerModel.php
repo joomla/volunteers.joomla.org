@@ -66,6 +66,18 @@ class VolunteerModel extends AdminModel
     protected array $url_fields = ['website', 'github', 'twitter', 'crowdin', 'joomladocs', 'certification'];
 
     /**
+     * The fields of an existing Joomler that are managed on the Joomla! Identity portal
+     *
+     * @var    array
+     * @since  6.1.0
+     */
+    protected array $identityFields = [
+        'name', 'alias', 'email', 'user_id', 'country', 'city-location', 'latitude', 'longitude', 'address', 'city', 'region',
+        'zip', 'image', 'intro', 'joomlastory', 'website', 'github', 'twitter', 'facebook', 'linkedin', 'crowdin',
+        'joomlaforum', 'joomladocs', 'certification', 'stackexchange', 'joomlastackexchange',
+    ];
+
+    /**
      * Abstract method for getting the form from the model.
      *
      * @param   array    $data      Data for the form.
@@ -95,7 +107,33 @@ class VolunteerModel extends AdminModel
             $form->setFieldAttribute('state', 'filter', 'unset');
         }
 
+        // The Joomler edits the profile on the Joomla! Identity portal, which syncs it to this site
+        if ($this->isExistingJoomler($data)) {
+            foreach ($this->identityFields as $field) {
+                $form->setFieldAttribute($field, 'readonly', 'true');
+                $form->setFieldAttribute($field, 'required', 'false');
+            }
+
+            // The Joomler logs in with Single Sign On
+            $form->removeField('password1');
+            $form->removeField('password2');
+        }
+
         return $form;
+    }
+
+    /**
+     * Check if the form is for an existing Joomler
+     *
+     * @param   array  $data  Data for the form.
+     *
+     * @return  boolean
+     *
+     * @since   6.1.0
+     */
+    protected function isExistingJoomler(array $data): bool
+    {
+        return (int) ($data['id'] ?? $this->getState($this->getName() . '.id')) > 0;
     }
 
     /**
@@ -255,6 +293,11 @@ class VolunteerModel extends AdminModel
      */
     public function save($data)
     {
+        // Keep the profile of an existing Joomler as synced from the Joomla! Identity portal
+        if ($this->isExistingJoomler($data)) {
+            $data = array_diff_key($data, array_flip($this->identityFields));
+        }
+
         // Check the url fields
         foreach ($data as $field => $value) {
             if (in_array($field, $this->url_fields)) {
@@ -281,48 +324,37 @@ class VolunteerModel extends AdminModel
             }
         }
 
-        $app = Factory::getApplication();
+        // The Joomla! Identity portal manages the user account of an existing Joomler
+        if (!$this->isExistingJoomler($data)) {
+            $dataUser = [
+                'name'      => $data['name'],
+                'username'  => PunycodeHelper::emailToPunycode($data['email']),
+                'password'  => $data['password1'] ?? '',
+                'password2' => $data['password2'] ?? '',
+                'email'     => PunycodeHelper::emailToPunycode($data['email']),
+                'groups'    => [ComponentHelper::getParams('com_users')->get('new_usertype', 2)],
+            ];
 
-        // Joomla User
-        $dataUser = [
-            'name'      => $data['name'],
-            'username'  => PunycodeHelper::emailToPunycode($data['email']),
-            'password'  => $data['password1'] ?? '',
-            'password2' => $data['password2'] ?? '',
-            'email'     => PunycodeHelper::emailToPunycode($data['email']),
-        ];
+            $user = new User();
 
-        // Handle com_users changes
-        if (isset($data['id'])) {
-            $userId         = (int) $this->getItem($data['id'])->user_id;
-            $dataUser['id'] = $userId;
-            $user           = new User($userId);
-        } else {
-            $user                 = new User();
-            $params               = ComponentHelper::getParams('com_users');
-            $dataUser['groups'][] = $params->get('new_usertype', 2);
+            // Bind the data.
+            if (!$user->bind($dataUser)) {
+                throw new Exception("Could not bind data. Error: " . $user->getError());
+            }
+
+            // Store the data.
+            if (!$user->save()) {
+                throw new Exception("Could not save user. Error: " . $user->getError());
+            }
+
+            $data['user_id'] = $user->id;
+            $data['alias']   = ApplicationHelper::stringURLSafe($data['name']);
         }
-
-        // Bind the data.
-        if (!$user->bind($dataUser)) {
-            throw new Exception("Could not bind data. Error: " . $user->getError());
-        }
-
-        // Store the data.
-        if (!$user->save()) {
-            throw new Exception("Could not save user. Error: " . $user->getError());
-        }
-
-        // Get User ID
-        $data['user_id'] = $user->id;
 
         // Unset data
         unset($data['email']);
         unset($data['password1']);
         unset($data['password2']);
-
-        // Set alias
-        $data['alias'] = ApplicationHelper::stringURLSafe($data['name']);
 
         return parent::save($data);
     }
@@ -425,7 +457,7 @@ class VolunteerModel extends AdminModel
      * @since 4.0.0
      * @throws Exception
      */
-    public function getVolunteerTeams(int $pk = null)
+    public function getVolunteerTeams(?int $pk = null)
     {
         $pk = (!empty($pk)) ? $pk : (int) $this->getState($this->getName() . '.id');
 

@@ -31,6 +31,13 @@ $noImage = Uri::root() . 'media/com_volunteers/images/joomlaperson.png';
 
     <?php echo LayoutHelper::render('joomla.edit.title_alias', $this); ?>
 
+    <?php if ($this->item->id) : ?>
+        <div class="alert alert-info">
+            <span class="icon-info-circle" aria-hidden="true"></span><span class="visually-hidden"><?php echo Text::_('INFO'); ?></span>
+            <?php echo Text::_('COM_VOLUNTEERS_VOLUNTEER_IDENTITY_MANAGED'); ?>
+        </div>
+    <?php endif; ?>
+
     <div class="main-card">
         <?php echo HTMLHelper::_('uitab.startTabSet', 'myTab', ['active' => 'details', 'recall' => true, 'breakpoint' => 768]); ?>
 

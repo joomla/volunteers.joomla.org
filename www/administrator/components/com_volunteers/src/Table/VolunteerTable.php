@@ -165,9 +165,11 @@ class VolunteerTable extends Table implements VersionableTableInterface, Taggabl
             }
         }
 
-        // Birthday format
-        if (($this->birthday ?? null) && ($this->birthday ?? null) != '0000-00-00 00:00:00') {
-            $this->birthday = Factory::getDate('0000-' . ($this->birthday ?? null))->format('Y-m-d');
+        // Birthday format, an empty birthday is stored as the column default
+        if (empty($this->birthday) || str_starts_with((string) $this->birthday, '0000-00-00')) {
+            $this->birthday = '0000-00-00';
+        } else {
+            $this->birthday = Factory::getDate('0000-' . $this->birthday)->format('Y-m-d');
         }
 
         return parent::store($updateNulls);

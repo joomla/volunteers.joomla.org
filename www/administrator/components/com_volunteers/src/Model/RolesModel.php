@@ -56,8 +56,7 @@ class RolesModel extends ListModel
                 'a.created',
                 'created_by',
                 'a.created_by',
-                'ordering',
-                'a.ordering',
+                'published',
                 'featured',
                 'a.featured',
             ];
@@ -86,8 +85,8 @@ class RolesModel extends ListModel
         parent::populateState($ordering, $direction);
 
         // Without a selected status the list shows published and unpublished, the models loaded with ignore_request keep the published default
-        if ($this->state->get('filter.state') === null) {
-            $this->setState('filter.state', '');
+        if ($this->state->get('filter.published') === null) {
+            $this->setState('filter.published', '');
         }
     }
 
@@ -107,7 +106,7 @@ class RolesModel extends ListModel
     {
         // Compile the store id.
         $id .= ':' . $this->getState('filter.search');
-        $id .= ':' . $this->getState('filter.state');
+        $id .= ':' . $this->getState('filter.published');
         $id .= ':' . implode(',', (array) $this->getState('filter.team'));
 
         return parent::getStoreId($id);
@@ -140,7 +139,7 @@ class RolesModel extends ListModel
             ->join('LEFT', '#__users AS ' . $db->quoteName('checked_out') . ' ON checked_out.id = a.checked_out');
 
         // Filter by published state
-        $state = $this->getState('filter.state', 1);
+        $state = $this->getState('filter.published', 1);
 
         if (is_numeric($state)) {
             $query->where('a.state = ' . (int) $state);

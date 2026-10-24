@@ -1,0 +1,65 @@
+{
+    "_information": {
+        "title": "COM_AKEEBA_CONFIG_ENGINE_POSTPROC_ONEDRIVEAPP_TITLE",
+        "description": "COM_AKEEBA_CONFIG_ENGINE_POSTPROC_ONEDRIVEAPP_DESCRIPTION"
+    },
+    "engine.postproc.common.after_part": {
+        "default": "0",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_POSTPROCPARTS_TITLE",
+        "description": "COM_AKEEBA_CONFIG_POSTPROCPARTS_DESCRIPTION"
+    },
+    "engine.postproc.common.abort_on_fail": {
+        "default": "0",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_POSTPROC_ABORT_ON_FAIL_TITLE",
+        "description": "COM_AKEEBA_CONFIG_POSTPROC_ABORT_ON_FAIL_DESCRIPTION"
+    },
+    "engine.postproc.common.delete_after": {
+        "default": "1",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_DELETEAFTER_TITLE",
+        "description": "COM_AKEEBA_CONFIG_DELETEAFTER_DESCRIPTION"
+    },
+    "engine.postproc.onedriveapp.chunk_upload": {
+        "default": "1",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_BOX_CHUNKUPLOAD_ENABLE"
+    },
+    "engine.postproc.onedriveapp.chunk_upload_size": {
+        "default": "10",
+        "type": "integer",
+        "min": "4",
+        "max": "60",
+        "shortcuts": "5|10|20|40|60",
+        "scale": "1",
+        "uom": "MB",
+        "title": "COM_AKEEBA_CONFIG_BOX_CHUNKUPLOAD_SIZE",
+        "showon": "engine.postproc.onedriveapp.chunk_upload:1"
+    },
+    "engine.postproc.onedriveapp.openoauth": {
+        "default": "",
+        "type": "button",
+        "title": "COM_AKEEBA_CONFIG_BOX_OPENOAUTH_TITLE",
+        "description": "COM_AKEEBA_CONFIG_BOX_OPENOAUTH_DESC",
+        "hook": "akconfig_onedriveapp_openoauth"
+    },
+    "engine.postproc.onedriveapp.directory": {
+        "default": "\/",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_ONEDRIVEAPP_DIRECTORY_TITLE",
+        "description": "COM_AKEEBA_CONFIG_ONEDRIVEAPP_DIRECTORY_DESCRIPTION"
+    },
+    "engine.postproc.onedriveapp.access_token": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_ONEDRIVE_ACCESSTOKEN_TITLE",
+        "description": "COM_AKEEBA_CONFIG_ONEDRIVE_ACCESSTOKEN_DESCRIPTION"
+    },
+    "engine.postproc.onedriveapp.refresh_token": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_ONEDRIVE_REFRESHTOKEN_TITLE",
+        "description": "COM_AKEEBA_CONFIG_ONEDRIVE_REFRESHTOKEN_DESCRIPTION"
+    }
+}

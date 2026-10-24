@@ -1,0 +1,102 @@
+{
+    "_information": {
+        "title": "COM_AKEEBA_CONFIG_ENGINE_POSTPROC_GOOGLEDRIVE_TITLE",
+        "description": "COM_AKEEBA_CONFIG_ENGINE_POSTPROC_GOOGLEDRIVE_DESCRIPTION",
+        "activation_callback": "akeeba_googledrive_refreshdrives"
+    },
+    "engine.postproc.googledrive.oauth2_type": {
+        "default": "akeeba",
+        "type": "enum",
+        "enumkeys": "COM_AKEEBA_CONFIG_COMMON_OAUTH2_TYPE_OPT_AKEEBA|COM_AKEEBA_CONFIG_COMMON_OAUTH2_TYPE_OPT_CUSTOM",
+        "enumvalues": "akeeba|custom",
+        "title": "COM_AKEEBA_CONFIG_COMMON_OAUTH2_TYPE_TITLE",
+        "description": "COM_AKEEBA_CONFIG_COMMON_OAUTH2_TYPE_DESCRIPTION"
+    },
+    "engine.postproc.googledrive.oauth2_helper": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_COMMON_OAUTH2_HELPER_TITLE",
+        "description": "COM_AKEEBA_CONFIG_COMMON_OAUTH2_HELPER_DESCRIPTION",
+        "showon": "engine.postproc.googledrive.oauth2_type:custom"
+    },
+    "engine.postproc.googledrive.oauth2_refresh": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_COMMON_OAUTH2_REFRESH_TITLE",
+        "description": "COM_AKEEBA_CONFIG_COMMON_OAUTH2_REFRESH_DESCRIPTION",
+        "showon": "engine.postproc.googledrive.oauth2_type:custom"
+    },
+    "engine.postproc.common.after_part": {
+        "default": "0",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_POSTPROCPARTS_TITLE",
+        "description": "COM_AKEEBA_CONFIG_POSTPROCPARTS_DESCRIPTION"
+    },
+    "engine.postproc.common.abort_on_fail": {
+        "default": "0",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_POSTPROC_ABORT_ON_FAIL_TITLE",
+        "description": "COM_AKEEBA_CONFIG_POSTPROC_ABORT_ON_FAIL_DESCRIPTION"
+    },
+    "engine.postproc.common.delete_after": {
+        "default": "1",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_DELETEAFTER_TITLE",
+        "description": "COM_AKEEBA_CONFIG_DELETEAFTER_DESCRIPTION"
+    },
+    "engine.postproc.googledrive.chunk_upload_size": {
+        "default": "10",
+        "type": "integer",
+        "min": "4",
+        "max": "60",
+        "shortcuts": "1|5|10|20|40|60|100",
+        "scale": "1",
+        "uom": "MB",
+        "title": "COM_AKEEBA_CONFIG_BOX_CHUNKUPLOAD_SIZE"
+    },
+    "engine.postproc.googledrive.openoauth": {
+        "default": "",
+        "type": "button",
+        "title": "COM_AKEEBA_CONFIG_BOX_OPENOAUTH_TITLE",
+        "description": "COM_AKEEBA_CONFIG_BOX_OPENOAUTH_DESC",
+        "hook": "akconfig_googledrive_openoauth"
+    },
+    "engine.postproc.googledrive.refreshdrives": {
+        "default": "",
+        "type": "button",
+        "title": "COM_AKEEBA_CONFIG_GOOGLEDRIVE_REFRESHTEAMDRIVES_TITLE",
+        "hook": "akeeba_googledrive_refreshdrives"
+    },
+    "engine.postproc.googledrive.team_drive": {
+        "default": "",
+        "type": "enum",
+        "enumkeys": "COM_AKEEBA_CONFIG_GOOGLEDRIVE_TEAMDRIVE_OPT_PERSONAL",
+        "enumvalues": "",
+        "title": "COM_AKEEBA_CONFIG_GOOGLEDRIVE_TEAMDRIVE_TITLE",
+        "description": "COM_AKEEBA_CONFIG_GOOGLEDRIVE_TEAMDRIVE_DESCRIPTION"
+    },
+    "engine.postproc.googledrive.uploadtosharedwithme": {
+        "default": "0",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_GOOGLEDRIVE_UPLOADTOSHAREDWITHME_TITLE",
+        "description": "COM_AKEEBA_CONFIG_GOOGLEDRIVE_UPLOADTOSHAREDWITHME_DESCRIPTION"
+    },
+    "engine.postproc.googledrive.directory": {
+        "default": "\/",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_GOOGLEDRIVE_DIRECTORY_TITLE",
+        "description": "COM_AKEEBA_CONFIG_GOOGLEDRIVE_DIRECTORY_DESCRIPTION"
+    },
+    "engine.postproc.googledrive.access_token": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_GOOGLEDRIVE_ACCESSTOKEN_TITLE",
+        "description": "COM_AKEEBA_CONFIG_GOOGLEDRIVE_ACCESSTOKEN_DESCRIPTION"
+    },
+    "engine.postproc.googledrive.refresh_token": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_GOOGLEDRIVE_REFRESHTOKEN_TITLE",
+        "description": "COM_AKEEBA_CONFIG_GOOGLEDRIVE_ACCESSTOKEN_DESCRIPTION"
+    }
+}

@@ -1,0 +1,140 @@
+{
+    "_information": {
+        "title": "COM_AKEEBA_CONFIG_ENGINE_POSTPROC_S3_TITLE",
+        "description": "COM_AKEEBA_CONFIG_ENGINE_POSTPROC_S3_DESCRIPTION"
+    },
+    "engine.postproc.common.after_part": {
+        "default": "0",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_POSTPROCPARTS_TITLE",
+        "description": "COM_AKEEBA_CONFIG_POSTPROCPARTS_DESCRIPTION"
+    },
+    "engine.postproc.common.abort_on_fail": {
+        "default": "0",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_POSTPROC_ABORT_ON_FAIL_TITLE",
+        "description": "COM_AKEEBA_CONFIG_POSTPROC_ABORT_ON_FAIL_DESCRIPTION"
+    },
+    "engine.postproc.common.delete_after": {
+        "default": "1",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_DELETEAFTER_TITLE",
+        "description": "COM_AKEEBA_CONFIG_DELETEAFTER_DESCRIPTION"
+    },
+    "engine.postproc.amazons3.accesskey": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_S3ACCESSKEY_TITLE",
+        "description": "COM_AKEEBA_CONFIG_S3ACCESSKEY_DESCRIPTION"
+    },
+    "engine.postproc.amazons3.secretkey": {
+        "default": "",
+        "type": "password",
+        "title": "COM_AKEEBA_CONFIG_S3SECRETKEY_TITLE",
+        "description": "COM_AKEEBA_CONFIG_S3SECRETKEY_DESCRIPTION"
+    },
+    "engine.postproc.amazons3.usessl": {
+        "default": "1",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_S3USESSL_TITLE",
+        "description": "COM_AKEEBA_CONFIG_S3USESSL_DESCRIPTION"
+    },
+    "engine.postproc.amazons3.dualstack": {
+        "default": "1",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_S3_DUALSTACK_TITLE",
+        "description": "COM_AKEEBA_CONFIG_S3_DUALSTACK_DESCRIPTION"
+    },
+    "engine.postproc.amazons3.bucket": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_S3BUCKET_TITLE",
+        "description": "COM_AKEEBA_CONFIG_S3BUCKET_DESCRIPTION"
+    },
+    "engine.postproc.amazons3.signature": {
+        "default": "v4",
+        "type": "enum",
+        "enumkeys": "COM_AKEEBA_S3_SIGNATURE_V4|COM_AKEEBA_S3_SIGNATURE_V2",
+        "enumvalues": "v4|v2",
+        "title": "COM_AKEEBA_S3_SIGNATURE_TITLE",
+        "description": "COM_AKEEBA_S3_SIGNATURE_DESCRIPTION"
+    },
+    "engine.postproc.amazons3.region": {
+        "default": "us-east-1",
+        "type": "enum",
+        "enumkeys": "COM_AKEEBA_S3_REGION_CUSTOM_OR_NONE|COM_AKEEBA_S3_REGION_USEAST1|COM_AKEEBA_S3_REGION_USEAST2|COM_AKEEBA_S3_REGION_USWEST1|COM_AKEEBA_S3_REGION_USWEST2|COM_AKEEBA_S3_REGION_CACENTRAL1|COM_AKEEBA_S3_REGION_EUCENTRAL1|COM_AKEEBA_S3_REGION_EUCENTRAL2|COM_AKEEBA_S3_REGION_EUNORTH1|COM_AKEEBA_S3_REGION_EUSOUTH1|COM_AKEEBA_S3_REGION_EUSOUTH2|COM_AKEEBA_S3_REGION_EUWEST1|COM_AKEEBA_S3_REGION_EUWEST2|COM_AKEEBA_S3_REGION_EUWEST3|COM_AKEEBA_S3_REGION_APEAST1|COM_AKEEBA_S3_REGION_APNORTHEAST1|COM_AKEEBA_S3_REGION_APNORTHEAST2|COM_AKEEBA_S3_REGION_APNORTHEAST3|COM_AKEEBA_S3_REGION_APSOUTH1|COM_AKEEBA_S3_REGION_APSOUTH2|COM_AKEEBA_S3_REGION_APSOUTHEAST1|COM_AKEEBA_S3_REGION_APSOUTHEAST2|COM_AKEEBA_S3_REGION_APSOUTHEAST3|COM_AKEEBA_S3_REGION_APSOUTHEAST4|COM_AKEEBA_S3_REGION_SAEAST1|COM_AKEEBA_S3_REGION_MECENTRAL1|COM_AKEEBA_S3_REGION_MESOUTH1|COM_AKEEBA_S3_REGION_AFSOUTH1|COM_AKEEBA_S3_REGION_CNNORTH1|COM_AKEEBA_S3_REGION_CNNORTHWEST1|COM_AKEEBA_S3_REGION_USGOVEAST1|COM_AKEEBA_S3_REGION_USGOVEAST2",
+        "enumvalues": "|us-east-1|us-east-2|us-west-1|us-west-2|ca-central-1|eu-central-1|eu-central-2|eu-north-1|eu-south-1|eu-south-2|eu-west-1|eu-west-2|eu-west-3|ap-east-1|ap-northeast-1|ap-northeast-2|ap-northeast-3|ap-south-1|ap-south-2|ap-southeast-1|ap-southeast-2|ap-southeast-3|ap-southeast-4|sa-east-1|me-central-1|me-south-1|af-south-1|cn-north-1|cn-northwest-1|us-gov-east-1|us-gov-west-1",
+        "title": "COM_AKEEBA_S3_REGION_TITLE",
+        "description": "COM_AKEEBA_S3_REGION_DESCRIPTION",
+        "showon": "engine.postproc.amazons3.signature:v4"
+    },
+    "engine.postproc.amazons3.custom_region": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_S3_CUSTOM_REGION_TITLE",
+        "description": "COM_AKEEBA_S3_CUSTOM_REGION_DESCRIPTION",
+        "showon": "engine.postproc.amazons3.signature:v4[AND]engine.postproc.amazons3.region:"
+    },
+    "engine.postproc.amazons3.pathaccess": {
+        "default": "0",
+        "type": "enum",
+        "enumkeys": "COM_AKEEBA_S3_ACCESS_VIRTUALHOST|COM_AKEEBA_S3_ACCESS_PATH",
+        "enumvalues": "0|1",
+        "title": "COM_AKEEBA_S3_ACCESS_TITLE",
+        "description": "COM_AKEEBA_S3_ACCESS_DESCRIPTION"
+    },
+    "engine.postproc.amazons3.directory": {
+        "default": "\/",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_S3DIRECTORY_TITLE",
+        "description": "COM_AKEEBA_CONFIG_S3DIRECTORY_DESCRIPTION"
+    },
+    "engine.postproc.amazons3.acl": {
+        "default": "bucket-owner-full-control",
+        "type": "enum",
+        "enumkeys": "COM_AKEEBA_CONFIG_S3_ACL_PRIVATE|COM_AKEEBA_CONFIG_S3_ACL_PUBLIC_READ|COM_AKEEBA_CONFIG_S3_ACL_PUBLIC_READ_WRITE|COM_AKEEBA_CONFIG_S3_ACL_AUTHENTICATED_READ|COM_AKEEBA_CONFIG_S3_ACL_BUCKET_OWNER_READ|COM_AKEEBA_CONFIG_S3_ACL_BUCKET_OWNER_FULL_CONTROL",
+        "enumvalues": "private|public-read|public-read-write|authenticated-read|bucket-owner-read|bucket-owner-full-control",
+        "title": "COM_AKEEBA_CONFIG_S3_ACL_TITLE",
+        "description": "COM_AKEEBA_CONFIG_S3_ACL_DESCRIPTION"
+    },
+    "engine.postproc.amazons3.legacy": {
+        "default": "0",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_S3LEGACY_TITLE",
+        "description": "COM_AKEEBA_CONFIG_S3LEGACY_DESCRIPTION"
+    },
+    "engine.postproc.amazons3.rrs": {
+        "default": "0",
+        "type": "enum",
+        "enumkeys": "COM_AKEEBA_S3_RRS_STANDARD|COM_AKEEBA_S3_RRS_RRS|COM_AKEEBA_S3_RRS_STANDARD_IA|COM_AKEEBA_S3_RRS_ONEZONE_IA|COM_AKEEBA_S3_RRS_INTELLIGENT_TIERING|COM_AKEEBA_S3_RRS_GLACIER|COM_AKEEBA_S3_RRS_DEEP_ARCHIVE",
+        "enumvalues": "0|1|2|3|4|5|6",
+        "title": "COM_AKEEBA_CONFIG_S3RRS_TITLE",
+        "description": "COM_AKEEBA_CONFIG_S3RRS_DESCRIPTION"
+    },
+    "engine.postproc.amazons3.customendpoint": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_S3CUSTOMENDPOINT_TITLE",
+        "description": "COM_AKEEBA_CONFIG_S3CUSTOMENDPOINT_DESCRIPTION"
+    },
+    "engine.postproc.amazons3.alternateDateHeaderFormat": {
+        "default": "1",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_S3_ALTERNATEDATEHEADERFORMAT_TITLE",
+        "description": "COM_AKEEBA_CONFIG_S3_ALTERNATEDATEHEADERFORMAT_DESCRIPTION",
+        "showon": "engine.postproc.amazons3.customendpoint!:"
+    },
+    "engine.postproc.amazons3.useHTTPDateHeader": {
+        "default": "0",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_S3_USEHTTPDATEHEADER_TITLE",
+        "description": "COM_AKEEBA_CONFIG_S3_USEHTTPDATEHEADER_DESCRIPTION"
+    },
+    "engine.postproc.amazons3.preSignedBucketInURL": {
+        "default": "0",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_S3_PRESIGNEDBUCKETINURL_TITLE",
+        "description": "COM_AKEEBA_CONFIG_S3_PRESIGNEDBUCKETINURL_DESCRIPTION",
+        "showon": "engine.postproc.amazons3.signature:v4"
+    }
+}

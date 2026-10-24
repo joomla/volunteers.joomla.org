@@ -31,6 +31,7 @@ The following extensions must be uninstalled:
   - Smart Search - Joomla Volunteer Portal - Reports
   - Smart Search - Joomla Volunteer Portal - Teams
   - Smart Search - Joomla Volunteer Portal - Joomlers
+- Akeeba Backup 10 (`pkg_akeebabackup`), replaces Akeeba Backup 8, see [Akeeba Backup](#akeeba-backup)
 - YourSites (`plg_system_yoursites`) to 1.73.0, the Joomla 6 version of the plugin. Install it over the Joomla 3 version, the settings are kept.
 
 ## Search
@@ -61,3 +62,13 @@ The banner code on the Banners page (`/banners`) used the Copy Me plugin for its
 1. Run `database/updates/2026-10-24-copy-code.sql`, replace `#__` with the table prefix. This replaces the `{copyme}` tags in the "Spread the Joomla! love" article with `<pre class="copy-code">` blocks
 2. Uninstall the Copy Me plugin (`plg_content_copyme`), this also removes `media/hepta`
 3. Check that each banner code on `/banners` has a Copy button that copies the code
+
+## Akeeba Backup
+Akeeba Backup 8 (`pkg_akeeba`) does not run on Joomla 6 and cannot be uninstalled there. Akeeba Backup 10 (`pkg_akeebabackup`) replaces it and takes over its quickicon, actionlog and backuponupdate plugins. The files of Akeeba Backup 8 and of the FOF 3, FOF 4 and FEF frameworks it used are removed in the repository.
+
+1. Install Akeeba Backup 10 (`pkg_akeebabackup`)
+2. Migrate the backup profiles, settings and backup records: `php cli/joomla.php akeeba:migrate`
+3. Check with `php cli/joomla.php akeeba:profile:list` and `php cli/joomla.php akeeba:backup:list` that the profiles and backup records are there
+4. Run `database/updates/2026-10-24-akeeba.sql`, replace `#__` with the table prefix. This removes the extensions, update sites, administrator menu item and asset of Akeeba Backup 8, FOF 3, FOF 4 and FEF, and drops the `#__ak_profiles`, `#__ak_stats` and `#__ak_storage` tables
+5. Point the backup cron jobs to the Joomla CLI of Akeeba Backup 10, the old `cli/akeeba-*.php` scripts are removed: `php cli/joomla.php akeeba:backup:take --profile=<id>`
+6. Check the S3 settings of the backup profiles and take a test backup

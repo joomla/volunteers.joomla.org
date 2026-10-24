@@ -1,0 +1,15 @@
+{
+	"$schema": "https://developer.joomla.org/schemas/json-schema/web_assets.json",
+	"name": "plg_quickicon_akeebabackup",
+	"version": "10.4.0",
+	"description": "Akeeba Backup",
+	"license": "GPL-3.0-or-later",
+	"assets": [
+		{
+			"name": "plg_quickicon_akeebabackup.icons",
+			"description": "Akeeba Backup quick icons CSS",
+			"type": "style",
+			"uri": "plg_quickicon_akeebabackup/icons.css"
+		}
+	]
+}

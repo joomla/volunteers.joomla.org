@@ -1,0 +1,123 @@
+{
+    "_group": {
+        "description": "COM_AKEEBA_CONFIG_HEADER_QUOTA"
+    },
+    "akeeba.quota.maxage.enable": {
+        "default": "0",
+        "type": "none",
+        "protected": "1"
+    },
+    "akeeba.quota.obsolete_quota": {
+        "default": "50",
+        "type": "integer",
+        "min": "0",
+        "max": "500",
+        "shortcuts": "1|10|20|30|40|50",
+        "scale": "1",
+        "uom": "items",
+        "title": "COM_AKEEBA_CONFIG_OBSOLETEQUOTA_ENABLE_TITLE",
+        "description": "COM_AKEEBA_CONFIG_OBSOLETEQUOTA_ENABLE_DESCRIPTION"
+    },
+    "akeeba.quota.enable_logfiles": {
+        "default": "0",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_LOGFILES_TITLE",
+        "description": "COM_AKEEBA_CONFIG_LOGFILES_DESCRIPTION"
+    },
+    "akeeba.quota.logfiles.type": {
+        "default": "count",
+        "type": "enum",
+        "protected": "1",
+        "enumkeys": "COM_AKEEBA_CONFIG_LOGFILES_TYPE_SIZE|COM_AKEEBA_CONFIG_LOGFILES_TYPE_COUNT|COM_AKEEBA_CONFIG_LOGFILES_TYPE_DAYS",
+        "enumvalues": "size|count|days",
+        "title": "COM_AKEEBA_CONFIG_LOGFILES_TYPE_TITLE",
+        "description": "COM_AKEEBA_CONFIG_LOGFILES_TYPE_DESCRIPTION",
+        "showon": "akeeba.quota.enable_logfiles:1"
+    },
+    "akeeba.quota.logfiles.count": {
+        "default": "3",
+        "type": "integer",
+        "min": "0",
+        "max": "10000",
+        "shortcuts": "1|3|7|10|30|100",
+        "scale": "1",
+        "title": "COM_AKEEBA_CONFIG_LOGFILES_COUNT_TITLE",
+        "description": "COM_AKEEBA_CONFIG_LOGFILES_COUNT_DESCRIPTION",
+        "showon": "akeeba.quota.enable_logfiles:1[AND]akeeba.quota.logfiles.type:count"
+    },
+    "akeeba.quota.logfiles.size": {
+        "default": "10485760",
+        "type": "integer",
+        "min": "1",
+        "max": "1125899906842624",
+        "shortcuts": "15728640|52428800|104857600|268435456|536870912|1073741824|2147483648|5368709120|10737418240|21474836480|1099511627776",
+        "scale": "1048576",
+        "uom": "Mb",
+        "title": "COM_AKEEBA_CONFIG_LOGFILES_SIZE_TITLE",
+        "description": "COM_AKEEBA_CONFIG_LOGFILES_SIZE_DESCRIPTION",
+        "showon": "akeeba.quota.enable_logfiles:1[AND]akeeba.quota.logfiles.type:size"
+    },
+    "akeeba.quota.logfiles.days": {
+        "default": "30",
+        "type": "integer",
+        "min": "1",
+        "max": "365",
+        "shortcuts": "31|60|182|365",
+        "scale": "1",
+        "uom": "days",
+        "title": "COM_AKEEBA_CONFIG_LOGFILES_DAYS_TITLE",
+        "description": "COM_AKEEBA_CONFIG_LOGFILES_DAYS_DESCRIPTION",
+        "showon": "akeeba.quota.enable_logfiles:1[AND]akeeba.quota.logfiles.type:days"
+    },
+    "akeeba.quota.enable_size_quota": {
+        "default": "0",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_SIZEQUOTA_ENABLE_TITLE",
+        "description": "COM_AKEEBA_CONFIG_SIZEQUOTA_ENABLE_DESCRIPTION"
+    },
+    "akeeba.quota.size_quota": {
+        "default": "15728640",
+        "type": "integer",
+        "min": "1",
+        "max": "1125899906842624",
+        "shortcuts": "15728640|52428800|104857600|268435456|536870912|1073741824|2147483648|5368709120|10737418240|21474836480|1099511627776",
+        "scale": "1048576",
+        "uom": "MB",
+        "title": "COM_AKEEBA_CONFIG_SIZEQUOTA_VALUE_TITLE",
+        "description": "COM_AKEEBA_CONFIG_SIZEQUOTA_VALUE_DESCRIPTION",
+        "showon": "akeeba.quota.enable_size_quota:1"
+    },
+    "akeeba.quota.enable_count_quota": {
+        "default": "1",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_COUNTQUOTA_ENABLE_TITLE",
+        "description": "COM_AKEEBA_CONFIG_COUNTQUOTA_ENABLE_DESCRIPTION"
+    },
+    "akeeba.quota.count_quota": {
+        "default": "3",
+        "type": "integer",
+        "min": "1",
+        "max": "200",
+        "shortcuts": "1|5|10|50|100|200",
+        "scale": "1",
+        "uom": "",
+        "title": "COM_AKEEBA_CONFIG_COUNTQUOTA_VALUE_TITLE",
+        "description": "COM_AKEEBA_CONFIG_COUNTQUOTA_VALUE_DESCRIPTION",
+        "showon": "akeeba.quota.enable_count_quota:1"
+    },
+    "akeeba.quota.remotely.maxage.enable": {
+        "default": "0",
+        "type": "none",
+        "protected": "1"
+    },
+    "akeeba.quota.remotely.enable_count_quota": {
+        "default": "0",
+        "type": "none",
+        "protected": "1"
+    },
+    "akeeba.quota.remotely.enable_size_quota": {
+        "default": "0",
+        "type": "none",
+        "protected": "1"
+    }
+}

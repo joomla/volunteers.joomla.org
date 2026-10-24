@@ -1,0 +1,5 @@
+/*!*
+ * @package   akeebabackup
+ * @copyright Copyright 2006-2026 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @license   GNU General Public License version 3, or later
+ */@media screen{section#content main .alert[class*=alert-] a[class*=btn-]{color:var(--btn-color)}section#content main .alert[class*=alert-] a.btn-primary{color:var(--btn-primary-color)}section#content main .alert[class*=alert-] a.btn-secondary{color:var(--btn-secondary-color)}section#content main .alert[class*=alert-] a[class*=btn-outline-]{color:var(--btn-color)}section#content main .alert[class*=alert-] a.btn:hover{color:var(--btn-hover-color)}}/*# sourceMappingURL=j5.css.map */

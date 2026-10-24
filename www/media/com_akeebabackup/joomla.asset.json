@@ -1,0 +1,335 @@
+{
+	"$schema": "https://developer.joomla.org/schemas/json-schema/web_assets.json",
+	"name": "com_akeebabackup",
+	"version": "10.4.0",
+	"description": "Akeeba Backup",
+	"license": "GPL-3.0-or-later",
+	"assets": [
+		{
+			"name": "com_akeebabackup.akeebaui",
+			"description": "Common user interface CSS, light mode",
+			"type": "style",
+			"uri": "com_akeebabackup/akeebaui.css"
+		},
+		{
+			"name": "com_akeebabackup.j5",
+			"description": "Joomla 5 CSS",
+			"type": "style",
+			"uri": "com_akeebabackup/j5.css"
+		},
+		{
+			"name": "com_akeebabackup.j5dark",
+			"description": "Joomla 5 Dark Mode CSS",
+			"type": "style",
+			"uri": "com_akeebabackup/j5dark.css"
+		},
+		{
+			"name": "com_akeebabackup.system",
+			"description": "Common JavaScript",
+			"type": "script",
+			"uri": "com_akeebabackup/System.min.js",
+			"dependencies": [
+				"core",
+				"bootstrap.alert",
+				"bootstrap.button",
+				"bootstrap.modal"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_akeebabackup.controlpanel",
+			"description": "JavaScript for the Control Panel page",
+			"type": "script",
+			"uri": "com_akeebabackup/ControlPanel.min.js",
+			"dependencies": [
+				"core",
+				"com_akeebabackup.system",
+				"bootstrap.modal"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_akeebabackup.configuration",
+			"description": "JavaScript for the Configuration page",
+			"type": "script",
+			"uri": "com_akeebabackup/Configuration.min.js",
+			"dependencies": [
+				"core",
+				"showon",
+				"com_akeebabackup.system",
+				"bootstrap.modal",
+				"bootstrap.popover"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_akeebabackup.browser",
+			"description": "JavaScript for the Configuration page",
+			"type": "script",
+			"uri": "com_akeebabackup/Browser.min.js",
+			"dependencies": [
+				"core",
+				"com_akeebabackup.system"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_akeebabackup.configuration_wizard",
+			"description": "JavaScript for the Configuration Wizard page",
+			"type": "script",
+			"uri": "com_akeebabackup/ConfigurationWizard.min.js",
+			"dependencies": [
+				"core",
+				"com_akeebabackup.system",
+				"com_akeebabackup.backup",
+				"bootstrap.modal"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_akeebabackup.backup",
+			"description": "JavaScript for the Backup page",
+			"type": "script",
+			"uri": "com_akeebabackup/Backup.min.js",
+			"dependencies": [
+				"core",
+				"com_akeebabackup.system",
+				"bootstrap.modal"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_akeebabackup.log",
+			"description": "JavaScript for the Log page",
+			"type": "script",
+			"uri": "com_akeebabackup/Log.min.js",
+			"dependencies": [
+				"core",
+				"com_akeebabackup.system"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_akeebabackup.manage",
+			"description": "JavaScript for the Manage Backups page",
+			"type": "script",
+			"uri": "com_akeebabackup/Manage.min.js",
+			"dependencies": [
+				"core",
+				"bootstrap.modal",
+				"bootstrap.popover",
+				"com_akeebabackup.system"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_akeebabackup.remotefiles",
+			"description": "JavaScript for the Remote Files Management popup dialog",
+			"type": "script",
+			"uri": "com_akeebabackup/RemoteFiles.min.js",
+			"dependencies": [
+				"core",
+				"com_akeebabackup.system"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_akeebabackup.upload",
+			"description": "JavaScript for the Upload to Remote Storage popup dialog",
+			"type": "script",
+			"uri": "com_akeebabackup/Upload.min.js",
+			"dependencies": [
+				"core",
+				"com_akeebabackup.system"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_akeebabackup.filefilters",
+			"description": "JavaScript for the Filefilters page, reused in Databasefilters and RegEx* views.",
+			"type": "script",
+			"uri": "com_akeebabackup/FileFilters.min.js",
+			"dependencies": [
+				"core",
+				"com_akeebabackup.system"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_akeebabackup.databasefilters",
+			"description": "JavaScript for the Databasefilters page.",
+			"type": "script",
+			"uri": "com_akeebabackup/DatabaseFilters.min.js",
+			"dependencies": [
+				"core",
+				"com_akeebabackup.system",
+				"com_akeebabackup.filefilters"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_akeebabackup.regexdatabasefilters",
+			"description": "JavaScript for the Regexdatabasefilters page.",
+			"type": "script",
+			"uri": "com_akeebabackup/RegExDatabaseFilters.min.js",
+			"dependencies": [
+				"core",
+				"com_akeebabackup.system",
+				"com_akeebabackup.filefilters"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_akeebabackup.regexfilefilters",
+			"description": "JavaScript for the Regexfilefilters page.",
+			"type": "script",
+			"uri": "com_akeebabackup/RegExFileFilters.min.js",
+			"dependencies": [
+				"core",
+				"com_akeebabackup.system",
+				"com_akeebabackup.filefilters"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_akeebabackup.includefolders",
+			"description": "JavaScript for the Includefolders page.",
+			"type": "script",
+			"uri": "com_akeebabackup/IncludeFolders.min.js",
+			"dependencies": [
+				"core",
+				"com_akeebabackup.system",
+				"com_akeebabackup.configuration",
+				"com_akeebabackup.filefilters"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_akeebabackup.multipledatabases",
+			"description": "JavaScript for the Multipledatabases page.",
+			"type": "script",
+			"uri": "com_akeebabackup/MultipleDatabases.min.js",
+			"dependencies": [
+				"core",
+				"bootstrap.modal",
+				"com_akeebabackup.system",
+				"com_akeebabackup.filefilters"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_akeebabackup.discover",
+			"description": "JavaScript for the Discover page.",
+			"type": "script",
+			"uri": "com_akeebabackup/Discover.min.js",
+			"dependencies": [
+				"core",
+				"com_akeebabackup.system",
+				"com_akeebabackup.configuration"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_akeebabackup.restore",
+			"description": "JavaScript for the integrated restoration (Restore) page.",
+			"type": "script",
+			"uri": "com_akeebabackup/Restore.min.js",
+			"dependencies": [
+				"core",
+				"com_akeebabackup.system",
+				"com_akeebabackup.configuration"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_akeebabackup.s3import",
+			"description": "JavaScript for the S3import page.",
+			"type": "script",
+			"uri": "com_akeebabackup/S3Import.min.js",
+			"dependencies": [
+				"core",
+				"com_akeebabackup.system"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_akeebabackup.transfer",
+			"description": "JavaScript for the Transfer page.",
+			"type": "script",
+			"uri": "com_akeebabackup/Transfer.min.js",
+			"dependencies": [
+				"core",
+				"com_akeebabackup.system"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_akeebabackup.webpush",
+			"description": "JavaScript for the WebPush user interface in Control Panel.",
+			"type": "script",
+			"uri": "com_akeebabackup/WebPush.min.js",
+			"dependencies": [
+				"core"
+			],
+			"attributes": {
+				"defer": true
+			}
+		},
+		{
+			"name": "com_akeebabackup.webpush-worker",
+			"description": "Service Worker for the Web Push API.",
+			"type": "script",
+			"uri": "com_akeebabackup/WebPushWorker.min.js"
+		},
+
+		{
+			"name": "com_akeebabackup.common",
+			"type": "preset",
+			"dependencies": [
+				"com_akeebabackup.akeebaui#style",
+
+				"com_akeebabackup.system#script"
+			]
+		}
+	]
+}

@@ -1,0 +1,397 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--~
+  ~ @package   akeebabackup
+  ~ @copyright Copyright 2006-2026 Nicholas K. Dionysopoulos / Akeeba Ltd
+  ~ @license   GNU General Public License version 3, or later
+  -->
+<config addfieldpath="/administrator/components/com_akeebabackup/src/Field"
+		addfieldprefix="Akeeba\Component\AkeebaBackup\Administrator\Field"
+>
+	<inlinehelp button="show"/>
+	<fieldset name="backend" label="COM_AKEEBABACKUP_CONFIG_BACKEND_HEADER_LABEL"
+			  description="COM_AKEEBABACKUP_CONFIG_BACKEND_HEADER_DESC">
+
+		<field name="stats_enabled"
+			   type="radio"
+			   layout="joomla.form.field.radio.switcher"
+			   default="1"
+			   label="COM_AKEEBABACKUP_CONFIG_USAGESTATS_LABEL"
+			   description="COM_AKEEBABACKUP_CONFIG_USAGESTATS_DESC"
+			   class="btn-group btn-group-yesno">
+			<option value="0">JNO</option>
+			<option value="1">JYES</option>
+		</field>
+
+		<field name="dateformat" type="text" default="" size="30"
+			   label="COM_AKEEBABACKUP_CONFIG_DATEFORMAT_LABEL"
+			   description="COM_AKEEBABACKUP_CONFIG_DATEFORMAT_DESC"/>
+
+		<field name="localtime"
+			   type="radio"
+			   layout="joomla.form.field.radio.switcher"
+			   default="1"
+			   label="COM_AKEEBABACKUP_CONFIG_BACKEND_LOCALTIME_LABEL"
+			   description="COM_AKEEBABACKUP_CONFIG_BACKEND_LOCALTIME_DESC"
+			   class="btn-group btn-group-yesno">
+			<option value="0">JNo</option>
+			<option value="1">JYes</option>
+		</field>
+
+		<field name="timezonetext" type="list" default="T"
+			   label="COM_AKEEBABACKUP_CONFIG_BACKEND_TIMEZONETEXT_LABEL"
+			   description="COM_AKEEBABACKUP_CONFIG_BACKEND_TIMEZONETEXT_DESC">
+			<option value="">COM_AKEEBABACKUP_CONFIG_BACKEND_TIMEZONETEXT_NONE</option>
+			<option value="T">COM_AKEEBABACKUP_CONFIG_BACKEND_TIMEZONETEXT_ABBREVIATION</option>
+			<option value="\G\M\TP">COM_AKEEBABACKUP_CONFIG_BACKEND_TIMEZONETEXT_GMTOFFSET</option>
+		</field>
+
+		<field name="showDeleteOnRestore"
+			   type="radio"
+			   layout="joomla.form.field.radio.switcher"
+			   default="0"
+			   label="COM_AKEEBABACKUP_CONFIG_BACKEND_SHOWDELETEONRESTORE_LABEL"
+			   description="COM_AKEEBABACKUP_CONFIG_BACKEND_SHOWDELETEONRESTORE_DESC"
+			   class="btn-group btn-group-yesno">
+			<option value="0">JNo</option>
+			<option value="1">JYes</option>
+		</field>
+
+		<field name="useencryption"
+			   type="radio"
+			   layout="joomla.form.field.radio.switcher"
+			   default="1"
+			   label="COM_AKEEBABACKUP_CONFIG_SECURITY_USEENCRYPTION_LABEL"
+			   description="COM_AKEEBABACKUP_CONFIG_SECURITY_USEENCRYPTION_DESCRIPTION"
+			   class="btn-group btn-group-yesno">
+			<option value="0">JNo</option>
+			<option value="1">JYes</option>
+		</field>
+
+		<field name="no_flush"
+			   type="radio"
+			   layout="joomla.form.field.radio.switcher"
+			   default="0"
+			   label="COM_AKEEBABACKUP_CONFIG_SECURITY_NO_FLUSH_LABEL"
+			   description="COM_AKEEBABACKUP_CONFIG_SECURITY_NO_FLUSH_DESCRIPTION"
+			   class="btn-group btn-group-yesno">
+			<option value="0">JNo</option>
+			<option value="1">JYes</option>
+		</field>
+
+		<field name="accurate_php_cli"
+			   type="radio"
+			   layout="joomla.form.field.radio.switcher"
+			   default="1"
+			   label="COM_AKEEBABACKUP_CONFIG_ACCURATE_PHP_CLI_LABEL"
+			   description="COM_AKEEBABACKUP_CONFIG_ACCURATE_PHP_CLI_DESCRIPTION"
+			   class="btn-group btn-group-yesno">
+			<option value="0">JNo</option>
+			<option value="1">JYes</option>
+		</field>
+	</fieldset>
+
+	<fieldset name="frontend" label="COM_AKEEBABACKUP_CONFIG_FRONTEND_HEADER_LABEL"
+			  description="COM_AKEEBABACKUP_CONFIG_FRONTEND_HEADER_DESC">
+
+		<field name="legacyapi_enabled"
+			   type="radio"
+			   layout="joomla.form.field.radio.switcher"
+			   default="0"
+			   label="COM_AKEEBABACKUP_CONFIG_LEGACYAPI_ENABLED_LABEL"
+			   description="COM_AKEEBABACKUP_CONFIG_LEGACYAPI_ENABLED_DESC"
+			   class="btn-group btn-group-yesno">
+			<option value="0">JNo</option>
+			<option value="1">JYes</option>
+		</field>
+
+		<field name="jsonapi_enabled"
+			   type="radio"
+			   layout="joomla.form.field.radio.switcher"
+			   default="0"
+			   label="COM_AKEEBABACKUP_CONFIG_JSONAPI_ENABLED_LABEL"
+			   description="COM_AKEEBABACKUP_CONFIG_JSONAPI_ENABLED_DESC"
+			   class="btn-group btn-group-yesno">
+			<option value="0">JNo</option>
+			<option value="1">JYes</option>
+		</field>
+
+		<field name="frontend_secret_word" type="akencrypted"
+			   default="" size="30"
+			   label="COM_AKEEBABACKUP_CONFIG_SECRETWORD_LABEL"
+			   description="COM_AKEEBABACKUP_CONFIG_SECRETWORD_DESC"
+			   class="input-xxlarge"
+			   showon="legacyapi_enabled:1[OR]jsonapi_enabled:1"
+		/>
+
+		<field name="forced_backup_timezone" type="timezone" default="AKEEBA/DEFAULT"
+			   size="1"
+			   label="COM_AKEEBABACKUP_CONFIG_FORCEDBACKUPTZ_LABEL"
+			   description="COM_AKEEBABACKUP_CONFIG_FORCEDBACKUPTZ_DESC"
+			   class="input-xxlarge">
+			<option value="AKEEBA/DEFAULT">COM_AKEEBABACKUP_CONFIG_FORCEDBACKUPTZ_DEFAULT</option>
+			<option value="GMT">GMT</option>
+		</field>
+
+		<field name="frontend_email_on_finish"
+			   type="radio"
+			   layout="joomla.form.field.radio.switcher"
+			   default="0"
+			   label="COM_AKEEBABACKUP_CONFIG_FRONTENDEMAIL_LABEL"
+			   description="COM_AKEEBABACKUP_CONFIG_FRONTENDEMAIL_DESC"
+			   class="btn-group btn-group-yesno">
+			<option value="0">JNo</option>
+			<option value="1">JYes</option>
+		</field>
+
+		<field name="frontend_email_when" type="list" default="always"
+			   label="COM_AKEEBABACKUP_CONFIG_FRONTEND_EMAIL_WHEN_LABEL"
+			   description="COM_AKEEBABACKUP_CONFIG_FRONTEND_EMAIL_WHEN_DESC"
+			   showon="frontend_email_on_finish:1"
+		>
+			<option value="always">COM_AKEEBABACKUP_CONFIG_FRONTEND_EMAIL_WHEN_ALWAYS</option>
+			<option value="failedupload">COM_AKEEBABACKUP_CONFIG_FRONTEND_EMAIL_WHEN_FAILEDUPLOAD</option>
+		</field>
+
+		<field name="frontend_email_address" type="text" default="" size="50"
+			   label="COM_AKEEBABACKUP_CONFIG_ARBITRARYFEEMAIL_LABEL"
+			   description="COM_AKEEBABACKUP_CONFIG_ARBITRARYFEEMAIL_DESC"
+			   class="input-xxlarge"
+			   showon="frontend_email_on_finish:1"
+		/>
+
+		<field name="frontend_email_subject" type="text" default="" size="50"
+			   label="COM_AKEEBABACKUP_CONFIG_FEEMAILSUBJECT_LABEL"
+			   description="COM_AKEEBABACKUP_CONFIG_FEEMAILSUBJECT_DESC"
+			   class="input-xxlarge"
+			   showon="frontend_email_on_finish:1"
+		/>
+
+		<field name="frontend_email_body" type="textarea" default="" rows="10" cols="55"
+			   label="COM_AKEEBABACKUP_CONFIG_FEEMAILBODY_LABEL"
+			   description="COM_AKEEBABACKUP_CONFIG_FEEMAILBODY_DESC"
+			   showon="frontend_email_on_finish:1"
+		/>
+
+		<!-- FAILURE CHECK SETTINGS -->
+		<field type="spacer" label="COM_AKEEBABACKUP_CONFIG_FAILURE_SEPARATOR"/>
+
+		<field name="failure_timeout" type="text" default="180"
+			   filter="integer"
+			   label="COM_AKEEBABACKUP_CONFIG_FAILURE_TIMEOUT_LABEL"
+			   description="COM_AKEEBABACKUP_CONFIG_FAILURE_TIMEOUT_DESC"
+		/>
+
+		<field name="failure_email_address" type="text" default="" size="50"
+			   label="COM_AKEEBABACKUP_CONFIG_FAILURE_EMAILADDRESS_LABEL"
+			   description="COM_AKEEBABACKUP_CONFIG_FAILURE_EMAILADDRESS_DESC"/>
+
+		<field name="failure_email_subject" type="text" default="" size="50"
+			   label="COM_AKEEBABACKUP_CONFIG_FAILURE_EMAILSUBJECT_LABEL"
+			   description="COM_AKEEBABACKUP_CONFIG_FAILURE_EMAILSUBJECT_DESC"/>
+
+		<field name="failure_email_body" type="textarea" default="" rows="10" cols="55"
+			   label="COM_AKEEBABACKUP_CONFIG_FAILURE_EMAILBODY_LABEL"
+			   description="COM_AKEEBABACKUP_CONFIG_FAILURE_EMAILBODY_DESC"/>
+
+		<!-- FAILURE CHECK SETTINGS -->
+		<field type="spacer" label="COM_AKEEBABACKUP_CONFIG_UPLOADFAILURE_SEPARATOR"/>
+
+		<field name="uploadfailure_email_address" type="text" default="" size="50"
+			   label="COM_AKEEBABACKUP_CONFIG_UPLOADFAILURE_EMAILADDRESS_LABEL"
+			   description="COM_AKEEBABACKUP_CONFIG_UPLOADFAILURE_EMAILADDRESS_DESC"/>
+
+		<field name="uploadfailure_email_subject" type="text" default="" size="50"
+			   label="COM_AKEEBABACKUP_CONFIG_UPLOADFAILURE_EMAILSUBJECT_LABEL"
+			   description="COM_AKEEBABACKUP_CONFIG_UPLOADFAILURE_EMAILSUBJECT_DESC"/>
+
+		<field name="uploadfailure_email_body" type="textarea" default="" rows="10" cols="55"
+			   label="COM_AKEEBABACKUP_CONFIG_UPLOADFAILURE_EMAILBODY_LABEL"
+			   description="COM_AKEEBABACKUP_CONFIG_UPLOADFAILURE_EMAILBODY_DESC"/>
+
+        <!-- HIDDEN -->
+		<field name="siteurl" type="hidden" default="" label=""/>
+		<field name="jlibrariesdir" type="hidden" default="" label=""/>
+		<field name="show_howtorestoremodal" type="hidden" default="1" label=""/>
+		<field name="migrated_from_pkg_akeeba" type="hidden" default="0" label=""/>
+		<field name="vapidKey" type="hidden" />
+	</fieldset>
+
+	<fieldset name="push" label="COM_AKEEBABACKUP_CONFIG_PUSH_HEADER_LABEL" description="COM_AKEEBABACKUP_CONFIG_PUSH_HEADER_DESC">
+		<field name="desktop_notifications"
+			   type="radio"
+			   layout="joomla.form.field.radio.switcher"
+			   default="0"
+			   label="COM_AKEEBABACKUP_CONFIG_DESKTOP_NOTIFICATIONS_LABEL"
+			   description="COM_AKEEBABACKUP_CONFIG_DESKTOP_NOTIFICATIONS_DESC"
+			   class="btn-group btn-group-yesno">
+			<option value="0">JNO</option>
+			<option value="1">JYES</option>
+		</field>
+
+		<field name="push_preference" type="list" default="0"
+			   label="COM_AKEEBABACKUP_CONFIG_PUSH_PREFERENCE_LABEL"
+			   description="COM_AKEEBABACKUP_CONFIG_PUSH_PREFERENCE_DESC">
+			<option value="0">COM_AKEEBABACKUP_CONFIG_PUSH_PREFERENCE_OPT_NONE</option>
+			<option value="webpush">COM_AKEEBABACKUP_CONFIG_PUSH_PREFERENCE_OPT_WEBPUSH</option>
+			<option value="1">COM_AKEEBABACKUP_CONFIG_PUSH_PREFERENCE_OPT_PUSHBULLET</option>
+		</field>
+
+		<field name="push_apikey" type="text" default="" size="30"
+			   label="COM_AKEEBABACKUP_CONFIG_PUSH_APIKEY_LABEL"
+			   description="COM_AKEEBABACKUP_CONFIG_PUSH_APIKEY_DESC"
+			   showon="push_preference:1"
+		/>
+	</fieldset>
+
+	<fieldset name="oauth2"
+			  label="COM_AKEEBABACKUP_CONFIG_OAUTH2_HEADER_LABEL"
+			  description="COM_AKEEBABACKUP_CONFIG_OAUTH2_HEADER_DESC"
+	>
+		<!-- Box.com -->
+		
+		<field name="oauth2_client_box"
+			   type="radio"
+			   layout="joomla.form.field.radio.switcher"
+			   default="0"
+			   label="COM_AKEEBABACKUP_CONFIG_OAUTH2_CLIENT_BOX_LABEL"
+			   description="COM_AKEEBABACKUP_CONFIG_OAUTH2_CLIENT_BOX_DESC"
+			   class="btn-group btn-group-yesno">
+			<option value="0">JNO</option>
+			<option value="1">JYES</option>
+		</field>
+
+		<field name="box_info"
+			   type="Oauth2url"
+			   showon="oauth2_client_box:1"
+			   engine="box"
+		/>
+
+		<field name="box_client_id"
+			   type="text"
+			   label="COM_AKEEBABACKUP_CONFIG_BOX_CLIENT_ID_LABEL"
+			   description="COM_AKEEBABACKUP_CONFIG_BOX_CLIENT_ID_DESC"
+			   showon="oauth2_client_box:1"
+		/>
+
+		<field name="box_client_secret"
+			   type="password"
+			   label="COM_AKEEBABACKUP_CONFIG_BOX_CLIENT_SECRET_LABEL"
+			   description="COM_AKEEBABACKUP_CONFIG_BOX_CLIENT_SECRET_DESC"
+			   showon="oauth2_client_box:1"
+		/>
+
+		<!-- Dropbox -->
+		
+		<field name="oauth2_client_dropbox"
+			   type="radio"
+			   layout="joomla.form.field.radio.switcher"
+			   default="0"
+			   label="COM_AKEEBABACKUP_CONFIG_OAUTH2_CLIENT_DROPBOX_LABEL"
+			   description="COM_AKEEBABACKUP_CONFIG_OAUTH2_CLIENT_DROPBOX_DESC"
+			   class="btn-group btn-group-yesno">
+			<option value="0">JNO</option>
+			<option value="1">JYES</option>
+		</field>
+
+		<field name="dropbox_info"
+			   type="Oauth2url"
+			   showon="oauth2_client_dropbox:1"
+			   engine="dropbox"
+		/>
+
+		<field name="dropbox_client_id"
+			   type="text"
+			   label="COM_AKEEBABACKUP_CONFIG_DROPBOX_CLIENT_ID_LABEL"
+			   description="COM_AKEEBABACKUP_CONFIG_DROPBOX_CLIENT_ID_DESC"
+			   showon="oauth2_client_dropbox:1"
+		/>
+
+		<field name="dropbox_client_secret"
+			   type="password"
+			   label="COM_AKEEBABACKUP_CONFIG_DROPBOX_CLIENT_SECRET_LABEL"
+			   description="COM_AKEEBABACKUP_CONFIG_DROPBOX_CLIENT_SECRET_DESC"
+			   showon="oauth2_client_dropbox:1"
+		/>
+
+		<!-- Google Drive -->
+
+		<field name="oauth2_client_googledrive"
+			   type="radio"
+			   layout="joomla.form.field.radio.switcher"
+			   default="0"
+			   label="COM_AKEEBABACKUP_CONFIG_OAUTH2_CLIENT_GOOGLEDRIVE_LABEL"
+			   description="COM_AKEEBABACKUP_CONFIG_OAUTH2_CLIENT_GOOGLEDRIVE_DESC"
+			   class="btn-group btn-group-yesno">
+			<option value="0">JNO</option>
+			<option value="1">JYES</option>
+		</field>
+
+		<field name="googledrive_info"
+			   type="Oauth2url"
+			   showon="oauth2_client_googledrive:1"
+			   engine="googledrive"
+		/>
+
+		<field name="googledrive_client_id"
+			   type="text"
+			   label="COM_AKEEBABACKUP_CONFIG_GOOGLEDRIVE_CLIENT_ID_LABEL"
+			   description="COM_AKEEBABACKUP_CONFIG_GOOGLEDRIVE_CLIENT_ID_DESC"
+			   showon="oauth2_client_googledrive:1"
+		/>
+
+		<field name="googledrive_client_secret"
+			   type="password"
+			   label="COM_AKEEBABACKUP_CONFIG_GOOGLEDRIVE_CLIENT_SECRET_LABEL"
+			   description="COM_AKEEBABACKUP_CONFIG_GOOGLEDRIVE_CLIENT_SECRET_DESC"
+			   showon="oauth2_client_googledrive:1"
+		/>
+
+		<!-- OneDrive Business -->
+
+		<field name="oauth2_client_onedrivebusiness"
+			   type="radio"
+			   layout="joomla.form.field.radio.switcher"
+			   default="0"
+			   label="COM_AKEEBABACKUP_CONFIG_OAUTH2_CLIENT_ONEDRIVEBUSINESS_LABEL"
+			   description="COM_AKEEBABACKUP_CONFIG_OAUTH2_CLIENT_ONEDRIVEBUSINESS_DESC"
+			   class="btn-group btn-group-yesno">
+			<option value="0">JNO</option>
+			<option value="1">JYES</option>
+		</field>
+
+		<field name="onedrivebusiness_info"
+			   type="Oauth2url"
+			   showon="oauth2_client_onedrivebusiness:1"
+			   engine="onedrivebusiness"
+		/>
+
+		<field name="onedrivebusiness_client_id"
+			   type="text"
+			   label="COM_AKEEBABACKUP_CONFIG_ONEDRIVEBUSINESS_CLIENT_ID_LABEL"
+			   description="COM_AKEEBABACKUP_CONFIG_ONEDRIVEBUSINESS_CLIENT_ID_DESC"
+			   showon="oauth2_client_onedrivebusiness:1"
+		/>
+
+		<field name="onedrivebusiness_client_secret"
+			   type="password"
+			   label="COM_AKEEBABACKUP_CONFIG_ONEDRIVEBUSINESS_CLIENT_SECRET_LABEL"
+			   description="COM_AKEEBABACKUP_CONFIG_ONEDRIVEBUSINESS_CLIENT_SECRET_DESC"
+			   showon="oauth2_client_onedrivebusiness:1"
+		/>
+	</fieldset>
+
+	<fieldset
+			name="permissions"
+			label="JCONFIG_PERMISSIONS_LABEL"
+			description="JCONFIG_PERMISSIONS_DESC"
+	>
+		<field
+				name="rules"
+				type="rules"
+				label="JCONFIG_PERMISSIONS_LABEL"
+				class="inputbox"
+				filter="rules"
+				component="com_akeebabackup"
+				section="component"/>
+	</fieldset>
+</config>

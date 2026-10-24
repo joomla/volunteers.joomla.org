@@ -1,0 +1,14 @@
+{
+    "brs-generic": {
+        "name": "Akeeba Backup Restoration Script for Miscellaneous PHP Applications",
+        "package": "brs.jpa,brs-generic.jpa",
+        "language": "language-brs.jpa,language-generic.jpa",
+        "installerroot": "installation",
+        "sqlroot": "installation\/sql",
+        "databasesini": "1",
+        "readme": "1",
+        "extrainfo": "1",
+        "password": "1",
+        "typedtablelist": "1"
+    }
+}

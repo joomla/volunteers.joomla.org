@@ -1,0 +1,77 @@
+{
+  "name": "akeeba/engine",
+  "type": "library",
+  "description": "Akeeba Engine - a site backup engine written in pure PHP",
+  "keywords": [
+    "backup",
+    "php",
+    "mysql"
+  ],
+  "homepage": "https://github.com/akeeba/engine",
+  "license": "GPL-3.0-or-later",
+  "authors": [
+    {
+      "name": "Nicholas K. Dionysopoulos",
+      "email": "nicholas_NO_SPAM_PLEASE@akeeba.com",
+      "homepage": "https://www.dionysopoulos.me",
+      "role": "Lead Developer"
+    },
+    {
+      "name": "Davide Tampellini",
+      "email": "davide_NO_SPAM_PLEASE@akeeba.com",
+      "homepage": "https://www.dionysopoulos.me",
+      "role": "Senior Developer"
+    }
+  ],
+  "require": {
+    "akeeba/s3": "dev-development",
+    "greenlion/php-sql-parser": "^4.6.0",
+    "php": "^7.4.0|^8.0",
+    "ext-fileinfo": "*",
+    "ext-json": "*",
+    "ext-mbstring": "*"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^9.0.0",
+    "rector/rector": "^0.15.21",
+    "mnapoli/silly": "^1.8.3",
+    "composer/ca-bundle": "^1.3.6",
+    "joomla/uri": "^3.0-dev"
+  },
+  "suggest": {
+    "ext-curl": "*",
+    "ext-dom": "*",
+    "ext-ftp": "*",
+    "ext-mysqli": "*",
+    "ext-openssl": "*",
+    "ext-pdo": "*",
+    "ext-simplexml": "*",
+    "ext-sqlite3": "*",
+    "ext-ssh2": "*",
+    "ext-zip": "*"
+  },
+  "platform": {
+    "php": "7.4.999"
+  },
+  "autoload": {
+    "psr-4": {
+      "Akeeba\\Engine\\": "engine/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Akeeba\\Engine\\DevPlatform\\": "dev_platform/",
+      "Akeeba\\Engine\\Filter\\": "dev_platform/Platform/Filter/",
+      "Akeeba\\Engine\\Platform\\": "dev_platform/Platform/",
+      "Akeeba\\Engine\\Test\\": "Test/"
+    }
+  },
+  "scripts": {
+    "test": "phpunit"
+  },
+  "archive": {
+    "exclude": [
+      "binned_ideas", "connector_development", "dev_platform", "run", "Test", "tools"
+    ]
+  }
+}

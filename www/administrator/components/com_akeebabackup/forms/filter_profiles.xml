@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--~
+  ~ @package   akeebabackup
+  ~ @copyright Copyright 2006-2026 Nicholas K. Dionysopoulos / Akeeba Ltd
+  ~ @license   GNU General Public License version 3, or later
+  -->
+
+<form addfieldprefix="Akeeba\Component\AkeebaBackup\Administrator\Field">
+    <fields name="filter">
+        <field
+                name="search"
+                type="text"
+                inputmode="search"
+                label="COM_AKEEBABACKUP_PROFILES_FILTER_SEARCH_LABEL"
+                description="COM_AKEEBABACKUP_PROFILES_FILTER_SEARCH_DESC"
+                hint="JSEARCH_FILTER"
+        />
+
+        <field
+                name="quickicon"
+                type="status"
+                optionsFilter="*,0,1"
+                label="COM_AKEEBABACKUP_CONFIG_QUICKICON_LABEL"
+                onchange="this.form.submit();"
+        >
+            <option value="">COM_AKEEBABACKUP_FILTER_SELECT_QUICKICON</option>
+        </field>
+    </fields>
+    <fields name="list">
+        <field
+                name="fullordering"
+                type="list"
+                label="JGLOBAL_SORT_BY"
+                statuses="*,0,1"
+                onchange="this.form.submit();"
+                default="id ASC"
+                validate="options"
+        >
+            <option value="">JGLOBAL_SORT_BY</option>
+            <option value="description ASC">JGLOBAL_NAME_ASC</option>
+            <option value="description DESC">JGLOBAL_NAME_DESC</option>
+            <option value="id ASC">JGRID_HEADING_ID_ASC</option>
+            <option value="id DESC">JGRID_HEADING_ID_DESC</option>
+        </field>
+
+        <field
+                name="limit"
+                type="limitbox"
+                label="JGLOBAL_LIST_LIMIT"
+                default="25"
+                onchange="this.form.submit();"
+        />
+    </fields>
+</form>

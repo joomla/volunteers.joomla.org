@@ -1,0 +1,117 @@
+{
+    "_group": {
+        "description": "COM_AKEEBABACKUP_CONFIG_PLATFORM"
+    },
+    "akeeba.platform.override_root": {
+        "default": "0",
+        "type": "bool",
+        "title": "COM_AKEEBABACKUP_CONFIG_PLATFORM_OVERRIDEROOT_TITLE",
+        "description": "COM_AKEEBABACKUP_CONFIG_PLATFORM_OVERRIDEROOT_DESCRIPTION"
+    },
+    "akeeba.platform.newroot": {
+        "default": "",
+        "type": "browsedir",
+        "title": "COM_AKEEBABACKUP_CONFIG_PLATFORM_NEWROOT_TITLE",
+        "description": "COM_AKEEBABACKUP_CONFIG_PLATFORM_NEWROOT_DESCRIPTION",
+        "showon": "akeeba.platform.override_root:1"
+    },
+    "akeeba.platform.override_db": {
+        "default": "0",
+        "type": "bool",
+        "title": "COM_AKEEBABACKUP_CONFIG_PLATFORM_OVERRIDEDB_TITLE",
+        "description": "COM_AKEEBABACKUP_CONFIG_PLATFORM_OVERRIDEDB_DESCRIPTION"
+    },
+    "akeeba.platform.dbdriver": {
+        "default": "mysqli",
+        "type": "enum",
+        "enumkeys": "MySQL|MySQLi",
+        "enumvalues": "mysql|mysqli",
+        "title": "COM_AKEEBABACKUP_CONFIG_PLATFORM_DBDRIVER_TITLE",
+        "description": "COM_AKEEBABACKUP_CONFIG_PLATFORM_DBDRIVER_DESCRIPTION",
+        "showon": "akeeba.platform.override_db:1"
+    },
+    "akeeba.platform.dbhost": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBABACKUP_CONFIG_PLATFORM_DBHOST_TITLE",
+        "description": "COM_AKEEBABACKUP_CONFIG_PLATFORM_DBHOST_DESCRIPTION",
+        "showon": "akeeba.platform.override_db:1"
+    },
+    "akeeba.platform.dbport": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBABACKUP_CONFIG_PLATFORM_DBPORT_TITLE",
+        "description": "COM_AKEEBABACKUP_CONFIG_PLATFORM_DBPORT_DESCRIPTION",
+        "showon": "akeeba.platform.override_db:1"
+    },
+    "akeeba.platform.dbusername": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBABACKUP_CONFIG_PLATFORM_DBUSERNAME_TITLE",
+        "description": "COM_AKEEBABACKUP_CONFIG_PLATFORM_DBUSERNAME_DESCRIPTION",
+        "showon": "akeeba.platform.override_db:1"
+    },
+    "akeeba.platform.dbpassword": {
+        "default": "",
+        "type": "password",
+        "title": "COM_AKEEBABACKUP_CONFIG_PLATFORM_DBPASSWORD_TITLE",
+        "description": "COM_AKEEBABACKUP_CONFIG_PLATFORM_DBPASSWORD_DESCRIPTION",
+        "showon": "akeeba.platform.override_db:1"
+    },
+    "akeeba.platform.dbname": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBABACKUP_CONFIG_PLATFORM_DBDATABASE_TITLE",
+        "description": "COM_AKEEBABACKUP_CONFIG_PLATFORM_DBDATABASE_DESCRIPTION",
+        "showon": "akeeba.platform.override_db:1"
+    },
+    "akeeba.platform.dbprefix": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBABACKUP_CONFIG_PLATFORM_DBPREFIX_TITLE",
+        "description": "COM_AKEEBABACKUP_CONFIG_PLATFORM_DBPREFIX_DESCRIPTION",
+        "showon": "akeeba.platform.override_db:1"
+    },
+    "akeeba.platform.dbencryption": {
+        "default": "0",
+        "type": "bool",
+        "title": "COM_AKEEBABACKUP_CONFIG_PLATFORM_DBENCRYPTION_TITLE",
+        "description": "COM_AKEEBABACKUP_CONFIG_PLATFORM_DBENCRYPTION_DESCRIPTION",
+        "showon": "akeeba.platform.override_db:1"
+    },
+    "akeeba.platform.dbsslcipher": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBABACKUP_CONFIG_PLATFORM_DBSSLCIPHER_TITLE",
+        "description": "COM_AKEEBABACKUP_CONFIG_PLATFORM_DBSSLCIPHER_DESCRIPTION",
+        "showon": "akeeba.platform.override_db:1[AND]akeeba.platform.dbencryption:1"
+    },
+    "akeeba.platform.dbsslca": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBABACKUP_CONFIG_PLATFORM_DBSSLCA_TITLE",
+        "description": "COM_AKEEBABACKUP_CONFIG_PLATFORM_DBSSLCA_DESCRIPTION",
+        "showon": "akeeba.platform.override_db:1[AND]akeeba.platform.dbencryption:1"
+    },
+    "akeeba.platform.dbsslkey": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBABACKUP_CONFIG_PLATFORM_DBSSLKEY_TITLE",
+        "description": "COM_AKEEBABACKUP_CONFIG_PLATFORM_DBSSLKEY_DESCRIPTION",
+        "showon": "akeeba.platform.override_db:1[AND]akeeba.platform.dbencryption:1"
+    },
+    "akeeba.platform.dbsslcert": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBABACKUP_CONFIG_PLATFORM_DBSSLCERT_TITLE",
+        "description": "COM_AKEEBABACKUP_CONFIG_PLATFORM_DBSSLCERT_DESCRIPTION",
+        "showon": "akeeba.platform.override_db:1[AND]akeeba.platform.dbencryption:1"
+    },
+    "akeeba.platform.dbsslverifyservercert": {
+        "default": "0",
+        "type": "bool",
+        "title": "COM_AKEEBABACKUP_CONFIG_PLATFORM_DBSSLVERIFYSERVERCERT_TITLE",
+        "description": "COM_AKEEBABACKUP_CONFIG_PLATFORM_DBSSLVERIFYSERVERCERT_DESCRIPTION",
+        "showon": "akeeba.platform.override_db:1[AND]akeeba.platform.dbencryption:1"
+    }
+}

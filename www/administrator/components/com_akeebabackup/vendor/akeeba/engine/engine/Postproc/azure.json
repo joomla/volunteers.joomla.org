@@ -1,0 +1,70 @@
+{
+    "_information": {
+        "title": "COM_AKEEBA_CONFIG_ENGINE_POSTPROC_AZURE_TITLE",
+        "description": "COM_AKEEBA_CONFIG_ENGINE_POSTPROC_AZURE_DESCRIPTION"
+    },
+    "engine.postproc.common.after_part": {
+        "default": "0",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_POSTPROCPARTS_TITLE",
+        "description": "COM_AKEEBA_CONFIG_POSTPROCPARTS_DESCRIPTION"
+    },
+    "engine.postproc.common.abort_on_fail": {
+        "default": "0",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_POSTPROC_ABORT_ON_FAIL_TITLE",
+        "description": "COM_AKEEBA_CONFIG_POSTPROC_ABORT_ON_FAIL_DESCRIPTION"
+    },
+    "engine.postproc.common.delete_after": {
+        "default": "1",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_DELETEAFTER_TITLE",
+        "description": "COM_AKEEBA_CONFIG_DELETEAFTER_DESCRIPTION"
+    },
+    "engine.postproc.azure.chunk_upload": {
+        "default": "1",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_BOX_CHUNKUPLOAD_ENABLE"
+    },
+    "engine.postproc.azure.chunk_upload_size": {
+        "default": "20",
+        "type": "integer",
+        "min": "1",
+        "max": "4000",
+        "shortcuts": "5|10|20|40|50|75|100|250|1024|2047",
+        "scale": "1",
+        "uom": "MB",
+        "title": "COM_AKEEBA_CONFIG_BOX_CHUNKUPLOAD_SIZE",
+        "showon": "engine.postproc.azure.chunk_upload:1"
+    },
+    "engine.postproc.azure.account": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_AZURE_ACCOUNTNAME_TITLE",
+        "description": "COM_AKEEBA_CONFIG_AZURE_ACCOUNTNAME_DESCRIPTION"
+    },
+    "engine.postproc.azure.key": {
+        "default": "",
+        "type": "password",
+        "title": "COM_AKEEBA_CONFIG_AZURE_KEY_TITLE",
+        "description": "COM_AKEEBA_CONFIG_AZURE_KEY_DESCRIPTION"
+    },
+    "engine.postproc.azure.usessl": {
+        "default": "1",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_S3USESSL_TITLE",
+        "description": "COM_AKEEBA_CONFIG_S3USESSL_DESCRIPTION"
+    },
+    "engine.postproc.azure.container": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_AZURE_CONTAINER_TITLE",
+        "description": "COM_AKEEBA_CONFIG_AZURE_CONTAINER_DESCRIPTION"
+    },
+    "engine.postproc.azure.directory": {
+        "default": "\/",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_AZURE_DIRECTORY_TITLE",
+        "description": "COM_AKEEBA_CONFIG_AZURE_DIRECTORY_DESCRIPTION"
+    }
+}

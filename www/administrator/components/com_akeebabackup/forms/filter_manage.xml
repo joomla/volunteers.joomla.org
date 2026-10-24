@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--~
+  ~ @package   akeebabackup
+  ~ @copyright Copyright 2006-2026 Nicholas K. Dionysopoulos / Akeeba Ltd
+  ~ @license   GNU General Public License version 3, or later
+  -->
+
+<form addfieldprefix="Akeeba\Component\AkeebaBackup\Administrator\Field">
+    <fields name="filter">
+        <!-- Search description -->
+        <field
+                name="search"
+                type="text"
+                inputmode="search"
+                label="COM_AKEEBABACKUP_BACKUP_LABEL_DESCRIPTION"
+                hint="JSEARCH_FILTER"
+        />
+
+        <!-- From -->
+        <field
+                name="from"
+                type="calendar"
+                label="COM_AKEEBABACKUP_BUADMIN_LABEL_FROM_DATE"
+                translateformat="true"
+                showtime="true"
+                size="22"
+                filter="user_utc"
+        />
+
+        <!-- To -->
+        <field
+                name="to"
+                type="calendar"
+                label="COM_AKEEBABACKUP_BUADMIN_LABEL_TO_DATE"
+                translateformat="true"
+                showtime="true"
+                size="22"
+                filter="user_utc"
+        />
+
+        <!-- Origin -->
+        <field
+                name="origin"
+                type="list"
+                label="COM_AKEEBABACKUP_BUADMIN_LABEL_ORIGIN"
+                default=""
+                onchange="this.form.submit();"
+            >
+            <option value="">COM_AKEEBABACKUP_BUADMIN_LABEL_ORIGIN_SELECT</option>
+            <option value="backend">COM_AKEEBABACKUP_BUADMIN_LABEL_ORIGIN_BACKEND</option>
+            <option value="cli">COM_AKEEBABACKUP_BUADMIN_LABEL_ORIGIN_CLI</option>
+            <option value="frontend">COM_AKEEBABACKUP_BUADMIN_LABEL_ORIGIN_FRONTEND</option>
+            <option value="json">COM_AKEEBABACKUP_BUADMIN_LABEL_ORIGIN_JSON</option>
+        </field>
+
+        <!-- Profile -->
+        <field
+            name="profile"
+            type="backupprofiles"
+            label="COM_AKEEBABACKUP_BUADMIN_LABEL_PROFILEID"
+            default=""
+            show_none="1"
+            layout="joomla.form.field.list-fancy-select"
+            onchange="this.form.submit();"
+            />
+
+        <!-- Frozen -->
+        <field
+                name="frozen"
+                type="list"
+                label="COM_AKEEBABACKUP_BUADMIN_LABEL_FROZEN"
+                onchange="this.form.submit();"
+        >
+            <option value="">COM_AKEEBABACKUP_FILTER_SELECT_FROZEN</option>
+            <option value="0">COM_AKEEBABACKUP_BUADMIN_LABEL_FROZEN_FROZEN</option>
+            <option value="2">COM_AKEEBABACKUP_BUADMIN_LABEL_FROZEN_UNFROZEN</option>
+        </field>
+    </fields>
+
+    <fields name="list">
+        <field
+                name="fullordering"
+                type="list"
+                label="JGLOBAL_SORT_BY"
+                statuses="*,0,1"
+                onchange="this.form.submit();"
+                default="id DESC"
+                validate="options"
+        >
+            <option value="">JGLOBAL_SORT_BY</option>
+            <option value="description ASC">JGLOBAL_NAME_ASC</option>
+            <option value="description DESC">JGLOBAL_NAME_DESC</option>
+            <option value="id ASC">JGRID_HEADING_ID_ASC</option>
+            <option value="id DESC">JGRID_HEADING_ID_DESC</option>
+            <option value="backupstart ASC">COM_AKEEBABACKUP_BUADMIN_SORT_BACKUPSTART_ASC</option>
+            <option value="backupstart DESC">COM_AKEEBABACKUP_BUADMIN_SORT_BACKUPSTART_DESC</option>
+        </field>
+
+        <field
+                name="limit"
+                type="limitbox"
+                label="JGLOBAL_LIST_LIMIT"
+                default="25"
+                onchange="this.form.submit();"
+        />
+    </fields>
+</form>

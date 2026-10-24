@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--~
+  ~ @package   akeebabackup
+  ~ @copyright Copyright 2006-2026 Nicholas K. Dionysopoulos / Akeeba Ltd
+  ~ @license   GNU General Public License version 3, or later
+  -->
+
+<form addfieldprefix="Akeeba\Component\AkeebaBackup\Administrator\Field">
+    <fieldset name="details">
+        <field
+                name="id"
+                type="number"
+                label="COM_AKEEBABACKUP_BUADMIN_LABEL_ID"
+                default="0"
+                readonly="true"
+                class="readonly"
+        />
+
+        <field
+                name="description"
+                type="text"
+                label="COM_AKEEBABACKUP_BUADMIN_LABEL_DESCRIPTION"
+                size="40"
+                required="true"
+        />
+
+        <field
+                name="comment"
+                type="textarea"
+                rows="10"
+                label="COM_AKEEBABACKUP_BUADMIN_LABEL_COMMENT"
+                size="40"
+                required="false"
+        />
+
+        <field
+                name="backupstart"
+                type="calendar"
+                label="COM_AKEEBABACKUP_BUADMIN_LABEL_START"
+                readonly="true"
+                class="readonly"
+                translateformat="true"
+                showtime="true"
+                size="22"
+                filter="user_utc"
+        />
+
+        <field
+                name="backupend"
+                type="calendar"
+                label="COM_AKEEBABACKUP_BUADMIN_LABEL_END"
+                readonly="true"
+                class="readonly"
+                translateformat="true"
+                showtime="true"
+                size="22"
+                filter="user_utc"
+        />
+
+        <field
+                name="status"
+                type="list"
+                label="COM_AKEEBABACKUP_BUADMIN_LABEL_STATUS"
+                default="complete"
+                validate="options"
+                readonly="true"
+                class="readonly"
+        >
+
+            <option value="run">COM_AKEEBABACKUP_BUADMIN_LABEL_STATUS_PENDING</option>
+            <option value="complete">COM_AKEEBABACKUP_BUADMIN_LABEL_STATUS_COMPLETE</option>
+            <option value="fail">COM_AKEEBABACKUP_BUADMIN_LABEL_STATUS_FAIL</option>
+        </field>
+
+        <field
+                name="origin"
+                type="list"
+                label="COM_AKEEBABACKUP_BUADMIN_LABEL_ORIGIN"
+                default="backend"
+                validate="options"
+                readonly="true"
+                class="readonly"
+        >
+
+            <option value="backend">COM_AKEEBABACKUP_BUADMIN_LABEL_ORIGIN_BACKEND</option>
+            <option value="cli">COM_AKEEBABACKUP_BUADMIN_LABEL_ORIGIN_CLI</option>
+            <option value="frontend">COM_AKEEBABACKUP_BUADMIN_LABEL_ORIGIN_FRONTEND</option>
+            <option value="json">COM_AKEEBABACKUP_BUADMIN_LABEL_ORIGIN_JSON</option>
+        </field>
+
+        <field
+                name="profile_id"
+                type="backupprofiles"
+                label="COM_AKEEBABACKUP_BUADMIN_LABEL_PROFILEID"
+                default=""
+                show_none="1"
+                readonly="true"
+                class="readonly"
+        />
+
+
+        <field
+                name="frozen"
+                type="list"
+                label="COM_AKEEBABACKUP_BUADMIN_LABEL_FROZEN"
+                class="form-select-color-state"
+                size="1"
+                default="0"
+                validate="options"
+        >
+            <option value="1">JYES</option>
+            <option value="0">JNO</option>
+        </field>
+
+
+    </fieldset>
+</form>

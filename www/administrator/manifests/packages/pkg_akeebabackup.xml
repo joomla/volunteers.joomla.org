@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--~
+  ~ @package   akeebabackup
+  ~ @copyright Copyright 2006-2026 Nicholas K. Dionysopoulos / Akeeba Ltd
+  ~ @license   GNU General Public License version 3, or later
+  -->
+
+<extension type="package" method="upgrade">
+    <name>pkg_akeebabackup</name>
+    <author>Nicholas K. Dionysopoulos</author>
+    <creationDate>2026-08-26</creationDate>
+    <packagename>akeebabackup</packagename>
+    <version>10.4.0</version>
+    <url>https://www.akeeba.com</url>
+    <packager>Akeeba Ltd</packager>
+    <packagerurl>https://www.akeeba.com</packagerurl>
+    <copyright>Copyright (c)2006-2025 Akeeba Ltd / Nicholas K. Dionysopoulos</copyright>
+    <license>GNU GPL v3 or later</license>
+    <description>PKG_AKEEBABACKUP_XML_DESCRIPTION</description>
+    <dlid prefix="dlid=" suffix=""/>
+    <blockChildUninstall>true</blockChildUninstall>
+
+    <files>
+        <file type="component" id="com_akeebabackup">com_akeebabackup-pro.zip</file>
+
+        <file type="plugin" group="console" id="akeebabackup">plg_console_akeebabackup.zip</file>
+
+        <file type="plugin" group="quickicon" id="akeebabackup">plg_quickicon_akeebabackup.zip</file>
+
+        <file type="plugin" group="system" id="akwarn">plg_system_akwarn.zip</file>
+        <file type="plugin" group="system" id="backuponupdate">plg_system_backuponupdate.zip</file>
+
+        <file type="plugin" group="actionlog" id="akeebabackup">plg_actionlog_akeebabackup.zip</file>
+
+        <file type="plugin" group="task" id="akeebabackup">plg_task_akeebabackup.zip</file>
+
+        <file type="plugin" group="webservices" id="akeebabackup">plg_webservices_akeebabackup.zip</file>
+    </files>
+
+    <languages folder="language">
+        <language tag="en-GB">en-GB/pkg_akeebabackup.sys.ini</language>
+        <language tag="el-GR">el-GR/pkg_akeebabackup.sys.ini</language>
+        <language tag="fr-FR">fr-FR/pkg_akeebabackup.sys.ini</language>
+        <language tag="de-DE">de-DE/pkg_akeebabackup.sys.ini</language>
+        <language tag="es-ES">es-ES/pkg_akeebabackup.sys.ini</language>
+        <language tag="pt-PT">pt-PT/pkg_akeebabackup.sys.ini</language>
+        <language tag="it-IT">it-IT/pkg_akeebabackup.sys.ini</language>
+    </languages>
+
+    <scriptfile>script.akeebabackup.php</scriptfile>
+
+    <updateservers>
+        <server type="extension" priority="1" name="Akeeba Backup Professional for Joomla!">https://cdn.akeeba.com/updates/pkgakeebabackuppro.xml</server>
+    </updateservers>
+</extension>

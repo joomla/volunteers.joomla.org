@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--~
+  ~ @package   akeebabackup
+  ~ @copyright Copyright 2006-2026 Nicholas K. Dionysopoulos / Akeeba Ltd
+  ~ @license   GNU General Public License version 3, or later
+  -->
+
+<form addfieldprefix="Akeeba\Component\AkeebaBackup\Administrator\Field">
+    <fieldset name="details">
+        <field
+                name="id"
+                type="number"
+                label="JGLOBAL_FIELD_ID_LABEL"
+                default="0"
+                readonly="true"
+                class="readonly"
+        />
+
+        <field
+                name="description"
+                type="text"
+                label="COM_AKEEBABACKUP_PROFILES_LABEL_DESCRIPTION"
+                description="COM_AKEEBABACKUP_PROFILES_LABEL_DESCRIPTION_TOOLTIP"
+                size="40"
+                required="true"
+        />
+
+        <field
+                name="quickicon"
+                type="list"
+                label="COM_AKEEBABACKUP_CONFIG_QUICKICON_LABEL"
+                description="COM_AKEEBABACKUP_CONFIG_QUICKICON_DESC"
+                class="form-select-color-state"
+                size="1"
+                default="0"
+                validate="options"
+        >
+            <option value="1">JYES</option>
+            <option value="0">JNO</option>
+        </field>
+
+        <field
+                name="access"
+                type="accesslevel"
+                label="JFIELD_ACCESS_LABEL"
+                filter="UINT"
+                validate="options"
+        />
+    </fieldset>
+</form>

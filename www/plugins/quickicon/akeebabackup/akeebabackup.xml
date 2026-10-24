@@ -1,76 +1,98 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--~
   ~ @package   akeebabackup
-  ~ @copyright Copyright (c)2006-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
+  ~ @copyright Copyright 2006-2026 Nicholas K. Dionysopoulos / Akeeba Ltd
   ~ @license   GNU General Public License version 3, or later
   -->
 
-<extension version="2.5" type="plugin" group="quickicon" method="upgrade">
-    <name>plg_quickicon_akeebabackup</name>
-    <author>Nicholas K. Dionysopoulos</author>
-    <authorEmail>nicholas@akeeba.com</authorEmail>
-    <authorUrl>https://www.akeeba.com</authorUrl>
-    <copyright>Copyright (c)2006-2023 Nicholas K. Dionysopoulos</copyright>
-    <license>GNU General Public License version 3, or later</license>
-    <creationDate>2023-01-18</creationDate>
-    <version>8.2.6</version>
-    <description>PLG_QUICKICON_AKEEBABACKUP_XML_DESCRIPTION</description>
-    <files>
-        <filename plugin="akeebabackup">akeebabackup.php</filename>
-        <filename>index.html</filename>
-        <filename>.htaccess</filename>
-        <filename>web.config</filename>
-    </files>
-    <languages folder="language">
-        <language tag="en-GB">en-GB/en-GB.plg_quickicon_akeebabackup.ini</language>
-        <language tag="en-GB">en-GB/en-GB.plg_quickicon_akeebabackup.sys.ini</language>
-    </languages>
-    <config addfieldpath="/administrator/components/com_akeeba/fields">
-        <fields name="params">
-            <fieldset name="basic">
-                <field name="enablewarning"
-					   type="fancyradio"
+<extension type="plugin" group="quickicon" method="upgrade">
+	<name>PLG_QUICKICON_AKEEBABACKUP</name>
+	<version>10.4.0</version>
+	<creationDate>2026-08-26</creationDate>
+	<author>Nicholas K. Dionysopoulos</author>
+	<authorEmail>nicholas@dionysopoulos.me</authorEmail>
+	<authorUrl>https://www.akeeba.com</authorUrl>
+	<copyright>Copyright (c)2006-2025 Akeeba Ltd / Nicholas K. Dionysopoulos</copyright>
+	<license>GNU General Public License version 3, or later</license>
+	<description>PLG_QUICKICON_AKEEBABACKUP_XML_DESCRIPTION</description>
+	<namespace path="src">Akeeba\Plugin\QuickIcon\AkeebaBackup</namespace>
+
+	<files>
+		<folder plugin="akeebabackup">services</folder>
+		<folder>src</folder>
+
+		<filename>.htaccess</filename>
+		<filename>web.config</filename>
+	</files>
+
+	<media destination="plg_quickicon_akeebabackup" folder="media">
+		<folder>css</folder>
+
+		<file>joomla.asset.json</file>
+	</media>
+
+	<languages folder="language">
+		<language tag="en-GB">en-GB/plg_quickicon_akeebabackup.ini</language>
+		<language tag="en-GB">en-GB/plg_quickicon_akeebabackup.sys.ini</language>
+		<language tag="el-GR">el-GR/plg_quickicon_akeebabackup.ini</language>
+		<language tag="el-GR">el-GR/plg_quickicon_akeebabackup.sys.ini</language>
+		<language tag="fr-FR">fr-FR/plg_quickicon_akeebabackup.ini</language>
+		<language tag="fr-FR">fr-FR/plg_quickicon_akeebabackup.sys.ini</language>
+		<language tag="de-DE">de-DE/plg_quickicon_akeebabackup.ini</language>
+		<language tag="de-DE">de-DE/plg_quickicon_akeebabackup.sys.ini</language>
+		<language tag="es-ES">es-ES/plg_quickicon_akeebabackup.ini</language>
+		<language tag="es-ES">es-ES/plg_quickicon_akeebabackup.sys.ini</language>
+		<language tag="pt-PT">pt-PT/plg_quickicon_akeebabackup.ini</language>
+		<language tag="pt-PT">pt-PT/plg_quickicon_akeebabackup.sys.ini</language>
+		<language tag="it-IT">it-IT/plg_quickicon_akeebabackup.ini</language>
+		<language tag="it-IT">it-IT/plg_quickicon_akeebabackup.sys.ini</language>
+	</languages>
+
+	<config addfieldpath="/administrator/components/com_akeebabackup/src/Field"
+			addfieldprefix="Akeeba\Component\AkeebaBackup\Administrator\Field"
+	>
+		<fields name="params">
+			<fieldset name="basic">
+				<field name="enablewarning"
+					   type="radio"
+					   layout="joomla.form.field.radio.switcher"
 					   label="PLG_QUICKICON_AKEEBABACKUP_LBL_WARNINGS"
-                       description="PLG_QUICKICON_AKEEBABACKUP_DESC_WARNINGS"
+					   description="PLG_QUICKICON_AKEEBABACKUP_DESC_WARNINGS"
 					   default="1"
-                       class="btn-group btn-group-yesno"
 				>
-                    <option value="0">JNO</option>
-                    <option value="1">JYES</option>
-                </field>
+					<option value="0">JNO</option>
+					<option value="1">JYES</option>
+				</field>
 
-                <field name="warnfailed"
-                       type="fancyradio"
-                       label="PLG_QUICKICON_AKEEBABACKUP_LBL_WARNFAILED"
-                       description="PLG_QUICKICON_AKEEBABACKUP_DESC_WARNFAILED"
+				<field name="warnfailed"
+					   type="radio"
+					   layout="joomla.form.field.radio.switcher"
+					   label="PLG_QUICKICON_AKEEBABACKUP_LBL_WARNFAILED"
+					   description="PLG_QUICKICON_AKEEBABACKUP_DESC_WARNFAILED"
 					   default="1"
-                       class="btn-group btn-group-yesno"
-                       showon="enablewarning:1"
-                >
-                    <option value="0">JNO</option>
-                    <option value="1">JYES</option>
-                </field>
+					   showon="enablewarning:1"
+				>
+					<option value="0">JNO</option>
+					<option value="1">JYES</option>
+				</field>
 
-                <field name="maxbackupperiod"
+				<field name="maxbackupperiod"
 					   type="number"
 					   label="PLG_QUICKICON_AKEEBABACKUP_LBL_PERIOD"
-                       description="PLG_QUICKICON_AKEEBABACKUP_DESC_PERIOD"
+					   description="PLG_QUICKICON_AKEEBABACKUP_DESC_PERIOD"
 					   min="1"
 					   max="87600"
 					   step="1"
 					   default="24"/>
 
-
-                <field name="profileid"
+				<field name="profileid"
 					   type="backupprofiles"
 					   default="1"
-                       label="PLG_QUICKICON_AKEEBABACKUP_PROFILE_LABEL"
+					   label="PLG_QUICKICON_AKEEBABACKUP_PROFILE_LABEL"
 					   class="advancedSelect"
-                       description="PLG_QUICKICON_AKEEBABACKUP_PROFILE_DESC"
-                />
-            </fieldset>
-        </fields>
-    </config>
-
-    <scriptfile>script.php</scriptfile>
+					   description="PLG_QUICKICON_AKEEBABACKUP_PROFILE_DESC"
+				/>
+			</fieldset>
+		</fields>
+	</config>
 </extension>

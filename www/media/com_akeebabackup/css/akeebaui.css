@@ -1,0 +1,25 @@
+/*!*
+ * @package   akeebabackup
+ * @copyright Copyright 2006-2026 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @license   GNU General Public License version 3, or later
+ *//*!*
+ * @package   akeebabackup
+ * @copyright Copyright 2006-2026 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @license   GNU General Public License version 3, or later
+ *//*!*
+ * @package   akeebabackup
+ * @copyright Copyright 2006-2026 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @license   GNU General Public License version 3, or later
+ */@font-face{font-family:AkeebaBackup;src:url("../fonts/Akeeba-Products.woff");font-display:swap}.icon-akeeba:before{font-family:AkeebaBackup !important;font-style:normal !important;font-weight:normal !important;line-height:1 !important;display:inline-block;-webkit-font-smoothing:antialiased;position:relative;-moz-osx-font-smoothing:grayscale;content:"B"}/*!*
+ * @package   akeebabackup
+ * @copyright Copyright 2006-2026 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @license   GNU General Public License version 3, or later
+ */@media(prefers-reduced-motion: reduce){:root{--akeebabackkup-no-motion: none}}.akeebabackup-rotate{animation:var(--akeebabackkup-no-motion, akeebabackup-spinning 2s linear infinite)}@keyframes akeebabackup-spinning{from{transform:rotate(0deg)}to{transform:rotate(359deg)}}/*!*
+ * @package   akeebabackup
+ * @copyright Copyright 2006-2026 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @license   GNU General Public License version 3, or later
+ */span.folder-name{cursor:pointer}/*!*
+ * @package   akeebabackup
+ * @copyright Copyright 2006-2026 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @license   GNU General Public License version 3, or later
+ */body.com_akeebabackup div.alert a:not(.btn){text-decoration:underline;color:var(--link-color)}/*# sourceMappingURL=akeebaui.css.map */

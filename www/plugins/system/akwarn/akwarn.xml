@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--~
+  ~ @package   akeebabackup
+  ~ @copyright Copyright 2006-2026 Nicholas K. Dionysopoulos / Akeeba Ltd
+  ~ @license   GNU General Public License version 3, or later
+  -->
+
+<extension type="plugin" group="system" method="upgrade">
+    <name>PLG_SYSTEM_AKWARN</name>
+    <version>10.4.0</version>
+    <creationDate>2026-08-26</creationDate>
+    <author>Nicholas K. Dionysopoulos</author>
+    <authorEmail>nicholas@dionysopoulos.me</authorEmail>
+    <authorUrl>https://www.akeeba.com</authorUrl>
+    <copyright>Copyright (c)2006-2025 Akeeba Ltd / Nicholas K. Dionysopoulos</copyright>
+    <license>GNU General Public License version 3, or later</license>
+    <description>PLG_SYSTEM_AKWARN_XML_DESCRIPTION</description>
+    <namespace path="src">Akeeba\Plugin\System\AKWarn</namespace>
+
+    <files>
+        <folder plugin="akwarn">services</folder>
+        <folder>src</folder>
+        <folder>tmpl</folder>
+
+        <filename>.htaccess</filename>
+        <filename>web.config</filename>
+    </files>
+
+    <languages folder="language">
+        <language tag="en-GB">en-GB/plg_system_akwarn.ini</language>
+        <language tag="en-GB">en-GB/plg_system_akwarn.sys.ini</language>
+        <language tag="el-GR">el-GR/plg_system_akwarn.ini</language>
+        <language tag="el-GR">el-GR/plg_system_akwarn.sys.ini</language>
+        <language tag="fr-FR">fr-FR/plg_system_akwarn.ini</language>
+        <language tag="fr-FR">fr-FR/plg_system_akwarn.sys.ini</language>
+        <language tag="de-DE">de-DE/plg_system_akwarn.ini</language>
+        <language tag="de-DE">de-DE/plg_system_akwarn.sys.ini</language>
+        <language tag="es-ES">es-ES/plg_system_akwarn.ini</language>
+        <language tag="es-ES">es-ES/plg_system_akwarn.sys.ini</language>
+        <language tag="pt-PT">pt-PT/plg_system_akwarn.ini</language>
+        <language tag="pt-PT">pt-PT/plg_system_akwarn.sys.ini</language>
+        <language tag="it-IT">it-IT/plg_system_akwarn.ini</language>
+        <language tag="it-IT">it-IT/plg_system_akwarn.sys.ini</language>
+    </languages>
+
+    <config>
+        <fields name="params">
+            <fieldset name="basic">
+            </fieldset>
+        </fields>
+    </config>
+</extension>

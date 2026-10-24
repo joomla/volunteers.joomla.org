@@ -1,0 +1,23 @@
+{
+    "core.filters.installedtables.enabled": {
+        "default": "0",
+        "type": "bool",
+        "title": "COM_AKEEBABACKUP_CONFIG_OPTIONALFILTERS_INSTALLEDTABLES_ENABLED_TITLE",
+        "description": "COM_AKEEBABACKUP_CONFIG_OPTIONALFILTERS_INSTALLEDTABLES_ENABLED_DESCRIPTION",
+        "bold": "1"
+    },
+    "core.filters.installedtables.onlyjoomla": {
+        "default": "0",
+        "type": "bool",
+        "title": "COM_AKEEBABACKUP_CONFIG_OPTIONALFILTERS_INSTALLEDTABLES_ONLYJOOMLA_TITLE",
+        "description": "COM_AKEEBABACKUP_CONFIG_OPTIONALFILTERS_INSTALLEDTABLES_ONLYJOOMLA_DESCRIPTION",
+		"showon": "core.filters.installedtables.enabled:1"
+    },
+	"core.filters.installedtables.extra": {
+		"default": "",
+		"type": "string",
+		"title": "COM_AKEEBABACKUP_CONFIG_OPTIONALFILTERS_INSTALLEDTABLES_EXTRA_TITLE",
+		"description": "COM_AKEEBABACKUP_CONFIG_OPTIONALFILTERS_INSTALLEDTABLES_EXTRA_DESCRIPTION",
+		"showon": "core.filters.installedtables.enabled:1"
+	}
+}

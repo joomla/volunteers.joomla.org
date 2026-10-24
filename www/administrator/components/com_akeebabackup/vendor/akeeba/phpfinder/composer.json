@@ -1,0 +1,26 @@
+{
+	"name": "akeeba/phpfinder",
+	"type": "library",
+	"description": "Locate the PHP CLI binary on the server",
+	"require": {
+		"php": ">=7.2.0 <=8.4"
+	},
+	"keywords": [
+		"php", "cli"
+	],
+	"homepage": "https://github.com/akeeba/phpfinder",
+	"license": "GPL-3.0-or-later",
+	"authors": [
+		{
+			"name": "Nicholas K. Dionysopoulos",
+			"email": "nicholas_NO_SPAM_PLEASE@akeeba.com",
+			"homepage": "http://www.dionysopoulos.me",
+			"role": "Lead Developer"
+		}
+	],
+	"autoload": {
+		"psr-4": {
+			"Akeeba\\PHPFinder\\": "src"
+		}
+	}
+}

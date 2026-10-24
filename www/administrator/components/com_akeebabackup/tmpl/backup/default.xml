@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--~
+  ~ @package   akeebabackup
+  ~ @copyright Copyright 2006-2026 Nicholas K. Dionysopoulos / Akeeba Ltd
+  ~ @license   GNU General Public License version 3, or later
+  -->
+<metadata>
+	<layout title="COM_AKEEBABACKUP_VIEW_BACKUP_TITLE">
+		<message>
+			<![CDATA[COM_AKEEBABACKUP_VIEW_BACKUP_DESC]]>
+		</message>
+	</layout>
+	<fields name="request"
+			addfieldpath="/administrator/components/com_akeebabackup/src/Field"
+			addfieldprefix="Akeeba\Component\AkeebaBackup\Administrator\Field">
+		<fieldset name="request">
+			<field name="profileid"
+				   type="backupprofiles"
+				   show_none="yes"
+				   default="0"
+				   label="COM_AKEEBABACKUP_VIEW_BACKUP_PROFILE_LABEL"
+				   description="COM_AKEEBABACKUP_VIEW_BACKUP_PROFILE_DESC"
+			/>
+
+			<field name="autostart"
+				   type="radio"
+				   layout="joomla.form.field.radio.switcher"
+				   default="0"
+				   label="COM_AKEEBABACKUP_VIEW_BACKUP_AUTOSTART_LABEL"
+				   description="COM_AKEEBABACKUP_VIEW_BACKUP_AUTOSTART_DESC"
+			>
+				<option value="0">JNo</option>
+				<option value="1">JYes</option>
+			</field>
+
+			<!--
+			<field name="akeeba_hide_toolbar"
+				   type="radio"
+				   layout="joomla.form.field.radio.switcher"
+				   default="0"
+				   label="COM_AKEEBABACKUP_VIEW_BACKUP_HIDETOOLBAR_LABEL"
+				   description="COM_AKEEBABACKUP_VIEW_BACKUP_HIDETOOLBAR_DESC"
+			>
+				<option value="0">JNo</option>
+				<option value="1">JYes</option>
+			</field>
+			-->
+
+			<field name="returnurl"
+				   type="urlencoded"
+				   default=""
+				   label="COM_AKEEBABACKUP_VIEW_BACKUP_RETURNURL_LABEL"
+				   description="COM_AKEEBABACKUP_VIEW_BACKUP_RETURNURL_DESC"
+				   />
+		</fieldset>
+	</fields>
+</metadata>

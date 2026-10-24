@@ -1,0 +1,93 @@
+{
+    "_information": {
+        "title": "COM_AKEEBA_CONFIG_ENGINE_POSTPROC_DROPBOX2_TITLE",
+        "description": "COM_AKEEBA_CONFIG_ENGINE_POSTPROC_DROPBOX2_DESCRIPTION"
+    },
+    "engine.postproc.dropbox2.oauth2_type": {
+        "default": "akeeba",
+        "type": "enum",
+        "enumkeys": "COM_AKEEBA_CONFIG_COMMON_OAUTH2_TYPE_OPT_AKEEBA|COM_AKEEBA_CONFIG_COMMON_OAUTH2_TYPE_OPT_CUSTOM",
+        "enumvalues": "akeeba|custom",
+        "title": "COM_AKEEBA_CONFIG_COMMON_OAUTH2_TYPE_TITLE",
+        "description": "COM_AKEEBA_CONFIG_COMMON_OAUTH2_TYPE_DESCRIPTION"
+    },
+    "engine.postproc.dropbox2.oauth2_helper": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_COMMON_OAUTH2_HELPER_TITLE",
+        "description": "COM_AKEEBA_CONFIG_COMMON_OAUTH2_HELPER_DESCRIPTION",
+        "showon": "engine.postproc.dropbox2.oauth2_type:custom"
+    },
+    "engine.postproc.dropbox2.oauth2_refresh": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_COMMON_OAUTH2_REFRESH_TITLE",
+        "description": "COM_AKEEBA_CONFIG_COMMON_OAUTH2_REFRESH_DESCRIPTION",
+        "showon": "engine.postproc.dropbox2.oauth2_type:custom"
+    },
+    "engine.postproc.common.after_part": {
+        "default": "0",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_POSTPROCPARTS_TITLE",
+        "description": "COM_AKEEBA_CONFIG_POSTPROCPARTS_DESCRIPTION"
+    },
+    "engine.postproc.common.abort_on_fail": {
+        "default": "0",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_POSTPROC_ABORT_ON_FAIL_TITLE",
+        "description": "COM_AKEEBA_CONFIG_POSTPROC_ABORT_ON_FAIL_DESCRIPTION"
+    },
+    "engine.postproc.common.delete_after": {
+        "default": "1",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_DELETEAFTER_TITLE",
+        "description": "COM_AKEEBA_CONFIG_DELETEAFTER_DESCRIPTION"
+    },
+    "engine.postproc.dropbox2.chunk_upload": {
+        "default": "1",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_BOX_CHUNKUPLOAD_ENABLE"
+    },
+    "engine.postproc.dropbox2.chunk_upload_size": {
+        "default": "20",
+        "type": "integer",
+        "min": "5",
+        "max": "100",
+        "shortcuts": "5|10|20|40|60|80",
+        "scale": "1",
+        "uom": "MB",
+        "title": "COM_AKEEBA_CONFIG_BOX_CHUNKUPLOAD_SIZE",
+        "showon": "engine.postproc.dropbox2.chunk_upload:1"
+    },
+    "engine.postproc.dropbox2.openoauth": {
+        "default": "",
+        "type": "button",
+        "title": "COM_AKEEBA_CONFIG_BOX_OPENOAUTH_TITLE",
+        "description": "COM_AKEEBA_CONFIG_BOX_OPENOAUTH_DESC",
+        "hook": "akconfig_dropbox2_openoauth"
+    },
+    "engine.postproc.dropbox2.team": {
+        "default": "0",
+        "type": "bool",
+        "title": "COM_AKEEBA_CONFIG_DROPBOX_TEAM_TITLE",
+        "description": "COM_AKEEBA_CONFIG_DROPBOX_TEAM_DESC"
+    },
+    "engine.postproc.dropbox2.directory": {
+        "default": "\/",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_DROPBOXDIRECTORY_TITLE",
+        "description": "COM_AKEEBA_CONFIG_DROPBOXDIRECTORY_DESCRIPTION"
+    },
+    "engine.postproc.dropbox2.access_token": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_DROPBOXTOKEN_TITLE",
+        "description": "COM_AKEEBA_CONFIG_DROPBOXTOKEN_DESCRIPTION"
+    },
+    "engine.postproc.dropbox2.refresh_token": {
+        "default": "",
+        "type": "string",
+        "title": "COM_AKEEBA_CONFIG_DROPBOXREFRESHTOKEN_TITLE",
+        "description": "COM_AKEEBA_CONFIG_DROPBOXREFRESHTOKEN_DESCRIPTION"
+    }
+}

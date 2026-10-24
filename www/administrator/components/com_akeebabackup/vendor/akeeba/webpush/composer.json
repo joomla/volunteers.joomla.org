@@ -1,0 +1,33 @@
+{
+  "name": "akeeba/webpush",
+  "type": "library",
+  "description": "WebPush for Joomla components",
+  "keywords": ["push", "notifications", "web", "WebPush", "Push API", "Joomla"],
+  "homepage": "https://github.com/akeeba/webpush",
+  "minimum-stability": "stable",
+  "license": "GPL-3.0-or-later",
+  "authors": [
+    {
+      "name": "Nicholas K. Dionysopoulos",
+      "email": "nicholas@akeeba.com"
+    }
+  ],
+  "config": {
+    "platform": {
+      "php": "7.4.999"
+    }
+  },
+  "require": {
+    "php": "^7.4|^8.0",
+    "ext-openssl": "*",
+    "ext-json": "*"
+  },
+  "suggest": {
+    "ext-gmp": "*"
+  },
+  "autoload": {
+    "psr-4" : {
+      "Akeeba\\WebPush\\" : "src"
+    }
+  }
+}

@@ -1,44 +1,66 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--~
   ~ @package   akeebabackup
-  ~ @copyright Copyright (c)2006-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
+  ~ @copyright Copyright 2006-2026 Nicholas K. Dionysopoulos / Akeeba Ltd
   ~ @license   GNU General Public License version 3, or later
   -->
 
-<extension version="2.5.0" type="plugin" group="system" method="upgrade">
-	<name>PLG_SYSTEM_BACKUPONUPDATE</name>
-	<author>Nicholas K. Dionysopoulos</author>
-	<authorEmail>nicholas@dionysopoulos.me</authorEmail>
-	<authorUrl>https://www.akeeba.com</authorUrl>
-	<copyright>Copyright (c)2006-2023 Nicholas K. Dionysopoulos</copyright>
-	<license>GNU General Public License version 3, or later</license>
-	<creationDate>2023-01-18</creationDate>
-	<version>8.2.6</version>
-	<description>PLG_SYSTEM_BACKUPONUPDATE_XML_DESCRIPTION</description>
-	<files>
-		<filename plugin="backuponupdate">backuponupdate.php</filename>
-		<filename>.htaccess</filename>
-		<filename>web.config</filename>
-	</files>
-	<languages folder="language">
-		<language tag="en-GB">en-GB/en-GB.plg_system_backuponupdate.ini</language>
-		<language tag="en-GB">en-GB/en-GB.plg_system_backuponupdate.sys.ini</language>
-	</languages>
-    <config addfieldpath="/administrator/components/com_akeeba/fields">
+<extension type="plugin" group="system" method="upgrade">
+    <name>PLG_SYSTEM_BACKUPONUPDATE</name>
+    <version>10.4.0</version>
+    <creationDate>2026-08-26</creationDate>
+    <author>Nicholas K. Dionysopoulos</author>
+    <authorEmail>nicholas@dionysopoulos.me</authorEmail>
+    <authorUrl>https://www.akeeba.com</authorUrl>
+    <copyright>Copyright (c)2006-2025 Akeeba Ltd / Nicholas K. Dionysopoulos</copyright>
+    <license>GNU General Public License version 3, or later</license>
+    <description>PLG_SYSTEM_BACKUPONUPDATE_XML_DESCRIPTION</description>
+    <namespace path="src">Akeeba\Plugin\System\BackupOnUpdate</namespace>
+
+    <files>
+        <folder plugin="backuponupdate">services</folder>
+        <folder>src</folder>
+        <folder>tmpl</folder>
+
+        <filename>.htaccess</filename>
+        <filename>web.config</filename>
+    </files>
+
+    <languages folder="language">
+        <language tag="en-GB">en-GB/plg_system_backuponupdate.ini</language>
+        <language tag="en-GB">en-GB/plg_system_backuponupdate.sys.ini</language>
+        <language tag="el-GR">el-GR/plg_system_backuponupdate.ini</language>
+        <language tag="el-GR">el-GR/plg_system_backuponupdate.sys.ini</language>
+        <language tag="fr-FR">fr-FR/plg_system_backuponupdate.ini</language>
+        <language tag="fr-FR">fr-FR/plg_system_backuponupdate.sys.ini</language>
+        <language tag="de-DE">de-DE/plg_system_backuponupdate.ini</language>
+        <language tag="de-DE">de-DE/plg_system_backuponupdate.sys.ini</language>
+        <language tag="es-ES">es-ES/plg_system_backuponupdate.ini</language>
+        <language tag="es-ES">es-ES/plg_system_backuponupdate.sys.ini</language>
+        <language tag="pt-PT">pt-PT/plg_system_backuponupdate.ini</language>
+        <language tag="pt-PT">pt-PT/plg_system_backuponupdate.sys.ini</language>
+        <language tag="it-IT">it-IT/plg_system_backuponupdate.ini</language>
+        <language tag="it-IT">it-IT/plg_system_backuponupdate.sys.ini</language>
+    </languages>
+
+    <config addfieldpath="/administrator/components/com_akeebabackup/src/Field"
+            addfieldprefix="Akeeba\Component\AkeebaBackup\Administrator\Field"
+    >
         <fields name="params">
             <fieldset name="basic">
-                <field name="profileid" type="backupprofiles" default="1"
+                <field name="profileid"
+                       type="backupprofiles"
+                       default="1"
                        label="PLG_SYSTEM_BACKUPONUPDATE_PROFILE_LABEL"
                        description="PLG_SYSTEM_BACKUPONUPDATE_PROFILE_DESC"
                 />
 
-				<field name="description" type="text" default="" size="30"
-					   label="COM_AKEEBA_CONFIG_DESCRIPTION_LABEL"
-					   description="COM_AKEEBA_CONFIG_DESCRIPTION_DESC"/>
-
-			</fieldset>
+                <field name="description"
+                       type="text" default=""
+                       size="30"
+                       label="COM_AKEEBA_CONFIG_DESCRIPTION_LABEL"
+                       description="COM_AKEEBA_CONFIG_DESCRIPTION_DESC"/>
+            </fieldset>
         </fields>
     </config>
-
-	<scriptfile>script.php</scriptfile>
 </extension>

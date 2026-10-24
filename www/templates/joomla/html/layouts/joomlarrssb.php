@@ -13,8 +13,7 @@ use Joomla\CMS\Http\HttpFactory;
 defined('_JEXEC') or die;
 
 // Import media
-HTMLHelper::_('jquery.framework');
-HTMLHelper::_('script', 'joomlarrssb/rrssb.min.js', ['relative' => true]);
+HTMLHelper::_('script', 'joomlarrssb/joomlarrssb.js', ['relative' => true], ['defer' => true]);
 HTMLHelper::_('stylesheet', 'joomlarrssb/rrssb.css', ['relative' => true]);
 HTMLHelper::_('stylesheet', 'joomlarrssb/joomla.css', ['relative' => true]);
 

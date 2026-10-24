@@ -35,7 +35,6 @@
                 type="textarea"
                 label="JGLOBAL_DESCRIPTION"
                 rows="4"
-                class="span12"
         />
     </fieldset>
 

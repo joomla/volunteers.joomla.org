@@ -25,9 +25,7 @@ try {
     exit();
 }
 $wa->useScript('keepalive');
-$wa->useScript('form.validate');
-//HTMLHelper::_('formbehavior.chosen', 'select');;
-
+$wa->useScript('com_volunteers.form-edit');
 ?>
 
 <div class="department-edit">
@@ -35,29 +33,26 @@ $wa->useScript('form.validate');
     <form id="department"
         action="<?php echo Route::_('index.php?option=com_volunteers&task=department.save&id=' . (int) $this->item->id); ?>"
         method="post" class="form-validate" enctype="multipart/form-data">
-        <div class="row">
-            <div class="top-toolbar">
-                <div class="btn-bottom-toolbar float-end">
-                    <div id="toolbar-cancel" class="btn-group">
-                        <button class="btn btn-danger"  type="button" onclick="history.back();return false;">
-                            <span class="icon-cancel" aria-hidden="true"></span>
-                            <?php echo Text::_('JCANCEL') ?>
-                        </button>
-                    </div>
-                    <div id="toolbar-apply" class="btn-group">
-                        <button class="vol-button-admin-success" type="submit">
-                            <span class="icon-pencil" aria-hidden="true"></span>
-                            <?php echo Text::_('JSAVE') ?>
-                        </button>
-                    </div>
+        <div class="filter-bar clearfix">
+            <div class="btn-toolbar float-end gap-2">
+                <div id="toolbar-cancel" class="btn-group">
+                    <button class="btn btn-danger" type="button" data-task="department.cancel">
+                        <span class="icon-cancel" aria-hidden="true"></span>
+                        <?php echo Text::_('JCANCEL') ?>
+                    </button>
+                </div>
+                <div id="toolbar-apply" class="btn-group">
+                    <button class="btn btn-success" type="button" data-task="department.save">
+                        <span class="icon-pencil" aria-hidden="true"></span>
+                        <?php echo Text::_('JSAVE') ?>
+                    </button>
                 </div>
             </div>
-            <div class="border-bottom pb-2 mb-3">
-                <h1 class="vol_h1">
-                    <?php echo Text::_('COM_VOLUNTEERS_TITLE_DEPARTMENTS_EDIT') ?>
-                </h1>
-            </div>
-
+        </div>
+        <div class="border-bottom pb-2 mb-3">
+            <h1 class="vol_h1">
+                <?php echo Text::_('COM_VOLUNTEERS_TITLE_DEPARTMENTS_EDIT') ?>
+            </h1>
         </div>
 
         <?php echo $this->form->renderField('title'); ?>
@@ -74,16 +69,16 @@ $wa->useScript('form.validate');
 
         <hr>
 
-        <div class="bottom-toolbar">
-            <div class="btn-bottom-toolbar float-end">
+        <div class="filter-bar clearfix">
+            <div class="btn-toolbar float-end gap-2">
                 <div id="toolbar-cancel" class="btn-group">
-                    <button class="btn btn-danger"  type="button" onclick="history.back();return false;">
+                    <button class="btn btn-danger" type="button" data-task="department.cancel">
                         <span class="icon-cancel" aria-hidden="true"></span>
                         <?php echo Text::_('JCANCEL') ?>
                     </button>
                 </div>
                 <div id="toolbar-apply" class="btn-group">
-                    <button class="vol-button-admin-success" type="submit">
+                    <button class="btn btn-success" type="button" data-task="department.save">
                         <span class="icon-pencil" aria-hidden="true"></span>
                         <?php echo Text::_('JSAVE') ?>
                     </button>
@@ -93,6 +88,6 @@ $wa->useScript('form.validate');
 
         <input type="hidden" name="option" value="com_volunteers" />
         <input type="hidden" name="task" value="department.save" />
-        <?php echo HtmlHelper::_('form.token'); ?>
+        <?php echo HTMLHelper::_('form.token'); ?>
     </form>
 </div>

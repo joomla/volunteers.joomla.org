@@ -16,6 +16,8 @@ use Joomla\CMS\Mail\MailerFactoryInterface;
 use Joomla\CMS\MVC\Controller\FormController;
 use Joomla\CMS\Router\Route;
 use Joomla\Component\Volunteers\Administrator\Service\AclService;
+use Joomla\Database\DatabaseInterface;
+use Joomla\Database\ParameterType;
 
 // phpcs:disable PSR1.Files.SideEffects
 \defined('_JEXEC') or die;
@@ -89,13 +91,14 @@ class DepartmentController extends FormController
         // Use parent save method
         $return = parent::save($key, $urlVar);
 
+        // Stay on the form when the data does not validate
+        if (!$return) {
+            return $return;
+        }
+
         // Redirect to the department
         $this->setMessage(Text::_('COM_VOLUNTEERS_LBL_DEPARTMENT_SAVED'));
-        if ($departmentId === 58) {
-            $this->setRedirect(Route::_('index.php?option=com_volunteers&view=board', false));
-        } else {
-            $this->setRedirect(Route::_('index.php?option=com_volunteers&view=department&id=' . $departmentId, false));
-        }
+        $this->setRedirect($this->getDepartmentUrl($departmentId));
 
         return $return;
     }
@@ -114,12 +117,35 @@ class DepartmentController extends FormController
         // Get variables
         $departmentId = $this->input->getInt('id');
 
-        // Use parent cancel method
-        //$return = parent::cancel($key);
+        // Use parent cancel method to check the department in again
+        $return = parent::cancel($key);
 
-        $this->setRedirect(Route::_('index.php?option=com_volunteers&view=department&id=' . $departmentId, false));
+        $this->setRedirect($this->getDepartmentUrl($departmentId));
 
-        return true;
+        return $return;
+    }
+
+    /**
+     * Get the URL of the department, or of the board for a department without a parent.
+     *
+     * @param   integer  $departmentId  The department.
+     *
+     * @return  string  The URL.
+     *
+     * @since   6.1.0
+     */
+    private function getDepartmentUrl(int $departmentId): string
+    {
+        $db    = Factory::getContainer()->get(DatabaseInterface::class);
+        $query = $db->createQuery()
+            ->select($db->quoteName('parent_id'))
+            ->from($db->quoteName('#__volunteers_departments'))
+            ->where($db->quoteName('id') . ' = :id')
+            ->bind(':id', $departmentId, ParameterType::INTEGER);
+
+        $view = ((int) $db->setQuery($query)->loadResult() === 0) ? 'board' : 'department';
+
+        return Route::_('index.php?option=com_volunteers&view=' . $view . '&id=' . $departmentId, false);
     }
 
     /**

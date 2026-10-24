@@ -10,7 +10,7 @@
 		/>
 
 		<field
-			name="state"
+			name="published"
 			type="status"
 			label="COM_VOLUNTEERS_FILTER_PUBLISHED"
 			description="COM_VOLUNTEERS_FILTER_PUBLISHED_DESC"
@@ -25,9 +25,47 @@
 			label="COM_VOLUNTEERS_FIELD_DEPARTMENT"
 			description="COM_VOLUNTEERS_FIELD_DEPARTMENT_DESC"
 			class="js-select-submit-on-change"
-			/>
+		/>
+
+		<field
+			name="parent"
+			type="teams"
+			label="COM_VOLUNTEERS_FIELD_TEAM_PARENT"
+			multiple="true"
+			layout="joomla.form.field.list-fancy-select"
+			hint="COM_VOLUNTEERS_SELECT_TEAM_PARENT"
+			class="js-select-submit-on-change"
+		/>
+
+		<field
+			name="teamStatus"
+			type="list"
+			label="COM_VOLUNTEERS_FIELD_TEAMSTATUS"
+			class="js-select-submit-on-change"
+			>
+			<option value="">COM_VOLUNTEERS_SELECT_TEAMSTATUS</option>
+			<option value="0">COM_VOLUNTEERS_FIELD_STATUS_INFORMATION</option>
+			<option value="1">COM_VOLUNTEERS_FIELD_STATUS_OFFICIAL</option>
+			<option value="2">COM_VOLUNTEERS_FIELD_STATUS_UNOFFICIAL</option>
+		</field>
+
+		<field
+			name="active"
+			type="list"
+			label="COM_VOLUNTEERS_FIELD_ACTIVE"
+			class="js-select-submit-on-change"
+			>
+			<option value="">COM_VOLUNTEERS_SELECT_TEAM_ACTIVE</option>
+			<option value="1">COM_VOLUNTEERS_ACTIVE</option>
+			<option value="0">COM_VOLUNTEERS_ARCHIVED</option>
+		</field>
 	</fields>
 	<fields name="list">
+		<field
+				name="fullordering"
+				type="hidden"
+		/>
+
 		<field
 			name="limit"
 			type="limitbox"

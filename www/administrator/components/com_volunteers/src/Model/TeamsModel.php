@@ -14,6 +14,7 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\CMS\MVC\Model\ListModel;
 use Joomla\Database\QueryInterface;
+use Joomla\Utilities\ArrayHelper;
 
 // phpcs:disable PSR1.Files.SideEffects
 \defined('_JEXEC') or die;
@@ -35,7 +36,7 @@ class TeamsModel extends ListModel
      * @since   4.0.0
      * @throws Exception
      */
-    public function __construct($config = [], MVCFactoryInterface $factory = null)
+    public function __construct($config = [], ?MVCFactoryInterface $factory = null)
     {
         if (empty($config['filter_fields'])) {
             $config['filter_fields'] = [
@@ -55,10 +56,18 @@ class TeamsModel extends ListModel
                 'a.created',
                 'created_by',
                 'a.created_by',
-                'ordering',
-                'a.ordering',
                 'featured',
                 'a.featured',
+                'status',
+                'a.status',
+                'date_ended',
+                'a.date_ended',
+                'department.title',
+                'published',
+                'department',
+                'parent',
+                'teamStatus',
+                'active',
             ];
         }
 
@@ -76,20 +85,21 @@ class TeamsModel extends ListModel
      */
     protected function populateState($ordering = 'a.title', $direction = 'asc')
     {
-        // Load the filter state.
-        $this->setState('filter.search', $this->getUserStateFromRequest($this->context . '.filter.search', 'filter_search'));
-        $this->setState('filter.state', $this->getUserStateFromRequest($this->context . '.filter.state', 'filter_state'));
-        $this->setState('filter.department', $this->getUserStateFromRequest($this->context . '.filter.department', 'filter_department'));
-        $this->setState('filter.active', $this->getUserStateFromRequest($this->context . '.filter.active', 'filter_active'));
-        $this->setState('filter.parent', $this->getUserStateFromRequest($this->context . '.filter.parent', 'filter_parent'));
-        $this->setState('filter.groups', Factory::getApplication()->input->getInt('id'));
-
+        // The filters come from the filter form through the parent, a filter outside the form would stick in the session without a way to clear it
         // Load the parameters.
         $params = ComponentHelper::getParams('com_volunteers');
         $this->setState('params', $params);
 
         // List state information.
         parent::populateState($ordering, $direction);
+
+        // Without a selected status the list shows published and unpublished, the models loaded with ignore_request keep the published default
+        if ($this->state->get('filter.published') === null) {
+            $this->setState('filter.published', '');
+        }
+
+        // The list shows all teams, the models loaded with ignore_request only get the top level teams outside the board
+        $this->setState('filter.all', true);
     }
 
     /**
@@ -108,10 +118,14 @@ class TeamsModel extends ListModel
     {
         // Compile the store id.
         $id .= ':' . $this->getState('filter.search');
-        $id .= ':' . $this->getState('filter.state');
+        $id .= ':' . $this->getState('filter.published');
         $id .= ':' . $this->getState('filter.department');
         $id .= ':' . $this->getState('filter.active');
         $id .= ':' . $this->getState('filter.groups');
+        $id .= ':' . $this->getState('filter.teamStatus');
+        $id .= ':' . implode(',', (array) $this->getState('filter.parent'));
+        $id .= ':' . $this->getState('filter.subteams');
+        $id .= ':' . $this->getState('filter.all');
 
         return parent::getStoreId($id);
     }
@@ -150,10 +164,12 @@ class TeamsModel extends ListModel
             ->join('LEFT', '#__volunteers_teams AS ' . $db->quoteName('parentteam') . ' ON parentteam.id = a.parent_id');
 
         // Filter by published state
-        $state = $this->getState('filter.state', 1);
+        $state = $this->getState('filter.published', 1);
 
         if (is_numeric($state)) {
             $query->where('a.state = ' . (int) $state);
+        } elseif ($state === '') {
+            $query->whereIn($db->quoteName('a.state'), [0, 1]);
         }
 
         // Filter by search in title
@@ -173,7 +189,7 @@ class TeamsModel extends ListModel
 
         if (is_numeric($groups) && ($groups > 0)) {
             $query->where('a.department = ' . (int) $groups);
-        } elseif (empty($this->getState('filter.parent'))) {
+        } elseif (empty($this->getState('filter.parent')) && !$this->getState('filter.all')) {
             // Subteams belong to the same department as their parent, also when that is the groups department
             $query->where('a.department <> 58');
         }
@@ -201,22 +217,25 @@ class TeamsModel extends ListModel
             }
         }
 
+        // Filter by team status
+        $teamStatus = $this->getState('filter.teamStatus');
+
+        if (is_numeric($teamStatus)) {
+            $query->where($db->quoteName('a.status') . ' = ' . (int) $teamStatus);
+        }
+
         // Filter by subteams
         $subteams = $this->getState('filter.subteams');
 
-        if (!$subteams) {
+        if (!$subteams && !$this->getState('filter.all')) {
             $query->where('a.parent_id = 0');
         }
 
-        // Filter by parent
-        $parent = $this->getState('filter.parent');
+        // Filter by parent, the list filter selects one or more teams, the team models set a single team
+        $parents = array_filter(ArrayHelper::toInteger((array) $this->getState('filter.parent')));
 
-        if (is_array($parent)) {
-            $query->where('a.parent_id IN (' . implode(',', $parent) . ')');
-        }
-
-        if (is_numeric($parent) && ($parent > 0)) {
-            $query->where('a.parent_id = ' . (int) $parent);
+        if ($parents) {
+            $query->whereIn($db->quoteName('a.parent_id'), $parents);
         }
 
         // Group by ID

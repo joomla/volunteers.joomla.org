@@ -153,7 +153,8 @@ class VolunteerModel extends AdminModel
 
                 return $data;
             } catch (Exception $e) {
-                throw new Exception(($e));
+                // Keep the 404 of a missing Joomler, anything else is a server error
+                throw new Exception($e->getMessage(), $e->getCode() === 404 ? 404 : 500, $e);
             }
         } else {
             //throw new Exception(Text::_('COM_VOLUNTEERS_ERROR_VOLUNTEER_NOT_FOUND'),404);

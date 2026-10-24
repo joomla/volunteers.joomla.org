@@ -22,6 +22,34 @@ use Joomla\Component\Volunteers\Site\Helper\VolunteersHelper;
 try {
     $wa = Factory::getApplication()->getDocument()->getWebAssetManager();
     $wa->useStyle('com_volunteers.frontend');
+    // Report a spam profile, the button turns green once the report is sent
+    $wa->addInlineScript(<<<'JS'
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.js-reportspam').forEach((button) => {
+        button.addEventListener('click', (event) => {
+            event.preventDefault();
+
+            const data = new URLSearchParams({
+                option: 'com_ajax',
+                plugin: 'reportspam',
+                format: 'json',
+                volunteer: button.dataset.volunteer,
+                [Joomla.getOptions('csrf.token')]: 1,
+            });
+
+            fetch(Joomla.getOptions('system.paths').base + '/index.php', { method: 'POST', body: data })
+                .then((response) => response.json())
+                .then((result) => {
+                    if (result.success && result.data) {
+                        button.classList.replace('btn-danger', 'btn-success');
+                        button.innerHTML = '<span class="icon-thumbs-up" aria-hidden="true"></span> ' + button.dataset.success;
+                    }
+                });
+        });
+    });
+});
+JS, [], [], ['core']);
+    HTMLHelper::_('form.csrf');
 } catch (Exception $e) {
     echo $e->getMessage();
     exit();
@@ -270,37 +298,6 @@ try {
             echo HTMLHelper::_('uitab.endTab');
         } ?>
 
-
-
-
-
-
-
-
-
-
-        <script type="text/javascript">
-
-
-            // Report Spam Button
-            let reportspambutton = jQuery('.js-reportspam');
-            if (reportspambutton) {
-                reportspambutton.click(function (e) {
-                    e.preventDefault();
-                    let item = jQuery(this),
-                        request = {
-                            'option': 'com_ajax',
-                            'plugin': 'reportspam',
-                            'format': 'json',
-                            'volunteer': item.attr('data-volunteer')
-                        };
-
-                    jQuery.ajax({
-                        type: 'POST',
-                        data: request,
-                        success: function (response) {
-                            item.removeClass('btn-danger').addClass('btn-success').html('<span class="icon-thumbs-up"></span> ' + item.attr('data-success'));
-                        }
-                    });
-                });
-            }
+        <?php echo HTMLHelper::_('uitab.endTabSet'); ?>
+    </div>
+</div>

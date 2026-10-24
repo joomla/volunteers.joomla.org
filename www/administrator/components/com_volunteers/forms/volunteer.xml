@@ -86,6 +86,7 @@
 			name="country"
 			type="countries"
 			label="COM_VOLUNTEERS_FIELD_COUNTRY"
+			class="location-country location"
 			required="true"
 		/>
 		<field

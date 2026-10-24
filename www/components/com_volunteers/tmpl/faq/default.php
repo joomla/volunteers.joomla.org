@@ -13,10 +13,6 @@ use Joomla\CMS\Language\Text;
 // phpcs:disable PSR1.Files.SideEffects
 \defined('_JEXEC') or die;
 // phpcs:enable PSR1.Files.SideEffects
-$wa = Factory::getApplication()->getDocument()->getWebAssetManager();
-$wa->useScript('jquery');
-$wa->useScript('jquery-noconflict');
-$wa->useScript('jquery-migrate');
 
 // Import CSS
 try {

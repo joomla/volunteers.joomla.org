@@ -16,30 +16,49 @@ use Joomla\Component\Volunteers\Administrator\View\Member\HtmlView;
 // phpcs:enable PSR1.Files.SideEffects
 /** @var $this HtmlView */
 
-$wa = $this->getDocument()->
-getWebAssetManager();
+$wa = $this->getDocument()->getWebAssetManager();
 $wa->useScript('keepalive')
-    ->useScript('form.validate');
-?>
+    ->useScript('form.validate')
+    ->addInlineScript(<<<'JS'
+document.addEventListener('DOMContentLoaded', () => {
+    const team = document.getElementById('jform_team');
+    const role = document.getElementById('jform_role');
 
-<script>
-    jQuery(document).ready(function ($) {
-        $(".team").change(function () {
-            let team = $("#" + this.id).val();
-            $.ajax({
-                url: 'index.php?option=com_volunteers&task=roles.getTeamRoles',
-                type: "POST",
-                data: {
-                    'team': team,
-                    'role': <?php echo $this->item->role; ?>,
+    if (!team || !role) {
+        return;
+    }
+
+    // Load the roles of the selected team
+    team.addEventListener('change', () => {
+        const data = new FormData();
+        data.append('team', team.value);
+        data.append('role', role.value);
+
+        fetch('index.php?option=com_volunteers&task=roles.getTeamRoles', { method: 'POST', body: data })
+            .then((response) => response.text())
+            .then((html) => {
+                const list = document.createElement('select');
+                list.innerHTML = html;
+
+                const fancySelect = role.closest('joomla-field-fancy-select');
+
+                if (fancySelect && fancySelect.choicesInstance) {
+                    const choices = [...list.options].map((option) => ({
+                        value: option.value,
+                        label: option.text,
+                        selected: option.selected,
+                    }));
+
+                    fancySelect.choicesInstance.clearStore();
+                    fancySelect.choicesInstance.setChoices(choices, 'value', 'label', true);
+                } else {
+                    role.innerHTML = html;
                 }
-            }).done(function (options) {
-                $(".roles").html(options);
-                $(".roles").trigger("liszt:updated");
-            })
-        }).trigger('change');
+            });
     });
-</script>
+});
+JS);
+?>
 
 <form action="<?php echo Route::_('index.php?option=com_volunteers&layout=edit&id=' . (int) $this->item->id); ?>"
       method="post" name="adminForm" id="member-form" class="form-validate">

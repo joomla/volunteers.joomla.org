@@ -18,16 +18,6 @@
       "uri": "media/com_volunteers/css/icons.css"
     },
     {
-      "name": "com_volunteers.jquery-gmaps-latlon-picker",
-      "type": "script",
-      "uri": "media/com_volunteers/js/jquery-gmaps-latlon-picker.js",
-      "attributes": {
-        "defer": true
-      },
-      "package": "volunteers",
-      "version": "5.0.0"
-    },
-    {
       "name": "com_volunteers.markerclusterer",
       "type": "script",
       "uri": "media/com_volunteers/js/markerclusterer.js",
@@ -41,16 +31,6 @@
       "name": "com_volunteers.oms",
       "type": "script",
       "uri": "media/com_volunteers/js/oms.js",
-      "attributes": {
-        "defer": true
-      },
-      "package": "volunteers",
-      "version": "5.0.0"
-    },
-    {
-      "name": "com_volunteers.google_maps",
-      "type": "script",
-      "uri": "https://maps.googleapis.com/maps/api/js?key=AIzaSyC04czYnPuPFkO6eDAKX-j_lfrpanAAo-U",
       "attributes": {
         "defer": true
       },
@@ -107,6 +87,30 @@
       },
       "package": "volunteers",
       "version": "1.4.1"
+    },
+    {
+      "name": "com_volunteers.location-picker",
+      "type": "script",
+      "uri": "media/com_volunteers/js/location-picker.js",
+      "dependencies": [
+        "core",
+        "messages",
+        "com_volunteers.leaflet-js"
+      ],
+      "attributes": {
+        "defer": true
+      },
+      "package": "volunteers",
+      "version": "5.0.0"
+    },
+    {
+      "name": "com_volunteers.location-picker",
+      "type": "preset",
+      "dependencies": [
+        "com_volunteers.location-picker#script",
+        "com_volunteers.leaflet-js#script",
+        "com_volunteers.leaflet-css#style"
+      ]
     }
   ]
 }

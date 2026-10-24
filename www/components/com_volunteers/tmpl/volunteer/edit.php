@@ -261,14 +261,3 @@ $wa->useScript('form.validate');
         <?php echo HtmlHelper::_('form.token'); ?>
     </form>
 </div>
-
-<script>
-    jQuery(document).ready(function () {
-        jQuery('.location').on('change', function (e) {
-            var city = jQuery('.location-city').val();
-            var country = jQuery('.location-country').val();
-            jQuery('.gllpSearchField').val(city + ', ' + country);
-            jQuery('.gllpSearchButton').click();
-        });
-    });
-</script>

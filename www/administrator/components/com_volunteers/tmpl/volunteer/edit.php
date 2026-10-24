@@ -17,10 +17,6 @@ use Joomla\CMS\Layout\LayoutHelper;
 use Joomla\CMS\Router\Route;
 
 $wa = Factory::getApplication()->getDocument()->getWebAssetManager();
-$wa->useScript('jquery');
-$wa->useScript('jquery-noconflict');
-$wa->useScript('jquery-migrate');
-
 $wa->useScript('form.validate');
 //HTMLHelper::_('formbehavior.chosen', 'select');;
 
@@ -74,14 +70,3 @@ Joomla.submitform(task, document.getElementById('volunteer-form'));
     <input type="hidden" name="task" value="" />
     <?php echo HTMLHelper::_('form.token'); ?>
 </form>
-
-<script>
-    jQuery(document).ready(function () {
-        jQuery('.location').on('change', function (e) {
-            let city = jQuery('.location-city').val();
-            let country = jQuery('.location-country').val();
-            jQuery('.gllpSearchField').val(city + ', ' + country);
-            jQuery('.gllpSearchButton').click();
-        });
-    });
-</script>

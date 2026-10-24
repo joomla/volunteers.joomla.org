@@ -301,12 +301,6 @@ div#toolbar-cancel.btn-group a {
     vertical-align: middle;
 }
 
-/* Read more buttons on the team and department cards get a visible outline */
-.team .btn-light {
-    --bs-btn-border-color: var(--bs-border-color);
-    --bs-btn-hover-border-color: var(--bs-border-color);
-}
-
 /* Status filter: neutral until selected, then green (active) or red (archived) */
 #filter_active1:checked + .btn {
     --bs-btn-active-bg: var(--bs-success);

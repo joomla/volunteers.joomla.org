@@ -115,3 +115,18 @@ body.site {
     font-weight: bold;
     line-height: 1.4;
 }
+
+/* Light buttons are grey in light mode on every page, as on the Joomla 3 site */
+@media (prefers-color-scheme: light) {
+    .btn-light {
+        --bs-btn-color: #333;
+        --bs-btn-bg: #eee;
+        --bs-btn-border-color: #e6e6e6;
+        --bs-btn-hover-color: #333;
+        --bs-btn-hover-bg: #e6e6e6;
+        --bs-btn-hover-border-color: #d9d9d9;
+        --bs-btn-active-color: #333;
+        --bs-btn-active-bg: #e6e6e6;
+        --bs-btn-active-border-color: #d9d9d9;
+    }
+}

@@ -21,6 +21,8 @@ The following extensions must be uninstalled:
 - Search - Volunteers - Teams
 - Search - Volunteers - Volunteers
 - Perfect Image Form Field (`plg_content_perfectimage`), the Joomla 3 image cropper of the profile edit and the registration form. Joomlers edit their profile and photo on the Joomla! Identity portal.
+- Captcha - Invisible reCAPTCHA (`plg_captcha_recaptcha_invisible`), a Joomla 3 core plugin that is no longer part of Joomla 6
+- FOF (`lib_fof`), the Joomla 3 version 2 of the Akeeba framework
 
 ### Update Extensions
 - Joomla Volunteer Portal package, this installs the Smart Search plugins:

@@ -16,14 +16,6 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.3.4\n"
 
-msgid "{authorize:Authorize:403_text}"
-msgstr ""
-"Za dostop do spletne storitve nima ustreznih pravic. Obrnite se na "
-"administratorja vašega IdP."
-
-msgid "{authorize:Authorize:403_header}"
-msgstr "Dostop zavrnjen"
-
 msgid "Access forbidden"
 msgstr "Dostop zavrnjen"
 

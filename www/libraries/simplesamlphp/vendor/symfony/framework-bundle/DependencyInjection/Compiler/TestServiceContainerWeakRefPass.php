@@ -14,7 +14,6 @@ namespace Symfony\Bundle\FrameworkBundle\DependencyInjection\Compiler;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\Compiler\ServiceLocatorTagPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
 
 /**
@@ -22,7 +21,7 @@ use Symfony\Component\DependencyInjection\Reference;
  */
 class TestServiceContainerWeakRefPass implements CompilerPassInterface
 {
-    public function process(ContainerBuilder $container)
+    public function process(ContainerBuilder $container): void
     {
         if (!$container->hasDefinition('test.private_services_locator')) {
             return;
@@ -30,10 +29,12 @@ class TestServiceContainerWeakRefPass implements CompilerPassInterface
 
         $privateServices = [];
         $definitions = $container->getDefinitions();
-        $hasErrors = method_exists(Definition::class, 'hasErrors') ? 'hasErrors' : 'getErrors';
 
         foreach ($definitions as $id => $definition) {
-            if ($id && '.' !== $id[0] && (!$definition->isPublic() || $definition->isPrivate()) && !$definition->$hasErrors() && !$definition->isAbstract()) {
+            if ($inner = $definition->getTag('container.decorator')[0]['inner'] ?? null) {
+                $privateServices[$inner] = new Reference($inner, ContainerBuilder::IGNORE_ON_UNINITIALIZED_REFERENCE);
+            }
+            if ($id && '.' !== $id[0] && ($definition->isPrivate() || $definition->hasTag('container.private')) && !$definition->hasErrors() && !$definition->isAbstract()) {
                 $privateServices[$id] = new Reference($id, ContainerBuilder::IGNORE_ON_UNINITIALIZED_REFERENCE);
             }
         }
@@ -41,11 +42,11 @@ class TestServiceContainerWeakRefPass implements CompilerPassInterface
         $aliases = $container->getAliases();
 
         foreach ($aliases as $id => $alias) {
-            if ($id && '.' !== $id[0] && (!$alias->isPublic() || $alias->isPrivate())) {
+            if ($id && '.' !== $id[0] && $alias->isPrivate()) {
                 while (isset($aliases[$target = (string) $alias])) {
                     $alias = $aliases[$target];
                 }
-                if (isset($definitions[$target]) && !$definitions[$target]->$hasErrors() && !$definitions[$target]->isAbstract()) {
+                if (isset($definitions[$target]) && !$definitions[$target]->hasErrors() && !$definitions[$target]->isAbstract()) {
                     $privateServices[$id] = new Reference($target, ContainerBuilder::IGNORE_ON_UNINITIALIZED_REFERENCE);
                 }
             }

@@ -11,6 +11,8 @@
 
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
+use Symfony\Component\Config\Loader\ParamConfigurator;
+use Symfony\Component\DependencyInjection\Argument\AbstractArgument;
 use Symfony\Component\DependencyInjection\Argument\IteratorArgument;
 use Symfony\Component\DependencyInjection\Argument\ServiceLocatorArgument;
 use Symfony\Component\DependencyInjection\Argument\TaggedIteratorArgument;
@@ -19,6 +21,7 @@ use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
 use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
+use Symfony\Component\DependencyInjection\Loader\UndefinedExtensionHandler;
 use Symfony\Component\ExpressionLanguage\Expression;
 
 /**
@@ -28,33 +31,37 @@ class ContainerConfigurator extends AbstractConfigurator
 {
     public const FACTORY = 'container';
 
-    private $container;
-    private $loader;
-    private $instanceof;
-    private $path;
-    private $file;
-    private $anonymousCount = 0;
+    private array $instanceof;
+    private int $anonymousCount = 0;
 
-    public function __construct(ContainerBuilder $container, PhpFileLoader $loader, array &$instanceof, string $path, string $file)
-    {
-        $this->container = $container;
-        $this->loader = $loader;
+    public function __construct(
+        private ContainerBuilder $container,
+        private PhpFileLoader $loader,
+        array &$instanceof,
+        private string $path,
+        private string $file,
+        private ?string $env = null,
+    ) {
         $this->instanceof = &$instanceof;
-        $this->path = $path;
-        $this->file = $file;
     }
 
-    final public function extension(string $namespace, array $config)
+    final public function extension(string $namespace, array $config, bool $prepend = false): void
     {
+        if ($prepend) {
+            $this->container->prependExtensionConfig($namespace, static::processValue($config));
+
+            return;
+        }
+
         if (!$this->container->hasExtension($namespace)) {
-            $extensions = array_filter(array_map(function (ExtensionInterface $ext) { return $ext->getAlias(); }, $this->container->getExtensions()));
-            throw new InvalidArgumentException(sprintf('There is no extension able to load the configuration for "%s" (in "%s"). Looked for namespace "%s", found "%s".', $namespace, $this->file, $namespace, $extensions ? implode('", "', $extensions) : 'none'));
+            $extensions = array_filter(array_map(static fn (ExtensionInterface $ext) => $ext->getAlias(), $this->container->getExtensions()));
+            throw new InvalidArgumentException(UndefinedExtensionHandler::getErrorMessage($namespace, $this->file, $namespace, $extensions));
         }
 
         $this->container->loadFromExtension($namespace, static::processValue($config));
     }
 
-    final public function import(string $resource, string $type = null, $ignoreErrors = false)
+    final public function import(string $resource, ?string $type = null, bool|string $ignoreErrors = false): void
     {
         $this->loader->setCurrentDir(\dirname($this->path));
         $this->loader->import($resource, $type, $ignoreErrors, $this->file);
@@ -69,20 +76,45 @@ class ContainerConfigurator extends AbstractConfigurator
     {
         return new ServicesConfigurator($this->container, $this->loader, $this->instanceof, $this->path, $this->anonymousCount);
     }
+
+    /**
+     * Get the current environment to be able to write conditional configuration.
+     */
+    final public function env(): ?string
+    {
+        return $this->env;
+    }
+
+    final public function withPath(string $path): static
+    {
+        $clone = clone $this;
+        $clone->path = $clone->file = $path;
+        $clone->loader->setCurrentDir(\dirname($path));
+
+        return $clone;
+    }
 }
 
 /**
- * Creates a service reference.
+ * Creates a parameter.
  */
-function ref(string $id): ReferenceConfigurator
+function param(string $name): ParamConfigurator
 {
-    return new ReferenceConfigurator($id);
+    return new ParamConfigurator($name);
+}
+
+/**
+ * Creates a reference to a service.
+ */
+function service(string $serviceId): ReferenceConfigurator
+{
+    return new ReferenceConfigurator($serviceId);
 }
 
 /**
  * Creates an inline service.
  */
-function inline(string $class = null): InlineServiceConfigurator
+function inline_service(?string $class = null): InlineServiceConfigurator
 {
     return new InlineServiceConfigurator(new Definition($class));
 }
@@ -90,11 +122,13 @@ function inline(string $class = null): InlineServiceConfigurator
 /**
  * Creates a service locator.
  *
- * @param ReferenceConfigurator[] $values
+ * @param array<ReferenceConfigurator|InlineServiceConfigurator> $values
  */
 function service_locator(array $values): ServiceLocatorArgument
 {
-    return new ServiceLocatorArgument(AbstractConfigurator::processValue($values, true));
+    $values = AbstractConfigurator::processValue($values, true);
+
+    return new ServiceLocatorArgument($values);
 }
 
 /**
@@ -109,36 +143,58 @@ function iterator(array $values): IteratorArgument
 
 /**
  * Creates a lazy iterator by tag name.
- *
- * @deprecated since Symfony 4.4, to be removed in 5.0, use "tagged_iterator" instead.
  */
-function tagged(string $tag, string $indexAttribute = null, string $defaultIndexMethod = null): TaggedIteratorArgument
+function tagged_iterator(string $tag, ?string $indexAttribute = null, ?string $defaultIndexMethod = null, ?string $defaultPriorityMethod = null, string|array $exclude = [], bool $excludeSelf = true): TaggedIteratorArgument
 {
-    @trigger_error(__NAMESPACE__.'\tagged() is deprecated since Symfony 4.4 and will be removed in 5.0, use '.__NAMESPACE__.'\tagged_iterator() instead.', \E_USER_DEPRECATED);
-
-    return new TaggedIteratorArgument($tag, $indexAttribute, $defaultIndexMethod);
-}
-
-/**
- * Creates a lazy iterator by tag name.
- */
-function tagged_iterator(string $tag, string $indexAttribute = null, string $defaultIndexMethod = null, string $defaultPriorityMethod = null): TaggedIteratorArgument
-{
-    return new TaggedIteratorArgument($tag, $indexAttribute, $defaultIndexMethod, false, $defaultPriorityMethod);
+    return new TaggedIteratorArgument($tag, $indexAttribute, $defaultIndexMethod, false, $defaultPriorityMethod, (array) $exclude, $excludeSelf);
 }
 
 /**
  * Creates a service locator by tag name.
  */
-function tagged_locator(string $tag, string $indexAttribute = null, string $defaultIndexMethod = null): ServiceLocatorArgument
+function tagged_locator(string $tag, ?string $indexAttribute = null, ?string $defaultIndexMethod = null, ?string $defaultPriorityMethod = null, string|array $exclude = [], bool $excludeSelf = true): ServiceLocatorArgument
 {
-    return new ServiceLocatorArgument(new TaggedIteratorArgument($tag, $indexAttribute, $defaultIndexMethod, true));
+    return new ServiceLocatorArgument(new TaggedIteratorArgument($tag, $indexAttribute, $defaultIndexMethod, true, $defaultPriorityMethod, (array) $exclude, $excludeSelf));
 }
 
 /**
  * Creates an expression.
  */
-function expr(string $expression): Expression
+function expr(string $expression): ExpressionConfigurator
 {
-    return new Expression($expression);
+    return new ExpressionConfigurator($expression);
+}
+
+/**
+ * Creates an abstract argument.
+ */
+function abstract_arg(string $description): AbstractArgument
+{
+    return new AbstractArgument($description);
+}
+
+/**
+ * Creates an environment variable reference.
+ */
+function env(string $name): EnvConfigurator
+{
+    return new EnvConfigurator($name);
+}
+
+/**
+ * Creates a closure service reference.
+ */
+function service_closure(string $serviceId): ClosureReferenceConfigurator
+{
+    return new ClosureReferenceConfigurator($serviceId);
+}
+
+/**
+ * Creates a closure.
+ */
+function closure(string|array|\Closure|ReferenceConfigurator|Expression $callable): InlineServiceConfigurator
+{
+    return (new InlineServiceConfigurator(new Definition('Closure')))
+        ->factory(['Closure', 'fromCallable'])
+        ->args([$callable]);
 }

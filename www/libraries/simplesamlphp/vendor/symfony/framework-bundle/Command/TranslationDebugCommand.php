@@ -11,7 +11,10 @@
 
 namespace Symfony\Bundle\FrameworkBundle\Command;
 
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Completion\CompletionInput;
+use Symfony\Component\Console\Completion\CompletionSuggestions;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -26,7 +29,6 @@ use Symfony\Component\Translation\LoggingTranslator;
 use Symfony\Component\Translation\MessageCatalogue;
 use Symfony\Component\Translation\Reader\TranslationReaderInterface;
 use Symfony\Component\Translation\Translator;
-use Symfony\Component\Translation\TranslatorInterface as LegacyTranslatorInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
@@ -37,126 +39,90 @@ use Symfony\Contracts\Translation\TranslatorInterface;
  *
  * @final
  */
+#[AsCommand(name: 'debug:translation', description: 'Display translation messages information')]
 class TranslationDebugCommand extends Command
 {
+    public const EXIT_CODE_GENERAL_ERROR = 64;
+    public const EXIT_CODE_MISSING = 65;
+    public const EXIT_CODE_UNUSED = 66;
+    public const EXIT_CODE_FALLBACK = 68;
     public const MESSAGE_MISSING = 0;
     public const MESSAGE_UNUSED = 1;
     public const MESSAGE_EQUALS_FALLBACK = 2;
 
-    protected static $defaultName = 'debug:translation';
-
-    private $translator;
-    private $reader;
-    private $extractor;
-    private $defaultTransPath;
-    private $defaultViewsPath;
-    private $transPaths;
-    private $viewsPaths;
-
-    /**
-     * @param TranslatorInterface $translator
-     */
-    public function __construct($translator, TranslationReaderInterface $reader, ExtractorInterface $extractor, string $defaultTransPath = null, string $defaultViewsPath = null, array $transPaths = [], array $viewsPaths = [])
-    {
-        if (!$translator instanceof LegacyTranslatorInterface && !$translator instanceof TranslatorInterface) {
-            throw new \TypeError(sprintf('Argument 1 passed to "%s()" must be an instance of "%s", "%s" given.', __METHOD__, TranslatorInterface::class, \is_object($translator) ? \get_class($translator) : \gettype($translator)));
-        }
+    public function __construct(
+        private TranslatorInterface $translator,
+        private TranslationReaderInterface $reader,
+        private ExtractorInterface $extractor,
+        private ?string $defaultTransPath = null,
+        private ?string $defaultViewsPath = null,
+        private array $transPaths = [],
+        private array $codePaths = [],
+        private array $enabledLocales = [],
+    ) {
         parent::__construct();
-
-        $this->translator = $translator;
-        $this->reader = $reader;
-        $this->extractor = $extractor;
-        $this->defaultTransPath = $defaultTransPath;
-        $this->defaultViewsPath = $defaultViewsPath;
-        $this->transPaths = $transPaths;
-        $this->viewsPaths = $viewsPaths;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setDefinition([
                 new InputArgument('locale', InputArgument::REQUIRED, 'The locale'),
                 new InputArgument('bundle', InputArgument::OPTIONAL, 'The bundle name or directory where to load the messages'),
-                new InputOption('domain', null, InputOption::VALUE_OPTIONAL, 'The messages domain'),
-                new InputOption('only-missing', null, InputOption::VALUE_NONE, 'Displays only missing messages'),
-                new InputOption('only-unused', null, InputOption::VALUE_NONE, 'Displays only unused messages'),
+                new InputOption('domain', null, InputOption::VALUE_REQUIRED, 'The messages domain'),
+                new InputOption('only-missing', null, InputOption::VALUE_NONE, 'Display only missing messages'),
+                new InputOption('only-unused', null, InputOption::VALUE_NONE, 'Display only unused messages'),
                 new InputOption('all', null, InputOption::VALUE_NONE, 'Load messages from all registered bundles'),
             ])
-            ->setDescription('Displays translation messages information')
             ->setHelp(<<<'EOF'
-The <info>%command.name%</info> command helps finding unused or missing translation
-messages and comparing them with the fallback ones by inspecting the
-templates and translation files of a given bundle or the default translations directory.
+                The <info>%command.name%</info> command helps finding unused or missing translation
+                messages and comparing them with the fallback ones by inspecting the
+                templates and translation files of a given bundle or the default translations directory.
 
-You can display information about bundle translations in a specific locale:
+                You can display information about bundle translations in a specific locale:
 
-  <info>php %command.full_name% en AcmeDemoBundle</info>
+                  <info>php %command.full_name% en AcmeDemoBundle</info>
 
-You can also specify a translation domain for the search:
+                You can also specify a translation domain for the search:
 
-  <info>php %command.full_name% --domain=messages en AcmeDemoBundle</info>
+                  <info>php %command.full_name% --domain=messages en AcmeDemoBundle</info>
 
-You can only display missing messages:
+                You can only display missing messages:
 
-  <info>php %command.full_name% --only-missing en AcmeDemoBundle</info>
+                  <info>php %command.full_name% --only-missing en AcmeDemoBundle</info>
 
-You can only display unused messages:
+                You can only display unused messages:
 
-  <info>php %command.full_name% --only-unused en AcmeDemoBundle</info>
+                  <info>php %command.full_name% --only-unused en AcmeDemoBundle</info>
 
-You can display information about application translations in a specific locale:
+                You can display information about application translations in a specific locale:
 
-  <info>php %command.full_name% en</info>
+                  <info>php %command.full_name% en</info>
 
-You can display information about translations in all registered bundles in a specific locale:
+                You can display information about translations in all registered bundles in a specific locale:
 
-  <info>php %command.full_name% --all en</info>
+                  <info>php %command.full_name% --all en</info>
 
-EOF
+                EOF
             )
         ;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
 
         $locale = $input->getArgument('locale');
         $domain = $input->getOption('domain');
+
+        $exitCode = self::SUCCESS;
+
         /** @var KernelInterface $kernel */
         $kernel = $this->getApplication()->getKernel();
-        $rootDir = $kernel->getContainer()->getParameter('kernel.root_dir');
 
         // Define Root Paths
-        $transPaths = $this->transPaths;
-        if (is_dir($dir = $rootDir.'/Resources/translations')) {
-            if ($dir !== $this->defaultTransPath) {
-                $notice = sprintf('Storing translations in the "%s" directory is deprecated since Symfony 4.2, ', $dir);
-                @trigger_error($notice.($this->defaultTransPath ? sprintf('use the "%s" directory instead.', $this->defaultTransPath) : 'configure and use "framework.translator.default_path" instead.'), \E_USER_DEPRECATED);
-            }
-            $transPaths[] = $dir;
-        }
-        if ($this->defaultTransPath) {
-            $transPaths[] = $this->defaultTransPath;
-        }
-        $viewsPaths = $this->viewsPaths;
-        if (is_dir($dir = $rootDir.'/Resources/views')) {
-            if ($dir !== $this->defaultViewsPath) {
-                $notice = sprintf('Loading Twig templates from the "%s" directory is deprecated since Symfony 4.2, ', $dir);
-                @trigger_error($notice.($this->defaultViewsPath ? sprintf('use the "%s" directory instead.', $this->defaultViewsPath) : 'configure and use "twig.default_path" instead.'), \E_USER_DEPRECATED);
-            }
-            $viewsPaths[] = $dir;
-        }
-        if ($this->defaultViewsPath) {
-            $viewsPaths[] = $this->defaultViewsPath;
-        }
+        $transPaths = $this->getRootTransPaths();
+        $codePaths = $this->getRootCodePaths($kernel);
 
         // Override with provided Bundle info
         if (null !== $input->getArgument('bundle')) {
@@ -164,67 +130,34 @@ EOF
                 $bundle = $kernel->getBundle($input->getArgument('bundle'));
                 $bundleDir = $bundle->getPath();
                 $transPaths = [is_dir($bundleDir.'/Resources/translations') ? $bundleDir.'/Resources/translations' : $bundleDir.'/translations'];
-                $viewsPaths = [is_dir($bundleDir.'/Resources/views') ? $bundleDir.'/Resources/views' : $bundleDir.'/templates'];
+                $codePaths = [is_dir($bundleDir.'/Resources/views') ? $bundleDir.'/Resources/views' : $bundleDir.'/templates'];
                 if ($this->defaultTransPath) {
                     $transPaths[] = $this->defaultTransPath;
                 }
-                if (is_dir($dir = sprintf('%s/Resources/%s/translations', $rootDir, $bundle->getName()))) {
-                    $transPaths[] = $dir;
-                    $notice = sprintf('Storing translations files for "%s" in the "%s" directory is deprecated since Symfony 4.2, ', $dir, $bundle->getName());
-                    @trigger_error($notice.($this->defaultTransPath ? sprintf('use the "%s" directory instead.', $this->defaultTransPath) : 'configure and use "framework.translator.default_path" instead.'), \E_USER_DEPRECATED);
-                }
                 if ($this->defaultViewsPath) {
-                    $viewsPaths[] = $this->defaultViewsPath;
+                    $codePaths[] = $this->defaultViewsPath;
                 }
-                if (is_dir($dir = sprintf('%s/Resources/%s/views', $rootDir, $bundle->getName()))) {
-                    $viewsPaths[] = $dir;
-                    $notice = sprintf('Loading Twig templates for "%s" from the "%s" directory is deprecated since Symfony 4.2, ', $bundle->getName(), $dir);
-                    @trigger_error($notice.($this->defaultViewsPath ? sprintf('use the "%s" directory instead.', $this->defaultViewsPath) : 'configure and use "twig.default_path" instead.'), \E_USER_DEPRECATED);
-                }
-            } catch (\InvalidArgumentException $e) {
+            } catch (\InvalidArgumentException) {
                 // such a bundle does not exist, so treat the argument as path
                 $path = $input->getArgument('bundle');
 
                 $transPaths = [$path.'/translations'];
-                if (is_dir($dir = $path.'/Resources/translations')) {
-                    if ($dir !== $this->defaultTransPath) {
-                        @trigger_error(sprintf('Storing translations in the "%s" directory is deprecated since Symfony 4.2, use the "%s" directory instead.', $dir, $path.'/translations'), \E_USER_DEPRECATED);
-                    }
-                    $transPaths[] = $dir;
-                }
+                $codePaths = [$path.'/templates'];
 
-                $viewsPaths = [$path.'/templates'];
-                if (is_dir($dir = $path.'/Resources/views')) {
-                    if ($dir !== $this->defaultViewsPath) {
-                        @trigger_error(sprintf('Loading Twig templates from the "%s" directory is deprecated since Symfony 4.2, use the "%s" directory instead.', $dir, $path.'/templates'), \E_USER_DEPRECATED);
-                    }
-                    $viewsPaths[] = $dir;
-                }
-
-                if (!is_dir($transPaths[0]) && !isset($transPaths[1])) {
-                    throw new InvalidArgumentException(sprintf('"%s" is neither an enabled bundle nor a directory.', $transPaths[0]));
+                if (!is_dir($transPaths[0])) {
+                    throw new InvalidArgumentException(\sprintf('"%s" is neither an enabled bundle nor a directory.', $transPaths[0]));
                 }
             }
         } elseif ($input->getOption('all')) {
             foreach ($kernel->getBundles() as $bundle) {
                 $bundleDir = $bundle->getPath();
                 $transPaths[] = is_dir($bundleDir.'/Resources/translations') ? $bundleDir.'/Resources/translations' : $bundle->getPath().'/translations';
-                $viewsPaths[] = is_dir($bundleDir.'/Resources/views') ? $bundleDir.'/Resources/views' : $bundle->getPath().'/templates';
-                if (is_dir($deprecatedPath = sprintf('%s/Resources/%s/translations', $rootDir, $bundle->getName()))) {
-                    $transPaths[] = $deprecatedPath;
-                    $notice = sprintf('Storing translations files for "%s" in the "%s" directory is deprecated since Symfony 4.2, ', $bundle->getName(), $deprecatedPath);
-                    @trigger_error($notice.($this->defaultTransPath ? sprintf('use the "%s" directory instead.', $this->defaultTransPath) : 'configure and use "framework.translator.default_path" instead.'), \E_USER_DEPRECATED);
-                }
-                if (is_dir($deprecatedPath = sprintf('%s/Resources/%s/views', $rootDir, $bundle->getName()))) {
-                    $viewsPaths[] = $deprecatedPath;
-                    $notice = sprintf('Loading Twig templates for "%s" from the "%s" directory is deprecated since Symfony 4.2, ', $bundle->getName(), $deprecatedPath);
-                    @trigger_error($notice.($this->defaultViewsPath ? sprintf('use the "%s" directory instead.', $this->defaultViewsPath) : 'configure and use "twig.default_path" instead.'), \E_USER_DEPRECATED);
-                }
+                $codePaths[] = is_dir($bundleDir.'/Resources/views') ? $bundleDir.'/Resources/views' : $bundle->getPath().'/templates';
             }
         }
 
         // Extract used messages
-        $extractedCatalogue = $this->extractMessages($locale, $viewsPaths);
+        $extractedCatalogue = $this->extractMessages($locale, $codePaths);
 
         // Load defined messages
         $currentCatalogue = $this->loadCurrentMessages($locale, $transPaths);
@@ -237,25 +170,25 @@ EOF
         }
 
         // No defined or extracted messages
-        if (empty($allMessages) || null !== $domain && empty($allMessages[$domain])) {
-            $outputMessage = sprintf('No defined or extracted messages for locale "%s"', $locale);
+        if (!$allMessages || null !== $domain && empty($allMessages[$domain])) {
+            $outputMessage = \sprintf('No defined or extracted messages for locale "%s"', $locale);
 
             if (null !== $domain) {
-                $outputMessage .= sprintf(' and domain "%s"', $domain);
+                $outputMessage .= \sprintf(' and domain "%s"', $domain);
             }
 
             $io->getErrorStyle()->warning($outputMessage);
 
-            return 0;
+            return self::EXIT_CODE_GENERAL_ERROR;
         }
 
         // Load the fallback catalogues
         $fallbackCatalogues = $this->loadFallbackCatalogues($locale, $transPaths);
 
         // Display header line
-        $headers = ['State', 'Domain', 'Id', sprintf('Message Preview (%s)', $locale)];
+        $headers = ['State', 'Domain', 'Id', \sprintf('Message Preview (%s)', $locale)];
         foreach ($fallbackCatalogues as $fallbackCatalogue) {
-            $headers[] = sprintf('Fallback Message Preview (%s)', $fallbackCatalogue->getLocale());
+            $headers[] = \sprintf('Fallback Message Preview (%s)', $fallbackCatalogue->getLocale());
         }
         $rows = [];
         // Iterate all message ids and determine their state
@@ -267,19 +200,30 @@ EOF
                 if ($extractedCatalogue->defines($messageId, $domain)) {
                     if (!$currentCatalogue->defines($messageId, $domain)) {
                         $states[] = self::MESSAGE_MISSING;
+
+                        if (!$input->getOption('only-unused')) {
+                            $exitCode |= self::EXIT_CODE_MISSING;
+                        }
                     }
                 } elseif ($currentCatalogue->defines($messageId, $domain)) {
                     $states[] = self::MESSAGE_UNUSED;
+
+                    if (!$input->getOption('only-missing')) {
+                        $exitCode |= self::EXIT_CODE_UNUSED;
+                    }
                 }
 
-                if (!\in_array(self::MESSAGE_UNUSED, $states) && true === $input->getOption('only-unused')
-                    || !\in_array(self::MESSAGE_MISSING, $states) && true === $input->getOption('only-missing')) {
+                if (!\in_array(self::MESSAGE_UNUSED, $states, true) && $input->getOption('only-unused')
+                    || !\in_array(self::MESSAGE_MISSING, $states, true) && $input->getOption('only-missing')
+                ) {
                     continue;
                 }
 
                 foreach ($fallbackCatalogues as $fallbackCatalogue) {
                     if ($fallbackCatalogue->defines($messageId, $domain) && $value === $fallbackCatalogue->get($messageId, $domain)) {
                         $states[] = self::MESSAGE_EQUALS_FALLBACK;
+
+                        $exitCode |= self::EXIT_CODE_FALLBACK;
 
                         break;
                     }
@@ -296,7 +240,45 @@ EOF
 
         $io->table($headers, $rows);
 
-        return 0;
+        return $exitCode;
+    }
+
+    public function complete(CompletionInput $input, CompletionSuggestions $suggestions): void
+    {
+        if ($input->mustSuggestArgumentValuesFor('locale')) {
+            $suggestions->suggestValues($this->enabledLocales);
+
+            return;
+        }
+
+        /** @var KernelInterface $kernel */
+        $kernel = $this->getApplication()->getKernel();
+
+        if ($input->mustSuggestArgumentValuesFor('bundle')) {
+            $availableBundles = [];
+            foreach ($kernel->getBundles() as $bundle) {
+                $availableBundles[] = $bundle->getName();
+
+                if ($extension = $bundle->getContainerExtension()) {
+                    $availableBundles[] = $extension->getAlias();
+                }
+            }
+
+            $suggestions->suggestValues($availableBundles);
+
+            return;
+        }
+
+        if ($input->mustSuggestOptionValuesFor('domain')) {
+            $locale = $input->getArgument('locale');
+
+            $mergeOperation = new MergeOperation(
+                $this->extractMessages($locale, $this->getRootCodePaths($kernel)),
+                $this->loadCurrentMessages($locale, $this->getRootTransPaths())
+            );
+
+            $suggestions->suggestValues($mergeOperation->getDomains());
+        }
     }
 
     private function formatState(int $state): string
@@ -328,7 +310,7 @@ EOF
 
     private function formatId(string $id): string
     {
-        return sprintf('<fg=cyan;options=bold>%s</>', $id);
+        return \sprintf('<fg=cyan;options=bold>%s</>', $id);
     }
 
     private function sanitizeString(string $string, int $length = 40): string
@@ -393,5 +375,26 @@ EOF
         }
 
         return $fallbackCatalogues;
+    }
+
+    private function getRootTransPaths(): array
+    {
+        $transPaths = $this->transPaths;
+        if ($this->defaultTransPath) {
+            $transPaths[] = $this->defaultTransPath;
+        }
+
+        return $transPaths;
+    }
+
+    private function getRootCodePaths(KernelInterface $kernel): array
+    {
+        $codePaths = $this->codePaths;
+        $codePaths[] = $kernel->getProjectDir().'/src';
+        if ($this->defaultViewsPath) {
+            $codePaths[] = $this->defaultViewsPath;
+        }
+
+        return $codePaths;
     }
 }

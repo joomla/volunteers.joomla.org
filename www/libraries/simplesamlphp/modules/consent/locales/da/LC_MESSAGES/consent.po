@@ -15,100 +15,20 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.3.4\n"
 
-msgid "{consent:consent:service_providers_for}"
-msgstr "Tjenesteudbyder for"
-
-msgid "{consent:consent:abort}"
-msgstr "Afbryd login til SPNAME"
-
-msgid "{consent:consent:remember}"
-msgstr "Husk samtykke"
-
-msgid "{consent:consent:login}"
-msgstr "login"
-
-msgid "{consent:consent:consent_purpose}"
-msgstr "SPNAME har til formål at SPDESC"
-
-msgid "{consent:consent:noconsent_goto_about}"
-msgstr "Gå til side med information om tjenesten"
-
-msgid "{consent:consent:consent_header}"
-msgstr "Samtykke til at frigive personlige oplysninger"
-
-msgid "{consent:consent:show_hide_attributes}"
-msgstr "vis/skjul attributter"
-
-msgid "{consent:consent:table_caption}"
-msgstr "Bruger information"
-
-msgid "{consent:consent:status_header}"
-msgstr "Samtykke status"
-
-msgid "{consent:consent:noconsent_title}"
-msgstr "Manglende samtykke"
-
-msgid "{consent:consent:consent_accept}"
-msgstr ""
-"SPNAME kræver at nedenstående oplysninger overføres fra IDPNAME. Vil du "
-"acceptere dette?"
-
-msgid "{consent:consent:table_summary}"
-msgstr "Informationer som vil blive sendt til den service du er ved at logge in på"
-
-msgid "{consent:consent:service_provider_header}"
-msgstr "Tjenesteudbyder"
-
-msgid "{consent:consent:show_attributes}"
-msgstr "Vis attributter"
-
-msgid "{consent:consent:show_attribute}"
-msgstr "Vis indhold"
-
-msgid "{consent:consent:no}"
-msgstr "Nej, jeg accepterer ikke"
-
-msgid "{consent:consent:consent_privacypolicy}"
-msgstr "Tjenestens politik vedrørende personoplysninger"
-
-msgid "{consent:consent:noconsent_text}"
-msgstr "Du har ikke givet samtykke til overleveringen af oplysninger til tjenesten"
-
-msgid "{consent:consent:noconsent_return}"
-msgstr "Gå tilbage"
-
-msgid "{consent:consent:yes}"
-msgstr "Ja, jeg accepterer"
-
-msgid "{consent:consent:consent_attributes_header}"
-msgstr "Attributter som bliver sendt til SPNAME"
-
-msgid "Service Providers for"
-msgstr "Tjenesteudbyder for"
-
 msgid "Yes, continue"
 msgstr "Ja, jeg accepterer"
 
 msgid "Return to consent page"
 msgstr "Gå tilbage"
 
-msgid "Consent status"
-msgstr "Samtykke status"
-
 msgid "Go to information page for the service"
 msgstr "Gå til side med information om tjenesten"
 
-msgid "Service Provider"
-msgstr "Tjenesteudbyder"
+msgid "Abort login to %SPNAME%"
+msgstr "Afbryd login til %SPNAME%"
 
-msgid "Abort login to SPNAME"
-msgstr "Afbryd login til SPNAME"
-
-msgid "show/hide attributes"
-msgstr "vis/skjul attributter"
-
-msgid "The purpose of SPNAME is SPDESC"
-msgstr "SPNAME har til formål at SPDESC"
+msgid "The purpose of %SPNAME% is %SPDESC%"
+msgstr "%SPNAME% har til formål at %SPDESC%"
 
 msgid ""
 "List the information about you that is about to be transmitted to the "
@@ -121,10 +41,7 @@ msgstr "Samtykke til at frigive personlige oplysninger"
 msgid "No consent given"
 msgstr "Manglende samtykke"
 
-msgid "login"
-msgstr "login"
-
-msgid "You did not give consent for transfering your attributes to SPNAME."
+msgid "You did not give consent for transferring your attributes to %SPNAME%."
 msgstr "Du har ikke givet samtykke til overleveringen af oplysninger til tjenesten"
 
 msgid "Remember"
@@ -133,23 +50,20 @@ msgstr "Husk samtykke"
 msgid "Show content"
 msgstr "Vis indhold"
 
-msgid "SPNAME requires that the information below is transferred."
+msgid "%SPNAME% requires that the information below is transferred."
 msgstr ""
-"SPNAME kræver at nedenstående oplysninger overføres fra IDPNAME. Vil du "
+"%SPNAME% kræver at nedenstående oplysninger overføres fra %IDPNAME%. Vil du "
 "acceptere dette?"
 
-msgid "Privacypolicy for the service"
+msgid "Privacy policy for the service"
 msgstr "Tjenestens politik vedrørende personoplysninger"
 
 msgid "No, cancel"
 msgstr "Nej, jeg accepterer ikke"
 
-msgid "Show attributes"
-msgstr "Vis attributter"
-
 msgid "User information"
 msgstr "Bruger information"
 
-msgid "Information that will be sent to SPNAME"
-msgstr "Attributter som bliver sendt til SPNAME"
+msgid "Information that will be sent to %SPNAME%"
+msgstr "Attributter som bliver sendt til %SPNAME%"
 

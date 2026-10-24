@@ -15,14 +15,6 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.3.4\n"
 
-msgid "{authorize:Authorize:403_text}"
-msgstr ""
-"Ez duzu beharrezko pribilegiorik aplikazio honetan sartzeko. Hau okerra "
-"dela baderitzozu, jar zaitez administratzailearekin harremanetan. "
-
-msgid "{authorize:Authorize:403_header}"
-msgstr "Sarrera debekatua"
-
 msgid "Access forbidden"
 msgstr "Sarrera debekatua"
 

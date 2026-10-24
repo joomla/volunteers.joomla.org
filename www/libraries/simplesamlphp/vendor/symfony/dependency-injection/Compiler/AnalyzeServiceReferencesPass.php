@@ -16,7 +16,9 @@ use Symfony\Component\DependencyInjection\Argument\IteratorArgument;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\DependencyInjection\Exception\LogicException;
 use Symfony\Component\DependencyInjection\Reference;
+use Symfony\Component\ExpressionLanguage\Expression;
 
 /**
  * Run this pass before passes that need to know more about the relation of
@@ -28,40 +30,33 @@ use Symfony\Component\DependencyInjection\Reference;
  * @author Johannes M. Schmitt <schmittjoh@gmail.com>
  * @author Nicolas Grekas <p@tchwork.com>
  */
-class AnalyzeServiceReferencesPass extends AbstractRecursivePass implements RepeatablePassInterface
+class AnalyzeServiceReferencesPass extends AbstractRecursivePass
 {
-    private $graph;
-    private $currentDefinition;
-    private $onlyConstructorArguments;
-    private $hasProxyDumper;
-    private $lazy;
-    private $byConstructor;
-    private $byFactory;
-    private $definitions;
-    private $aliases;
+    protected bool $skipScalars = true;
+
+    private ServiceReferenceGraph $graph;
+    private ?Definition $currentDefinition = null;
+    private bool $lazy;
+    private bool $byConstructor;
+    private bool $byFactory;
+    private bool $byMultiUseArgument;
+    private array $definitions;
+    private array $aliases;
 
     /**
      * @param bool $onlyConstructorArguments Sets this Service Reference pass to ignore method calls
      */
-    public function __construct(bool $onlyConstructorArguments = false, bool $hasProxyDumper = true)
-    {
-        $this->onlyConstructorArguments = $onlyConstructorArguments;
-        $this->hasProxyDumper = $hasProxyDumper;
+    public function __construct(
+        private bool $onlyConstructorArguments = false,
+        private bool $hasProxyDumper = true,
+    ) {
         $this->enableExpressionProcessing();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function setRepeatedPass(RepeatedPass $repeatedPass)
-    {
-        @trigger_error(sprintf('The "%s()" method is deprecated since Symfony 4.2.', __METHOD__), \E_USER_DEPRECATED);
     }
 
     /**
      * Processes a ContainerBuilder object to populate the service reference graph.
      */
-    public function process(ContainerBuilder $container)
+    public function process(ContainerBuilder $container): void
     {
         $this->container = $container;
         $this->graph = $container->getCompiler()->getServiceReferenceGraph();
@@ -69,6 +64,7 @@ class AnalyzeServiceReferencesPass extends AbstractRecursivePass implements Repe
         $this->lazy = false;
         $this->byConstructor = false;
         $this->byFactory = false;
+        $this->byMultiUseArgument = false;
         $this->definitions = $container->getDefinitions();
         $this->aliases = $container->getAliases();
 
@@ -84,14 +80,19 @@ class AnalyzeServiceReferencesPass extends AbstractRecursivePass implements Repe
         }
     }
 
-    protected function processValue($value, $isRoot = false)
+    protected function processValue(mixed $value, bool $isRoot = false): mixed
     {
         $lazy = $this->lazy;
         $inExpression = $this->inExpression();
 
         if ($value instanceof ArgumentInterface) {
             $this->lazy = !$this->byFactory || !$value instanceof IteratorArgument;
+            $byMultiUseArgument = $this->byMultiUseArgument;
+            if ($value instanceof IteratorArgument) {
+                $this->byMultiUseArgument = true;
+            }
             parent::processValue($value->getValues());
+            $this->byMultiUseArgument = $byMultiUseArgument;
             $this->lazy = $lazy;
 
             return $value;
@@ -106,9 +107,10 @@ class AnalyzeServiceReferencesPass extends AbstractRecursivePass implements Repe
                 $targetId,
                 $targetDefinition,
                 $value,
-                $this->lazy || ($this->hasProxyDumper && $targetDefinition && $targetDefinition->isLazy()),
+                $this->lazy || ($this->hasProxyDumper && $targetDefinition?->isLazy()),
                 ContainerInterface::IGNORE_ON_UNINITIALIZED_REFERENCE === $value->getInvalidBehavior(),
-                $this->byConstructor
+                $this->byConstructor,
+                $this->byMultiUseArgument
             );
 
             if ($inExpression) {
@@ -118,9 +120,11 @@ class AnalyzeServiceReferencesPass extends AbstractRecursivePass implements Repe
                     $targetId,
                     $targetDefinition,
                     $value,
-                    $this->lazy || ($targetDefinition && $targetDefinition->isLazy()),
-                    true
-               );
+                    $this->lazy || $targetDefinition?->isLazy(),
+                    true,
+                    $this->byConstructor,
+                    $this->byMultiUseArgument
+                );
             }
 
             return $value;
@@ -143,8 +147,16 @@ class AnalyzeServiceReferencesPass extends AbstractRecursivePass implements Repe
 
         $byFactory = $this->byFactory;
         $this->byFactory = true;
-        $this->processValue($value->getFactory());
+        if (\is_string($factory = $value->getFactory()) && str_starts_with($factory, '@=')) {
+            if (!class_exists(Expression::class)) {
+                throw new LogicException('Expressions cannot be used in service factories without the ExpressionLanguage component. Try running "composer require symfony/expression-language".');
+            }
+
+            $factory = new Expression(substr($factory, 2));
+        }
+        $this->processValue($factory);
         $this->byFactory = $byFactory;
+
         $this->processValue($value->getArguments());
 
         $properties = $value->getProperties();

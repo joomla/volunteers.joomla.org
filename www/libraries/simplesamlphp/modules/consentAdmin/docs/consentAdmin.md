@@ -13,13 +13,20 @@ database to store the consents.
 Setting up the consentAdmin module
 ----------------------------------
 
-The first thing you need to do is to enable the consentAdmin module:
+The first thing you need to do is to enable the consentAdmin module: in
+`config.php`, search for the `module.enable` key and set `consentAdmin` to true:
 
-    touch modules/consentAdmin/enable
+```
+    'module.enable' => [
+         'consentAdmin' => true,
+         …
+    ],
+```
+
 
 Next you need to copy the module config file to the config directory:
 
-    cp modules/consentAdmin/config-templates/module_config.php config
+    cp modules/consentAdmin/config-templates/module_consentAdmin.php config/
 
 Then you will need to set up the database. The consentAdmin uses the same
 table as the consent module, but you still need the set the correct
@@ -32,7 +39,7 @@ credentials in the config file. Example:
 		'password'	=>	'sdfsdf',
 	),
 
-Notice that credentials usualy is the same as for the consent module, but
+Notice that credentials usually is the same as for the consent module, but
 can be different.
 
 Go to the frontpage of your SimpleSAMLphp installation. A link to the
@@ -71,7 +78,7 @@ The call to these filters are made with an isPassive request, with means that
 no filter is allowed to make userinteraction. 
 
 It is up to the developers of the filters to respect the isPassive request.
-The prefered thing to do is to make your setup so that only filters that
+The preferred thing to do is to make your setup so that only filters that
 modify attributes is run. Othervise it is recommended that developers of
 filters to throw a 'NoPassive' exception, if the filter can not run without
 userinteraction.

@@ -16,16 +16,15 @@ use Symfony\Component\Config\Definition\ScalarNode;
 /**
  * This class provides a fluent interface for defining a node.
  *
+ * @template TParent of NodeParentInterface|null = null
+ *
+ * @extends VariableNodeDefinition<TParent>
+ *
  * @author Johannes M. Schmitt <schmittjoh@gmail.com>
  */
 class ScalarNodeDefinition extends VariableNodeDefinition
 {
-    /**
-     * Instantiate a Node.
-     *
-     * @return ScalarNode The node
-     */
-    protected function instantiateNode()
+    protected function instantiateNode(): ScalarNode
     {
         return new ScalarNode($this->name, $this->parent, $this->pathSeparator);
     }

@@ -6,8 +6,8 @@ The ErrorHandler component provides tools to manage errors and ease debugging PH
 Getting Started
 ---------------
 
-```
-$ composer require symfony/error-handler
+```bash
+composer require symfony/error-handler
 ```
 
 ```php
@@ -20,6 +20,9 @@ Debug::enable();
 // or enable only one feature
 //ErrorHandler::register();
 //DebugClassLoader::enable();
+
+// If you want a custom generic template when debug is not enabled
+// HtmlErrorRenderer::setTemplate('/path/to/custom/error.html.php');
 
 $data = ErrorHandler::call(static function () use ($filename, $datetimeFormat) {
     // if any code executed inside this anonymous function fails, a PHP exception
@@ -35,7 +38,7 @@ $data = ErrorHandler::call(static function () use ($filename, $datetimeFormat) {
 Resources
 ---------
 
-  * [Contributing](https://symfony.com/doc/current/contributing/index.html)
-  * [Report issues](https://github.com/symfony/symfony/issues) and
-    [send Pull Requests](https://github.com/symfony/symfony/pulls)
-    in the [main Symfony repository](https://github.com/symfony/symfony)
+ * [Contributing](https://symfony.com/doc/current/contributing/index.html)
+ * [Report issues](https://github.com/symfony/symfony/issues) and
+   [send Pull Requests](https://github.com/symfony/symfony/pulls)
+   in the [main Symfony repository](https://github.com/symfony/symfony)

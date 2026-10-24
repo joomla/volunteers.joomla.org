@@ -15,14 +15,6 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.3.4\n"
 
-msgid "{authorize:Authorize:403_text}"
-msgstr ""
-"אין לך הרשאות מספקות לגשת לישום זה. צור קשר עם מנהל המערכת שלך אם עובדה "
-"זו לא נכונה."
-
-msgid "{authorize:Authorize:403_header}"
-msgstr "גישה אסורה"
-
 msgid "Access forbidden"
 msgstr "גישה אסורה"
 

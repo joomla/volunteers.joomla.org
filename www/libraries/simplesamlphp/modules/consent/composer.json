@@ -14,11 +14,18 @@
         "preferred-install": {
             "simplesamlphp/simplesamlphp": "source",
             "*": "dist"
+        },
+        "allow-plugins": {
+            "composer/package-versions-deprecated": true,
+            "simplesamlphp/composer-module-installer": true,
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "phpstan/extension-installer": true,
+            "simplesamlphp/composer-xmlprovider-installer": true
         }
     },
     "autoload": {
         "psr-4": {
-            "SimpleSAML\\Module\\consent\\": "lib/"
+            "SimpleSAML\\Module\\consent\\": "src/"
         }
     },
     "autoload-dev": {
@@ -27,16 +34,21 @@
         }
     },
     "require": {
-        "php": ">=5.6",
-        "simplesamlphp/composer-module-installer": "~1.1"
+        "php": "^8.3",
+        "ext-pdo": "*",
+
+        "simplesamlphp/assert": "~2.0",
+        "simplesamlphp/composer-module-installer": "~1.7",
+        "simplesamlphp/saml2": "~6.1",
+
+        "simplesamlphp/simplesamlphp": "~2.5@dev",
+        "symfony/http-foundation": "^7.4"
     },
     "require-dev": {
-        "simplesamlphp/simplesamlphp": "^1.17",
-        "phpunit/phpunit": "~5.7",
-        "webmozart/assert": "<1.7"
+        "simplesamlphp/simplesamlphp-test-framework": "~1.11"
     },
     "support": {
-        "issues": "https://github.com/tvdijen/simplesamlphp-module-consent/issues",
-        "source": "https://github.com/tvdijen/simplesamlphp-module-consent"
+        "issues": "https://github.com/simplesamlphp/simplesamlphp-module-consent/issues",
+        "source": "https://github.com/simplesamlphp/simplesamlphp-module-consent"
     }
 }

@@ -1,0 +1,29 @@
+{
+    "name": "simplesamlphp/simplesamlphp-assets-jquery",
+    "description": "Assets for SimpleSAMLphp modules that require jQuery",
+    "type": "simplesamlphp-module",
+    "license": "LGPL-2.1-or-later",
+    "authors": [
+        {
+            "name": "Tim van Dijen",
+            "email": "tvdijen@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "^8.3",
+
+        "simplesamlphp/composer-module-installer": "~1.7"
+    },
+    "archive": {
+        "exclude": [
+            ".gitattributes",
+            ".gitignore",
+            "package.json",
+            "package-lock.json",
+            "resources",
+            "tools",
+            "README.md",
+            "webpack.config.js"
+        ]
+    }
+}

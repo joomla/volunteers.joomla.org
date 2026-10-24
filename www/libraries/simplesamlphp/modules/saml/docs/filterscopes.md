@@ -31,21 +31,22 @@ Here are the options available for the filter:
 :   An array containing a list of attributes that are scoped and therefore should be evaluated.
     Defaults to _eduPersonPrincipalName_ and _eduPersonScopedAffiliation_.
 
-
 Examples
 --------
 
 Basic configuration:
-```
+
+```php
     'authproc' => [
         90 => [
             'class' => 'saml:FilterScopes',
         ],
-    [,
+    ],
 ```
 
 Specify `mail` and `eduPersonPrincipalName` as scoped attributes:
-```
+
+```php
     'authproc' => [
         90 => [
             'class' => 'saml:FilterScopes',
@@ -58,7 +59,8 @@ Specify `mail` and `eduPersonPrincipalName` as scoped attributes:
 ```
 
 Specify the same attributes in OID format:
-```
+
+```php
     'authproc' => [
         90 => [
             'class' => 'saml:FilterScopes',

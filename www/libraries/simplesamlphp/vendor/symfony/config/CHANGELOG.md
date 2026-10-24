@@ -1,6 +1,93 @@
 CHANGELOG
 =========
 
+7.4
+---
+
+ * Add TagAwareAdapterInterface to NullAdapter
+ * Add argument `$singular` to `NodeBuilder::arrayNode()` to decouple plurals/singulars from XML
+ * Add support for `defaultNull()` on `ArrayNodeDefinition`
+ * Add `ArrayNodeDefinition::acceptAndWrap()` to list alternative types that should be accepted and wrapped in an array
+ * Add array-shapes to generated config builders
+ * Deprecate accessing the internal scope of the loader in PHP config files, use only its public API instead
+ * Deprecate setting a default value to a node that is required, and vice versa
+ * Deprecate fluent config builders, return PHP arrays from your config instead
+
+7.3
+---
+
+ * Add `ExprBuilder::ifFalse()`
+ * Add support for info on `ArrayNodeDefinition::canBeEnabled()` and `ArrayNodeDefinition::canBeDisabled()`
+ * Allow using an enum FQCN with `EnumNode`
+ * Add `NodeDefinition::docUrl()`
+
+7.2
+---
+
+ * Add `#[WhenNot]` attribute to prevent service from being registered in a specific environment
+ * Generate a meta file in JSON format for resource tracking
+ * Add `SkippingResourceChecker`
+ * Add support for `defaultNull()` on `BooleanNodeDefinition`
+ * Add `StringNode` and `StringNodeDefinition`
+ * Add `ArrayNodeDefinition::stringPrototype()` method
+ * Add `NodeBuilder::stringNode()` method
+
+7.1
+---
+
+ * Allow custom meta location in `ResourceCheckerConfigCache`
+ * Allow custom meta location in `ConfigCache`
+
+7.0
+---
+
+ * Require explicit argument when calling `NodeBuilder::setParent()`
+
+6.3
+---
+
+ * Allow enum values in `EnumNode`
+
+6.2
+---
+
+ * Deprecate calling `NodeBuilder::setParent()` without any arguments
+ * Add a more accurate typehint in generated PHP config
+
+6.1
+---
+
+ * Allow using environment variables in `EnumNode`
+ * Add Node's information in generated Config
+ * Add `DefinitionFileLoader` class to load a TreeBuilder definition from an external file
+ * Add `DefinitionConfigurator` helper
+
+6.0
+---
+
+ * Remove `BaseNode::getDeprecationMessage()`
+
+5.3.0
+-----
+
+ * Add support for generating `ConfigBuilder` for extensions
+
+5.1.0
+-----
+
+ * updated the signature of method `NodeDefinition::setDeprecated()` to `NodeDefinition::setDeprecation(string $package, string $version, string $message)`
+ * updated the signature of method `BaseNode::setDeprecated()` to `BaseNode::setDeprecation(string $package, string $version, string $message)`
+ * deprecated passing a null message to `BaseNode::setDeprecated()` to un-deprecate a node
+ * deprecated `BaseNode::getDeprecationMessage()`, use `BaseNode::getDeprecation()` instead
+
+5.0.0
+-----
+
+ * Dropped support for constructing a `TreeBuilder` without passing root node information.
+ * Removed the `root()` method in `TreeBuilder`, pass the root node information to the constructor instead
+ * Added method `getChildNodeDefinitions()` to ParentNodeDefinitionInterface
+ * Removed `FileLoaderLoadException`, use `LoaderLoadException` instead
+
 4.4.0
 -----
 

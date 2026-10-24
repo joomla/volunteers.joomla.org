@@ -12,53 +12,47 @@
 namespace Symfony\Bundle\FrameworkBundle\CacheWarmer;
 
 use Psr\Container\ContainerInterface;
-use Symfony\Bundle\FrameworkBundle\DependencyInjection\CompatibilityServiceSubscriberInterface as ServiceSubscriberInterface;
 use Symfony\Component\HttpKernel\CacheWarmer\CacheWarmerInterface;
 use Symfony\Component\HttpKernel\CacheWarmer\WarmableInterface;
+use Symfony\Contracts\Service\ServiceSubscriberInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * Generates the catalogues for translations.
  *
  * @author Xavier Leune <xavier.leune@gmail.com>
+ *
+ * @final since Symfony 7.1
  */
 class TranslationsCacheWarmer implements CacheWarmerInterface, ServiceSubscriberInterface
 {
-    private $container;
-    private $translator;
-
-    public function __construct(ContainerInterface $container)
-    {
-        // As this cache warmer is optional, dependencies should be lazy-loaded, that's why a container should be injected.
-        $this->container = $container;
-    }
+    private TranslatorInterface $translator;
 
     /**
-     * {@inheritdoc}
+     * As this cache warmer is optional, dependencies should be lazy-loaded, that's why a container should be injected.
      */
-    public function warmUp($cacheDir)
+    public function __construct(
+        private ContainerInterface $container,
+    ) {
+    }
+
+    public function warmUp(string $cacheDir, ?string $buildDir = null): array
     {
-        if (null === $this->translator) {
-            $this->translator = $this->container->get('translator');
-        }
+        $this->translator ??= $this->container->get('translator');
 
         if ($this->translator instanceof WarmableInterface) {
-            $this->translator->warmUp($cacheDir);
+            return $this->translator->warmUp($cacheDir, $buildDir);
         }
+
+        return [];
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function isOptional()
+    public function isOptional(): bool
     {
         return true;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public static function getSubscribedServices()
+    public static function getSubscribedServices(): array
     {
         return [
             'translator' => TranslatorInterface::class,

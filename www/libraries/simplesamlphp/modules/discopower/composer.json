@@ -3,7 +3,7 @@
     "description": "Fancy tabbed discovery service with filtering capabilities where SPs can have different sets of metadata listed",
     "type": "simplesamlphp-module",
     "keywords": ["simplesamlphp", "discopower", "discovery"],
-    "license": "LGPL-3.0-or-later",
+    "license": "LGPL-2.1-or-later",
     "authors": [
         {
             "name": "Andreas Åkre Solberg",
@@ -14,11 +14,18 @@
         "preferred-install": {
             "simplesamlphp/simplesamlphp": "source",
             "*": "dist"
+        },
+        "allow-plugins": {
+            "composer/package-versions-deprecated": true,
+            "simplesamlphp/composer-module-installer": true,
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "phpstan/extension-installer": true,
+            "simplesamlphp/composer-xmlprovider-installer": true
         }
     },
     "autoload": {
         "psr-4": {
-            "SimpleSAML\\modules\\discopower\\": "lib/"
+            "SimpleSAML\\Module\\discopower\\": "src/"
         }
     },
     "autoload-dev": {
@@ -27,16 +34,19 @@
         }
     },
     "require": {
-        "php": ">=5.6",
-        "simplesamlphp/composer-module-installer": "~1.1",
-        "webmozart/assert": "~1.4 <1.6"
+        "php": "^8.3",
+
+        "simplesamlphp/assert": "~2.0",
+        "simplesamlphp/simplesamlphp": "~2.5@dev",
+        "simplesamlphp/simplesamlphp-assets-jquery": "~2.5",
+        "simplesamlphp/composer-module-installer": "~1.7",
+        "symfony/http-foundation": "^7.4"
     },
     "require-dev": {
-        "simplesamlphp/simplesamlphp": "^1.17",
-        "phpunit/phpunit": "~5.7"
+        "simplesamlphp/simplesamlphp-test-framework": "~1.11"
     },
     "support": {
-        "issues": "https://github.com/tvdijen/simplesamlphp-module-discopower/issues",
-        "source": "https://github.com/tvdijen/simplesamlphp-module-discopower"
+        "issues": "https://github.com/simplesamlphp/simplesamlphp-module-discopower/issues",
+        "source": "https://github.com/simplesamlphp/simplesamlphp-module-discopower"
     }
 }

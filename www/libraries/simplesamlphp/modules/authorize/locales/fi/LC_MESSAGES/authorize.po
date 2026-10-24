@@ -15,14 +15,6 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.3.4\n"
 
-msgid "{authorize:Authorize:403_text}"
-msgstr ""
-"Sinulla ei ole tarvittavia oikeuksia käyttää tätä sovellusta. Ota "
-"yhteyttä ylläpitoon, jos huomaat tämän olevan virheellinen."
-
-msgid "{authorize:Authorize:403_header}"
-msgstr "Pääsy estetty."
-
 msgid "Access forbidden"
 msgstr "Pääsy estetty."
 

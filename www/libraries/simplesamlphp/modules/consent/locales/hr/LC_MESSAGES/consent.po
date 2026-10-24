@@ -16,100 +16,20 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.3.4\n"
 
-msgid "{consent:consent:service_providers_for}"
-msgstr "Davatelji usluge za"
-
-msgid "{consent:consent:abort}"
-msgstr "Odustani od prijave u SPNAME"
-
-msgid "{consent:consent:remember}"
-msgstr "Zapamti moj odabir"
-
-msgid "{consent:consent:login}"
-msgstr "prijavi se"
-
-msgid "{consent:consent:consent_purpose}"
-msgstr "Namjena servisa SPNAME je SPDESC"
-
-msgid "{consent:consent:noconsent_goto_about}"
-msgstr "Idi na stranicu s informacijama o servisu"
-
-msgid "{consent:consent:consent_header}"
-msgstr "Dozvola za isporuku osobnih podataka"
-
-msgid "{consent:consent:show_hide_attributes}"
-msgstr "prikaži/sakrij atribute"
-
-msgid "{consent:consent:table_caption}"
-msgstr "Informacije o korisniku"
-
-msgid "{consent:consent:status_header}"
-msgstr "Status odobrenja"
-
-msgid "{consent:consent:noconsent_title}"
-msgstr "Isporuka podataka nije odobrena"
-
-msgid "{consent:consent:consent_accept}"
-msgstr "Servis SPNAME zahtjeva isporuku dolje navedenih podataka."
-
-msgid "{consent:consent:table_summary}"
-msgstr ""
-"Prikaži popis vaših podataka koji će biti prosljeđeni servisu kojem "
-"želite pristupiti"
-
-msgid "{consent:consent:service_provider_header}"
-msgstr "Davatelj usluge"
-
-msgid "{consent:consent:show_attributes}"
-msgstr "Prikaži atribute"
-
-msgid "{consent:consent:show_attribute}"
-msgstr "Prikaži sadržaj"
-
-msgid "{consent:consent:no}"
-msgstr "Ne, odustani"
-
-msgid "{consent:consent:consent_privacypolicy}"
-msgstr "Politika zaštite privatnosti kod servisa"
-
-msgid "{consent:consent:noconsent_text}"
-msgstr "Niste dali pristanak da se vaši podaci isporuče davatelju usluge."
-
-msgid "{consent:consent:noconsent_return}"
-msgstr "Povratak na stranicu za kreiranje dozvola"
-
-msgid "{consent:consent:yes}"
-msgstr "Da, nastavi"
-
-msgid "{consent:consent:consent_attributes_header}"
-msgstr "Informacije koje će biti poslane servisu SPNAME"
-
-msgid "Service Providers for"
-msgstr "Davatelji usluge za"
-
 msgid "Yes, continue"
 msgstr "Da, nastavi"
 
 msgid "Return to consent page"
 msgstr "Povratak na stranicu za kreiranje dozvola"
 
-msgid "Consent status"
-msgstr "Status odobrenja"
-
 msgid "Go to information page for the service"
 msgstr "Idi na stranicu s informacijama o servisu"
 
-msgid "Service Provider"
-msgstr "Davatelj usluge"
+msgid "Abort login to %SPNAME%"
+msgstr "Odustani od prijave u %SPNAME%"
 
-msgid "Abort login to SPNAME"
-msgstr "Odustani od prijave u SPNAME"
-
-msgid "show/hide attributes"
-msgstr "prikaži/sakrij atribute"
-
-msgid "The purpose of SPNAME is SPDESC"
-msgstr "Namjena servisa SPNAME je SPDESC"
+msgid "The purpose of %SPNAME% is %SPDESC%"
+msgstr "Namjena servisa %SPNAME% je %SPDESC%"
 
 msgid ""
 "List the information about you that is about to be transmitted to the "
@@ -124,10 +44,7 @@ msgstr "Dozvola za isporuku osobnih podataka"
 msgid "No consent given"
 msgstr "Isporuka podataka nije odobrena"
 
-msgid "login"
-msgstr "prijavi se"
-
-msgid "You did not give consent for transfering your attributes to SPNAME."
+msgid "You did not give consent for transferring your attributes to %SPNAME%."
 msgstr "Niste dali pristanak da se vaši podaci isporuče davatelju usluge."
 
 msgid "Remember"
@@ -136,21 +53,18 @@ msgstr "Zapamti moj odabir"
 msgid "Show content"
 msgstr "Prikaži sadržaj"
 
-msgid "SPNAME requires that the information below is transferred."
-msgstr "Servis SPNAME zahtjeva isporuku dolje navedenih podataka."
+msgid "%SPNAME% requires that the information below is transferred."
+msgstr "Servis %SPNAME% zahtjeva isporuku dolje navedenih podataka."
 
-msgid "Privacypolicy for the service"
+msgid "Privacy policy for the service"
 msgstr "Politika zaštite privatnosti kod servisa"
 
 msgid "No, cancel"
 msgstr "Ne, odustani"
 
-msgid "Show attributes"
-msgstr "Prikaži atribute"
-
 msgid "User information"
 msgstr "Informacije o korisniku"
 
-msgid "Information that will be sent to SPNAME"
-msgstr "Informacije koje će biti poslane servisu SPNAME"
+msgid "Information that will be sent to %SPNAME%"
+msgstr "Informacije koje će biti poslane servisu %SPNAME%"
 

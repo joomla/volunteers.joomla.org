@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="plugin" group="console" method="upgrade">
+    <name>PLG_CONSOLE_SSO</name>
+    <creationDate>16 september 2026</creationDate>
+    <author>RolandD Cyber Produksi</author>
+    <authorEmail>support@rolandd.com</authorEmail>
+    <authorUrl>https://rolandd.com</authorUrl>
+    <copyright>Copyright (C) 2023 RolandD Cyber Produksi. All rights reserved.</copyright>
+    <license>GPLv3 https://www.gnu.org/licenses/gpl.html</license>
+    <version>2.3.1</version>
+    <description>PLG_CONSOLE_SSO_DESCRIPTION</description>
+    <namespace path="src">Rolandd\Plugin\Console\Sso</namespace>
+
+    <scriptfile>script.php</scriptfile>
+
+    <files>
+        <folder plugin="sso">services</folder>
+        <folder>language</folder>
+        <folder>src</folder>
+    </files>
+
+    <config>
+        <fields name="params">
+            <fieldset name="basic">
+                <field
+                        name="logstokeep"
+                        type="integer"
+                        label="PLG_CONSOLE_SSO_ROTATELOGS_LOGSTOKEEP_LABEL"
+                        description="PLG_CONSOLE_SSO_ROTATELOGS_LOGSTOKEEP_DESC"
+                        first="1"
+                        last="10"
+                        step="1"
+                        default="5"
+                        filter="int"
+                        validate="number"
+                />
+            </fieldset>
+        </fields>
+    </config>
+</extension>

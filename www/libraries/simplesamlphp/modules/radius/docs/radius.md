@@ -9,11 +9,20 @@ The RADIUS module provides a single authentication module:
 This authentication module contacts a RADIUS server, and authenticates
 the user by using username & password authentication.
 
-To use this module, enable the radius module by creating a file named
-`enable` in the `modules/radius/`-directory. Then you need to add a
-authentication source which uses the `radius:Radius` module to
-`config/authsources.php`:
+To use this module, enable the radius module: in `config.php`, search
+for the `module.enable` key and set `radius` to true:
 
+```php
+    'module.enable' => [
+         'radius' => true,
+         …
+    ],
+```
+
+Then you need to add a authentication source which uses the `radius:Radius`
+module to `config/authsources.php`:
+
+```php
     'example-radius' => [
         'radius:Radius',
 
@@ -44,13 +53,9 @@ authentication source which uses the `radius:Radius` module to
         'timeout' => 5,
 
         /*
-         * The number of times we should retry connections to the RADIUS server.
-         * Please note that retries would be attempted with each server before
-         * trying with the next server in the queue, so if you want not to wait
-         * before trying the next server, retries should be set to 1.
-         * Optional, defaults to 3 attempts.
+         * Set debug modus
          */
-        'retries' => 3,
+        'debug' => true,
 
         /*
          * The NAS identifier to use when querying the radius server.
@@ -68,13 +73,13 @@ authentication source which uses the `radius:Radius` module to
         'realm' => 'example.edu',
 
         /*
-         * The attribute name we should store the username in. Ths username
+         * The attribute name we should store the username in. This username
          * will not be saved in any attribute if this is NULL.
          * Optional, defaults to NULL.
          */
         'username_attribute' => 'eduPersonPrincipalName',
     ],
-
+```
 
 User attributes
 ---------------
@@ -86,10 +91,11 @@ from the RADIUS server.
 
 The code expects one vendor-attribute with a specific vendor and a specific
 vendor attribute type for each user attribute. The vendor-attribute must
-contain a value of the form `&lt;name&gt;=&lt;value&gt;`.
+contain a value of the form `<name>=<value>`.
 
 The following configuration options are available for user attributes:
 
+```php
         /*
          * This is the vendor for the vendor-specific attribute which contains
          * the attributes for this user. This can be NULL if no attributes are
@@ -104,3 +110,4 @@ The following configuration options are available for user attributes:
          * Required if 'vendor' is set.
          */
         'attribute_vendor_type' => 4,
+```

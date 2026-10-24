@@ -15,14 +15,6 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.3.4\n"
 
-msgid "{authorize:Authorize:403_text}"
-msgstr ""
-"Sul pole sellele rakendusele ligipääsuks vajalikke õigusi. Kui arvad "
-"teisiti, siis võta palun ühendust administraatoriga."
-
-msgid "{authorize:Authorize:403_header}"
-msgstr "Juurdepääs keelatud"
-
 msgid "Access forbidden"
 msgstr "Juurdepääs keelatud"
 

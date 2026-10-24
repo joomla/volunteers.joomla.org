@@ -11,6 +11,8 @@
 
 namespace Symfony\Component\HttpKernel\Event;
 
+use Symfony\Component\HttpFoundation\Response;
+
 /**
  * Allows to create a response for a request.
  *
@@ -20,6 +22,35 @@ namespace Symfony\Component\HttpKernel\Event;
  *
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-class RequestEvent extends GetResponseEvent
+class RequestEvent extends KernelEvent
 {
+    private ?Response $response = null;
+
+    /**
+     * Returns the response object.
+     */
+    public function getResponse(): ?Response
+    {
+        return $this->response;
+    }
+
+    /**
+     * Sets a response and stops event propagation.
+     */
+    public function setResponse(Response $response): void
+    {
+        $this->response = $response;
+
+        $this->stopPropagation();
+    }
+
+    /**
+     * Returns whether a response was set.
+     *
+     * @psalm-assert-if-true !null $this->getResponse()
+     */
+    public function hasResponse(): bool
+    {
+        return null !== $this->response;
+    }
 }

@@ -3,7 +3,7 @@
     "description": "This module provides a user authorization filter based on attribute matching",
     "type": "simplesamlphp-module",
     "keywords": ["simplesamlphp", "authorize"],
-    "license": "LGPL-3.0-or-later",
+    "license": "LGPL-2.1-or-later",
     "authors": [
         {
             "name": "Ernesto Revilla",
@@ -14,11 +14,18 @@
         "preferred-install": {
             "simplesamlphp/simplesamlphp": "source",
             "*": "dist"
+        },
+        "allow-plugins": {
+            "composer/package-versions-deprecated": true,
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "phpstan/extension-installer": true,
+            "simplesamlphp/composer-module-installer": true,
+            "simplesamlphp/composer-xmlprovider-installer": true
         }
     },
     "autoload": {
         "psr-4": {
-            "SimpleSAML\\Module\\authorize\\": "lib/"
+            "SimpleSAML\\Module\\authorize\\": "src/"
         }
     },
     "autoload-dev": {
@@ -28,15 +35,18 @@
         }
     },
     "require": {
-        "php": ">=5.6",
-        "simplesamlphp/composer-module-installer": "~1.1"
+        "php": "^8.3",
+
+        "simplesamlphp/assert": "~2.0",
+        "simplesamlphp/saml2": "^6.1",
+        "simplesamlphp/simplesamlphp": "^2.5@dev",
+        "symfony/http-foundation": "^7.4"
     },
     "require-dev": {
-        "simplesamlphp/simplesamlphp": "^1.17",
-        "phpunit/phpunit": "~5.7"
+        "simplesamlphp/simplesamlphp-test-framework": "^1.11"
     },
     "support": {
-        "issues": "https://github.com/tvdijen/simplesamlphp-module-authorize/issues",
-        "source": "https://github.com/tvdijen/simplesamlphp-module-authorize"
+        "issues": "https://github.com/simplesamlphp/simplesamlphp-module-authorize/issues",
+        "source": "https://github.com/simplesamlphp/simplesamlphp-module-authorize"
     }
 }

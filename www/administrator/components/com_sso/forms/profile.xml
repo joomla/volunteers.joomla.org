@@ -1,0 +1,462 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form>
+	<config>
+		<inlinehelp button="show"/>
+	</config>
+	<fieldset name="settings">
+		<field name="id" type="hidden" class="readonly" readonly="true"  />
+
+		<field name="name"
+			   type="text"
+			   label="COM_SSO_PROFILE_NAME_LABEL"
+			   description="COM_SSO_PROFILE_NAME_DESC"
+			   required="true"
+			   default=""/>
+
+		<field name="alias"
+			   type="text"
+			   label="COM_SSO_ALIAS_NAME_LABEL"
+			   description="COM_SSO_ALIAS_NAME_DESC"
+			   class="readonly"
+			   readonly="true"
+			   required="false"
+			   inlineHelp="true"
+			   default=""/>
+
+		<field name="protocol"
+			   type="list"
+			   label="COM_SSO_PROTOCOL_LABEL"
+			   description="COM_SSO_PROTOCOL_DESC"
+			   required="true"
+			   default="saml">
+			<option value="saml">SAML</option>
+			<option value="ldap">LDAP</option>
+		</field>
+
+		<field
+				name="published"
+				type="list"
+				label="JSTATUS"
+				size="1"
+				default="1"
+		>
+			<option value="1">JPUBLISHED</option>
+			<option value="0">JUNPUBLISHED</option>
+		</field>
+	</fieldset>
+
+	<fieldset name="authorization_saml" label="COM_SSO_CONFIG_AUTHORIZATION_SAML" showon="protocol:saml">
+		<fields name="authorization_saml">
+			<field name="entityID"
+				   type="url"
+				   label="COM_SSO_CONFIG_ENTITY_ID_LABEL"
+				   description="COM_SSO_CONFIG_ENTITY_ID_DESC"
+				   required="false" />
+
+			<field name="idpMetadata"
+				   type="url"
+				   label="COM_SSO_CONFIG_IDP_LABEL"
+				   description="COM_SSO_CONFIG_IDP_DESC"
+				   required="false" />
+
+			<field name="idp"
+				   type="url"
+				   label="COM_SSO_CONFIG_IDP_LOGIN_LABEL"
+				   description="COM_SSO_CONFIG_IDP_LOGIN_DESC"
+				   required="false" />
+
+            <field name="metadataXml"
+                   type="textarea"
+                   label="COM_SSO_CONFIG_IDP_METADATA_LABEL"
+                   description="COM_SSO_CONFIG_IDP_METADATA_DESC"
+                   filter="raw"
+                   rows="10"
+                   default=""/>
+
+			<field name="privatekey"
+				   type="filelist"
+				   label="COM_SSO_CONFIG_PRIVATEKEY_LABEL"
+				   description="COM_SSO_CONFIG_PRIVATEKEY_DESC"
+				   required="false"
+				   directory="libraries/simplesamlphp/cert"
+				   hide_default="true"/>
+
+			<field name="privatekey_pass"
+				   type="password"
+				   label="COM_SSO_CONFIG_PRIVATEKEY_PASS_LABEL"
+				   description="COM_SSO_CONFIG_PRIVATEKEY_PASS_DESC"
+				   required="false"/>
+
+			<field name="certificate"
+				   type="filelist"
+				   label="COM_SSO_CONFIG_CERTIFICATE_LABEL"
+				   description="COM_SSO_CONFIG_CERTIFICATE_DESC"
+				   required="false"
+				   directory="libraries/simplesamlphp/cert"
+				   hide_default="true"/>
+
+			<field
+					name="sign_logout"
+					type="radio"
+					label="COM_SSO_CONFIG_SIGN_LOGOUT_LABEL"
+					description="COM_SSO_CONFIG_SIGN_LOGOUT_DESC"
+					default="0"
+					class="btn-group btn-group-yesno"
+					filter="integer"
+					showon="privatekey!:-1"
+			>
+				<option value="1">JYES</option>
+				<option value="0">JNO</option>
+			</field>
+
+			<field
+					name="metadata_sign_enable"
+					type="radio"
+					label="COM_SSO_CONFIG_METADATA_SIGN_LABEL"
+					description="COM_SSO_CONFIG_METADATA_SIGN_DESC"
+					default="0"
+					class="btn-group btn-group-yesno"
+					filter="integer"
+			>
+				<option value="1">JYES</option>
+				<option value="0">JNO</option>
+			</field>
+
+			<field name="metadata_sign_privatekey"
+				   type="filelist"
+				   label="COM_SSO_CONFIG_PRIVATEKEY_LABEL"
+				   description="COM_SSO_CONFIG_PRIVATEKEY_DESC"
+				   required="true"
+				   directory="libraries/simplesamlphp/cert"
+				   hide_default="true"
+				   showon="metadata_sign_enable:1"/>
+
+			<field name="metadata_sign_privatekey_pass"
+				   type="password"
+				   label="COM_SSO_CONFIG_PRIVATEKEY_PASS_LABEL"
+				   description="COM_SSO_CONFIG_PRIVATEKEY_PASS_DESC"
+				   required="false"
+				   showon="metadata_sign_enable:1"/>
+
+			<field name="metadata_sign_certificate"
+				   type="filelist"
+				   label="COM_SSO_CONFIG_CERTIFICATE_LABEL"
+				   description="COM_SSO_CONFIG_CERTIFICATE_DESC"
+				   required="true"
+				   directory="libraries/simplesamlphp/cert"
+				   hide_default="true"
+				   showon="metadata_sign_enable:1"/>
+		</fields>
+	</fieldset>
+
+	<fieldset name="authorization_ldap" label="COM_SSO_CONFIG_AUTHORIZATION_LDAP" showon="protocol:ldap">
+		<fields name="authorization_ldap">
+			<field name="hostname"
+				   type="url"
+				   label="COM_SSO_CONFIG_HOSTNAME_LABEL"
+				   description="COM_SSO_CONFIG_HOSTNAME_DESC"
+				   required="false"/>
+
+			<field name="port"
+				   type="number"
+				   label="COM_SSO_CONFIG_LDAP_PORT_LABEL"
+				   description="COM_SSO_CONFIG_LDAP_PORT_DESC"
+				   required="false"
+				   default="389"/>
+
+			<field
+					name="encryption"
+					type="list"
+					label="COM_SSO_CONFIG_ENCRYPTION_LABEL"
+					description="COM_SSO_CONFIG_ENCRYPTION_LABEL"
+					default="none"
+			>
+				<option value="none">COM_SSO_CONFIG_ENCRYPTION_NONE</option>
+				<option value="ssl">SSL</option>
+				<option value="tls">TLS</option>
+			</field>
+
+            <field name="version"
+                   type="number"
+                   label="COM_SSO_CONFIG_LDAP_VERSION_LABEL"
+                   description="COM_SSO_CONFIG_LDAP_VERSION_DESC"
+                   required="false"
+                   default="3"/>
+
+			<field
+					name="referrals"
+					type="list"
+					label="COM_SSO_CONFIG_LDAP_REFERRALS_LABEL"
+					description="COM_SSO_CONFIG_LDAP_REFERRALS_DESC"
+					default="0x00"
+			>
+				<option value="0x00">COM_SSO_CONFIG_REFERRALS_NEVER</option>
+				<option value="0x01">COM_SSO_CONFIG_REFERRALS_SEARCHING</option>
+				<option value="0x02">COM_SSO_CONFIG_REFERRALS_FINDING</option>
+				<option value="0x03">COM_SSO_CONFIG_REFERRALS_ALWAYS</option>
+			</field>
+
+			<field
+					name="debug"
+					type="radio"
+					label="COM_SSO_CONFIG_LDAP_DEBUG_LABEL"
+					description="COM_SSO_CONFIG_LDAP_DEBUG_DESC"
+					default="0"
+					class="btn-group btn-group-yesno"
+					filter="integer"
+			>
+				<option value="1">JYES</option>
+				<option value="0">JNO</option>
+			</field>
+
+			<field name="timeout"
+				   type="number"
+				   label="COM_SSO_CONFIG_LDAP_TIMEOUT_LABEL"
+				   description="COM_SSO_CONFIG_LDAP_TIMEOUT_DESC"
+				   required="false"
+				   default="0"/>
+
+			<field name="attributes"
+				   type="subform"
+				   label="COM_SSO_CONFIG_ATTRIBUTES_LABEL"
+				   description="COM_SSO_CONFIG_ATTRIBUTES_DESC"
+				   required="false"
+                   multiple="true">
+                <form>
+                    <fieldset>
+                        <field
+                                name="attribute"
+                                label="COM_SSO_CONFIG_ATTRIBUTES_ATTRIBUTE_LABEL"
+                                type="text"/>
+                    </fieldset>
+                </form>
+            </field>
+
+			<field name="dnpattern"
+				   type="url"
+				   label="COM_SSO_CONFIG_DNPATTERN_LABEL"
+				   description="COM_SSO_CONFIG_DNPATTERN_DESC"
+				   required="false"
+				   hint="cn=%username%,ou=people,dc=example,dc=org"/>
+
+			<field
+					name="usernameCleanup"
+					type="text"
+					label="PLG_SYSTEM_SSO_USERNAMECLEANUP_LABEL"
+					description="PLG_SYSTEM_SSO_USERNAMECLEANUP_DESC"/>
+
+			<field
+					name="search_enable"
+					type="radio"
+					label="COM_SSO_CONFIG_SEARCH_ENABLE_LABEL"
+					description="COM_SSO_CONFIG_SEARCH_ENABLE_DESC"
+					default="0"
+					class="btn-group btn-group-yesno"
+					filter="integer"
+			>
+				<option value="1">JYES</option>
+				<option value="0">JNO</option>
+			</field>
+
+			<field name="search_base"
+				   type="subform"
+				   label="COM_SSO_CONFIG_SEARCH_BASE_LABEL"
+				   description="COM_SSO_CONFIG_SEARCH_BASE_DESC"
+				   required="false"
+                   multiple="true"
+                   showon="search_enable:1">
+                <form>
+                    <fieldset>
+                        <field
+                                name="base"
+                                type="text"
+                                label="COM_SSO_CONFIG_SEARCH_BASE_ITEM_LABEL"
+                                hint="ou=people,dc=example,dc=org"/>
+                    </fieldset>
+                </form>
+            </field>
+
+			<field name="search_attributes"
+				   type="subform"
+				   label="COM_SSO_CONFIG_SEARCH_ATTRIBUTES_LABEL"
+				   description="COM_SSO_CONFIG_SEARCH_ATTRIBUTES_DESC"
+				   required="false"
+                   multiple="true"
+				   showon="search_enable:1">
+                <form>
+                    <fieldset>
+                        <field
+                                name="attribute"
+                                type="text"
+                                label="COM_SSO_CONFIG_SEARCH_ATTRIBUTES_ATTRIBUTE_LABEL"
+                                hint="uid"/>
+                    </fieldset>
+                </form>
+            </field>
+
+			<field name="search_scope"
+				   type="list"
+				   label="COM_SSO_CONFIG_SEARCH_SCOPE_LABEL"
+				   description="COM_SSO_CONFIG_SEARCH_SCOPE_DESC"
+				   required="false"
+                   default="sub"
+				   showon="search_enable:1">
+				<option value="sub">subtree</option>
+				<option value="one">onelevel</option>
+				<option value="base">base</option>
+			</field>
+
+			<field name="search_filter"
+				   type="text"
+				   label="COM_SSO_CONFIG_SEARCH_FILTER_LABEL"
+				   description="COM_SSO_CONFIG_SEARCH_FILTER_DESC"
+				   required="false"
+                   hint="(&amp;(objectClass=Person)(|(sn=Doe)(cn=John *)))"
+				   showon="search_enable:1"/>
+
+			<field name="search_username"
+				   type="text"
+				   label="COM_SSO_CONFIG_SEARCH_USERNAME_LABEL"
+				   description="COM_SSO_CONFIG_SEARCH_USERNAME_DESC"
+				   required="false"
+				   showon="search_enable:1"/>
+
+			<field name="search_password"
+				   type="password"
+				   label="COM_SSO_CONFIG_SEARCH_PASSWORD_LABEL"
+				   description="COM_SSO_CONFIG_SEARCH_PASSWORD_DESC"
+				   required="false"
+				   showon="search_enable:1"/>
+
+		</fields>
+	</fieldset>
+
+	<fieldset name="joomla" label="COM_SSO_CONFIG_JOOMLA">
+		<fields name="joomla">
+			<field name="userGroup"
+				   type="usergrouplist"
+				   label="COM_SSO_CONFIG_USERGROUP_LABEL"
+				   description="COM_SSO_CONFIG_USERGROUP_DESC"
+				   multiple="true"
+				   required="true"
+				   default="2"/>
+
+			<field name="userGroupMapping"
+				   type="subform"
+				   label="COM_SSO_CONFIG_USERGROUP_MAPPING_LABEL"
+				   description="COM_SSO_CONFIG_USERGROUP_MAPPING_DESC"
+				   multiple="true"
+				   required="false"
+				   emptylabel="true"
+				   buttons="add,remove"
+				   layout="joomla.form.field.subform.repeatable-table">
+				<form>
+					<fieldset>
+						<field
+								name="groupName"
+								type="usergrouplist"
+								label="COM_SSO_CONFIG_GROUPNAME_LABEL"
+								description="COM_SSO_CONFIG_GROUPNAME_DESC"
+								multiple="true"/>
+
+						<field
+								name="mapName"
+								type="sso.fieldname"
+								label="COM_SSO_CONFIG_MAP_NAME_LABEL"
+								description="COM_SSO_CONFIG_MAP_NAME_DESC"/>
+
+						<field
+								name="mapValue"
+								type="text"
+								label="COM_SSO_CONFIG_MAP_VALUE_LABEL"
+								description="COM_SSO_CONFIG_MAP_VALUE_DESC"/>
+					</fieldset>
+				</form>
+			</field>
+
+			<field
+					name="syncUserGroups"
+					type="radio"
+					label="COM_SSO_CONFIG_SYNC_USERGROUPS_LABEL"
+					description="COM_SSO_CONFIG_SYNC_USERGROUPS_DESC"
+					default="0"
+					class="btn-group btn-group-yesno"
+					filter="integer"
+			>
+				<option value="1">JYES</option>
+				<option value="0">JNO</option>
+			</field>
+
+			<field
+					name="keepUserGroups"
+					type="radio"
+					label="COM_SSO_CONFIG_KEEP_USERGROUPS_LABEL"
+					description="COM_SSO_CONFIG_KEEP_USERGROUPS_DESC"
+					default="0"
+					class="btn-group btn-group-yesno"
+					filter="integer"
+					showon="syncUserGroups:1"
+			>
+				<option value="1">JYES</option>
+				<option value="0">JNO</option>
+			</field>
+
+            <field
+                    name="createUser"
+                    type="radio"
+                    label="COM_SSO_CONFIG_CREATE_USER_LABEL"
+                    description="COM_SSO_CONFIG_CREATE_USER_DESC"
+                    default="1"
+                    class="btn-group btn-group-yesno"
+                    filter="integer"
+            >
+                <option value="1">JYES</option>
+                <option value="0">JNO</option>
+            </field>
+
+			<field name="redirect"
+				   type="menuitem"
+				   label="COM_SSO_CONFIG_REDIRECT_LABEL"
+				   description="COM_SSO_CONFIG_REDIRECT_DESC"
+				   required="true"
+				   default="active">
+				<option value="active">COM_SSO_CONFIG_REDIRECT_ACTIVE_PAGE</option>
+			</field>
+		</fields>
+	</fieldset>
+
+	<fieldset name="fields" label="COM_SSO_CONFIG_FIELDS">
+		<fields name="fields">
+			<field name="fieldMap"
+				   type="subform"
+				   label="COM_SSO_CONFIG_FIELDMAP_LABEL"
+				   description="COM_SSO_CONFIG_FIELDMAP_DESC"
+				   multiple="true"
+				   groupByFieldset="true"
+				   value="1"
+				   emptylabel="true"
+				   buttons="add,remove"
+				   layout="joomla.form.field.subform.repeatable-table">
+				<form>
+					<fieldset name="fields" label="COM_SSO_CONFIG_FIELDS">
+						<fields name="fields">
+							<field name="idpName"
+								   type="text"
+								   label="COM_SSO_CONFIG_IDPNAME_LABEL"
+								   description="COM_SSO_CONFIG_IDPNAME_DESC"
+								   required="true"
+								   class="input-fieldMap"/>
+
+							<field name="localName"
+								   type="text"
+								   label="COM_SSO_CONFIG_LOCALNAME_LABEL"
+								   description="COM_SSO_CONFIG_LOCALNAME_DESC"
+								   required="true"
+								   class="input-fieldMap"/>
+						</fields>
+					</fieldset>
+				</form>
+			</field>
+		</fields>
+	</fieldset>
+</form>

@@ -1,0 +1,156 @@
+<?php
+
+declare(strict_types=1);
+
+namespace SimpleSAML\SAML2\XML\saml;
+
+use DOMElement;
+use SimpleSAML\SAML2\Assert\Assert;
+use SimpleSAML\SAML2\Constants as C;
+use SimpleSAML\SAML2\Type\DecisionTypeValue;
+use SimpleSAML\XML\SchemaValidatableElementInterface;
+use SimpleSAML\XML\SchemaValidatableElementTrait;
+use SimpleSAML\XMLSchema\Exception\InvalidDOMElementException;
+use SimpleSAML\XMLSchema\Exception\MissingElementException;
+use SimpleSAML\XMLSchema\Exception\SchemaViolationException;
+use SimpleSAML\XMLSchema\Exception\TooManyElementsException;
+use SimpleSAML\XMLSchema\Type\AnyURIValue;
+
+use function array_pop;
+use function strval;
+
+/**
+ * Class representing a SAML2 AuthzDecisionStatement
+ *
+ * @package simplesamlphp/saml2
+ */
+final class AuthzDecisionStatement extends AbstractStatementType implements SchemaValidatableElementInterface
+{
+    use SchemaValidatableElementTrait;
+
+
+    /**
+     * Initialize an AuthzDecisionStatement.
+     *
+     * @param \SimpleSAML\XMLSchema\Type\AnyURIValue $resource
+     * @param \SimpleSAML\SAML2\Type\DecisionTypeValue $decision
+     * @param \SimpleSAML\SAML2\XML\saml\Action[] $action
+     * @param \SimpleSAML\SAML2\XML\saml\Evidence|null $evidence
+     */
+    public function __construct(
+        // Uses the base AnyURIValue because the SAML-specification allows this attribute to be an empty string
+        protected AnyURIValue $resource,
+        protected DecisionTypeValue $decision,
+        protected array $action,
+        protected ?Evidence $evidence = null,
+    ) {
+        Assert::maxCount($action, C::UNBOUNDED_LIMIT);
+        Assert::allIsInstanceOf($action, Action::class, SchemaViolationException::class);
+    }
+
+
+    /**
+     * Collect the value of the resource-property
+     *
+     * @return \SimpleSAML\XMLSchema\Type\AnyURIValue
+     */
+    public function getResource(): AnyURIValue
+    {
+        return $this->resource;
+    }
+
+
+    /**
+     * Collect the value of the decision-property
+     *
+     * @return \SimpleSAML\SAML2\Type\DecisionTypeValue
+     */
+    public function getDecision(): DecisionTypeValue
+    {
+        return $this->decision;
+    }
+
+
+    /**
+     * Collect the value of the action-property
+     *
+     * @return \SimpleSAML\SAML2\XML\saml\Action[]
+     */
+    public function getAction(): array
+    {
+        return $this->action;
+    }
+
+
+    /**
+     * Collect the value of the evidence-property
+     *
+     * @return \SimpleSAML\SAML2\XML\saml\Evidence|null
+     */
+    public function getEvidence(): ?Evidence
+    {
+        return $this->evidence;
+    }
+
+
+    /**
+     * Convert XML into an AuthzDecisionStatement
+     *
+     * @throws \SimpleSAML\XMLSchema\Exception\InvalidDOMElementException
+     *   if the qualified name of the supplied element is wrong
+     * @throws \SimpleSAML\XMLSchema\Exception\MissingElementException
+     *   if one of the mandatory child-elements is missing
+     * @throws \Exception if the authentication instant is not a valid timestamp.
+     */
+    public static function fromXML(DOMElement $xml): static
+    {
+        Assert::same($xml->localName, 'AuthzDecisionStatement', InvalidDOMElementException::class);
+        Assert::same($xml->namespaceURI, AuthzDecisionStatement::NS, InvalidDOMElementException::class);
+
+        $action = Action::getChildrenOfClass($xml);
+        Assert::minCount(
+            $action,
+            1,
+            'Missing <saml:Action> in <saml:AuthzDecisionStatement>',
+            MissingElementException::class,
+        );
+
+        $evidence = Evidence::getChildrenOfClass($xml);
+        Assert::maxCount(
+            $evidence,
+            1,
+            'Too many <saml:Evidence> in <saml:AuthzDecisionStatement>',
+            TooManyElementsException::class,
+        );
+
+
+        return new static(
+            self::getAttribute($xml, 'Resource', AnyURIValue::class),
+            self::getAttribute($xml, 'Decision', DecisionTypeValue::class),
+            $action,
+            array_pop($evidence),
+        );
+    }
+
+
+    /**
+     * Convert this AuthzDecisionStatement to XML.
+     */
+    public function toXML(?DOMElement $parent = null): DOMElement
+    {
+        $e = $this->instantiateParentElement($parent);
+
+        $e->setAttribute('Resource', strval($this->getResource()));
+        $e->setAttribute('Decision', strval($this->getDecision()));
+
+        foreach ($this->getAction() as $action) {
+            $action->toXML($e);
+        }
+
+        if ($this->getEvidence() !== null && !$this->getEvidence()->isEmptyElement()) {
+            $this->getEvidence()->toXML($e);
+        }
+
+        return $e;
+    }
+}

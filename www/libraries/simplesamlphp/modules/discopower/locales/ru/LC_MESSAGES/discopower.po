@@ -35,7 +35,7 @@ msgid "{discopower:tabs:southafrica}"
 msgstr "Южная Африка"
 
 msgid "{discopower:tabs:edugain}"
-msgstr "Европа (eduGAIN)"
+msgstr "eduGAIN"
 
 msgid "{discopower:tabs:iceland}"
 msgstr "Исландия"
@@ -79,6 +79,6 @@ msgstr "Разное"
 msgid "Finland"
 msgstr "Финляндия"
 
-msgid "Europe (eduGAIN)"
-msgstr "Европа (eduGAIN)"
+msgid "eduGAIN"
+msgstr "eduGAIN"
 

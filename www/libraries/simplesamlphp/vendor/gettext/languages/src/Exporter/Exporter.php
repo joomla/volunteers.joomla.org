@@ -62,7 +62,7 @@ abstract class Exporter
     {
         $exporters = self::getExporters();
         if (!isset($exporters[$exporterHandle])) {
-            throw new Exception("Invalid exporter handle: '${exporterHandle}'");
+            throw new Exception("Invalid exporter handle: '{$exporterHandle}'");
         }
 
         return call_user_func(self::getExporterClassName($exporterHandle) . '::getDescription');
@@ -84,28 +84,31 @@ abstract class Exporter
      * Convert a list of Language instances to string.
      *
      * @param \Gettext\Languages\Language[] $languages the Language instances to convert
+     * @param array|null $options
      *
      * @return string
      */
     final public static function toString($languages, $options = null)
     {
-        if (isset($options) && is_array($options)) {
-            if (isset($options['us-ascii']) && $options['us-ascii']) {
-                $asciiList = array();
-                foreach ($languages as $language) {
-                    $asciiList[] = $language->getUSAsciiClone();
-                }
-                $languages = $asciiList;
+        if (!isset($options) || !is_array($options)) {
+            $options = array();
+        }
+        if (isset($options['us-ascii']) && $options['us-ascii']) {
+            $asciiList = array();
+            foreach ($languages as $language) {
+                $asciiList[] = $language->getUSAsciiClone();
             }
+            $languages = $asciiList;
         }
 
-        return static::toStringDo($languages);
+        return static::toStringDoWithOptions($languages, $options);
     }
 
     /**
      * Save the Language instances to a file.
      *
      * @param \Gettext\Languages\Language[] $languages the Language instances to convert
+     * @param array|null $options
      *
      * @throws \Exception
      */
@@ -113,7 +116,7 @@ abstract class Exporter
     {
         $data = self::toString($languages, $options);
         if (@file_put_contents($filename, $data) === false) {
-            throw new Exception("Error writing data to '${filename}'");
+            throw new Exception("Error writing data to '{$filename}'");
         }
     }
 
@@ -125,6 +128,16 @@ abstract class Exporter
     public static function isForPublicUse()
     {
         return true;
+    }
+
+    /**
+     * Does this exporter supports exporting formulas both with and without extra parenthesis?
+     *
+     * @return bool
+     */
+    public static function supportsFormulasWithAndWithoutParenthesis()
+    {
+        return false;
     }
 
     /**
@@ -141,11 +154,15 @@ abstract class Exporter
      * Convert a list of Language instances to string.
      *
      * @param \Gettext\Languages\Language[] $languages the Language instances to convert
+     * @param array $options export options
      *
      * @return string
      */
-    protected static function toStringDo($languages)
+    protected static function toStringDoWithOptions($languages, array $options)
     {
+        if (method_exists(get_called_class(), 'toStringDo')) {
+            return static::toStringDo($languages);
+        }
         throw new Exception(get_called_class() . ' does not implement the method ' . __FUNCTION__);
     }
 }

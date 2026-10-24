@@ -1,29 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<extension version="3.8" type="module" client="site" method="upgrade">
+<extension type="module" client="site" method="upgrade">
 	<name>MOD_SSO</name>
-	<creationDate>14 February 2021</creationDate>
+	<creationDate>16 september 2026</creationDate>
 	<author>RolandD Cyber Produksi</author>
 	<authorEmail>contact@rolandd.com</authorEmail>
 	<authorUrl>https://rolandd.com</authorUrl>
-	<copyright>Copyright (C) 2017 - 2021 RolandD Cyber Produksi. All rights reserved.</copyright>
-	<license>GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html</license>
-	<version>1.3.0</version>
+	<copyright>Copyright (C) 2017 - 2026 RolandD Cyber Produksi. All rights reserved.</copyright>
+	<license>GNU/GPLv3 https://www.gnu.org/licenses/gpl-3.0.html</license>
+	<version>2.3.1</version>
 	<description>MOD_SSO_XML_DESCRIPTION</description>
+	<namespace path="src">Rolandd\Module\Sso</namespace>
 
 	<files>
-		<filename module="mod_sso">mod_sso.php</filename>
-		<folder>tmpl</folder>
+		<folder module="mod_sso">services</folder>
 		<folder>language</folder>
-		<filename>mod_sso.xml</filename>
+		<folder>src</folder>
+		<folder>tmpl</folder>
 	</files>
 
 	<config>
 		<fields name="params">
 			<fieldset name="basic">
 				<field
-						addfieldpath="administrator/components/com_sso/models/fields"
+						addfieldprefix="Rolandd\Component\Sso\Administrator\Field"
 						name="profile"
-						type="sso.profile"
+						type="Profile"
 						label="MOD_SSO_PROFILE_LABEL"
 						description="MOD_SSO_PROFILE_DESC" />
 			</fieldset>

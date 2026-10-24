@@ -15,91 +15,17 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.3.4\n"
 
-msgid "{consent:consent:service_providers_for}"
-msgstr "Palveluntarjoaja"
-
-msgid "{consent:consent:remember}"
-msgstr "Muista"
-
-msgid "{consent:consent:login}"
-msgstr "Tunnus"
-
-msgid "{consent:consent:consent_purpose}"
-msgstr "Palvelun SPNAME käyttötarkoitus on SPDESC"
-
-msgid "{consent:consent:noconsent_goto_about}"
-msgstr "Siirry palvelun tiedot -sivulle"
-
-msgid "{consent:consent:consent_header}"
-msgstr "Henkilötietojen luovutuksen hyväksyntä"
-
-msgid "{consent:consent:show_hide_attributes}"
-msgstr "Näytä/piilota attribuutteja"
-
-msgid "{consent:consent:table_caption}"
-msgstr "Käyttäjätiedot"
-
-msgid "{consent:consent:status_header}"
-msgstr "Hyväksynnään tila"
-
-msgid "{consent:consent:noconsent_title}"
-msgstr "Lupaa ei annettu"
-
-msgid "{consent:consent:consent_accept}"
-msgstr ""
-"Olet kirjautumassa palveluun SPNAME. Identiteetilähteesi henkilötietojasi"
-" palvelun tarjoajalle. Hyväksytkö tietojen siirron?"
-
-msgid "{consent:consent:table_summary}"
-msgstr "Näytä tietosi, joita ollaan siirtämässä palveluun"
-
-msgid "{consent:consent:service_provider_header}"
-msgstr "Palveluntarjoaja"
-
-msgid "{consent:consent:show_attributes}"
-msgstr "Näytä henkilötiedot"
-
-msgid "{consent:consent:no}"
-msgstr "ei"
-
-msgid "{consent:consent:consent_privacypolicy}"
-msgstr "Tietosuojaseloste palvelulle"
-
-msgid "{consent:consent:noconsent_text}"
-msgstr "Et antanut lupaa siirtää henkilötietojasi palveluntarjoajalle"
-
-msgid "{consent:consent:noconsent_return}"
-msgstr "Palaa hyväksyntäsivulle"
-
-msgid "{consent:consent:yes}"
-msgstr "Kyllä"
-
-msgid "{consent:consent:consent_attributes_header}"
-msgstr "Tiedot lähetetään palvelulle SPNAME"
-
-msgid "Service Providers for"
-msgstr "Palveluntarjoaja"
-
 msgid "Yes, continue"
 msgstr "Kyllä"
 
 msgid "Return to consent page"
 msgstr "Palaa hyväksyntäsivulle"
 
-msgid "Consent status"
-msgstr "Hyväksynnään tila"
-
 msgid "Go to information page for the service"
 msgstr "Siirry palvelun tiedot -sivulle"
 
-msgid "Service Provider"
-msgstr "Palveluntarjoaja"
-
-msgid "show/hide attributes"
-msgstr "Näytä/piilota attribuutteja"
-
-msgid "The purpose of SPNAME is SPDESC"
-msgstr "Palvelun SPNAME käyttötarkoitus on SPDESC"
+msgid "The purpose of %SPNAME% is %SPDESC%"
+msgstr "Palvelun %SPNAME% käyttötarkoitus on %SPDESC%"
 
 msgid ""
 "List the information about you that is about to be transmitted to the "
@@ -112,32 +38,26 @@ msgstr "Henkilötietojen luovutuksen hyväksyntä"
 msgid "No consent given"
 msgstr "Lupaa ei annettu"
 
-msgid "login"
-msgstr "Tunnus"
-
-msgid "You did not give consent for transfering your attributes to SPNAME."
+msgid "You did not give consent for transferring your attributes to %SPNAME%."
 msgstr "Et antanut lupaa siirtää henkilötietojasi palveluntarjoajalle"
 
 msgid "Remember"
 msgstr "Muista"
 
-msgid "SPNAME requires that the information below is transferred."
+msgid "%SPNAME% requires that the information below is transferred."
 msgstr ""
-"Olet kirjautumassa palveluun SPNAME. Identiteetilähteesi henkilötietojasi"
+"Olet kirjautumassa palveluun %SPNAME%. Identiteetilähteesi henkilötietojasi"
 " palvelun tarjoajalle. Hyväksytkö tietojen siirron?"
 
-msgid "Privacypolicy for the service"
+msgid "Privacy policy for the service"
 msgstr "Tietosuojaseloste palvelulle"
 
 msgid "No, cancel"
 msgstr "ei"
 
-msgid "Show attributes"
-msgstr "Näytä henkilötiedot"
-
 msgid "User information"
 msgstr "Käyttäjätiedot"
 
-msgid "Information that will be sent to SPNAME"
-msgstr "Tiedot lähetetään palvelulle SPNAME"
+msgid "Information that will be sent to %SPNAME%"
+msgstr "Tiedot lähetetään palvelulle %SPNAME%"
 

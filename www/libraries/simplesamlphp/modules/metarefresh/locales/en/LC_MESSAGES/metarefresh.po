@@ -15,11 +15,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.3.4\n"
 
-msgid "metarefresh_header"
+msgid "Metarefresh"
 msgstr "Metarefresh"
 
-msgid "metarefresh_no_output"
+msgid "No output from metarefresh."
 msgstr "No output from metarefresh."
 
-msgid "metarefresh_fetched"
+msgid "Fetched metadata"
 msgstr "Fetched metadata"

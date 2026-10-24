@@ -16,20 +16,23 @@ use Symfony\Component\Config\Definition\EnumNode;
 /**
  * Enum Node Definition.
  *
+ * @template TParent of NodeParentInterface|null
+ *
+ * @extends ScalarNodeDefinition<TParent>
+ *
  * @author Johannes M. Schmitt <schmittjoh@gmail.com>
  */
 class EnumNodeDefinition extends ScalarNodeDefinition
 {
-    private $values;
+    private array $values;
+    private string $enumFqcn;
 
     /**
      * @return $this
      */
-    public function values(array $values)
+    public function values(array $values): static
     {
-        $values = array_unique($values);
-
-        if (empty($values)) {
+        if (!$values) {
             throw new \InvalidArgumentException('->values() must be called with at least one value.');
         }
 
@@ -39,18 +42,34 @@ class EnumNodeDefinition extends ScalarNodeDefinition
     }
 
     /**
-     * Instantiate a Node.
+     * @param class-string<\UnitEnum> $enumFqcn
      *
-     * @return EnumNode The node
-     *
-     * @throws \RuntimeException
+     * @return $this
      */
-    protected function instantiateNode()
+    public function enumFqcn(string $enumFqcn): static
     {
-        if (null === $this->values) {
-            throw new \RuntimeException('You must call ->values() on enum nodes.');
+        if (!enum_exists($enumFqcn)) {
+            throw new \InvalidArgumentException(\sprintf('The enum class "%s" does not exist.', $enumFqcn));
         }
 
-        return new EnumNode($this->name, $this->parent, $this->values, $this->pathSeparator);
+        $this->enumFqcn = $enumFqcn;
+
+        return $this;
+    }
+
+    /**
+     * @throws \RuntimeException when no values or enumFqcn is set
+     */
+    protected function instantiateNode(): EnumNode
+    {
+        if (!isset($this->values) && !isset($this->enumFqcn)) {
+            throw new \RuntimeException('You must call either ->values() or ->enumFqcn() on enum nodes.');
+        }
+
+        if (isset($this->values) && isset($this->enumFqcn)) {
+            throw new \RuntimeException('You must call either ->values() or ->enumFqcn() on enum nodes but not both.');
+        }
+
+        return new EnumNode($this->name, $this->parent, $this->values ?? [], $this->pathSeparator, $this->enumFqcn ?? null);
     }
 }

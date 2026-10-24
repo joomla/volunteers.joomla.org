@@ -1,0 +1,70 @@
+<?php
+
+declare(strict_types=1);
+
+namespace SimpleSAML\SAML2\XML\md;
+
+use SimpleSAML\SAML2\Assert\Assert;
+use SimpleSAML\SAML2\Exception\ArrayValidationException;
+use SimpleSAML\SAML2\Type\EmailAddressValue;
+use SimpleSAML\XML\ArrayizableElementInterface;
+use SimpleSAML\XML\SchemaValidatableElementInterface;
+use SimpleSAML\XML\SchemaValidatableElementTrait;
+use SimpleSAML\XML\TypedTextContentTrait;
+
+use function array_key_first;
+use function preg_filter;
+
+/**
+ * Class implementing EmailAddress.
+ *
+ * @package simplesamlphp/saml2
+ */
+final class EmailAddress extends AbstractMdElement implements
+    ArrayizableElementInterface,
+    SchemaValidatableElementInterface
+{
+    use SchemaValidatableElementTrait;
+    use TypedTextContentTrait {
+        TypedTextContentTrait::getContent as getRawContent;
+    }
+
+
+    public const string TEXTCONTENT_TYPE = EmailAddressValue::class;
+
+
+    /**
+     * Get the content of the element.
+     */
+    public function getContent(): string
+    {
+        return preg_filter('/^/', 'mailto:', $this->getRawContent()->getValue());
+    }
+
+
+    /**
+     * Create a class from an array
+     *
+     * @param array<string> $data
+     */
+    public static function fromArray(array $data): static
+    {
+        Assert::allString($data, ArrayValidationException::class);
+
+        $index = array_key_first($data);
+        return new static(
+            EmailAddressValue::fromString($data[$index]),
+        );
+    }
+
+
+    /**
+     * Create an array from this class
+     *
+     * @return array<string>
+     */
+    public function toArray(): array
+    {
+        return [$this->getContent()];
+    }
+}

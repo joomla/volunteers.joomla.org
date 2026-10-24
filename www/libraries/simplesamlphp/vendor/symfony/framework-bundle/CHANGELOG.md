@@ -1,6 +1,378 @@
 CHANGELOG
 =========
 
+7.4
+---
+
+ * Auto-generate `config/reference.php` to assist in writing and discovering app's configuration
+ * Auto-register routes from attributes found on controller services
+ * Add `ControllerHelper`; the helpers from AbstractController as a standalone service
+ * Allow using their name without added suffix when using `#[Target]` for custom services
+ * Deprecate `Symfony\Bundle\FrameworkBundle\Console\Application::add()` in favor of `Symfony\Bundle\FrameworkBundle\Console\Application::addCommand()`
+ * Add `assertEmailAddressNotContains()` to the `MailerAssertionsTrait`
+ * Add `framework.type_info.aliases` option
+ * Add `KernelBrowser::getSession()`
+ * Add support for configuring workflow places with glob patterns matching consts/backed enums
+ * Add support for configuring the `CachingHttpClient`
+ * Add support for weighted transitions in workflows
+ * Add support for union types with `Symfony\Component\EventDispatcher\Attribute\AsEventListener`
+ * Add `framework.allowed_http_method_override` option
+ * Initialize `router.request_context`'s `_locale` parameter to `%kernel.default_locale%`
+ * Deprecate `ConfigBuilderCacheWarmer`, return PHP arrays from your config instead
+ * Add support for selecting the appropriate error renderer based on the `APP_RUNTIME_MODE` env var
+ * Add `KernelInterface::getShareDir()`, `APP_SHARE_DIR` and `%kernel.share_dir%` to store application data that are shared between all front-end servers
+
+7.3
+---
+
+ * Add `errors.php` and `webhook.php` routing configuration files (use them instead of their XML equivalent)
+
+   Before:
+
+   ```yaml
+   when@dev:
+       _errors:
+           resource: '@FrameworkBundle/Resources/config/routing/errors.xml'
+           prefix: /_error
+
+   webhook:
+       resource: '@FrameworkBundle/Resources/config/routing/webhook.xml'
+       prefix: /webhook
+   ```
+
+   After:
+
+   ```yaml
+   when@dev:
+       _errors:
+           resource: '@FrameworkBundle/Resources/config/routing/errors.php'
+           prefix: /_error
+
+   webhook:
+       resource: '@FrameworkBundle/Resources/config/routing/webhook.php'
+       prefix: /webhook
+   ```
+
+ * Add support for the ObjectMapper component
+ * Add support for assets pre-compression
+ * Rename `TranslationUpdateCommand` to `TranslationExtractCommand`
+ * Add JsonStreamer services and configuration
+ * Add new `framework.property_info.with_constructor_extractor` option to allow enabling or disabling the constructor extractor integration
+ * Deprecate the `--show-arguments` option of the `container:debug` command, as arguments are now always shown
+ * Add autowiring alias for `RateLimiterFactoryInterface`
+ * Add `framework.validation.disable_translation` option
+ * Add support for signal plain name in the `messenger.stop_worker_on_signals` configuration
+ * Deprecate the `framework.validation.cache` option
+ * Add `--method` option to the `debug:router` command
+ * Auto-exclude DI extensions, test cases, entities and messenger messages
+ * Add DI alias from `ServicesResetterInterface` to `services_resetter`
+ * Add `methods` argument in `#[IsCsrfTokenValid]` attribute
+ * Allow configuring the logging channel per type of exceptions
+ * Enable service argument resolution on classes that use the `#[Route]` attribute,
+   the `#[AsController]` attribute is no longer required
+ * Deprecate setting the `framework.profiler.collect_serializer_data` config option to `false`
+ * Set `framework.rate_limiter.limiters.*.lock_factory` to `auto` by default
+ * Deprecate `RateLimiterFactory` autowiring aliases, use `RateLimiterFactoryInterface` instead
+ * Allow configuring compound rate limiters
+ * Make `ValidatorCacheWarmer` use `kernel.build_dir` instead of `cache_dir`
+ * Make `SerializeCacheWarmer` use `kernel.build_dir` instead of `cache_dir`
+ * Support executing custom workflow validators during container compilation
+
+7.2
+---
+
+ * Add support for `--sort` option when extracting translations with `translation:extract` command and `--force` option
+ * Add support for setting `headers` with `Symfony\Bundle\FrameworkBundle\Controller\TemplateController`
+ * Add `--resolve-env-vars` option to `lint:container` command
+ * Derivate `kernel.secret` from the decryption secret when its env var is not defined
+ * Make the `config/` directory optional in `MicroKernelTrait`, add support for service arguments in the
+   invokable Kernel class, and register `FrameworkBundle` by default when the `bundles.php` file is missing
+ * [BC BREAK] The `secrets:decrypt-to-local` command terminates with a non-zero exit code when a secret could not be read
+ * Deprecate making `cache.app` adapter taggable, use the `cache.app.taggable` adapter instead
+ * Enable `json_decode_detailed_errors` in the default serializer context in debug mode by default when `seld/jsonlint` is installed
+ * Register `Symfony\Component\Serializer\NameConverter\SnakeCaseToCamelCaseNameConverter` as a service named `serializer.name_converter.snake_case_to_camel_case` if available
+ * Add `framework.csrf_protection.stateless_token_ids`, `.cookie_name`, and `.check_header` options to use stateless headers/cookies-based CSRF protection
+ * Add `framework.form.csrf_protection.field_attr` option
+ * Deprecate `session.sid_length` and `session.sid_bits_per_character` config options
+ * Add the ability to use an existing service as a lock/semaphore resource
+ * Add support for configuring multiple serializer instances via the configuration
+ * Add support for `SYMFONY_TRUSTED_PROXIES`, `SYMFONY_TRUSTED_HEADERS`, `SYMFONY_TRUST_X_SENDFILE_TYPE_HEADER` and `SYMFONY_TRUSTED_HOSTS` env vars
+ * Add `--no-fill` option to `translation:extract` command
+
+7.1
+---
+
+ * Add `CheckAliasValidityPass` to `lint:container` command
+ * Add `private_ranges` as a shortcut for private IP address ranges to the `trusted_proxies` option
+ * Mark classes `ConfigBuilderCacheWarmer`, `Router`, `SerializerCacheWarmer`, `TranslationsCacheWarmer`, `Translator` and `ValidatorCacheWarmer` as `final`
+ * Move the Router `cache_dir` to `kernel.build_dir`
+ * Deprecate the `router.cache_dir` config option
+ * Add `rate_limiter` tags to rate limiter services
+ * Add `secrets:reveal` command
+ * Add `rate_limiter` option to `http_client.default_options` and `http_client.scoped_clients`
+ * Attach the workflow's configuration to the `workflow` tag
+ * Add the `allowed_recipients` option for mailer to allow some users to receive
+   emails even if `recipients` is defined.
+ * Reset env vars when resetting the container
+
+7.0
+---
+
+ * Remove command `translation:update`, use `translation:extract` instead
+ * Make the `http_method_override` config option default to `false`
+ * Remove `AbstractController::renderForm()`, use `render()` instead
+ * Remove the `Symfony\Component\Serializer\Normalizer\ObjectNormalizer` and
+   `Symfony\Component\Serializer\Normalizer\PropertyNormalizer` autowiring aliases, type-hint against
+   `Symfony\Component\Serializer\Normalizer\NormalizerInterface` or implement `NormalizerAwareInterface` instead
+ * Remove the `Http\Client\HttpClient` service, use `Psr\Http\Client\ClientInterface` instead
+ * Remove the integration of Doctrine annotations, use native attributes instead
+ * Remove `EnableLoggerDebugModePass`, use argument `$debug` of HttpKernel's `Logger` instead
+ * Remove `AddDebugLogProcessorPass::configureLogger()`, use HttpKernel's `DebugLoggerConfigurator` instead
+ * Make the `framework.handle_all_throwables` config option default to `true`
+ * Make the `framework.php_errors.log` config option default to `true`
+ * Make the `framework.session.cookie_secure` config option default to `auto`
+ * Make the `framework.session.cookie_samesite` config option default to `lax`
+ * Make the `framework.session.handler_id` default to null if `save_path` is not set and to `session.handler.native_file` otherwise
+ * Make the `framework.uid.default_uuid_version` config option default to `7`
+ * Make the `framework.uid.time_based_uuid_version` config option default to `7`
+ * Make the `framework.validation.email_validation_mode` config option default to `html5`
+ * Remove the `framework.validation.enable_annotations` config option, use `framework.validation.enable_attributes` instead
+ * Remove the `framework.serializer.enable_annotations` config option, use `framework.serializer.enable_attributes` instead
+ * Remove the `routing.loader.annotation` service, use the `routing.loader.attribute` service instead
+ * Remove the `routing.loader.annotation.directory` service, use the `routing.loader.attribute.directory` service instead
+ * Remove the `routing.loader.annotation.file` service, use the `routing.loader.attribute.file` service instead
+ * Remove `AnnotatedRouteControllerLoader`, use `AttributeRouteControllerLoader` instead
+ * Remove `AddExpressionLanguageProvidersPass`, use `Symfony\Component\Routing\DependencyInjection\AddExpressionLanguageProvidersPass` instead
+ * Remove `DataCollectorTranslatorPass`, use `Symfony\Component\Translation\DependencyInjection\DataCollectorTranslatorPass` instead
+ * Remove `LoggingTranslatorPass`, use `Symfony\Component\Translation\DependencyInjection\LoggingTranslatorPass` instead
+ * Remove `WorkflowGuardListenerPass`, use `Symfony\Component\Workflow\DependencyInjection\WorkflowGuardListenerPass` instead
+
+6.4
+---
+
+ * Add `HttpClientAssertionsTrait`
+ * Add `AbstractController::renderBlock()` and `renderBlockView()`
+ * Remove call to `renderView()` in `AbstractController::render()`
+ * Add native return type to `Translator` and to `Application::reset()`
+ * Deprecate the integration of Doctrine annotations, either uninstall the `doctrine/annotations` package or disable the integration by setting `framework.annotations` to `false`
+ * Enable `json_decode_detailed_errors` context for Serializer by default if `kernel.debug` is true and the `seld/jsonlint` package is installed
+ * Add `DomCrawlerAssertionsTrait::assertAnySelectorTextContains(string $selector, string $text)`
+ * Add `DomCrawlerAssertionsTrait::assertAnySelectorTextSame(string $selector, string $text)`
+ * Add `DomCrawlerAssertionsTrait::assertAnySelectorTextNotContains(string $selector, string $text)`
+ * Deprecate `EnableLoggerDebugModePass`, use argument `$debug` of HttpKernel's `Logger` instead
+ * Deprecate `AddDebugLogProcessorPass::configureLogger()`, use HttpKernel's `DebugLoggerConfigurator` instead
+ * Deprecate not setting the `framework.handle_all_throwables` config option; it will default to `true` in 7.0
+ * Deprecate not setting the `framework.php_errors.log` config option; it will default to `true` in 7.0
+ * Deprecate not setting the `framework.session.cookie_secure` config option; it will default to `auto` in 7.0
+ * Deprecate not setting the `framework.session.cookie_samesite` config option; it will default to `lax` in 7.0
+ * Deprecate not setting either `framework.session.handler_id` or `save_path` config options; `handler_id` will
+   default to null in 7.0 if `save_path` is not set and to `session.handler.native_file` otherwise
+ * Deprecate not setting the `framework.uid.default_uuid_version` config option; it will default to `7` in 7.0
+ * Deprecate not setting the `framework.uid.time_based_uuid_version` config option; it will default to `7` in 7.0
+ * Deprecate not setting the `framework.validation.email_validation_mode` config option; it will default to `html5` in 7.0
+ * Deprecate `framework.validation.enable_annotations`, use `framework.validation.enable_attributes` instead
+ * Deprecate `framework.serializer.enable_annotations`, use `framework.serializer.enable_attributes` instead
+ * Add `array $tokenAttributes = []` optional parameter to `KernelBrowser::loginUser()`
+ * Add support for relative URLs in BrowserKit's redirect assertion
+ * Change BrowserKitAssertionsTrait::getClient() to be protected
+ * Deprecate the `framework.asset_mapper.provider` config option
+ * Add `--exclude` option to the `cache:pool:clear` command
+ * Add parameters deprecations to the output of `debug:container` command
+ * Change `framework.asset_mapper.importmap_polyfill` from a URL to the name of an item in the importmap
+ * Provide `$buildDir` when running `CacheWarmer` to build read-only resources
+ * Add the global `--profile` option to the console to enable profiling commands
+ * Deprecate the `routing.loader.annotation` service, use the `routing.loader.attribute` service instead
+ * Deprecate the `routing.loader.annotation.directory` service, use the `routing.loader.attribute.directory` service instead
+ * Deprecate the `routing.loader.annotation.file` service, use the `routing.loader.attribute.file` service instead
+ * Deprecate `AnnotatedRouteControllerLoader`, use `AttributeRouteControllerLoader` instead
+ * Deprecate `AddExpressionLanguageProvidersPass`, use `Symfony\Component\Routing\DependencyInjection\AddExpressionLanguageProvidersPass` instead
+ * Deprecate `DataCollectorTranslatorPass`, use `Symfony\Component\Translation\DependencyInjection\DataCollectorTranslatorPass` instead
+ * Deprecate `LoggingTranslatorPass`, use `Symfony\Component\Translation\DependencyInjection\LoggingTranslatorPass` instead
+ * Deprecate `WorkflowGuardListenerPass`, use `Symfony\Component\Workflow\DependencyInjection\WorkflowGuardListenerPass` instead
+
+6.3
+---
+
+ * Add `extra` option for `http_client.default_options` and `http_client.scoped_client`
+ * Add `DomCrawlerAssertionsTrait::assertSelectorCount(int $count, string $selector)`
+ * Allow to avoid `limit` definition in a RateLimiter configuration when using the `no_limit` policy
+ * Add `--format` option to the `debug:config` command
+ * Add support to pass namespace wildcard in `framework.messenger.routing`
+ * Deprecate `framework:exceptions` tag, unwrap it and replace `framework:exception` tags' `name` attribute by `class`
+ * Deprecate the `notifier.logger_notification_listener` service, use the `notifier.notification_logger_listener` service instead
+ * Allow setting private services with the test container
+ * Register alias for argument for workflow services with workflow name only
+ * Configure the `ErrorHandler` on `FrameworkBundle::boot()`
+ * Allow setting `debug.container.dump` to `false` to disable dumping the container to XML
+ * Add `framework.http_cache.skip_response_headers` option
+ * Display warmers duration on debug verbosity for `cache:clear` command
+ * Add `AbstractController::sendEarlyHints()` to send HTTP Early Hints
+ * Add autowiring aliases for `Http\Client\HttpAsyncClient`
+ * Deprecate the `Http\Client\HttpClient` service, use `Psr\Http\Client\ClientInterface` instead
+ * Add `stop_worker_on_signals` configuration option to `messenger` to define signals which would stop a worker
+ * Add support for `--all` option to clear all cache pools with `cache:pool:clear` command
+ * Add `--show-aliases` option to `debug:router` command
+
+6.2
+---
+
+ * Add `resolve-env` option to `debug:config` command to display actual values of environment variables in dumped configuration
+ * Add `NotificationAssertionsTrait`
+ * Add option `framework.handle_all_throwables` to allow `Symfony\Component\HttpKernel\HttpKernel` to handle all kinds of `Throwable`
+ * Make `AbstractController::render()` able to deal with forms and deprecate `renderForm()`
+ * Deprecate the `Symfony\Component\Serializer\Normalizer\ObjectNormalizer` and
+   `Symfony\Component\Serializer\Normalizer\PropertyNormalizer` autowiring aliases, type-hint against
+   `Symfony\Component\Serializer\Normalizer\NormalizerInterface` or implement `NormalizerAwareInterface` instead
+ * Add service usages list to the `debug:container` command output
+ * Add service and alias deprecation message to `debug:container [<name>]` output
+ * Tag all workflows services with `workflow`, those with type=workflow are
+   tagged with `workflow.workflow`, and those with type=state_machine with
+   `workflow.state_machine`
+ * Add `rate_limiter` configuration option to `messenger.transport` to allow rate limited transports using the RateLimiter component
+ * Remove `@internal` tag from secret vaults to allow them to be used directly outside the framework bundle and custom vaults to be added
+ * Deprecate `framework.form.legacy_error_messages` config node
+ * Add a `framework.router.cache_dir` configuration option to configure the default `Router` `cache_dir` option
+ * Add option `framework.messenger.buses.*.default_middleware.allow_no_senders` to enable throwing when a message doesn't have a sender
+ * Deprecate `AbstractController::renderForm()`, use `render()` instead
+ * Deprecate `FrameworkExtension::registerRateLimiter()`
+
+6.1
+---
+
+ * Add support for configuring semaphores
+ * Environment variable `SYMFONY_IDE` is read by default when `framework.ide` config is not set
+ * Load PHP configuration files by default in the `MicroKernelTrait`
+ * Add `cache:pool:invalidate-tags` command
+ * Add `xliff` support in addition to `xlf` for `XliffFileDumper`
+ * Deprecate the `reset_on_message` config option. It can be set to `true` only and does nothing now
+ * Add `trust_x_sendfile_type_header` option
+ * Add support for first-class callable route controller in `MicroKernelTrait`
+ * Add tag `routing.condition_service` to autoconfigure routing condition services
+ * Automatically register kernel methods marked with the `Symfony\Component\Routing\Annotation\Route` attribute or annotation as controllers in `MicroKernelTrait`
+ * Deprecate not setting the `http_method_override` config option. The default value will change to `false` in 7.0.
+ * Add `framework.profiler.collect_serializer_data` config option, set it to `true` to enable the serializer data collector and profiler panel
+
+6.0
+---
+
+ * Remove the `session.storage` alias and `session.storage.*` services, use the `session.storage.factory` alias and `session.storage.factory.*` services instead
+ * Remove `framework.session.storage_id` configuration option, use the `framework.session.storage_factory_id` configuration option instead
+ * Remove the `session` service and the `SessionInterface` alias, use the `\Symfony\Component\HttpFoundation\Request::getSession()` or the new `\Symfony\Component\HttpFoundation\RequestStack::getSession()` methods instead
+ * Remove the `session.attribute_bag` service and `session.flash_bag` service
+ * Remove the `lock.RESOURCE_NAME` and `lock.RESOURCE_NAME.store` services and the `lock`, `LockInterface`, `lock.store` and `PersistingStoreInterface` aliases, use `lock.RESOURCE_NAME.factory`, `lock.factory` or `LockFactory` instead
+ * The `form.factory`, `form.type.file`, `translator`, `security.csrf.token_manager`, `serializer`,
+   `cache_clearer`, `filesystem` and `validator` services are now private
+ * Remove the `output-format` and `xliff-version` options from `TranslationUpdateCommand`
+ * Remove `has()`, `get()`, `getDoctrine()`n and `dispatchMessage()` from `AbstractController`, use method/constructor injection instead
+ * Make the "framework.router.utf8" configuration option default to `true`
+ * Remove the `AdapterInterface` autowiring alias, use `CacheItemPoolInterface` instead
+ * Make the `profiler` service private
+ * Remove all other values than "none", "php_array" and "file" for `framework.annotation.cache`
+ * Register workflow services as private
+ * Remove support for passing a `RouteCollectionBuilder` to `MicroKernelTrait::configureRoutes()`, type-hint `RoutingConfigurator` instead
+ * Remove the `cache.adapter.doctrine` service
+ * Remove the `framework.translator.enabled_locales` config option, use `framework.enabled_locales` instead
+ * Make the `framework.messenger.reset_on_message` configuration option default to `true`
+
+5.4
+---
+
+ * Add `set_locale_from_accept_language` config option to automatically set the request locale based on the `Accept-Language`
+   HTTP request header and the `framework.enabled_locales` config option
+ * Add `set_content_language_from_locale` config option to automatically set the `Content-Language` HTTP response header based on the Request locale
+ * Deprecate the `framework.translator.enabled_locales`, use `framework.enabled_locales` instead
+ * Add autowiring alias for `HttpCache\StoreInterface`
+ * Add the ability to enable the profiler using a request query parameter, body parameter or attribute
+ * Deprecate the `AdapterInterface` autowiring alias, use `CacheItemPoolInterface` instead
+ * Deprecate the public `profiler` service to private
+ * Deprecate `get()`, `has()`, `getDoctrine()`, and `dispatchMessage()` in `AbstractController`, use method/constructor injection instead
+ * Deprecate the `cache.adapter.doctrine` service
+ * Add support for resetting container services after each messenger message
+ * Add `configureContainer()`, `configureRoutes()`, `getConfigDir()` and `getBundlesPath()` to `MicroKernelTrait`
+ * Add support for configuring log level, and status code by exception class
+ * Bind the `default_context` parameter onto serializer's encoders and normalizers
+ * Add support for `statusCode` default parameter when loading a template directly from route using the `Symfony\Bundle\FrameworkBundle\Controller\TemplateController` controller
+ * Deprecate `translation:update` command, use `translation:extract` instead
+ * Add `PhpStanExtractor` support for the PropertyInfo component
+ * Add `cache.adapter.doctrine_dbal` service to replace `cache.adapter.pdo` when a Doctrine DBAL connection is used.
+
+5.3
+---
+
+ * Deprecate the `session.storage` alias and `session.storage.*` services, use the `session.storage.factory` alias and `session.storage.factory.*` services instead
+ * Deprecate the `framework.session.storage_id` configuration option, use the `framework.session.storage_factory_id` configuration option instead
+ * Deprecate the `session` service and the `SessionInterface` alias, use the `Request::getSession()` or the new `RequestStack::getSession()` methods instead
+ * Add `AbstractController::renderForm()` to render a form and set the appropriate HTTP status code
+ * Add support for configuring PHP error level to log levels
+ * Add the `dispatcher` option to `debug:event-dispatcher`
+ * Add the `event_dispatcher.dispatcher` tag
+ * Add `assertResponseFormatSame()` in `BrowserKitAssertionsTrait`
+ * Add support for configuring UUID factory services
+ * Add tag `assets.package` to register asset packages
+ * Add support to use a PSR-6 compatible cache for Doctrine annotations
+ * Deprecate all other values than "none", "php_array" and "file" for `framework.annotation.cache`
+ * Add `KernelTestCase::getContainer()` as the best way to get a container in tests
+ * Rename the container parameter `profiler_listener.only_master_requests` to `profiler_listener.only_main_requests`
+ * Add service `fragment.uri_generator` to generate the URI of a fragment
+ * Deprecate registering workflow services as public
+ * Deprecate option `--xliff-version` of the `translation:update` command, use e.g. `--format=xlf20` instead
+ * Deprecate option `--output-format` of the `translation:update` command, use e.g. `--format=xlf20` instead
+
+5.2.0
+-----
+
+ * Added `framework.http_cache` configuration tree
+ * Added `framework.trusted_proxies` and `framework.trusted_headers` configuration options
+ * Deprecated the public `form.factory`, `form.type.file`, `translator`, `security.csrf.token_manager`, `serializer`,
+   `cache_clearer`, `filesystem` and `validator` services to private.
+ * Added `TemplateAwareDataCollectorInterface` and `AbstractDataCollector` to simplify custom data collector creation and leverage autoconfiguration
+ * Add `cache.adapter.redis_tag_aware` tag to use `RedisCacheAwareAdapter`
+ * added `framework.http_client.retry_failing` configuration tree
+ * added `assertCheckboxChecked()` and `assertCheckboxNotChecked()` in `WebTestCase`
+ * added `assertFormValue()` and `assertNoFormValue()` in `WebTestCase`
+ * Added "--as-tree=3" option to `translation:update` command to dump messages as a tree-like structure. The given value defines the level where to switch to inline YAML
+ * Deprecated the `lock.RESOURCE_NAME` and `lock.RESOURCE_NAME.store` services and the `lock`, `LockInterface`, `lock.store` and `PersistingStoreInterface` aliases, use `lock.RESOURCE_NAME.factory`, `lock.factory` or `LockFactory` instead.
+
+5.1.0
+-----
+ * Removed `--no-backup` option from `translation:update` command (broken since `5.0.0`)
+ * Added link to source for controllers registered as named services
+ * Added link to source on controller on `router:match`/`debug:router` (when `framework.ide` is configured)
+ * Added the `framework.router.default_uri` configuration option to configure the default `RequestContext`
+ * Made `MicroKernelTrait::configureContainer()` compatible with `ContainerConfigurator`
+ * Added a new `mailer.message_bus` option to configure or disable the message bus to use to send mails.
+ * Added flex-compatible default implementation for `MicroKernelTrait::registerBundles()`
+ * Deprecated passing a `RouteCollectionBuilder` to `MicroKernelTrait::configureRoutes()`, type-hint `RoutingConfigurator` instead
+ * The `TemplateController` now accepts context argument
+ * Deprecated *not* setting the "framework.router.utf8" configuration option as it will default to `true` in Symfony 6.0
+ * Added tag `routing.expression_language_function` to define functions available in route conditions
+ * Added `debug:container --deprecations` option to see compile-time deprecations.
+ * Made `BrowserKitAssertionsTrait` report the original error message in case of a failure
+ * Added ability for `config:dump-reference` and `debug:config` to dump and debug kernel container extension configuration.
+ * Deprecated `session.attribute_bag` service and `session.flash_bag` service.
+
+5.0.0
+-----
+
+ * Removed support to load translation resources from the legacy directories `src/Resources/translations/` and `src/Resources/<BundleName>/translations/`
+ * Removed `ControllerNameParser`.
+ * Removed `ResolveControllerNameSubscriber`
+ * Removed support for `bundle:controller:action` to reference controllers. Use `serviceOrFqcn::method` instead
+ * Removed support for PHP templating, use Twig instead
+ * Removed `Controller`, use `AbstractController` instead
+ * Removed `Client`, use `KernelBrowser` instead
+ * Removed `ContainerAwareCommand`, use dependency injection instead
+ * Removed the `validation.strict_email` option, use `validation.email_validation_mode` instead
+ * Removed the `cache.app.simple` service and its corresponding PSR-16 autowiring alias
+ * Removed cache-related compiler passes and `RequestDataCollector`
+ * Removed the `translator.selector` and `session.save_listener` services
+ * Removed `SecurityUserValueResolver`, use `UserValueResolver` instead
+ * Removed `routing.loader.service`.
+ * Service route loaders must be tagged with `routing.route_loader`.
+ * Added `slugger` service and `SluggerInterface` alias
+ * Removed the `lock.store.flock`, `lock.store.semaphore`, `lock.store.memcached.abstract` and `lock.store.redis.abstract` services.
+ * Removed the `router.cache_class_prefix` parameter.
+
 4.4.0
 -----
 
@@ -22,6 +394,7 @@ CHANGELOG
  * Made `framework.session.handler_id` accept a DSN
  * Marked the `RouterDataCollector` class as `@final`.
  * [BC Break] The `framework.messenger.buses.<name>.middleware` config key is not deeply merged anymore.
+ * Moved `MailerAssertionsTrait` in `KernelTestCase`
 
 4.3.0
 -----
@@ -47,8 +420,8 @@ CHANGELOG
    options if you're using Symfony's serializer.
  * [BC Break] Removed the `framework.messenger.routing.send_and_handle` configuration.
    Instead of setting it to true, configure a `SyncTransport` and route messages to it.
- * Added information about deprecated aliases in `debug:autowiring` 
- * Added php ini session options `sid_length` and `sid_bits_per_character` 
+ * Added information about deprecated aliases in `debug:autowiring`
+ * Added php ini session options `sid_length` and `sid_bits_per_character`
    to the `session` section of the configuration
  * Added support for Translator paths, Twig paths in translation commands.
  * Added support for PHP files with translations in translation commands.
@@ -347,7 +720,7 @@ CHANGELOG
  * added Client::enableProfiler()
  * a new parameter has been added to the DIC: `router.request_context.base_url`
    You can customize it for your functional tests or for generating URLs with
-   the right base URL when your are in the CLI context.
+   the right base URL when you are in the CLI context.
  * added support for default templates per render tag
 
 2.1.0

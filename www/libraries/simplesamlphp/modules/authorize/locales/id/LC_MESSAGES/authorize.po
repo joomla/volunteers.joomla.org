@@ -15,15 +15,6 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.3.4\n"
 
-msgid "{authorize:Authorize:403_text}"
-msgstr ""
-"Anda tidak memiliki hak yang diperlukan untuk mengakses aplikasi ini. "
-"Silahkan menghubungi administrator jika seharusnya anda dapat mengakses "
-"aplikasi ini."
-
-msgid "{authorize:Authorize:403_header}"
-msgstr "Dilarang mengakses"
-
 msgid "Access forbidden"
 msgstr "Dilarang mengakses"
 

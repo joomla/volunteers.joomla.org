@@ -1,6 +1,8 @@
 #!/usr/bin/env php
 <?php
 
+declare(strict_types=1);
+
 // Check that the memcache library is enabled
 if (!class_exists('Memcache') && !class_exists('Memcached')) {
     echo "Error: the memcached (or memcache) PHP extension appears to be unavailable.\n";
@@ -18,13 +20,14 @@ if (!class_exists('Memcache') && !class_exists('Memcached')) {
 }
 
 // This is the base directory of the SimpleSAMLphp installation
-$baseDir = dirname(dirname(__FILE__));
+$baseDir = dirname(__FILE__, 2);
 
 // Add library autoloader
-require_once($baseDir . '/lib/_autoload.php');
+require_once($baseDir . '/src/_autoload.php');
 
 // Initialize the configuration
-$configdir = SimpleSAML\Utils\Config::getConfigDir();
+$configUtils = new SimpleSAML\Utils\Config();
+$configdir = $configUtils->getConfigDir();
 \SimpleSAML\Configuration::setConfigDir($configdir);
 
 // Things we should warn the user about

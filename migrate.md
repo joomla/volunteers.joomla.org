@@ -32,6 +32,7 @@ The following extensions must be uninstalled:
   - Smart Search - Joomla Volunteer Portal - Teams
   - Smart Search - Joomla Volunteer Portal - Joomlers
 - Akeeba Backup 10 (`pkg_akeebabackup`), replaces Akeeba Backup 8, see [Akeeba Backup](#akeeba-backup)
+- RO Single Sign On (`pkg_sso`) to 2.3.1, see [RO Single Sign On](#ro-single-sign-on)
 - YourSites (`plg_system_yoursites`) to 1.73.0, the Joomla 6 version of the plugin. Install it over the Joomla 3 version, the settings are kept.
 
 ## Search
@@ -72,3 +73,12 @@ Akeeba Backup 8 (`pkg_akeeba`) does not run on Joomla 6 and cannot be uninstalle
 4. Run `database/updates/2026-10-24-akeeba.sql`, replace `#__` with the table prefix. This removes the extensions, update sites, administrator menu item and asset of Akeeba Backup 8, FOF 3, FOF 4 and FEF, and drops the `#__ak_profiles`, `#__ak_stats` and `#__ak_storage` tables
 5. Point the backup cron jobs to the Joomla CLI of Akeeba Backup 10, the old `cli/akeeba-*.php` scripts are removed: `php cli/joomla.php akeeba:backup:take --profile=<id>`
 6. Check the S3 settings of the backup profiles and take a test backup
+
+## RO Single Sign On
+RO Single Sign On 2.3.1 (`pkg_sso`) is installed over 1.3.0 and comes with SimpleSAMLphp 2 as the `simplesamlphp` library. SimpleSAMLphp 2 serves its pages from `libraries/simplesamlphp/public` instead of `libraries/simplesamlphp/www`. The files of 1.3.0 and SimpleSAMLphp 1 and the SSO - Joomla plugin (`plg_sso_joomla`) are removed in the repository.
+
+1. Install RO Single Sign On 2.3.1 (`pkg_sso`) over 1.3.0
+2. Run `database/updates/2026-10-24-sso.sql`, replace `#__` with the table prefix. This removes the SSO - Joomla plugin and the schema version of 1.3.0
+3. Check that the `sso` symlink in the webroot points to `libraries/simplesamlphp/public`
+4. Open Components > RO Single Sign On > Configuration and save it, this writes `libraries/simplesamlphp/config/config.php` for SimpleSAMLphp 2. The config, metadata and cert folders are not in the repository.
+5. Check the Identity Provider profile and that logging in and out through the Login and Logout menu items works

@@ -23,7 +23,7 @@ use Symfony\Component\HttpKernel\HttpKernelInterface;
  */
 class SubRequestHandler
 {
-    public static function handle(HttpKernelInterface $kernel, Request $request, $type, $catch): Response
+    public static function handle(HttpKernelInterface $kernel, Request $request, int $type, bool $catch): Response
     {
         // save global state related to trusted headers and proxies
         $trustedProxies = Request::getTrustedProxies();
@@ -31,13 +31,14 @@ class SubRequestHandler
 
         // remove untrusted values
         $remoteAddr = $request->server->get('REMOTE_ADDR');
-        if (!IpUtils::checkIp($remoteAddr, $trustedProxies)) {
+        if (!$remoteAddr || !IpUtils::checkIp($remoteAddr, $trustedProxies)) {
             $trustedHeaders = [
                 'FORWARDED' => $trustedHeaderSet & Request::HEADER_FORWARDED,
                 'X_FORWARDED_FOR' => $trustedHeaderSet & Request::HEADER_X_FORWARDED_FOR,
                 'X_FORWARDED_HOST' => $trustedHeaderSet & Request::HEADER_X_FORWARDED_HOST,
                 'X_FORWARDED_PROTO' => $trustedHeaderSet & Request::HEADER_X_FORWARDED_PROTO,
                 'X_FORWARDED_PORT' => $trustedHeaderSet & Request::HEADER_X_FORWARDED_PORT,
+                'X_FORWARDED_PREFIX' => $trustedHeaderSet & Request::HEADER_X_FORWARDED_PREFIX,
             ];
             foreach (array_filter($trustedHeaders) as $name => $key) {
                 $request->headers->remove($name);
@@ -50,16 +51,16 @@ class SubRequestHandler
         $trustedValues = [];
         foreach (array_reverse($request->getClientIps()) as $ip) {
             $trustedIps[] = $ip;
-            $trustedValues[] = sprintf('for="%s"', $ip);
+            $trustedValues[] = \sprintf('for="%s"', $ip);
         }
         if ($ip !== $remoteAddr) {
             $trustedIps[] = $remoteAddr;
-            $trustedValues[] = sprintf('for="%s"', $remoteAddr);
+            $trustedValues[] = \sprintf('for="%s"', $remoteAddr);
         }
 
         // set trusted values, reusing as much as possible the global trusted settings
         if (Request::HEADER_FORWARDED & $trustedHeaderSet) {
-            $trustedValues[0] .= sprintf(';host="%s";proto=%s', $request->getHttpHost(), $request->getScheme());
+            $trustedValues[0] .= \sprintf(';host="%s";proto=%s', $request->getHttpHost(), $request->getScheme());
             $request->headers->set('Forwarded', $v = implode(', ', $trustedValues));
             $request->server->set('HTTP_FORWARDED', $v);
         }

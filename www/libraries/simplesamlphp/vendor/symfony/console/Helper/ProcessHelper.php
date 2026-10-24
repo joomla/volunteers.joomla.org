@@ -21,22 +21,18 @@ use Symfony\Component\Process\Process;
  *
  * @author Fabien Potencier <fabien@symfony.com>
  *
- * @final since Symfony 4.2
+ * @final
  */
 class ProcessHelper extends Helper
 {
     /**
      * Runs an external process.
      *
-     * @param array|Process $cmd       An instance of Process or an array of the command and arguments
-     * @param string|null   $error     An error message that must be displayed if something went wrong
-     * @param callable|null $callback  A PHP callback to run whenever there is some
-     *                                 output available on STDOUT or STDERR
-     * @param int           $verbosity The threshold for verbosity
-     *
-     * @return Process The process that ran
+     * @param array|Process $cmd      An instance of Process or an array of the command and arguments
+     * @param callable|null $callback A PHP callback to run whenever there is some
+     *                                output available on STDOUT or STDERR
      */
-    public function run(OutputInterface $output, $cmd, $error = null, callable $callback = null, $verbosity = OutputInterface::VERBOSITY_VERY_VERBOSE)
+    public function run(OutputInterface $output, array|Process $cmd, ?string $error = null, ?callable $callback = null, int $verbosity = OutputInterface::VERBOSITY_VERY_VERBOSE): Process
     {
         if (!class_exists(Process::class)) {
             throw new \LogicException('The ProcessHelper cannot be run as the Process component is not installed. Try running "compose require symfony/process".');
@@ -52,11 +48,6 @@ class ProcessHelper extends Helper
             $cmd = [$cmd];
         }
 
-        if (!\is_array($cmd)) {
-            @trigger_error(sprintf('Passing a command as a string to "%s()" is deprecated since Symfony 4.2, pass it the command as an array of arguments instead.', __METHOD__), \E_USER_DEPRECATED);
-            $cmd = [method_exists(Process::class, 'fromShellCommandline') ? Process::fromShellCommandline($cmd) : new Process($cmd)];
-        }
-
         if (\is_string($cmd[0] ?? null)) {
             $process = new Process($cmd);
             $cmd = [];
@@ -64,7 +55,7 @@ class ProcessHelper extends Helper
             $process = $cmd[0];
             unset($cmd[0]);
         } else {
-            throw new \InvalidArgumentException(sprintf('Invalid command provided to "%s()": the command should be an array whose first element is either the path to the binary to run or a "Process" object.', __METHOD__));
+            throw new \InvalidArgumentException(\sprintf('Invalid command provided to "%s()": the command should be an array whose first element is either the path to the binary to run or a "Process" object.', __METHOD__));
         }
 
         if ($verbosity <= $output->getVerbosity()) {
@@ -78,12 +69,12 @@ class ProcessHelper extends Helper
         $process->run($callback, $cmd);
 
         if ($verbosity <= $output->getVerbosity()) {
-            $message = $process->isSuccessful() ? 'Command ran successfully' : sprintf('%s Command did not run successfully', $process->getExitCode());
+            $message = $process->isSuccessful() ? 'Command ran successfully' : \sprintf('%s Command did not run successfully', $process->getExitCode());
             $output->write($formatter->stop(spl_object_hash($process), $message, $process->isSuccessful()));
         }
 
         if (!$process->isSuccessful() && null !== $error) {
-            $output->writeln(sprintf('<error>%s</error>', $this->escapeString($error)));
+            $output->writeln(\sprintf('<error>%s</error>', $this->escapeString($error)));
         }
 
         return $process;
@@ -95,20 +86,17 @@ class ProcessHelper extends Helper
      * This is identical to run() except that an exception is thrown if the process
      * exits with a non-zero exit code.
      *
-     * @param string|Process $cmd      An instance of Process or a command to run
-     * @param string|null    $error    An error message that must be displayed if something went wrong
-     * @param callable|null  $callback A PHP callback to run whenever there is some
-     *                                 output available on STDOUT or STDERR
-     *
-     * @return Process The process that ran
+     * @param array|Process $cmd      An instance of Process or a command to run
+     * @param callable|null $callback A PHP callback to run whenever there is some
+     *                                output available on STDOUT or STDERR
      *
      * @throws ProcessFailedException
      *
      * @see run()
      */
-    public function mustRun(OutputInterface $output, $cmd, $error = null, callable $callback = null)
+    public function mustRun(OutputInterface $output, array|Process $cmd, ?string $error = null, ?callable $callback = null, int $verbosity = OutputInterface::VERBOSITY_VERY_VERBOSE): Process
     {
-        $process = $this->run($output, $cmd, $error, $callback);
+        $process = $this->run($output, $cmd, $error, $callback, $verbosity);
 
         if (!$process->isSuccessful()) {
             throw new ProcessFailedException($process);
@@ -119,10 +107,8 @@ class ProcessHelper extends Helper
 
     /**
      * Wraps a Process callback to add debugging output.
-     *
-     * @return callable
      */
-    public function wrapCallback(OutputInterface $output, Process $process, callable $callback = null)
+    public function wrapCallback(OutputInterface $output, Process $process, ?callable $callback = null): callable
     {
         if ($output instanceof ConsoleOutputInterface) {
             $output = $output->getErrorOutput();
@@ -144,10 +130,7 @@ class ProcessHelper extends Helper
         return str_replace('<', '\\<', $str);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getName()
+    public function getName(): string
     {
         return 'process';
     }

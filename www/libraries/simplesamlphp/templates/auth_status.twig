@@ -7,7 +7,9 @@
     <p>{% trans %}Hi, this is the status page of SimpleSAMLphp. Here you can see if your session is timed out, how long it lasts until it times out and all the attributes that are attached to your session.{% endtrans %}</p>
 
 {% if remaining %}
-    <p>{% trans %}Your session is valid for {{ remaining }} seconds from now.{% endtrans %}</p>
+    <p>{% trans with {
+        '%remaining%': remaining
+    } %}Your session is valid for %remaining% seconds from now.{% endtrans %}</p>
 {% endif %}
 
 
@@ -16,9 +18,9 @@
 
 {% embed '_table.twig' -%}
 
-    {% block namecol -%}
+    {% block namecol %}
     {% set translated = name|trans %}
-    <td class="attrname">{% if translated != name %} {{ translated }} <br>{% endif %} <samp>{{ name }}</samp></td>
+    <td class="attrname">{% if translated != name %}{{ translated }}<br>{% endif %}<samp>{{ name }}</samp></td>
     {% endblock %}
 
 
@@ -26,7 +28,7 @@
     {% if name =='jpegPhoto'-%}
         <img src="data:image/jpeg;base64,{{ value }}" />
     {% else %}{{ value }}{% endif -%}
-    {% endblock %}
+    {% endblock -%}
 
 {%- endembed %}
 
@@ -69,7 +71,7 @@
 
     <dl>
       <dt>{% trans %}Debug information to be used by your support staff{% endtrans %}</dt>
-      {%- embed "includes/expander.twig" %}
+      <dd>{%- embed "includes/expander.twig" %}
         {%- block content %}
 
         <dl>
@@ -99,6 +101,7 @@
         {%- endblock content %}
       {%- endembed %}
 
+     </dd>
     </dl>
     <br>
 

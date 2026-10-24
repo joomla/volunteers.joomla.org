@@ -15,14 +15,6 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.3.4\n"
 
-msgid "{authorize:Authorize:403_text}"
-msgstr ""
-"Ha o na makgabane a lokelang ho fihlella tshebediso ena. Ka kopo ikopanye "
-"le motsamaisi haeba o fumana sena se sa nepahala."
-
-msgid "{authorize:Authorize:403_header}"
-msgstr "Phihlello e thibetswe"
-
 msgid "Access forbidden"
 msgstr "Phihlello e thibetswe"
 

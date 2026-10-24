@@ -14,6 +14,7 @@ namespace Symfony\Component\DependencyInjection\Compiler;
 use Symfony\Component\DependencyInjection\Alias;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
 use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 use Symfony\Component\DependencyInjection\Reference;
 
@@ -24,9 +25,11 @@ use Symfony\Component\DependencyInjection\Reference;
  * @author Fabien Potencier <fabien@symfony.com>
  * @author Diego Saint Esteben <diego@saintesteben.me>
  */
-class DecoratorServicePass implements CompilerPassInterface
+class DecoratorServicePass extends AbstractRecursivePass
 {
-    public function process(ContainerBuilder $container)
+    protected bool $skipScalars = true;
+
+    public function process(ContainerBuilder $container): void
     {
         $definitions = new \SplPriorityQueue();
         $order = \PHP_INT_MAX;
@@ -38,6 +41,11 @@ class DecoratorServicePass implements CompilerPassInterface
             $definitions->insert([$id, $definition], [$decorated[2], --$order]);
         }
         $decoratingDefinitions = [];
+        $decoratedIds = [];
+
+        $tagsToKeep = $container->hasParameter('container.behavior_describing_tags')
+            ? $container->getParameter('container.behavior_describing_tags')
+            : ['proxy', 'container.do_not_inline', 'container.service_locator', 'container.service_subscriber', 'container.service_subscriber.locator'];
 
         foreach ($definitions as [$id, $definition]) {
             $decoratedService = $definition->getDecoratedService();
@@ -49,6 +57,11 @@ class DecoratorServicePass implements CompilerPassInterface
             if (!$renamedId) {
                 $renamedId = $id.'.inner';
             }
+
+            $decoratedIds[$inner] ??= $renamedId;
+            $this->currentId = $renamedId;
+            $this->processValue($definition);
+
             $definition->innerServiceId = $renamedId;
             $definition->decorationOnInvalid = $invalidBehavior;
 
@@ -57,12 +70,11 @@ class DecoratorServicePass implements CompilerPassInterface
             if ($container->hasAlias($inner)) {
                 $alias = $container->getAlias($inner);
                 $public = $alias->isPublic();
-                $private = $alias->isPrivate();
                 $container->setAlias($renamedId, new Alias((string) $alias, false));
+                $decoratedDefinition = $container->findDefinition($alias);
             } elseif ($container->hasDefinition($inner)) {
                 $decoratedDefinition = $container->getDefinition($inner);
                 $public = $decoratedDefinition->isPublic();
-                $private = $decoratedDefinition->isPrivate();
                 $decoratedDefinition->setPublic(false);
                 $container->setDefinition($renamedId, $decoratedDefinition);
                 $decoratingDefinitions[$inner] = $decoratedDefinition;
@@ -71,9 +83,13 @@ class DecoratorServicePass implements CompilerPassInterface
                 continue;
             } elseif (ContainerInterface::NULL_ON_INVALID_REFERENCE === $invalidBehavior) {
                 $public = $definition->isPublic();
-                $private = $definition->isPrivate();
+                $decoratedDefinition = null;
             } else {
                 throw new ServiceNotFoundException($inner, $id);
+            }
+
+            if ($decoratedDefinition?->isSynthetic()) {
+                throw new InvalidArgumentException(\sprintf('A synthetic service cannot be decorated: service "%s" cannot decorate "%s".', $id, $inner));
             }
 
             if (isset($decoratingDefinitions[$inner])) {
@@ -82,10 +98,12 @@ class DecoratorServicePass implements CompilerPassInterface
                 $decoratingTags = $decoratingDefinition->getTags();
                 $resetTags = [];
 
-                if (isset($decoratingTags['container.service_locator'])) {
-                    // container.service_locator has special logic and it must not be transferred out to decorators
-                    $resetTags = ['container.service_locator' => $decoratingTags['container.service_locator']];
-                    unset($decoratingTags['container.service_locator']);
+                // Behavior-describing tags must not be transferred out to decorators
+                foreach ($tagsToKeep as $containerTag) {
+                    if (isset($decoratingTags[$containerTag])) {
+                        $resetTags[$containerTag] = $decoratingTags[$containerTag];
+                        unset($decoratingTags[$containerTag]);
+                    }
                 }
 
                 $definition->setTags(array_merge($decoratingTags, $definition->getTags()));
@@ -93,7 +111,20 @@ class DecoratorServicePass implements CompilerPassInterface
                 $decoratingDefinitions[$inner] = $definition;
             }
 
-            $container->setAlias($inner, $id)->setPublic($public)->setPrivate($private);
+            $container->setAlias($inner, $id)->setPublic($public);
         }
+
+        foreach ($decoratingDefinitions as $inner => $definition) {
+            $definition->addTag('container.decorator', ['id' => $inner, 'inner' => $decoratedIds[$inner]]);
+        }
+    }
+
+    protected function processValue(mixed $value, bool $isRoot = false): mixed
+    {
+        if ($value instanceof Reference && '.inner' === (string) $value) {
+            return new Reference($this->currentId, $value->getInvalidBehavior());
+        }
+
+        return parent::processValue($value, $isRoot);
     }
 }

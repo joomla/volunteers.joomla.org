@@ -13,7 +13,6 @@ namespace Symfony\Contracts\HttpClient;
 
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\ExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
@@ -22,8 +21,6 @@ use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
  * A (lazily retrieved) HTTP response.
  *
  * @author Nicolas Grekas <p@tchwork.com>
- *
- * @experimental in 1.1
  */
 interface ResponseInterface
 {
@@ -39,7 +36,7 @@ interface ResponseInterface
      *
      * @param bool $throw Whether an exception should be thrown on 3/4/5xx status codes
      *
-     * @return string[][] The headers of the response keyed by header names in lowercase
+     * @return array<string, list<string>> The headers of the response keyed by header names in lowercase
      *
      * @throws TransportExceptionInterface   When a network error occurs
      * @throws RedirectionExceptionInterface On a 3xx when $throw is true and the "max_redirects" option has been reached
@@ -97,15 +94,15 @@ interface ResponseInterface
      *  - response_headers (array) - an array modelled after the special $http_response_header variable
      *  - start_time (float) - the time when the request was sent or 0.0 when it's pending
      *  - url (string) - the last effective URL of the request
-     *  - user_data (mixed|null) - the value of the "user_data" request option, null if not set
+     *  - user_data (mixed) - the value of the "user_data" request option, null if not set
      *
      * When the "capture_peer_cert_chain" option is true, the "peer_certificate_chain"
      * attribute SHOULD list the peer certificates as an array of OpenSSL X.509 resources.
      *
      * Other info SHOULD be named after curl_getinfo()'s associative return value.
      *
-     * @return array|mixed|null An array of all available info, or one of them when $type is
-     *                          provided, or null when an unsupported type is requested
+     * @return mixed An array of all available info, or one of them when $type is
+     *               provided, or null when an unsupported type is requested
      */
-    public function getInfo(string $type = null);
+    public function getInfo(?string $type = null): mixed;
 }

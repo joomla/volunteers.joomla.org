@@ -15,92 +15,17 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.3.4\n"
 
-msgid "{consent:consent:service_providers_for}"
-msgstr "サービスプロバイダ: "
-
-msgid "{consent:consent:remember}"
-msgstr "記憶する"
-
-msgid "{consent:consent:login}"
-msgstr "ログイン"
-
-msgid "{consent:consent:consent_purpose}"
-msgstr "SPNAMEの目的はSPDESCです"
-
-msgid "{consent:consent:noconsent_goto_about}"
-msgstr "サービスの為の情報ページを参照"
-
-msgid "{consent:consent:consent_header}"
-msgstr "個人情報の承認を解除"
-
-msgid "{consent:consent:show_hide_attributes}"
-msgstr "表示/非表示属性"
-
-msgid "{consent:consent:table_caption}"
-msgstr "ユーザー情報"
-
-msgid "{consent:consent:status_header}"
-msgstr "承認ステータス"
-
-msgid "{consent:consent:noconsent_title}"
-msgstr "承認はありません"
-
-msgid "{consent:consent:consent_accept}"
-msgstr "SPNAMEは以下の変換された情報を要求します。"
-
-msgid "{consent:consent:table_summary}"
-msgstr "一覧の情報はあなたがログインする際にサービスに転送されます。"
-
-msgid "{consent:consent:service_provider_header}"
-msgstr "サービスプロバイダ"
-
-msgid "{consent:consent:show_attributes}"
-msgstr "属性を表示する"
-
-msgid "{consent:consent:show_attribute}"
-msgstr "内容を表示する"
-
-msgid "{consent:consent:no}"
-msgstr "いいえ、キャンセルします"
-
-msgid "{consent:consent:consent_privacypolicy}"
-msgstr "サービスのプライバシポリシー"
-
-msgid "{consent:consent:noconsent_text}"
-msgstr "あなたはサービスプロバイダに属性を転送する事を承認していません。"
-
-msgid "{consent:consent:noconsent_return}"
-msgstr "承認ページに戻る"
-
-msgid "{consent:consent:yes}"
-msgstr "はい、続けます"
-
-msgid "{consent:consent:consent_attributes_header}"
-msgstr "SPNAMEとして送信される情報"
-
-msgid "Service Providers for"
-msgstr "サービスプロバイダ: "
-
 msgid "Yes, continue"
 msgstr "はい、続けます"
 
 msgid "Return to consent page"
 msgstr "承認ページに戻る"
 
-msgid "Consent status"
-msgstr "承認ステータス"
-
 msgid "Go to information page for the service"
 msgstr "サービスの為の情報ページを参照"
 
-msgid "Service Provider"
-msgstr "サービスプロバイダ"
-
-msgid "show/hide attributes"
-msgstr "表示/非表示属性"
-
-msgid "The purpose of SPNAME is SPDESC"
-msgstr "SPNAMEの目的はSPDESCです"
+msgid "The purpose of %SPNAME% is %SPDESC%"
+msgstr "%SPNAME%の目的は%SPDESC%です"
 
 msgid ""
 "List the information about you that is about to be transmitted to the "
@@ -113,10 +38,7 @@ msgstr "個人情報の承認を解除"
 msgid "No consent given"
 msgstr "承認はありません"
 
-msgid "login"
-msgstr "ログイン"
-
-msgid "You did not give consent for transfering your attributes to SPNAME."
+msgid "You did not give consent for transferring your attributes to %SPNAME%."
 msgstr "あなたはサービスプロバイダに属性を転送する事を承認していません。"
 
 msgid "Remember"
@@ -125,21 +47,18 @@ msgstr "記憶する"
 msgid "Show content"
 msgstr "内容を表示する"
 
-msgid "SPNAME requires that the information below is transferred."
-msgstr "SPNAMEは以下の変換された情報を要求します。"
+msgid "%SPNAME% requires that the information below is transferred."
+msgstr "%SPNAME%は以下の変換された情報を要求します。"
 
-msgid "Privacypolicy for the service"
+msgid "Privacy policy for the service"
 msgstr "サービスのプライバシポリシー"
 
 msgid "No, cancel"
 msgstr "いいえ、キャンセルします"
 
-msgid "Show attributes"
-msgstr "属性を表示する"
-
 msgid "User information"
 msgstr "ユーザー情報"
 
-msgid "Information that will be sent to SPNAME"
-msgstr "SPNAMEとして送信される情報"
+msgid "Information that will be sent to %SPNAME%"
+msgstr "%SPNAME%として送信される情報"
 

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form>
+	<fieldset name="authproc" label="COM_SSO_CONFIG_AUTHPROC">
+		<fields name="authproc">
+			<field name="priority"
+				   type="number"
+				   label="COM_SSO_CONFIG_PRIORITY_LABEL"
+				   description="COM_SSO_CONFIG_PRIORITY_DESC"
+				   required="true"
+				   class="input-xxlarge"/>
+
+			<field name="class"
+				   type="text"
+				   label="COM_SSO_CONFIG_CLASS_LABEL"
+				   description="COM_SSO_CONFIG_CLASS_DESC"
+				   required="true"
+				   class="input-xxlarge"/>
+
+			<field name="attribute"
+				   type="text"
+				   label="COM_SSO_CONFIG_ATTRIBUTE_LABEL"
+				   description="COM_SSO_CONFIG_ATTRIBUTE_DESC"
+				   required="false"
+				   class="input-xxlarge"/>
+
+			<field name="format"
+				   type="text"
+				   label="COM_SSO_CONFIG_FORMAT_LABEL"
+				   description="COM_SSO_CONFIG_FORMAT_DESC"
+				   required="false"
+				   class="input-xxlarge"/>
+		</fields>
+	</fieldset>
+</form>

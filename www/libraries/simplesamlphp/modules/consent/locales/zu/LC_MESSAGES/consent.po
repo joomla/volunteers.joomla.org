@@ -14,82 +14,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 1.3\n"
 
-msgid "{consent:consent:show_attribute}"
-msgstr "Bonisa izici"
-
-msgid "{consent:consent:noconsent_return}"
-msgstr "Buyela ekhasini lemvume"
-
-msgid "{consent:consent:yes}"
-msgstr "Yebo, qhubeka"
-
-msgid "{consent:consent:service_providers_for}"
-msgstr "Abahlinzeki Besevisi bokuthi"
-
-msgid "{consent:consent:show_attributes}"
-msgstr "Bonisa okuqukethwe"
-
-msgid "{consent:consent:status_header}"
-msgstr "Isimo semvume"
-
-msgid "{consent:consent:noconsent_title}"
-msgstr "Ayikho imvume enikeziwe"
-
-msgid "{consent:consent:show_hide_attributes}"
-msgstr "bonisa/fihla izici"
-
-msgid "{consent:consent:service_provider_header}"
-msgstr "Umhlinzeki Wesevisi"
-
-msgid "{consent:consent:noconsent_text}"
-msgstr "Awuzange uyinikeze imvume yokudlulisa izici zakho ku-SPNAME."
-
-msgid "{consent:consent:consent_header}"
-msgstr "Imvume mayelana nokukhulula ulwazi lomuntu siqu"
-
-msgid "{consent:consent:consent_purpose}"
-msgstr "Injongo ye-SPNAME yi-SPDESC"
-
-msgid "{consent:consent:noconsent_goto_about}"
-msgstr "Iya ekhasini lolwazi lesevisi"
-
-msgid "{consent:consent:table_caption}"
-msgstr "Ulwazi lomsebenzisi"
-
-msgid "{consent:consent:consent_attributes_header}"
-msgstr "Ulwazi oluzothunyelwa ku-SPNAME"
-
-msgid "{consent:consent:abort}"
-msgstr "Yeka ukungena ku-SPNAME"
-
-msgid "{consent:consent:login}"
-msgstr "ngena"
-
-msgid "{consent:consent:consent_accept}"
-msgstr "I-SPNAME idinga ukuthi ulwazi olungezansi ludluliswe."
-
-msgid "{consent:consent:no}"
-msgstr "Cha, khansela"
-
-msgid "{consent:consent:consent_privacypolicy}"
+msgid "Privacy policy for the service"
 msgstr "Inqubomgomo yobumfihlo yesevisi"
-
-msgid "{consent:consent:table_summary}"
-msgstr ""
-"Enza uhlu olumayelana nolwazi lwakho oluzodluliselwa kusevisi ozongena "
-"kuyo"
-
-msgid "{consent:consent:remember}"
-msgstr "Khumbula"
 
 msgid "Consent about releasing personal information"
 msgstr "Imvume mayelana nokukhulula ulwazi lomuntu siqu"
-
-msgid "Show attributes"
-msgstr "Bonisa okuqukethwe"
-
-msgid "show/hide attributes"
-msgstr "bonisa/fihla izici"
 
 msgid "Yes, continue"
 msgstr "Yebo, qhubeka"
@@ -97,23 +26,14 @@ msgstr "Yebo, qhubeka"
 msgid "No consent given"
 msgstr "Ayikho imvume enikeziwe"
 
-msgid "Information that will be sent to SPNAME"
-msgstr "Ulwazi oluzothunyelwa ku-SPNAME"
-
-msgid "Service Providers for"
-msgstr "Abahlinzeki Besevisi bokuthi"
-
-msgid "Consent status"
-msgstr "Isimo semvume"
+msgid "Information that will be sent to %SPNAME%"
+msgstr "Ulwazi oluzothunyelwa ku-%SPNAME%"
 
 msgid "Go to information page for the service"
 msgstr "Iya ekhasini lolwazi lesevisi"
 
 msgid "Return to consent page"
 msgstr "Buyela ekhasini lemvume"
-
-msgid "Service Provider"
-msgstr "Umhlinzeki Wesevisi"
 
 msgid "No, cancel"
 msgstr "Cha, khansela"
@@ -124,17 +44,17 @@ msgstr "Bonisa izici"
 msgid "Privacy policy for the service"
 msgstr "Inqubomgomo yobumfihlo yesevisi"
 
-msgid "The purpose of SPNAME is SPDESC"
-msgstr "Injongo ye-SPNAME yi-SPDESC"
+msgid "The purpose of %SPNAME% is %SPDESC%"
+msgstr "Injongo ye-%SPNAME% yi-%SPDESC%"
 
-msgid "Abort login to SPNAME"
-msgstr "Yeka ukungena ku-SPNAME"
+msgid "Abort login to %SPNAME%"
+msgstr "Yeka ukungena ku-%SPNAME%"
 
 msgid "Remember"
 msgstr "Khumbula"
 
-msgid "SPNAME requires that the information below is transferred."
-msgstr "I-SPNAME idinga ukuthi ulwazi olungezansi ludluliswe."
+msgid "%SPNAME% requires that the information below is transferred."
+msgstr "I-%SPNAME% idinga ukuthi ulwazi olungezansi ludluliswe."
 
 msgid "User information"
 msgstr "Ulwazi lomsebenzisi"
@@ -146,9 +66,6 @@ msgstr ""
 "Enza uhlu olumayelana nolwazi lwakho oluzodluliselwa kusevisi ozongena "
 "kuyo"
 
-msgid "login"
-msgstr "ngena"
-
-msgid "You did not give consent for transfering your attributes to SPNAME."
-msgstr "Awuzange uyinikeze imvume yokudlulisa izici zakho ku-SPNAME."
+msgid "You did not give consent for transferring your attributes to %SPNAME%."
+msgstr "Awuzange uyinikeze imvume yokudlulisa izici zakho ku-%SPNAME%."
 

@@ -3,7 +3,7 @@
     "description": "This is a authentication module for authenticating a user against a SQL database",
     "type": "simplesamlphp-module",
     "keywords": ["simplesamlphp", "sqlauth"],
-    "license": "LGPL-3.0-or-later",
+    "license": "LGPL-2.1-or-later",
     "authors": [
         {
             "name": "Olav Morken",
@@ -14,29 +14,39 @@
         "preferred-install": {
             "simplesamlphp/simplesamlphp": "source",
             "*": "dist"
+        },
+        "allow-plugins": {
+            "composer/package-versions-deprecated": true,
+            "simplesamlphp/composer-module-installer": true,
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "phpstan/extension-installer": true,
+            "simplesamlphp/composer-xmlprovider-installer": true
         }
     },
     "autoload": {
         "psr-4": {
-            "SimpleSAML\\Module\\sqlauth\\": "lib/"
+            "SimpleSAML\\Module\\sqlauth\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "SimpleSAML\\Test\\Utils\\": "vendor/simplesamlphp/simplesamlphp/tests/Utils"
+            "SimpleSAML\\Test\\Utils\\": "vendor/simplesamlphp/simplesamlphp/tests/Utils",
+            "SimpleSAML\\Test\\Module\\sqlauth\\Auth\\Source\\": "tests/src/Auth/Source/"
         }
     },
     "require": {
-        "php": ">=5.6",
-        "simplesamlphp/composer-module-installer": "~1.1"
+        "php": "^8.3",
+        "ext-pdo": "*",
+
+        "simplesamlphp/assert": "~2.0",
+        "simplesamlphp/composer-module-installer": "~1.7",
+        "simplesamlphp/simplesamlphp": "^2.5@dev"
     },
     "require-dev": {
-        "phpunit/phpunit": "~5.7",
-        "simplesamlphp/simplesamlphp": "^1.17",
-        "webmozart/assert": "^1.4"
+        "simplesamlphp/simplesamlphp-test-framework": "~1.11"
     },
     "support": {
-        "issues": "https://github.com/tvdijen/simplesamlphp-module-sqlauth/issues",
-        "source": "https://github.com/tvdijen/simplesamlphp-module-sqlauth"
+        "issues": "https://github.com/simplesamlphp/simplesamlphp-module-sqlauth/issues",
+        "source": "https://github.com/simplesamlphp/simplesamlphp-module-sqlauth"
     }
 }

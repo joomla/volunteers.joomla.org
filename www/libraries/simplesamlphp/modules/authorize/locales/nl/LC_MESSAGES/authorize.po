@@ -15,14 +15,6 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.3.4\n"
 
-msgid "{authorize:Authorize:403_text}"
-msgstr ""
-"U heeft niet genoeg rechten om deze applicatie te benaderen. Benader de "
-"beheerder als u denkt dat dit ten onrechte is."
-
-msgid "{authorize:Authorize:403_header}"
-msgstr "Geen toegang"
-
 msgid "Access forbidden"
 msgstr "Geen toegang"
 
@@ -33,3 +25,8 @@ msgstr ""
 "U heeft niet genoeg rechten om deze applicatie te benaderen. Benader de "
 "beheerder als u denkt dat dit ten onrechte is."
 
+msgid "Change account?"
+msgstr "Verander account?"
+
+msgid "You are currently logged in as"
+msgstr "Je bent ingelogd als"

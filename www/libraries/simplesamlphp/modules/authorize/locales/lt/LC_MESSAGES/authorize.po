@@ -16,14 +16,6 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.3.4\n"
 
-msgid "{authorize:Authorize:403_text}"
-msgstr ""
-"Jūs neturite reikiamų teisių šiai aplikacijai pasiekti. Prašome "
-"susisiekti su administratoriumi, jei manote, kad taip neturėtų būti."
-
-msgid "{authorize:Authorize:403_header}"
-msgstr "Priėjimas uždraustas"
-
 msgid "Access forbidden"
 msgstr "Priėjimas uždraustas"
 

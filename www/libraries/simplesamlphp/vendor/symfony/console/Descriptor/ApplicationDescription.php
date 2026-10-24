@@ -24,35 +24,28 @@ class ApplicationDescription
 {
     public const GLOBAL_NAMESPACE = '_global';
 
-    private $application;
-    private $namespace;
-    private $showHidden;
+    private array $namespaces;
 
     /**
-     * @var array
+     * @var array<string, Command>
      */
-    private $namespaces;
+    private array $commands;
 
     /**
-     * @var Command[]
+     * @var array<string, Command>
      */
-    private $commands;
+    private array $aliases = [];
 
-    /**
-     * @var Command[]
-     */
-    private $aliases;
-
-    public function __construct(Application $application, string $namespace = null, bool $showHidden = false)
-    {
-        $this->application = $application;
-        $this->namespace = $namespace;
-        $this->showHidden = $showHidden;
+    public function __construct(
+        private Application $application,
+        private ?string $namespace = null,
+        private bool $showHidden = false,
+    ) {
     }
 
     public function getNamespaces(): array
     {
-        if (null === $this->namespaces) {
+        if (!isset($this->namespaces)) {
             $this->inspectApplication();
         }
 
@@ -64,7 +57,7 @@ class ApplicationDescription
      */
     public function getCommands(): array
     {
-        if (null === $this->commands) {
+        if (!isset($this->commands)) {
             $this->inspectApplication();
         }
 
@@ -77,13 +70,13 @@ class ApplicationDescription
     public function getCommand(string $name): Command
     {
         if (!isset($this->commands[$name]) && !isset($this->aliases[$name])) {
-            throw new CommandNotFoundException(sprintf('Command "%s" does not exist.', $name));
+            throw new CommandNotFoundException(\sprintf('Command "%s" does not exist.', $name));
         }
 
-        return isset($this->commands[$name]) ? $this->commands[$name] : $this->aliases[$name];
+        return $this->commands[$name] ?? $this->aliases[$name];
     }
 
-    private function inspectApplication()
+    private function inspectApplication(): void
     {
         $this->commands = [];
         $this->namespaces = [];
@@ -92,7 +85,6 @@ class ApplicationDescription
         foreach ($this->sortCommands($all) as $namespace => $commands) {
             $names = [];
 
-            /** @var Command $command */
             foreach ($commands as $name => $command) {
                 if (!$command->getName() || (!$this->showHidden && $command->isHidden())) {
                     continue;
@@ -111,6 +103,9 @@ class ApplicationDescription
         }
     }
 
+    /**
+     * @return array<string, array<string, Command>>
+     */
     private function sortCommands(array $commands): array
     {
         $namespacedCommands = [];
@@ -131,7 +126,7 @@ class ApplicationDescription
         }
 
         if ($namespacedCommands) {
-            ksort($namespacedCommands);
+            ksort($namespacedCommands, \SORT_STRING);
             foreach ($namespacedCommands as $key => $commandsSet) {
                 ksort($commandsSet);
                 $sortedCommands[$key] = $commandsSet;

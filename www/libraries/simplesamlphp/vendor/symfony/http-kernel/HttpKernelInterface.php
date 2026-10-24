@@ -21,7 +21,7 @@ use Symfony\Component\HttpFoundation\Response;
  */
 interface HttpKernelInterface
 {
-    public const MASTER_REQUEST = 1;
+    public const MAIN_REQUEST = 1;
     public const SUB_REQUEST = 2;
 
     /**
@@ -31,12 +31,10 @@ interface HttpKernelInterface
      * and do its best to convert them to a Response instance.
      *
      * @param int  $type  The type of the request
-     *                    (one of HttpKernelInterface::MASTER_REQUEST or HttpKernelInterface::SUB_REQUEST)
+     *                    (one of HttpKernelInterface::MAIN_REQUEST or HttpKernelInterface::SUB_REQUEST)
      * @param bool $catch Whether to catch exceptions or not
-     *
-     * @return Response A Response instance
      *
      * @throws \Exception When an Exception occurs during processing
      */
-    public function handle(Request $request, $type = self::MASTER_REQUEST, $catch = true);
+    public function handle(Request $request, int $type = self::MAIN_REQUEST, bool $catch = true): Response;
 }

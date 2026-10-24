@@ -16,14 +16,6 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.3.4\n"
 
-msgid "{authorize:Authorize:403_text}"
-msgstr ""
-"لا يمكنك الدخول لهذا التطبيق. قم بأخطار إدارة الموقع ان كنت تظن ان هذا "
-"غير صحيح"
-
-msgid "{authorize:Authorize:403_header}"
-msgstr "ممنوع الدخول"
-
 msgid "Access forbidden"
 msgstr "ممنوع الدخول"
 

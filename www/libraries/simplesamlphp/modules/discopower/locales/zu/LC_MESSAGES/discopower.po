@@ -33,7 +33,7 @@ msgid "{discopower:tabs:iceland}"
 msgstr "I-Iceland"
 
 msgid "{discopower:tabs:edugain}"
-msgstr "IYurophu (eduGAIN)"
+msgstr "eduGAIN"
 
 msgid "{discopower:tabs:norway}"
 msgstr "ENorway"

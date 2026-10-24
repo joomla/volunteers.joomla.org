@@ -1,6 +1,204 @@
 CHANGELOG
 =========
 
+7.4
+---
+
+ * Add support for the `QUERY` HTTP method
+ * Deprecate implementing `__sleep/wakeup()` on kernels; use `__(un)serialize()` instead
+ * Deprecate implementing `__sleep/wakeup()` on data collectors; use `__(un)serialize()` instead
+ * Add `#[IsSignatureValid]` attribute to validate URI signatures
+ * Make `Profile` final and `Profiler::__sleep()` internal
+ * Collect the application runner class
+ * Allow configuring `DumpListener` to use a different dumper when CLI profiling is enabled
+
+7.3
+---
+
+ * Record a `waiting` trace in the `HttpCache` when the cache had to wait for another request to finish
+ * Add `$key` argument to `#[MapQueryString]` that allows using a specific key for argument resolving
+ * Support `Uid` in `#[MapQueryParameter]`
+ * Add `ServicesResetterInterface`, implemented by `ServicesResetter`
+ * Allow configuring the logging channel per type of exceptions in ErrorListener
+
+7.2
+---
+
+ * Remove `@internal` flag and add `@final` to `ServicesResetter`
+ * Add support for `SYMFONY_DISABLE_RESOURCE_TRACKING` env var
+ * Add support for configuring trusted proxies/headers/hosts via env vars
+
+7.1
+---
+
+ * Add method `isKernelTerminating()` to `ExceptionEvent` that allows to check if an exception was thrown while the kernel is being terminated
+ * Add `HttpException::fromStatusCode()`
+ * Add `$validationFailedStatusCode` argument to `#[MapQueryParameter]` that allows setting a custom HTTP status code when validation fails
+ * Add `NearMissValueResolverException` to let value resolvers report when an argument could be under their watch but failed to be resolved
+ * Add `$type` argument to `#[MapRequestPayload]` that allows mapping a list of items
+ * The `Extension` class is marked as internal, extend the `Extension` class from the DependencyInjection component instead
+ * Deprecate `Extension::addAnnotatedClassesToCompile()`
+ * Deprecate `AddAnnotatedClassesToCachePass`
+ * Deprecate the `setAnnotatedClassCache()` and `getAnnotatedClassesToCompile()` methods of the `Kernel` class
+ * Add `#[MapUploadedFile]` attribute to fetch, validate, and inject uploaded files into controller arguments
+
+7.0
+---
+
+ * Add argument `$reflector` to `ArgumentResolverInterface::getArguments()` and `ArgumentMetadataFactoryInterface::createArgumentMetadata()`
+ * Remove `ArgumentValueResolverInterface`, use `ValueResolverInterface` instead
+ * Remove `StreamedResponseListener`
+ * Remove `AbstractSurrogate::$phpEscapeMap`
+ * Remove `HttpKernelInterface::MASTER_REQUEST`
+ * Remove `terminate_on_cache_hit` option from `HttpCache`
+ * Require explicit argument when calling `ConfigDataCollector::setKernel()`, `RouterListener::setCurrentRequest()`
+ * Remove `Kernel::stripComments()`
+ * Remove `FileLinkFormatter`, use `FileLinkFormatter` from the ErrorHandler component instead
+ * Remove `UriSigner`, use `UriSigner` from the HttpFoundation component instead
+ * Add argument `$buildDir` to `WarmableInterface`
+ * Add argument `$filter` to `Profiler::find()` and `FileProfilerStorage::find()`
+
+6.4
+---
+
+ * Support backed enums in #[MapQueryParameter]
+ * `BundleInterface` no longer extends `ContainerAwareInterface`
+ * Add optional `$className` parameter to `ControllerEvent::getAttributes()`
+ * Add native return types to `TraceableEventDispatcher` and to `MergeExtensionConfigurationPass`
+ * Add argument `$validationFailedStatusCode` to `#[MapQueryString]` and `#[MapRequestPayload]`
+ * Add argument `$debug` to `Logger`
+ * Add class `DebugLoggerConfigurator`
+ * Add parameters `kernel.runtime_mode` and `kernel.runtime_mode.*`, all set from env var `APP_RUNTIME_MODE`
+ * Deprecate `Kernel::stripComments()`
+ * Support the `!` character at the beginning of a string as a negation operator in the url filter of the profiler
+ * Deprecate `UriSigner`, use `UriSigner` from the HttpFoundation component instead
+ * Deprecate `FileLinkFormatter`, use `FileLinkFormatter` from the ErrorHandler component instead
+ * Add argument `$buildDir` to `WarmableInterface`
+ * Add argument `$filter` to `Profiler::find()` and `FileProfilerStorage::find()`
+ * Add `ControllerResolver::allowControllers()` to define which callables are legit controllers when the `_check_controller_is_allowed` request attribute is set
+
+6.3
+---
+
+ * Deprecate parameters `container.dumper.inline_factories` and `container.dumper.inline_class_loader`, use `.container.dumper.inline_factories` and `.container.dumper.inline_class_loader` instead
+ * `FileProfilerStorage` removes profiles automatically after two days
+ * Add `#[WithHttpStatus]` for defining status codes for exceptions
+ * Use an instance of `Psr\Clock\ClockInterface` to generate the current date time in `DateTimeValueResolver`
+ * Add `#[WithLogLevel]` for defining log levels for exceptions
+ * Add `skip_response_headers` to the `HttpCache` options
+ * Introduce targeted value resolvers with `#[ValueResolver]` and `#[AsTargetedValueResolver]`
+ * Add `#[MapRequestPayload]` to map and validate request payload from `Request::getContent()` or `Request::$request->all()` to typed objects
+ * Add `#[MapQueryString]` to map and validate request query string from `Request::$query->all()` to typed objects
+ * Add `#[MapQueryParameter]` to map and validate individual query parameters to controller arguments
+ * Collect data from every event dispatcher
+
+6.2
+---
+
+ * Add constructor argument `bool $handleAllThrowable` to `HttpKernel`
+ * Add `ControllerEvent::getAttributes()` to handle attributes on controllers
+ * Add `#[Cache]` to describe the default HTTP cache headers on controllers
+ * Add `absolute_uri` option to surrogate fragment renderers
+ * Add `ValueResolverInterface` and deprecate `ArgumentValueResolverInterface`
+ * Add argument `$reflector` to `ArgumentResolverInterface` and `ArgumentMetadataFactoryInterface`
+ * Deprecate calling `ConfigDataCollector::setKernel()`, `RouterListener::setCurrentRequest()` without arguments
+
+6.1
+---
+
+ * Add `BackedEnumValueResolver` to resolve backed enum cases from request attributes in controller arguments
+ * Add `DateTimeValueResolver` to resolve request attributes into DateTime objects in controller arguments
+ * Deprecate StreamedResponseListener, it's not needed anymore
+ * Add `Profiler::isEnabled()` so collaborating collector services may elect to omit themselves
+ * Add the `UidValueResolver` argument value resolver
+ * Add `AbstractBundle` class for DI configuration/definition on a single file
+ * Update the path of a bundle placed in the `src/` directory to the parent directory when `AbstractBundle` is used
+
+6.0
+---
+
+ * Remove `ArgumentInterface`
+ * Remove `ArgumentMetadata::getAttribute()`, use `getAttributes()` instead
+ * Remove support for returning a `ContainerBuilder` from `KernelInterface::registerContainerConfiguration()`
+ * Remove `KernelEvent::isMasterRequest()`, use `isMainRequest()` instead
+ * Remove support for `service:action` syntax to reference controllers, use `serviceOrFqcn::method` instead
+
+5.4
+---
+
+ * Add the ability to enable the profiler using a request query parameter, body parameter or attribute
+ * Deprecate `AbstractTestSessionListener` and `TestSessionListener`, use `AbstractSessionListener` and `SessionListener` instead
+ * Deprecate the `fileLinkFormat` parameter of `DebugHandlersListener`
+ * Add support for configuring log level, and status code by exception class
+ * Allow ignoring "kernel.reset" methods that don't exist with "on_invalid" attribute
+
+5.3
+---
+
+ * Deprecate `ArgumentInterface`
+ * Add `ArgumentMetadata::getAttributes()`
+ * Deprecate `ArgumentMetadata::getAttribute()`, use `getAttributes()` instead
+ * Mark the class `Symfony\Component\HttpKernel\EventListener\DebugHandlersListener` as internal
+ * Deprecate returning a `ContainerBuilder` from `KernelInterface::registerContainerConfiguration()`
+ * Deprecate `HttpKernelInterface::MASTER_REQUEST` and add `HttpKernelInterface::MAIN_REQUEST` as replacement
+ * Deprecate `KernelEvent::isMasterRequest()` and add `isMainRequest()` as replacement
+ * Add `#[AsController]` attribute for declaring standalone controllers on PHP 8
+ * Add `FragmentUriGeneratorInterface` and `FragmentUriGenerator` to generate the URI of a fragment
+
+5.2.0
+-----
+
+ * added session usage
+ * made the public `http_cache` service handle requests when available
+ * allowed enabling trusted hosts and proxies using new `kernel.trusted_hosts`,
+   `kernel.trusted_proxies` and `kernel.trusted_headers` parameters
+ * content of request parameter `_password` is now also hidden
+   in the request profiler raw content section
+ * Allowed adding attributes on controller arguments that will be passed to argument resolvers.
+ * kernels implementing the `ExtensionInterface` will now be auto-registered to the container
+ * added parameter `kernel.runtime_environment`, defined as `%env(default:kernel.environment:APP_RUNTIME_ENV)%`
+ * do not set a default `Accept` HTTP header when using `HttpKernelBrowser`
+
+5.1.0
+-----
+
+ * allowed to use a specific logger channel for deprecations
+ * made `WarmableInterface::warmUp()` return a list of classes or files to preload on PHP 7.4+;
+   not returning an array is deprecated
+ * made kernels implementing `WarmableInterface` be part of the cache warmup stage
+ * deprecated support for `service:action` syntax to reference controllers, use `serviceOrFqcn::method` instead
+ * allowed using public aliases to reference controllers
+ * added session usage reporting when the `_stateless` attribute of the request is set to `true`
+ * added `AbstractSessionListener::onSessionUsage()` to report when the session is used while a request is stateless
+
+5.0.0
+-----
+
+ * removed support for getting the container from a non-booted kernel
+ * removed the first and second constructor argument of `ConfigDataCollector`
+ * removed `ConfigDataCollector::getApplicationName()`
+ * removed `ConfigDataCollector::getApplicationVersion()`
+ * removed support for `Symfony\Component\Templating\EngineInterface` in `HIncludeFragmentRenderer`, use a `Twig\Environment` only
+ * removed `TranslatorListener` in favor of `LocaleAwareListener`
+ * removed `getRootDir()` and `getName()` from `Kernel` and `KernelInterface`
+ * removed `FilterControllerArgumentsEvent`, use `ControllerArgumentsEvent` instead
+ * removed `FilterControllerEvent`, use `ControllerEvent` instead
+ * removed `FilterResponseEvent`, use `ResponseEvent` instead
+ * removed `GetResponseEvent`, use `RequestEvent` instead
+ * removed `GetResponseForControllerResultEvent`, use `ViewEvent` instead
+ * removed `GetResponseForExceptionEvent`, use `ExceptionEvent` instead
+ * removed `PostResponseEvent`, use `TerminateEvent` instead
+ * removed `SaveSessionListener` in favor of `AbstractSessionListener`
+ * removed `Client`, use `HttpKernelBrowser` instead
+ * added method `getProjectDir()` to `KernelInterface`
+ * removed methods `serialize` and `unserialize` from `DataCollector`, store the serialized state in the data property instead
+ * made `ProfilerStorageInterface` internal
+ * removed the second and third argument of `KernelInterface::locateResource`
+ * removed the second and third argument of `FileLocator::__construct`
+ * removed loading resources from `%kernel.root_dir%/Resources` and `%kernel.root_dir%` as
+   fallback directories.
+ * removed class `ExceptionListener`, use `ErrorListener` instead
+
 4.4.0
 -----
 

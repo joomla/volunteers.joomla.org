@@ -14,15 +14,17 @@ namespace Symfony\Component\VarDumper\Caster;
 use Symfony\Component\VarDumper\Cloner\Stub;
 
 /**
- * Casts pqsql resources to array representation.
+ * Casts pgsql resources to array representation.
  *
  * @author Nicolas Grekas <p@tchwork.com>
  *
- * @final since Symfony 4.4
+ * @final
+ *
+ * @internal since Symfony 7.3
  */
 class PgSqlCaster
 {
-    private static $paramCodes = [
+    private const PARAM_CODES = [
         'server_encoding',
         'client_encoding',
         'is_superuser',
@@ -35,7 +37,7 @@ class PgSqlCaster
         'standard_conforming_strings',
     ];
 
-    private static $transactionStatus = [
+    private const TRANSACTION_STATUS = [
         \PGSQL_TRANSACTION_IDLE => 'PGSQL_TRANSACTION_IDLE',
         \PGSQL_TRANSACTION_ACTIVE => 'PGSQL_TRANSACTION_ACTIVE',
         \PGSQL_TRANSACTION_INTRANS => 'PGSQL_TRANSACTION_INTRANS',
@@ -43,7 +45,7 @@ class PgSqlCaster
         \PGSQL_TRANSACTION_UNKNOWN => 'PGSQL_TRANSACTION_UNKNOWN',
     ];
 
-    private static $resultStatus = [
+    private const RESULT_STATUS = [
         \PGSQL_EMPTY_QUERY => 'PGSQL_EMPTY_QUERY',
         \PGSQL_COMMAND_OK => 'PGSQL_COMMAND_OK',
         \PGSQL_TUPLES_OK => 'PGSQL_TUPLES_OK',
@@ -54,7 +56,7 @@ class PgSqlCaster
         \PGSQL_FATAL_ERROR => 'PGSQL_FATAL_ERROR',
     ];
 
-    private static $diagCodes = [
+    private const DIAG_CODES = [
         'severity' => \PGSQL_DIAG_SEVERITY,
         'sqlstate' => \PGSQL_DIAG_SQLSTATE,
         'message' => \PGSQL_DIAG_MESSAGE_PRIMARY,
@@ -69,22 +71,22 @@ class PgSqlCaster
         'function' => \PGSQL_DIAG_SOURCE_FUNCTION,
     ];
 
-    public static function castLargeObject($lo, array $a, Stub $stub, $isNested)
+    public static function castLargeObject($lo, array $a, Stub $stub, bool $isNested): array
     {
         $a['seek position'] = pg_lo_tell($lo);
 
         return $a;
     }
 
-    public static function castLink($link, array $a, Stub $stub, $isNested)
+    public static function castLink($link, array $a, Stub $stub, bool $isNested): array
     {
         $a['status'] = pg_connection_status($link);
         $a['status'] = new ConstStub(\PGSQL_CONNECTION_OK === $a['status'] ? 'PGSQL_CONNECTION_OK' : 'PGSQL_CONNECTION_BAD', $a['status']);
         $a['busy'] = pg_connection_busy($link);
 
         $a['transaction'] = pg_transaction_status($link);
-        if (isset(self::$transactionStatus[$a['transaction']])) {
-            $a['transaction'] = new ConstStub(self::$transactionStatus[$a['transaction']], $a['transaction']);
+        if (isset(self::TRANSACTION_STATUS[$a['transaction']])) {
+            $a['transaction'] = new ConstStub(self::TRANSACTION_STATUS[$a['transaction']], $a['transaction']);
         }
 
         $a['pid'] = pg_get_pid($link);
@@ -96,7 +98,7 @@ class PgSqlCaster
         $a['options'] = pg_options($link);
         $a['version'] = pg_version($link);
 
-        foreach (self::$paramCodes as $v) {
+        foreach (self::PARAM_CODES as $v) {
             if (false !== $s = pg_parameter_status($link, $v)) {
                 $a['param'][$v] = $s;
             }
@@ -108,17 +110,17 @@ class PgSqlCaster
         return $a;
     }
 
-    public static function castResult($result, array $a, Stub $stub, $isNested)
+    public static function castResult($result, array $a, Stub $stub, bool $isNested): array
     {
         $a['num rows'] = pg_num_rows($result);
         $a['status'] = pg_result_status($result);
-        if (isset(self::$resultStatus[$a['status']])) {
-            $a['status'] = new ConstStub(self::$resultStatus[$a['status']], $a['status']);
+        if (isset(self::RESULT_STATUS[$a['status']])) {
+            $a['status'] = new ConstStub(self::RESULT_STATUS[$a['status']], $a['status']);
         }
         $a['command-completion tag'] = pg_result_status($result, \PGSQL_STATUS_STRING);
 
         if (-1 === $a['num rows']) {
-            foreach (self::$diagCodes as $k => $v) {
+            foreach (self::DIAG_CODES as $k => $v) {
                 $a['error'][$k] = pg_result_error_field($result, $v);
             }
         }
@@ -131,11 +133,11 @@ class PgSqlCaster
         for ($i = 0; $i < $fields; ++$i) {
             $field = [
                 'name' => pg_field_name($result, $i),
-                'table' => sprintf('%s (OID: %s)', pg_field_table($result, $i), pg_field_table($result, $i, true)),
-                'type' => sprintf('%s (OID: %s)', pg_field_type($result, $i), pg_field_type_oid($result, $i)),
-                'nullable' => (bool) pg_field_is_null($result, $i),
+                'table' => \sprintf('%s (OID: %s)', pg_field_table($result, $i), pg_field_table($result, $i, true)),
+                'type' => \sprintf('%s (OID: %s)', pg_field_type($result, $i), pg_field_type_oid($result, $i)),
+                'nullable' => (bool) (\PHP_VERSION_ID >= 80300 ? pg_field_is_null($result, null, $i) : pg_field_is_null($result, $i)),
                 'storage' => pg_field_size($result, $i).' bytes',
-                'display' => pg_field_prtlen($result, $i).' chars',
+                'display' => (\PHP_VERSION_ID >= 80300 ? pg_field_prtlen($result, null, $i) : pg_field_prtlen($result, $i)).' chars',
             ];
             if (' (OID: )' === $field['table']) {
                 $field['table'] = null;

@@ -37,20 +37,16 @@ class Glob
 {
     /**
      * Returns a regexp which is the equivalent of the glob pattern.
-     *
-     * @param string $glob                The glob pattern
-     * @param bool   $strictLeadingDot
-     * @param bool   $strictWildcardSlash
-     * @param string $delimiter           Optional delimiter
-     *
-     * @return string regex The regexp
      */
-    public static function toRegex($glob, $strictLeadingDot = true, $strictWildcardSlash = true, $delimiter = '#')
+    public static function toRegex(string $glob, bool $strictLeadingDot = true, bool $strictWildcardSlash = true, string $delimiter = '#'): string
     {
         $firstByte = true;
         $escaping = false;
         $inCurlies = 0;
         $regex = '';
+        if ($unanchored = str_starts_with($glob, '**/')) {
+            $glob = '/'.$glob;
+        }
         $sizeGlob = \strlen($glob);
         for ($i = 0; $i < $sizeGlob; ++$i) {
             $car = $glob[$i];
@@ -109,6 +105,10 @@ class Glob
                 $regex .= $car;
             }
             $escaping = false;
+        }
+
+        if ($unanchored) {
+            $regex = substr_replace($regex, '?', 1 + ('/' === $delimiter) + ($strictLeadingDot ? \strlen('(?=[^\.])') : 0), 0);
         }
 
         return $delimiter.'^'.$regex.'$'.$delimiter;

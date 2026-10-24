@@ -19,44 +19,41 @@ namespace Symfony\Component\Config\Resource;
  *
  * @author Charles-Henri Bruyand <charleshenri.bruyand@gmail.com>
  *
- * @final since Symfony 4.3
+ * @final
  */
 class FileExistenceResource implements SelfCheckingResourceInterface
 {
-    private $resource;
-
-    private $exists;
+    private bool $exists;
 
     /**
      * @param string $resource The file path to the resource
      */
-    public function __construct(string $resource)
-    {
-        $this->resource = $resource;
+    public function __construct(
+        private string $resource,
+    ) {
         $this->exists = file_exists($resource);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function __toString()
+    public function __toString(): string
+    {
+        return 'existence.'.$this->resource;
+    }
+
+    public function getResource(): string
     {
         return $this->resource;
     }
 
-    /**
-     * @return string The file path to the resource
-     */
-    public function getResource()
-    {
-        return $this->resource;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function isFresh($timestamp)
+    public function isFresh(int $timestamp): bool
     {
         return file_exists($this->resource) === $this->exists;
+    }
+
+    public function __serialize(): array
+    {
+        return [
+            'resource' => $this->resource,
+            'exists' => $this->exists,
+        ];
     }
 }

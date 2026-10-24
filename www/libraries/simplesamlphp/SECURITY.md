@@ -6,11 +6,13 @@ This page contains information about security vulnerabilities, incidents or issu
 
 ## Supported Versions
 
-Only the current minor version (X.Y) receives bug and security fixes as a general rule. Release candidates are not considered stable, meaning the previous minor version will still receive fixes until the release candidate promotes to stable.
+Only the current minor version (X.Y) receives bug and security fixes as a general rule.
+
+The 1.19 branch will receive security and critical bug fixes until the end of 2023.
 
 ## Reporting a Vulnerability
 
-In case you find a vulnerability in SimpleSAMLphp, or you want to confirm a possible security issue in the software, please get in touch with us through [UNINETT's CERT team](https://www.uninett.no/cert). Please use our PGP public key to encrypt any possible sensitive data that you may need to submit. We will get back to you as soon as possible according to our working hours in Central European Time.
+In case you find a vulnerability in SimpleSAMLphp, or you want to confirm a possible security issue in the software, please get in touch with us through [Sikt's CERT team](https://sikt.no/abuse). Please use our PGP public key to encrypt any possible sensitive data that you may need to submit. We will get back to you as soon as possible according to our working hours in Central European Time.
 
 When reporting a security issue, please add as much information as possible to help us identify, confirm, replicate and fix the problem. In particular, remember to include the following information in your report:
 

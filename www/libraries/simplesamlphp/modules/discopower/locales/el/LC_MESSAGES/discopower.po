@@ -37,7 +37,7 @@ msgid "{discopower:tabs:sweden}"
 msgstr "Σουηδία"
 
 msgid "{discopower:tabs:edugain}"
-msgstr "Ευρώπη (eduGAIN)"
+msgstr "eduGAIN"
 
 msgid "{discopower:tabs:iceland}"
 msgstr "Ισλανδία"
@@ -87,8 +87,8 @@ msgstr "Άλλοι φορείς"
 msgid "Finland"
 msgstr "Φινλανδία"
 
-msgid "Europe (eduGAIN)"
-msgstr "Ευρώπη (eduGAIN)"
+msgid "eduGAIN"
+msgstr "eduGAIN"
 
 msgid "InCommon"
 msgstr "InCommon"

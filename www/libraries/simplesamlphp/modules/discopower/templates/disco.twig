@@ -1,52 +1,67 @@
-{% set pagetitle = 'selectidp'|trans %}
+{% set pagetitle = 'Select your identity provider'|trans %}
 {% extends "base.twig" %}
 
 {% block preload %}
-    <link rel="stylesheet" media="screen" href="/{{ baseurlpath }}module.php/discopower/assets/css/uitheme1.12.1/jquery-ui.min.css">
-    <link rel="stylesheet" media="screen" href="/{{ baseurlpath }}module.php/discopower/assets/css/disco.css">
+    <link rel="stylesheet" media="screen" href="{{ asset('css/disco.css', 'discopower') }}">
+    <link rel="stylesheet" media="screen" href="{{ asset('css/jquery-ui.min.css', 'jquery') }}">
 {% endblock %}
 {% block postload %}
-    <script src="/{{ baseurlpath }}module.php/discopower/assets/js/jquery-ui-1.12.1.min.js"></script>
-    <script src="/{{ baseurlpath }}module.php/discopower/assets/js/jquery.livesearch.js"></script>
-    <script src="/{{ baseurlpath }}module.php/discopower/assets/js/{{ score }}.js"></script>
-    <script src="/{{ baseurlpath }}module.php/discopower/assets/js/tablist.js"></script>
+    <script src="{{ asset('js/jquery.min.js', 'jquery') }}"></script>
+    <script src="{{ asset('js/jquery-ui.min.js', 'jquery') }}"></script>
+    <script src="{{ asset('js/jquery.livesearch.js', 'discopower') }}"></script>
+    <script src="{{ asset('js/' ~ score ~ '.js', 'discopower') }}"></script>
+    <script src="{{ asset('js/tablist.js', 'discopower') }}"></script>
 {% endblock %}
 
 {% block content %}
     {% if faventry is not empty %}
-    <div class="favourite">{{ '{disco:previous_auth}'|trans }}
-        <strong>{{ faventry.translated|escape('html') }}</strong>
-        <form id="idpselectform" method="get" action="{{ urlpattern }}">
-            <input type="hidden" name="entityID" value="{{ entityID|escape('html') }}" />
-            <input type="hidden" name="return" value="{{ return|escape('html') }}" />
-            <input type="hidden" name="returnIDParam" value="{{ returnIDParam|escape('html') }}" />
-            <input type="hidden" name="idpentityid" value="{{ faventry.entityid|escape('html') }}" />
-            <input type="submit" name="formsubmit" id="favouritesubmit" value="{{ '{disco:login_at}'|trans }} {{ faventry.translated|escape('html') }}" />
-    </form>
+    <div class="favourite">{{ 'You have previously chosen to authenticate at'|trans }}
+        <strong>{{ faventry|entityDisplayName }}</strong><br>
+        <form id="idpselectform" class="pure-form" method="get" action="{{ urlpattern }}">
+            <input type="hidden" name="entityID" value="{{ entityID }}">
+            <input type="hidden" name="return" value="{{ return }}">
+            <input type="hidden" name="returnIDParam" value="{{ returnIDParam }}">
+            <input type="hidden" name="idpentityid" value="{{ faventry.entityid }}">
+            <input type="submit" name="formsubmit" id="favouritesubmit" value="{{ 'Login at'|trans }} {{ faventry|entityDisplayName }}" class="pure-button pure-button-primary">
+            {% if rememberenabled %}
+            <label for="remember" id="favouriteremember" class="pure-checkbox" title="{{ "The institution you've chosen will be saved in this browser so that you do not need to select it each time you login."|trans }}">
+                <input type="checkbox" name="remember" id="remember" value="1"{% if rememberchecked %} checked{% endif %}>
+                {{ 'Remember my choice' | trans }}
+            </label>
+            {% endif %}
+        </form>
     </div>
     {% endif %}
 
     <div id="tabdiv">
-        <ul class="tabset_tabs">
-        {% for tab, idps in idplist %}
-            {% if idps is not empty %}
-            <li class="tab-link{% if loop.first %}current{% endif %}" data-tab="{{ tab }}"><a href="#{{ tab }}"><span>{{ tabNames[tab]|trans }}</span></a></li>
-            {% endif %}
-        {% endfor %}
-        </ul>
+        {% if idplist|length > 1 %}
+            <ul class="tabset-tabs">
+            {% for tab, idps in idplist %}
+                {% if idps is not empty %}
+                {# NOTE: pass through raw to allow HTML entities in tabNames, e.g. Belgi&euml; #}
+                <li class="tab-link{% if loop.first %}current{% endif %}" data-tab="{{ tab }}"><a href="#{{ tab }}"><span>{{ tabNames[tab]|trans|raw }}</span></a></li>
+                {% endif %}
+            {% endfor %}
+            </ul>
+        {% endif %}
 
         {% for tab, idps in idplist %}
         {% if idps is not empty %}
-          <div id="{{ tab }}" class="tabset_content{% if loop.first %} current{% endif %}">
+          <div id="{{ tab }}" class="tabset-content{% if loop.first %} current{% endif %}">
           <div class="inlinesearch">
-              <p>{{ '{discopower:tabs:incremental_search}'|trans }}</p>
               <form id="idpselectform" method="get">
-                  <input class="inlinesearch" type="text" value="" name="query_{{ tab }}" id="query_{{ tab }}" />
+                  <input class="inlinesearch" type="text" value="" name="query_{{ tab }}" id="query_{{ tab }}" placeholder="{{ '{discopower:tabs:incremental_search}'|trans }}" aria-label="{{ '{discopower:tabs:incremental_search}'|trans }}">
               </form>
           </div>
           <div class="metalist" id="list_{{ tab }}">
           {% for entityid, entity in idps %}
-              {{ entity.html|raw }}
+              <a class="metaentry{% if entity == faventry %} favourite{% endif %}"
+                  href="{{ entity.actionUrl }}"
+                  data-keywords="{{ entity.keywords }}">{{ entity|entityDisplayName }}
+              {% if entity.iconUrl is defined %}
+                    <img alt="Icon for identity provider" class="entryicon" src="{{ entity.iconUrl }}" loading="lazy">
+              {% endif %}
+              </a>
           {% endfor %}
           </div>
           </div>

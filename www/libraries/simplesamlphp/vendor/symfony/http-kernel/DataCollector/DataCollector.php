@@ -28,55 +28,22 @@ use Symfony\Component\VarDumper\Cloner\VarCloner;
  */
 abstract class DataCollector implements DataCollectorInterface
 {
-    /**
-     * @var array|Data
-     */
-    protected $data = [];
+    protected array|Data $data = [];
 
-    /**
-     * @var ClonerInterface
-     */
-    private $cloner;
-
-    /**
-     * @deprecated since Symfony 4.3, store all the serialized state in the data property instead
-     */
-    public function serialize()
-    {
-        @trigger_error(sprintf('The "%s" method is deprecated since Symfony 4.3, store all the serialized state in the data property instead.', __METHOD__), \E_USER_DEPRECATED);
-
-        $trace = debug_backtrace(\DEBUG_BACKTRACE_PROVIDE_OBJECT, 2);
-        $isCalledFromOverridingMethod = isset($trace[1]['function'], $trace[1]['object']) && 'serialize' === $trace[1]['function'] && $this === $trace[1]['object'];
-
-        return $isCalledFromOverridingMethod ? $this->data : serialize($this->data);
-    }
-
-    /**
-     * @deprecated since Symfony 4.3, store all the serialized state in the data property instead
-     */
-    public function unserialize($data)
-    {
-        @trigger_error(sprintf('The "%s" method is deprecated since Symfony 4.3, store all the serialized state in the data property instead.', __METHOD__), \E_USER_DEPRECATED);
-
-        $this->data = \is_array($data) ? $data : unserialize($data);
-    }
+    private ClonerInterface $cloner;
 
     /**
      * Converts the variable into a serializable Data instance.
      *
      * This array can be displayed in the template using
      * the VarDumper component.
-     *
-     * @param mixed $var
-     *
-     * @return Data
      */
-    protected function cloneVar($var)
+    protected function cloneVar(mixed $var): Data
     {
         if ($var instanceof Data) {
             return $var;
         }
-        if (null === $this->cloner) {
+        if (!isset($this->cloner)) {
             $this->cloner = new VarCloner();
             $this->cloner->setMaxItems(-1);
             $this->cloner->addCasters($this->getCasters());
@@ -88,14 +55,26 @@ abstract class DataCollector implements DataCollectorInterface
     /**
      * @return callable[] The casters to add to the cloner
      */
-    protected function getCasters()
+    protected function getCasters(): array
     {
-        $casters = [
-            '*' => function ($v, array $a, Stub $s, $isNested) {
+        return [
+            '*' => static function ($v, array $a, Stub $s, $isNested) {
                 if (!$v instanceof Stub) {
+                    $b = $a;
                     foreach ($a as $k => $v) {
-                        if (\is_object($v) && !$v instanceof \DateTimeInterface && !$v instanceof Stub) {
-                            $a[$k] = new CutStub($v);
+                        if (!\is_object($v) || $v instanceof \DateTimeInterface || $v instanceof Stub) {
+                            continue;
+                        }
+
+                        try {
+                            $a[$k] = $s = new CutStub($v);
+
+                            if ($b[$k] === $s) {
+                                // we've hit a non-typed reference
+                                $a[$k] = $v;
+                            }
+                        } catch (\TypeError $e) {
+                            // we've hit a typed reference
                         }
                     }
                 }
@@ -103,28 +82,82 @@ abstract class DataCollector implements DataCollectorInterface
                 return $a;
             },
         ] + ReflectionCaster::UNSET_CLOSURE_FILE_INFO;
+    }
 
-        return $casters;
+    public function __serialize(): array
+    {
+        if (self::class === (new \ReflectionMethod($this, '__sleep'))->class || self::class !== (new \ReflectionMethod($this, '__serialize'))->class) {
+            return ['data' => $this->data];
+        }
+
+        trigger_deprecation('symfony/http-kernel', '7.4', 'Implementing "%s::__sleep()" is deprecated, use "__serialize()" instead.', get_debug_type($this));
+
+        $data = [];
+        foreach ($this->__sleep() as $key) {
+            try {
+                if (($r = new \ReflectionProperty($this, $key))->isInitialized($this)) {
+                    $data[$key] = $r->getValue($this);
+                }
+            } catch (\ReflectionException) {
+                $data[$key] = $this->$key;
+            }
+        }
+
+        return $data;
+    }
+
+    public function __unserialize(array $data): void
+    {
+        if ($wakeup = self::class !== (new \ReflectionMethod($this, '__wakeup'))->class && self::class === (new \ReflectionMethod($this, '__unserialize'))->class) {
+            trigger_deprecation('symfony/http-kernel', '7.4', 'Implementing "%s::__wakeup()" is deprecated, use "__unserialize()" instead.', get_debug_type($this));
+        }
+
+        if (\in_array(array_keys($data), [['data'], ["\0*\0data"]], true)) {
+            $this->data = $data['data'] ?? $data["\0*\0data"];
+
+            if ($wakeup) {
+                $this->__wakeup();
+            }
+
+            return;
+        }
+
+        trigger_deprecation('symfony/http-kernel', '7.4', 'Passing more than just key "data" to "%s::__unserialize()" is deprecated, populate properties in "%s::__unserialize()" instead.', self::class, get_debug_type($this));
+
+        \Closure::bind(function ($data) use ($wakeup) {
+            foreach ($data as $key => $value) {
+                $this->{("\0" === $key[0] ?? '') ? substr($key, 1 + strrpos($key, "\0")) : $key} = $value;
+            }
+
+            if ($wakeup) {
+                $this->__wakeup();
+            }
+        }, $this, static::class)($data);
     }
 
     /**
-     * @return array
+     * @deprecated since Symfony 7.4, will be replaced by `__serialize()` in 8.0
      */
-    public function __sleep()
+    public function __sleep(): array
     {
-        if (__CLASS__ !== $c = (new \ReflectionMethod($this, 'serialize'))->getDeclaringClass()->name) {
-            @trigger_error(sprintf('Implementing the "%s::serialize()" method is deprecated since Symfony 4.3, store all the serialized state in the "data" property instead.', $c), \E_USER_DEPRECATED);
-            $this->data = $this->serialize();
-        }
+        trigger_deprecation('symfony/http-kernel', '7.4', 'Calling "%s::__sleep()" is deprecated, use "__serialize()" instead.', get_debug_type($this));
 
         return ['data'];
     }
 
-    public function __wakeup()
+    /**
+     * @deprecated since Symfony 7.4, will be replaced by `__unserialize()` in 8.0
+     */
+    public function __wakeup(): void
     {
-        if (__CLASS__ !== $c = (new \ReflectionMethod($this, 'unserialize'))->getDeclaringClass()->name) {
-            @trigger_error(sprintf('Implementing the "%s::unserialize()" method is deprecated since Symfony 4.3, store all the serialized state in the "data" property instead.', $c), \E_USER_DEPRECATED);
-            $this->unserialize($this->data);
-        }
+        trigger_deprecation('symfony/http-kernel', '7.4', 'Calling "%s::__wakeup()" is deprecated, use "__unserialize()" instead.', get_debug_type($this));
+    }
+
+    /**
+     * @return void
+     */
+    public function reset()
+    {
+        $this->data = [];
     }
 }

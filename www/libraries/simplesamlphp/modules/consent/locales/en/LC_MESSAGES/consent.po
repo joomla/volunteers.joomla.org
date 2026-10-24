@@ -15,76 +15,8 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.3.4\n"
 
-msgid "{consent:consent:service_providers_for}"
-msgstr "Service Providers for"
-
-msgid "{consent:consent:abort}"
-msgstr "Abort login to SPNAME"
-
-msgid "{consent:consent:remember}"
-msgstr "Remember"
-
-msgid "{consent:consent:login}"
-msgstr "login"
-
-msgid "{consent:consent:consent_purpose}"
-msgstr "The purpose of SPNAME is SPDESC"
-
-msgid "{consent:consent:noconsent_goto_about}"
-msgstr "Go to information page for the service"
-
-msgid "{consent:consent:consent_header}"
-msgstr "Consent about releasing personal information"
-
-msgid "{consent:consent:show_hide_attributes}"
-msgstr "show/hide attributes"
-
-msgid "{consent:consent:table_caption}"
-msgstr "User information"
-
-msgid "{consent:consent:status_header}"
-msgstr "Consent status"
-
-msgid "{consent:consent:noconsent_title}"
-msgstr "No consent given"
-
-msgid "{consent:consent:consent_accept}"
-msgstr "SPNAME requires that the information below is transferred."
-
-msgid "{consent:consent:table_summary}"
-msgstr ""
-"List the information about you that is about to be transmitted to the "
-"service you are going to login to"
-
-msgid "{consent:consent:service_provider_header}"
-msgstr "Service Provider"
-
-msgid "{consent:consent:show_attributes}"
-msgstr "Show attributes"
-
-msgid "{consent:consent:show_attribute}"
-msgstr "Show content"
-
-msgid "{consent:consent:no}"
-msgstr "No, cancel"
-
-msgid "{consent:consent:consent_privacypolicy}"
-msgstr "Privacypolicy for the service"
-
-msgid "{consent:consent:noconsent_text}"
-msgstr "You did not give consent for transfering your attributes to SPNAME."
-
-msgid "{consent:consent:noconsent_return}"
-msgstr "Return to consent page"
-
-msgid "{consent:consent:yes}"
-msgstr "Yes, continue"
-
-msgid "{consent:consent:consent_attributes_header}"
-msgstr "Information that will be sent to SPNAME"
-
-msgid "Service Providers for"
-msgstr "Service Providers for"
+msgid "Privacy policy for the service"
+msgstr "Privacy policy for the service"
 
 msgid "Yes, continue"
 msgstr "Yes, continue"
@@ -92,23 +24,14 @@ msgstr "Yes, continue"
 msgid "Return to consent page"
 msgstr "Return to consent page"
 
-msgid "Consent status"
-msgstr "Consent status"
-
 msgid "Go to information page for the service"
 msgstr "Go to information page for the service"
 
-msgid "Service Provider"
-msgstr "Service Provider"
+msgid "Abort login to %SPNAME%"
+msgstr "Abort login to %SPNAME%"
 
-msgid "Abort login to SPNAME"
-msgstr "Abort login to SPNAME"
-
-msgid "show/hide attributes"
-msgstr "show/hide attributes"
-
-msgid "The purpose of SPNAME is SPDESC"
-msgstr "The purpose of SPNAME is SPDESC"
+msgid "The purpose of %SPNAME% is %SPDESC%"
+msgstr "The purpose of %SPNAME% is %SPDESC%"
 
 msgid ""
 "List the information about you that is about to be transmitted to the "
@@ -123,11 +46,8 @@ msgstr "Consent about releasing personal information"
 msgid "No consent given"
 msgstr "No consent given"
 
-msgid "login"
-msgstr "login"
-
-msgid "You did not give consent for transfering your attributes to SPNAME."
-msgstr "You did not give consent for transfering your attributes to SPNAME."
+msgid "You did not give consent for transferring your attributes to %SPNAME%."
+msgstr "You did not give consent for transferring your attributes to %SPNAME%."
 
 msgid "Remember"
 msgstr "Remember"
@@ -135,21 +55,18 @@ msgstr "Remember"
 msgid "Show content"
 msgstr "Show content"
 
-msgid "SPNAME requires that the information below is transferred."
-msgstr "SPNAME requires that the information below is transferred."
+msgid "%SPNAME% requires that the information below is transferred."
+msgstr "%SPNAME% requires that the information below is transferred."
 
-msgid "Privacypolicy for the service"
-msgstr "Privacypolicy for the service"
+msgid "Privacy policy for the service"
+msgstr "Privacy policy for the service"
 
 msgid "No, cancel"
 msgstr "No, cancel"
 
-msgid "Show attributes"
-msgstr "Show attributes"
-
 msgid "User information"
 msgstr "User information"
 
-msgid "Information that will be sent to SPNAME"
-msgstr "Information that will be sent to SPNAME"
+msgid "Information that will be sent to %SPNAME%"
+msgstr "Information that will be sent to %SPNAME%"
 

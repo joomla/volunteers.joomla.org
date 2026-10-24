@@ -14,80 +14,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 1.3\n"
 
-msgid "{consent:consent:show_attribute}"
-msgstr "Bonisa iimpawu"
-
-msgid "{consent:consent:noconsent_return}"
-msgstr "Buyela kwikhasi lemvume"
-
-msgid "{consent:consent:yes}"
-msgstr "Ewe, qhubeka"
-
-msgid "{consent:consent:service_providers_for}"
-msgstr "Umboneleli enkonzo we-"
-
-msgid "{consent:consent:show_attributes}"
-msgstr "Bonisa isiqulatho"
-
-msgid "{consent:consent:status_header}"
-msgstr "Ubume bemvume"
-
-msgid "{consent:consent:noconsent_title}"
-msgstr "Akukho mvume inikelweyo"
-
-msgid "{consent:consent:show_hide_attributes}"
-msgstr "bonisa/fihla iimpawu"
-
-msgid "{consent:consent:service_provider_header}"
-msgstr "Umboneleli Wenkonzo"
-
-msgid "{consent:consent:noconsent_text}"
-msgstr "Awuyinikelanga imvume yokudluliselwa iimpawu zakho kwi-SPNAME."
-
-msgid "{consent:consent:consent_header}"
-msgstr "Imvume malunga nokukhutshwa kwenkcazelo yobuqu"
-
-msgid "{consent:consent:consent_purpose}"
-msgstr "Injongo ye-SPNAME yi-SPDESC"
-
-msgid "{consent:consent:noconsent_goto_about}"
-msgstr "Yiya kwikhasi lenkcazelo ukuze ufumane inkonzo"
-
-msgid "{consent:consent:table_caption}"
-msgstr "Inkcazelo yomsebenzisi"
-
-msgid "{consent:consent:consent_attributes_header}"
-msgstr "Inkcazelo eza kuthunyelwa ku-SPNAME"
-
-msgid "{consent:consent:abort}"
-msgstr "Yeka ungeno kwi-SPNAME"
-
-msgid "{consent:consent:login}"
-msgstr "ngena"
-
-msgid "{consent:consent:consent_accept}"
-msgstr "I-SPNAME idinga ukuba inkcazelo engezantsi idluliselwe."
-
-msgid "{consent:consent:no}"
-msgstr "Hayi, rhoxisa"
-
-msgid "{consent:consent:consent_privacypolicy}"
+msgid "Privacy policy for the service"
 msgstr "Ipolisi yokugcinwa kwemfihlelo yenkonzo"
-
-msgid "{consent:consent:table_summary}"
-msgstr "Dwelisa inkcazelo engawe eza kudluliselwa kwinkonzo oza kungena kuyo"
-
-msgid "{consent:consent:remember}"
-msgstr "Khumbula"
 
 msgid "Consent about releasing personal information"
 msgstr "Imvume malunga nokukhutshwa kwenkcazelo yobuqu"
-
-msgid "Show attributes"
-msgstr "Bonisa isiqulatho"
-
-msgid "show/hide attributes"
-msgstr "bonisa/fihla iimpawu"
 
 msgid "Yes, continue"
 msgstr "Ewe, qhubeka"
@@ -95,23 +26,14 @@ msgstr "Ewe, qhubeka"
 msgid "No consent given"
 msgstr "Akukho mvume inikelweyo"
 
-msgid "Information that will be sent to SPNAME"
-msgstr "Inkcazelo eza kuthunyelwa ku-SPNAME"
-
-msgid "Service Providers for"
-msgstr "Umboneleli enkonzo we-"
-
-msgid "Consent status"
-msgstr "Ubume bemvume"
+msgid "Information that will be sent to %SPNAME%"
+msgstr "Inkcazelo eza kuthunyelwa ku-%SPNAME%"
 
 msgid "Go to information page for the service"
 msgstr "Yiya kwikhasi lenkcazelo ukuze ufumane inkonzo"
 
 msgid "Return to consent page"
 msgstr "Buyela kwikhasi lemvume"
-
-msgid "Service Provider"
-msgstr "Umboneleli Wenkonzo"
 
 msgid "No, cancel"
 msgstr "Hayi, rhoxisa"
@@ -122,17 +44,17 @@ msgstr "Bonisa iimpawu"
 msgid "Privacy policy for the service"
 msgstr "Ipolisi yokugcinwa kwemfihlelo yenkonzo"
 
-msgid "The purpose of SPNAME is SPDESC"
-msgstr "Injongo ye-SPNAME yi-SPDESC"
+msgid "The purpose of %SPNAME% is %SPDESC%"
+msgstr "Injongo ye-%SPNAME% yi-%SPDESC%"
 
-msgid "Abort login to SPNAME"
-msgstr "Yeka ungeno kwi-SPNAME"
+msgid "Abort login to %SPNAME%"
+msgstr "Yeka ungeno kwi-%SPNAME%"
 
 msgid "Remember"
 msgstr "Khumbula"
 
-msgid "SPNAME requires that the information below is transferred."
-msgstr "I-SPNAME idinga ukuba inkcazelo engezantsi idluliselwe."
+msgid "%SPNAME% requires that the information below is transferred."
+msgstr "I-%SPNAME% idinga ukuba inkcazelo engezantsi idluliselwe."
 
 msgid "User information"
 msgstr "Inkcazelo yomsebenzisi"
@@ -142,9 +64,6 @@ msgid ""
 "service you are going to login to"
 msgstr "Dwelisa inkcazelo engawe eza kudluliselwa kwinkonzo oza kungena kuyo"
 
-msgid "login"
-msgstr "ngena"
-
-msgid "You did not give consent for transfering your attributes to SPNAME."
-msgstr "Awuyinikelanga imvume yokudluliselwa iimpawu zakho kwi-SPNAME."
+msgid "You did not give consent for transferring your attributes to %SPNAME%."
+msgstr "Awuyinikelanga imvume yokudluliselwa iimpawu zakho kwi-%SPNAME%."
 

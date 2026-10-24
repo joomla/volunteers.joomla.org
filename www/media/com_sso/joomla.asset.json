@@ -1,0 +1,19 @@
+{
+    "$schema": "https://developer.joomla.org/schemas/json-schema/web_assets.json",
+    "name": "com_sso",
+    "version": "1.0.0",
+    "description": "RO Single Sign On",
+    "license": "GPL-3.0+",
+    "assets": [
+        {
+            "name": "com_sso.core",
+            "type": "style",
+            "uri": "com_sso/style.css"
+        },
+        {
+            "name": "com_sso.dashboard",
+            "type": "script",
+            "uri": "com_sso/dashboard.js"
+        }
+    ]
+}

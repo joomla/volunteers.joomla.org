@@ -15,15 +15,6 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.3.4\n"
 
-msgid "{authorize:Authorize:403_text}"
-msgstr ""
-"Δεν έχετε τα απαραίτητα δικαιώματα για να αποκτήσετε πρόσβαση σε αυτή την"
-" υπηρεσία. Παρακαλούμε επικοινωνήστε με το διαχειριστή αν θεωρείτε ότι "
-"αυτό να είναι λανθασμένο."
-
-msgid "{authorize:Authorize:403_header}"
-msgstr "Δεν επιτρέπεται η πρόσβαση"
-
 msgid "Access forbidden"
 msgstr "Δεν επιτρέπεται η πρόσβαση"
 

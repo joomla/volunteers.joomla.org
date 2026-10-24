@@ -1,2 +1,2 @@
 RewriteEngine On
-RewriteRule !^www/ - [F,NC]
+RewriteRule !^public/ - [F,NC]

@@ -1,6 +1,113 @@
 CHANGELOG
 =========
 
+7.4
+---
+
+ * Add `AttributeServicesLoader` and `RoutingControllerPass` to auto-register routes from attributes on services
+ * Allow query-specific parameters in `UrlGenerator` using `_query`
+ * Add support of multiple env names in the  `Symfony\Component\Routing\Attribute\Route` attribute
+ * Add argument `$parameters` to `RequestContext`'s constructor
+ * Handle declaring routes using PHP arrays that follow the same shape as corresponding yaml files
+ * Add `RoutesReference` to help writing PHP configs using yaml-like array-shapes
+ * Deprecate class aliases in the `Annotation` namespace, use attributes instead
+ * Deprecate getters and setters in attribute classes in favor of public properties
+ * Deprecate accessing the internal scope of the loader in PHP config files, use only its public API instead
+ * Deprecate XML configuration format, use YAML, PHP or attributes instead
+
+7.3
+---
+
+ * Allow aliases and deprecations in `#[Route]` attribute
+ * Add the `Requirement::MONGODB_ID` constant to validate MongoDB ObjectIDs in hexadecimal format
+
+7.2
+---
+
+ * Add the `Requirement::UID_RFC9562` constant to validate UUIDs in the RFC 9562 format
+ * Deprecate the `AttributeClassLoader::$routeAnnotationClass` property
+
+7.1
+---
+
+ * Add `{foo:bar}` syntax to define a mapping between a route parameter and its corresponding request attribute
+
+7.0
+---
+
+ * Add argument `$routeParameters` to `UrlMatcher::handleRouteRequirements()`
+ * Remove Doctrine annotations support in favor of native attributes
+ * Remove `AnnotationClassLoader`, use `AttributeClassLoader` instead
+ * Remove `AnnotationDirectoryLoader`, use `AttributeDirectoryLoader` instead
+ * Remove `AnnotationFileLoader`, use `AttributeFileLoader` instead
+
+6.4
+---
+
+ * Add FQCN and FQCN::method aliases for routes loaded from attributes/annotations when applicable
+ * Add native return type to `AnnotationClassLoader::setResolver()`
+ * Deprecate Doctrine annotations support in favor of native attributes
+ * Change the constructor signature of `AnnotationClassLoader` to `__construct(?string $env = null)`, passing an annotation reader as first argument is deprecated
+ * Deprecate `AnnotationClassLoader`, use `AttributeClassLoader` instead
+ * Deprecate `AnnotationDirectoryLoader`, use `AttributeDirectoryLoader` instead
+ * Deprecate `AnnotationFileLoader`, use `AttributeFileLoader` instead
+ * Add `AddExpressionLanguageProvidersPass` (moved from `FrameworkBundle`)
+ * Add aliases for all classes in the `Annotation` namespace to `Attribute`
+
+6.2
+---
+
+ * Add `Requirement::POSITIVE_INT` for common ids and pagination
+
+6.1
+---
+
+ * Add `getMissingParameters` and `getRouteName` methods on `MissingMandatoryParametersException`
+ * Allow using UTF-8 parameter names
+ * Support the `attribute` type (alias of `annotation`) in annotation loaders
+ * Already encoded slashes are not decoded nor double-encoded anymore when generating URLs (query parameters)
+ * Add `EnumRequirement` to help generate route requirements from a `\BackedEnum`
+ * Add `Requirement`, a collection of universal regular-expression constants to use as route parameter requirements
+ * Add `params` variable to condition expression
+ * Deprecate not passing route parameters as the fourth argument to `UrlMatcher::handleRouteRequirements()`
+
+5.3
+---
+
+ * Already encoded slashes are not decoded nor double-encoded anymore when generating URLs
+ * Add support for per-env configuration in XML and Yaml loaders
+ * Deprecate creating instances of the `Route` annotation class by passing an array of parameters
+ * Add `RoutingConfigurator::env()` to get the current environment
+
+5.2.0
+-----
+
+ * Added support for inline definition of requirements and defaults for host
+ * Added support for `\A` and `\z` as regex start and end for route requirement
+ * Added support for `#[Route]` attributes
+
+5.1.0
+-----
+
+ * added the protected method `PhpFileLoader::callConfigurator()` as extension point to ease custom routing configuration
+ * deprecated `RouteCollectionBuilder` in favor of `RoutingConfigurator`.
+ * added "priority" option to annotated routes
+ * added argument `$priority` to `RouteCollection::add()`
+ * deprecated the `RouteCompiler::REGEX_DELIMITER` constant
+ * added `ExpressionLanguageProvider` to expose extra functions to route conditions
+ * added support for a `stateless` keyword for configuring route stateless in PHP, YAML and XML configurations.
+ * added the "hosts" option to be able to configure the host per locale.
+ * added `RequestContext::fromUri()` to ease building the default context
+
+5.0.0
+-----
+
+ * removed `PhpGeneratorDumper` and `PhpMatcherDumper`
+ * removed `generator_base_class`, `generator_cache_class`, `matcher_base_class` and `matcher_cache_class` router options
+ * `Serializable` implementing methods for `Route` and `CompiledRoute` are final
+ * removed referencing service route loaders with a single colon
+ * Removed `ServiceRouterLoader` and `ObjectRouteLoader`.
+
 4.4.0
 -----
 
@@ -44,15 +151,15 @@ CHANGELOG
 3.3.0
 -----
 
-  * [DEPRECATION] Class parameters have been deprecated and will be removed in 4.0.
-    * router.options.generator_class
-    * router.options.generator_base_class
-    * router.options.generator_dumper_class
-    * router.options.matcher_class
-    * router.options.matcher_base_class
-    * router.options.matcher_dumper_class
-    * router.options.matcher.cache_class
-    * router.options.generator.cache_class
+ * [DEPRECATION] Class parameters have been deprecated and will be removed in 4.0.
+   * router.options.generator_class
+   * router.options.generator_base_class
+   * router.options.generator_dumper_class
+   * router.options.matcher_class
+   * router.options.matcher_base_class
+   * router.options.matcher_dumper_class
+   * router.options.matcher.cache_class
+   * router.options.generator.cache_class
 
 3.2.0
 -----

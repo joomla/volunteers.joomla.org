@@ -31,7 +31,7 @@ msgid "{discopower:tabs:sweden}"
 msgstr "Suecia"
 
 msgid "{discopower:tabs:edugain}"
-msgstr "Europa (eduGAIN)"
+msgstr "eduGAIN"
 
 msgid "{discopower:tabs:iceland}"
 msgstr "Islandia"
@@ -72,6 +72,6 @@ msgstr "Miscelanea"
 msgid "Finland"
 msgstr "Finlandia"
 
-msgid "Europe (eduGAIN)"
-msgstr "Europa (eduGAIN)"
+msgid "eduGAIN"
+msgstr "eduGAIN"
 

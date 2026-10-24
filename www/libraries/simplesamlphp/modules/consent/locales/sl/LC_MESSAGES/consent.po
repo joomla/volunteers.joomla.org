@@ -16,96 +16,16 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.3.4\n"
 
-msgid "{consent:consent:service_providers_for}"
-msgstr "SP za"
-
-msgid "{consent:consent:remember}"
-msgstr "Zapomni si privolitev."
-
-msgid "{consent:consent:login}"
-msgstr "Prijava"
-
-msgid "{consent:consent:consent_purpose}"
-msgstr "Namen %SPNAME%: %SPDESC%"
-
-msgid "{consent:consent:noconsent_goto_about}"
-msgstr "Pojdi na spletno stran z informacijami o storitvi"
-
-msgid "{consent:consent:consent_header}"
-msgstr "Odločitev o privolitvi posredovanja vaših osebnih podatkov"
-
-msgid "{consent:consent:show_hide_attributes}"
-msgstr "prikaži/skrij atribute"
-
-msgid "{consent:consent:table_caption}"
-msgstr "Podatki o uporabniku"
-
-msgid "{consent:consent:status_header}"
-msgstr "Stanje privolitve"
-
-msgid "{consent:consent:noconsent_title}"
-msgstr "Privolitev ni bila dana."
-
-msgid "{consent:consent:consent_accept}"
-msgstr ""
-"Pravkar se nameravate prijaviti v storitev SPNAME. Med postopkom prijave "
-"bo IdP tej storitvi posredoval atribute, ki vsebujejo informacije o vaši "
-"identiteti. Ali se s tem strinjate? "
-
-msgid "{consent:consent:table_summary}"
-msgstr ""
-"Seznam podatkov o vas, ki bodo posredovani storitvi, v katero se "
-"nameravate prijaviti"
-
-msgid "{consent:consent:service_provider_header}"
-msgstr "SP"
-
-msgid "{consent:consent:show_attributes}"
-msgstr "Prikaži atribute"
-
-msgid "{consent:consent:show_attribute}"
-msgstr "Prikaži vsebino"
-
-msgid "{consent:consent:no}"
-msgstr "Ne, prekliči"
-
-msgid "{consent:consent:consent_privacypolicy}"
-msgstr "Politika zasebnosti za ta SP"
-
-msgid "{consent:consent:noconsent_text}"
-msgstr "Niste podali privolitve za posredovanje atributov SP-ju."
-
-msgid "{consent:consent:noconsent_return}"
-msgstr "Vrnitev na privolitveno stran"
-
-msgid "{consent:consent:yes}"
-msgstr "Da, nadaljuj"
-
-msgid "{consent:consent:consent_attributes_header}"
-msgstr "Atributi, ki bodo poslani SPju"
-
-msgid "Service Providers for"
-msgstr "SP za"
-
 msgid "Yes, continue"
 msgstr "Da, nadaljuj"
 
 msgid "Return to consent page"
 msgstr "Vrnitev na privolitveno stran"
 
-msgid "Consent status"
-msgstr "Stanje privolitve"
-
 msgid "Go to information page for the service"
 msgstr "Pojdi na spletno stran z informacijami o storitvi"
 
-msgid "Service Provider"
-msgstr "SP"
-
-msgid "show/hide attributes"
-msgstr "prikaži/skrij atribute"
-
-msgid "The purpose of SPNAME is SPDESC"
+msgid "The purpose of %SPNAME% is %SPDESC%"
 msgstr "Namen %SPNAME%: %SPDESC%"
 
 msgid ""
@@ -121,10 +41,7 @@ msgstr "Odločitev o privolitvi posredovanja vaših osebnih podatkov"
 msgid "No consent given"
 msgstr "Privolitev ni bila dana."
 
-msgid "login"
-msgstr "Prijava"
-
-msgid "You did not give consent for transfering your attributes to SPNAME."
+msgid "You did not give consent for transferring your attributes to %SPNAME%."
 msgstr "Niste podali privolitve za posredovanje atributov SP-ju."
 
 msgid "Remember"
@@ -133,24 +50,21 @@ msgstr "Zapomni si privolitev."
 msgid "Show content"
 msgstr "Prikaži vsebino"
 
-msgid "SPNAME requires that the information below is transferred."
+msgid "%SPNAME% requires that the information below is transferred."
 msgstr ""
-"Pravkar se nameravate prijaviti v storitev SPNAME. Med postopkom prijave "
+"Pravkar se nameravate prijaviti v storitev %SPNAME%. Med postopkom prijave "
 "bo IdP tej storitvi posredoval atribute, ki vsebujejo informacije o vaši "
 "identiteti. Ali se s tem strinjate? "
 
-msgid "Privacypolicy for the service"
+msgid "Privacy policy for the service"
 msgstr "Politika zasebnosti za ta SP"
 
 msgid "No, cancel"
 msgstr "Ne, prekliči"
 
-msgid "Show attributes"
-msgstr "Prikaži atribute"
-
 msgid "User information"
 msgstr "Podatki o uporabniku"
 
-msgid "Information that will be sent to SPNAME"
+msgid "Information that will be sent to %SPNAME%"
 msgstr "Atributi, ki bodo poslani SPju"
 

@@ -1,0 +1,80 @@
+<?php
+
+declare(strict_types=1);
+
+namespace SimpleSAML\SAML2\XML\saml;
+
+use DOMElement;
+use SimpleSAML\SAML2\Assert\Assert;
+use SimpleSAML\XML\Constants as C;
+use SimpleSAML\XML\SchemaValidatableElementInterface;
+use SimpleSAML\XML\SchemaValidatableElementTrait;
+use SimpleSAML\XMLSchema\Exception\InvalidDOMElementException;
+use SimpleSAML\XMLSchema\Exception\SchemaViolationException;
+
+/**
+ * SAML AudienceRestriction data type.
+ *
+ * @package simplesamlphp/saml2
+ */
+final class AudienceRestriction extends AbstractConditionType implements SchemaValidatableElementInterface
+{
+    use SchemaValidatableElementTrait;
+
+
+    /**
+     * Initialize a saml:AudienceRestriction
+     *
+     * @param \SimpleSAML\SAML2\XML\saml\Audience[] $audience
+     */
+    public function __construct(
+        protected array $audience,
+    ) {
+        Assert::minCount($audience, 1, SchemaViolationException::class);
+        Assert::maxCount($audience, C::UNBOUNDED_LIMIT);
+        Assert::allIsInstanceOf($audience, Audience::class, SchemaViolationException::class);
+    }
+
+
+    /**
+     * Collect the audience
+     *
+     * @return \SimpleSAML\SAML2\XML\saml\Audience[]
+     */
+    public function getAudience(): array
+    {
+        return $this->audience;
+    }
+
+
+    /**
+     * Convert XML into an AudienceRestriction
+     *
+     * @throws \SimpleSAML\XMLSchema\Exception\InvalidDOMElementException
+     *   if the qualified name of the supplied element is wrong
+     */
+    public static function fromXML(DOMElement $xml): static
+    {
+        Assert::same($xml->localName, 'AudienceRestriction', InvalidDOMElementException::class);
+        Assert::same($xml->namespaceURI, AudienceRestriction::NS, InvalidDOMElementException::class);
+
+        $audience = Audience::getChildrenOfClass($xml);
+
+        return new static($audience);
+    }
+
+
+    /**
+     * Convert this Audience to XML.
+     */
+    public function toXML(?DOMElement $parent = null): DOMElement
+    {
+        $e = $this->instantiateParentElement($parent);
+
+        foreach ($this->getAudience() as $audience) {
+            $audience->toXML($e);
+        }
+
+        return $e;
+    }
+}

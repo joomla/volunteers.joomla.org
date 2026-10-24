@@ -1,0 +1,431 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form>
+    <config>
+        <inlinehelp button="show"/>
+    </config>
+    <fieldset name="sso" label="COM_SSO_CONFIG_SSO">
+        <fields name="sso">
+            <field name="baseurlpath"
+                   type="text"
+                   label="COM_SSO_CONFIG_BASEURLPATH_LABEL"
+                   description="COM_SSO_CONFIG_BASEURLPATH_DESC"
+                   default="sso/"
+                   required="true"/>
+
+            <field name="adminpassword"
+                   type="password"
+                   label="COM_SSO_CONFIG_ADMINPASSWORD_LABEL"
+                   description="COM_SSO_CONFIG_ADMINPASSWORD_DESC"
+                   required="false"/>
+
+            <field name="secretsalt"
+                   type="password"
+                   label="COM_SSO_CONFIG_SECRETSALT_LABEL"
+                   description="COM_SSO_CONFIG_SECRETSALT_DESC"
+                   required="true"/>
+
+            <field name="technicalcontact_name"
+                   type="text"
+                   label="COM_SSO_CONFIG_TECHNICALCONTACT_NAME_LABEL"
+                   description="COM_SSO_CONFIG_TECHNICALCONTACT_NAME_DESC"
+                   required="true"/>
+
+            <field name="technicalcontact_email"
+                   type="text"
+                   label="COM_SSO_CONFIG_TECHNICALCONTACT_EMAIL_LABEL"
+                   description="COM_SSO_CONFIG_TECHNICALCONTACT_EMAIL_DESC"
+                   required="true"/>
+
+            <field
+                    name="idp"
+                    type="radio"
+                    label="COM_SSO_CONFIG_SETIDP_LABEL"
+                    description="COM_SSO_CONFIG_SETIDP_DESC"
+                    default="0"
+                    class="btn-group btn-group-yesno"
+                    filter="integer"
+            >
+                <option value="1">JYES</option>
+                <option value="0">JNO</option>
+            </field>
+
+            <field name="privatekey"
+                   type="filelist"
+                   label="COM_SSO_CONFIG_PRIVATEKEY_LABEL"
+                   description="COM_SSO_CONFIG_PRIVATEKEY_DESC"
+                   required="false"
+                   directory="libraries/simplesamlphp/cert"
+                   hide_default="true"
+                   showon="idp:1"/>
+
+            <field name="privatekey_pass"
+                   type="password"
+                   label="COM_SSO_CONFIG_PRIVATEKEY_PASS_LABEL"
+                   description="COM_SSO_CONFIG_PRIVATEKEY_PASS_DESC"
+                   required="false"
+                   showon="idp:1"/>
+
+            <field name="certificate"
+                   type="filelist"
+                   label="COM_SSO_CONFIG_CERTIFICATE_LABEL"
+                   description="COM_SSO_CONFIG_CERTIFICATE_DESC"
+                   required="false"
+                   directory="libraries/simplesamlphp/cert"
+                   hide_default="true"
+                   showon="idp:1"/>
+
+            <field name="login"
+                   type="text"
+                   label="COM_SSO_CONFIG_LOGIN_LABEL"
+                   description="COM_SSO_CONFIG_LOGIN_DESC"
+                   required="false"
+                   showon="idp:1"
+                   default="joomla:Joomla"/>
+
+            <field name="theme"
+                   type="text"
+                   label="COM_SSO_CONFIG_THEME_LABEL"
+                   description="COM_SSO_CONFIG_THEME_DESC"
+                   required="false"/>
+
+            <field name="themeController"
+                   type="text"
+                   label="COM_SSO_CONFIG_THEMECONTROLLER_LABEL"
+                   description="COM_SSO_CONFIG_THEMECONTROLLER_DESC"
+                   required="false"
+                   showon="theme!:default"/>
+
+            <field name="consent"
+                   type="text"
+                   label="COM_SSO_CONFIG_CONSENT_LABEL"
+                   description="COM_SSO_CONFIG_CONSENT_DESC"
+                   required="false"/>
+
+            <field name="language_default"
+                   type="list"
+                   label="COM_SSO_CONFIG_LANGUAGE_DEFAULT_LABEL"
+                   description="COM_SSO_CONFIG_LANGUAGE_DEFAULT_DESC"
+                   required="false"
+                   default="en">
+                <option value="en">COM_SSO_CONFIG_LANGUAGE_EN</option>
+                <option value="af">COM_SSO_CONFIG_LANGUAGE_AF</option>
+                <option value="ca">COM_SSO_CONFIG_LANGUAGE_CA</option>
+                <option value="cs">COM_SSO_CONFIG_LANGUAGE_CS</option>
+                <option value="da">COM_SSO_CONFIG_LANGUAGE_DA</option>
+                <option value="de">COM_SSO_CONFIG_LANGUAGE_DE</option>
+                <option value="el">COM_SSO_CONFIG_LANGUAGE_EL</option>
+                <option value="es">COM_SSO_CONFIG_LANGUAGE_ES</option>
+                <option value="et">COM_SSO_CONFIG_LANGUAGE_ET</option>
+                <option value="eu">COM_SSO_CONFIG_LANGUAGE_EU</option>
+                <option value="fi">COM_SSO_CONFIG_LANGUAGE_FI</option>
+                <option value="fr">COM_SSO_CONFIG_LANGUAGE_FR</option>
+                <option value="he">COM_SSO_CONFIG_LANGUAGE_HE</option>
+                <option value="hr">COM_SSO_CONFIG_LANGUAGE_HR</option>
+                <option value="hu">COM_SSO_CONFIG_LANGUAGE_HU</option>
+                <option value="id">COM_SSO_CONFIG_LANGUAGE_ID</option>
+                <option value="it">COM_SSO_CONFIG_LANGUAGE_IT</option>
+                <option value="ja">COM_SSO_CONFIG_LANGUAGE_JA</option>
+                <option value="lb">COM_SSO_CONFIG_LANGUAGE_LB</option>
+                <option value="lt">COM_SSO_CONFIG_LANGUAGE_LT</option>
+                <option value="lv">COM_SSO_CONFIG_LANGUAGE_LV</option>
+                <option value="nl">COM_SSO_CONFIG_LANGUAGE_NL</option>
+                <option value="nn">COM_SSO_CONFIG_LANGUAGE_NN</option>
+                <option value="no">COM_SSO_CONFIG_LANGUAGE_NO</option>
+                <option value="pl">COM_SSO_CONFIG_LANGUAGE_PL</option>
+                <option value="pt">COM_SSO_CONFIG_LANGUAGE_PT</option>
+                <option value="pt_BR">COM_SSO_CONFIG_LANGUAGE_PT_BR</option>
+                <option value="ro">COM_SSO_CONFIG_LANGUAGE_RO</option>
+                <option value="ru">COM_SSO_CONFIG_LANGUAGE_RU</option>
+                <option value="se">COM_SSO_CONFIG_LANGUAGE_SE</option>
+                <option value="sk">COM_SSO_CONFIG_LANGUAGE_SK</option>
+                <option value="sl">COM_SSO_CONFIG_LANGUAGE_SL</option>
+                <option value="sr">COM_SSO_CONFIG_LANGUAGE_SR</option>
+                <option value="st">COM_SSO_CONFIG_LANGUAGE_ST</option>
+                <option value="sv">COM_SSO_CONFIG_LANGUAGE_SV</option>
+                <option value="tr">COM_SSO_CONFIG_LANGUAGE_TR</option>
+                <option value="xh">COM_SSO_CONFIG_LANGUAGE_XH</option>
+                <option value="zh">COM_SSO_CONFIG_LANGUAGE_ZH</option>
+                <option value="zh_TW">COM_SSO_CONFIG_LANGUAGE_ZH_TW</option>
+                <option value="zu">COM_SSO_CONFIG_LANGUAGE_ZU</option>
+            </field>
+
+            <field name="language_available"
+                   type="list"
+                   label="COM_SSO_CONFIG_LANGUAGE_AVAILABLE_LABEL"
+                   description="COM_SSO_CONFIG_LANGUAGE_AVAILABLE_DESC"
+                   required="false"
+                   multiple="true"
+                   default="en"
+                   layout="joomla.form.field.list-fancy-select">
+                <option value="en">COM_SSO_CONFIG_LANGUAGE_EN</option>
+                <option value="af">COM_SSO_CONFIG_LANGUAGE_AF</option>
+                <option value="ca">COM_SSO_CONFIG_LANGUAGE_CA</option>
+                <option value="cs">COM_SSO_CONFIG_LANGUAGE_CS</option>
+                <option value="da">COM_SSO_CONFIG_LANGUAGE_DA</option>
+                <option value="de">COM_SSO_CONFIG_LANGUAGE_DE</option>
+                <option value="el">COM_SSO_CONFIG_LANGUAGE_EL</option>
+                <option value="es">COM_SSO_CONFIG_LANGUAGE_ES</option>
+                <option value="et">COM_SSO_CONFIG_LANGUAGE_ET</option>
+                <option value="eu">COM_SSO_CONFIG_LANGUAGE_EU</option>
+                <option value="fi">COM_SSO_CONFIG_LANGUAGE_FI</option>
+                <option value="fr">COM_SSO_CONFIG_LANGUAGE_FR</option>
+                <option value="he">COM_SSO_CONFIG_LANGUAGE_HE</option>
+                <option value="hr">COM_SSO_CONFIG_LANGUAGE_HR</option>
+                <option value="hu">COM_SSO_CONFIG_LANGUAGE_HU</option>
+                <option value="id">COM_SSO_CONFIG_LANGUAGE_ID</option>
+                <option value="it">COM_SSO_CONFIG_LANGUAGE_IT</option>
+                <option value="ja">COM_SSO_CONFIG_LANGUAGE_JA</option>
+                <option value="lb">COM_SSO_CONFIG_LANGUAGE_LB</option>
+                <option value="lt">COM_SSO_CONFIG_LANGUAGE_LT</option>
+                <option value="lv">COM_SSO_CONFIG_LANGUAGE_LV</option>
+                <option value="nl">COM_SSO_CONFIG_LANGUAGE_NL</option>
+                <option value="nn">COM_SSO_CONFIG_LANGUAGE_NN</option>
+                <option value="no">COM_SSO_CONFIG_LANGUAGE_NO</option>
+                <option value="pl">COM_SSO_CONFIG_LANGUAGE_PL</option>
+                <option value="pt">COM_SSO_CONFIG_LANGUAGE_PT</option>
+                <option value="pt_BR">COM_SSO_CONFIG_LANGUAGE_PT_BR</option>
+                <option value="ro">COM_SSO_CONFIG_LANGUAGE_RO</option>
+                <option value="ru">COM_SSO_CONFIG_LANGUAGE_RU</option>
+                <option value="se">COM_SSO_CONFIG_LANGUAGE_SE</option>
+                <option value="sk">COM_SSO_CONFIG_LANGUAGE_SK</option>
+                <option value="sl">COM_SSO_CONFIG_LANGUAGE_SL</option>
+                <option value="sr">COM_SSO_CONFIG_LANGUAGE_SR</option>
+                <option value="st">COM_SSO_CONFIG_LANGUAGE_ST</option>
+                <option value="sv">COM_SSO_CONFIG_LANGUAGE_SV</option>
+                <option value="tr">COM_SSO_CONFIG_LANGUAGE_TR</option>
+                <option value="xh">COM_SSO_CONFIG_LANGUAGE_XH</option>
+                <option value="zh">COM_SSO_CONFIG_LANGUAGE_ZH</option>
+                <option value="zh_TW">COM_SSO_CONFIG_LANGUAGE_ZH_TW</option>
+                <option value="zu">COM_SSO_CONFIG_LANGUAGE_ZU</option>
+            </field>
+
+            <field
+                    name="production"
+                    type="radio"
+                    label="COM_SSO_CONFIG_PRODUCTION_LABEL"
+                    description="COM_SSO_CONFIG_PRODUCTION_DESC"
+                    default="1"
+                    class="btn-group btn-group-yesno"
+            >
+                <option value="1">JYES</option>
+                <option value="0">JNO</option>
+            </field>
+
+            <field
+                    name="debug"
+                    type="radio"
+                    label="COM_SSO_CONFIG_DEBUG_LABEL"
+                    description="COM_SSO_CONFIG_DEBUG_DESC"
+                    default="0"
+                    class="btn-group btn-group-yesno"
+            >
+                <option value="1">JYES</option>
+                <option value="0">JNO</option>
+            </field>
+
+            <field name="logging_level"
+                   type="list"
+                   label="COM_SSO_CONFIG_LOGGING_LEVEL_LABEL"
+                   description="COM_SSO_CONFIG_LOGGING_LEVEL_DESC"
+                   required="false"
+                   default="7"
+                    showon="debug:1">
+                 <option value="0">COM_SSO_CONFIG_LOGLEVEL_EMERG</option>
+                 <option value="1">COM_SSO_CONFIG_LOGLEVEL_ALERT</option>
+                 <option value="2">COM_SSO_CONFIG_LOGLEVEL_CRIT</option>
+                 <option value="3">COM_SSO_CONFIG_LOGLEVEL_ERR</option>
+                 <option value="4">COM_SSO_CONFIG_LOGLEVEL_WARNING</option>
+                 <option value="5">COM_SSO_CONFIG_LOGLEVEL_NOTICE</option>
+                 <option value="6">COM_SSO_CONFIG_LOGLEVEL_INFO</option>
+                 <option value="7">COM_SSO_CONFIG_LOGLEVEL_DEBUG</option>
+            </field>
+
+            <field name="logging_handler"
+                   type="list"
+                   label="COM_SSO_CONFIG_LOGGING_HANDLER_LABEL"
+                   description="COM_SSO_CONFIG_LOGGING_HANDLER_DESC"
+                   required="false"
+                   default="syslog"
+                   showon="debug:1">
+                <option value="syslog">COM_SSO_CONFIG_LOGGING_HANDLER_SYSLOG</option>
+                <option value="errorlog">COM_SSO_CONFIG_LOGGING_HANDLER_ERRORLOG</option>
+                <option value="stderr">COM_SSO_CONFIG_LOGGING_HANDLER_STDERR</option>
+                <option value="file">COM_SSO_CONFIG_LOGGING_HANDLER_FILE</option>
+            </field>
+
+            <field name="logging_format"
+                   type="text"
+                   label="COM_SSO_CONFIG_LOGGING_FORMAT_LABEL"
+                   description="COM_SSO_CONFIG_LOGGING_FORMAT_DESC"
+                   required="false"
+                   default="%date{M j H:i:s} %process %level %stat[%trackid] %msg"
+                   showon="debug:1"/>
+
+            <field name="logging_processname"
+                   type="text"
+                   label="COM_SSO_CONFIG_LOGGING_PROCESSNAME_LABEL"
+                   description="COM_SSO_CONFIG_LOGGING_PROCESSNAME_DESC"
+                   required="false"
+                   showon="debug:1"
+                   default="simplesamlphp"/>
+
+            <field name="logging_logfile"
+                   type="text"
+                   label="COM_SSO_CONFIG_LOGGING_LOGFILE_LABEL"
+                   description="COM_SSO_CONFIG_LOGGING_LOGFILE_DESC"
+                   required="false"
+                   showon="debug:1[AND]logging_handler:file"
+                   default="simplesamlphp.log"/>
+
+            <field
+                    name="cronemail"
+                    type="radio"
+                    label="COM_SSO_CONFIG_CRONEMAIL_LABEL"
+                    description="COM_SSO_CONFIG_CRONEMAIL_DESC"
+                    default="0"
+                    class="btn-group btn-group-yesno"
+            >
+                <option value="1">JYES</option>
+                <option value="0">JNO</option>
+            </field>
+        </fields>
+    </fieldset>
+    <fieldset name="authproc" label="COM_SSO_CONFIG_AUTHPROC">
+        <fields name="authproc">
+            <field name="filters"
+                   type="subform"
+                   formsource="/administrator/components/com_sso/forms/authproc.xml"
+                   label="COM_SSO_CONFIG_AUTHPROC_FILTERS_LABEL"
+                   description="COM_SSO_CONFIG_AUTHPROC_FILTERS_DESC"
+                   multiple="true"
+                   groupByFieldset="true"
+                   value="1"
+                   emptylabel="true"
+                   buttons="add,remove"
+                   layout="joomla.form.field.subform.repeatable-table">
+            </field>
+        </fields>
+    </fieldset>
+    <fieldset name="modules" label="COM_SSO_CONFIG_MODULES">
+        <fields name="modules">
+            <field name="modules"
+                   type="subform"
+                   label=""
+                   multiple="true"
+                   emptylabel="true"
+                   buttons="add,remove,move"
+                   layout="joomla.form.field.subform.repeatable-table"
+            >
+                <form>
+                    <field name="name"
+                           type="text"
+                           label="COM_SSO_CONFIG_MODULES_NAME_LABEL"
+                           description="COM_SSO_CONFIG_MODULES_NAME_DESC"
+                           required="true"/>
+                    <field name="enabled"
+                           type="radio"
+                           label="COM_SSO_CONFIG_MODULES_ENABLED_LABEL"
+                           description="COM_SSO_CONFIG_MODULES_ENABLED_DESC"
+                           required="true"
+                            default="0"
+                           class="btn-group btn-group-yesno">
+                        <option value="1">JYES</option>
+                        <option value="0">JNO</option>
+                    </field>
+                </form>
+            </field>
+        </fields>
+    </fieldset>
+    <fieldset name="csp" label="COM_SSO_CONFIG_CSP">
+        <fields name="csp">
+            <field
+                    name="additional_httpheader"
+                    type="subform"
+                    label="COM_SSO_ADDITIONAL_HEADER"
+                    multiple="true"
+            >
+                <form>
+                    <field
+                            name="key"
+                            type="list"
+                            label="COM_SSO_ADDITIONAL_HEADER_KEY"
+                            validate="options"
+                            class="col-md-4"
+                    >
+                        <option value="content-security-policy">Content-Security-Policy</option>
+                        <option value="content-security-policy-report-only">Content-Security-Policy-Report-Only</option>
+                        <option value="cross-origin-opener-policy">Cross-Origin-Opener-Policy</option>
+                        <option value="expect-ct">Expect-CT</option>
+                        <option value="feature-policy">Feature-Policy</option>
+                        <option value="nel">NEL</option>
+                        <option value="permissions-policy">Permissions-Policy</option>
+                        <option value="referrer-policy">Referrer-Policy</option>
+                        <option value="report-to">Report-To</option>
+                        <option value="strict-transport-security">Strict-Transport-Security</option>
+                        <option value="x-content-type-options">X-Content-Type-Options</option>
+                        <option value="x-frame-options">X-Frame-Options</option>
+                    </field>
+                    <field
+                            name="value"
+                            type="text"
+                            label="COM_SSO_ADDITIONAL_HEADER_VALUE"
+                            class="col-md-10"
+                    />
+                </form>
+            </field>
+
+            <field
+                    name="contentsecuritypolicy_values"
+                    type="subform"
+                    label="COM_SSO_CONTENTSECURITYPOLICY_VALUES"
+                    multiple="true"
+            >
+                <form>
+                    <field
+                            name="directive"
+                            type="list"
+                            label="COM_SSO_CONTENTSECURITYPOLICY_VALUES_DIRECTIVE"
+                            class="col-md-4"
+                            validate="options"
+                            layout="joomla.form.field.list-fancy-select"
+                    >
+                        <option value="base-uri">base-uri</option>
+                        <option value="block-all-mixed-content">block-all-mixed-content</option>
+                        <option value="child-src">child-src</option>
+                        <option value="connect-src">connect-src</option>
+                        <option value="default-src">default-src</option>
+                        <option value="font-src">font-src</option>
+                        <option value="form-action">form-action</option>
+                        <option value="frame-ancestors">frame-ancestors</option>
+                        <option value="frame-src">frame-src</option>
+                        <option value="img-src">img-src</option>
+                        <option value="manifest-src">manifest-src</option>
+                        <option value="media-src">media-src</option>
+                        <option value="navigate-to">navigate-to</option>
+                        <option value="object-src">object-src</option>
+                        <option value="plugin-types">plugin-types</option>
+                        <option value="prefetch-src">prefetch-src</option>
+                        <option value="report-to">report-to</option>
+                        <option value="report-uri">report-uri</option>
+                        <option value="require-sri-for">require-sri-for</option>
+                        <option value="sandbox">sandbox</option>
+                        <option value="script-src">script-src</option>
+                        <option value="script-src-attr">script-src-attr</option>
+                        <option value="script-src-elem">script-src-elem</option>
+                        <option value="style-src">style-src</option>
+                        <option value="style-src-attr">style-src-attr</option>
+                        <option value="style-src-elem">style-src-elem</option>
+                        <option value="upgrade-insecure-requests">upgrade-insecure-requests</option>
+                        <option value="worker-src">worker-src</option>
+                    </field>
+                    <field
+                            name="value"
+                            type="text"
+                            label="COM_SSO_CONTENTSECURITYPOLICY_VALUES_VALUE"
+                            class="col-md-10"
+                    />
+                </form>
+            </field>
+        </fields>
+    </fieldset>
+</form>

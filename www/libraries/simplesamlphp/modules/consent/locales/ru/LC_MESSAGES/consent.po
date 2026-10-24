@@ -16,100 +16,20 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.3.4\n"
 
-msgid "{consent:consent:service_providers_for}"
-msgstr "Поставщики услуг для"
-
-msgid "{consent:consent:abort}"
-msgstr "Прекратить логин в SPNAME"
-
-msgid "{consent:consent:remember}"
-msgstr "Запомнить"
-
-msgid "{consent:consent:login}"
-msgstr "Логин"
-
-msgid "{consent:consent:consent_purpose}"
-msgstr "Цель SPNAME - SPDESC"
-
-msgid "{consent:consent:noconsent_goto_about}"
-msgstr "Перейти на страницу с информацией о данной службе"
-
-msgid "{consent:consent:consent_header}"
-msgstr "Согласие на передачу некоторых персональных данных"
-
-msgid "{consent:consent:show_hide_attributes}"
-msgstr "показать/скрыть атрибуты"
-
-msgid "{consent:consent:table_caption}"
-msgstr "Информация о пользователе"
-
-msgid "{consent:consent:status_header}"
-msgstr "Разрешительный статус"
-
-msgid "{consent:consent:noconsent_title}"
-msgstr "Нет данного согласия"
-
-msgid "{consent:consent:consent_accept}"
-msgstr "SPNAME требует, чтобы информация, представленная ниже, была передана."
-
-msgid "{consent:consent:table_summary}"
-msgstr ""
-"Выдать список информации, которая будет передана службе, в которую вы "
-"пытаетесь войти"
-
-msgid "{consent:consent:service_provider_header}"
-msgstr "Поставщик услуг"
-
-msgid "{consent:consent:show_attributes}"
-msgstr "Показать атрибуты"
-
-msgid "{consent:consent:show_attribute}"
-msgstr "Показать содержимое"
-
-msgid "{consent:consent:no}"
-msgstr "Нет, отменить"
-
-msgid "{consent:consent:consent_privacypolicy}"
-msgstr "Политика конфиденциальности для службы"
-
-msgid "{consent:consent:noconsent_text}"
-msgstr "Вы не дали согласия на передачу ваших атрибутов к поставщику услуг."
-
-msgid "{consent:consent:noconsent_return}"
-msgstr "Вернуться на страницу для выражения согласия"
-
-msgid "{consent:consent:yes}"
-msgstr "Да, продолжить"
-
-msgid "{consent:consent:consent_attributes_header}"
-msgstr "Информация, которая будет передана в SPNAME "
-
-msgid "Service Providers for"
-msgstr "Поставщики услуг для"
-
 msgid "Yes, continue"
 msgstr "Да, продолжить"
 
 msgid "Return to consent page"
 msgstr "Вернуться на страницу для выражения согласия"
 
-msgid "Consent status"
-msgstr "Разрешительный статус"
-
 msgid "Go to information page for the service"
 msgstr "Перейти на страницу с информацией о данной службе"
 
-msgid "Service Provider"
-msgstr "Поставщик услуг"
+msgid "Abort login to %SPNAME%"
+msgstr "Прекратить логин в %SPNAME%"
 
-msgid "Abort login to SPNAME"
-msgstr "Прекратить логин в SPNAME"
-
-msgid "show/hide attributes"
-msgstr "показать/скрыть атрибуты"
-
-msgid "The purpose of SPNAME is SPDESC"
-msgstr "Цель SPNAME - SPDESC"
+msgid "The purpose of %SPNAME% is %SPDESC%"
+msgstr "Цель %SPNAME% - %SPDESC%"
 
 msgid ""
 "List the information about you that is about to be transmitted to the "
@@ -124,10 +44,7 @@ msgstr "Согласие на передачу некоторых персона
 msgid "No consent given"
 msgstr "Нет данного согласия"
 
-msgid "login"
-msgstr "Логин"
-
-msgid "You did not give consent for transfering your attributes to SPNAME."
+msgid "You did not give consent for transferring your attributes to %SPNAME%."
 msgstr "Вы не дали согласия на передачу ваших атрибутов к поставщику услуг."
 
 msgid "Remember"
@@ -136,21 +53,18 @@ msgstr "Запомнить"
 msgid "Show content"
 msgstr "Показать содержимое"
 
-msgid "SPNAME requires that the information below is transferred."
-msgstr "SPNAME требует, чтобы информация, представленная ниже, была передана."
+msgid "%SPNAME% requires that the information below is transferred."
+msgstr "%SPNAME% требует, чтобы информация, представленная ниже, была передана."
 
-msgid "Privacypolicy for the service"
+msgid "Privacy policy for the service"
 msgstr "Политика конфиденциальности для службы"
 
 msgid "No, cancel"
 msgstr "Нет, отменить"
 
-msgid "Show attributes"
-msgstr "Показать атрибуты"
-
 msgid "User information"
 msgstr "Информация о пользователе"
 
-msgid "Information that will be sent to SPNAME"
-msgstr "Информация, которая будет передана в SPNAME "
+msgid "Information that will be sent to %SPNAME%"
+msgstr "Информация, которая будет передана в %SPNAME%"
 

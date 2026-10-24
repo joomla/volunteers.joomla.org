@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form>
+    <config>
+        <inlinehelp button="show"/>
+    </config>
+    <fieldset name="excludes">
+        <field name="id" type="hidden" class="readonly" readonly="true"/>
+
+        <field name="url"
+               type="url"
+               label="COM_SSO_EXCLUDES_URL_LABEL"
+               description="COM_SSO_EXCLUDES_URL_DESC"
+               class="input-xxlarge"
+               required="true"/>
+
+        <field
+                name="published"
+                type="list"
+                label="JSTATUS"
+                class="advancedSelect"
+                size="1"
+                default="1"
+        >
+            <option value="1">JPUBLISHED</option>
+            <option value="0">JUNPUBLISHED</option>
+        </field>
+    </fieldset>
+</form>

@@ -1,0 +1,37 @@
+{
+    "name": "symfony/ldap",
+    "type": "library",
+    "description": "Provides a LDAP client for PHP on top of PHP's ldap extension",
+    "keywords": ["ldap", "active-directory"],
+    "homepage": "https://symfony.com",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Charles Sarrazin",
+            "email": "charles@sarraz.in"
+        },
+        {
+            "name": "Symfony Community",
+            "homepage": "https://symfony.com/contributors"
+        }
+    ],
+    "require": {
+        "php": ">=8.2",
+        "ext-ldap": "*",
+        "symfony/options-resolver": "^7.3|^8.0"
+    },
+    "require-dev": {
+        "symfony/security-core": "^6.4|^7.0|^8.0",
+        "symfony/security-http": "^6.4|^7.0|^8.0"
+    },
+    "conflict": {
+        "symfony/security-core": "<6.4"
+    },
+    "autoload": {
+        "psr-4": { "Symfony\\Component\\Ldap\\": "" },
+        "exclude-from-classmap": [
+            "/Tests/"
+        ]
+    },
+    "minimum-stability": "dev"
+}

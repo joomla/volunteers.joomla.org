@@ -39,7 +39,7 @@ msgid "{discopower:tabs:greece}"
 msgstr "Grisi"
 
 msgid "{discopower:tabs:edugain}"
-msgstr "Yurophu (eduGAIN)"
+msgstr "eduGAIN"
 
 msgid "{discopower:tabs:norway}"
 msgstr "Norowe"

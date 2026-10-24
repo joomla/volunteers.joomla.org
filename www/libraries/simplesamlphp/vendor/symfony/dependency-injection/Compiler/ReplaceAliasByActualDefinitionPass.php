@@ -24,27 +24,42 @@ use Symfony\Component\DependencyInjection\Reference;
  */
 class ReplaceAliasByActualDefinitionPass extends AbstractRecursivePass
 {
-    private $replacements;
+    protected bool $skipScalars = true;
+
+    private array $replacements;
 
     /**
      * Process the Container to replace aliases with service definitions.
      *
      * @throws InvalidArgumentException if the service definition does not exist
      */
-    public function process(ContainerBuilder $container)
+    public function process(ContainerBuilder $container): void
     {
         // First collect all alias targets that need to be replaced
         $seenAliasTargets = [];
         $replacements = [];
-        foreach ($container->getAliases() as $definitionId => $target) {
+
+        // Sort aliases so non-deprecated ones come first. This ensures that when
+        // multiple aliases point to the same private definition, non-deprecated
+        // aliases get priority for renaming. Otherwise, the definition might be
+        // renamed to a deprecated alias ID, causing the original service ID to
+        // become an alias to the deprecated one (inverting the alias chain).
+        $aliases = $container->getAliases();
+        uasort($aliases, static fn ($a, $b) => $a->isDeprecated() <=> $b->isDeprecated());
+
+        foreach ($aliases as $definitionId => $target) {
             $targetId = (string) $target;
             // Special case: leave this target alone
             if ('service_container' === $targetId) {
                 continue;
             }
-            // Check if target needs to be replaces
+            // Check if target needs to be replaced
             if (isset($replacements[$targetId])) {
-                $container->setAlias($definitionId, $replacements[$targetId])->setPublic($target->isPublic())->setPrivate($target->isPrivate());
+                $container->setAlias($definitionId, $replacements[$targetId])->setPublic($target->isPublic());
+
+                if ($target->isDeprecated()) {
+                    $container->getAlias($definitionId)->setDeprecated(...array_values($target->getDeprecation('%alias_id%')));
+                }
             }
             // No need to process the same target twice
             if (isset($seenAliasTargets[$targetId])) {
@@ -65,11 +80,14 @@ class ReplaceAliasByActualDefinitionPass extends AbstractRecursivePass
                 continue;
             }
             // Remove private definition and schedule for replacement
-            $definition->setPublic(!$target->isPrivate());
-            $definition->setPrivate($target->isPrivate());
+            $definition->setPublic($target->isPublic());
             $container->setDefinition($definitionId, $definition);
             $container->removeDefinition($targetId);
             $replacements[$targetId] = $definitionId;
+
+            if ($target->isPublic() && $target->isDeprecated()) {
+                $definition->addTag('container.private', $target->getDeprecation('%service_id%'));
+            }
         }
         $this->replacements = $replacements;
 
@@ -77,16 +95,13 @@ class ReplaceAliasByActualDefinitionPass extends AbstractRecursivePass
         $this->replacements = [];
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function processValue($value, $isRoot = false)
+    protected function processValue(mixed $value, bool $isRoot = false): mixed
     {
         if ($value instanceof Reference && isset($this->replacements[$referenceId = (string) $value])) {
             // Perform the replacement
             $newId = $this->replacements[$referenceId];
             $value = new Reference($newId, $value->getInvalidBehavior());
-            $this->container->log($this, sprintf('Changed reference of service "%s" previously pointing to "%s" to "%s".', $this->currentId, $referenceId, $newId));
+            $this->container->log($this, \sprintf('Changed reference of service "%s" previously pointing to "%s" to "%s".', $this->currentId, $referenceId, $newId));
         }
 
         return parent::processValue($value, $isRoot);

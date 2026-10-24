@@ -22,23 +22,21 @@ class ServerBag extends ParameterBag
 {
     /**
      * Gets the HTTP headers.
-     *
-     * @return array
      */
-    public function getHeaders()
+    public function getHeaders(): array
     {
         $headers = [];
         foreach ($this->parameters as $key => $value) {
-            if (0 === strpos($key, 'HTTP_')) {
+            if (str_starts_with($key, 'HTTP_')) {
                 $headers[substr($key, 5)] = $value;
-            } elseif (\in_array($key, ['CONTENT_TYPE', 'CONTENT_LENGTH', 'CONTENT_MD5'], true)) {
+            } elseif (\in_array($key, ['CONTENT_TYPE', 'CONTENT_LENGTH', 'CONTENT_MD5'], true) && '' !== $value) {
                 $headers[$key] = $value;
             }
         }
 
         if (isset($this->parameters['PHP_AUTH_USER'])) {
             $headers['PHP_AUTH_USER'] = $this->parameters['PHP_AUTH_USER'];
-            $headers['PHP_AUTH_PW'] = isset($this->parameters['PHP_AUTH_PW']) ? $this->parameters['PHP_AUTH_PW'] : '';
+            $headers['PHP_AUTH_PW'] = $this->parameters['PHP_AUTH_PW'] ?? '';
         } else {
             /*
              * php-cgi under Apache does not pass HTTP Basic user/pass to PHP by default
@@ -51,7 +49,7 @@ class ServerBag extends ParameterBag
              * RewriteCond %{HTTP:Authorization} .+
              * RewriteRule ^ - [E=HTTP_AUTHORIZATION:%0]
              * RewriteCond %{REQUEST_FILENAME} !-f
-             * RewriteRule ^(.*)$ app.php [QSA,L]
+             * RewriteRule ^(.*)$ index.php [QSA,L]
              */
 
             $authorizationHeader = null;
@@ -89,7 +87,7 @@ class ServerBag extends ParameterBag
 
         // PHP_AUTH_USER/PHP_AUTH_PW
         if (isset($headers['PHP_AUTH_USER'])) {
-            $headers['AUTHORIZATION'] = 'Basic '.base64_encode($headers['PHP_AUTH_USER'].':'.$headers['PHP_AUTH_PW']);
+            $headers['AUTHORIZATION'] = 'Basic '.base64_encode($headers['PHP_AUTH_USER'].':'.($headers['PHP_AUTH_PW'] ?? ''));
         } elseif (isset($headers['PHP_AUTH_DIGEST'])) {
             $headers['AUTHORIZATION'] = $headers['PHP_AUTH_DIGEST'];
         }

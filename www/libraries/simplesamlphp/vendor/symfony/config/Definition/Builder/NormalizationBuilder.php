@@ -14,28 +14,36 @@ namespace Symfony\Component\Config\Definition\Builder;
 /**
  * This class builds normalization conditions.
  *
+ * @template T of NodeDefinition
+ *
  * @author Johannes M. Schmitt <schmittjoh@gmail.com>
  */
 class NormalizationBuilder
 {
-    protected $node;
-    public $before = [];
-    public $remappings = [];
+    /**
+     * @var (ExprBuilder<T>|\Closure)[]
+     */
+    public array $before = [];
+    public array $declaredTypes = [];
+    public array $remappings = [];
 
-    public function __construct(NodeDefinition $node)
-    {
-        $this->node = $node;
+    /**
+     * @param T $node
+     */
+    public function __construct(
+        protected NodeDefinition $node,
+    ) {
     }
 
     /**
      * Registers a key to remap to its plural form.
      *
-     * @param string $key    The key to remap
-     * @param string $plural The plural of the key in case of irregular plural
+     * @param string      $key    The key to remap
+     * @param string|null $plural The plural of the key in case of irregular plural
      *
      * @return $this
      */
-    public function remap($key, $plural = null)
+    public function remap(string $key, ?string $plural = null): static
     {
         $this->remappings[] = [$key, null === $plural ? $key.'s' : $plural];
 
@@ -45,11 +53,11 @@ class NormalizationBuilder
     /**
      * Registers a closure to run before the normalization or an expression builder to build it if null is provided.
      *
-     * @return ExprBuilder|$this
+     * @return ($closure is \Closure ? $this : ExprBuilder<T>)
      */
-    public function before(\Closure $closure = null)
+    public function before(?\Closure $closure = null): ExprBuilder|static
     {
-        if (null !== $closure) {
+        if ($closure) {
             $this->before[] = $closure;
 
             return $this;

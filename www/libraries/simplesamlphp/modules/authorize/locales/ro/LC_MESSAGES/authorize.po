@@ -16,15 +16,6 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.3.4\n"
 
-msgid "{authorize:Authorize:403_text}"
-msgstr ""
-"Nu aveți drepturile necesare pentru a accesa/folosi această aplicație. Vă"
-" rugăm să contactați administratorul sistemului dacă considerați această "
-"afirmație ca fiind incorectă."
-
-msgid "{authorize:Authorize:403_header}"
-msgstr "Accesul nu este permis"
-
 msgid "Access forbidden"
 msgstr "Accesul nu este permis"
 

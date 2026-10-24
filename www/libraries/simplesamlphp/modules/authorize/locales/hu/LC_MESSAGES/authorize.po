@@ -15,14 +15,6 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.3.4\n"
 
-msgid "{authorize:Authorize:403_text}"
-msgstr ""
-"Önnek nincsenek meg a szükséges jogosultságai a lap megtekintéséhez. "
-"Kérjük, forduljon az oldal adminisztrátorához."
-
-msgid "{authorize:Authorize:403_header}"
-msgstr "Hozzáférés megtagadva"
-
 msgid "Access forbidden"
 msgstr "Hozzáférés megtagadva"
 

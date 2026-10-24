@@ -16,100 +16,20 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.3.4\n"
 
-msgid "{consent:consent:service_providers_for}"
-msgstr "Poskytovatel služby pro"
-
-msgid "{consent:consent:abort}"
-msgstr "Zrušit přihlášení k SPNAME"
-
-msgid "{consent:consent:remember}"
-msgstr "Zapamatuj"
-
-msgid "{consent:consent:login}"
-msgstr "Login"
-
-msgid "{consent:consent:consent_purpose}"
-msgstr "Cíl SPNAME v SPDESC"
-
-msgid "{consent:consent:noconsent_goto_about}"
-msgstr "Jdi na stránku s informacemi o službě"
-
-msgid "{consent:consent:consent_header}"
-msgstr "Obsah odesílaných osobních informací"
-
-msgid "{consent:consent:show_hide_attributes}"
-msgstr "zobraz/skryj atributy"
-
-msgid "{consent:consent:table_caption}"
-msgstr "Uživatelské informace"
-
-msgid "{consent:consent:status_header}"
-msgstr "Status souhlasu"
-
-msgid "{consent:consent:noconsent_title}"
-msgstr "Souhlas nebyl vydán"
-
-msgid "{consent:consent:consent_accept}"
-msgstr "Můžete se přihlásit do služby SPNAME"
-
-msgid "{consent:consent:table_summary}"
-msgstr ""
-"Seznam informací o vás, které budou předány službě, ke které se "
-"přihlašujete"
-
-msgid "{consent:consent:service_provider_header}"
-msgstr "Poskytovatel služby"
-
-msgid "{consent:consent:show_attributes}"
-msgstr "Zobraz atributy"
-
-msgid "{consent:consent:show_attribute}"
-msgstr "Zobrazit obsah"
-
-msgid "{consent:consent:no}"
-msgstr "Ne, neakceptuji"
-
-msgid "{consent:consent:consent_privacypolicy}"
-msgstr "Bezpečnostní politika služby"
-
-msgid "{consent:consent:noconsent_text}"
-msgstr "Nedal jste souhlas pro zaslání svých atributů poskytovateli služeb."
-
-msgid "{consent:consent:noconsent_return}"
-msgstr "Zpátky na stránku pro souhlas"
-
-msgid "{consent:consent:yes}"
-msgstr "Ano, akceptuji"
-
-msgid "{consent:consent:consent_attributes_header}"
-msgstr "Atributy, které mohou být zaslány službě"
-
-msgid "Service Providers for"
-msgstr "Poskytovatel služby pro"
-
 msgid "Yes, continue"
 msgstr "Ano, akceptuji"
 
 msgid "Return to consent page"
 msgstr "Zpátky na stránku pro souhlas"
 
-msgid "Consent status"
-msgstr "Status souhlasu"
-
 msgid "Go to information page for the service"
 msgstr "Jdi na stránku s informacemi o službě"
 
-msgid "Service Provider"
-msgstr "Poskytovatel služby"
+msgid "Abort login to %SPNAME%"
+msgstr "Zrušit přihlášení k %SPNAME%"
 
-msgid "Abort login to SPNAME"
-msgstr "Zrušit přihlášení k SPNAME"
-
-msgid "show/hide attributes"
-msgstr "zobraz/skryj atributy"
-
-msgid "The purpose of SPNAME is SPDESC"
-msgstr "Cíl SPNAME v SPDESC"
+msgid "The purpose of %SPNAME% is %SPDESC%"
+msgstr "Cíl %SPNAME% v %SPDESC%"
 
 msgid ""
 "List the information about you that is about to be transmitted to the "
@@ -124,10 +44,7 @@ msgstr "Obsah odesílaných osobních informací"
 msgid "No consent given"
 msgstr "Souhlas nebyl vydán"
 
-msgid "login"
-msgstr "Login"
-
-msgid "You did not give consent for transfering your attributes to SPNAME."
+msgid "You did not give consent for transferring your attributes to %SPNAME%."
 msgstr "Nedal jste souhlas pro zaslání svých atributů poskytovateli služeb."
 
 msgid "Remember"
@@ -136,21 +53,18 @@ msgstr "Zapamatuj"
 msgid "Show content"
 msgstr "Zobrazit obsah"
 
-msgid "SPNAME requires that the information below is transferred."
-msgstr "Můžete se přihlásit do služby SPNAME"
+msgid "%SPNAME% requires that the information below is transferred."
+msgstr "Můžete se přihlásit do služby %SPNAME%"
 
-msgid "Privacypolicy for the service"
+msgid "Privacy policy for the service"
 msgstr "Bezpečnostní politika služby"
 
 msgid "No, cancel"
 msgstr "Ne, neakceptuji"
 
-msgid "Show attributes"
-msgstr "Zobraz atributy"
-
 msgid "User information"
 msgstr "Uživatelské informace"
 
-msgid "Information that will be sent to SPNAME"
+msgid "Information that will be sent to %SPNAME%"
 msgstr "Atributy, které mohou být zaslány službě"
 

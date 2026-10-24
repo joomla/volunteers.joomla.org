@@ -4,13 +4,28 @@
     "license": "LGPL-2.1-only",
     "type": "composer-plugin",
     "autoload": {
-        "psr-0": {"SimpleSamlPhp\\Composer": "src/"}
+        "psr-4": {
+            "SimpleSAML\\Composer\\": "src/"
+        }
     },
     "extra": {
-        "class": "SimpleSamlPhp\\Composer\\ModuleInstallerPlugin"
+        "class": "SimpleSAML\\Composer\\ModuleInstallerPlugin"
     },
     "require": {
-        "composer-plugin-api": "^1.1|^2.0",
-        "simplesamlphp/simplesamlphp": "*"
+        "php": "^8.3",
+        "ext-mbstring": "*",
+
+        "composer-plugin-api": "~2.9",
+        "simplesamlphp/assert": "~2.0"
+    },
+    "require-dev": {
+        "composer/composer": "~2.9",
+        "simplesamlphp/simplesamlphp-test-framework": "~1.11"
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "phpstan/extension-installer": true
+        }
     }
 }

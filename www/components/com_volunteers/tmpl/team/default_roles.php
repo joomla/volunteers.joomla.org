@@ -16,7 +16,7 @@ use Joomla\Component\Volunteers\Site\Helper\VolunteersHelper;
 
 /** @var \Joomla\Component\Volunteers\Site\View\Team\HtmlView $this */
 ?>
-<div class="tab-pane" id="roles">
+<div class="tab-pane">
 <?php if ($this->acl->edit) : ?>
     <div class="row">
         <div class="filter-bar">
@@ -53,7 +53,7 @@ use Joomla\Component\Volunteers\Site\Helper\VolunteersHelper;
                         <h2 class="vol_h2"><?php echo $role->title; ?></h2>
                         <p><?php echo $role->description; ?></p>
                         <?php if ($role->open) : ?>
-                            <a class="btn btn-light" onclick="document.getElementById('teamsTab').activateTab(document.getElementById('viewcontact'));">
+                            <a class="btn btn-light" onclick="document.getElementById('teamsTab').activateTab(document.getElementById('contact'));">
                                 <span class="icon-chevron-right" aria-hidden="true"></span>
                                 <?php echo Text::_('COM_VOLUNTEERS_ROLE_APPLY'); ?>
                             </a>
@@ -70,7 +70,7 @@ use Joomla\Component\Volunteers\Site\Helper\VolunteersHelper;
                                 <?php endforeach; ?>
                             <?php endif; ?>
                             <?php if ($role->open) : ?>
-                                <a class="all-members"  onclick="document.getElementById('teamsTab').activateTab(document.getElementById('viewgetinvolved'));">
+                                <a class="all-members"  onclick="document.getElementById('teamsTab').activateTab(document.getElementById('getinvolved'));">
                                     <span class="all"><?php echo Text::_('COM_VOLUNTEERS_YOU'); ?></span><span class="number">?</span>
                                 </a>
                             <?php endif; ?>

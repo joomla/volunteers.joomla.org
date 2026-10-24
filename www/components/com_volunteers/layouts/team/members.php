@@ -21,7 +21,7 @@ use Joomla\Component\Volunteers\Site\Helper\VolunteersHelper;
 ?>
 
 <?php if ($displayData->item->active) { ?>
-    <?php echo HTMLHelper::_('uitab.addTab', 'teamsTab', 'viewmembers', Text::_('COM_VOLUNTEERS_TAB_MEMBERS')); ?>
+    <?php echo HTMLHelper::_('uitab.addTab', 'teamsTab', 'members', Text::_('COM_VOLUNTEERS_TAB_MEMBERS')); ?>
     <?php if ($displayData->acl->edit) { ?>
         <div class="clearfix">
             <a class="btn btn-light float-end"

@@ -65,16 +65,18 @@ try {
                                     <?php echo $role->description; ?>
                                 </td>
                                 <td>
-                                    <a class="btn btn-light btn-sm float-end"
-                                        href="<?php echo Route::_('index.php?option=com_volunteers&view=team&id=' . $role->team . '&tab=contact') ?>">
-                                        <span class="icon-mail" aria-hidden="true"></span>
-                                        <?php echo Text::_('COM_VOLUNTEERS_TAB_CONTACT') ?>
-                                    </a>
-                                    <a class="btn btn-light btn-sm float-end"
-                                        href="<?php echo Route::_('index.php?option=com_volunteers&view=team&id=' . $role->team . '&tab=getinvolved') ?>">
-                                        <span class="icon-chevron-right" aria-hidden="true"></span>
-                                        <?php echo Text::_('COM_VOLUNTEERS_ROLE_APPLY') ?>
-                                    </a>
+                                    <div class="d-flex flex-wrap justify-content-end gap-2">
+                                        <a class="btn btn-light btn-sm"
+                                            href="<?php echo Route::_('index.php?option=com_volunteers&view=team&id=' . $role->team) . '#getinvolved' ?>">
+                                            <span class="icon-chevron-right" aria-hidden="true"></span>
+                                            <?php echo Text::_('COM_VOLUNTEERS_ROLE_APPLY') ?>
+                                        </a>
+                                        <a class="btn btn-light btn-sm"
+                                            href="<?php echo Route::_('index.php?option=com_volunteers&view=team&id=' . $role->team) . '#contact' ?>">
+                                            <span class="icon-mail" aria-hidden="true"></span>
+                                            <?php echo Text::_('COM_VOLUNTEERS_TAB_CONTACT') ?>
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

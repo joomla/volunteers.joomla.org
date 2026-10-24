@@ -17,7 +17,7 @@ use Joomla\Component\Volunteers\Site\Helper\VolunteersHelper;
 /** @var \Joomla\Component\Volunteers\Site\View\Team\HtmlView $this */
 
 ?>
-<div class="tab-pane" id="honorroll">
+<div class="tab-pane">
 <?php if ($this->acl->edit) : ?>
     <div class="row">
         <div class="filter-bar">

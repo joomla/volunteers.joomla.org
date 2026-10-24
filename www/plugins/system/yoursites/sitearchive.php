@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @version    CVS: 1.70.0
+ * @version    CVS: 1.73.0
  * @package    com_yoursites
  * @author     Geraint Edwards <via website>
  * @copyright  2016-YOURSITES_COPYRIGHT GWE Systems Ltd
@@ -183,7 +183,7 @@ class YstsSiteArchive {
                         return false;
                     }
 
-                    if ( $entry == "ysts_archive.php" || $entry == "ysts_removeArchive.php" || $entry == "rclibrary" )
+                    if ( $entry == "ysts_archive.php" || $entry == "ysts_removeArchive.php") //  || $entry == "rclibrary" )
                     {
                         return false;
                     }
@@ -208,6 +208,10 @@ class YstsSiteArchive {
 
                     if ( strpos( $path, '/administrator/cache/' ) > 0 || strpos( $path, '/administrator/logs/' ) > 0 )
                     {
+                        if ( $entry == "index.html")
+                        {
+                            return true;
+                        }
                         return false;
                     }
 
@@ -231,7 +235,7 @@ class YstsSiteArchive {
                             "bz",
                             "rar"
                         ) )
-                         && ! in_array( $entry, array( 'angie.jpa', 'angie-generic.jpa', 'angie-joomla.jpa' ) ) )
+                         && ! in_array( $entry, array( 'angie.jpa', 'angie-generic.jpa', 'angie-joomla.jpa', 'brs.jpa', 'brs-joomla.jpa', 'brs-generic.jpa' ) ) )
                     {
                         return false;
                     }

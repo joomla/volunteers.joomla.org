@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @version    CVS: 1.70.0.1
+ * @version    CVS: 1.73.0.1
  * @package    com_yoursites
  * @author     Geraint Edwards
  * @copyright  2017-YOURSITES_COPYRIGHT GWE Systems Ltd
@@ -27,6 +27,7 @@ use Joomla\CMS\Form\Form;
 Use Joomla\Filesystem\Path;
 Use Joomla\Filesystem\Folder;
 
+#[\AllowDynamicProperties]
 class plgSystemYourSites extends CMSPlugin {
     /**
      * Application object.
@@ -41,12 +42,12 @@ class plgSystemYourSites extends CMSPlugin {
 
         $input = Factory::getApplication()->input;
         /*
-                if ($input->get('._ysts_diagnose', 0))
-                {
-                    include_once 'yoursites_getupdatedata.php';
-                    set_exception_handler(array("YourSitesDiagnosis", 'captureException'));
-                    set_error_handler(array("YourSitesDiagnosis",'captureFatalError'));
-                }
+            if ($input->get('._ysts_diagnose', 0))
+            {
+                include_once 'yoursites_getupdatedata.php';
+                set_exception_handler(array("YourSitesDiagnosis", 'captureException'));
+                set_error_handler(array("YourSitesDiagnosis",'captureFatalError'));
+            }
         */
         $task = $input->get( 'task', $input->get( 'typeaheadtask', '', 'cmd' ), 'cmd' );
 

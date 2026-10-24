@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @version    CVS: 1.70.0
+ * @version    CVS: 1.73.0
  * @package    com_yoursites
  * @author     Geraint Edwards <via website>
  * @copyright  2016-YOURSITES_COPYRIGHT GWE Systems Ltd
@@ -1576,15 +1576,26 @@ function findJoomlaUpdates( $requestObject, &$returnData ) {
             }
             $updateParams->set("updatesource", 'default');
             $updateParams->set("customurl", '');
-
+        }
+        else if ($requestObject->updateserver === 'next'){
+            $serverChanged = true;
+            if (version_compare(JVERSION, '5.4', 'lt')) {
+                $updateParams->set("updatesource", "custom");
+                $updateParams->set("customurl", 'https://update.joomla.org/core/sts/list_sts.xml');
+            }
+            else
+            {
+                $updateParams->set("updatesource", 'next');
+                $updateParams->set("customurl", '');
+            }
         }
         // it's not clientvalue, custom nor blank so use the updateserver value as the custom URL.
         else {
             if ($updateSource !== 'custom' || $customURL != $requestObject->updateserver) {
                 $serverChanged = true;
             }
-            $updateParams->set("updatesource", 'custom');
-            $updateParams->set("customurl", $requestObject->updateserver);
+            $updateParams->set( "updatesource", 'custom' );
+            $updateParams->set( "customurl", $requestObject->updateserver );
         }
 
         if (isset($requestObject->minimum_stability)) {
@@ -1842,7 +1853,7 @@ function upgradeJoomla( $requestObject, &$returnData ) {
     // Use HttpFactory that allows using CURL and Sockets as alternative method when available
     // Adding a valid user agent string etc.
     $goptions = new Registry;
-    $goptions->set( 'userAgent', 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:41.0) Gecko/20100101 Firefox/41.0' );
+    $goptions->set( 'userAgent', 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:150.0) Gecko/20100101 Firefox/150.0' );
     $goptions->set( 'timeout', '120' );
 
     /*
@@ -2606,7 +2617,7 @@ function uninstallExtension( $requestObject, &$returnData ) {
             {
                 // Package uninstalled successfully
                 $returnData->error      = false;
-                $returnData->messages[] = Text::sprintf( 'COM_INSTALLER_UNINSTALL_SUCCESS', $extensiontype );
+                $returnData->messages[] = Text::sprintf( 'COM_INSTALLER_UNINSTALL_SUCCESS', Text::_($extension->name), $extensiontype );
                 if ( $installer->message )
                 {
                     $returnData->messages[] = $installer->message;
@@ -6150,6 +6161,17 @@ function securityCheck( &$requestObject, &$returnData ) {
                     $json = $json64;
                 }
                 $filehash = ! empty( $json ) ? hash( 'sha256', $json ) : '';
+
+                // Trap for AdminTools
+                if (count($_FILES) && isset($_FILES['install_package']))
+                {
+                    $returnData->errormessages[] = "*** AdminTools Problem ***";
+                    $returnData->errormessages[] = "A recent AdminTools udate has hardened the uploadShield which requires a special WAF Exception for this site.";
+                    $returnData->errormessages[] = "Please see out <a href=\"https://www.yoursites.net/documentation/fixing-extension-installation-and-yoursites-client-updates-on-sites-with-admintools\">documentation page</a> for guidance on how to configure this";
+
+                    return false;
+                }
+
             }
 
             if ( $securitytoken && password_verify( hash( 'sha256', $randomtoken . " combined with " . $servertoken . $filehash ), $securitytoken ) )
@@ -6159,6 +6181,27 @@ function securityCheck( &$requestObject, &$returnData ) {
             else
             {
                 $returnData->errormessages[] = "Failed to match the hash";
+                if ( ! $filecount )
+                {
+                    $returnData->errormessages[]="No file available";
+                }
+                // THIS SHOULD NOT BE RETURNED - ONLY FOR DEBUGGING
+                /*
+                $returnData->errormessages[]="Security token = ".$securitytoken;
+                $returnData->errormessages[]="Random token   = ".$randomtoken;
+                $returnData->errormessages[]="Server token   = ".$servertoken;
+                $returnData->errormessages[]="Filecount      = ". ( $filecount ?? 0 );
+                $returnData->errormessages[]="File hash      = ".$filehash;
+                $returnData->errormessages[]="JSON           = ". (string) $json;
+                $returnData->errormessages[]="JSON 64        = ". (string) $json64;
+                $returnData->errormessages[]="Filesize       = ". ( $install_package['size'] ?? 'empty');
+
+                //$returnData->errormessages[]='FILES: ' . var_export($_FILES, true);
+                $returnData->errormessages[]='POST keys: ' . implode(',', array_keys($_POST));
+                $returnData->errormessages[]='GET keys: ' . implode(',', array_keys($_GET));
+                //$returnData->errormessages[]='CL: ' . ($_SERVER['CONTENT_LENGTH'] ?? 'none');
+                //$returnData->errormessages[]='CT: ' . ($_SERVER['CONTENT_TYPE'] ?? 'none');
+                */
             }
             // THIS SHOULD NOT BE RETURNED - ONLY FOR DEBUGGING
             /*
@@ -7527,7 +7570,7 @@ function getJoomlaUpdateSitesIds( $column = 0 ) {
  * @return  boolean  True on success.
  *
  * @throws  \RuntimeException
- * @since   1.70.0
+ * @since   1.71.0
  */
 function copyr2( $src, $dest, $prefix, &$returnData, $exclusions = array() ) {
     diagnosticLog( $returnData, 'yoursites_cloning', "Starting to copy files from $src => $dest" );
@@ -7588,7 +7631,7 @@ function copyr2( $src, $dest, $prefix, &$returnData, $exclusions = array() ) {
                     "bz",
                     "rar"
                 ) )
-                 && ! in_array( $entry, array( 'angie.jpa', 'angie-generic.jpa', 'angie-joomla.jpa' ) ) )
+                 && ! in_array( $entry, array( 'angie.jpa', 'angie-generic.jpa', 'angie-joomla.jpa', 'brs.jpa', 'brs-joomla.jpa', 'brs-generic.jpa' ) ) )
             {
                 continue;
             }
@@ -7678,7 +7721,7 @@ function copyr2( $src, $dest, $prefix, &$returnData, $exclusions = array() ) {
                     "bz",
                     "rar"
                 ) )
-                 && ! in_array( $entry, array( 'angie.jpa', 'angie-generic.jpa', 'angie-joomla.jpa' ) ) )
+                 && ! in_array( $entry, array( 'angie.jpa', 'angie-generic.jpa', 'angie-joomla.jpa', 'brs.jpa', 'brs-joomla.jpa', 'brs-generic.jpa' ) ) )
             {
                 continue;
             }
@@ -7751,7 +7794,7 @@ function copyr2( $src, $dest, $prefix, &$returnData, $exclusions = array() ) {
  * @return  boolean  True on success.
  *
  * @throws  \RuntimeException
- * @since   1.70.0
+ * @since   1.71.0
  */
 function filelistr2( $src, $dest, $prefix, &$returnData, &$processedFiles, $exclusions = array() ) {
 
@@ -7795,7 +7838,7 @@ function filelistr2( $src, $dest, $prefix, &$returnData, &$processedFiles, $excl
                 "bz",
                 "rar"
             ) )
-             && ! in_array( $entry, array( 'angie.jpa', 'angie-generic.jpa', 'angie-joomla.jpa' ) ) )
+             && ! in_array( $entry, array( 'angie.jpa', 'angie-generic.jpa', 'angie-joomla.jpa', 'brs.jpa', 'brs-joomla.jpa', 'brs-generic.jpa' ) ) )
         {
             continue;
         }
@@ -7870,7 +7913,7 @@ function filelistr2( $src, $dest, $prefix, &$returnData, &$processedFiles, $excl
  * @return  boolean  True on success.
  *
  * @throws  \RuntimeException
- * @since   1.70.0
+ * @since   1.71.0
  */
 function copylist2( &$returnData, &$processedFiles, $exclusions = array() ) {
 
@@ -7933,7 +7976,7 @@ function copylist2( &$returnData, &$processedFiles, $exclusions = array() ) {
  * @return  boolean  True on success.
  *
  * @throws  \RuntimeException
- * @since   1.70.0
+ * @since   1.71.0
  */
 function deleter2( $src, &$returnData ) {
 
@@ -8525,6 +8568,17 @@ function setOffline( $requestObject, &$returnData ) {
             $configuration = str_replace( "public \$offline = $oldMode;", "public \$offline = $newMode;", $configuration );
 
             $configuration = str_replace( 'public $offline_message = "' . $oldMessage . '";', 'public $offline_message = "' . $newMessage . '";', $configuration );
+            if (strpos($configuration, $newMessage) == false && strpos($configuration, $oldMessage) >0 )
+            {
+                $configuration = str_replace( 'public $offline_message = \'' . $oldMessage . '\';', 'public $offline_message = \'' . $newMessage . '\';', $configuration );
+            }
+
+            if (strpos($configuration, $newMessage) == false && strpos($configuration, $oldMessage) == false )
+            {
+                $oldMessage = addcslashes( $oldMessage, '\\\'' );
+                $configuration = str_replace( 'public $offline_message = \'' . $oldMessage . '\';', 'public $offline_message = \'' . $newMessage . '\';', $configuration );
+            }
+
             $configuration = str_replace( "public \$display_offline_message = '$oldOfflineMessage';", "public \$display_offline_message = '$newOfflineMessage';", $configuration );
         }
 

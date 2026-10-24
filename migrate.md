@@ -28,6 +28,7 @@ The following extensions must be uninstalled:
   - Smart Search - Joomla Volunteer Portal - Reports
   - Smart Search - Joomla Volunteer Portal - Teams
   - Smart Search - Joomla Volunteer Portal - Joomlers
+- YourSites (`plg_system_yoursites`) to 1.73.0, the Joomla 6 version of the plugin. Install it over the Joomla 3 version, the settings are kept.
 
 ## Search
 The Joomla 3 search does not work on Joomla 6 and is replaced by Smart Search.

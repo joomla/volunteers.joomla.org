@@ -64,7 +64,7 @@ final class Reportspam extends CMSPlugin implements SubscriberInterface
 
         // +1 on the spam column of the volunteer
         $db    = $this->getDatabase();
-        $query = $db->getQuery(true)
+        $query = $db->createQuery()
             ->update($db->quoteName('#__volunteers_volunteers'))
             ->set($db->quoteName('spam') . ' = ' . $db->quoteName('spam') . ' + 1')
             ->where($db->quoteName('id') . ' = :id')

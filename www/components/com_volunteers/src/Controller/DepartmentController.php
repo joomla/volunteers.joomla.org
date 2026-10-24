@@ -10,6 +10,7 @@ namespace Joomla\Component\Volunteers\Site\Controller;
 
 use Exception;
 use Joomla\CMS\Application\CMSApplicationInterface;
+use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Mail\MailerFactoryInterface;
 use Joomla\CMS\MVC\Controller\FormController;
@@ -162,7 +163,7 @@ class DepartmentController extends FormController
         }
 
         // Get a reference to the Joomla! mailer object
-        $mailer = $this->app->getContainer()->get(MailerFactoryInterface::class)->createMailer();
+        $mailer = Factory::getContainer()->get(MailerFactoryInterface::class)->createMailer();
 
         // Set the sender
         $mailer->addReplyTo($user->email, $user->name);

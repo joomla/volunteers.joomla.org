@@ -13,6 +13,7 @@ namespace Joomla\Component\Volunteers\Site\Controller;
 // phpcs:enable PSR1.Files.SideEffects
 
 use Exception;
+use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Mail\MailerFactoryInterface;
 use Joomla\CMS\MVC\Controller\FormController;
@@ -144,12 +145,12 @@ class VolunteerController extends FormController
 
         // Get Volunteer Profile owner
         $volunteerUserId = (int) $this->getModel()->getItem($volunteerId)->user_id;
-        $userFactory     = $this->app->getContainer()->get(UserFactoryInterface::class);
+        $userFactory     = Factory::getContainer()->get(UserFactoryInterface::class);
 
         $volunteer =  $userFactory->loadUserById($volunteerUserId);
 
         // Get a reference to the Joomla! mailer object
-        $mailer = $this->app->getContainer()->get(MailerFactoryInterface::class)->createMailer();
+        $mailer = Factory::getContainer()->get(MailerFactoryInterface::class)->createMailer();
 
         // Set the sender
         $mailer->addReplyTo($user->email, $user->name);

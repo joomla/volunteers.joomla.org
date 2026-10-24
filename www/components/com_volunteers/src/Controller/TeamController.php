@@ -13,6 +13,7 @@ namespace Joomla\Component\Volunteers\Site\Controller;
 // phpcs:enable PSR1.Files.SideEffects
 
 use Exception;
+use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Mail\MailerFactoryInterface;
 use Joomla\CMS\MVC\Controller\FormController;
@@ -212,7 +213,7 @@ class TeamController extends FormController
         }
 
         // Get email department coordinator for CC
-        $db    = $this->app->getContainer()->get(DatabaseInterface::class);
+        $db    = Factory::getContainer()->get(DatabaseInterface::class);
         $query = $db->createQuery();
         $query
             ->select($db->quoteName(['user.email', 'user.name']))
@@ -230,14 +231,17 @@ class TeamController extends FormController
         }
 
         // Get a reference to the Joomla! mailer object
-        $mailer = $this->app->getContainer()->get(MailerFactoryInterface::class)->createMailer();
+        $mailer = Factory::getContainer()->get(MailerFactoryInterface::class)->createMailer();
 
         // Set the sender
         $mailer->addReplyTo($user->email, $user->name);
 
         // Set the recipient
         $mailer->addRecipient($team->email, $team->title);
-        $mailer->addCc($coordinator->email, $coordinator->name);
+
+        if (!empty($coordinator->email)) {
+            $mailer->addCc($coordinator->email, $coordinator->name);
+        }
 
         // Set the subject
         $mailer->setSubject($subject);

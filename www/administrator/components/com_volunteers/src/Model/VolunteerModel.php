@@ -324,13 +324,7 @@ class VolunteerModel extends AdminModel
         // Set alias
         $data['alias'] = ApplicationHelper::stringURLSafe($data['name']);
 
-        $return = parent::save($data);
-
-        // Store the newly created volunteer ID
-        $volunteerId = $this->getState('volunteer.id');
-        $app->setUserState('com_volunteers.registration.id', $volunteerId);
-
-        return $return;
+        return parent::save($data);
     }
 
     /**

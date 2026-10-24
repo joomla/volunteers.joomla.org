@@ -7,8 +7,9 @@
 			label="COM_VOLUNTEERS_FILTER_SEARCH"
 			hint="JSEARCH_FILTER"
 		/>
+
 		<field
-			name="state"
+			name="published"
 			type="status"
 			label="COM_VOLUNTEERS_FILTER_PUBLISHED"
 			description="COM_VOLUNTEERS_FILTER_PUBLISHED_DESC"
@@ -16,6 +17,7 @@
 			>
 			<option value="">JOPTION_SELECT_PUBLISHED</option>
 		</field>
+
 		<field
 			name="coc"
 			type="list"
@@ -28,6 +30,11 @@
 		</field>
 	</fields>
 	<fields name="list">
+		<field
+			name="fullordering"
+			type="hidden"
+		/>
+
 		<field
 			name="limit"
 			type="limitbox"

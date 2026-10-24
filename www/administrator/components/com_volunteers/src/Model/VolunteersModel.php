@@ -36,7 +36,7 @@ class VolunteersModel extends ListModel
      * @since   4.0.0
      * @throws Exception
      */
-    public function __construct($config = [], MVCFactoryInterface $factory = null)
+    public function __construct($config = [], ?MVCFactoryInterface $factory = null)
     {
         if (empty($config['filter_fields'])) {
             $config['filter_fields'] = [
@@ -47,13 +47,15 @@ class VolunteersModel extends ListModel
                 'state', 'a.state',
                 'created', 'a.created',
                 'created_by', 'a.created_by',
-                'ordering', 'a.ordering',
                 'featured', 'a.featured',
+                'name', 'user.name',
                 'username', 'user.username',
                 'modified', 'a.modified',
                 'num_teams', 'num_teams',
                 'spam', 'a.spam',
                 'birthday', 'a.birthday',
+                'published',
+                'coc',
             ];
         }
 
@@ -95,11 +97,13 @@ class VolunteersModel extends ListModel
             ->join('LEFT', $db->quoteName('#__volunteers_members', 'member') . ' ON ' . $db->qn('member.volunteer') . ' = ' . $db->qn('a.id'));
 
         // Filter by published state
-        $state = $this->getState('filter.state', 1);
+        $state = $this->getState('filter.published', 1);
 
         if (is_numeric($state)) {
             $query->where($db->quoteName('a.state') . ' = :state')
                 ->bind(':state', $state, ParameterType::INTEGER);
+        } elseif ($state === '') {
+            $query->whereIn($db->quoteName('a.state'), [0, 1]);
         }
 
         // Filter by search in title
@@ -163,8 +167,8 @@ class VolunteersModel extends ListModel
         // Filter by coc
         $coc = $this->getState('filter.coc');
 
-        if (is_numeric($coc) && $coc == 1) {
-            $query->where('a.coc = 1');
+        if (is_numeric($coc)) {
+            $query->where($db->quoteName('a.coc') . ' = ' . ((int) $coc ? 1 : 0));
         }
 
         // Group by ID
@@ -195,7 +199,7 @@ class VolunteersModel extends ListModel
     {
         // Compile the store id.
         $id .= ':' . $this->getState('filter.search');
-        $id .= ':' . $this->getState('filter.state');
+        $id .= ':' . $this->getState('filter.published');
         $id .= ':' . $this->getState('filter.image');
         $id .= ':' . $this->getState('filter.joomlastory');
         $id .= ':' . $this->getState('filter.location');
@@ -215,14 +219,7 @@ class VolunteersModel extends ListModel
      */
     protected function populateState($ordering = 'user.name', $direction = 'asc')
     {
-        // Load the filter state.
-        $this->setState('filter.search', $this->getUserStateFromRequest($this->context . '.filter.search', 'filter_search'));
-        $this->setState('filter.state', $this->getUserStateFromRequest($this->context . '.filter.state', 'filter_state'));
-        $this->setState('filter.image', $this->getUserStateFromRequest($this->context . '.filter.image', 'filter_image'));
-        $this->setState('filter.joomlastory', $this->getUserStateFromRequest($this->context . '.filter.joomlastory', 'filter_joomlastory'));
-        $this->setState('filter.location', $this->getUserStateFromRequest($this->context . '.filter.location', 'filter_location'));
-        $this->setState('filter.coc', $this->getUserStateFromRequest($this->context . '.filter.coc', 'filter_coc'));
-        $this->setState('filter.active', $this->getUserStateFromRequest($this->context . '.filter.active', 'filter_active'));
+        // The filters come from the filter form through the parent, a filter outside the form would stick in the session without a way to clear it
 
         // Load the parameters.
         $params = ComponentHelper::getParams('com_volunteers');
@@ -230,6 +227,11 @@ class VolunteersModel extends ListModel
 
         // List state information.
         parent::populateState($ordering, $direction);
+
+        // Without a selected status the list shows published and unpublished, the models loaded with ignore_request keep the published default
+        if ($this->state->get('filter.published') === null) {
+            $this->setState('filter.published', '');
+        }
     }
 
     /**

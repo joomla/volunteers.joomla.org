@@ -25,6 +25,9 @@
 				name="team"
 				type="teams"
 				label="COM_VOLUNTEERS_FIELD_TEAM"
+				layout="joomla.form.field.list-fancy-select"
+				hint="COM_VOLUNTEERS_SELECT_TEAM"
+				filter="integer"
 		/>
 		<field
 				name="description"

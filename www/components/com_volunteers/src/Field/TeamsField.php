@@ -43,8 +43,8 @@ class TeamsField extends ListField
     {
         $parent    = $this->element['parent'];
         $teams     = VolunteersHelper::teams($parent);
-        // An optional field of an edit form stores none as 0, a required field and a list filter need an empty value
-        $empty     = $this->required || $this->group ? '' : 0;
+        // An optional field of an edit form stores none as 0, a required field, a list filter and a fancy select need an empty value
+        $empty     = $this->required || $this->group || $this->layout === 'joomla.form.field.list-fancy-select' ? '' : 0;
         $default[] = HTMLHelper::_('select.option', $empty, Text::_('COM_VOLUNTEERS_SELECT_TEAM'));
         $options   = array_merge($default, $teams);
 

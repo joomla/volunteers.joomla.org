@@ -21,7 +21,6 @@ use Joomla\CMS\Tag\TaggableTableInterface;
 use Joomla\CMS\Tag\TaggableTableTrait;
 use Joomla\CMS\Versioning\VersionableTableInterface;
 use Joomla\Database\DatabaseDriver;
-use stdClass;
 
 /**
  * Team Table class
@@ -32,8 +31,6 @@ class TeamTable extends Table implements VersionableTableInterface, TaggableTabl
 {
     use TaggableTableTrait;
 
-    protected stdClass $myData;
-
     /**
      * Constructor
      *
@@ -43,7 +40,6 @@ class TeamTable extends Table implements VersionableTableInterface, TaggableTabl
      */
     public function __construct(protected DatabaseDriver $myDB)
     {
-        $this->myData    = new stdClass();
         $this->typeAlias = 'com_volunteers.team';
         parent::__construct('#__volunteers_teams', 'id', $this->myDB);
 
@@ -62,7 +58,7 @@ class TeamTable extends Table implements VersionableTableInterface, TaggableTabl
      */
     public function get($property, $default = null)
     {
-        return $this->myData->{$property};
+        return $this->{$property} ?? $default;
     }
 
     /**
@@ -75,7 +71,7 @@ class TeamTable extends Table implements VersionableTableInterface, TaggableTabl
      */
     public function set($property, $value = null)
     {
-        $this->myData->{$property} = $value;
+        $this->{$property} = $value;
     }
 
     /**
@@ -116,6 +112,13 @@ class TeamTable extends Table implements VersionableTableInterface, TaggableTabl
 
         if (trim(str_replace('-', '', $this->alias ?? null)) == '') {
             $this->alias = Factory::getDate()->format("Y-m-d-H-i-s");
+        }
+
+        // The date columns do not allow NULL, an empty date is stored as a zero date
+        foreach (['date_started', 'date_ended'] as $field) {
+            if (empty($this->$field ?? null)) {
+                $this->$field = '0000-00-00';
+            }
         }
 
         return true;

@@ -384,3 +384,7 @@ div#toolbar-cancel.btn-group a {
     color: var(--bs-secondary-color);
     border-bottom-color: var(--bs-border-color);
 }
+
+.js-editor-tinymce {
+    display: flow-root;
+}

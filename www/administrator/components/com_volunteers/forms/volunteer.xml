@@ -179,7 +179,7 @@
 			type="editor"
 			label="COM_VOLUNTEERS_FIELD_JOOMLASTORY"
 			buttons="false"
-			filter="ComponentHelper::filterText"
+			filter="\Joomla\CMS\Component\ComponentHelper::filterText"
 		/>
 		<field
 			name="birthday"

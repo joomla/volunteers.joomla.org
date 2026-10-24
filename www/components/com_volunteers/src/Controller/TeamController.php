@@ -162,6 +162,11 @@ class TeamController extends FormController
         // Use parent save method
         $return = parent::save($key, $urlVar);
 
+        // Stay on the form when the data does not validate
+        if (!$return) {
+            return $return;
+        }
+
         // Redirect to the team
         $this->setMessage(Text::_('COM_VOLUNTEERS_LBL_TEAM_SAVED'));
         $this->setRedirect(Route::_('index.php?option=com_volunteers&view=team&id=' . $teamId, false));

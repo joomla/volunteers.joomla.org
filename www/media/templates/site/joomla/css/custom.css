@@ -149,3 +149,25 @@ body .rrssb-buttons li.rrssb-twitter a {
 body .rrssb-buttons li.rrssb-twitter a:hover {
     background-color: #333;
 }
+
+/* Joomla form validation */
+.form-control.invalid,
+.form-select.invalid {
+    border-color: var(--bs-form-invalid-border-color);
+}
+
+.form-control.invalid:focus,
+.form-select.invalid:focus {
+    border-color: var(--bs-form-invalid-border-color);
+    box-shadow: 0 0 0 .25rem rgba(var(--bs-danger-rgb), .25);
+}
+
+label.invalid,
+.form-control-feedback {
+    color: var(--bs-form-invalid-color);
+}
+
+.form-control-feedback {
+    display: block;
+    font-size: .875em;
+}

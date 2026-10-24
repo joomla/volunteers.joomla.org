@@ -21,7 +21,6 @@ use Joomla\CMS\Tag\TaggableTableInterface;
 use Joomla\CMS\Tag\TaggableTableTrait;
 use Joomla\CMS\Versioning\VersionableTableInterface;
 use Joomla\Database\DatabaseDriver;
-use stdClass;
 
 /**
  * Position Table class
@@ -32,8 +31,6 @@ class PositionTable extends Table implements VersionableTableInterface, Taggable
 {
     use TaggableTableTrait;
 
-    protected stdClass $myData;
-
     /**
      * Constructor
      *
@@ -43,7 +40,6 @@ class PositionTable extends Table implements VersionableTableInterface, Taggable
      */
     public function __construct(DatabaseDriver $db)
     {
-        $this->myData    = new stdClass();
         $this->typeAlias = 'com_volunteers.position';
         parent::__construct('#__volunteers_positions', 'id', $db);
 
@@ -62,7 +58,7 @@ class PositionTable extends Table implements VersionableTableInterface, Taggable
      */
     public function get($property, $default = null)
     {
-        return $this->myData->{$property};
+        return $this->{$property} ?? $default;
     }
 
     /**
@@ -75,7 +71,7 @@ class PositionTable extends Table implements VersionableTableInterface, Taggable
      */
     public function set($property, $value = null)
     {
-        $this->myData->{$property} = $value;
+        $this->{$property} = $value;
     }
 
     /**

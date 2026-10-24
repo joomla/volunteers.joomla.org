@@ -28,7 +28,7 @@
 			type="editor"
 			label="JGLOBAL_DESCRIPTION"
 			buttons="false"
-			filter="ComponentHelper::filterText"
+			filter="\Joomla\CMS\Component\ComponentHelper::filterText"
 		/>
 	</fieldset>
 	<fieldset name="acl">

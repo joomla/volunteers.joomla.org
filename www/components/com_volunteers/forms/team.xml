@@ -38,7 +38,7 @@
 
         <field
                 name="parent_id"
-                type="text"
+                type="teams"
                 label="COM_VOLUNTEERS_FIELD_TEAM_PARENT"
                 parent="true"
         />
@@ -81,16 +81,18 @@
         <field
                 name="description"
                 type="editor"
+                editor="tinymce|none"
                 buttons="false"
-                filter="ComponentHelper::filterText"
+                filter="\Joomla\CMS\Component\ComponentHelper::filterText"
                 label="JGLOBAL_DESCRIPTION"
         />
 
         <field
                 name="getinvolved"
                 type="editor"
+                editor="tinymce|none"
                 buttons="false"
-                filter="ComponentHelper::filterText"
+                filter="\Joomla\CMS\Component\ComponentHelper::filterText"
                 label="COM_VOLUNTEERS_FIELD_INVOLVED"
         />
 

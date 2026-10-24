@@ -19,7 +19,6 @@ use Joomla\CMS\Tag\TaggableTableInterface;
 use Joomla\CMS\Tag\TaggableTableTrait;
 use Joomla\CMS\Versioning\VersionableTableInterface;
 use Joomla\Database\DatabaseDriver;
-use stdClass;
 
 /**
  * Volunteer Table class
@@ -28,8 +27,6 @@ use stdClass;
 class VolunteerTable extends Table implements VersionableTableInterface, TaggableTableInterface
 {
     use TaggableTableTrait;
-
-    protected stdClass $myData;
 
     public int $version;
     /**
@@ -41,7 +38,6 @@ class VolunteerTable extends Table implements VersionableTableInterface, Taggabl
      */
     public function __construct(DatabaseDriver $db)
     {
-        $this->myData    = new stdClass();
         $this->typeAlias = 'com_volunteers.volunteers';
         parent::__construct('#__volunteers_volunteers', 'id', $db);
 
@@ -60,7 +56,7 @@ class VolunteerTable extends Table implements VersionableTableInterface, Taggabl
      */
     public function get($property, $default = null)
     {
-        return $this->myData->{$property};
+        return $this->{$property} ?? $default;
     }
 
     /**
@@ -73,7 +69,7 @@ class VolunteerTable extends Table implements VersionableTableInterface, Taggabl
      */
     public function set($property, $value = null)
     {
-        $this->myData->{$property} = $value;
+        $this->{$property} = $value;
     }
 
     /**

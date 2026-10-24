@@ -89,6 +89,20 @@
       "version": "1.4.1"
     },
     {
+      "name": "com_volunteers.form-edit",
+      "type": "script",
+      "uri": "media/com_volunteers/js/form-edit.js",
+      "dependencies": [
+        "core",
+        "form.validate"
+      ],
+      "attributes": {
+        "defer": true
+      },
+      "package": "volunteers",
+      "version": "5.0.0"
+    },
+    {
       "name": "com_volunteers.location-picker",
       "type": "script",
       "uri": "media/com_volunteers/js/location-picker.js",

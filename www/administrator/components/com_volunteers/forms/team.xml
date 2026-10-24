@@ -69,14 +69,14 @@
 			type="editor"
 			label="JGLOBAL_DESCRIPTION"
 			buttons="false"
-			filter="ComponentHelper::filterText"
+			filter="\Joomla\CMS\Component\ComponentHelper::filterText"
 		/>
 		<field
 			name="getinvolved"
 			type="editor"
 			label="COM_VOLUNTEERS_FIELD_INVOLVED"
 			buttons="false"
-			filter="ComponentHelper::filterText"
+			filter="\Joomla\CMS\Component\ComponentHelper::filterText"
 		/>
 	</fieldset>
 	<fieldset name="details">

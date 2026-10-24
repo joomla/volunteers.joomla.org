@@ -21,7 +21,6 @@ use Joomla\CMS\Versioning\VersionableTableInterface;
 use Joomla\CMS\Tag\TaggableTableInterface;
 use Joomla\CMS\Tag\TaggableTableTrait;
 use Joomla\Database\DatabaseDriver;
-use stdClass;
 
 /**
  * Department Table class
@@ -33,8 +32,6 @@ class DepartmentTable extends Table implements VersionableTableInterface, Taggab
     use TaggableTableTrait;
 
 
-    protected stdClass $myData;
-
     /**
      * Constructor
      *
@@ -44,7 +41,6 @@ class DepartmentTable extends Table implements VersionableTableInterface, Taggab
      */
     public function __construct(DatabaseDriver $db)
     {
-        $this->myData    = new stdClass();
         $this->typeAlias = 'com_volunteers.department';
         parent::__construct('#__volunteers_departments', 'id', $db);
 
@@ -63,7 +59,7 @@ class DepartmentTable extends Table implements VersionableTableInterface, Taggab
      */
     public function get($property, $default = null)
     {
-        return $this->myData->{$property};
+        return $this->{$property} ?? $default;
     }
 
     /**
@@ -76,7 +72,7 @@ class DepartmentTable extends Table implements VersionableTableInterface, Taggab
      */
     public function set($property, $value = null)
     {
-        $this->myData->{$property} = $value;
+        $this->{$property} = $value;
     }
 
 

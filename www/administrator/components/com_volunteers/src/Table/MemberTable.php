@@ -19,7 +19,6 @@ use Joomla\CMS\Tag\TaggableTableInterface;
 use Joomla\CMS\Tag\TaggableTableTrait;
 use Joomla\CMS\Versioning\VersionableTableInterface;
 use Joomla\Database\DatabaseDriver;
-use stdClass;
 
 /**
  * Member Table class
@@ -30,8 +29,6 @@ class MemberTable extends Table implements VersionableTableInterface, TaggableTa
 {
     use TaggableTableTrait;
 
-    protected stdClass $myData;
-
     /**
      * Constructor
      *
@@ -41,7 +38,6 @@ class MemberTable extends Table implements VersionableTableInterface, TaggableTa
      */
     public function __construct(DatabaseDriver $db)
     {
-        $this->myData    = new stdClass();
         $this->typeAlias = 'com_volunteers.member';
         parent::__construct('#__volunteers_members', 'id', $db);
 
@@ -60,7 +56,7 @@ class MemberTable extends Table implements VersionableTableInterface, TaggableTa
      */
     public function get($property, $default = null)
     {
-        return $this->myData->{$property};
+        return $this->{$property} ?? $default;
     }
 
     /**
@@ -73,7 +69,7 @@ class MemberTable extends Table implements VersionableTableInterface, TaggableTa
      */
     public function set($property, $value = null)
     {
-        $this->myData->{$property} = $value;
+        $this->{$property} = $value;
     }
 
     /**

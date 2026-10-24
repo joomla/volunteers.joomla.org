@@ -21,7 +21,6 @@ use Joomla\CMS\Tag\TaggableTableInterface;
 use Joomla\CMS\Tag\TaggableTableTrait;
 use Joomla\CMS\Versioning\VersionableTableInterface;
 use Joomla\Database\DatabaseDriver;
-use stdClass;
 
 /**
  * Role Table class
@@ -30,8 +29,6 @@ use stdClass;
 class RoleTable extends Table implements VersionableTableInterface, TaggableTableInterface
 {
     use TaggableTableTrait;
-
-    protected stdClass $myData;
 
     /**
      * Constructor
@@ -43,7 +40,6 @@ class RoleTable extends Table implements VersionableTableInterface, TaggableTabl
     public function __construct(DatabaseDriver $db)
     {
 
-        $this->myData    = new stdClass();
         $this->typeAlias = 'com_volunteers.roles';
         parent::__construct('#__volunteers_roles', 'id', $db);
 
@@ -62,7 +58,7 @@ class RoleTable extends Table implements VersionableTableInterface, TaggableTabl
      */
     public function get($property, $default = null)
     {
-        return $this->myData->{$property};
+        return $this->{$property} ?? $default;
     }
 
     /**
@@ -75,7 +71,7 @@ class RoleTable extends Table implements VersionableTableInterface, TaggableTabl
      */
     public function set($property, $value = null)
     {
-        $this->myData->{$property} = $value;
+        $this->{$property} = $value;
     }
 
     /**

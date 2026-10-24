@@ -16,6 +16,12 @@
     text-decoration: none;
 }
 
+/* Joomler photos in the list are always square, whatever the uploaded size */
+img.joomlers {
+    aspect-ratio: 1;
+    object-fit: cover;
+}
+
 .members img {
     border-radius: 6px;
     height: 50px;

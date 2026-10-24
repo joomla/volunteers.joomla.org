@@ -283,6 +283,17 @@ div#toolbar-cancel.btn-group a {
 .btn-facebook { --brand: #1668d6; --brand-dark: #1053ab; }
 .btn-linkedin { --brand: #0a66c2; --brand-dark: #084e96; }
 
+/* The near black brands disappear on the dark page, lighten them and add a border */
+@media (prefers-color-scheme: dark) {
+    .volunteer-links .btn-github,
+    .volunteer-links .btn-twitter,
+    .volunteer-links .btn-crowdin {
+        --brand: #3d444d;
+        --brand-dark: #545d68;
+        --bs-btn-border-color: rgba(255, 255, 255, .2);
+    }
+}
+
 /* Text links only underline on hover, as on the homepage */
 .com_volunteers main a:not(.btn, .pathway) {
     text-decoration: none;

@@ -15,6 +15,7 @@ namespace Joomla\Component\Volunteers\Administrator\View\Volunteers;
 use Joomla\CMS\Helper\ContentHelper;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\View\ListView;
+use Joomla\CMS\Toolbar\ToolbarButton;
 
 /**
  * View class for a list of Joomlers.
@@ -77,9 +78,17 @@ class HtmlView extends ListView
         parent::addToolbar();
 
         if ($this->canDo->get('core.edit')) {
-            $this->getDocument()->getToolbar()
-                ->standardButton('refresh', 'COM_VOLUNTEERS_TOOLBAR_RESET', 'volunteers.resetspam')
+            $toolbar = $this->getDocument()->getToolbar();
+
+            // Take the options button off, so the reset button shows before it
+            $items   = $toolbar->getItems();
+            $options = array_filter($items, static fn ($button) => $button instanceof ToolbarButton && $button->getName() === 'options');
+            $toolbar->setItems(array_diff_key($items, $options));
+
+            $toolbar->standardButton('refresh', 'COM_VOLUNTEERS_TOOLBAR_RESET', 'volunteers.resetspam')
                 ->listCheck(false);
+
+            $toolbar->setItems(array_merge($toolbar->getItems(), array_values($options)));
         }
     }
 }

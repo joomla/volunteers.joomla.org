@@ -319,3 +319,40 @@ div#toolbar-cancel.btn-group a {
     --bs-btn-active-border-color: var(--bs-danger);
     --bs-btn-active-color: #fff;
 }
+
+/* Searchable team/department filter: follow the light and dark colour scheme */
+.filter-bar joomla-field-fancy-select {
+    min-width: 20rem;
+}
+
+.filter-bar .choices__list--dropdown,
+.filter-bar .choices__list[aria-expanded] {
+    color: var(--bs-body-color);
+    background-color: var(--bs-body-bg);
+    border-color: var(--bs-border-color);
+}
+
+.filter-bar .choices[data-type*=select-one] .choices__input {
+    color: var(--bs-body-color);
+    background-color: var(--bs-body-bg);
+    border-bottom-color: var(--bs-border-color);
+}
+
+.filter-bar .choices .choices__list--dropdown .choices__item--selectable {
+    padding-inline-end: 10px;
+    word-break: normal;
+}
+
+.filter-bar .choices .choices__list--dropdown .choices__item--selectable.is-selected {
+    background-color: var(--bs-secondary-bg);
+}
+
+.filter-bar .choices .choices__list--dropdown .choices__item--selectable.is-highlighted {
+    color: #fff;
+    background-color: var(--bs-primary);
+}
+
+.filter-bar .choices__heading {
+    color: var(--bs-secondary-color);
+    border-bottom-color: var(--bs-border-color);
+}

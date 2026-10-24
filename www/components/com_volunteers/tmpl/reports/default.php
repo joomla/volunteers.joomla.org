@@ -23,12 +23,16 @@ use Joomla\Component\Volunteers\Site\Helper\VolunteersHelper;
 try {
     $wa = Factory::getApplication()->getDocument()->getWebAssetManager();
     $wa->useStyle('com_volunteers.frontend');
+    // The team and department list is long, make it searchable
+    $wa->usePreset('choicesjs')
+        ->useScript('webcomponent.field-fancy-select');
 } catch (Exception $e) {
     echo $e->getMessage();
     exit();
 }
 
-
+Text::script('JGLOBAL_SELECT_NO_RESULTS_MATCH');
+Text::script('JGLOBAL_SELECT_PRESS_TO_SELECT');
 ?>
 
 <form action="<?php echo htmlspecialchars(Uri::getInstance()->toString()); ?>" method="post" name="adminForm"
@@ -36,6 +40,7 @@ try {
     <div class="row">
         <div class="filter-bar d-flex justify-content-end">
             <label class="visually-hidden" for="filter_category"><?php echo Text::_('COM_VOLUNTEERS_SELECT_REPORTCATEGORY'); ?></label>
+            <joomla-field-fancy-select search-placeholder="<?php echo $this->escape(Text::_('JSEARCH_FILTER')); ?>">
             <?php echo HtmlHelper::_(
                 'select.groupedlist',
                 VolunteersHelper::reportcategories(),
@@ -48,6 +53,7 @@ try {
                     ],
                 ]
             ); ?>
+            </joomla-field-fancy-select>
         </div>
         <div class="border-bottom pb-2 mb-3">
             <h1 class="vol_h1">

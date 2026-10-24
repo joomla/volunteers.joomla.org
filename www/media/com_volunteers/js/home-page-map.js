@@ -30,7 +30,7 @@ if (Joomla.getOptions('com_volunteers_maps')) {
     for (let i = 0; i < joomlers.length; i++) {
         let a = JSON.parse(joomlers[i]);
         let marker = L.marker(new L.LatLng(a.lat, a.lng), { icon: myIcon});
-        marker.bindPopup('<div style="width:200px;"><img width="40" class="float-start" style="padding-right: 10px"   src="' + a.image + '"/><a href="' + a.url + '">' + a.title + '</a></div>');
+        marker.bindPopup('<div class="map-popup"><img class="map-popup-image float-start" width="40" height="40" alt="" src="' + a.image + '"><a href="' + a.url + '">' + a.title + '</a></div>');
         markers.addLayer(marker);
     }
 

@@ -388,3 +388,15 @@ div#toolbar-cancel.btn-group a {
 .js-editor-tinymce {
     display: flow-root;
 }
+
+.map-popup {
+    display: flow-root;
+    width: 200px;
+}
+
+.map-popup-image {
+    width: 40px;
+    height: 40px;
+    margin-inline-end: 10px;
+    object-fit: cover;
+}

@@ -136,3 +136,8 @@ body.site {
     font-family: inherit;
     font-weight: 400;
 }
+
+/* Space between system messages and the page content */
+#system-message-container joomla-alert {
+    margin-bottom: 1rem;
+}

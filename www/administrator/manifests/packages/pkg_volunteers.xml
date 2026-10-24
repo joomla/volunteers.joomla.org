@@ -2,7 +2,7 @@
 <extension type="package" version="3.6" method="upgrade">
 	<name>pkg_volunteers</name>
 	<packagename>volunteers</packagename>
-	<creationDate>2026-10-17</creationDate>
+	<creationDate>2026-10-24</creationDate>
 	<packager>Joomla! Project</packager>
 	<copyright>(C) 2022 Open Source Matters. All rights reserved.</copyright>
 	<packageremail>admin@joomla.org</packageremail>
@@ -21,6 +21,11 @@
 		<file type="plugin" id="joomlaidentityvolunteers" group="system">plg_system_joomlaidentityvolunteers.zip</file>
 		<file type="plugin" id="volunteers" group="system">plg_system_volunteers.zip</file>
 		<file type="plugin" id="volunteer" group="user">plg_user_volunteer.zip</file>
+		<file type="plugin" id="reportspam" group="ajax">plg_ajax_reportspam.zip</file>
 		<file type="plugin" id="jvp" group="sampledata">plg_sampledata_jvp.zip</file>
+		<file type="plugin" id="volunteers_departments" group="finder">plg_finder_volunteers_departments.zip</file>
+		<file type="plugin" id="volunteers_reports" group="finder">plg_finder_volunteers_reports.zip</file>
+		<file type="plugin" id="volunteers_teams" group="finder">plg_finder_volunteers_teams.zip</file>
+		<file type="plugin" id="volunteers_volunteers" group="finder">plg_finder_volunteers_volunteers.zip</file>
 	 </files>
 </extension>

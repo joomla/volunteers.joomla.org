@@ -86,7 +86,7 @@ body.site {
     border: 0 !important;
 }
 
-/* Article headings in line with the volunteer pages: a 28px title with a line under it and 18px section headings */
+/* Article headings in line with the volunteer pages: a 28px title with a line under it, 22px and 18px headings in the text */
 .com-content-article .page-header {
     padding-bottom: .5rem;
     margin-bottom: 1rem;
@@ -97,6 +97,14 @@ body.site {
 .com-content-article .page-header h2 {
     margin: 0;
     font-size: 28px;
+    font-weight: bold;
+    line-height: 1.4;
+}
+
+.com-content-article__body h2 {
+    margin-top: 1.5rem;
+    margin-bottom: .6rem;
+    font-size: 22px;
     font-weight: bold;
     line-height: 1.4;
 }

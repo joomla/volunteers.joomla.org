@@ -383,7 +383,7 @@ class VolunteerModel extends AdminModel
         }
 
         // Check for response code
-        if ($response->code !== 200 && $response->code !== 301) {
+        if ($response === null || ($response->code !== 200 && $response->code !== 301)) {
             throw new RuntimeException();
         }
 

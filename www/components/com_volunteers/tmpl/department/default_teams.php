@@ -20,11 +20,13 @@ use Joomla\Component\Volunteers\Site\Helper\VolunteersHelper;
 <div class="tab-pane" id="teams">
     <?php if ($this->acl->create_team) : ?>
         <div class="row">
-            <a href="<?php echo Route::_('index.php?option=com_volunteers&task=team.add&department=' . $this->item->id) ?>">
-                <button class="vol-button-admin" role="button">
-                <span class="icon-new" aria-hidden="true"></span>
-                <?php echo Text::_('COM_VOLUNTEERS_TEAM_ADD') ?></button>
-            </a>
+            <div class="filter-bar">
+                <a class="btn btn-light float-end"
+                    href="<?php echo Route::_('index.php?option=com_volunteers&task=team.add&department=' . $this->item->id) ?>">
+                    <span class="icon-new" aria-hidden="true"></span>
+                    <?php echo Text::_('COM_VOLUNTEERS_TEAM_ADD') ?>
+                </a>
+            </div>
         </div>
         <hr>
     <?php endif; ?>

@@ -154,7 +154,7 @@ try {
             if ($this->item->getinvolved) {
                 echo $this->item->getinvolved;
             } else {
-                echo '<a  class="btn btn-light"  onclick="document.getElementById(\'teamsTab\').activateTab(document.getElementById(\'contact\'));">' . Text::_('COM_VOLUNTEERS_USE_CONTACT') . '</a>';
+                echo '<a  class="btn btn-light"  onclick="document.getElementById(\'teamsTab\').activateTab(document.getElementById(\'contact\'));"><span class="icon-chevron-right" aria-hidden="true"></span> ' . Text::_('COM_VOLUNTEERS_USE_CONTACT') . '</a>';
             }
 
             echo HTMLHelper::_('uitab.endTab');

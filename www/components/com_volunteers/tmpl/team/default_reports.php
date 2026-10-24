@@ -64,6 +64,7 @@ use Joomla\Component\Volunteers\Site\Helper\VolunteersHelper;
                 </p>
                 <a href="<?php echo Route::_('index.php?option=com_volunteers&view=report&id=' . $report->id) ?>"
                     class="btn btn-light">
+                    <span class="icon-chevron-right" aria-hidden="true"></span>
                     <?php echo Text::_('COM_VOLUNTEERS_READ_MORE') ?>&nbsp;<?php echo ($report->title); ?>
                 </a>
             </div>
@@ -73,7 +74,7 @@ use Joomla\Component\Volunteers\Site\Helper\VolunteersHelper;
     <?php if (count($this->item->reports) == 10) : ?>
         <a href="<?php echo Route::_('index.php?option=com_volunteers&view=reports') ?>?filter_category=t.<?php echo $this->item->id; ?>"
             class="btn btn-light">
-            <span class="icon-chevron-right"></span>
+            <span class="icon-chevron-right" aria-hidden="true"></span>
             <?php echo Text::_('COM_VOLUNTEERS_REPORTS_BROWSE') ?>&nbsp
         </a>
     <?php endif; ?>

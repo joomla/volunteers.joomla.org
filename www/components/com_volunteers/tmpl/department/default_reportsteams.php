@@ -62,8 +62,8 @@ use Joomla\Component\Volunteers\Site\Helper\VolunteersHelper;
                     </p>
                     <a href="<?php echo Route::_('index.php?option=com_volunteers&view=report&id=' . $report->id) ?>"
                        class="btn btn-light">
-                        <?php echo Text::_('COM_VOLUNTEERS_READ_MORE') ?>
-                        &nbsp;<?php echo ($report->title); ?>
+                        <span class="icon-chevron-right" aria-hidden="true"></span>
+                        <?php echo Text::_('COM_VOLUNTEERS_READ_MORE') ?>&nbsp;<?php echo ($report->title); ?>
                     </a>
                 </div>
             </div>

@@ -53,7 +53,7 @@ use Joomla\Component\Volunteers\Site\Helper\VolunteersHelper;
                     </p>
                     <a href="<?php echo Route::_('index.php?option=com_volunteers&view=team&id=' . $item->id) ?>"
                         class="btn btn-light">
-                        <span class="icon-chevron-right"></span>
+                        <span class="icon-chevron-right" aria-hidden="true"></span>
                         <?php echo Text::_('COM_VOLUNTEERS_READ_MORE') . ' ' . $item->title; ?>
                     </a>
                 </div>
@@ -72,15 +72,16 @@ use Joomla\Component\Volunteers\Site\Helper\VolunteersHelper;
                                 }
                             }
                         }
-                        if (count($item->members) > 14) {
+                        if (!empty($item->members) && count($item->members) > 14) {
                             ?>
-                        <a href="<?php echo Route::_('index.php?option=com_volunteers&view=team&id=' . $item->id) ?>"
-                            class="all-members">
-                            <span class="all">
-                                <?php echo Text::_('COM_VOLUNTEERS_ALL') ?>
-                            </span><span class="number"><?php echo (' ' . count($item->members)); ?></span>
-                        </a>
+                            <a href="<?php echo Route::_('index.php?option=com_volunteers&view=team&id=' . $item->id) ?>"
+                                class="all-members">
+                                <span class="all">
+                                    <?php echo Text::_('COM_VOLUNTEERS_ALL') ?>
+                                </span><span class="number"><?php echo (' ' . count($item->members)); ?></span>
+                            </a>
                         <?php } ?>
+                    </div>
                 </div>
             </div>
         </div>

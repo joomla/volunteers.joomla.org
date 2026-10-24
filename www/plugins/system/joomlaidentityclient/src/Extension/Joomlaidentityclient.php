@@ -11,7 +11,7 @@
 namespace Joomla\Plugin\System\Joomlaidentityclient\Extension;
 
 use Joomla\CMS\Event\Application\AfterRouteEvent;
-use Joomla\CMS\Event\Content\PrepareFormEvent;
+use Joomla\CMS\Event\Model\PrepareFormEvent;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Log\Log;
 use Joomla\CMS\Plugin\CMSPlugin;
@@ -200,11 +200,11 @@ final class Joomlaidentityclient extends CMSPlugin implements SubscriberInterfac
      *
      * @param   PrepareFormEvent  $event  The event object
      *
-     * @return  boolean
+     * @return  void
      *
      * @since   1.0.0
      */
-    public function onContentPrepareForm(PrepareFormEvent $event): bool
+    public function onContentPrepareForm(PrepareFormEvent $event): void
     {
         $form = $event->getForm();
         $data = $event->getData();
@@ -212,7 +212,7 @@ final class Joomlaidentityclient extends CMSPlugin implements SubscriberInterfac
         // Check we are manipulating a valid form.
         if (!\in_array($form->getName(), array('com_admin.profile', 'com_users.user', 'com_users.profile', 'com_users.registration')))
         {
-            return true;
+            return;
         }
 
         // Disable editing the name, username, email, password and requireReset fields
@@ -222,7 +222,5 @@ final class Joomlaidentityclient extends CMSPlugin implements SubscriberInterfac
         $form->setFieldAttribute('password', 'readonly', 'readonly');
         $form->setFieldAttribute('password2', 'readonly', 'readonly');
         $form->setFieldAttribute('requireReset', 'readonly', 'readonly');
-
-        return true;
     }
 }

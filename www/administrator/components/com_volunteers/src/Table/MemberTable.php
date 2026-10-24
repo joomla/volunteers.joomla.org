@@ -86,6 +86,13 @@ class MemberTable extends Table implements VersionableTableInterface, TaggableTa
             $this->$field = (int) ($this->$field ?? 0);
         }
 
+        // The date columns do not allow NULL, an empty date is stored as a zero date
+        foreach (['date_started', 'date_ended'] as $field) {
+            if (empty($this->$field ?? null)) {
+                $this->$field = '0000-00-00';
+            }
+        }
+
         return true;
     }
 

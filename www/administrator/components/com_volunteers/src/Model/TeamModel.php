@@ -115,7 +115,15 @@ class TeamModel extends AdminModel
         $data = Factory::getApplication()->getUserState('com_volunteers.edit.team.data', []);
 
         if (empty($data)) {
-            $data = $this->getItem();
+            // A copy of the item, the dates are only cleared for the form
+            $data = clone $this->getItem();
+
+            // A date that is not set is stored as a zero date, which the calendar field shows as a wrong date
+            foreach (['date_started', 'date_ended'] as $field) {
+                if (str_starts_with((string) ($data->$field ?? ''), '0000-00-00')) {
+                    $data->$field = '';
+                }
+            }
         }
 
         $this->preprocessData('com_volunteers.team', $data);

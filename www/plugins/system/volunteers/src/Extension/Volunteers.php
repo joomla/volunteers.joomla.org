@@ -17,7 +17,6 @@ use Joomla\Event\SubscriberInterface;
 // phpcs:enable PSR1.Files.SideEffects
 
 use Exception;
-use Joomla\CMS\Language\Text;
 use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\Uri\Uri;
@@ -32,47 +31,6 @@ use Joomla\Component\Volunteers\Administrator\Model\VolunteerModel;
  */
 final class Volunteers extends CMSPlugin implements SubscriberInterface
 {
-
-    /**
-     * Check if volunteer filled in all required fields
-     *
-     * @return  boolean  True on success
-     * @since 4.0.0
-     * @throws Exception
-     */
-    public function onAfterRender(): bool
-    {
-        $app = $this->getApplication();
-
-        // Run on frontend only
-        if ($app->isClient('administrator')) {
-            return true;
-        }
-
-        // Get variables
-        $view = $app->getInput()->getString('view');
-        $task = $app->getInput()->getString('task');
-
-        // Check if volunteer needs to update profile
-        $update = $app->getSession()->get('updateprofile');
-
-        if ($update && $view != 'volunteer' && $task != 'volunteer.edit') {
-            /** @var VolunteersComponent $extension */
-            $extension   = $app->bootComponent('com_volunteers');
-            /** @var VolunteerModel $model */
-            $model       = $extension->getMVCFactory()->createModel('Volunteer', 'Administrator', ['ignore_request' => true]);
-            $userId      = $app->getIdentity()->id;
-            $volunteerId = (int) $model->getVolunteerId($userId);
-
-            // Redirect to profile
-            $this->loadLanguage('com_volunteers', JPATH_ADMINISTRATOR);
-            $app->enqueueMessage(Text::_('COM_VOLUNTEERS_PROFILE_ACTIVEMEMBERFIELDS'), 'warning');
-            $app->redirect('index.php?option=com_volunteers&task=volunteer.edit&id=' . $volunteerId);
-        }
-
-        return true;
-    }
-
     /**
      * If the user is not logged in, redirect to the login component
      *
@@ -127,6 +85,6 @@ final class Volunteers extends CMSPlugin implements SubscriberInterface
     }
     public static function getSubscribedEvents(): array
     {
-        return ['onAfterRender' => 'onAfterRender', 'onAfterRoute' => 'onAfterRoute'];
+        return ['onAfterRoute' => 'onAfterRoute'];
     }
 }

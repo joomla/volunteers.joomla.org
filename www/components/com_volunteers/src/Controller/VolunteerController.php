@@ -88,9 +88,6 @@ class VolunteerController extends FormController
         // Use parent save method
         $return = parent::save($key, $urlVar);
 
-        // Remove session variable
-        $this->app->getSession()->set('updateprofile', 0);
-
         // Redirect to the list screen.
         if ($return == true) {
             $this->setMessage(Text::_('COM_VOLUNTEERS_LBL_VOLUNTEER_SAVED'));

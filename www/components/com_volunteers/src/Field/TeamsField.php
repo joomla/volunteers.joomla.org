@@ -43,7 +43,9 @@ class TeamsField extends ListField
     {
         $parent    = $this->element['parent'];
         $teams     = VolunteersHelper::teams($parent);
-        $default[] = HTMLHelper::_('select.option', '', Text::_('COM_VOLUNTEERS_SELECT_TEAM'));
+        // An optional field of an edit form stores none as 0, a required field and a list filter need an empty value
+        $empty     = $this->required || $this->group ? '' : 0;
+        $default[] = HTMLHelper::_('select.option', $empty, Text::_('COM_VOLUNTEERS_SELECT_TEAM'));
         $options   = array_merge($default, $teams);
 
         return array_merge(parent::getOptions(), $options);

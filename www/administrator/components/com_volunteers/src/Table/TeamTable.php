@@ -121,6 +121,10 @@ class TeamTable extends Table implements VersionableTableInterface, TaggableTabl
             }
         }
 
+        // A team without a parent team is stored as 0
+        $this->parent_id  = (int) ($this->parent_id ?? 0);
+        $this->department = (int) ($this->department ?? 0);
+
         return true;
     }
 

@@ -73,6 +73,23 @@ class MemberTable extends Table implements VersionableTableInterface, TaggableTa
     }
 
     /**
+     * Overloaded check method to ensure data integrity.
+     *
+     * @return  boolean  True on success.
+     *
+     * @since 4.0.0
+     */
+    public function check()
+    {
+        // A member belongs to a department or a team and may have no role, the empty columns are stored as 0
+        foreach (['department', 'team', 'role', 'position', 'volunteer'] as $field) {
+            $this->$field = (int) ($this->$field ?? 0);
+        }
+
+        return true;
+    }
+
+    /**
      * Get the type alias for the history table
      *
      * @return  string  The alias as described above

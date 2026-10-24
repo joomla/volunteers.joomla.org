@@ -117,6 +117,9 @@ class DepartmentTable extends Table implements VersionableTableInterface, Taggab
             $this->alias = Factory::getDate()->format("Y-m-d-H-i-s");
         }
 
+        // A department without a parent department is stored as 0
+        $this->parent_id = (int) ($this->parent_id ?? 0);
+
         return true;
     }
 

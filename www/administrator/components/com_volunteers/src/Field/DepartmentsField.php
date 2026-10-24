@@ -43,7 +43,9 @@ class DepartmentsField extends ListField
     public function getOptions()
     {
         $depts     = VolunteersHelper::departments();
-        $default[] = HTMLHelper::_('select.option', '', Text::_('COM_VOLUNTEERS_SELECT_DEPARTMENT'));
+        // An optional field of an edit form stores none as 0, a required field and a list filter need an empty value
+        $empty     = $this->required || $this->group ? '' : 0;
+        $default[] = HTMLHelper::_('select.option', $empty, Text::_('COM_VOLUNTEERS_SELECT_DEPARTMENT'));
         $options   = array_merge($default, $depts);
         return array_merge(parent::getOptions(), $options);
     }

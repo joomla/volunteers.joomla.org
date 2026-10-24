@@ -99,6 +99,11 @@ class RoleTable extends Table implements VersionableTableInterface, TaggableTabl
             $this->alias = Factory::getDate()->format("Y-m-d-H-i-s");
         }
 
+        // A role belongs to a department or a team, the other column is stored as 0
+        foreach (['department', 'team'] as $field) {
+            $this->$field = (int) ($this->$field ?? 0);
+        }
+
         return true;
     }
 

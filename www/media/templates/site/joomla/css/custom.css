@@ -9,3 +9,79 @@
     --bs-breadcrumb-bg: var(--bs-tertiary-bg);
     --bs-breadcrumb-border-radius: var(--bs-border-radius);
 }
+
+/* Colours as on the Joomla 3 site: a light grey page with a lighter blue for links */
+:root {
+    --vol-page-bg: #f4f6f7;
+    --bs-link-color: #08c;
+    --bs-link-color-rgb: 0, 136, 204;
+    --bs-link-hover-color: #005580;
+    --bs-link-hover-color-rgb: 0, 85, 128;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --vol-page-bg: #1a1d20;
+        --bs-link-color: #6ea8fe;
+        --bs-link-color-rgb: 110, 168, 254;
+        --bs-link-hover-color: #8bb9fe;
+        --bs-link-hover-color-rgb: 139, 185, 254;
+    }
+}
+
+body.site {
+    background-color: var(--vol-page-bg);
+}
+
+/* The page content sits in a box with a border, as on the Joomla 3 site */
+.body > .container {
+    padding: 20px;
+    background-color: var(--bs-body-bg);
+    border: 1px solid var(--bs-border-color-translucent);
+    border-radius: 4px;
+    box-shadow: 0 0 6px rgba(0, 0, 0, .05);
+}
+
+/* The box keeps its content in line with the header and sticks out by its padding and border, as on the Joomla 3 site */
+@media (min-width: 576px) {
+    .body > .container {
+        max-width: 558px;
+    }
+}
+
+@media (min-width: 768px) {
+    .body > .container {
+        max-width: 738px;
+    }
+}
+
+@media (min-width: 992px) {
+    .body > .container {
+        max-width: 978px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .body > .container {
+        max-width: 1158px;
+    }
+}
+
+@media (min-width: 1400px) {
+    .body > .container {
+        max-width: 1338px;
+    }
+}
+
+/* Joomla 3 class still used by the search module, hide the label for sighted users only */
+.element-invisible {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}

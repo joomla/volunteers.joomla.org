@@ -60,7 +60,7 @@ final class Volunteers extends CMSPlugin implements SubscriberInterface
             /** @var VolunteersComponent $extension */
             $extension   = $app->bootComponent('com_volunteers');
             /** @var VolunteerModel $model */
-            $model       = $extension->getMVCFactory()->createModel('Volunteers', 'Administrator', ['ignore_request' => true]);
+            $model       = $extension->getMVCFactory()->createModel('Volunteer', 'Administrator', ['ignore_request' => true]);
             $userId      = $app->getIdentity()->id;
             $volunteerId = (int) $model->getVolunteerId($userId);
 

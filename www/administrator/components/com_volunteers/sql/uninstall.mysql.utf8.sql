@@ -8,4 +8,6 @@ DROP TABLE IF EXISTS `#__volunteers_roles`;
 DROP TABLE IF EXISTS `#__volunteers_teams`;
 DROP TABLE IF EXISTS `#__volunteers_volunteers`;
 
+DELETE FROM `#__mail_templates` WHERE `extension` = 'com_volunteers';
+
 SET FOREIGN_KEY_CHECKS = 1;

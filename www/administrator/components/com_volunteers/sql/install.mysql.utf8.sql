@@ -213,3 +213,8 @@ CREATE TABLE IF NOT EXISTS `#__volunteers_volunteers`
     PRIMARY KEY (`id`),
     UNIQUE KEY `user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 DEFAULT COLLATE=utf8mb4_unicode_ci;
+
+/* Mail template of the email to the selected members */
+
+INSERT IGNORE INTO `#__mail_templates` (`template_id`, `extension`, `language`, `subject`, `body`, `htmlbody`, `attachments`, `params`)
+VALUES ('com_volunteers.members.mail', 'com_volunteers', '', 'COM_VOLUNTEERS_MAIL_MEMBERS_MAIL_SUBJECT', 'COM_VOLUNTEERS_MAIL_MEMBERS_MAIL_BODY', 'COM_VOLUNTEERS_MAIL_MEMBERS_MAIL_HTMLBODY', '', '{"tags":["subject","body"]}');

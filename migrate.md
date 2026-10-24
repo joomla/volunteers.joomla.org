@@ -41,3 +41,11 @@ The Joomla 3 search does not work on Joomla 6 and is replaced by Smart Search.
 4. Build the index: `php cli/joomla.php finder:index`
 5. Schedule the Smart Search indexer, as a scheduled task or a cron job running `php cli/joomla.php finder:index`, so reports created on the frontend are found
 6. Check that a search from the header box returns results
+
+## Mail template for emailing members
+The "E-mail current selection" button of the members list sends its mail through the mail template `com_volunteers.members.mail`, so the site mail settings and the HTML mail layout apply.
+
+1. Run `database/updates/2026-10-24-mail-template.sql`, replace `#__` with the table prefix. This:
+   - adds the mail template
+   - sets the Mail Format of System > Mail Templates > Options to "Both", so the message from the editor is sent as HTML. This applies to all mail templates of the site.
+2. Check that "Volunteers: Email to Members" is listed in System > Mail Templates and that the Mail Format is "Both"

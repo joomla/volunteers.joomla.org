@@ -6,13 +6,11 @@
                 type="text"
                 class="input-xxlarge input-large-text"
                 label="COM_VOLUNTEERS_FIELD_SUBJECT"
-                required="true"
         />
         <field
                 name="message"
                 type="editor"
                 label="COM_VOLUNTEERS_FIELD_TEXT"
-                required="true"
         />
     </fieldset>
 </form>

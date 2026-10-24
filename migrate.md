@@ -85,6 +85,12 @@ RO Single Sign On 2.3.1 (`pkg_sso`) is installed over 1.3.0 and comes with Simpl
 4. Open Components > RO Single Sign On > Configuration and save it, this writes `libraries/simplesamlphp/config/config.php` for SimpleSAMLphp 2. The config, metadata and cert folders are not in the repository.
 5. Check the Identity Provider profile and that logging in and out through the Login and Logout menu items works
 
+## System - Volunteers plugin
+The System - Volunteers plugin (`plg_system_volunteers`) is enabled on the live site: it redirects old Joomler URLs to the right URL and marks My Profile as active on the own Joomler page. It is disabled in the migrated database.
+
+1. Run `database/updates/2026-10-24-volunteers-plugin.sql`, replace `#__` with the table prefix. This enables the plugin
+2. Check that `index.php?option=com_volunteers&view=volunteer&id=<id>` redirects to the Joomler page
+
 ## Joomla Identity plugins
 The identity.joomla.org portal sends profile changes to this site. The System - Joomla Identity Client plugin receives them and triggers `onProcessIdentity`, the System - Joomla Volunteer Portal Identity plugin stores them in the Joomler profile. Both plugins come from the `plugins/joomlaidentityclient` and `plugins/joomlaidentityvolunteers` folders of the identity.joomla.org repository. The Joomla 3 version of the client plugin does not work on Joomla 6, and the Volunteer Portal Identity plugin is no longer part of the Joomla Volunteer Portal package.
 

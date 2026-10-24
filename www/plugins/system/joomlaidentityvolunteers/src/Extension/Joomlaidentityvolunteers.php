@@ -1,16 +1,15 @@
 <?php
 
 /**
- * @package         Joomla.Plugins
- * @subpackage      System.actionlogs
+ * @package     Joomla.Plugin
+ * @subpackage  System.joomlaidentityvolunteers
  *
- * @copyright   (C) 2018 Open Source Matters, Inc. <https://www.joomla.org>
- * @license         GNU General Public License version 2 or later; see LICENSE.txt
+ * @copyright   Copyright (C) 2005 - 2024 Open Source Matters, Inc. All rights reserved.
+ * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
 
-namespace Joomla\Plugin\System\JoomlaIdentityVolunteers\Extension;
+namespace Joomla\Plugin\System\Joomlaidentityvolunteers\Extension;
 
-use Joomla\Event\SubscriberInterface;
 use Exception;
 use InvalidArgumentException;
 use Joomla\CMS\Application\ApplicationHelper;
@@ -18,17 +17,20 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Log\Log;
 use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\Database\DatabaseAwareTrait;
+use Joomla\Event\Event;
+use Joomla\Event\SubscriberInterface;
+use stdClass;
 
 // phpcs:disable PSR1.Files.SideEffects
 \defined('_JEXEC') or die;
 // phpcs:enable PSR1.Files.SideEffects
 
 /**
- * Joomla Identity Plugin class
+ * Joomla Identity Volunteers Plugin class
  *
- * @since  4.0.0
+ * @since  1.0.0
  */
-final class JoomlaIdentityVolunteers extends CMSPlugin implements SubscriberInterface
+final class Joomlaidentityvolunteers extends CMSPlugin implements SubscriberInterface
 {
     use DatabaseAwareTrait;
 
@@ -46,7 +48,7 @@ final class JoomlaIdentityVolunteers extends CMSPlugin implements SubscriberInte
      * @var    array
      * @since  1.0.0
      */
-    private $requiredFields = [
+    private array $requiredFields = [
         'address',
         'city',
         'region',
@@ -67,46 +69,66 @@ final class JoomlaIdentityVolunteers extends CMSPlugin implements SubscriberInte
         'longitude',
         'joomlaforum',
         'joomladocs',
-        'crowdin',
+        'crowdin'
     ];
+
+    /**
+     * Returns an array of events this subscriber will listen to.
+     *
+     * @return  array
+     *
+     * @since   5.3.0
+     */
+    public static function getSubscribedEvents(): array
+    {
+        return [
+            'onProcessIdentity' => 'onProcessIdentity',
+        ];
+    }
 
     /**
      * Method triggered in processing Joomla identity data
      *
-     * @param   integer  $userId  Joomla User ID
-     * @param   string   $guid    GUID of user
-     * @param   string   $task    Task triggered
-     * @param   object   $data    Object containing user data
+     * The Joomla Identity Client plugin passes the arguments userId, guid, task and data.
+     *
+     * @param   Event  $event  The event object
      *
      * @return  void
      *
-     * @since   4.0.0
+     * @since   1.0.0
      */
-    public function onProcessIdentity(int $userId, string $guid, string $task, object $data)
+    public function onProcessIdentity(Event $event): void
     {
-        try {
+        $userId = (int) $event->getArgument('userId');
+        $guid   = (string) $event->getArgument('guid');
+        $data   = $event->getArgument('data');
+
+        try
+        {
             $this->validateData($data);
             $this->updateVolunteer($userId, $guid, $data);
-        } catch (Exception $exception) {
+        }
+        catch (\Exception $exception)
+        {
             echo $exception->getMessage();
         }
     }
 
     /**
-     * Validate the posted data containing all the required fields.
+     * Validate the posted data containing al the required fields.
      *
-     * @param   object  $data  The data to store
+     * @param   stdClass  $data  The data to store
      *
      * @return  void
      *
-     * @since   4.0.0
-     * @throws  InvalidArgumentException
-     *
+     * @since   1.0.0
      */
-    private function validateData(object $data)
+    private function validateData(stdClass $data): void
     {
-        foreach ($this->requiredFields as $field) {
-            if (!isset($data->$field)) {
+        foreach ($this->requiredFields as $field)
+        {
+            if (!isset($data->$field))
+            {
                 throw new InvalidArgumentException(Text::sprintf('PLG_SYSTEM_JOOMLAIDENTITYVOLUNTEERS_MISSING_FIELD', $field));
             }
         }
@@ -115,18 +137,18 @@ final class JoomlaIdentityVolunteers extends CMSPlugin implements SubscriberInte
     /**
      * Method to update the volunteer data
      *
-     * @param   integer  $userId  Joomla User ID
-     * @param   string   $guid    GUID of user
-     * @param   object   $data    Object containing user data
+     * @param   integer $userId Joomla User ID
+     * @param   string  $guid   GUID of user
+     * @param   object  $data   Object containing user data
      *
      * @return  void
      *
-     * @since   4.0.0
+     * @since   1.0.0
      */
-    private function updateVolunteer(int $userId, string $guid, object $data)
+    private function updateVolunteer(int $userId, string $guid, object $data): void
     {
         // Consent date
-        $volunteer = (object)[
+        $volunteer = (object) array(
             'user_id'             => $userId,
             'alias'               => ApplicationHelper::stringURLSafe($data->name),
             'address'             => $data->address,
@@ -153,18 +175,17 @@ final class JoomlaIdentityVolunteers extends CMSPlugin implements SubscriberInte
             'crowdin'             => $data->crowdin,
             'osmAddress'          => $data->osmAddress,
             'nda'                 => $data->nda,
-        ];
+        );
 
-        Log::add(json_encode($volunteer), Log::INFO, 'idpjvp');
+        Log::add(json_encode($volunteer), Log::INFO, 'idp');
 
-        try {
+        try
+        {
             $this->getDatabase()->insertObject('#__volunteers_volunteers', $volunteer, 'user_id');
-        } catch (Exception) {
+        }
+        catch (Exception $e)
+        {
             $this->getDatabase()->updateObject('#__volunteers_volunteers', $volunteer, ['user_id']);
         }
-    }
-    public static function getSubscribedEvents(): array
-    {
-        return ['onProcessIdentity' => 'onProcessIdentity'];
     }
 }

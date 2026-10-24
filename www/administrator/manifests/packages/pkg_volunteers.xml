@@ -18,7 +18,6 @@
 		<file type="component" id="com_volunteers">com_volunteers.zip</file>
 		<file type="module" id="mod_volunteers_latest" client="site">mod_volunteers_latest.zip</file>
 		<file type="module" id="mod_volunteers_story" client="site">mod_volunteers_story.zip</file>
-		<file type="plugin" id="joomlaidentityvolunteers" group="system">plg_system_joomlaidentityvolunteers.zip</file>
 		<file type="plugin" id="volunteers" group="system">plg_system_volunteers.zip</file>
 		<file type="plugin" id="volunteer" group="user">plg_user_volunteer.zip</file>
 		<file type="plugin" id="reportspam" group="ajax">plg_ajax_reportspam.zip</file>

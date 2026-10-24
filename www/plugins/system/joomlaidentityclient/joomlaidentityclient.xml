@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<extension version="3.0" type="plugin" group="system" method="upgrade">
+<extension type="plugin" group="system" method="upgrade">
     <name>PLG_SYSTEM_JOOMLAIDENTITYCLIENT</name>
     <author>Joomla! Project</author>
-    <creationDate>March 2018</creationDate>
-    <copyright>(C) 2005 - 2019 Open Source Matters. All rights reserved.</copyright>
+    <creationDate>January 2024</creationDate>
+    <copyright>(C) 2005 - 2024 Open Source Matters. All rights reserved.</copyright>
     <license>GNU General Public License version 2 or later; see LICENSE.txt</license>
     <authorEmail>admin@joomla.org</authorEmail>
     <authorUrl>www.joomla.org</authorUrl>
-    <version>1.0.0</version>
+    <version>2.0.0</version>
     <description>PLG_SYSTEM_JOOMLAIDENTITYCLIENT_XML_DESCRIPTION</description>
-
+    <namespace path="src">Joomla\Plugin\System\Joomlaidentityclient</namespace>
     <files>
-        <filename plugin="joomlaidentityclient">joomlaidentityclient.php</filename>
-        <filename>joomlaidentityclient.xml</filename>
+        <folder plugin="joomlaidentityclient">services</folder>
+        <folder>src</folder>
         <folder>language</folder>
     </files>
 

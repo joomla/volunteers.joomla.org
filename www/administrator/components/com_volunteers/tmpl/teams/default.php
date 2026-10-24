@@ -14,10 +14,12 @@ use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Layout\LayoutHelper;
 use Joomla\CMS\Router\Route;
+use Joomla\CMS\WebAsset\WebAssetManager;
+use Joomla\Component\Volunteers\Administrator\View\Teams\HtmlView;
 
-/** @var \Joomla\Component\Volunteers\Administrator\View\Teams\HtmlView $this */
+/** @var HtmlView $this */
 
-/** @var \Joomla\CMS\WebAsset\WebAssetManager $wa */
+/** @var WebAssetManager $wa */
 $wa = $this->getDocument()->getWebAssetManager();
 $wa->useScript('table.columns')
     ->useScript('multiselect');

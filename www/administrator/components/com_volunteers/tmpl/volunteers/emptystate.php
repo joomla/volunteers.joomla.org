@@ -11,8 +11,9 @@
 // phpcs:enable PSR1.Files.SideEffects
 
 use Joomla\CMS\Layout\LayoutHelper;
+use Joomla\Component\Volunteers\Administrator\View\Volunteers\HtmlView;
 
-/** @var \Joomla\Component\Volunteers\Administrator\View\Volunteers\HtmlView $this */
+/** @var HtmlView $this */
 
 $displayData = [
     'textPrefix' => 'COM_VOLUNTEERS_VOLUNTEERS',

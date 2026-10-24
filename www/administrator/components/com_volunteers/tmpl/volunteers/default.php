@@ -15,11 +15,13 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Layout\LayoutHelper;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\Uri\Uri;
+use Joomla\CMS\WebAsset\WebAssetManager;
 use Joomla\Component\Volunteers\Administrator\Helper\VolunteersHelper;
+use Joomla\Component\Volunteers\Administrator\View\Volunteers\HtmlView;
 
-/** @var \Joomla\Component\Volunteers\Administrator\View\Volunteers\HtmlView $this */
+/** @var HtmlView $this */
 
-/** @var \Joomla\CMS\WebAsset\WebAssetManager $wa */
+/** @var WebAssetManager $wa */
 $wa = $this->getDocument()->getWebAssetManager();
 $wa->useScript('table.columns')
     ->useScript('multiselect')

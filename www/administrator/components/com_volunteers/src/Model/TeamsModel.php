@@ -173,7 +173,8 @@ class TeamsModel extends ListModel
 
         if (is_numeric($groups) && ($groups > 0)) {
             $query->where('a.department = ' . (int) $groups);
-        } else {
+        } elseif (empty($this->getState('filter.parent'))) {
+            // Subteams belong to the same department as their parent, also when that is the groups department
             $query->where('a.department <> 58');
         }
 

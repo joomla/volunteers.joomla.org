@@ -16,109 +16,19 @@ use Exception;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Mail\MailerFactoryInterface;
-use Joomla\CMS\MVC\Controller\FormController;
+use Joomla\CMS\MVC\Controller\BaseController;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\User\UserFactoryInterface;
 
 /**
  * Volunteer controller class.
  *
+ * Joomlers edit their profile on the Joomla! Identity portal, this controller only sends a message to a Joomler.
+ *
  * @since 4.0.0
  */
-class VolunteerController extends FormController
+class VolunteerController extends BaseController
 {
-    protected $view_list = 'volunteers';
-
-    /**
-     * Method to edit volunteer data
-     *
-     * @param   string  $key     The name of the primary key of the URL variable.
-     * @param   string  $urlVar  The name of the URL variable if different from the primary key
-     *                           (sometimes required to avoid router collisions).
-     *
-     * @return  boolean  True if access level check and checkout passes, false otherwise.
-     *
-     * @since 4.0.0
-     * @throws Exception
-     */
-    public function edit($key = null, $urlVar = null)
-    {
-        // Get variables
-        $volunteerId     = $this->input->getInt('id');
-        $volunteerUserId = (int) $this->getModel()->getItem($volunteerId)->user_id;
-
-        $userId       = $this->app->getIdentity()->id;
-        // Check if the volunteer is editing own data
-        if ($volunteerUserId != $userId) {
-            throw new Exception(Text::sprintf('JLIB_APPLICATION_ERROR_UNHELD_ID', $volunteerId), 403);
-        }
-
-        // Get the model.
-        $model = $this->getModel('Volunteer', 'VolunteersModel');
-        $model->checkin();
-
-        // Use parent edit method
-        return parent::edit($key, $urlVar);
-    }
-
-    /**
-     * Method to save volunteer data.
-     *
-     * @param   string  $key     The name of the primary key of the URL variable.
-     * @param   string  $urlVar  The name of the URL variable if different from the primary key (sometimes required to avoid router collisions).
-     *
-     * @return  boolean  True if successful, false otherwise.
-     * @since 4.0.0
-     * @throws Exception
-     */
-    public function save($key = null, $urlVar = null)
-    {
-        // Check for request forgeries.
-        $this->checkToken();
-
-        // Get variables
-        $volunteerId     = $this->input->getInt('id');
-        $volunteerUserId = (int) $this->getModel()->getItem($volunteerId)->user_id;
-        $userId          = $this->app->getIdentity()->id;
-        // Check if the volunteer is saving own data
-        if ($volunteerUserId != $userId) {
-            throw new Exception(Text::sprintf('JLIB_APPLICATION_ERROR_UNHELD_ID', $volunteerId), 403);
-        }
-
-        // Use parent save method
-        $return = parent::save($key, $urlVar);
-
-        // Redirect to the list screen.
-        if ($return == true) {
-            $this->setMessage(Text::_('COM_VOLUNTEERS_LBL_VOLUNTEER_SAVED'));
-            $this->setRedirect(Route::_('index.php?option=com_volunteers&view=volunteer&id=' . $volunteerId, false));
-        }
-
-        return $return;
-    }
-
-    /**
-     * Method to cancel member data.
-     *
-     * @param   string  $key  The name of the primary key of the URL variable.
-     *
-     * @return  boolean  True if access level checks pass, false otherwise.
-     *
-     * @since 4.0.0
-     */
-    public function cancel($key = null)
-    {
-        // Get variables
-        $volunteerId = $this->input->getInt('id');
-
-        // Use parent save method
-        $return = parent::cancel($key);
-
-        $this->setRedirect(Route::_('index.php?option=com_volunteers&view=volunteer&id=' . $volunteerId, false));
-
-        return $return;
-    }
-
     /**
      * Method to send an email to a volunteer.
      *

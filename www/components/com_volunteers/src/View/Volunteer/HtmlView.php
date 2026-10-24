@@ -33,7 +33,6 @@ class HtmlView extends BaseHtmlView
 {
     protected mixed $state;
     protected mixed $item;
-    protected mixed $form;
     protected User|null $user = null;
 
     protected string $share;
@@ -78,7 +77,6 @@ class HtmlView extends BaseHtmlView
         $this->item = $model->getItem();
 
         $this->state       = $model->getState();
-        $this->form        = $model->getForm();
         $this->user        = $this->getCurrentUser();
         $this->item->teams = $model->getVolunteerTeams();
         $this->item->new   = $this->app->input->getInt('new', '0');
@@ -94,34 +92,10 @@ class HtmlView extends BaseHtmlView
             throw new GenericDataException(implode("\n", $errors));
         }
 
-        // Manipulate form
-        $this->manipulateForm();
-
         // Prepare document
         $this->prepareDocument();
 
         parent::display($tpl);
-    }
-
-    /**
-     * Manipulates the form.
-     *
-     * @return  void.
-     *
-     * @since 4.0.0
-     */
-    protected function manipulateForm()
-    {
-        // Clear birthday field if not set
-        if (empty($this->item->birthday) || $this->item->birthday === '0000-00-00') {
-            $this->form->setValue('birthday', null, null);
-        }
-
-        // Make mailing address required for active team members
-        if ($this->item->teams->activemember) {
-            $this->form->setFieldAttribute('address', 'required', 'true');
-            $this->form->setFieldAttribute('zip', 'required', 'true');
-        }
     }
 
     /**

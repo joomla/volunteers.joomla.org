@@ -51,11 +51,10 @@ final class Volunteers extends CMSPlugin implements SubscriberInterface
         $input  = $app->getInput();
         $option = $input->getString('option');
         $view   = $input->getString('view');
-        $layout = $input->getString('layout');
         $id     = $input->getInt('id');
 
         // Check if volunteer url is correct
-        if ($option == 'com_volunteers' && $view == 'volunteer' && $layout != 'edit') {
+        if ($option == 'com_volunteers' && $view == 'volunteer') {
             $itemURL    = Route::_('index.php?option=com_volunteers&view=volunteer&id=' . $id);
             $correctURL = Uri::getInstance()->toString(['scheme', 'host', 'port']) . $itemURL;
             $currentURL = str_replace("&", "&amp;", Uri::getInstance()->toString());

@@ -13,140 +13,45 @@ namespace Joomla\Component\Volunteers\Site\Model;
 // phpcs:enable PSR1.Files.SideEffects
 
 use Exception;
-use Joomla\CMS\Application\ApplicationHelper;
 use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Factory;
-use Joomla\CMS\Form\Form;
-use Joomla\CMS\Http\HttpFactory;
 use Joomla\CMS\Language\Text;
-use Joomla\CMS\Log\Log;
-use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
-use Joomla\CMS\MVC\Model\AdminModel;
+use Joomla\CMS\MVC\Model\ItemModel;
 use Joomla\CMS\Router\Route;
-use Joomla\CMS\String\PunycodeHelper;
 use Joomla\CMS\Table\Table;
-use Joomla\CMS\User\User;
 use Joomla\Database\ParameterType;
-use Joomla\Registry\Registry;
 use Joomla\Utilities\ArrayHelper;
-use RuntimeException;
 use stdClass;
 
 /**
  * Volunteer model.
+ *
+ * Joomlers edit their profile on the Joomla! Identity portal, which sends the changes to this site, so this model only reads a Joomler.
+ *
  * @since 4.0.0
  */
-class VolunteerModel extends AdminModel
+class VolunteerModel extends ItemModel
 {
     /**
-     * The type alias for this content type.
+     * Model context string.
      *
      * @var    string
-     * @since 4.0.0
-     */
-    public $typeAlias = 'com_volunteers.volunteer';
-
-    /**
-     * The prefix to use with controller messages.
-     *
-     * @var    string
-     * @since 4.0.0
-     */
-    protected $text_prefix = 'COM_VOLUNTEERS';
-
-    /**
-     * @var null  Item data
-     * @since  4.0.0
-     */
-    protected mixed $item = null;
-
-    /**
-     * @var \Joomla\CMS\Application\CMSApplicationInterface
      * @since  6.1.0
      */
-    protected $app;
+    protected $_context = 'com_volunteers.volunteer';
 
     /**
-     * Constructor.
+     * Method to auto-populate the model state.
      *
-     * @param   array                $config   An optional associative array of configuration settings.
-     * @param   MVCFactoryInterface  $factory  The factory.
+     * @return  void
      *
-     * @since   4.0.0
+     * @since   6.1.0
      * @throws  Exception
      */
-    public function __construct($config = [], MVCFactoryInterface $factory = null)
+    protected function populateState()
     {
-        parent::__construct($config, $factory);
-
-        $this->app = Factory::getApplication();
-    }
-
-    /**
-     * The fields containing an url, only those that we can check on a 200 code
-     *
-     * @var    array
-     * @since 4.0.0
-     */
-    protected array $url_fields = ['website', 'github', 'twitter', 'crowdin', 'joomladocs', 'certification'];
-
-    /**
-     * Method to check for valid certification link
-     *
-     * @param $url
-     *
-     * @return bool
-     *
-     * @since 4.0.0
-     */
-    public function checkCertification($url)
-    {
-        // JHttp transport throws an exception when there's no response.
-        try {
-            $http     = HttpFactory::getHttp();
-            $response = $http->get($url, [], 5);
-        } catch (RuntimeException $e) {
-            Log::add($e->getMessage());
-            $response = null;
-        }
-
-        // Check for error text (most likely this will break at some point in the future...)
-        if ((str_contains((string) $response->body, 'You do not have any certifications.'))) {
-            throw new RuntimeException();
-        }
-
-        return true;
-    }
-
-    /**
-     * Method to check a link for a 200 or 301 response code
-     *
-     * @param $url
-     *
-     * @return bool
-     *
-     * @since 1.0.1
-     * @since 4.0.0
-     */
-    public function checkLink($url)
-    {
-        // Adding a valid user agent string, otherwise some feed-servers returning an error
-        $options = new Registry();
-        $options->set('userAgent', 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:41.0) Gecko/20100101 Firefox/41.0');
-
-        try {
-            $response = HttpFactory::getHttp($options)->get($url, [], 5);
-        } catch (RuntimeException $e) {
-            Log::add($e->getMessage());
-            $response = null;
-        }
-
-        // Check for response code
-        if ($response === null || ($response->code !== 200 && $response->code !== 301)) {
-            throw new RuntimeException();
-        }
-
-        return true;
+        $this->setState($this->getName() . '.id', Factory::getApplication()->getInput()->getInt('id'));
+        $this->setState('params', ComponentHelper::getParams('com_volunteers'));
     }
 
     /**
@@ -157,107 +62,13 @@ class VolunteerModel extends AdminModel
      * @param   array   $options  Configuration array for model. Optional.
      *
      * @return  Table  A Table object
-     * @since 4.0.0
-     * @throws Exception
+     *
+     * @since   4.0.0
+     * @throws  Exception
      */
-    public function getTable($name = 'Volunteer', $prefix = 'VolunteersTable', $options = [])
+    public function getTable($name = 'Volunteer', $prefix = 'Administrator', $options = [])
     {
         return parent::getTable($name, $prefix, $options);
-    }
-
-    /**
-     * Abstract method for getting the form from the model.
-     *
-     * @param   array    $data      Data for the form.
-     * @param   boolean  $loadData  True if the form is to load its own data (default case), false if not.
-     *
-     * @return  mixed  A Form object on success, false on failure
-     * @since 4.0.0
-     * @throws Exception
-     */
-    public function getForm($data = [], $loadData = true)
-    {
-        // Get the form.
-        $form = $this->loadForm('com_volunteers.volunteer', 'volunteer', ['control' => 'jform', 'load_data' => $loadData]);
-
-        if (empty($form)) {
-            return false;
-        }
-
-        // Modify the form based on access controls.
-        if (!$this->canEditState((object) $data)) {
-            // Disable fields for display.
-            $form->setFieldAttribute('ordering', 'disabled', 'true');
-            $form->setFieldAttribute('state', 'disabled', 'true');
-
-            // Disable fields while saving.
-            $form->setFieldAttribute('ordering', 'filter', 'unset');
-            $form->setFieldAttribute('state', 'filter', 'unset');
-        }
-
-        return $form;
-    }
-
-    /**
-     * Method to get the data that should be injected in the form.
-     *
-     * @return  array  The default data is an empty array.
-     * @since 4.0.0
-     * @throws Exception
-     */
-    protected function loadFormData()
-    {
-        // Check the session for previously entered form data.
-        $data = $this->app->getUserState('com_volunteers.edit.volunteer.data', []);
-
-        if (empty($data)) {
-            $data = $this->getItem();
-        }
-
-        $this->preprocessData('com_volunteers.volunteer', $data);
-
-        return (array)$data;
-    }
-
-    /**
-     * Prepare and sanitise the table data prior to saving.
-     *
-     * @param   Table  $table  A reference to a Table object.
-     *
-     * @return  void
-     * @since 4.0.0
-     * @throws Exception
-     */
-    protected function prepareTable($table)
-    {
-        $date = Factory::getDate();
-        $user = $this->getCurrentUser();
-
-        if (empty($table->getId())) {
-            // Set the values
-
-            // Set ordering to the last item if not set
-            if (empty($table->ordering)) {
-                $db    = $this->getDatabase();
-                $query = $db->getQuery(true)
-                    ->select('MAX(ordering)')
-                    ->from($db->quoteName('#__volunteers_volunteers'));
-
-                $db->setQuery($query);
-                $max = $db->loadResult();
-
-                $table->ordering = $max + 1;
-            } else {
-                // Set the values
-                $table->modified    = $date->toSql();
-                $table->modified_by = $user->id;
-            }
-        }
-
-        // Increment the version number.
-        $v  = $table->version;
-        $v++;
-        $table->version = $v;
     }
 
     /**
@@ -326,94 +137,6 @@ class VolunteerModel extends AdminModel
     }
 
     /**
-     * Method to save the form data.
-     *
-     * @param   array  $data  The form data.
-     *
-     * @return  boolean  True on success.
-     * @since 4.0.0
-     * @throws Exception
-     */
-    public function save($data)
-    {
-        // Check the url fields
-        foreach ($data as $field => $value) {
-            if (in_array($field, $this->url_fields)) {
-                $url = match ($field) {
-                    'github' => 'https://github.com/' . $value,
-                    'twitter' => 'https://x.com/' . $value,
-                    'certification' => 'https://exam.joomla.org/directory/user/' . $value,
-                    'joomladocs' => 'https://docs.joomla.org/User:' . $value,
-                    'crowdin' => 'https://crowdin.com/profile/' . $value,
-                    default => $value,
-                };
-
-                if ($value) {
-                    try {
-                        if ($field == 'certification') {
-                            $this->checkCertification($url);
-                        } else {
-                            $this->checkLink($url);
-                        }
-                    } catch (RuntimeException $e) {
-                        Log::add($e->getMessage());
-                        throw new Exception(sprintf(Text::_('COM_VOLUNTEERS_ERROR_URL_INVALID'), $url, ucfirst((string) $field)));
-                    }
-                }
-            }
-        }
-
-        // Joomla User
-        $dataUser = [
-            'name'      => $data['name'],
-            'username'  => PunycodeHelper::emailToPunycode($data['email']),
-            'password'  => $data['password1'] ?? '',
-            'password2' => $data['password2'] ?? '',
-            'email'     => PunycodeHelper::emailToPunycode($data['email']),
-        ];
-
-        // Handle com_users changes
-        if (isset($data['id'])) {
-            $userId         = (int) $this->getItem($data['id'])->user_id;
-            $dataUser['id'] = $userId;
-            $user           = new User($userId);
-        } else {
-            $user                 = new User();
-            $params               = ComponentHelper::getParams('com_users');
-            $dataUser['groups'][] = $params->get('new_usertype', 2);
-        }
-
-        // Bind the data.
-        if (!$user->bind($dataUser)) {
-            throw new Exception("Could not bind data. Error: " . $user->getError());
-        }
-
-        // Store the data.
-        if (!$user->save()) {
-            throw new Exception("Could not save user. Error: " . $user->getError());
-        }
-
-        // Get User ID
-        $data['user_id'] = $user->id;
-
-        // Unset data
-        unset($data['email']);
-        unset($data['password1']);
-        unset($data['password2']);
-
-        // Set alias
-        $data['alias'] = ApplicationHelper::stringURLSafe($data['name']);
-
-        $return = parent::save($data);
-
-        // Store the newly created volunteer ID
-        $volunteerId = $this->getState('volunteer.id');
-        $this->app->setUserState('com_volunteers.registration.id', $volunteerId);
-
-        return $return;
-    }
-
-    /**
      * getVolunteerId
      *
      * @param $userId
@@ -454,7 +177,7 @@ class VolunteerModel extends AdminModel
      * @since 4.0.0
      * @throws Exception
      */
-    public function getVolunteerTeams(int $pk = null)
+    public function getVolunteerTeams(?int $pk = null)
     {
         $pk = (!empty($pk)) ? $pk : (int) $this->getState($this->getName() . '.id');
 

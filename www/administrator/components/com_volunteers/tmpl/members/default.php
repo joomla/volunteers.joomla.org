@@ -45,19 +45,17 @@ $wa->useScript('table.columns');
                 <?php
         else :
             ?>
-                <h3><?php echo count($this->items); ?> members (matching filters)</h3>
                 <table class="table table-striped" id="itemsList">
                     <thead>
                     <tr>
-                        <th width="6%"></th>
+                        <th scope="col">
+                            <?php echo HTMLHelper::_('searchtools.sort', 'COM_VOLUNTEERS_FIELD_POSITION', 'a.position', $listDirn, $listOrder); ?>
+                        </th>
                         <th width="15%" class="team">
                             <?php echo HTMLHelper::_('searchtools.sort', 'COM_VOLUNTEERS_FIELD_DEPARTMENT', 'a.department', $listDirn, $listOrder); ?>
                         </th>
                         <th width="15%" class="team">
                             <?php echo HTMLHelper::_('searchtools.sort', 'COM_VOLUNTEERS_FIELD_TEAM', 'a.team', $listDirn, $listOrder); ?>
-                        </th>
-                        <th>
-                            <?php echo HTMLHelper::_('searchtools.sort', 'COM_VOLUNTEERS_FIELD_POSITION', 'a.position', $listDirn, $listOrder); ?>
                         </th>
                         <th width="15%" class="name">
                             <?php echo HTMLHelper::_('searchtools.sort', 'COM_VOLUNTEERS_FIELD_VOLUNTEER', 'a.volunteer', $listDirn, $listOrder); ?>
@@ -89,11 +87,21 @@ $wa->useScript('table.columns');
                                           else :
                                                 ?> error<?php
                                           endif; ?>" sortable-volunteer-id="<?php echo $item->id ?>">
-                                <td>
-                                    <a class="btn btn-secondary btn-sm" href="<?php echo Route::_('index.php?option=com_volunteers&task=member.edit&id=' . (int) $item->id); ?>">
-                                        <span class="icon-edit" aria-hidden="true"></span>Edit
-                                    </a>
-                                </td>
+                                <th scope="row" class="text-nowrap has-context">
+                                    <?php if ($item->checked_out) : ?>
+                                        <?php echo HTMLHelper::_('jgrid.checkedout', $i, $item->editor, $item->checked_out_time, 'members.', $canCheckin); ?>
+                                    <?php endif; ?>
+                                    <?php if ($canEdit) : ?>
+                                        <a href="<?php echo Route::_('index.php?option=com_volunteers&task=member.edit&id=' . (int) $item->id); ?>"
+                                            title="<?php echo Text::_('JACTION_EDIT'); ?>">
+                                            <?php echo $this->escape($item->position_title); ?></a>
+                                    <?php else : ?>
+                                        <?php echo $this->escape($item->position_title); ?>
+                                    <?php endif; ?>
+                                    <?php if ($item->role_title) : ?>
+                                        <div class="small"><?php echo $this->escape($item->role_title); ?></div>
+                                    <?php endif; ?>
+                                </th>
                                 <td class="text-nowrap">
                                     <?php echo $item->department_title; ?>
                                     <?php echo $item->teamdepartment_title; ?>
@@ -125,14 +133,6 @@ $wa->useScript('table.columns');
                                     endif; ?>
                                 </td>
                                 <td class="text-nowrap">
-                                    <?php echo $item->position_title; ?>
-                                    <?php if ($item->role_title) :
-                                        ?>
-                                            <br><small><?php echo $item->role_title; ?></small>
-                                            <?php
-                                    endif; ?>
-                                </td>
-                                <td class="text-nowrap">
                                     <?php if ($canEdit) :
                                         ?>
                                             <a href="<?php echo Route::_('index.php?option=com_volunteers&task=volunteer.edit&id=' . (int) $item->volunteer); ?>">
@@ -146,12 +146,12 @@ $wa->useScript('table.columns');
                                     endif; ?>
                                     <br><small><?php echo $item->user_email; ?></small>
                                 </td>
-                                <td>
-                                    <?php echo $item->date_started; ?>
-                                </td>
-                                <td>
-                                    <?php echo $item->date_ended; ?>
-                                </td>
+                                <?php // A member who has not stepped down has a zero end date, which is shown empty ?>
+                                <?php foreach (['date_started', 'date_ended'] as $field) : ?>
+                                    <td class="text-nowrap">
+                                        <?php echo $item->$field && $item->$field !== '0000-00-00' ? $item->$field : ''; ?>
+                                    </td>
+                                <?php endforeach; ?>
                                 <td class="text-center d-none d-md-table-cell">
                                     <?php echo (int) $item->id; ?>
                                 </td>

@@ -53,9 +53,6 @@ if ($saveOrder) {
                         <?php echo Text::_('JGLOBAL_NO_MATCHING_RESULTS'); ?>
                     </div>
                 <?php else : ?>
-                    <h3>
-                        <?php echo count($this->items); ?> volunteers (matching filters)
-                    </h3>
                     <table class="table" id="itemsList">
                         <caption class="visually-hidden">
                             <?php echo Text::_('COM_VOLUNTEERS_TEAMS_TABLE_CAPTION'); ?>,

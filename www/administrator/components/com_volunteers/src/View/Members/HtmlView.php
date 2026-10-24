@@ -106,10 +106,6 @@ class HtmlView extends BaseHtmlView
             $toolbar->addNew('member.add');
         }
 
-        if ($canDo->get('core.edit')) {
-            ToolbarHelper::editList('member.edit');
-        }
-
         if ($user->authorise('core.admin', 'com_volunteers')) {
             ToolbarHelper::custom('members.export', 'download', 'download', 'Export current selection (CSV)', false);
             ToolbarHelper::custom('members.mail', 'mail', 'mail', 'E-mail current selection', false);

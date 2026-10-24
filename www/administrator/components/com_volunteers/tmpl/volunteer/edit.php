@@ -14,6 +14,7 @@ use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Layout\LayoutHelper;
 use Joomla\CMS\Router\Route;
+use Joomla\CMS\Uri\Uri;
 use Joomla\CMS\WebAsset\WebAssetManager;
 use Joomla\Component\Volunteers\Administrator\View\Volunteer\HtmlView;
 
@@ -23,6 +24,8 @@ use Joomla\Component\Volunteers\Administrator\View\Volunteer\HtmlView;
 $wa = $this->getDocument()->getWebAssetManager();
 $wa->useScript('keepalive')
     ->useScript('form.validate');
+
+$noImage = Uri::root() . 'media/com_volunteers/images/joomlaperson.png';
 ?>
 <form action="<?php echo Route::_('index.php?option=com_volunteers&layout=edit&id=' . (int) $this->item->id); ?>" method="post" name="adminForm" id="volunteer-form" aria-label="<?php echo Text::_('COM_VOLUNTEERS_TITLE_VOLUNTEERS_' . (empty($this->item->id) ? 'NEW' : 'EDIT'), true); ?>" class="form-validate">
 
@@ -34,7 +37,14 @@ $wa->useScript('keepalive')
         <?php echo HTMLHelper::_('uitab.addTab', 'myTab', 'details', Text::_('JDETAILS')); ?>
         <div class="row">
             <div class="col-lg-9">
-                <?php echo $this->form->renderFieldset('item'); ?>
+                <?php foreach (['account', 'location', 'address'] as $fieldset) : ?>
+                    <fieldset id="fieldset-<?php echo $fieldset; ?>" class="options-form">
+                        <legend><?php echo Text::_($this->form->getFieldsets()[$fieldset]->label); ?></legend>
+                        <div>
+                            <?php echo $this->form->renderFieldset($fieldset); ?>
+                        </div>
+                    </fieldset>
+                <?php endforeach; ?>
             </div>
             <div class="col-lg-3">
                 <fieldset class="form-vertical">
@@ -47,6 +57,40 @@ $wa->useScript('keepalive')
                 </fieldset>
             </div>
         </div>
+        <?php echo HTMLHelper::_('uitab.endTab'); ?>
+
+        <?php echo HTMLHelper::_('uitab.addTab', 'myTab', 'profile', Text::_('COM_VOLUNTEERS_FIELDSET_PROFILE')); ?>
+        <div class="row">
+            <div class="col-lg-9">
+                <fieldset id="fieldset-profile" class="options-form">
+                    <legend><?php echo Text::_('COM_VOLUNTEERS_FIELDSET_PROFILE'); ?></legend>
+                    <div>
+                        <?php echo $this->form->renderFieldset('profile'); ?>
+                    </div>
+                </fieldset>
+            </div>
+            <div class="col-lg-3">
+                <fieldset id="fieldset-photo" class="options-form">
+                    <legend><?php echo Text::_('COM_VOLUNTEERS_FIELDSET_PHOTO'); ?></legend>
+                    <div>
+                        <?php // The photo is a link to the image on the Joomla! Identity portal ?>
+                        <img class="img-fluid rounded mb-3" src="<?php echo $this->escape($this->item->image ?: $noImage); ?>" alt="">
+                        <div class="form-vertical">
+                            <?php echo $this->form->renderFieldset('photo'); ?>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+        <?php echo HTMLHelper::_('uitab.endTab'); ?>
+
+        <?php echo HTMLHelper::_('uitab.addTab', 'myTab', 'accounts', Text::_('COM_VOLUNTEERS_FIELDSET_ACCOUNTS')); ?>
+        <fieldset id="fieldset-accounts" class="options-form">
+            <legend><?php echo Text::_('COM_VOLUNTEERS_FIELDSET_ACCOUNTS'); ?></legend>
+            <div>
+                <?php echo $this->form->renderFieldset('accounts'); ?>
+            </div>
+        </fieldset>
         <?php echo HTMLHelper::_('uitab.endTab'); ?>
 
         <?php echo HTMLHelper::_('uitab.addTab', 'myTab', 'publishing', Text::_('JGLOBAL_FIELDSET_PUBLISHING')); ?>

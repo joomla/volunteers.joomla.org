@@ -20,6 +20,7 @@ The following extensions must be uninstalled:
 - Search - Volunteers - Reports
 - Search - Volunteers - Teams
 - Search - Volunteers - Volunteers
+- Perfect Image Form Field (`plg_content_perfectimage`), the Joomla 3 image cropper of the profile edit and the registration form. Joomlers edit their profile and photo on the Joomla! Identity portal.
 
 ### Update Extensions
 - Joomla Volunteer Portal package, this installs the Smart Search plugins:

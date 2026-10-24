@@ -12,144 +12,49 @@ namespace Joomla\Component\Volunteers\Administrator\View\Position;
 \defined('_JEXEC') or die;
 // phpcs:enable PSR1.Files.SideEffects
 
-use Exception;
-use Joomla\CMS\Application\CMSApplicationInterface;
-use Joomla\CMS\Factory;
 use Joomla\CMS\Helper\ContentHelper;
 use Joomla\CMS\Language\Text;
-use Joomla\CMS\MVC\View\GenericDataException;
-use Joomla\CMS\MVC\View\HtmlView as BaseHtmlView;
-
-use Joomla\CMS\Toolbar\Toolbar;
-use Joomla\CMS\Toolbar\ToolbarHelper;
-use Joomla\Component\Volunteers\Administrator\Model\PositionModel;
+use Joomla\CMS\MVC\View\FormView;
 
 /**
  * View to edit a position.
  *
- * @since 4.0.0
+ * @since  4.0.0
  */
-class HtmlView extends BaseHtmlView
+class HtmlView extends FormView
 {
-    protected mixed $state;
-    protected mixed $item;
-    protected mixed $form;
-
-    /**
-     * @var CMSApplicationInterface
-     * @since  6.1.0
-     */
-    protected $app;
-
     /**
      * Constructor
      *
-     * @param   array  $config  A named configuration array for object construction.
+     * @param   array  $config  An optional associative array of configuration settings.
      *
      * @since   4.0.0
      */
-    public function __construct($config = [])
+    public function __construct(array $config)
     {
+        if (empty($config['option'])) {
+            $config['option'] = 'com_volunteers';
+        }
+
+        $config['toolbar_icon'] = 'joomla';
+
         parent::__construct($config);
-
-        $this->app = \Joomla\CMS\Factory::getApplication();
     }
 
     /**
-     * Display the view
-     *
-     * @param   string  $tpl  Template
+     * Prepare view data
      *
      * @return  void
      *
-     * @since 4.0.0
-     * @throws Exception
+     * @since   6.1.0
      */
-    public function display($tpl = null)
+    protected function initializeView()
     {
-        /** @var PositionModel $model */
-        $model       = $this->getModel();
-        $model->setUseExceptions(true);
-        
-        $this->state = $model->getState();
-        $this->item  = $model->getItem();
-        $this->form  = $model->getForm();
+        parent::initializeView();
 
-        $errors = $model->getErrors();
+        $this->canDo        = ContentHelper::getActions('com_volunteers');
+        $this->toolbarTitle = Text::_('COM_VOLUNTEERS') . ': ' . Text::_('COM_VOLUNTEERS_TITLE_POSITIONS_' . (empty($this->item->id) ? 'NEW' : 'EDIT'));
 
-        if ($errors && count($errors) > 0) {
-            throw new GenericDataException(implode("\n", $errors));
-        }
-
-        $this->addToolbar();
-        parent::display($tpl);
-    }
-
-    /**
-     * Add the page title and toolbar.
-     *
-     * @return  void
-     *
-     * @since 4.0.0
-     * @throws Exception
-     */
-    protected function addToolbar()
-    {
-        $this->app->getInput()->set('hidemainmenu', true);
-        $user       = $this->getCurrentUser();
-        $userId     = $user->id;
-        $isNew      = ($this->item->id == 0);
-        $checkedOut = !(is_null($this->item->checked_out) || $this->item->checked_out == $userId);
-        $toolbar    = $this->getDocument()->getToolbar();
-        $canDo      = ContentHelper::getActions('com_volunteers');
-
-        ToolbarHelper::title($isNew ? Text::_('COM_VOLUNTEERS') . ': ' . Text::_('COM_VOLUNTEERS_TITLE_POSITIONS_NEW') : Text::_('COM_VOLUNTEERS') . ': ' . Text::_('COM_VOLUNTEERS_TITLE_POSITIONS_EDIT'), 'joomla');
-
-        // For new records, check the create permission.
-        if ($isNew) {
-            $toolbar->apply('position.apply');
-
-            $saveGroup = $toolbar->dropdownButton('save-group');
-
-            $saveGroup->configure(
-                function (Toolbar $childBar) use ($user) {
-                    $childBar->save('position.save');
-                    $childBar->save2new('position.save2new');
-                }
-            );
-
-            $toolbar->cancel('position.cancel', 'JTOOLBAR_CANCEL');
-        } else {
-            // Since it's an existing record, check the edit permission, or fall back to edit own if the owner.
-            $itemEditable = $canDo->get('core.edit') || ($canDo->get('core.edit.own') && $this->item->created_by == $userId);
-
-            if (!$checkedOut && $itemEditable) {
-                $toolbar->apply('position.apply');
-            }
-
-            $saveGroup = $toolbar->dropdownButton('save-group');
-
-            $saveGroup->configure(
-                function (Toolbar $childBar) use ($checkedOut, $itemEditable, $canDo, $user) {
-                    // Can't save the record if it's checked out and editable
-                    if (!$checkedOut && $itemEditable) {
-                        $childBar->save('position.save');
-                    }
-                    // If checked out, we can still save
-                    if ($canDo->get('core.create')) {
-                        $childBar->save2copy('position.save2copy');
-                    }
-                }
-            );
-            if ($this->state->params->get('save_history', 0) && $user->authorise('core.edit')) {
-                $toolbar->versions('com_volunteers.position', $this->item->id);
-            }
-            $toolbar->cancel('position.cancel');
-        }
-
-        $toolbar->divider();
-        $toolbar->inlinehelp();
-        // For future use
-        // $toolbar->help('Volunteers_position:_Edit');
+        $this->form->addControlField('task');
     }
 }

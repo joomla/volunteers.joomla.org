@@ -118,7 +118,7 @@ JS, [], [], ['core']);
             [$item->stackexchange, 'https://stackexchange.com/users/' . $item->stackexchange, 'stackexchange', 'fa-brands fa-stack-exchange', 'COM_VOLUNTEERS_CONNECT_STACKEXCHANGE'],
             [$item->joomlastackexchange, 'https://joomla.stackexchange.com/users/' . $item->joomlastackexchange, 'joomlastackexchange', 'fa-brands fa-stack-exchange', 'COM_VOLUNTEERS_CONNECT_JOOMLASTACKEXCHANGE'],
             [preg_match('#^https?://.+#i', (string) $item->website), $item->website, 'website', 'fa-solid fa-globe', 'COM_VOLUNTEERS_CONNECT_WEBSITE'],
-            [$item->twitter, 'https://twitter.com/' . $item->twitter, 'twitter', 'fa-brands fa-x-twitter', 'COM_VOLUNTEERS_CONNECT_TWITTER'],
+            [$item->twitter, 'https://x.com/' . $item->twitter, 'twitter', 'fa-brands fa-x-twitter', 'COM_VOLUNTEERS_CONNECT_TWITTER'],
             [$item->facebook, 'https://www.facebook.com/' . $item->facebook, 'facebook', 'fa-brands fa-facebook', 'COM_VOLUNTEERS_CONNECT_FACEBOOK'],
             [$item->linkedin, 'https://www.linkedin.com/in/' . $item->linkedin, 'linkedin', 'fa-brands fa-linkedin', 'COM_VOLUNTEERS_CONNECT_LINKEDIN'],
         ];

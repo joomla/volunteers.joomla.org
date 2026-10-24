@@ -141,3 +141,11 @@ body.site {
 #system-message-container joomla-alert {
     margin-bottom: 1rem;
 }
+
+/* The X share button uses the X brand colour instead of the old Twitter blue */
+body .rrssb-buttons li.rrssb-twitter a {
+    background-color: #000;
+}
+body .rrssb-buttons li.rrssb-twitter a:hover {
+    background-color: #333;
+}

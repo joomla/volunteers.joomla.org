@@ -259,7 +259,7 @@ class VolunteerModel extends AdminModel
             if (in_array($field, $this->url_fields)) {
                 $url = match ($field) {
                     'github' => 'https://github.com/' . $value,
-                    'twitter' => 'https://twitter.com/' . $value,
+                    'twitter' => 'https://x.com/' . $value,
                     'certification' => 'https://exam.joomla.org/directory/user/' . $value,
                     'joomladocs' => 'https://docs.joomla.org/User:' . $value,
                     'crowdin' => 'https://crowdin.com/profile/' . $value,

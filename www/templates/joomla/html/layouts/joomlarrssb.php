@@ -7,23 +7,24 @@
  */
 
 use Joomla\CMS\Factory;
+use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Http\HttpFactory;
 
 defined('_JEXEC') or die;
 
 // Import media
-JHtml::_('jquery.framework');
-JHtml::_('script', 'joomlarrssb/rrssb.min.js', false, true);
-JHtml::_('stylesheet', 'joomlarrssb/rrssb.css', [], true);
-JHtml::_('stylesheet', 'joomlarrssb/joomla.css', [], true);
+HTMLHelper::_('jquery.framework');
+HTMLHelper::_('script', 'joomlarrssb/rrssb.min.js', ['relative' => true]);
+HTMLHelper::_('stylesheet', 'joomlarrssb/rrssb.css', ['relative' => true]);
+HTMLHelper::_('stylesheet', 'joomlarrssb/joomla.css', ['relative' => true]);
 
 // Optional RTL support
-if (JFactory::getDocument()->getDirection() == 'rtl')
+if (Factory::getApplication()->getDocument()->getDirection() == 'rtl')
 {
-	JHtml::_('stylesheet', 'joomlarrssb/joomla-rtl.css', [], true);
+	HTMLHelper::_('stylesheet', 'joomlarrssb/joomla-rtl.css', ['relative' => true]);
 }
 
-// If the item has an image use it otherwise default is hardcoded to the card image used for Twitter
+// If the item has an image use it otherwise default is hardcoded to the card image used for X
 $displayData->image = !empty($displayData->image) ? $displayData->image : 'https://cdn.joomla.org/images/joomla-org-og.jpg';
 
 // Prevent recursion when crawled by YOURLs
@@ -83,13 +84,13 @@ if ($displayData->shorten && $displayData->shortenKey && !JDEBUG && (stristr($ag
 		<?php endif; ?>
 		<?php if ($displayData->displayTwitter) : ?>
 			<li class="rrssb-twitter">
-				<a href="https://twitter.com/intent/tweet?text=<?php echo urlencode($displayData->title . ': ' . $displayData->url); ?>" class="popup">
+				<a href="https://x.com/intent/post?text=<?php echo urlencode($displayData->title . ': ' . $displayData->url); ?>" class="popup">
 				<span class="rrssb-icon">
-					<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28">
-						<path d="M24.253 8.756C24.69 17.08 18.297 24.182 9.97 24.62c-3.122.162-6.22-.646-8.86-2.32 2.702.18 5.375-.648 7.507-2.32-2.072-.248-3.818-1.662-4.49-3.64.802.13 1.62.077 2.4-.154-2.482-.466-4.312-2.586-4.412-5.11.688.276 1.426.408 2.168.387-2.135-1.65-2.73-4.62-1.394-6.965C5.574 7.816 9.54 9.84 13.802 10.07c-.842-2.738.694-5.64 3.434-6.48 2.018-.624 4.212.043 5.546 1.682 1.186-.213 2.318-.662 3.33-1.317-.386 1.256-1.248 2.312-2.4 2.942 1.048-.106 2.07-.394 3.02-.85-.458 1.182-1.343 2.15-2.48 2.71z"/>
+					<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="-5 -5 34 34">
+						<path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/>
 					</svg>
 				</span>
-					<span class="rrssb-text">twitter</span>
+					<span class="rrssb-text">X</span>
 				</a>
 			</li>
 		<?php endif; ?>
@@ -107,7 +108,7 @@ if ($displayData->shorten && $displayData->shortenKey && !JDEBUG && (stristr($ag
 		<?php endif; ?>
 		<?php if ($displayData->displayLinkedin) : ?>
 			<li class="rrssb-linkedin">
-				<a href="http://www.linkedin.com/shareArticle?mini=true&amp;url=<?php echo urlencode($displayData->url); ?>&amp;title=<?php echo urlencode($displayData->title); ?>&amp;summary=<?php echo urlencode(JHtml::_('string.truncate', $displayData->text, 50, false, false)); ?>" class="popup">
+				<a href="http://www.linkedin.com/shareArticle?mini=true&amp;url=<?php echo urlencode($displayData->url); ?>&amp;title=<?php echo urlencode($displayData->title); ?>&amp;summary=<?php echo urlencode(HTMLHelper::_('string.truncate', $displayData->text, 50, false, false)); ?>" class="popup">
 					<span class="rrssb-icon">
 						<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28">
 							<path d="M25.424 15.887v8.447h-4.896v-7.882c0-1.98-.71-3.33-2.48-3.33-1.354 0-2.158.91-2.514 1.802-.13.315-.162.753-.162 1.194v8.216h-4.9s.067-13.35 0-14.73h4.9v2.087c-.01.017-.023.033-.033.05h.032v-.05c.65-1.002 1.812-2.435 4.414-2.435 3.222 0 5.638 2.106 5.638 6.632zM5.348 2.5c-1.676 0-2.772 1.093-2.772 2.54 0 1.42 1.066 2.538 2.717 2.546h.032c1.71 0 2.77-1.132 2.77-2.546C8.056 3.593 7.02 2.5 5.344 2.5h.005zm-2.48 21.834h4.896V9.604H2.867v14.73z"/>

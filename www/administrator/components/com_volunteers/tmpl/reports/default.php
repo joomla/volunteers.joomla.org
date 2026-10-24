@@ -16,7 +16,6 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Layout\LayoutHelper;
 use Joomla\CMS\MVC\View\HtmlView;
 use Joomla\CMS\Router\Route;
-use Joomla\CMS\Session\Session;
 
 
 $wa = $this->getDocument()->
@@ -30,12 +29,6 @@ $user = $this->getCurrentUser();
 $userId = $user->id;
 $listOrder = $this->escape($this->state->get('list.ordering'));
 $listDirn = $this->escape($this->state->get('list.direction'));
-$canOrder = $user->authorise('core.edit.state', 'com_volunteers');
-$saveOrder = $listOrder == 'a.ordering';
-if ($saveOrder) {
-    $saveOrderingUrl = 'index.php?option=com_volunteers&task=reports.saveOrderAjax&tmpl=component&' . Session::getFormToken() . '=1';
-    HTMLHelper::_('draggablelist.draggable');
-}
 
 ?>
 
@@ -65,9 +58,6 @@ if ($saveOrder) {
                                 <td class="w-1 text-center">
                                     <?php echo HTMLHelper::_('grid.checkall'); ?>
                                 </td>
-                                <th scope="col" class="w-1 text-center d-none d-md-table-cell">
-                                    <?php echo HTMLHelper::_('searchtools.sort', '', 'a.ordering', $listDirn, $listOrder, null, 'asc', 'JGRID_HEADING_ORDERING', 'icon-sort'); ?>
-                                </th>
                                 <th scope="col" class="w-1 text-center">
                                     <?php echo HTMLHelper::_('searchtools.sort', 'JSTATUS', 'a.state', $listDirn, $listOrder); ?>
                                 </th>
@@ -79,12 +69,8 @@ if ($saveOrder) {
                                 </th>
                             </tr>
                         </thead>
-                        <tbody <?php if ($saveOrder) :
-                            ?> class="js-draggable" data-url="<?php echo $saveOrderingUrl; ?>"
-                                data-direction="<?php echo strtolower((string) $listDirn); ?>" <?php
-                               endif; ?>>
+                        <tbody>
                             <?php foreach ($this->items as $i => $item) :
-                                $ordering = ($listOrder == 'a.ordering');
                                 $canCreate = $user->authorise('core.create', 'com_volunteers');
                                 $canEdit = $user->authorise('core.edit', 'com_volunteers');
                                 $canCheckin = $user->authorise('core.manage', 'com_checkin') || $item->checked_out == $user->id || $item->checked_out == 0;
@@ -93,23 +79,6 @@ if ($saveOrder) {
                                 <tr class="row<?php echo $i % 2; ?>">
                                     <td class="text-center">
                                         <?php echo HTMLHelper::_('grid.id', $i, $item->id, false, 'cid', 'cb', $item->title); ?>
-                                    </td>
-                                    <td class="text-center d-none d-md-table-cell">
-                                        <?php
-                                        $iconClass = '';
-                                        if (!$canChange) {
-                                            $iconClass = ' inactive';
-                                        } elseif (!$saveOrder) {
-                                            $iconClass = ' inactive" title="' . Text::_('JORDERINGDISABLED');
-                                        }
-                                        ?>
-                                        <span class="sortable-handler<?php echo $iconClass; ?>">
-                                            <span class="icon-ellipsis-v" aria-hidden="true"></span>
-                                        </span>
-                                        <?php if ($canChange && $saveOrder) : ?>
-                                            <input type="text" name="order[]" size="5" value="<?php echo $item->ordering; ?>"
-                                                class="width-20 text-area-order hidden" />
-                                        <?php endif; ?>
                                     </td>
                                     <td class="text-center">
                                         <?php echo HTMLHelper::_('jgrid.published', $item->state, $i, 'reports.', $canChange, 'cb'); ?>

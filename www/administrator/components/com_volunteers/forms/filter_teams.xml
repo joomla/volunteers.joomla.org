@@ -25,9 +25,7 @@
 			label="COM_VOLUNTEERS_FIELD_DEPARTMENT"
 			description="COM_VOLUNTEERS_FIELD_DEPARTMENT_DESC"
 			class="js-select-submit-on-change"
-			>
-			<option value="">COM_VOLUNTEERS_SELECT_DEPARTMENT</option>
-		</field>
+			/>
 	</fields>
 	<fields name="list">
 		<field

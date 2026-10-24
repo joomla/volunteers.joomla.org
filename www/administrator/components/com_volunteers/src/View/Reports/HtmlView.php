@@ -175,12 +175,12 @@ class HtmlView extends BaseHtmlView
                 $childBar->checkin('reports.checkin');
             }
 
-            if ($this->state->get('filter.published') != -2) {
+            if ($this->state->get('filter.state') != -2) {
                 $childBar->trash('reports.trash')->listCheck(true);
             }
         }
 
-        if (!$this->isEmptyState && $this->state->get('filter.published') == -2 && $canDo->get('core.delete')) {
+        if (!$this->isEmptyState && $this->state->get('filter.state') == -2 && $canDo->get('core.delete')) {
             $toolbar->delete('reports.delete', 'JTOOLBAR_EMPTY_TRASH')
                 ->message('JGLOBAL_CONFIRM_DELETE')
                 ->listCheck(true);

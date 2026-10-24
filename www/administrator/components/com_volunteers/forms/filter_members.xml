@@ -22,6 +22,9 @@
 			type="teams"
 			label="COM_VOLUNTEERS_FIELD_TEAM"
 			description="COM_VOLUNTEERS_FIELD_TEAM_DESC"
+			multiple="true"
+			layout="joomla.form.field.list-fancy-select"
+			hint="COM_VOLUNTEERS_SELECT_TEAM"
 			class="js-select-submit-on-change"
 		/>
 

@@ -19,6 +19,7 @@ use Joomla\CMS\MVC\Model\ListModel;
 use Joomla\CMS\Router\Route;
 use Joomla\Component\Volunteers\Administrator\Helper\VolunteersHelper;
 use Joomla\Database\QueryInterface;
+use Joomla\Utilities\ArrayHelper;
 
 /**
  * Methods supporting a list of teams records.
@@ -36,7 +37,7 @@ class ReportsModel extends ListModel
      * @since   4.0.0
      * @throws Exception
      */
-    public function __construct($config = [], MVCFactoryInterface $factory = null)
+    public function __construct($config = [], ?MVCFactoryInterface $factory = null)
     {
         if (empty($config['filter_fields'])) {
             $config['filter_fields'] = [
@@ -56,10 +57,10 @@ class ReportsModel extends ListModel
                 'a.created',
                 'created_by',
                 'a.created_by',
-                'ordering',
-                'a.ordering',
                 'featured',
                 'a.featured',
+                'department',
+                'team',
             ];
         }
 
@@ -76,17 +77,17 @@ class ReportsModel extends ListModel
      */
     protected function populateState($ordering = 'a.created', $direction = 'desc')
     {
-        // Load the filter state.
-        $this->setState('filter.search', $this->getUserStateFromRequest($this->context . '.filter.search', 'filter_search'));
-        $this->setState('filter.state', $this->getUserStateFromRequest($this->context . '.filter.state', 'filter_state'));
-        $this->setState('filter.team', $this->getUserStateFromRequest($this->context . '.filter.team', 'filter_team'));
-        $this->setState('filter.department', $this->getUserStateFromRequest($this->context . '.filter.department', 'filter_department'));
-        $this->setState('filter.category', $this->getUserStateFromRequest($this->context . '.filter.category', 'filter_category'));
+        // The filters come from the filter form through the parent, a filter outside the form would stick in the session without a way to clear it
         // Load the parameters.
         $params = ComponentHelper::getParams('com_volunteers');
         $this->setState('params', $params);
         // List state information.
         parent::populateState($ordering, $direction);
+
+        // Without a selected status the list shows published and unpublished, the models loaded with ignore_request keep the published default
+        if ($this->state->get('filter.state') === null) {
+            $this->setState('filter.state', '');
+        }
     }
 
     /**
@@ -106,7 +107,7 @@ class ReportsModel extends ListModel
         // Compile the store id.
         $id .= ':' . $this->getState('filter.search');
         $id .= ':' . $this->getState('filter.state');
-        $id .= ':' . $this->getState('filter.team');
+        $id .= ':' . implode(',', (array) $this->getState('filter.team'));
         $id .= ':' . $this->getState('filter.department');
         $id .= ':' . $this->getState('filter.category');
         return parent::getStoreId($id);
@@ -150,6 +151,8 @@ class ReportsModel extends ListModel
         $state = $this->getState('filter.state', 1);
         if (is_numeric($state)) {
             $query->where('a.state = ' . (int) $state);
+        } elseif ($state === '') {
+            $query->whereIn($db->quoteName('a.state'), [0, 1]);
         }
 
         // Filter by search in title
@@ -176,9 +179,10 @@ class ReportsModel extends ListModel
         }
 
         // Filter by team
-        $team = $this->getState('filter.team');
-        if (is_numeric($team) && ($team > 0)) {
-            $query->where('a.team = ' . (int) $team);
+        // The list filter selects one or more teams, the other models set a single team
+        $teams = array_filter(ArrayHelper::toInteger((array) $this->getState('filter.team')));
+        if ($teams) {
+            $query->whereIn($db->quoteName('a.team'), $teams);
         }
 
         // Filter by category

@@ -78,6 +78,11 @@ class MembersModel extends ListModel
                 'department_name',
                 'team_title',
                 'volunteer_name',
+                'departmentTeam',
+                'team',
+                'teamStatus',
+                'active',
+                'osmStatus',
             ];
         }
 
@@ -356,6 +361,7 @@ class MembersModel extends ListModel
         $id .= ':' . $this->getState('filter.state');
         $id .= ':' . $this->getState('filter.department');
         $id .= ':' . $this->getState('filter.departmentTeam');
+        $id .= ':' . implode(',', (array) $this->getState('filter.team'));
         $id .= ':' . $this->getState('filter.volunteer');
         $id .= ':' . $this->getState('filter.active');
         $id .= ':' . $this->getState('filter.type');
@@ -376,18 +382,7 @@ class MembersModel extends ListModel
      */
     protected function populateState($ordering = 'a.id', $direction = 'desc')
     {
-        // Load the filter state.
-        $this->setState('filter.search', $this->getUserStateFromRequest($this->context . '.filter.search', 'filter_search'));
-        $this->setState('filter.state', $this->getUserStateFromRequest($this->context . '.filter.state', 'filter_state'));
-        $this->setState('filter.department', $this->getUserStateFromRequest($this->context . '.filter.department', 'filter_department'));
-        $this->setState('filter.departmentTeam', $this->getUserStateFromRequest($this->context . '.filter.departmentTeam', 'filter_departmentTeam'));
-        $this->setState('filter.team', $this->getUserStateFromRequest($this->context . '.filter.team', 'filter_team'));
-        $this->setState('filter.volunteer', $this->getUserStateFromRequest($this->context . '.filter.volunteer', 'filter_volunteer'));
-        $this->setState('filter.position', $this->getUserStateFromRequest($this->context . '.filter.position', 'filter_position'));
-        $this->setState('filter.active', $this->getUserStateFromRequest($this->context . '.filter.active', 'filter_active'));
-        $this->setState('filter.type', $this->getUserStateFromRequest($this->context . '.filter.type', 'filter_type'));
-        $this->setState('filter.teamStatus', $this->getUserStateFromRequest($this->context . '.filter.teamStatus', 'filter_teamStatus'));
-        $this->setState('filter.osmStatus', $this->getUserStateFromRequest($this->context . '.filter.osmStatus', 'filter_osmStatus'));
+        // The filters come from the filter form through the parent, a filter outside the form would stick in the session without a way to clear it
 
         // Load the parameters.
         $params = ComponentHelper::getParams('com_volunteers');

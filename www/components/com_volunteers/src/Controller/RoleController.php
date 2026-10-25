@@ -102,6 +102,9 @@ class RoleController extends FormController
      */
     public function delete($key = null, $urlVar = null)
     {
+        // Check for request forgeries
+        $this->checkToken('get');
+
         // Get variables
         $roleId = $this->input->getInt('id');
         $teamId = (int) $this->getModel()->getItem($roleId)->team;

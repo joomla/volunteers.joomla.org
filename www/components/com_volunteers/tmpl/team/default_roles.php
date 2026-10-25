@@ -8,6 +8,7 @@
 
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
+use Joomla\CMS\Session\Session;
 use Joomla\Component\Volunteers\Site\Helper\VolunteersHelper;
 
 // phpcs:disable PSR1.Files.SideEffects
@@ -35,7 +36,7 @@ use Joomla\Component\Volunteers\Site\Helper\VolunteersHelper;
                 <div class="row">
 <div class="col-12">
         <?php if ($this->acl->edit) : ?>
-        <a class="btn btn-light btn-sm float-end" href="<?php echo Route::_('index.php?option=com_volunteers&task=role.delete&id=' . $role->id); ?>">
+        <a class="btn btn-light btn-sm float-end" href="<?php echo Route::_('index.php?option=com_volunteers&task=role.delete&id=' . $role->id . '&' . Session::getFormToken() . '=1'); ?>">
             <span class="icon-delete" aria-hidden="true"></span>
             <?php echo Text::_('COM_VOLUNTEERS_DELETE'); ?>
         </a>

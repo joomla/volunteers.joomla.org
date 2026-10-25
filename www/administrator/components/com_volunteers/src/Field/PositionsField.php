@@ -44,7 +44,12 @@ class PositionsField extends GroupedlistField
     protected function getGroups()
     {
         $types  = [0 => 'JNONE', 1 => 'COM_VOLUNTEERS_FIELD_DEPARTMENT', 2 => 'COM_VOLUNTEERS_FIELD_TEAM'];
-        $groups = [[HTMLHelper::_('select.option', '', Text::_('COM_VOLUNTEERS_SELECT_POSITION'))]];
+        // A field with multiple values has no option to select nothing
+        $groups = [];
+
+        if (!$this->multiple) {
+            $groups[] = [HTMLHelper::_('select.option', '', Text::_('COM_VOLUNTEERS_SELECT_POSITION'))];
+        }
 
         foreach (VolunteersHelper::positions() ?? [] as $position) {
             $groups[Text::_($types[(int) $position->type] ?? 'JNONE')][] = HTMLHelper::_('select.option', $position->value, $position->text);

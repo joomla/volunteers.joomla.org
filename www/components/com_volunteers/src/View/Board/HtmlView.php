@@ -15,6 +15,7 @@ namespace Joomla\Component\Volunteers\Site\View\Board;
 // phpcs:enable PSR1.Files.SideEffects
 
 use Joomla\CMS\Application\CMSApplicationInterface;
+use Joomla\CMS\Factory;
 use Joomla\CMS\HTML\Helpers\StringHelper;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\View\GenericDataException;
@@ -57,7 +58,7 @@ class HtmlView extends BaseHtmlView
     {
         parent::__construct($config);
 
-        $this->app = \Joomla\CMS\Factory::getApplication();
+        $this->app = Factory::getApplication();
     }
 
     /**
@@ -81,8 +82,8 @@ class HtmlView extends BaseHtmlView
         $this->state         = $model->getState();
         $this->form          = $model->getForm();
         $this->user          = $this->getCurrentUser();
-        $this->item->reports = $model->getDepartmentReports(58);
-        $this->item->members = $model->getDepartmentMembers(58);
+        $this->item->reports = $model->getDepartmentReports((int) $this->item->id);
+        $this->item->members = $model->getDepartmentMembers();
 
         /** @var AclService $aclService */
         $aclService = $this->app->bootComponent('com_volunteers')->getContainer()->get(AclService::class);

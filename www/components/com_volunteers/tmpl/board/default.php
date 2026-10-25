@@ -100,7 +100,7 @@ try {
                                 <?php VolunteersHelper::OutputVolunteer($volunteer); ?>
                             </td>
                             <td>
-                                <?php if ($volunteer->position == 11) : ?>
+                                <?php if ($volunteer->board_position) : ?>
                                     <?php echo $volunteer->position_title; ?>:
                                     <a
                                         href="<?php echo Route::_('index.php?option=com_volunteers&view=department&id=' . $volunteer->department) ?>">
@@ -171,7 +171,7 @@ try {
                                 <?php VolunteersHelper::OutputVolunteer($volunteer); ?>
                             </td>
                             <td>
-                                <?php if ($volunteer->position == 11) : ?>
+                                <?php if ($volunteer->board_position) : ?>
                                     <?php echo $volunteer->position_title; ?>:
                                     <a
                                         href="<?php echo Route::_('index.php?option=com_volunteers&view=department&id=' . $volunteer->department) ?>">

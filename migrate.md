@@ -117,3 +117,9 @@ The identity.joomla.org portal sends profile changes to this site. The System - 
 1. Zip both plugin folders of the identity.joomla.org repository and install them, the API key of the client plugin is kept
 2. Run `database/updates/2026-10-24-identity-plugins.sql`, replace `#__` with the table prefix. This removes the Volunteer Portal Identity plugin from the Joomla Volunteer Portal package
 3. Change a test profile on identity.joomla.org and check that the change shows on the Joomler page and is logged in `administrator/logs/idp-calls.php`
+
+## Board of Directors options
+The department of the Board of Directors and the positions of the other board members are options of the Joomla Volunteer Portal component instead of IDs in the code. They are set in the migrated database: Board Department "Board of Directors" (58) and Board Positions "Department Coordinator" (11).
+
+1. Check the options in Components > Joomla! Volunteers > Options > Board of Directors
+2. Check that `/board-of-directors` lists the officers and the Department Coordinators, and that `/groups` lists the teams of the board department

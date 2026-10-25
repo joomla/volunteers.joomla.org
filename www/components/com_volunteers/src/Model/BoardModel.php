@@ -16,10 +16,12 @@ use Exception;
 use Joomla\CMS\Application\ApplicationHelper;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Form\Form;
+use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\CMS\MVC\Model\AdminModel;
 
 use Joomla\CMS\Table\Table;
+use Joomla\Component\Volunteers\Administrator\Helper\VolunteersHelper;
 use Joomla\Database\ParameterType;
 use Joomla\String\StringHelper;
 use stdClass;
@@ -78,31 +80,41 @@ class BoardModel extends AdminModel
     }
 
     /**
-     * Hard codes board of directors
-     * @return bool|stdClass
+     * Gets the department of the Board of Directors that is set in the component options.
      *
-     * @since 4.0.0
+     * @return  stdClass
+     *
+     * @since   4.0.0
+     * @throws  Exception
      */
     public function getBoardItem()
     {
-        return json_decode(json_encode(parent::getItem(58)));
+        $board = VolunteersHelper::boardDepartment();
+        $item  = $board ? parent::getItem($board) : false;
+
+        if (!$item || empty($item->id)) {
+            throw new Exception(Text::_('COM_VOLUNTEERS_ERROR_BOARD_NOT_FOUND'), 404);
+        }
+
+        return json_decode(json_encode($item));
     }
 
     /**
-     * Method to get Department Members.
-     *
-     * @param   int|null  $pk  The id of the team.
+     * Method to get the members of the board: the members of the board department and the members of the
+     * other departments with a board position, see the component options.
      *
      * @return  stdClass  Data object on success, false on failure.
      * @since 4.0.0
      * @throws Exception
      */
-    public function getDepartmentMembers(int $pk = null)
+    public function getDepartmentMembers()
     {
+        $positions = VolunteersHelper::boardPositions();
+
         // Get members
 
         $model = $this->getMVCFactory()->createModel('Members', 'Administrator', ['ignore_request' => true]);
-        $model->setState('filter.position', [11, 13]);
+        $model->setState('filter.board', 1);
         $model->setState('filter.published', 1);
 
         $items = $model->getItems();
@@ -115,6 +127,14 @@ class BoardModel extends AdminModel
         $coordinator   = [];
 
         foreach ($items as $item) {
+            // A member with a board position, the other members are the officers of the board department
+            $item->board_position = \in_array((int) $item->position, $positions, true);
+
+            if ($item->board_position) {
+                $coordinator[$item->volunteer_name . $item->date_ended] = $item;
+                continue;
+            }
+
             switch ($item->role) {
                 case 33:
                 case 286:
@@ -134,12 +154,6 @@ class BoardModel extends AdminModel
                 case 34:
                 case 289:
                     $treasurer['treasurer-' . $item->volunteer_name . $item->date_ended] = $item;
-                    break;
-            }
-
-            switch ($item->position) {
-                case 11:
-                    $coordinator[$item->volunteer_name . $item->date_ended] = $item;
                     break;
             }
         }
@@ -178,7 +192,7 @@ class BoardModel extends AdminModel
      * @since 4.0.0
      * @throws Exception
      */
-    public function getDepartmentReports(int $pk = null)
+    public function getDepartmentReports(?int $pk = null)
     {
         $pk = (!empty($pk)) ? $pk : (int) $this->getState($this->getName() . '.id');
 

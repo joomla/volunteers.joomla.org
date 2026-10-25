@@ -10,6 +10,7 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Router\Route;
+use Joomla\Component\Volunteers\Administrator\Helper\VolunteersHelper as AdminVolunteersHelper;
 use Joomla\Component\Volunteers\Site\Helper\VolunteersHelper;
 
 // phpcs:disable PSR1.Files.SideEffects
@@ -70,7 +71,8 @@ try {
             <dd class="col-sm"><a href="<?php echo ($this->item->website) ?>"><?php echo ($this->item->website) ?></a></dd>
         <?php } ?>
 
-        <?php if (($this->item->department_title) && ($this->item->department != 58)) { ?>
+        <?php $boardTeam = (int) $this->item->department === AdminVolunteersHelper::boardDepartment(); ?>
+        <?php if ($this->item->department_title && !$boardTeam) { ?>
             <dt class="col-sm-auto">
                 <?php echo Text::_('COM_VOLUNTEERS_FIELD_DEPARTMENT') ?>
             </dt>

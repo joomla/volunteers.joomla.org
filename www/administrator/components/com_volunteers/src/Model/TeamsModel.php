@@ -13,6 +13,7 @@ use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Factory;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\CMS\MVC\Model\ListModel;
+use Joomla\Component\Volunteers\Administrator\Helper\VolunteersHelper;
 use Joomla\Database\QueryInterface;
 use Joomla\Utilities\ArrayHelper;
 
@@ -191,7 +192,7 @@ class TeamsModel extends ListModel
             $query->where('a.department = ' . (int) $groups);
         } elseif (empty($this->getState('filter.parent')) && !$this->getState('filter.all')) {
             // Subteams belong to the same department as their parent, also when that is the groups department
-            $query->where('a.department <> 58');
+            $query->where('a.department <> ' . VolunteersHelper::boardDepartment());
         }
 
         // Filter by department

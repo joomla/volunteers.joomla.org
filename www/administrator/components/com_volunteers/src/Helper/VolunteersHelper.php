@@ -13,6 +13,7 @@ namespace Joomla\Component\Volunteers\Administrator\Helper;
 \defined('_JEXEC') or die;
 // phpcs:enable PSR1.Files.SideEffects
 use Exception;
+use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Factory;
 use Joomla\CMS\HTML\Helpers\Sidebar;
@@ -22,6 +23,7 @@ use Joomla\Component\Volunteers\Administrator\Model\MemberModel;
 use Joomla\Component\Volunteers\Administrator\Model\PositionModel;
 use Joomla\Component\Volunteers\Administrator\Model\TeamModel;
 use Joomla\Component\Volunteers\Administrator\Model\VolunteerModel;
+use Joomla\Utilities\ArrayHelper;
 use RuntimeException;
 use stdClass;
 
@@ -240,6 +242,32 @@ class VolunteersHelper
         }
 
         return $options;
+    }
+
+    /**
+     * Gets the department of the Board of Directors from the component options.
+     *
+     * @return  integer  The id of the department, 0 when no department is set.
+     *
+     * @since 6.1.0
+     */
+    public static function boardDepartment(): int
+    {
+        return (int) ComponentHelper::getParams('com_volunteers')->get('board_department', 0);
+    }
+
+    /**
+     * Gets the positions of the other departments that make a member a member of the board.
+     *
+     * @return  integer[]  The ids of the positions.
+     *
+     * @since 6.1.0
+     */
+    public static function boardPositions(): array
+    {
+        $positions = (array) ComponentHelper::getParams('com_volunteers')->get('board_positions', []);
+
+        return array_values(array_filter(ArrayHelper::toInteger($positions)));
     }
 
     /**

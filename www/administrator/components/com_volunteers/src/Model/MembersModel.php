@@ -13,6 +13,7 @@ use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Factory;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\CMS\MVC\Model\ListModel;
+use Joomla\Component\Volunteers\Administrator\Helper\VolunteersHelper;
 use Joomla\Database\ParameterType;
 use Joomla\Database\QueryInterface;
 
@@ -179,6 +180,11 @@ class MembersModel extends ListModel
             ->select('checked_out.name AS editor')
             ->join('LEFT', '#__users AS ' . $db->quoteName('checked_out') . ' ON checked_out.id = a.checked_out');
 
+        // Filter by the members of the board
+        if ($this->getState('filter.board')) {
+            $this->filterBoard($query);
+        }
+
         // Filter by the selected members
         $ids = $this->getState('filter.ids');
 
@@ -223,9 +229,9 @@ class MembersModel extends ListModel
         $departmentTeam = $this->getState('filter.departmentTeam');
 
         if (is_numeric($departmentTeam) && ($departmentTeam > 0)) {
-            // Special handling for board of directors
-            if ($departmentTeam == 58) {
-                $query->where($db->quoteName('a.position') . ' IN (11,13)');
+            // The members of the board instead of the members of the teams of the board department
+            if ((int) $departmentTeam === VolunteersHelper::boardDepartment()) {
+                $this->filterBoard($query);
             } else {
                 $query->where($db->quoteName('team.department') . ' = :departmentTeam')
                     ->bind(':departmentTeam', $departmentTeam, ParameterType::INTEGER);
@@ -302,7 +308,7 @@ class MembersModel extends ListModel
             $query
                 ->whereIn($db->quoteName('a.position'), $positions)
                 ->where($db->quoteName('team.parent_id') . ' = 0')
-                ->where($db->quoteName('team.department') . ' != 58');
+                ->where($db->quoteName('team.department') . ' != ' . VolunteersHelper::boardDepartment());
         }
 
         // Filter private profile on frontend
@@ -372,8 +378,38 @@ class MembersModel extends ListModel
         $id .= ':' . $this->getState('filter.teamStatus');
         $id .= ':' . $this->getState('filter.osmStatus');
         $id .= ':' . implode(',', (array) $this->getState('filter.ids'));
+        $id .= ':' . $this->getState('filter.board');
 
         return parent::getStoreId($id);
+    }
+
+    /**
+     * Limit the query to the members of the board: the members of the board department and the members
+     * of the other departments with one of the board positions.
+     *
+     * @param   QueryInterface  $query  The query to limit.
+     *
+     * @return  void
+     *
+     * @since   6.1.0
+     */
+    private function filterBoard(QueryInterface $query): void
+    {
+        $db         = $this->getDatabase();
+        $department = VolunteersHelper::boardDepartment();
+        $positions  = VolunteersHelper::boardPositions();
+        // Team members have no department, so without a board department no member matches
+        $conditions = ['0 = 1'];
+
+        if ($department) {
+            $conditions[] = $db->quoteName('a.department') . ' = ' . $department;
+        }
+
+        if ($positions) {
+            $conditions[] = $db->quoteName('a.position') . ' IN (' . implode(',', $positions) . ')';
+        }
+
+        $query->where('(' . implode(' OR ', $conditions) . ')');
     }
 
     /**

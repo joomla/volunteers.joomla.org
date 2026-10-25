@@ -12,6 +12,7 @@ use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Factory;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\CMS\MVC\Model\ListModel;
+use Joomla\Component\Volunteers\Administrator\Helper\VolunteersHelper;
 use Joomla\Component\Volunteers\Administrator\Model\MembersModel;
 use Joomla\Database\ParameterType;
 use Joomla\Database\QueryInterface;
@@ -94,9 +95,10 @@ class TeamsModel extends ListModel
         $this->setState('filter.department', $this->getUserStateFromRequest($this->context . '.filter.department', 'filter_department'));
         $this->setState('filter.active', $this->getUserStateFromRequest($this->context . '.filter.active', 'filter_active'));
         $this->setState('filter.parent', $this->getUserStateFromRequest($this->context . '.filter.parent', 'filter_parent'));
+        // The teams of the board department are the groups
         $deptid = $this->app->input->getInt('id');
-        if ($deptid === 58) {
-            $this->setState('filter.groups', $this->app->input->getInt('id'));
+        if ($deptid && $deptid === VolunteersHelper::boardDepartment()) {
+            $this->setState('filter.groups', $deptid);
         }
 
         // Load the parameters.
@@ -194,7 +196,7 @@ class TeamsModel extends ListModel
             $query->where($db->quoteName('a.department') . ' = :groups')
                 ->bind(':groups', $groups, ParameterType::INTEGER);
         } else {
-            $query->where($db->quoteName('a.department') . ' <> 58');
+            $query->where($db->quoteName('a.department') . ' <> ' . VolunteersHelper::boardDepartment());
         }
 
         // Filter by department

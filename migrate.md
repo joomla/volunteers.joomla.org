@@ -10,7 +10,9 @@ On a local site perform the migration following the steps below.
 
 ### Successful migration
 - Move the database to the live server, see [Move the database](#move-the-database)
+- Before the `git pull`, run `git diff www/.htaccess` on the server. The `.htaccess` is rebuilt from the Joomla 6 `htaccess.txt`, so changes made on the server must be added to the new file first.
 - Do a `git pull` on the server
+- Check the security headers and the Content-Security-Policy on the live site, they are only sent for the host `volunteers.joomla.org`
 
 ## Move the database
 The migrated local database replaces the Joomla 3 database. The data that Joomlers change on the live site is copied from the Joomla 3 database afterwards. Everything else comes from the local database, so do not change articles, menus, modules or settings on the live site after the local database is dumped.

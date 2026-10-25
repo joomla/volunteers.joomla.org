@@ -23,6 +23,8 @@ use Joomla\Component\Volunteers\Administrator\Model\MemberModel;
 use Joomla\Component\Volunteers\Administrator\Model\PositionModel;
 use Joomla\Component\Volunteers\Administrator\Model\TeamModel;
 use Joomla\Component\Volunteers\Administrator\Model\VolunteerModel;
+use Joomla\Database\DatabaseInterface;
+use Joomla\Database\ParameterType;
 use Joomla\Utilities\ArrayHelper;
 use RuntimeException;
 use stdClass;
@@ -268,6 +270,86 @@ class VolunteersHelper
         $positions = (array) ComponentHelper::getParams('com_volunteers')->get('board_positions', []);
 
         return array_values(array_filter(ArrayHelper::toInteger($positions)));
+    }
+
+    /**
+     * Gets the roles of the officers of the board from the component options.
+     *
+     * @return  integer[]  The ids of the roles.
+     *
+     * @since 6.1.0
+     */
+    public static function boardRoles(): array
+    {
+        $roles = (array) ComponentHelper::getParams('com_volunteers')->get('board_roles', []);
+
+        return array_values(array_filter(ArrayHelper::toInteger($roles)));
+    }
+
+    /**
+     * Check if a membership makes a Joomler an officer of the board and a member of the board with a board
+     * position at the same time. Only current memberships count: published and without an end date or with
+     * an end date in the future.
+     *
+     * @param   array  $member  The membership with the volunteer, department, position, role, dates and state.
+     *
+     * @return  boolean  True when the Joomler would be an officer and a board member at the same time.
+     *
+     * @since 6.1.0
+     */
+    public static function isBoardConflict(array $member): bool
+    {
+        $department = self::boardDepartment();
+        $positions  = self::boardPositions();
+        $roles      = self::boardRoles();
+        $dateEnded  = (string) ($member['date_ended'] ?? '');
+        $today      = Factory::getDate()->format('Y-m-d');
+
+        if (!$department || !$positions || !$roles || empty($member['volunteer'])) {
+            return false;
+        }
+
+        $ended = $dateEnded >= '1000-01-01' && substr($dateEnded, 0, 10) <= $today;
+
+        if ((int) ($member['state'] ?? 1) !== 1 || $ended) {
+            return false;
+        }
+
+        $boardPosition = \in_array((int) ($member['position'] ?? 0), $positions, true);
+        $officer       = !$boardPosition && (int) ($member['department'] ?? 0) === $department
+            && \in_array((int) ($member['role'] ?? 0), $roles, true);
+
+        if (!$boardPosition && !$officer) {
+            return false;
+        }
+
+        $db        = Factory::getContainer()->get(DatabaseInterface::class);
+        $volunteer = (int) $member['volunteer'];
+        $id        = (int) ($member['id'] ?? 0);
+        $query     = $db->createQuery()
+            ->select('COUNT(*)')
+            ->from($db->quoteName('#__volunteers_members'))
+            ->where($db->quoteName('volunteer') . ' = :volunteer')
+            ->where($db->quoteName('id') . ' <> :id')
+            ->where($db->quoteName('state') . ' = 1')
+            ->where(
+                '(' . $db->quoteName('date_ended') . ' < ' . $db->quote('1000-01-01')
+                . ' OR ' . $db->quoteName('date_ended') . ' > :today)'
+            )
+            ->bind(':volunteer', $volunteer, ParameterType::INTEGER)
+            ->bind(':id', $id, ParameterType::INTEGER)
+            ->bind(':today', $today);
+
+        // An officer may not have a board position, a member with a board position may not be an officer
+        if ($officer) {
+            $query->whereIn($db->quoteName('position'), $positions);
+        } else {
+            $query->where($db->quoteName('department') . ' = ' . $department)
+                ->whereIn($db->quoteName('role'), $roles)
+                ->whereNotIn($db->quoteName('position'), $positions);
+        }
+
+        return (int) $db->setQuery($query)->loadResult() > 0;
     }
 
     /**

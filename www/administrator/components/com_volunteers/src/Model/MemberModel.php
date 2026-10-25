@@ -15,6 +15,7 @@ namespace Joomla\Component\Volunteers\Administrator\Model;
 use Exception;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Form\Form;
+use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\Model\AdminModel;
 
 use Joomla\CMS\Table\Table;
@@ -169,6 +170,31 @@ class MemberModel extends AdminModel
         $this->preprocessData('com_volunteers.member', $data);
 
         return $data;
+    }
+
+    /**
+     * Method to save the membership. A Joomler cannot be an officer of the board and a member of the board with
+     * a board position at the same time.
+     *
+     * @param   array  $data  The form data.
+     *
+     * @return  boolean  True on success, false on failure.
+     *
+     * @since   6.1.0
+     * @throws  Exception
+     */
+    public function save($data)
+    {
+        // The form data only has the fields of the form, the other values come from the stored membership
+        $member = array_merge((array) $this->getItem((int) ($data['id'] ?? 0)), $data);
+
+        if (VolunteersHelper::isBoardConflict($member)) {
+            $this->setError(Text::_('COM_VOLUNTEERS_ERROR_BOARD_OFFICER_AND_MEMBER'));
+
+            return false;
+        }
+
+        return parent::save($data);
     }
 
     /**

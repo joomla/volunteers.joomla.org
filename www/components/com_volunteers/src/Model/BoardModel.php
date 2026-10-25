@@ -117,51 +117,28 @@ class BoardModel extends AdminModel
 
         $items = $model->getItems();
 
-        // Sorting the results
-        $president     = [];
-        $vicepresident = [];
-        $secretary     = [];
-        $treasurer     = [];
-        $coordinator   = [];
+        // The officers in the ordering of their role, the members with a board position by name
+        $officers = [];
+        $others   = [];
 
         foreach ($items as $item) {
-            // A member with a board position, the other members are the officers of the board department
             $item->board_position = \in_array((int) $item->position, $positions, true);
 
             if ($item->board_position) {
-                $coordinator[$item->volunteer_name . $item->date_ended] = $item;
-                continue;
-            }
-
-            switch ($item->role) {
-                case 33:
-                case 286:
-                    $president['president-' . $item->volunteer_name . $item->date_ended] = $item;
-                    break;
-
-                case 36:
-                case 287:
-                    $vicepresident['vicepresident-' . $item->volunteer_name . $item->date_ended] = $item;
-                    break;
-
-                case 35:
-                case 288:
-                    $secretary['secretary-' . $item->volunteer_name . $item->date_ended] = $item;
-                    break;
-
-                case 34:
-                case 289:
-                    $treasurer['treasurer-' . $item->volunteer_name . $item->date_ended] = $item;
-                    break;
+                $others[] = $item;
+            } else {
+                $officers[] = $item;
             }
         }
 
+        usort($officers, static fn (object $a, object $b): int => (int) $a->role_ordering <=> (int) $b->role_ordering);
+        usort(
+            $others,
+            static fn (object $a, object $b): int
+                => [$a->volunteer_name, $a->date_ended] <=> [$b->volunteer_name, $b->date_ended]
+        );
 
-        // Sort all members by name
-        ksort($coordinator);
-
-        // Group them again
-        $groupmembers = $president + $vicepresident + $secretary + $treasurer + $coordinator;
+        $groupmembers = array_merge($officers, $others);
 
         $members            = new stdClass();
         $members->active    = [];

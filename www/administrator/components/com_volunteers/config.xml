@@ -24,6 +24,18 @@
 			multiple="true"
 			filter="intarray"
 		/>
+		<field
+			name="board_roles"
+			type="sql"
+			label="COM_VOLUNTEERS_CONFIG_BOARD_ROLES_LABEL"
+			description="COM_VOLUNTEERS_CONFIG_BOARD_ROLES_DESC"
+			query="SELECT r.id, CONCAT(r.title, ' (', d.title, ')') AS title FROM #__volunteers_roles AS r INNER JOIN #__volunteers_departments AS d ON d.id = r.department WHERE r.state = 1 ORDER BY d.title, r.ordering"
+			key_field="id"
+			value_field="title"
+			layout="joomla.form.field.list-fancy-select"
+			multiple="true"
+			filter="intarray"
+		/>
 	</fieldset>
 	<fieldset name="permissions" description="JCONFIG_PERMISSIONS_DESC" label="JCONFIG_PERMISSIONS_LABEL">
 		<field

@@ -120,7 +120,7 @@ The identity.joomla.org portal sends profile changes to this site. The System - 
 3. Change a test profile on identity.joomla.org and check that the change shows on the Joomler page and is logged in `administrator/logs/idp-calls.php`
 
 ## Board of Directors options
-The department of the Board of Directors and the positions of the other board members are options of the Joomla Volunteer Portal component instead of IDs in the code. They are set in the migrated database: Board Department "Board of Directors" (58) and Board Positions "Department Coordinator" (11).
+The department of the Board of Directors, the positions of the other board members and the roles of the officers are options of the Joomla Volunteer Portal component instead of IDs in the code. They are set in the migrated database: Board Department "Board of Directors" (58), Board Positions "Department Coordinator" (11) and Officer Roles "President", "Vice President", "Secretary" and "Treasurer" of the board department (286 to 289). A Joomler cannot be an officer and a member with a board position at the same time, saving such a membership gives an error.
 
 1. Check the options in Components > Joomla! Volunteers > Options > Board of Directors
 2. Check that `/board-of-directors` lists the officers and the Department Coordinators, and that `/groups` lists the teams of the board department

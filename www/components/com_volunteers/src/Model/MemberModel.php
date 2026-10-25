@@ -19,6 +19,7 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\Model\AdminModel;
 
 use Joomla\CMS\Table\Table;
+use Joomla\Component\Volunteers\Administrator\Helper\VolunteersHelper;
 use Joomla\Database\ParameterType;
 use Joomla\Utilities\ArrayHelper;
 
@@ -168,6 +169,38 @@ class MemberModel extends AdminModel
         $this->preprocessData('com_volunteers.member', $data);
 
         return (array) $data;
+    }
+
+    /**
+     * Method to save the membership. Of a board membership only the end date can be changed, and a Joomler cannot
+     * be an officer of the board and a member of the board with a board position at the same time.
+     *
+     * @param   array  $data  The form data.
+     *
+     * @return  boolean  True on success, false on failure.
+     *
+     * @since   6.1.0
+     * @throws  Exception
+     */
+    public function save($data)
+    {
+        $item = $this->getItem((int) ($data['id'] ?? 0));
+
+        // Of a board membership only the end date can be changed
+        if (!empty($item->id) && (int) $item->department === VolunteersHelper::boardDepartment()) {
+            $data = ['id' => (int) $item->id, 'date_ended' => $data['date_ended'] ?? ''];
+        }
+
+        // The form data only has the fields of the form, the other values come from the stored membership
+        $member = array_merge((array) $item, $data);
+
+        if (VolunteersHelper::isBoardConflict($member)) {
+            $this->setError(Text::_('COM_VOLUNTEERS_ERROR_BOARD_OFFICER_AND_MEMBER'));
+
+            return false;
+        }
+
+        return parent::save($data);
     }
 
     /**

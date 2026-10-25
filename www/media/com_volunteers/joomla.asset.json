@@ -10,7 +10,7 @@
       "type": "style",
       "uri": "media/com_volunteers/css/frontend.css",
       "package": "volunteers",
-      "version": "5.0.0"
+      "version": "6.1.0"
     },
     {
       "name": "com_volunteers.icons",

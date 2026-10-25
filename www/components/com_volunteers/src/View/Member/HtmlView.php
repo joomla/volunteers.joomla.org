@@ -132,6 +132,12 @@ class HtmlView extends BaseHtmlView
         if ($department && $department !== VolunteersHelper::boardDepartment()) {
             $this->form->removeField('role');
         }
+
+        // Of a board membership only the end date can be changed
+        if ($memberId && $department && $department === VolunteersHelper::boardDepartment()) {
+            $this->form->setFieldAttribute('role', 'readonly', 'true');
+            $this->form->setFieldAttribute('date_started', 'readonly', 'true');
+        }
     }
 
     /**

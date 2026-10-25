@@ -167,7 +167,7 @@ class MembersModel extends ListModel
             ->join('LEFT', '#__volunteers_positions AS ' . $db->quoteName('position') . ' ON position.id = a.position');
 
         // Join over the roles.
-        $query->select('role.title AS role_title')
+        $query->select('role.title AS role_title, role.ordering AS role_ordering')
             ->join('LEFT', '#__volunteers_roles AS ' . $db->quoteName('role') . ' ON role.id = a.role');
 
         // Join over the users.
@@ -285,25 +285,28 @@ class MembersModel extends ListModel
 
         // Filter by OSM status
         $osmStatus = $this->getState('filter.osmStatus');
-        $positions = [];
-        if ($osmStatus) {
-            switch ($osmStatus) {
-                case 'contributor':
-                    $positions = [8];
-                    break;
-                case 'member':
-                    $positions = [1, 2, 7];
-                    break;
-                case 'teamleaders':
-                    $positions = [2];
-                    break;
-                case 'directors':
-                    $positions = [11];
-                    break;
-                case 'officers':
-                    $positions = [13];
-                    break;
+
+        if ($osmStatus === 'directors' || $osmStatus === 'officers') {
+            // The board members with a board position or the officers of the board, see the component options
+            $positions  = VolunteersHelper::boardPositions();
+            $roles      = VolunteersHelper::boardRoles();
+            $department = VolunteersHelper::boardDepartment();
+
+            if ($osmStatus === 'directors' && $positions) {
+                $query->whereIn($db->quoteName('a.position'), $positions);
+            } elseif ($osmStatus === 'officers' && $department && $roles) {
+                $query->where($db->quoteName('a.department') . ' = ' . $department)
+                    ->whereIn($db->quoteName('a.role'), $roles);
+            } else {
+                $query->where('0 = 1');
             }
+        } elseif ($osmStatus) {
+            $positions = match ($osmStatus) {
+                'contributor' => [8],
+                'member'      => [1, 2, 7],
+                'teamleaders' => [2],
+                default       => [0],
+            };
 
             $query
                 ->whereIn($db->quoteName('a.position'), $positions)
@@ -384,8 +387,8 @@ class MembersModel extends ListModel
     }
 
     /**
-     * Limit the query to the members of the board: the members of the board department and the members
-     * of the other departments with one of the board positions.
+     * Limit the query to the members of the board: the members of the board department with an officer role
+     * and the members with one of the board positions.
      *
      * @param   QueryInterface  $query  The query to limit.
      *
@@ -398,11 +401,14 @@ class MembersModel extends ListModel
         $db         = $this->getDatabase();
         $department = VolunteersHelper::boardDepartment();
         $positions  = VolunteersHelper::boardPositions();
-        // Team members have no department, so without a board department no member matches
+        $roles      = VolunteersHelper::boardRoles();
+
+        // Without the board options no member matches
         $conditions = ['0 = 1'];
 
-        if ($department) {
-            $conditions[] = $db->quoteName('a.department') . ' = ' . $department;
+        if ($department && $roles) {
+            $conditions[] = '(' . $db->quoteName('a.department') . ' = ' . $department
+                . ' AND ' . $db->quoteName('a.role') . ' IN (' . implode(',', $roles) . '))';
         }
 
         if ($positions) {

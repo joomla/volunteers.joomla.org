@@ -130,14 +130,6 @@ HTMLHelper::_('bootstrap.tooltip');
                         'params'       => '{"menu-anchor_title":"","menu-anchor_css":"","menu_icon_css":"","menu_image":"","menu_image_css":"","menu_text":1,"menu_show":1,"page_title":"","show_page_heading":"","page_heading":"","pageclass_sfx":"","menu-meta_description":"","robots":""}'
                     ];
                     $menuitems[] = [
-                        'title'        => 'Register',
-                        'alias'        => 'register',
-                        'path'         => 'register',
-                        'link'         => 'index.php?option=com_volunteers&view=registration',
-                        'component_id' => $extension_id,
-                        'params'       => '{"menu-anchor_title":"","menu-anchor_css":"","menu_icon_css":"","menu_image":"","menu_image_css":"","menu_text":1,"menu_show":1,"page_title":"","show_page_heading":"","page_heading":"","pageclass_sfx":"","menu-meta_description":"","robots":""}'
-                    ];
-                    $menuitems[] = [
                         'title'        => 'Login',
                         'alias'        => 'login',
                         'path'         => 'login',

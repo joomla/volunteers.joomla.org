@@ -9,8 +9,27 @@
 On a local site perform the migration following the steps below.
 
 ### Successful migration
-- Move the database to the live server
+- Move the database to the live server, see [Move the database](#move-the-database)
 - Do a `git pull` on the server
+
+## Move the database
+The migrated local database replaces the Joomla 3 database. The data that Joomlers change on the live site is copied from the Joomla 3 database afterwards. Everything else comes from the local database, so do not change articles, menus, modules or settings on the live site after the local database is dumped.
+
+The data that is copied by `database/updates/2026-10-24-copy-live-data.sql`:
+- Users: `#__users`, `#__user_usergroup_map`, `#__user_notes`, and `#__user_profiles` without overwriting the Joomla 6 profile values
+- Joomla Volunteer Portal: `#__volunteers_departments`, `#__volunteers_members`, `#__volunteers_positions`, `#__volunteers_reports`, `#__volunteers_roles`, `#__volunteers_teams`, `#__volunteers_volunteers`
+- Privacy: `#__privacy_consents`, `#__privacy_requests`
+- User actions log: `#__action_logs`
+
+1. Put the live site offline in the Global Configuration
+2. Dump the local database without the old `vol_` tables:
+   `mariadb-dump --single-transaction volunteers $(mariadb -N -e "SHOW TABLES LIKE 'pa763\_%'" volunteers) > volunteers-j6.sql`
+3. Create a new database on the live server, for example `volj_j6`, and give the database user of the site access to it. Keep the Joomla 3 database `volj_live` as it is, it is the fallback.
+4. Import the dump: `mariadb volj_j6 < volunteers-j6.sql`
+5. Copy the live data, with a database user that can read `volj_live` and write `volj_j6`. In DBeaver: open `database/updates/2026-10-24-copy-live-data.sql` in an SQL editor, select `volj_j6` as the active database, replace `#__` with `pa763_` and run it as a script (Execute SQL Script, Alt+X)
+6. Set `$db` in `configuration.php` to `volj_j6` and check the other database settings
+7. Rebuild the Smart Search index, so it has the reports made after the local database was made: `php cli/joomla.php finder:index purge`
+8. Check that the newest reports and Joomlers of the live site are on the new site, then put the site online
 
 ## Extensions
 ### Uninstall Extensions

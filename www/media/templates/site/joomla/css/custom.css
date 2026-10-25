@@ -193,3 +193,24 @@ label.invalid,
     top: .5rem;
     right: .5rem;
 }
+
+/* Smart Search results: the core colours are for a light background only, use the theme colours so the results work in dark mode */
+.com-finder .result__item + .result__item {
+    border-top-color: var(--bs-border-color);
+}
+
+.com-finder .result__title-url,
+.com-finder .result__date {
+    color: var(--bs-secondary-color);
+}
+
+.com-finder .result__item mark {
+    padding: 0 .1em;
+    color: inherit;
+    background-color: rgba(var(--bs-warning-rgb), .3);
+    border-radius: .15em;
+}
+
+.com-finder .sorting__list-li-active {
+    background-color: var(--bs-tertiary-bg);
+}

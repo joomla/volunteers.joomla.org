@@ -160,17 +160,6 @@ $gtmId = JoomlaTemplateHelper::getGtmId(Uri::getInstance()->toString(['host']));
 <html lang="<?php echo $this->language; ?>" dir="<?php echo $this->direction; ?>">
 <head>
     <jdoc:include type="head" />
-    <script>
-        var _prum = [['id', '59300ad15992c776ad970068'],
-            ['mark', 'firstbyte', (new Date()).getTime()]];
-        (function() {
-            var s = document.getElementsByTagName('script')[0]
-                , p = document.createElement('script');
-            p.async = 'async';
-            p.src = 'https://rum-static.pingdom.net/prum.min.js';
-            s.parentNode.insertBefore(p, s);
-        })();
-    </script>
 </head>
 <body class="<?php echo "site $option view-$view layout-$layout task-$task itemid-$itemid" . ($this->direction == 'rtl' ? ' rtl' : ''); ?>">
 <?php

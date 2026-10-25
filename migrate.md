@@ -125,3 +125,9 @@ The department of the Board of Directors, the positions of the other board membe
 1. Check the options in Components > Joomla! Volunteers > Options > Board of Directors
 2. Check that `/board-of-directors` lists the officers and the Department Coordinators, and that `/groups` lists the teams of the board department
 3. The Board of Directors menu item has no department any more, its link is `index.php?option=com_volunteers&view=board`. The Groups menu item keeps the board department in its link (`&id=58`): a Teams menu item with a department shows the teams of that department.
+
+## FAQ page
+The FAQ page (`/faq`) is the "Frequently Asked Questions and Answers" article, it is maintained in Content > Articles. The `faq` view of the Joomla Volunteer Portal with the FAQ text in the language files is removed, no menu item used it.
+
+1. Run `database/updates/2026-10-25-faq-article.sql`, replace `#__` with the table prefix. This updates the FAQ article for the Joomla Identity portal, the current button and tab names of the team pages and removes the Glip chat channel
+2. Check that `/faq` shows the updated answers

@@ -405,6 +405,12 @@ div#toolbar-cancel.btn-group a {
     border-bottom-color: var(--bs-border-color);
 }
 
+/* A disabled fancy select shows white text on light grey, use the colours of a disabled form field */
+.choices.is-disabled {
+    --choices-bg-color-disabled: var(--bs-secondary-bg);
+    --choices-item-disabled-color: var(--bs-body-color);
+}
+
 .js-editor-tinymce {
     display: flow-root;
 }

@@ -189,7 +189,7 @@ class RoleController extends FormController
         // Use parent save method
         $return = parent::cancel($key);
 
-        $this->app->setUserState('com_volunteers.edit.report.teamid', null);
+        $this->app->setUserState('com_volunteers.edit.role.teamid', null);
         $this->setRedirect(Route::_('index.php?option=com_volunteers&view=team&id=' . $teamId . '#roles', false));
 
         return $return;

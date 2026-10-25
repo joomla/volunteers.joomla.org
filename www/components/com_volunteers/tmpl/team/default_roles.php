@@ -36,14 +36,16 @@ use Joomla\Component\Volunteers\Site\Helper\VolunteersHelper;
                 <div class="row">
 <div class="col-12">
         <?php if ($this->acl->edit) : ?>
-        <a class="btn btn-light btn-sm float-end" href="<?php echo Route::_('index.php?option=com_volunteers&task=role.delete&id=' . $role->id . '&' . Session::getFormToken() . '=1'); ?>">
-            <span class="icon-delete" aria-hidden="true"></span>
-            <?php echo Text::_('COM_VOLUNTEERS_DELETE'); ?>
-        </a>
-        <a class="btn btn-light btn-sm float-end" href="<?php echo Route::_('index.php?option=com_volunteers&task=role.edit&id=' . $role->id); ?>">
-            <span class="icon-edit" aria-hidden="true"></span>
-            <?php echo Text::_('COM_VOLUNTEERS_EDIT'); ?>
-        </a>
+        <div class="d-flex flex-wrap justify-content-end gap-2">
+            <a class="btn btn-light btn-sm" href="<?php echo Route::_('index.php?option=com_volunteers&task=role.edit&id=' . $role->id); ?>">
+                <span class="icon-edit" aria-hidden="true"></span>
+                <?php echo Text::_('COM_VOLUNTEERS_EDIT'); ?>
+            </a>
+            <a class="btn btn-light btn-sm" href="<?php echo Route::_('index.php?option=com_volunteers&task=role.delete&id=' . $role->id . '&' . Session::getFormToken() . '=1'); ?>">
+                <span class="icon-delete" aria-hidden="true"></span>
+                <?php echo Text::_('COM_VOLUNTEERS_DELETE'); ?>
+            </a>
+        </div>
         <?php endif; ?>
 </div>
                 </div>

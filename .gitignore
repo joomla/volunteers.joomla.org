@@ -42,5 +42,10 @@ Desktop.ini
 /www/libraries/simplesamlphp/metadata-generated/*
 
 # Akeeba
-/www/administrator/components/com_akeeba/backup/*
-!/www/administrator/components/com_akeeba/backup/index.html
+/www/administrator/components/com_akeebabackup/backup/*
+!/www/administrator/components/com_akeebabackup/backup/.htaccess
+!/www/administrator/components/com_akeebabackup/backup/index.htm
+!/www/administrator/components/com_akeebabackup/backup/index.html
+!/www/administrator/components/com_akeebabackup/backup/index.php
+!/www/administrator/components/com_akeebabackup/backup/web.config
+/www/administrator/components/com_akeebabackup/serverkey.php

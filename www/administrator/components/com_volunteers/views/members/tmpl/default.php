@@ -31,17 +31,16 @@ if ($saveOrder)
 ?>
 
 <form action="<?php echo JRoute::_('index.php?option=com_volunteers&view=members'); ?>" method="post" name="adminForm" id="adminForm">
-	<?php if (!empty($this->sidebar)) : ?>
-	<div id="j-sidebar-container" class="span2">
-		<?php echo $this->sidebar; ?>
-	</div>
-	<div id="j-main-container" class="span10">
-		<?php else : ?>
-		<div id="j-main-container">
-			<?php endif; ?>
+	<div class="row">
+		<?php if (!empty($this->sidebar)) : ?>
+		<div id="j-sidebar-container" class="col-md-2">
+			<?php echo $this->sidebar; ?>
+		</div>
+		<?php endif; ?>
+		<div id="j-main-container" class="j-main-container <?php echo empty($this->sidebar) ? 'col-md-12' : 'col-md-10'; ?>">
 			<?php echo JLayoutHelper::render('joomla.searchtools.default', array('view' => $this)); ?>
 			<?php if (empty($this->items)) : ?>
-				<div class="alert alert-no-items">
+				<div class="alert alert-info">
 					<?php echo JText::_('JGLOBAL_NO_MATCHING_RESULTS'); ?>
 				</div>
 			<?php else : ?>
@@ -68,7 +67,7 @@ if ($saveOrder)
 						<th width="8%">
 							<?php echo JHtml::_('searchtools.sort', 'COM_VOLUNTEERS_FIELD_DATE_ENDED', 'a.date_ended', $listDirn, $listOrder); ?>
 						</th>
-						<th width="1%" class="nowrap center hidden-phone">
+						<th width="1%" class="text-nowrap text-center d-none d-md-table-cell">
 							<?php echo JHtml::_('searchtools.sort', 'JGRID_HEADING_ID', 'a.id', $listDirn, $listOrder); ?>
 						</th>
 					</tr>
@@ -88,17 +87,17 @@ if ($saveOrder)
 						$canCheckin = $user->authorise('core.manage', 'com_checkin') || $item->checked_out == $user->get('id') || $item->checked_out == 0;
 						$canChange = $user->authorise('core.edit.state', 'com_volunteers') && $canCheckin;
 						?>
-						<tr class="row<?php echo $i % 2; ?><?php if (!$item->date_ended): ?> success<?php else: ?> error<?php endif; ?>" sortable-volunteer-id="<?php echo $item->id ?>">
+						<tr class="row<?php echo $i % 2; ?><?php if (!$item->date_ended): ?> table-success<?php else: ?> table-danger<?php endif; ?>" sortable-volunteer-id="<?php echo $item->id ?>">
 							<td>
-								<a class="btn btn-small" href="<?php echo JRoute::_('index.php?option=com_volunteers&task=member.edit&id=' . (int) $item->id); ?>">
+								<a class="btn btn-sm btn-secondary" href="<?php echo JRoute::_('index.php?option=com_volunteers&task=member.edit&id=' . (int) $item->id); ?>">
 									<span class="icon-edit"></span>Edit
 								</a>
 							</td>
-							<td class="nowrap">
+							<td class="text-nowrap">
 								<?php echo $item->department_title; ?>
 								<?php echo $item->teamdepartment_title; ?>
 							</td>
-							<td class="nowrap">
+							<td class="text-nowrap">
 								<?php if ($item->team_title): ?>
 									<?php echo $item->team_title; ?>
 									<br><small>
@@ -114,13 +113,13 @@ if ($saveOrder)
 									-
 								<?php endif; ?>
 							</td>
-							<td class="nowrap">
+							<td class="text-nowrap">
 								<?php echo $item->position_title; ?>
 								<?php if ($item->role_title): ?>
 									<br><small><?php echo $item->role_title; ?></small>
 								<?php endif; ?>
 							</td>
-							<td class="nowrap">
+							<td class="text-nowrap">
 								<?php if ($canEdit) : ?>
 									<a href="<?php echo JRoute::_('index.php?option=com_volunteers&task=volunteer.edit&id=' . (int) $item->volunteer); ?>">
 										<?php echo $this->escape($item->volunteer_name); ?>
@@ -136,7 +135,7 @@ if ($saveOrder)
 							<td>
 								<?php echo $item->date_ended; ?>
 							</td>
-							<td class="center hidden-phone">
+							<td class="text-center d-none d-md-table-cell">
 								<?php echo (int) $item->id; ?>
 							</td>
 						</tr>
@@ -149,4 +148,5 @@ if ($saveOrder)
 			<input type="hidden" name="boxchecked" value="0"/>
 			<?php echo JHtml::_('form.token'); ?>
 		</div>
+	</div>
 </form>

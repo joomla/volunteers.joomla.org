@@ -35,7 +35,7 @@ JFactory::getDocument()->addScriptDeclaration("
 
 				<?php echo $this->form->renderFieldset('item'); ?>
 
-				<div class="well">
+				<div class="card card-body">
 					<h3><?php echo JText::_('COM_VOLUNTEERS_FIELD_ACL'); ?></h3>
 					<p><?php echo JText::_('COM_VOLUNTEERS_FIELD_ACL_DESC'); ?></p>
 					<?php echo $this->form->renderFieldset('acl'); ?>
@@ -43,7 +43,7 @@ JFactory::getDocument()->addScriptDeclaration("
 			</div>
 		</div>
 		<div class="col-md-3">
-			<div class="form-vertical well">
+			<div class="form-vertical card card-body">
 				<?php echo $this->form->renderFieldset('details'); ?>
 			</div>
 		</div>

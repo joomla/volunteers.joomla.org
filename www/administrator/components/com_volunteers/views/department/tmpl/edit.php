@@ -35,7 +35,7 @@ JFactory::getDocument()->addScriptDeclaration("
 			</div>
 		</div>
 		<div class="col-md-3">
-			<div class="form-vertical well">
+			<div class="form-vertical card card-body">
 				<?php echo $this->form->renderFieldset('details'); ?>
 			</div>
 		</div>

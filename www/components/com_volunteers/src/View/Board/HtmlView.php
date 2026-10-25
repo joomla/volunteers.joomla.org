@@ -17,7 +17,6 @@ namespace Joomla\Component\Volunteers\Site\View\Board;
 use Joomla\CMS\Application\CMSApplicationInterface;
 use Joomla\CMS\Factory;
 use Joomla\CMS\HTML\Helpers\StringHelper;
-use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\View\GenericDataException;
 use Joomla\CMS\MVC\View\HtmlView as BaseHtmlView;
 use Joomla\CMS\Router\Route;
@@ -95,15 +94,6 @@ class HtmlView extends BaseHtmlView
         $errors = $model->getErrors();
         if ($errors && count($errors) > 0) {
             throw new GenericDataException(implode("\n", $errors));
-        }
-
-
-        if ($this->_layout == 'edit') {
-            $authorised = $this->user->authorise('core.create', 'com_volunteers');
-
-            if ($authorised !== true) {
-                throw new Exception(Text::_('JERROR_ALERTNOAUTHOR'));
-            }
         }
 
         $this->prepareDocument();

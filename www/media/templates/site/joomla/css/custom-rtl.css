@@ -10,11 +10,11 @@
     --bs-breadcrumb-border-radius: var(--bs-border-radius);
 }
 
-/* Colours as on the Joomla 3 site: a light grey page with a lighter blue for links */
+/* Colours as on the Joomla 3 site: a light grey page with a lighter blue for links, darkened to meet the WCAG AA contrast */
 :root {
     --vol-page-bg: #f4f6f7;
-    --bs-link-color: #08c;
-    --bs-link-color-rgb: 0, 136, 204;
+    --bs-link-color: #0071a8;
+    --bs-link-color-rgb: 0, 113, 168;
     --bs-link-hover-color: #005580;
     --bs-link-hover-color-rgb: 0, 85, 128;
 }
@@ -209,6 +209,13 @@ label.invalid,
     color: inherit;
     background-color: rgba(var(--bs-warning-rgb), .3);
     border-radius: .15em;
+}
+
+/* A lighter highlight in dark mode, so the light text on it keeps the WCAG AA contrast */
+@media (prefers-color-scheme: dark) {
+    .com-finder .result__item mark {
+        background-color: rgba(var(--bs-warning-rgb), .15);
+    }
 }
 
 .com-finder .sorting__list-li-active {

@@ -294,6 +294,15 @@ div#toolbar-cancel.btn-group a {
     }
 }
 
+/* Text pasted from Google Docs and Word keeps its black text and white background, use the colours of the dark page */
+@media (prefers-color-scheme: dark) {
+    .com_volunteers main [style*="color"],
+    .com_volunteers main font[color] {
+        color: inherit !important;
+        background-color: transparent !important;
+    }
+}
+
 /* Text links only underline on hover, as on the homepage */
 .com_volunteers main a:not(.btn, .pathway) {
     text-decoration: none;

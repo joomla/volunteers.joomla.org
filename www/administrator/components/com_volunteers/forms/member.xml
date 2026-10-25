@@ -36,6 +36,7 @@
         <field
 name="role"
 sql_select="id,title" sql_from="#__volunteers_roles" sql_where="state = 1" sql_order="title asc" sql_filter="team" key_field="id" value_field="title" type="sql" layout="joomla.form.field.list-fancy-select" label="COM_VOLUNTEERS_FIELD_ROLE"
+header="COM_VOLUNTEERS_SELECT_ROLE"
         />
 
         <field

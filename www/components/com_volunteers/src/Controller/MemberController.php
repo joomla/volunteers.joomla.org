@@ -18,6 +18,7 @@ use Exception;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\Controller\FormController;
 use Joomla\CMS\Router\Route;
+use Joomla\Component\Volunteers\Administrator\Helper\VolunteersHelper;
 use Joomla\Component\Volunteers\Administrator\Service\AclService;
 use stdClass;
 
@@ -51,10 +52,10 @@ class MemberController extends FormController
         // Department or team?
         if ($departmentId) {
             $acl = $aclService->getAcl('department', $departmentId);
-            $this->app->setUserState('com_volunteers.edit.member.departmentid', $departmentId);
+            $this->setEditContext($departmentId, 0);
         } elseif ($teamId) {
             $acl = $aclService->getAcl('team', $teamId);
-            $this->app->setUserState('com_volunteers.edit.member.teamid', $teamId);
+            $this->setEditContext(0, $teamId);
         }
 
         // Check if the user is authorized to edit this team
@@ -85,11 +86,11 @@ class MemberController extends FormController
         $return = parent::cancel($key);
 
         // Department or team?
+        $this->setEditContext(0, 0);
+
         if ($departmentId) {
-            $this->app->setUserState('com_volunteers.edit.member.departmentid', null);
-            $this->setRedirect(Route::_('index.php?option=com_volunteers&view=department&id=' . $departmentId, false));
+            $this->setRedirect($this->getDepartmentUrl((int) $departmentId));
         } elseif ($teamId) {
-            $this->app->setUserState('com_volunteers.edit.member.teamid', null);
             $this->setRedirect(Route::_('index.php?option=com_volunteers&view=team&id=' . $teamId, false));
         }
 
@@ -121,10 +122,10 @@ class MemberController extends FormController
         // Department or team?
         if ($member->department) {
             $acl = $aclService->getAcl('department', (int) $member->department);
-            $this->app->setUserState('com_volunteers.edit.member.departmentid', $member->department);
+            $this->setEditContext((int) $member->department, 0);
         } elseif ($member->team) {
             $acl = $aclService->getAcl('team', (int) $member->team);
-            $this->app->setUserState('com_volunteers.edit.member.teamid', $member->team);
+            $this->setEditContext(0, (int) $member->team);
         }
 
         // Check if the user is authorized to edit this team
@@ -163,10 +164,8 @@ class MemberController extends FormController
 
         // Department or team?
         if ($departmentId) {
-            $this->app->setUserState('com_volunteers.edit.member.departmentid', null);
             $acl = $aclService->getAcl('department', (int) $departmentId);
         } elseif ($teamId) {
-            $this->app->setUserState('com_volunteers.edit.member.teamid', null);
             $acl = $aclService->getAcl('team', (int) $teamId);
         }
 
@@ -178,16 +177,56 @@ class MemberController extends FormController
         // Use parent save method
         $return = parent::save($key, $urlVar);
 
-        // Redirect to the team
+        // Stay on the form when the data does not validate
+        if (!$return) {
+            return $return;
+        }
+
+        $this->setEditContext(0, 0);
+
+        // Redirect to the department or team
         $this->setMessage(Text::_('COM_VOLUNTEERS_LBL_MEMBER_SAVED'));
 
         // Department or team?
         if ($departmentId) {
-            $this->setRedirect(Route::_('index.php?option=com_volunteers&view=department&id=' . $departmentId, false));
+            $this->setRedirect($this->getDepartmentUrl((int) $departmentId));
         } elseif ($teamId) {
             $this->setRedirect(Route::_('index.php?option=com_volunteers&view=team&id=' . $teamId, false));
         }
 
         return $return;
+    }
+
+    /**
+     * Store the department or team of the member that is added or edited. The positions and roles that can
+     * be selected depend on it, so the other one is cleared.
+     *
+     * @param   integer  $departmentId  The department, 0 for none.
+     * @param   integer  $teamId        The team, 0 for none.
+     *
+     * @return  void
+     *
+     * @since   6.1.0
+     */
+    private function setEditContext(int $departmentId, int $teamId): void
+    {
+        $this->app->setUserState('com_volunteers.edit.member.departmentid', $departmentId ?: null);
+        $this->app->setUserState('com_volunteers.edit.member.teamid', $teamId ?: null);
+    }
+
+    /**
+     * Get the URL of the department, or of the board for the board department.
+     *
+     * @param   integer  $departmentId  The department.
+     *
+     * @return  string  The URL.
+     *
+     * @since   6.1.0
+     */
+    private function getDepartmentUrl(int $departmentId): string
+    {
+        $view = $departmentId === VolunteersHelper::boardDepartment() ? 'board' : 'department';
+
+        return Route::_('index.php?option=com_volunteers&view=' . $view . '&id=' . $departmentId, false);
     }
 }

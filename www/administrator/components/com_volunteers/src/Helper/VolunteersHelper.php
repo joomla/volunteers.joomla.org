@@ -344,26 +344,26 @@ class VolunteersHelper
     /**
      * Creates a list of active positions.
      *
+     * @param   integer  $department  The department of the member, only department positions when set.
+     * @param   integer  $team        The team of the member, only team positions when set.
+     *
      * @return  array  An array containing the positions that can be selected.
      *
      * @since 4.0.0
      * @throws Exception
      */
-    public static function positions()
+    public static function positions(int $department = 0, int $team = 0)
     {
-        $departmentId = Factory::getApplication()->getUserState('com_volunteers.edit.member.departmentid');
-        $teamId       = Factory::getApplication()->getUserState('com_volunteers.edit.member.teamid');
-        $options      = null;
-        $db           = Factory::getContainer()->get('DatabaseDriver');
-        $query        = $db->getQuery(true)
+        $options = null;
+        $db      = Factory::getContainer()->get('DatabaseDriver');
+        $query   = $db->getQuery(true)
             ->select('id AS value, title AS text, type')
             ->from('#__volunteers_positions')
             ->where('state = 1');
-        if ($departmentId) {
-            $query->where('type = 1');
-        }
 
-        if ($teamId) {
+        if ($department) {
+            $query->where('type = 1');
+        } elseif ($team) {
             $query->where('type = 2');
         }
 
@@ -400,26 +400,31 @@ class VolunteersHelper
     /**
      * Creates a list of active roles.
      *
-     * @return  array  An array containing the positions that can be selected.
+     * @param   integer  $team        The team of the member.
+     * @param   integer  $department  The department of the member, used when there is no team.
+     *
+     * @return  array  An array containing the roles that can be selected.
      *
      * @since 4.0.0
      * @throws Exception
      */
-    public static function roles($team = null)
+    public static function roles($team = 0, int $department = 0)
     {
         $options = null;
-        if (empty($team)) {
-            // Get team
-            $team = Factory::getApplication()->getUserState('com_volunteers.edit.member.teamid');
-        }
-
-        $db    = Factory::getContainer()->get('DatabaseDriver');
-        $query = $db->getQuery(true)
+        $db      = Factory::getContainer()->get('DatabaseDriver');
+        $query   = $db->getQuery(true)
             ->select('id AS value, title AS text')
             ->from('#__volunteers_roles')
             ->where('state = 1')
-            ->where($db->quoteName('team') . ' = ' . (int) $team)
             ->order('title asc');
+
+        // A member of a department has the roles of the department, a member of a team the roles of the team
+        if ($department && !$team) {
+            $query->where($db->quoteName('department') . ' = ' . $department);
+        } else {
+            $query->where($db->quoteName('team') . ' = ' . (int) $team);
+        }
+
         // Get the options.
         $db->setQuery($query);
         try {

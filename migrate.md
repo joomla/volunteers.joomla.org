@@ -27,9 +27,10 @@ The data that is copied by `database/updates/2026-10-24-copy-live-data.sql`:
 3. Create a new database on the live server, for example `volj_j6`, and give the database user of the site access to it. Keep the Joomla 3 database `volj_live` as it is, it is the fallback.
 4. Import the dump: `mariadb volj_j6 < volunteers-j6.sql`
 5. Copy the live data, with a database user that can read `volj_live` and write `volj_j6`. In DBeaver: open `database/updates/2026-10-24-copy-live-data.sql` in an SQL editor, select `volj_j6` as the active database, replace `#__` with `pa763_` and run it as a script (Execute SQL Script, Alt+X)
-6. Set `$db` in `configuration.php` to `volj_j6` and check the other database settings
-7. Rebuild the Smart Search index, so it has the reports made after the local database was made: `php cli/joomla.php finder:index purge`
-8. Check that the newest reports and Joomlers of the live site are on the new site, then put the site online
+6. Move the members of the Board of Directors to the roles of the board department: run `database/updates/2026-10-25-board-roles.sql` on `volj_j6` the same way, replace `#__` with `pa763_`. The copied live data still has the old roles President (33), Vice President (36), Secretary (35) and Treasurer (34) without a department.
+7. Set `$db` in `configuration.php` to `volj_j6` and check the other database settings
+8. Rebuild the Smart Search index, so it has the reports made after the local database was made: `php cli/joomla.php finder:index purge`
+9. Check that the newest reports and Joomlers of the live site are on the new site, then put the site online
 
 ## Extensions
 ### Uninstall Extensions

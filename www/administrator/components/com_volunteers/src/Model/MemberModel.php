@@ -130,6 +130,11 @@ class MemberModel extends AdminModel
             $form->setFieldAttribute('state', 'filter', 'unset');
         }
 
+        // A member of a department has the roles of the department, a member of a team the roles of the team
+        if ((int) $form->getValue('department')) {
+            $form->setFieldAttribute('role', 'sql_filter', 'department');
+        }
+
         return $form;
     }
 

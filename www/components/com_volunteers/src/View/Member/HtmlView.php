@@ -20,6 +20,7 @@ use Joomla\CMS\MVC\View\HtmlView as BaseHtmlView;
 use Exception;
 
 use Joomla\CMS\User\User;
+use Joomla\Component\Volunteers\Administrator\Helper\VolunteersHelper;
 use Joomla\Component\Volunteers\Site\Model\VolunteerModel;
 
 /**
@@ -117,16 +118,19 @@ class HtmlView extends BaseHtmlView
         if ($memberId) {
             $this->form->setFieldAttribute('volunteer', 'readonly', 'true');
             $this->form->setFieldAttribute('position', 'readonly', 'true');
-
-            if ($departmentId) {
-                $this->form->removeField('role');
-            }
         } else {
             $this->form->setValue('department', null, $departmentId);
             $this->form->setValue('team', null, $teamId);
             $this->form->setValue('date_started', null, Factory::getDate());
             $this->item->department = $departmentId;
             $this->item->team       = $teamId;
+        }
+
+        // Only the members of the board department have a role, such as the President
+        $department = (int) $this->item->department;
+
+        if ($department && $department !== VolunteersHelper::boardDepartment()) {
+            $this->form->removeField('role');
         }
     }
 

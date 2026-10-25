@@ -42,7 +42,11 @@ class RolesField extends ListField
      */
     public function getOptions()
     {
-        $options   = VolunteersHelper::roles();
+        // The roles of the department or team of the member in the form
+        $team       = (int) $this->form->getValue('team');
+        $department = (int) $this->form->getValue('department');
+        $options    = VolunteersHelper::roles($team, $department);
+
         // An optional field of an edit form stores none as 0, a required field and a list filter need an empty value
         $empty     = $this->required || $this->group ? '' : 0;
         $default[] = HTMLHelper::_('select.option', $empty, Text::_('COM_VOLUNTEERS_SELECT_ROLE'));

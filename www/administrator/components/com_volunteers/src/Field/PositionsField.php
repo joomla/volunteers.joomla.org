@@ -51,7 +51,11 @@ class PositionsField extends GroupedlistField
             $groups[] = [HTMLHelper::_('select.option', '', Text::_('COM_VOLUNTEERS_SELECT_POSITION'))];
         }
 
-        foreach (VolunteersHelper::positions() ?? [] as $position) {
+        // The positions of a department or a team, depending on the member in the form
+        $department = (int) $this->form->getValue('department');
+        $team       = (int) $this->form->getValue('team');
+
+        foreach (VolunteersHelper::positions($department, $team) ?? [] as $position) {
             $groups[Text::_($types[(int) $position->type] ?? 'JNONE')][] = HTMLHelper::_('select.option', $position->value, $position->text);
         }
 

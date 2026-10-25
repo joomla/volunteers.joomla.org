@@ -104,7 +104,7 @@ final class Joomlaidentityclient extends CMSPlugin implements SubscriberInterfac
             $hash = base64_decode($app->getInput()->get('hash', '', 'base64'));
 
             // Validate the hash
-            if ($hash !== hash_hmac('sha512', $data, $apiKey))
+            if (!hash_equals(hash_hmac('sha512', $data, $apiKey), (string) $hash))
             {
                 Log::add(Text::_('PLG_SYSTEM_JOOMLAIDENTITYCLIENT_INVALID_HASH'), Log::INFO, 'idp');
                 throw new \InvalidArgumentException(Text::_('PLG_SYSTEM_JOOMLAIDENTITYCLIENT_INVALID_HASH'));

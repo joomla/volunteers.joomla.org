@@ -10,6 +10,7 @@ namespace Joomla\Component\Volunteers\Site\Model;
 
 use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Factory;
+use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\CMS\MVC\Model\ListModel;
 use Joomla\Component\Volunteers\Administrator\Helper\VolunteersHelper;
@@ -43,7 +44,7 @@ class TeamsModel extends ListModel
      * @since   4.0.0
      * @throws Exception
      */
-    public function __construct($config = [], MVCFactoryInterface $factory = null)
+    public function __construct($config = [], ?MVCFactoryInterface $factory = null)
     {
         if (empty($config['filter_fields'])) {
             $config['filter_fields'] = [
@@ -95,9 +96,9 @@ class TeamsModel extends ListModel
         $this->setState('filter.department', $this->getUserStateFromRequest($this->context . '.filter.department', 'filter_department'));
         $this->setState('filter.active', $this->getUserStateFromRequest($this->context . '.filter.active', 'filter_active'));
         $this->setState('filter.parent', $this->getUserStateFromRequest($this->context . '.filter.parent', 'filter_parent'));
-        // The teams of the board department are the groups
+        // A menu item with a department shows the teams of that department, such as the groups of the board
         $deptid = $this->app->input->getInt('id');
-        if ($deptid && $deptid === VolunteersHelper::boardDepartment()) {
+        if ($deptid) {
             $this->setState('filter.groups', $deptid);
         }
 
@@ -107,6 +108,36 @@ class TeamsModel extends ListModel
 
         // List state information.
         parent::populateState($ordering, $direction);
+    }
+
+    /**
+     * Get the heading of the list: Groups for the teams of the board department, the title of the department
+     * for the teams of another department and Teams for the teams of all departments.
+     *
+     * @return  string
+     *
+     * @since   6.1.0
+     */
+    public function getHeading(): string
+    {
+        $department = (int) $this->getState('filter.groups');
+
+        if (!$department) {
+            return Text::_('COM_VOLUNTEERS_TITLE_TEAMS');
+        }
+
+        if ($department === VolunteersHelper::boardDepartment()) {
+            return Text::_('COM_VOLUNTEERS_TITLE_GROUPS');
+        }
+
+        $db    = $this->getDatabase();
+        $query = $db->createQuery()
+            ->select($db->quoteName('title'))
+            ->from($db->quoteName('#__volunteers_departments'))
+            ->where($db->quoteName('id') . ' = :id')
+            ->bind(':id', $department, ParameterType::INTEGER);
+
+        return (string) $db->setQuery($query)->loadResult() ?: Text::_('COM_VOLUNTEERS_TITLE_TEAMS');
     }
 
     /**

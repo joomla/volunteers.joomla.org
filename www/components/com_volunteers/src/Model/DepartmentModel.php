@@ -20,6 +20,7 @@ use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\CMS\MVC\Model\AdminModel;
 
 use Joomla\CMS\Table\Table;
+use Joomla\Component\Volunteers\Administrator\Helper\VolunteersHelper;
 use Joomla\Database\ParameterType;
 use Joomla\String\StringHelper;
 use stdClass;
@@ -102,15 +103,15 @@ class DepartmentModel extends AdminModel
             switch ($item->position) {
                 case 9:
                 case 11:
-                    $leaders[$item->volunteer_name . $item->date_ended] = $item;
+                    $leaders[VolunteersHelper::memberKey($item)] = $item;
                     break;
 
                 case 10:
-                    $assistants[$item->volunteer_name . $item->date_ended] = $item;
+                    $assistants[VolunteersHelper::memberKey($item)] = $item;
                     break;
 
                 default:
-                    $volunteers[$item->volunteer_name . $item->date_ended] = $item;
+                    $volunteers[VolunteersHelper::memberKey($item)] = $item;
                     break;
             }
         }
@@ -132,7 +133,7 @@ class DepartmentModel extends AdminModel
             if (empty($item->date_ended) || $item->date_ended === '0000-00-00') {
                 $members->active[] = $item;
             } else {
-                $members->honorroll[$item->date_ended . $item->volunteer_name] = $item;
+                $members->honorroll[$item->date_ended . VolunteersHelper::memberKey($item)] = $item;
             }
         }
 

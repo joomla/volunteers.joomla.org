@@ -124,3 +124,4 @@ The department of the Board of Directors, the positions of the other board membe
 
 1. Check the options in Components > Joomla! Volunteers > Options > Board of Directors
 2. Check that `/board-of-directors` lists the officers and the Department Coordinators, and that `/groups` lists the teams of the board department
+3. The Board of Directors menu item has no department any more, its link is `index.php?option=com_volunteers&view=board`. The Groups menu item keeps the board department in its link (`&id=58`): a Teams menu item with a department shows the teams of that department.

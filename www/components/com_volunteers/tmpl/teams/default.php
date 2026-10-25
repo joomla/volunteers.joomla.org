@@ -65,11 +65,7 @@ try {
             </div>
         </div>
         <div class="border-bottom pb-2 mb-3">
-            <?php if ($this->state->get('filter.groups')) : ?>
-                <h1 class="vol_h1"><?php echo Text::_('COM_VOLUNTEERS_TITLE_GROUPS') ?></h1>
-            <?php else : ?>
-                <h1 class="vol_h1"><?php echo Text::_('COM_VOLUNTEERS_TITLE_TEAMS') ?></h1>
-            <?php endif; ?>
+            <h1 class="vol_h1"><?php echo $this->escape($this->heading) ?></h1>
         </div>
     </div>
     <?php if (!empty($this->items)) {

@@ -353,6 +353,24 @@ class VolunteersHelper
     }
 
     /**
+     * Get the key of a membership in the lists of members of a department or team. The key sorts by name and
+     * only two entries of the same membership get the same key: the same Joomler, position and dates.
+     *
+     * @param   object  $member  The membership with the name of the Joomler.
+     *
+     * @return  string
+     *
+     * @since 6.1.0
+     */
+    public static function memberKey(object $member): string
+    {
+        return implode(
+            '|',
+            [$member->volunteer_name, $member->volunteer, $member->position, $member->date_started, $member->date_ended]
+        );
+    }
+
+    /**
      * Creates a list of active departments.
      *
      * @return  array  An array containing the departments that can be selected.

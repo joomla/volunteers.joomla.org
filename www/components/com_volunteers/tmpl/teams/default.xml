@@ -13,10 +13,9 @@
                     name="id"
                     type="sql"
                     label="COM_VOLUNTEERS_FIELD_DEPARTMENT"
-                    required="true"
-                    edit="true"
-                    clear="false"
-                    query="SELECT id AS value,title AS id FROM #__volunteers_departments;"
+                    description="COM_VOLUNTEERS_FIELD_TEAMS_DEPARTMENT_DESC"
+                    header="COM_VOLUNTEERS_FIELD_TEAMS_ALL_DEPARTMENTS"
+                    query="SELECT id AS value, title AS id FROM #__volunteers_departments WHERE state = 1 ORDER BY title"
             />
         </fieldset>
     </fields>

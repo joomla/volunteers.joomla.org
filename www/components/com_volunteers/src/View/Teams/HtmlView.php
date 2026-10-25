@@ -32,6 +32,7 @@ class HtmlView extends BaseHtmlView
     protected array $items;
     protected Pagination $pagination;
     protected mixed $state;
+    protected string $heading = '';
 
     /**
      * @var CMSApplicationInterface
@@ -74,6 +75,7 @@ class HtmlView extends BaseHtmlView
         $this->state      = $model->getState();
         $this->items      = $model->getItems();
         $this->pagination = $model->getPagination();
+        $this->heading    = $model->getHeading();
 
 
         $errors = $model->getErrors();
@@ -97,7 +99,7 @@ class HtmlView extends BaseHtmlView
     protected function prepareDocument()
     {
         // Prepare variables
-        $title   = ($this->state->get('filter.groups')) ? Text::_('COM_VOLUNTEERS_TITLE_GROUPS') : Text::_('COM_VOLUNTEERS_TITLE_TEAMS');
+        $title   = $this->heading;
         $image   = 'https://cdn.joomla.org/images/joomla-org-og.jpg';
         $itemURL = Route::_('index.php?option=com_volunteers&view=teams');
         $url     = Uri::getInstance()->toString(['scheme', 'host', 'port']) . $itemURL;

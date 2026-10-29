@@ -108,9 +108,13 @@ final class Joomlaidentityvolunteers extends CMSPlugin implements SubscriberInte
             $this->validateData($data);
             $this->updateVolunteer($userId, $guid, $data);
         }
-        catch (\Exception $exception)
+        catch (Exception $exception)
         {
-            echo $exception->getMessage();
+            Log::add(
+                Text::sprintf('PLG_SYSTEM_JOOMLAIDENTITYVOLUNTEERS_SAVE_FAILED', $userId, $exception->getMessage()),
+                Log::ERROR,
+                'idp'
+            );
         }
     }
 
@@ -173,8 +177,8 @@ final class Joomlaidentityvolunteers extends CMSPlugin implements SubscriberInte
             'joomlaforum'         => $data->joomlaforum,
             'joomladocs'          => $data->joomladocs,
             'crowdin'             => $data->crowdin,
-            'osmAddress'          => $data->osmAddress,
-            'nda'                 => $data->nda,
+            'osmAddress'          => (int) $data->osmAddress,
+            'nda'                 => (int) $data->nda,
         );
 
         Log::add(json_encode($volunteer), Log::INFO, 'idp');

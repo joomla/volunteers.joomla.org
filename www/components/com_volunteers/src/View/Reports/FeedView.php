@@ -45,15 +45,15 @@ class FeedView extends BaseHtmlView
         $app            = Factory::getApplication();
         $doc            = $app->getDocument();
         $siteEmail      = $app->get('mailfrom');
-        $this->category = $this->Category ?? null;
+        $model          = $this->getModel();
+        $this->category = $model->getCategory();
 
         // Set document data
         $doc->title = ($this->category) ? Text::_('COM_VOLUNTEERS_TITLE_REPORTS') . ': ' . $this->category : Text::_('COM_VOLUNTEERS_TITLE_REPORTS');
         $doc->link  = Route::_('index.php?option=com_volunteers&view=reports');
 
         // Get some data from the model
-        $app->getInput()->set('limit', $app->get('feed_limit'));
-        $rows = $this->Items ?? null;
+        $rows = $model->getItems();
 
         foreach ($rows as $row) {
             // Load individual item creator class

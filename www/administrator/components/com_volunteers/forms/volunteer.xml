@@ -21,6 +21,14 @@
 			autocomplete="off"
 		/>
 		<field
+			name="username"
+			type="text"
+			label="COM_VOLUNTEERS_FIELD_USERNAME_GUID"
+			description="COM_VOLUNTEERS_FIELD_USERNAME_GUID_DESC"
+			pattern="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"
+			autocomplete="off"
+		/>
+		<field
 			name="password1"
 			type="password"
 			label="COM_VOLUNTEERS_FIELD_PROFILE_PASSWORD1_LABEL"

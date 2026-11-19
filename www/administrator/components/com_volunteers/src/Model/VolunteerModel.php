@@ -24,10 +24,12 @@ use Joomla\CMS\Router\Route;
 use Joomla\CMS\String\PunycodeHelper;
 use Joomla\CMS\Table\Table;
 use Joomla\CMS\User\User;
+use Joomla\CMS\User\UserFactoryInterface;
 use Joomla\Registry\Registry;
 use Joomla\Utilities\ArrayHelper;
 use RuntimeException;
 use stdClass;
+use Symfony\Component\Uid\Uuid;
 
 /**
  * Volunteer model.
@@ -115,8 +117,13 @@ class VolunteerModel extends AdminModel
             }
 
             // The Joomler logs in with Single Sign On
+            $form->removeField('username');
             $form->removeField('password1');
             $form->removeField('password2');
+        } else {
+            // A new Joomler gets the user account with the given email, or a new user account
+            $form->removeField('user_id');
+            $form->setFieldAttribute('email', 'description', 'COM_VOLUNTEERS_FIELD_EMAIL_NEW_JOOMLER_DESC');
         }
 
         return $form;
@@ -326,37 +333,78 @@ class VolunteerModel extends AdminModel
 
         // The Joomla! Identity portal manages the user account of an existing Joomler
         if (!$this->isExistingJoomler($data)) {
-            $dataUser = [
-                'name'      => $data['name'],
-                'username'  => PunycodeHelper::emailToPunycode($data['email']),
-                'password'  => $data['password1'] ?? '',
-                'password2' => $data['password2'] ?? '',
-                'email'     => PunycodeHelper::emailToPunycode($data['email']),
-                'groups'    => [ComponentHelper::getParams('com_users')->get('new_usertype', 2)],
-            ];
+            $email  = PunycodeHelper::emailToPunycode($data['email']);
+            $userId = $this->getUserIdByEmail($email);
 
-            $user = new User();
+            if ($userId) {
+                // Make the existing user account a Joomler, a user account can only be one Joomler
+                if ($this->getVolunteerId($userId) > 0) {
+                    $this->setError(Text::sprintf('COM_VOLUNTEERS_ERROR_VOLUNTEER_USER_IS_JOOMLER', $data['email']));
 
-            // Bind the data.
-            if (!$user->bind($dataUser)) {
-                throw new Exception("Could not bind data. Error: " . $user->getError());
-            }
+                    return false;
+                }
 
-            // Store the data.
-            if (!$user->save()) {
-                throw new Exception("Could not save user. Error: " . $user->getError());
+                $user = Factory::getContainer()->get(UserFactoryInterface::class)->loadUserById($userId);
+            } else {
+                // Single Sign On finds the user account by the GUID of the Joomla! Identity portal, without a GUID the email is the username
+                $guid = strtolower(trim($data['username'] ?? ''));
+
+                if ($guid !== '' && !Uuid::isValid($guid)) {
+                    $this->setError(Text::_('COM_VOLUNTEERS_ERROR_USERNAME_GUID_INVALID'));
+
+                    return false;
+                }
+
+                $dataUser = [
+                    'name'      => $data['name'],
+                    'username'  => $guid ?: $email,
+                    'password'  => $data['password1'] ?? '',
+                    'password2' => $data['password2'] ?? '',
+                    'email'     => $email,
+                    'groups'    => [ComponentHelper::getParams('com_users')->get('new_usertype', 2)],
+                ];
+
+                $user = new User();
+
+                if (!$user->bind($dataUser) || !$user->save()) {
+                    $this->setError($user->getError());
+
+                    return false;
+                }
             }
 
             $data['user_id'] = $user->id;
-            $data['alias']   = ApplicationHelper::stringURLSafe($data['name']);
+            $data['alias']   = ApplicationHelper::stringURLSafe($user->name);
         }
 
         // Unset data
         unset($data['email']);
+        unset($data['username']);
         unset($data['password1']);
         unset($data['password2']);
 
         return parent::save($data);
+    }
+
+    /**
+     * Get the id of the user account with this email
+     *
+     * @param   string  $email  The email address
+     *
+     * @return  integer  The user id, 0 when there is no user account with this email
+     *
+     * @since   6.1.0
+     */
+    protected function getUserIdByEmail(string $email): int
+    {
+        $db    = $this->getDatabase();
+        $query = $db->getQuery(true)
+            ->select($db->quoteName('id'))
+            ->from($db->quoteName('#__users'))
+            ->where('LOWER(' . $db->quoteName('email') . ') = LOWER(:email)')
+            ->bind(':email', $email);
+
+        return (int) $db->setQuery($query)->loadResult();
     }
 
     /**

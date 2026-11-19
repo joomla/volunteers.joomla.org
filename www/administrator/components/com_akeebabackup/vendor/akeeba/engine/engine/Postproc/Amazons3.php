@@ -320,7 +320,7 @@ class Amazons3 extends Base
 
 		if (!empty($customEndpoint))
 		{
-			$protoPos = strpos($customEndpoint, ':\\');
+			$protoPos = strpos($customEndpoint, '://');
 
 			if ($protoPos !== false)
 			{

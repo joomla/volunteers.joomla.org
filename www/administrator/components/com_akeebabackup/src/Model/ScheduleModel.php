@@ -100,21 +100,14 @@ class ScheduleModel extends BaseModel
 
 		if (trim($ret->info->secret) && $ret->info->legacyapi)
 		{
-			$ret->frontend->path = 'index.php?option=com_akeebabackup&view=backup&key='
-			                       . urlencode($ret->info->secret);
+			$query = ['key' => $ret->info->secret];
 
 			if ($currentProfileID != 1)
 			{
-				$ret->frontend->path .= '&profile=' . $currentProfileID;
+				$query['profile'] = $currentProfileID;
 			}
 
-			$ret->frontend->path = Route::link(
-				'site',
-				$ret->frontend->path,
-				false,
-				Factory::getApplication()->get('force_ssl', 0) == 2 ? Route::TLS_FORCE : Route::TLS_IGNORE,
-				true
-			);
+			$ret->frontend->path = $this->getFrontendUrl('backup', $query);
 		}
 
 		// Get information for JSON API backups
@@ -189,16 +182,7 @@ class ScheduleModel extends BaseModel
 
 		if (trim($ret->info->secret) && $ret->info->legacyapi)
 		{
-			$ret->frontend->path = 'index.php?option=com_akeebabackup&view=check&key='
-			                       . urlencode($ret->info->secret);
-
-			$ret->frontend->path = Route::link(
-				'site',
-				$ret->frontend->path,
-				false,
-				Factory::getApplication()->get('force_ssl', 0) == 2 ? Route::TLS_FORCE : Route::TLS_IGNORE,
-				true
-			);
+			$ret->frontend->path = $this->getFrontendUrl('check', ['key' => $ret->info->secret]);
 		}
 
 		return $ret;
@@ -260,19 +244,39 @@ class ScheduleModel extends BaseModel
 
 		if (trim($ret->info->secret) && $ret->info->legacyapi)
 		{
-			$ret->frontend->path = 'index.php?option=com_akeebabackup&view=Checkupload&key='
-			                       . urlencode($ret->info->secret);
-
-			$ret->frontend->path = Route::link(
-				'site',
-				$ret->frontend->path,
-				false,
-				Factory::getApplication()->get('force_ssl', 0) == 2 ? Route::TLS_FORCE : Route::TLS_IGNORE,
-				true
-			);
+			$ret->frontend->path = $this->getFrontendUrl('uploadcheck', ['key' => $ret->info->secret]);
 		}
 
 		return $ret;
+	}
+
+	/**
+	 * Returns the absolute, routed front-end URL of a view, with the given query parameters appended.
+	 *
+	 * The parameters are added after routing, encoded here: the SEF router decodes the query it is given and writes it
+	 * back without encoding, which truncates a Secret Word containing & or # and corrupts one containing + or %.
+	 *
+	 * @param   string  $view   The front-end view
+	 * @param   array   $query  Extra query string parameters, name => value
+	 *
+	 * @return  string
+	 */
+	private function getFrontendUrl(string $view, array $query): string
+	{
+		$url = Route::link(
+			'site',
+			'index.php?option=com_akeebabackup&view=' . $view,
+			false,
+			Factory::getApplication()->get('force_ssl', 0) == 2 ? Route::TLS_FORCE : Route::TLS_IGNORE,
+			true
+		);
+
+		foreach ($query as $key => $value)
+		{
+			$url .= (strpos($url, '?') === false ? '?' : '&') . rawurlencode($key) . '=' . rawurlencode((string) $value);
+		}
+
+		return $url;
 	}
 
 	private function getPhpPath($component = 'com_akeebabackup'): ?string

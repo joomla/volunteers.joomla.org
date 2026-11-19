@@ -114,7 +114,8 @@ class FilterList extends AbstractCommand
 
 		$output = [];
 
-		if (!in_array($root, $roots))
+		// The root is ignored for --type=include, so there is no point validating it.
+		if ($type !== 'include' && !in_array($root, $roots))
 		{
 			$this->ioStyle->error(Text::sprintf(
 				'COM_AKEEBABACKUP_CLI_FILTER_DELETE_ERR_UNKNOWN_ROOT',
@@ -217,17 +218,18 @@ class FilterList extends AbstractCommand
 
 				foreach ($allFilters as $uuid => $item)
 				{
+					// Older CLI versions stored the username as `user` and did not store a dumpFile.
 					$output[] = [
 						'filter'   => $uuid,
 						'type'     => 'multidb',
-						'host'     => $item['host'],
-						'driver'   => $item['driver'],
-						'port'     => $item['port'],
-						'username' => $item['username'],
-						'password' => $item['password'],
-						'database' => $item['database'],
-						'prefix'   => $item['prefix'],
-						'dumpFile' => $item['dumpFile'],
+						'host'     => $item['host'] ?? null,
+						'driver'   => $item['driver'] ?? null,
+						'port'     => $item['port'] ?? null,
+						'username' => $item['username'] ?? ($item['user'] ?? null),
+						'password' => $item['password'] ?? null,
+						'database' => $item['database'] ?? null,
+						'prefix'   => $item['prefix'] ?? null,
+						'dumpFile' => $item['dumpFile'] ?? null,
 					];
 				}
 

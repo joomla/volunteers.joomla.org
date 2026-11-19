@@ -191,7 +191,7 @@ class FactoryStorage
 
 		if ($isPHPFile)
 		{
-			return '<' . '?' . 'php die(); ' . '>' . '?' . "\n" .
+			return '<' . '?' . 'php die(); ' . '?' . '>' . "\n" .
 				$encodingMethod . "\n" . $ret;
 		}
 

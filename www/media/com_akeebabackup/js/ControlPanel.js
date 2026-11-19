@@ -34,7 +34,7 @@ window.akeebabackup.ControlPanel = window.akeebabackup.ControlPanel || {
                 }
                 else if (readFile && !listFolder && !hasRandom)
                 {
-                    if (!akeeba.System.getOptions("akeeba.ControlPanel.hasSecurityFiles", true))
+                    if (!Joomla.getOptions("akeebabackup.ControlPanel.hasSecurityFiles", true))
                     {
                         document.getElementById("insecureOutputDirectory").style.display = "block";
 

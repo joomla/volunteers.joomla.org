@@ -100,7 +100,12 @@ class StatisticModel extends AdminModel
 			}
 
 			// Get the backup statistics record and the files to delete
-			$stat = (array) Platform::getInstance()->get_statistics($id);
+			$stat = Platform::getInstance()->get_statistics($id);
+
+			if (!is_array($stat))
+			{
+				throw new RuntimeException(Text::_('COM_AKEEBABACKUP_BUADMIN_ERROR_INVALIDID'));
+			}
 
 			$table->bind($stat);
 
@@ -209,7 +214,12 @@ class StatisticModel extends AdminModel
 			}
 
 			// Get the backup statistics record and the files to delete
-			$stat = (array) Platform::getInstance()->get_statistics($id);
+			$stat = Platform::getInstance()->get_statistics($id);
+
+			if (!is_array($stat))
+			{
+				throw new RuntimeException(Text::_('COM_AKEEBABACKUP_BUADMIN_ERROR_INVALIDID'));
+			}
 
 			if ($stat['frozen'])
 			{

@@ -89,22 +89,30 @@ class BackupDownload extends AbstractCommand
 			return 1;
 		}
 
-		$stat         = Platform::getInstance()->get_statistics($id);
+		$stat = Platform::getInstance()->get_statistics($id);
+
+		if (!is_array($stat))
+		{
+			$this->ioStyle->error(Text::_('COM_AKEEBABACKUP_BUADMIN_ERROR_INVALIDID'));
+
+			return 1;
+		}
+
 		$allFileNames = Factory::getStatistics()->get_all_filenames($stat);
+
+		// NULL means that the backup's writer never stored files on this server; they may be on remote storage.
+		if ($allFileNames === null)
+		{
+			$this->ioStyle->error(Text::sprintf('COM_AKEEBABACKUP_CLI_ERR_BACKUP_DOWNLOAD_NO_FILES_MAYBE_REMOTE', $id));
+
+			return 2;
+		}
 
 		if (empty($allFileNames))
 		{
 			$this->ioStyle->error(Text::sprintf('COM_AKEEBABACKUP_CLI_ERR_BACKUP_DOWNLOAD_NO_FILES', $id));
 
 			return 1;
-		}
-
-		/** @noinspection PhpConditionAlreadyCheckedInspection */
-		if (is_null($allFileNames))
-		{
-			$this->ioStyle->error(Text::sprintf('COM_AKEEBABACKUP_CLI_ERR_BACKUP_DOWNLOAD_NO_FILES_MAYBE_REMOTE', $id));
-
-			return 2;
 		}
 
 		if (($part >= (is_array($allFileNames) || $allFileNames instanceof Countable ? count($allFileNames) : 0)) || !isset($allFileNames[$part]))

@@ -9,11 +9,14 @@ namespace Akeeba\Component\AkeebaBackup\Administrator\Model;
 
 defined('_JEXEC') || die;
 
+use Akeeba\Component\AkeebaBackup\Administrator\Helper\DbQuery;
+use Akeeba\Component\AkeebaBackup\Administrator\Helper\PathContainment;
 use Akeeba\Component\AkeebaBackup\Administrator\Helper\SecretWord;
 use Akeeba\Component\AkeebaBackup\Administrator\Mixin\ModelChmodTrait;
 use Akeeba\Component\AkeebaBackup\Administrator\Service\ComponentParameters;
 use Akeeba\Engine\Factory;
 use Akeeba\Engine\Platform;
+use Akeeba\Engine\Util\AesAdapter\OpenSSL;
 use Akeeba\Engine\Util\Complexify;
 use Exception;
 use Joomla\CMS\Component\ComponentHelper;
@@ -90,7 +93,7 @@ class ControlpanelModel extends BaseDatabaseModel
 		$db            = $this->getDatabase();
 		$access_levels = JoomlaFactory::getApplication()->getIdentity()->getAuthorisedViewLevels();
 
-		$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+		$query = DbQuery::create($db)
 			->select([
 				$db->qn('id'),
 				$db->qn('description'),
@@ -310,7 +313,7 @@ class ControlpanelModel extends BaseDatabaseModel
 		// Get all profiles
 		$db = $this->getDatabase();
 
-		$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+		$query = DbQuery::create($db)
 			->select([
 				$db->qn('id'),
 			])->from($db->qn('#__akeebabackup_profiles'))
@@ -330,7 +333,7 @@ class ControlpanelModel extends BaseDatabaseModel
 		// Update all profiles
 		foreach ($profiles as $profile_id)
 		{
-			Factory::nuke();
+			$this->nukeEngine();
 			Platform::getInstance()->load_configuration($profile_id);
 			$config = Factory::getConfiguration();
 			$config->set('akeeba.flag.confwiz', 1);
@@ -338,8 +341,23 @@ class ControlpanelModel extends BaseDatabaseModel
 		}
 
 		// Restore the old profile
-		Factory::nuke();
+		$this->nukeEngine();
 		Platform::getInstance()->load_configuration($oldProfile);
+	}
+
+	/**
+	 * Resets the Akeeba Engine's objects, keeping the path to the encryption key file.
+	 *
+	 * Factory::nuke() also discards the SecureSettings object, taking with it the key file path set when the component
+	 * boots. The new object looks for serverkey.php in the engine's own folder, finds none, and decrypts every encrypted
+	 * profile to an empty string. Saving that back would overwrite the profile with defaults.
+	 *
+	 * @return  void
+	 */
+	private function nukeEngine(): void
+	{
+		Factory::nuke();
+		Factory::getSecureSettings()->setKeyFilename(JPATH_ADMINISTRATOR . '/components/com_akeebabackup/serverkey.php');
 	}
 
 	/**
@@ -396,6 +414,17 @@ class ControlpanelModel extends BaseDatabaseModel
 	}
 
 	/**
+	 * Checks if the OpenSSL extension is installed and enabled. Without it, encrypted settings (cloud keys, FTP and
+	 * SFTP passwords, OAuth refresh tokens, the JPS password and the Secret Word) are stored as plaintext.
+	 *
+	 * @return  bool
+	 */
+	public function checkOpenSsl()
+	{
+		return (new OpenSSL())->isSupported();
+	}
+
+	/**
 	 * Is the output directory under the configured site root?
 	 *
 	 * @param   string|null  $outDir  The output directory to check. NULL for the currently configured one.
@@ -426,7 +455,7 @@ class ControlpanelModel extends BaseDatabaseModel
 			return false;
 		}
 
-		return strpos($outDir, $siteRoot) === 0;
+		return PathContainment::isUnderRoot($outDir, $siteRoot);
 	}
 
 	/**
@@ -709,13 +738,14 @@ class ControlpanelModel extends BaseDatabaseModel
 		}
 
 		// The output directory is NOT under the site's root.
-		if (strpos($outDir, $siteRoot) !== 0)
+		if (!PathContainment::isUnderRoot($outDir, $siteRoot))
 		{
 			return null;
 		}
 
-		$relPath = trim(substr($outDir, strlen($siteRoot)), '/\\');
-		$isWin   = DIRECTORY_SEPARATOR == '\\';
+		$siteRoot = rtrim($siteRoot, '/\\');
+		$relPath  = trim(substr($outDir, strlen($siteRoot)), '/\\');
+		$isWin    = DIRECTORY_SEPARATOR == '\\';
 
 		if ($isWin)
 		{
@@ -812,7 +842,7 @@ class ControlpanelModel extends BaseDatabaseModel
 		try
 		{
 			$db    = $this->getDatabase();
-			$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+			$query = DbQuery::create($db)
 			            ->select($db->quoteName('enabled'))
 			            ->from($db->quoteName('#__extensions'))
 			            ->where($db->quoteName('extension_id') . ' = :eid')
@@ -863,7 +893,7 @@ class ControlpanelModel extends BaseDatabaseModel
 
 		// Get the profiles information
 		$db       = $this->getDatabase();
-		$query    = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+		$query    = DbQuery::create($db)
 			->select([
 				$db->qn('id'),
 				$db->qn('configuration'),
@@ -876,7 +906,7 @@ class ControlpanelModel extends BaseDatabaseModel
 		{
 			$id     = $profile->id;
 			$config = Factory::getSecureSettings()->decryptSettings($profile->configuration, $key);
-			$sql    = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+			$sql    = DbQuery::create($db)
 				->update($db->qn('#__akeebabackup_profiles'))
 				->set($db->qn('configuration') . ' = :configuration')
 				->where($db->qn('id') . ' = :id')
@@ -913,7 +943,7 @@ class ControlpanelModel extends BaseDatabaseModel
 
 		// Get the profiles information
 		$db       = $this->getDatabase();
-		$query    = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+		$query    = DbQuery::create($db)
 			->select([
 				$db->qn('id'),
 				$db->qn('configuration'),
@@ -931,7 +961,7 @@ class ControlpanelModel extends BaseDatabaseModel
 		{
 			$id     = $profile->id;
 			$config = Factory::getSecureSettings()->encryptSettings($profile->configuration, $key);
-			$sql    = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+			$sql    = DbQuery::create($db)
 				->update($db->qn('#__akeebabackup_profiles'))
 				->set($db->qn('configuration') . ' = :configuration')
 				->where($db->qn('id') . ' = :id')

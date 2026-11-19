@@ -145,6 +145,8 @@ abstract class Base extends Part
 	 */
 	private $useAbstractPrefix;
 
+	private $magicQuotesRuntime = null;
+
 	/**
 	 * Public constructor.
 	 *

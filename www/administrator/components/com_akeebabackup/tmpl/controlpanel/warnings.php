@@ -135,6 +135,18 @@ get involved with and better at web development. Stay curious!
     </details>
 <?php endif ?>
 
+<?php // OpenSSL warning ?>
+<?php if(!$this->checkOpenSsl): ?>
+    <details class="alert alert-error">
+		<summary class="h4 fs-4 m-0 p-0 text-danger">
+			<?= Text::_('COM_AKEEBABACKUP_CPANL_ERR_OPENSSL_TITLE') ?>
+		</summary>
+		<p>
+			<?= Text::_('COM_AKEEBABACKUP_CPANL_ERR_OPENSSL_BODY') ?>
+		</p>
+    </details>
+<?php endif ?>
+
 <?php // Front-end backup secret word reminder ?>
 <?php if(!empty($this->frontEndSecretWordIssue)): ?>
     <details class="alert alert-danger alert-dismissible">
@@ -240,12 +252,15 @@ get involved with and better at web development. Stay curious!
 				<span class="fa fa-trash"></span>
 				<?= Text::_('COM_AKEEBABACKUP_LBL_CPANEL_UPGRADED_FROM_AKEEBABACKUP8_BTN') ?>
 			</a>
+			<?php // Migration from Akeeba Backup 8 is not supported on Joomla 5.0 and later ?>
+			<?php if (version_compare(JVERSION, '5.0.0', 'lt')): ?>
 			<a class="btn btn-warning btn-sm"
 			   href="<?= Route::_('index.php?option=com_akeebabackup&view=Upgrade') ?>"
 			>
 				<span class="fa fa-hat-wizard"></span>
 				<?= Text::_('COM_AKEEBABACKUP_LBL_CPANEL_UPGRADE_FROM_AKEEBABACKUP8_BTN') ?>
 			</a>
+			<?php endif ?>
 		</p>
 	</div>
 
@@ -258,17 +273,22 @@ get involved with and better at web development. Stay curious!
 	</summary>
     <p><?= Text::sprintf('COM_AKEEBABACKUP_CPANEL_MSG_CLOUDFLARE_WARN1', 'https://support.cloudflare.com/hc/en-us/articles/200169456-Why-is-JavaScript-or-jQuery-not-working-on-my-site-') ?></p>
 </details>
+<span id="akeeba-cloudflare-test-key" hidden><?= htmlspecialchars($cloudFlareTestFile, ENT_QUOTES, 'UTF-8') ?></span>
 <?php
 /**
  * DO NOT REMOVE THE ATTRIBUTES.
  *
  * This is a specialised test which looks for CloudFlare's completely broken RocketLoader feature and warns the user
  * about it.
+ *
+ * The test key (built from Uri::base(), see above) is never interpolated into this inline script's source. It is
+ * read back from the hidden element's textContent instead, so nothing Uri::base() could ever contain — a stray
+ * quote from a poisoned Host header or a permissive proxy, for instance — can break out of the JS string literal.
  */
 
 $js = <<< JS
 window.addEventListener('DOMContentLoaded', function() {
-	var test = localStorage.getItem('$cloudFlareTestFile');
+	var test = localStorage.getItem(document.getElementById('akeeba-cloudflare-test-key').textContent);
 	if (test)
 	{
 		document.getElementById("cloudFlareWarn").style.display = "block";

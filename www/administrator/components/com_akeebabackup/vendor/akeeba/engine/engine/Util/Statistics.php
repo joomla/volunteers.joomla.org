@@ -40,13 +40,18 @@ class Statistics
 	 * or null if the backup type is wrong or the file doesn't exist. It takes into
 	 * account the multipart nature of Split Backup Archives.
 	 *
-	 * @param   array  $stat             The backup statistics record
+	 * @param   array|null  $stat             The backup statistics record, or null if it does not exist
 	 * @param   bool   $skipNonComplete  Skips over backups with no files produced
 	 *
 	 * @return array|null The filenames or null if it's not applicable
 	 */
 	public static function get_all_filenames($stat, $skipNonComplete = true)
 	{
+		if (!is_array($stat))
+		{
+			return null;
+		}
+
 		// Shortcut for database entries marked as having no files
 		if ($stat['filesexist'] == 0)
 		{

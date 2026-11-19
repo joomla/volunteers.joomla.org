@@ -227,7 +227,7 @@ class TransferController extends \Joomla\CMS\MVC\Controller\BaseController
 				'message'   => $e->getMessage(),
 			];
 		}
-		catch (Exception $e)
+		catch (\Throwable $e)
 		{
 			$result = (object) [
 				'status'    => false,
@@ -275,7 +275,7 @@ class TransferController extends \Joomla\CMS\MVC\Controller\BaseController
 				'ignorable' => true,
 			];
 		}
-		catch (Exception $e)
+		catch (\Throwable $e)
 		{
 			$result = (object) [
 				'status'    => false,
@@ -314,10 +314,10 @@ class TransferController extends \Joomla\CMS\MVC\Controller\BaseController
 			$config       = $model->getFtpConfig();
 			$uploadResult = $model->uploadChunk($config);
 		}
-		catch (Exception $e)
+		catch (\Throwable $e)
 		{
 			$uploadResult = (object) [
-				'status'    => false,
+				'result'    => false,
 				'message'   => $e->getMessage(),
 				'totalSize' => 0,
 				'doneSize'  => 0,

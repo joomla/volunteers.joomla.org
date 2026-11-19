@@ -148,7 +148,8 @@ class OptionsList extends AbstractCommand
 		$sort  = (string) $this->cliInput->getOption('sort-by') ?? 'none';
 		$order = (string) $this->cliInput->getOption('sort-order') ?? 'asc';
 
-		if ($sort != 'none')
+		// An unknown column (not one of those the help lists) means "do not sort".
+		if ($sort != 'none' && in_array($sort, ['key', 'value', 'type', 'default', 'title', 'description', 'section'], true))
 		{
 			usort($output, function ($a, $b) use ($sort, $order) {
 				if ($a[$sort] == $b[$sort])

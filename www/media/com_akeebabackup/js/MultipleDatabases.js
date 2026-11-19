@@ -117,6 +117,7 @@ akeebabackup.Multidb.addRow = function (root, def, append_to_here)
         // Set the parameters
         document.getElementById("ake_driver").value   = cache_data.driver;
         document.getElementById("ake_host").value     = cache_data.host;
+        document.getElementById("ake_port").value     = cache_data.port ?? "";
         document.getElementById("ake_username").value = cache_data.username;
         document.getElementById("ake_password").value = cache_data.password;
         document.getElementById("ake_database").value = cache_data.database;
@@ -212,10 +213,15 @@ akeebabackup.Multidb.addRow = function (root, def, append_to_here)
                 {
                     document.getElementById("ak_editor_notifier").className = "alert alert-danger";
 
-                    elEditorNotifierContent.innerHTML =
-                        Joomla.Text._("COM_AKEEBABACKUP_MULTIDB_GUI_LBL_CONNECTFAIL") +
-                        "<br/>" +
-                        "<code>" + response.message + "</code>";
+                    elEditorNotifierContent.innerHTML = "";
+                    elEditorNotifierContent.appendChild(
+                        document.createTextNode(Joomla.Text._("COM_AKEEBABACKUP_MULTIDB_GUI_LBL_CONNECTFAIL"))
+                    );
+                    elEditorNotifierContent.appendChild(document.createElement("br"));
+
+                    var elErrorCode         = document.createElement("code");
+                    elErrorCode.textContent = response.message;
+                    elEditorNotifierContent.appendChild(elErrorCode);
                 }
             }, function (message)
             {

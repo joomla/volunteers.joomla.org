@@ -2,17 +2,17 @@
     "packages": [
         {
             "name": "akeeba/engine",
-            "version": "10.4.0",
-            "version_normalized": "10.4.0.0",
+            "version": "10.5.0",
+            "version_normalized": "10.5.0.0",
             "source": {
                 "type": "git",
                 "url": "git@github.com:akeeba/engine.git",
-                "reference": "3327d0f94250b6e742ea3433df5e82edcfb016bb"
+                "reference": "2c1a600a9068e2454c42695fcf56b9f2e968716f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/akeeba/engine/zipball/3327d0f94250b6e742ea3433df5e82edcfb016bb",
-                "reference": "3327d0f94250b6e742ea3433df5e82edcfb016bb",
+                "url": "https://api.github.com/repos/akeeba/engine/zipball/2c1a600a9068e2454c42695fcf56b9f2e968716f",
+                "reference": "2c1a600a9068e2454c42695fcf56b9f2e968716f",
                 "shasum": ""
             },
             "require": {
@@ -42,7 +42,7 @@
                 "ext-ssh2": "*",
                 "ext-zip": "*"
             },
-            "time": "2026-08-04T21:10:00+00:00",
+            "time": "2026-10-24T12:00:33+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -98,7 +98,7 @@
                 "php"
             ],
             "support": {
-                "source": "https://github.com/akeeba/engine/tree/10.4.0",
+                "source": "https://github.com/akeeba/engine/tree/10.5.0",
                 "issues": "https://github.com/akeeba/engine/issues"
             },
             "install-path": "../akeeba/engine"
@@ -160,12 +160,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/akeeba/s3.git",
-                "reference": "111fdfc7d2a9f9cebedf07a0300f24942f25b42d"
+                "reference": "ec2dd98a5c8d49319d71e1a67c9518e9f076bb01"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/akeeba/s3/zipball/111fdfc7d2a9f9cebedf07a0300f24942f25b42d",
-                "reference": "111fdfc7d2a9f9cebedf07a0300f24942f25b42d",
+                "url": "https://api.github.com/repos/akeeba/s3/zipball/ec2dd98a5c8d49319d71e1a67c9518e9f076bb01",
+                "reference": "ec2dd98a5c8d49319d71e1a67c9518e9f076bb01",
                 "shasum": ""
             },
             "require": {
@@ -173,7 +173,7 @@
                 "ext-simplexml": "*",
                 "php": "^7.4.0|^8.0"
             },
-            "time": "2026-07-14T08:45:05+00:00",
+            "time": "2026-09-28T15:43:06+00:00",
             "default-branch": true,
             "type": "library",
             "installation-source": "dist",
@@ -263,28 +263,28 @@
         },
         {
             "name": "akeeba/webpush",
-            "version": "1.0.0",
-            "version_normalized": "1.0.0.0",
+            "version": "1.1.0",
+            "version_normalized": "1.1.0.0",
             "source": {
                 "type": "git",
                 "url": "git@github.com:akeeba/webpush.git",
-                "reference": "98f29a5df0e2bc32041e60ad8c8f3c171bed3953"
+                "reference": "73d06029961be40b4b33583526e6329ae958d12f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/akeeba/webpush/zipball/98f29a5df0e2bc32041e60ad8c8f3c171bed3953",
-                "reference": "98f29a5df0e2bc32041e60ad8c8f3c171bed3953",
+                "url": "https://api.github.com/repos/akeeba/webpush/zipball/73d06029961be40b4b33583526e6329ae958d12f",
+                "reference": "73d06029961be40b4b33583526e6329ae958d12f",
                 "shasum": ""
             },
             "require": {
                 "ext-json": "*",
                 "ext-openssl": "*",
-                "php": "^7.4|^8.0"
+                "php": ">=7.4 <8.7"
             },
             "suggest": {
                 "ext-gmp": "*"
             },
-            "time": "2026-07-25T06:52:19+00:00",
+            "time": "2026-09-21T11:07:26+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -312,7 +312,7 @@
                 "web"
             ],
             "support": {
-                "source": "https://github.com/akeeba/webpush/tree/1.0.0",
+                "source": "https://github.com/akeeba/webpush/tree/1.1.0",
                 "issues": "https://github.com/akeeba/webpush/issues"
             },
             "install-path": "../akeeba/webpush"

@@ -25,6 +25,58 @@ if (typeof akeebabackup.Transfer === "undefined")
 }
 
 /**
+ * Replaces the contents of an element with a message sent by the server.
+ *
+ * The messages are language strings which carry basic formatting (code, em, strong), so assigning them with
+ * textContent shows the tags to the user, and assigning them with innerHTML would trust whatever the message contains
+ * (it includes names which the user typed). Parse the message into an inert document and copy over the text and only
+ * the formatting elements of the allow-list, without any attributes; any other element is reduced to its text.
+ *
+ * @param   {Element}  element  The element to put the message into
+ * @param   {string}   message  The message sent by the server
+ */
+akeebabackup.Transfer.setMessage = function (element, message)
+{
+    var allowed = ["CODE", "EM", "STRONG"];
+    var doc     = new DOMParser().parseFromString(message ? String(message) : "", "text/html");
+
+    var copyNodes = function (from, to)
+    {
+        for (var i = 0; i < from.childNodes.length; i++)
+        {
+            var node = from.childNodes[i];
+
+            if (node.nodeType === Node.TEXT_NODE)
+            {
+                to.appendChild(document.createTextNode(node.nodeValue));
+
+                continue;
+            }
+
+            if (node.nodeType !== Node.ELEMENT_NODE)
+            {
+                continue;
+            }
+
+            if (allowed.indexOf(node.nodeName) === -1)
+            {
+                copyNodes(node, to);
+
+                continue;
+            }
+
+            var copy = document.createElement(node.nodeName.toLowerCase());
+
+            copyNodes(node, copy);
+            to.appendChild(copy);
+        }
+    };
+
+    element.textContent = "";
+    copyNodes(doc.body, element);
+};
+
+/**
  * Check the URL field
  */
 akeebabackup.Transfer.onUrlChange = function (force)
@@ -62,7 +114,8 @@ akeebabackup.Transfer.onUrlChange = function (force)
         return;
     }
 
-    var divList = document.querySelectorAll("#akeeba-transfer-row-url > div");
+    // Hide only the warnings. The row's own column also holds them, and hiding it hides them with it.
+    var divList = document.querySelectorAll("#akeeba-transfer-row-url .alert");
 
     for (var i = 0; i < divList.length; i++)
     {
@@ -271,7 +324,7 @@ akeebabackup.Transfer.applyConnection = function ()
                     }
                 }
 
-                akeebaTransferFTPErrorBody.innerHTML = res.message;
+                akeebabackup.Transfer.setMessage(akeebaTransferFTPErrorBody, res.message);
                 akeebaTransferFTPError.style.display = "";
                 akeebabackup.System.triggerEvent(akeebaTransferFTPError, "focus");
 
@@ -347,7 +400,7 @@ akeebabackup.Transfer.uploadKickstart = function ()
             stepKickstart.classList.remove('bg-warning');
             stepKickstart.classList.add('bg-danger', 'text-white');
 
-            uploadErrorBody.innerHTML    = res.message;
+            akeebabackup.Transfer.setMessage(uploadErrorBody, res.message);
             uploadErrorBox.style.display = "";
 
             return;
@@ -391,7 +444,7 @@ akeebabackup.Transfer.uploadArchive = function (start)
             stepArchive.classList.remove('bg-warning');
             stepArchive.classList.add('bg-danger', 'text-white');
 
-            uploadErrorBody.innerHTML    = res.message;
+            akeebabackup.Transfer.setMessage(uploadErrorBody, res.message);
             uploadErrorBox.style.display = "";
 
             return;
@@ -458,6 +511,12 @@ akeebabackup.Transfer.testFtpSftpConnection = function ()
 //=============================================================================
 akeebabackup.System.documentReady(function ()
 {
+    // The transfer forms are only rendered when there is a backup to transfer.
+    if (!document.getElementById("akeeba-transfer-btn-url"))
+    {
+        return;
+    }
+
     document.getElementById("akeeba-transfer-ftp-method")
             .addEventListener("change", akeebabackup.Transfer.onTransferMethodChange);
 

@@ -359,13 +359,34 @@ akeebabackup.Dbfilters.addRow = function (def, append_to_here)
                 verb:     "swap"
             };
 
-            var elEditContainer = that.parentNode.querySelector("span.editcontainer");
+            // Disabled: "span.editcontainer" matches nothing, so this was always null (no spinner while saving).
+            // Undecided whether to restore the spinner (with the correct selector) or remove this for good.
+            // var elEditContainer = that.parentNode.querySelector("span.editcontainer");
 
             akeebabackup.Dbfilters.toggle(
                 new_data,
-                elEditContainer,
+                null, // elEditContainer
+                // elEditContainer,
                 function (response, caller)
                 {
+                    // The filter was refused. Drop a new row, or put back the label of an existing one.
+                    if (!response.success)
+                    {
+                        if (def.node == "")
+                        {
+                            elRow.parentNode.removeChild(elRow);
+
+                            return;
+                        }
+
+                        var elOldName           = that.parentNode.querySelector("span.ak_filter_name");
+                        elOldName.style.display = "inline-block";
+
+                        that.parentNode.removeChild(that);
+
+                        return;
+                    }
+
                     // Remove the editor
                     var elFilterName           = that.parentNode.querySelector("span.ak_filter_name");
                     elFilterName.style.display = "inline-block";

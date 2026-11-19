@@ -9,6 +9,7 @@ namespace Akeeba\Component\AkeebaBackup\Administrator\Model;
 
 defined('_JEXEC') || die;
 
+use Akeeba\Component\AkeebaBackup\Administrator\Helper\DbQuery;
 use DirectoryIterator;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Installer\Adapter\PackageAdapter;
@@ -83,14 +84,14 @@ class UpgradeModel extends BaseModel implements DatabaseAwareInterface
 			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/src/Model/UsageStatisticsModel.php',
 
 			// Remove iDriveSync — the service has been discontinued
-			JPATH_ADMINISTRATOR . 'administrator/components/com_akeebabackup/vendor/akeeba/engine/Postproc/idrivesync.json',
-			JPATH_ADMINISTRATOR . 'administrator/components/com_akeebabackup/vendor/akeeba/engine/Postproc/Idrivesync.php',
-			JPATH_ADMINISTRATOR . 'administrator/components/com_akeebabackup/vendor/akeeba/engine/Postproc/Connector/Idrivesync.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Postproc/idrivesync.json',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Postproc/Idrivesync.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Postproc/Connector/Idrivesync.php',
 
 			// Remove Piecon
-			JPATH_ADMINISTRATOR . 'media/com_akeebabackup/js/piecon.js',
-			JPATH_ADMINISTRATOR . 'media/com_akeebabackup/js/piecon.min.js',
-			JPATH_ADMINISTRATOR . 'media/com_akeebabackup/js/piecon.min.js.map',
+			JPATH_ROOT . '/media/com_akeebabackup/js/piecon.js',
+			JPATH_ROOT . '/media/com_akeebabackup/js/piecon.min.js',
+			JPATH_ROOT . '/media/com_akeebabackup/js/piecon.min.js.map',
 
 			// Legacy helpers
 			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/src/Helper/CacheCleaner.php',
@@ -113,9 +114,24 @@ class UpgradeModel extends BaseModel implements DatabaseAwareInterface
 
 			// Old copy of Kickstart
 			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/installers/kickstart.txt',
+
+			// Development cruft shipped by older builds of greenlion/php-sql-parser
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/greenlion/php-sql-parser/.buildpath',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/greenlion/php-sql-parser/.eclipse-PHP-formatter.xml',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/greenlion/php-sql-parser/.gitmodules',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/greenlion/php-sql-parser/.project',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/greenlion/php-sql-parser/.travis.yml',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/greenlion/php-sql-parser/phpunit.xml',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/greenlion/php-sql-parser/README.md',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/greenlion/php-sql-parser/runtest.sh',
+
+			// Legacy error handler
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/tmpl/commontemplates/errorhandler.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/tmpl/commontemplates/hhvm.php',
+
 		],
 		'folders' => [
-			JPATH_ADMINISTRATOR . 'administrator/components/com_akeebabackup/platform/Joomla/Finalization',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/platform/Joomla/Finalization',
 
 			// Legacy traits
 			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/src/Controller/Mixin',
@@ -127,6 +143,14 @@ class UpgradeModel extends BaseModel implements DatabaseAwareInterface
 			// Legacy folders (these dependencies are now imported through Composer)
 			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/engine',
 			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/webpush',
+
+			// Development cruft shipped by older builds of greenlion/php-sql-parser
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/greenlion/php-sql-parser/.github',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/greenlion/php-sql-parser/.settings',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/greenlion/php-sql-parser/examples',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/greenlion/php-sql-parser/libs',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/greenlion/php-sql-parser/tests',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/greenlion/php-sql-parser/wiki',
 		],
 	];
 
@@ -138,103 +162,109 @@ class UpgradeModel extends BaseModel implements DatabaseAwareInterface
 	private const REMOVE_FROM_CORE = [
 		'files'   => [
 			// Pro engine features
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Archiver/Directftp.php',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Archiver/directftp.json',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Archiver/Directftpcurl.php',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Archiver/directftpcurl.json',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Archiver/Directsftp.php',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Archiver/directsftp.json',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Archiver/Directsftpcurl.php',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Archiver/directsftpcurl.json',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Archiver/Jps.php',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Archiver/jps.json',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Archiver/Zipnative.php',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Archiver/zipnative.json',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Postproc/Connector/**"',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Postproc/amazons3.json',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Postproc/Amazons3.php',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Postproc/azure.json',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Postproc/Azure.php',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Postproc/backblaze.json',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Postproc/Backblaze.php',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Postproc/box.json',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Postproc/Box.php',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Postproc/cloudfiles.json',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Postproc/Cloudfiles.php',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Postproc/cloudme.json',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Postproc/Cloudme.php',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Postproc/dreamobjects.json',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Postproc/Dreamobjects.php',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Postproc/dropbox.json',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Postproc/Dropbox.php',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Postproc/dropbox2.json',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Postproc/Dropbox2.php',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Postproc/ftp.json',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Postproc/Ftp.php',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Postproc/ftpcurl.json',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Postproc/Ftpcurl.php',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Postproc/googledrive.json',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Postproc/Googledrive.php',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Postproc/googlestorage.json',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Postproc/Googlestorage.php',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Postproc/googlestoragejson.json',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Postproc/Googlestoragejson.php',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Postproc/idrivesync.json',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Postproc/Idrivesync.php',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Postproc/onedrive.json',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Postproc/Onedrive.php',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Postproc/onedrivebusiness.json',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Postproc/Onedrivebusiness.php',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Postproc/ovh.json',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Postproc/Ovh.php',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Postproc/pcloud.json',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Postproc/Pcloud.php',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Postproc/s3.json',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Postproc/S3.php',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Postproc/sftp.json',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Postproc/Sftp.php',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Postproc/sftpcurl.json',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Postproc/Sftpcurl.php',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Postproc/sugarsync.json',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Postproc/Sugarsync.php',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Postproc/swift.json',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Postproc/Swift.php',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Postproc/webdav.json',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Postproc/Webdav.php',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Scan/large.json',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/Scan/Large.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Archiver/Directftp.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Archiver/directftp.json',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Archiver/Directftpcurl.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Archiver/directftpcurl.json',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Archiver/Directsftp.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Archiver/directsftp.json',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Archiver/Directsftpcurl.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Archiver/directsftpcurl.json',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Archiver/Jps.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Archiver/jps.json',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Archiver/Zipnative.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Archiver/zipnative.json',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Postproc/amazons3.json',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Postproc/Amazons3.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Postproc/azure.json',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Postproc/Azure.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Postproc/backblaze.json',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Postproc/Backblaze.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Postproc/box.json',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Postproc/Box.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Postproc/cloudfiles.json',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Postproc/Cloudfiles.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Postproc/cloudme.json',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Postproc/Cloudme.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Postproc/dreamobjects.json',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Postproc/Dreamobjects.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Postproc/dropbox.json',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Postproc/Dropbox.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Postproc/dropbox2.json',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Postproc/Dropbox2.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Postproc/ftp.json',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Postproc/Ftp.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Postproc/ftpcurl.json',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Postproc/Ftpcurl.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Postproc/googledrive.json',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Postproc/Googledrive.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Postproc/googlestorage.json',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Postproc/Googlestorage.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Postproc/googlestoragejson.json',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Postproc/Googlestoragejson.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Postproc/idrivesync.json',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Postproc/Idrivesync.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Postproc/onedrive.json',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Postproc/Onedrive.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Postproc/onedriveapp.json',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Postproc/Onedriveapp.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Postproc/onedrivebusiness.json',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Postproc/Onedrivebusiness.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Postproc/ovh.json',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Postproc/Ovh.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Postproc/pcloud.json',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Postproc/Pcloud.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Postproc/s3.json',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Postproc/S3.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Postproc/sftp.json',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Postproc/Sftp.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Postproc/sftpcurl.json',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Postproc/Sftpcurl.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Postproc/sugarsync.json',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Postproc/Sugarsync.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Postproc/swift.json',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Postproc/Swift.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Postproc/webdav.json',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Postproc/Webdav.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Scan/large.json',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Scan/Large.php',
 
 			// Kickstart, used for Site Transfer Wizard
 			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/installers/kickstart.txt',
 			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/installers/kickstart.dat',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/installers/kickstart.transfer.php',
+
+			// Generic (non-CMS) restoration script; this extension only ever selects the Joomla-specific `brs` one
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/installers/brs-generic.jpa',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/installers/brs-generic.json',
 
 			// Pro features: Controllers
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/Controller/AliceController.php',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/Controller/DiscoverController.php',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/Controller/IncludefoldersController.php',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/Controller/MultipledatabasesController.php',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/Controller/RegexdatabasefiltersController.php',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/Controller/RegexfilefiltersController.php',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/Controller/RemoteFilesController.php',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/Controller/RestoreController.php',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/Controller/ScheduleController.php',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/Controller/S3importController.php',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/Controller/TransferController.php',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/Controller/UploadController.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/src/Controller/AliceController.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/src/Controller/DiscoverController.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/src/Controller/IncludefoldersController.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/src/Controller/MultipledatabasesController.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/src/Controller/RegexdatabasefiltersController.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/src/Controller/RegexfilefiltersController.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/src/Controller/RemotefilesController.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/src/Controller/RestoreController.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/src/Controller/ScheduleController.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/src/Controller/S3importController.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/src/Controller/TransferController.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/src/Controller/UploadController.php',
 
 			// Pro features: Models
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/Model/AliceModel.php',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/Model/DiscoverModel.php',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/Model/IncludefoldersModel.php',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/Model/MultipledatabasesModel.php',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/Model/RegexdatabasefiltersModel.php',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/Model/RegexfilefiltersModel.php',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/Model/RemoteFilesModel.php',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/Model/RestoreModel.php',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/Model/ScheduleModel.php',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/Model/S3importModel.php',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/Model/TransferModel.php',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/Model/UploadModel.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/src/Model/AliceModel.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/src/Model/DiscoverModel.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/src/Model/IncludefoldersModel.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/src/Model/MultipledatabasesModel.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/src/Model/RegexdatabasefiltersModel.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/src/Model/RegexfilefiltersModel.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/src/Model/RemotefilesModel.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/src/Model/RestoreModel.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/src/Model/ScheduleModel.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/src/Model/S3importModel.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/src/Model/TransferModel.php',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/src/Model/UploadModel.php',
 
 			// Pro features: Platform files
 			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/platform/Joomla/Filter/Components.php',
@@ -245,56 +275,89 @@ class UpgradeModel extends BaseModel implements DatabaseAwareInterface
 			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/platform/Joomla/Filter/Plugins.php',
 			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/platform/Joomla/Filter/Templates.php',
 
-			// Pro features: integrated restoration — Should be removed by Joomla itself
+			/**
+			 * Pro features: integrated restoration.
+			 *
+			 * Joomla removes this one by itself, so we must not. `restore.php` is a top-level <filename> in the Pro
+			 * manifest's <administration><files> and is absent from the Core manifest, so Installer::parseFiles()
+			 * — via findDeletedFiles() — deletes it on the Pro→Core update. Verified on Joomla 6.1.2.
+			 */
 			// JPATH_ADMINISTRATOR . '/components/com_akeebabackup/restore.php',
 		],
 		'folders' => [
-			// Pro features: API application — Should be removed by Joomla itself
-			// JPATH_API . '/components/com_akeebabackup',
+			/**
+			 * Pro features: API application.
+			 *
+			 * Joomla does NOT remove this, contrary to what this entry assumed for a long time. Deleting the whole
+			 * <api> section from the Core manifest is precisely what prevents its removal: ComponentAdapter::
+			 * copyBaseFiles() guards the API client with `if ($this->getManifest()->api->files)`, so when the *new*
+			 * manifest has no <api> element, parseFiles() is never called for client 3 and findDeletedFiles() never
+			 * runs for it. The Pro API application therefore survives a Pro→Core downgrade untouched, and a Core
+			 * site is left serving Pro API endpoints. Verified on Joomla 6.1.2.
+			 */
+			JPATH_API . '/components/com_akeebabackup',
 
-			// Pro features: ALICE — Should be removed by Joomla itself
+			/**
+			 * Pro features: ALICE.
+			 *
+			 * Joomla removes this one by itself, so we must not — same mechanism as restore.php above: a top-level
+			 * <folder> present in the Pro manifest and absent from the Core one. Verified on Joomla 6.1.2.
+			 */
 			// JPATH_ADMINISTRATOR . '/components/com_akeebabackup/AliceChecks',
+
+			// Pro features: cloud storage connectors
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine/Postproc/Connector',
 
 			// Pro features: Joomla CLI integration
 			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/src/CliCommands',
 
 			// Pro features: Views
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/View/Alice',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/View/Discover',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/View/Includefolders',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/View/Multipledatabases',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/View/Regexdatabasefilters',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/View/Regexfilefilters',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/View/RemoteFiles',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/View/Restore',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/View/Schedule',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/View/S3import',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/View/Transfer',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/View/Upload',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/src/View/Alice',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/src/View/Discover',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/src/View/Includefolders',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/src/View/Multipledatabases',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/src/View/Regexdatabasefilters',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/src/View/Regexfilefilters',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/src/View/Remotefiles',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/src/View/Restore',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/src/View/Schedule',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/src/View/S3import',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/src/View/Transfer',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/src/View/Upload',
 
 			// Pro features: View templates
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/tmpl/Alice',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/tmpl/Discover',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/tmpl/Includefolders',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/tmpl/Multipledatabases',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/tmpl/Regexdatabasefilters',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/tmpl/Regexfilefilters',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/tmpl/RemoteFiles',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/tmpl/Restore',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/tmpl/Schedule',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/tmpl/S3import',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/tmpl/Transfer',
-			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/tmpl/Upload',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/tmpl/alice',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/tmpl/discover',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/tmpl/includefolders',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/tmpl/multipledatabases',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/tmpl/regexdatabasefilters',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/tmpl/regexfilefilters',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/tmpl/remotefiles',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/tmpl/restore',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/tmpl/schedule',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/tmpl/s3import',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/tmpl/transfer',
+			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/tmpl/upload',
 
 			// Pro features: Platform folders
 			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/platform/Joomla/Config/Pro',
 			JPATH_ADMINISTRATOR . '/components/com_akeebabackup/platform/Joomla/Finalization',
 
-			// Pro features: Frontend controllers — Should be removed by Joomla itself
-			// JPATH_SITE . '/src/Controller',
-
-			// Pro features: Frontend models — Should be removed by Joomla itself
-			// JPATH_SITE . '/src/Model',
+			/**
+			 * Pro features: front-end MVC.
+			 *
+			 * Joomla does NOT remove these. findDeletedFiles() only diffs *top-level* manifest entries, and `src` is
+			 * a <folder> in both the Core and the Pro manifest, so nothing nested inside it is ever considered —
+			 * it is overwritten, never pruned. (The front-end `tmpl` folder IS removed by Joomla, because that one
+			 * is a top-level entry present in the Pro manifest and absent from Core, which is why it is not listed
+			 * here.) Verified on Joomla 6.1.2.
+			 *
+			 * These previously carried a JPATH_SITE . '/src/...' path, which is missing the
+			 * /components/com_akeebabackup segment and pointed at a directory that does not exist.
+			 */
+			JPATH_SITE . '/components/com_akeebabackup/src/Controller',
+			JPATH_SITE . '/components/com_akeebabackup/src/Model',
+			JPATH_SITE . '/components/com_akeebabackup/src/View',
 		],
 	];
 
@@ -488,7 +551,7 @@ class UpgradeModel extends BaseModel implements DatabaseAwareInterface
 		}
 
 		$db    = $this->getDatabase();
-		$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+		$query = DbQuery::create($db)
 		            ->select($db->quoteName('extension_id'))
 		            ->from($db->quoteName('#__extensions'));
 
@@ -560,7 +623,7 @@ class UpgradeModel extends BaseModel implements DatabaseAwareInterface
 
 		// Reassign all extensions
 		$db    = $this->getDatabase();
-		$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+		$query = DbQuery::create($db)
 		            ->update($db->quoteName('#__extensions'))
 		            ->set($db->qn('package_id') . ' = :package_id')
 		            ->whereIn($db->qn('extension_id'), $extensionIDs, ParameterType::INTEGER)
@@ -632,7 +695,7 @@ class UpgradeModel extends BaseModel implements DatabaseAwareInterface
 		}
 
 		$db    = $this->getDatabase();
-		$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+		$query = DbQuery::create($db)
 		            ->update($db->quoteName('#__extensions'))
 		            ->set($db->qn('enabled') . ' = 1')
 		            ->whereIn($db->quoteName('extension_id'), $extensionIDs);
@@ -664,7 +727,7 @@ class UpgradeModel extends BaseModel implements DatabaseAwareInterface
 	{
 		// We will definitely remove REMOVE_FROM_ALL_VERSIONS in all versions
 		$removeSource = self::REMOVE_FROM_ALL_VERSIONS;
-		$isPro        = $isPro ?? $this->isPro();
+		$isPro        = $this->isPro();
 
 		if (!$isPro)
 		{
@@ -816,12 +879,21 @@ class UpgradeModel extends BaseModel implements DatabaseAwareInterface
 		}
 
 		/**
-		 * The two folders are identical.
+		 * The two folders are identical: we are on a case-insensitive filesystem, and $path and $altPath are two
+		 * spellings of one directory. The probe above proves it — a file written through $altPath was read back
+		 * through $path — so deleting it removes exactly the folder we were asked to remove, and nothing else.
 		 *
-		 * It is impossible to know if the folder is written on disk as lowercase or mixed case. We must rename it to
-		 * all lowercase. If we don't, moving the site to a case-sensitive filesystem will break it (the folder will be
-		 * in the wrong case!). Therefore we have to do a two-step process to effect the rename on a case-insensitive
-		 * filesystem...
+		 * We cannot simply delete $path, because we do not know how the entry is actually spelled on disk, and
+		 * deleting through the wrong spelling is what the original Windows breakage was about. So we first rename
+		 * the folder to a name we chose ourselves, whose spelling is therefore known exactly, and delete that.
+		 *
+		 * The rename is two-step because renaming Foo to foo is a no-op (or an error) on a case-insensitive
+		 * filesystem: the source and destination are the same entry. Going through a uniquely named intermediate
+		 * avoids that collision.
+		 *
+		 * If the deletion fails we still land the folder on its all-lowercase name rather than leaving it under the
+		 * intermediate one, so that a failure here leaves the tree tidy — and correctly cased, which matters if the
+		 * site is later moved to a case-sensitive filesystem.
 		 */
 		$intermediateBasename = $lowercaseBaseName . '_' . UserHelper::genRandomPassword(8);
 		$intermediatePath     = dirname($path) . '/' . $intermediateBasename;
@@ -829,11 +901,38 @@ class UpgradeModel extends BaseModel implements DatabaseAwareInterface
 		try
 		{
 			Folder::move($path, $intermediatePath);
+		}
+		catch (\Exception $e)
+		{
+			// Swallow; the is_dir() check below is what actually decides whether the rename landed.
+		}
+
+		/**
+		 * Folder::move() reports failure by RETURNING a string ('Rename failed', 'Folder already exists', …) rather
+		 * than throwing, so the catch above cannot be relied upon. Check the filesystem instead: if the folder is not
+		 * where we just tried to put it, the rename did not happen and there is nothing safe to delete.
+		 */
+		if (!is_dir($intermediatePath))
+		{
+			return false;
+		}
+
+		try
+		{
+			return Folder::delete($intermediatePath);
+		}
+		catch (\Exception $e)
+		{
+			// Deletion failed. Fall through and at least leave the folder correctly cased.
+		}
+
+		try
+		{
 			Folder::move($intermediatePath, $altPath);
 		}
 		catch (\Exception $e)
 		{
-			return false;
+			// Swallow: nothing further we can do.
 		}
 
 		return false;
@@ -916,7 +1015,7 @@ class UpgradeModel extends BaseModel implements DatabaseAwareInterface
 
 		// Reassign all extensions
 		$db    = $this->getDatabase();
-		$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+		$query = DbQuery::create($db)
 		            ->update($db->quoteName('#__extensions'))
 		            ->set($db->qn('package_id') . ' = :package_id')
 		            ->whereIn($db->qn('extension_id'), $extensionIDs, ParameterType::INTEGER)
@@ -947,7 +1046,7 @@ class UpgradeModel extends BaseModel implements DatabaseAwareInterface
 		// Get the existing list of extensions dependent on the specified version of FOF.
 		$keyName = 'fof' . $fofVersion . '0';
 		$db      = $this->getDatabase();
-		$query   = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+		$query   = DbQuery::create($db)
 		              ->select($db->quoteName('value'))
 		              ->from($db->quoteName('#__akeeba_common'))
 		              ->where($db->quoteName('key') . ' = :keyName')
@@ -973,7 +1072,7 @@ class UpgradeModel extends BaseModel implements DatabaseAwareInterface
 		$json = json_encode($list);
 
 		// Update the #__akeeba_common table.
-		$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+		$query = DbQuery::create($db)
 		            ->update($db->quoteName('#__akeeba_common'))
 		            ->set($db->quoteName('value') . ' = :json')
 		            ->where($db->quoteName('key') . ' = :keyName')
@@ -1116,12 +1215,12 @@ class UpgradeModel extends BaseModel implements DatabaseAwareInterface
 				break;
 
 			case 'plugin':
-				$group     = (string) $fileField->attributes()->group ?? 'system';
+				$group     = (string) ($fileField->attributes()->group ?? '') ?: 'system';
 				$extension = 'plg_' . $group . '_' . $id;
 				break;
 
 			case 'module':
-				$client    = (string) $fileField->attributes()->client ?? 'site';
+				$client    = (string) ($fileField->attributes()->client ?? '') ?: 'site';
 				$extension = (($client != 'site') ? 'a' : '') . $id;
 				break;
 
@@ -1423,7 +1522,7 @@ class UpgradeModel extends BaseModel implements DatabaseAwareInterface
 	private function removeExtensionPackageLink(int $eid): void
 	{
 		$db    = $this->getDatabase();
-		$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+		$query = DbQuery::create($db)
 			->update($db->quoteName('#__extensions'))
 			->set($db->quoteName('package_id') . ' = 0')
 			->where($db->quoteName('extension_id') . ' = :eid')

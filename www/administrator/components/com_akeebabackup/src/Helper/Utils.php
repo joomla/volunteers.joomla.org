@@ -113,6 +113,77 @@ class Utils
 	}
 
 	/**
+	 * Escapes the sprintf()/Text::sprintf() substitution parameters of a message built from attacker-influenced
+	 * data (e.g. file names, paths, or log lines lifted verbatim by the ALICE diagnostics checks) before they
+	 * are interpolated into a string that will later be echoed as raw HTML.
+	 *
+	 * Only the parameters are escaped, never the template string itself: several of the language strings ALICE
+	 * substitutes into contain intentional markup (e.g. <br/>, <strong>) which must survive.
+	 *
+	 * @param   array  $params
+	 *
+	 * @return  string[]
+	 */
+	public static function escapeSprintfParams(array $params): array
+	{
+		return array_map(
+			static fn($param) => htmlspecialchars((string) $param, ENT_QUOTES, 'UTF-8'),
+			$params
+		);
+	}
+
+	/**
+	 * Security gate for `startBackup`'s `overrides` parameter: is this key allowed to be written?
+	 *
+	 * A key is allowed only if BOTH of the following hold:
+	 * - it is in the `akeeba.` or `engine.` namespace; AND
+	 * - it is already known to the engine's configuration registry, i.e. the currently loaded profile already
+	 *   has a value under that exact path.
+	 *
+	 * Requiring "known" as well as the namespace prefix is what stops the override channel from conjuring up a
+	 * namespace or key that nothing else ever reads or writes, such as `volatile.*` (see security.md, C1/C2/C4) —
+	 * a correctly-prefixed but unknown key (e.g. `akeeba.invalid.key`) is just as disallowed as a key outside
+	 * either namespace.
+	 *
+	 * @param   \Akeeba\Engine\Configuration  $config  The configuration registry to query
+	 * @param   string                        $k       The override key to check, e.g. `akeeba.basic.output_directory`
+	 *
+	 * @return  bool
+	 * @since   10.5.0
+	 */
+	public static function isAllowedOverrideKey($config, string $k): bool
+	{
+		if (strpos($k, 'akeeba.') !== 0 && strpos($k, 'engine.') !== 0)
+		{
+			return false;
+		}
+
+		return self::isKnownConfigurationParameter($config, $k);
+	}
+
+	/**
+	 * Is the given registry path already known to the engine's configuration registry?
+	 *
+	 * "Known" means the currently loaded profile already has a value under that exact path — i.e. the override
+	 * can only change something the engine (or a prior, legitimate configuration save) already put there, never
+	 * conjure up a new namespace or key that nothing else ever reads or writes, such as `volatile.*`.
+	 *
+	 * @param   \Akeeba\Engine\Configuration  $config   The configuration registry to query
+	 * @param   string                        $regpath  The registry path to check, e.g. `akeeba.basic.output_directory`
+	 *
+	 * @return  bool
+	 * @since   10.5.0
+	 */
+	public static function isKnownConfigurationParameter($config, string $regpath): bool
+	{
+		static $sentinel;
+
+		$sentinel = $sentinel ?? new \stdClass();
+
+		return $config->get($regpath, $sentinel) !== $sentinel;
+	}
+
+	/**
 	 * Escapes a string for use with Javascript
 	 *
 	 * @param   string  $string  The string to escape
@@ -183,7 +254,12 @@ class Utils
 		$basePath = Uri::base(true);
 		$baseUrl = Uri::base(false);
 
-		if (strpos($returnUrl, $basePath) === 0)
+		if (rtrim($returnUrl, '/') === rtrim($baseUrl, '/'))
+		{
+			// Exactly the base URL, with or without its trailing slash (e.g. the Quick Icon plugin's return URL)
+			$checkUrl = '';
+		}
+		elseif (strpos($returnUrl, $basePath) === 0)
 		{
 			$checkUrl = substr($returnUrl, strlen($basePath));
 		}
@@ -195,7 +271,7 @@ class Utils
 		$checkUrl = ltrim($checkUrl, '/');
 
 		// Check if it's an internal URL
-		if (!Uri::isInternal($checkUrl))
+		if ($checkUrl !== '' && !Uri::isInternal($checkUrl))
 		{
 			return '';
 		}

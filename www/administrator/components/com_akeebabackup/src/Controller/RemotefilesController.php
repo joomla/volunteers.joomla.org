@@ -9,6 +9,7 @@ namespace Akeeba\Component\AkeebaBackup\Administrator\Controller;
 
 defined('_JEXEC') || die;
 
+use Akeeba\Component\AkeebaBackup\Administrator\Helper\ExceptionChain;
 use Akeeba\Component\AkeebaBackup\Administrator\Mixin\ControllerCustomACLTrait;
 use Akeeba\Component\AkeebaBackup\Administrator\Mixin\ControllerEventsTrait;
 use Akeeba\Component\AkeebaBackup\Administrator\Mixin\ControllerRegisterTasksTrait;
@@ -255,13 +256,10 @@ class RemotefilesController extends BaseController
 			$result = null;
 
 			// Failed to download. Get the messages from the engine.
-			$errors          = [];
-			$parentException = $e;
-			while ($parentException)
-			{
-				$errors[]        = $e->getMessage();
-				$parentException = $e->getPrevious();
-			}
+			$errors = array_map(
+				fn (\Throwable $exception) => $exception->getMessage(),
+				ExceptionChain::walk($e)
+			);
 
 			// Redirect and convey the errors to the user
 			$url = Uri::base()

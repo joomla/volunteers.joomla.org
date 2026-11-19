@@ -62,14 +62,27 @@ trait ModelExclusionFilterTrait
 					$ret['success'] = false;
 				}
 
-				if ($ret['success'] && !empty($oldNode))
+				// Renaming a filter to itself is a no-op
+				if ($ret['success'] && $oldNode === $node)
 				{
-					$ret = $this->applyExclusionFilter($type, $root, $oldNode, 'remove');
+					break;
 				}
 
+				// Add the new filter first: if it is refused (e.g. it already exists) the old one must survive.
 				if ($ret['success'])
 				{
-					$ret = $this->applyExclusionFilter($type, $root, $node, 'set');
+					$ret['success'] = $filter->set($root, $node);
+				}
+
+				if ($ret['success'] && !empty($oldNode))
+				{
+					$ret['success'] = $filter->remove($root, $oldNode);
+
+					// The old filter could not be removed; do not leave the new one behind.
+					if (!$ret['success'])
+					{
+						$filter->remove($root, $node);
+					}
 				}
 				break;
 		}

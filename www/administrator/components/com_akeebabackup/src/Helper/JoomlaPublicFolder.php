@@ -15,6 +15,7 @@
 
 namespace Akeeba\Component\AkeebaBackup\Administrator\Helper;
 
+use Akeeba\Component\AkeebaBackup\Administrator\Helper\DbQuery;
 use Akeeba\Engine\Factory;
 use Joomla\CMS\Factory as JoomlaFactory;
 use Joomla\Database\DatabaseDriver;
@@ -177,7 +178,7 @@ class JoomlaPublicFolder
 		/** @var DatabaseDriver $db */
 		$key   = self::KEY;
 		$db    = JoomlaFactory::getContainer()->get(DatabaseInterface::class);
-		$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+		$query = DbQuery::create($db)
 			->delete($db->quoteName('#__akeeba_common'))
 			->where($db->quoteName('key') . ' = :key')
 			->bind(':key', $key);
@@ -224,7 +225,7 @@ class JoomlaPublicFolder
 				{
 					/** @var DatabaseDriver $db */
 					$db     = JoomlaFactory::getContainer()->get(DatabaseInterface::class);
-					$query  = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+					$query  = DbQuery::create($db)
 						->select($db->quoteName('value'))
 						->from($db->quoteName('#__akeeba_common'))
 						->where($db->quoteName('key') . ' = :key')

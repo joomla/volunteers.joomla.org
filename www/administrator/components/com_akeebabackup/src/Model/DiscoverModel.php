@@ -9,6 +9,7 @@ namespace Akeeba\Component\AkeebaBackup\Administrator\Model;
 
 defined('_JEXEC') || die;
 
+use Akeeba\Component\AkeebaBackup\Administrator\Helper\DbQuery;
 use Akeeba\Engine\Factory;
 use Akeeba\Engine\Platform;
 use Exception;
@@ -30,8 +31,15 @@ class DiscoverModel extends BaseDatabaseModel
 			$this->getState('directory', '')
 		);
 
-		// Get all archive files
-		$files = array_filter(Factory::getFileLister()->getFiles($directory, true),
+		// Get all archive files. The lister returns false for a directory it cannot read.
+		$allFiles = Factory::getFileLister()->getFiles($directory, true);
+
+		if (!is_array($allFiles))
+		{
+			return [];
+		}
+
+		$files = array_filter($allFiles,
 			function ($file) {
 				$dotPos = strrpos($file, '.');
 
@@ -58,7 +66,7 @@ class DiscoverModel extends BaseDatabaseModel
 		// matched literally instead of acting as a wildcard.
 		$db            = $this->getDatabase();
 		$likeDirectory = str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $directory) . '%';
-		$sql           = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+		$sql           = DbQuery::create($db)
 			->select($db->qn('absolute_path'))
 			->from($db->qn('#__akeebabackup_backups'))
 			->where($db->qn('absolute_path') . ' LIKE :directory ESCAPE ' . $db->quote('\\'))
@@ -118,6 +126,12 @@ class DiscoverModel extends BaseDatabaseModel
 			{
 				$total_size += @filesize($newFile);
 			}
+		}
+
+		// A single-part archive has a part count of zero, like the ones the backup engine creates
+		if ($multipart <= 1)
+		{
+			$multipart = 0;
 		}
 
 		$fileModificationTime = @filemtime($directory . '/' . $file);

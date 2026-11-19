@@ -48,6 +48,7 @@ if (!defined('_AKEEBA_IS_WINDOWS'))
  * Packing engine. Takes care of putting gathered files (the file list) into
  * an archive.
  */
+#[\AllowDynamicProperties]
 final class Pack extends Part
 {
 	/** @var array Directories left to be scanned */
@@ -367,9 +368,10 @@ structure. You'll have to restore these files manually!
 
 ENDVCONTENT;
 
-			$counter = 0;
-			$vdir    = trim($registry->get('akeeba.advanced.virtual_folder'), '/') . '/';
-			$effini  = ['eff' => []];
+			$counter       = 0;
+			$virtualFolder = $registry->get('akeeba.advanced.virtual_folder') ?? '';
+			$vdir          = trim($virtualFolder, '/') . '/';
+			$effini        = ['eff' => []];
 
 			$rootsToPack = array_filter(
 				$this->root_definitions,
@@ -382,7 +384,7 @@ ENDVCONTENT;
 			{
 				$counter++;
 
-				$test = trim($dir[1]);
+				$test = trim($dir[1] ?? '');
 
 				if ($test == '/')
 				{
@@ -402,7 +404,7 @@ ENDVCONTENT;
 
 			if ($counter >= 1)
 			{
-				$archiver->addFileVirtual('README.txt', $registry->get('akeeba.advanced.virtual_folder'), $virtualContents);
+				$archiver->addFileVirtual('README.txt', $virtualFolder, $virtualContents);
 				$archiver->addFileVirtual('eff.json', $this->installerSettings->installerroot, $effini);
 			}
 			else
@@ -1213,8 +1215,7 @@ ENDVCONTENT;
 				}
 			}
 
-			$this->done_scanning = false; // Make sure we process this file list!
-			$this->root          = $dir_definition[0];
+			$this->root = $dir_definition[0];
 
 			// Translate the root into an absolute path
 			$stock_dirs   = Platform::getInstance()->get_stock_directories();

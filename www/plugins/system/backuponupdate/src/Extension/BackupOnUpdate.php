@@ -9,6 +9,7 @@ namespace Akeeba\Plugin\System\BackupOnUpdate\Extension;
 
 defined('_JEXEC') || die;
 
+use Akeeba\Component\AkeebaBackup\Administrator\Helper\DbQuery;
 use Exception;
 use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Document\Document;
@@ -119,7 +120,7 @@ class BackupOnUpdate extends CMSPlugin implements SubscriberInterface, DatabaseA
 		$jInput      = $this->getApplication()->getInput();
 		$toggleParam = $jInput->getCmd('_akeeba_backup_on_update_toggle', 'INVALID');
 
-		if ($toggleParam && ($toggleParam == $this->getApplication()->getSession()->getToken()))
+		if ($toggleParam && ($toggleParam === $this->getApplication()->getSession()->getToken()))
 		{
 			$this->toggleBoUFlag();
 
@@ -182,7 +183,7 @@ class BackupOnUpdate extends CMSPlugin implements SubscriberInterface, DatabaseA
 				'option'      => 'com_akeebabackup',
 				'view'        => 'Backup',
 				'autostart'   => 1,
-				'returnurl'   => base64_encode($returnUri->toString()),
+				'returnurl'   => urlencode(base64_encode($returnUri->toString())),
 				'description' => urlencode($description),
 				'profileid'   => $profileId,
 				$jtoken       => 1,
@@ -289,9 +290,7 @@ class BackupOnUpdate extends CMSPlugin implements SubscriberInterface, DatabaseA
 			return $this->isEnabled;
 		}
 
-		$this->isEnabled =
-			version_compare(PHP_VERSION, '7.4.0', '>=') &&
-			ComponentHelper::isEnabled('com_akeebabackup');
+		$this->isEnabled = ComponentHelper::isEnabled('com_akeebabackup');
 
 		return $this->isEnabled;
 	}
@@ -313,7 +312,7 @@ class BackupOnUpdate extends CMSPlugin implements SubscriberInterface, DatabaseA
 		{
 			$db            = $this->getDatabase();
 			$joomlaExtName = 'files_joomla';
-			$query         = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+			$query         = DbQuery::create($db)
 				->select($db->qn('extension_id'))
 				->from($db->qn('#__extensions'))
 				->where($db->qn('name') . ' = :name')
@@ -335,7 +334,7 @@ class BackupOnUpdate extends CMSPlugin implements SubscriberInterface, DatabaseA
 		try
 		{
 			$db           = $this->getDatabase();
-			$query        = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+			$query        = DbQuery::create($db)
 				->select('*')
 				->from($db->quoteName('#__updates'))
 				->where($db->quoteName('extension_id') . ' = :jEID')

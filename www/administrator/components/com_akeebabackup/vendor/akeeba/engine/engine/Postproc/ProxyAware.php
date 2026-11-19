@@ -50,40 +50,4 @@ trait ProxyAware
 
 		curl_setopt($ch, CURLOPT_PROXYUSERPWD, $proxySettings['user'] . ':' . $proxySettings['pass']);
 	}
-
-	protected function getProxyStreamContext()
-	{
-		if (defined('AKEEBA_NO_PROXY_AWARE'))
-		{
-			return [];
-		}
-
-		$ret           = [];
-		$proxySettings = Platform::getInstance()->getProxySettings();
-
-		if (!$proxySettings['enabled'])
-		{
-			return $ret;
-		}
-
-		$ret['http'] = [
-			'proxy'           => $proxySettings['host'] . ':' . $proxySettings['port'],
-			'request_fulluri' => true,
-		];
-		$ret['ftp']  = [
-			'proxy'           => $proxySettings['host'] . ':' . $proxySettings['port'],
-			// So, request_fulluri isn't documented for the FTP transport but seems to be required...?!
-			'request_fulluri' => true,
-		];
-
-		if (empty($proxySettings['user']))
-		{
-			return $ret;
-		}
-
-		$ret['http']['header'] = ['Proxy-Authorization: Basic ' . base64_encode($proxySettings['user'] . ':' . $proxySettings['pass'])];
-		$ret['ftp']['header'] = ['Proxy-Authorization: Basic ' . base64_encode($proxySettings['user'] . ':' . $proxySettings['pass'])];
-
-		return $ret;
-	}
 }

@@ -126,15 +126,13 @@ class ManageController extends AdminController
 			return;
 		}
 
-		$this->triggerEvent('onBeforeDownload', [$id, $part ?: 1]);
+		// The part is zero-based (-1 means the only part); the log shows the 1-based part number
+		$this->triggerEvent('onBeforeDownload', [$id, max($part, 0) + 1]);
 
 		// Remove php's time limit
-		if (function_exists('ini_get') && function_exists('set_time_limit'))
+		if (function_exists('set_time_limit'))
 		{
-			if (!ini_get('safe_mode'))
-			{
-				@set_time_limit(0);
-			}
+			@set_time_limit(0);
 		}
 
 		$basename  = @basename($filename);

@@ -14,6 +14,7 @@ use Akeeba\Component\AkeebaBackup\Administrator\CliCommands\MixIt\ConfigureIO;
 use Akeeba\Component\AkeebaBackup\Administrator\CliCommands\MixIt\InitialiseEngine;
 use Akeeba\Component\AkeebaBackup\Administrator\CliCommands\MixIt\PrintFormattedArray;
 use Akeeba\Component\AkeebaBackup\Administrator\Model\LogModel;
+use Akeeba\Engine\Platform;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\Factory\MVCFactoryAwareTrait;
 use Joomla\Console\Command\AbstractCommand;
@@ -76,6 +77,9 @@ class LogGet extends AbstractCommand
 		$log_tag    = (string) $this->cliInput->getArgument('log_tag') ?? 1;
 
 		define('AKEEBA_PROFILE', $profile_id);
+
+		// The engine configuration was loaded for the session's profile; load the requested profile's instead.
+		Platform::getInstance()->load_configuration($profile_id);
 
 		/** @var LogModel $model */
 		$model = $this->getMVCFactory()->createModel('Log', 'Administrator');

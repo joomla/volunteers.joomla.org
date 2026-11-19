@@ -20,6 +20,7 @@ namespace Akeeba\Engine\Platform;
 
 defined('AKEEBAENGINE') || die();
 
+use Akeeba\Engine\Driver\DbQuery;
 use Akeeba\Engine\Driver\Mysqli;
 use Akeeba\Engine\Driver\QueryException;
 use Akeeba\Engine\Factory;
@@ -94,7 +95,7 @@ abstract class Base implements PlatformInterface
 	public function delete_statistics($id)
 	{
 		$db    = Factory::getDatabase($this->get_platform_database_options());
-		$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+		$query = DbQuery::create($db)
 			->delete($db->qn($this->tableNameStats))
 			->where($db->qn('id') . ' = ' . $db->q((int) $id));
 		$db->setQuery($query);
@@ -208,7 +209,7 @@ abstract class Base implements PlatformInterface
 	public function get_running_backups($tag = null)
 	{
 		$db    = Factory::getDatabase($this->get_platform_database_options());
-		$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+		$query = DbQuery::create($db)
 			->select('*')
 			->from($db->qn($this->tableNameStats))
 			->where($db->qn('status') . ' = ' . $db->q('run'))
@@ -243,7 +244,7 @@ abstract class Base implements PlatformInterface
 	public function get_statistics($id)
 	{
 		$db    = Factory::getDatabase($this->get_platform_database_options());
-		$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+		$query = DbQuery::create($db)
 			->select('*')
 			->from($db->qn($this->tableNameStats))
 			->where($db->qn('id') . ' = ' . $db->q((int) $id));
@@ -264,7 +265,7 @@ abstract class Base implements PlatformInterface
 	{
 		$db = Factory::getDatabase($this->get_platform_database_options());
 
-		$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true));
+		$query = DbQuery::create($db);
 
 		$this->applyStatisticsFilters($db, $query, $filters);
 
@@ -298,7 +299,7 @@ abstract class Base implements PlatformInterface
 
 		$db = Factory::getDatabase($this->get_platform_database_options());
 
-		$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true));
+		$query = DbQuery::create($db);
 
 		$this->applyStatisticsFilters($db, $query, $config->filters);
 
@@ -359,13 +360,13 @@ abstract class Base implements PlatformInterface
 		// Whitelist the ORDER BY direction to ASC/DESC so it cannot be injected as SQL structure.
 		$ordering = (strtoupper(trim((string) $ordering)) === 'ASC') ? 'ASC' : 'DESC';
 
-		$query2 = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+		$query2 = DbQuery::create($db)
 			->select('MAX(' . $db->qn('id') . ') AS ' . $db->qn('id'))
 			->from($db->qn($this->tableNameStats))
 			->where($db->qn('status') . ' = ' . $db->q('complete'))
 			->group($db->qn('absolute_path'));
 
-		$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+		$query = DbQuery::create($db)
 			->select($db->qn('id'))
 			->from($db->qn($this->tableNameStats))
 			->where($db->qn('filesexist') . ' = ' . $db->q(1))
@@ -438,7 +439,7 @@ abstract class Base implements PlatformInterface
 		}
 
 		$db  = Factory::getDatabase($this->get_platform_database_options());
-		$sql = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+		$sql = DbQuery::create($db)
 			->select('*')
 			->from($db->qn($this->tableNameStats))
 			->where($db->qn('profile_id') . ' = ' . $db->q((int) $profile))
@@ -468,7 +469,7 @@ abstract class Base implements PlatformInterface
 			$temp[] = $db->q((int) $id);
 		}
 		$list = implode(',', $temp);
-		$sql  = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+		$sql  = DbQuery::create($db)
 			->update($db->qn($this->tableNameStats))
 			->set($db->qn('filesexist') . ' = ' . $db->q('0'))
 			->where($db->qn('id') . ' IN (' . $list . ')');;
@@ -542,7 +543,7 @@ abstract class Base implements PlatformInterface
 		try
 		{
 			// Load the INI format local configuration dump off the database
-			$sql = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+			$sql = DbQuery::create($db)
 				->select($db->qn('configuration'))
 				->from($db->qn($this->tableNameProfiles))
 				->where($db->qn('id') . ' = ' . $db->q($profile_id));
@@ -724,7 +725,7 @@ abstract class Base implements PlatformInterface
 		$db         = Factory::getDatabase($this->get_platform_database_options());
 
 		// Load the INI format local configuration dump off the database
-		$sql = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+		$sql = DbQuery::create($db)
 			->select($db->qn('filters'))
 			->from($db->qn($this->tableNameProfiles))
 			->where($db->qn('id') . ' = ' . $db->q($profile_id));
@@ -791,7 +792,7 @@ abstract class Base implements PlatformInterface
 		Factory::getLog()->debug("Removing any old records with $archivename filename");
 		$db = Factory::getDatabase($this->get_platform_database_options());
 
-		$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+		$query = DbQuery::create($db)
 			->select($db->qn('id'))
 			->from($db->qn($this->tableNameStats))
 			->where($db->qn('archivename') . ' = ' . $db->q($archivename))
@@ -854,7 +855,7 @@ abstract class Base implements PlatformInterface
 		$dump_profile   = $secureSettings->encryptSettings($dump_profile);
 
 		// Does the record already exist?
-		$sql = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+		$sql = DbQuery::create($db)
 			->select('COUNT(*)')
 			->from($db->qn($this->tableNameProfiles))
 			->where($db->qn('id') . ' = ' . $db->q($profile_id));
@@ -871,14 +872,14 @@ abstract class Base implements PlatformInterface
 
 		if ($exists)
 		{
-			$sql = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+			$sql = DbQuery::create($db)
 				->update($db->qn($this->tableNameProfiles))
 				->set($db->qn('configuration') . ' = ' . $db->q($dump_profile))
 				->where($db->qn('id') . ' = ' . $db->q($profile_id));
 		}
 		else
 		{
-			$sql = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+			$sql = DbQuery::create($db)
 				->insert($db->qn($this->tableNameProfiles))
 				->columns([
 					$db->qn('id'), $db->qn('description'), $db->qn('configuration'),
@@ -921,7 +922,7 @@ abstract class Base implements PlatformInterface
 
 		$encodedFilterData = json_encode($filter_data, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_FORCE_OBJECT | JSON_PRETTY_PRINT);
 
-		$sql = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+		$sql = DbQuery::create($db)
 			->update($db->qn($this->tableNameProfiles))
 			->set($db->qn('filters') . '=' . $db->q($encodedFilterData))
 			->where($db->qn('id') . ' = ' . $db->q($profile_id));
@@ -946,7 +947,7 @@ abstract class Base implements PlatformInterface
 	/** @inheritdoc */
 	public final function setProxySettings($useProxy = false, $host = '', $port = 8080, $username = '', $password = '')
 	{
-		$host = trim($host);
+		$host = trim($host ?? '');
 		$port = (int) $port;
 
 		$this->hasInitialisedProxySettings = true;
@@ -1000,10 +1001,10 @@ abstract class Base implements PlatformInterface
 				}
 
 				$sql_fields[] = $db->qn($key);
-				$sql_values   .= (!empty($sql_values) ? ',' : '') . $db->quote($value);
+				$sql_values   .= (!empty($sql_values) ? ',' : '') . ($value === null ? 'NULL' : $db->quote($value));
 			}
 
-			$sql = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+			$sql = DbQuery::create($db)
 				->insert($db->quoteName($this->tableNameStats))
 				->columns($sql_fields)
 				->values($sql_values);
@@ -1023,9 +1024,14 @@ abstract class Base implements PlatformInterface
 					continue;
 				}
 
-				$sql_set[] = $db->qn($key) . '=' . $db->q($value);
+				if (!in_array($key, $tableFields))
+				{
+					continue;
+				}
+
+				$sql_set[] = $db->qn($key) . '=' . ($value === null ? 'NULL' : $db->q($value));
 			}
-			$sql = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+			$sql = DbQuery::create($db)
 				->update($db->qn($this->tableNameStats))
 				->set($sql_set)
 				->where($db->qn('id') . '=' . $db->q((int) $id));

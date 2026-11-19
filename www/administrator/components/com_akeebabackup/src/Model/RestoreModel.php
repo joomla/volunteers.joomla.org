@@ -280,7 +280,7 @@ ENDDATA;
 			$ftp_pass = addcslashes($this->getState('ftp_pass', ''), "'\\");
 			$ftp_root = $this->getState('ftp_root', '');
 			$ftp_ssl  = $this->getState('ftp_ssl', 0);
-			$ftp_pasv = $this->getState('ftp_root', 1);
+			$ftp_pasv = $this->getState('ftp_pasv', 1);
 			$tempdir  = $this->getState('tmp_path', '');
 			$data     .= <<<ENDDATA
 	,

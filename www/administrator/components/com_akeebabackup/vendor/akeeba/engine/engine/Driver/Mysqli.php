@@ -314,7 +314,15 @@ class Mysqli extends Base
 	 */
 	public function freeResult($cursor = null)
 	{
-		mysqli_free_result($cursor ?: $this->cursor);
+		$cursor = $cursor ?: $this->cursor;
+
+		mysqli_free_result($cursor);
+
+		// Forget the cursor we just freed, otherwise close() would try to free it a second time.
+		if ($cursor === $this->cursor)
+		{
+			$this->cursor = null;
+		}
 	}
 
 	/**
@@ -932,7 +940,7 @@ class Mysqli extends Base
 	 */
 	public function renameTable($oldTable, $newTable, $backup = null, $prefix = null)
 	{
-		$this->setQuery('RENAME TABLE ' . $oldTable . ' TO ' . $newTable)->query();
+		$this->setQuery('RENAME TABLE ' . $this->quoteName($oldTable) . ' TO ' . $this->quoteName($newTable))->query();
 
 		return $this;
 	}

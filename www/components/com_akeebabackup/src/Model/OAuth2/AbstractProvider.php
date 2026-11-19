@@ -11,6 +11,7 @@ defined('_JEXEC') || die;
 
 use Composer\CaBundle\CaBundle;
 use Joomla\CMS\Component\ComponentHelper;
+use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Uri\Uri;
 use Joomla\Input\Input;
@@ -29,6 +30,11 @@ abstract class AbstractProvider implements ProviderInterface
 	public final function handleResponse(Input $input): TokenResponse
 	{
 		$this->checkConfiguration();
+
+		if (!$this->getStateManager()->validate($this->getEngineName(), $input->getRaw('state')))
+		{
+			throw new OAuth2Exception('invalid_state');
+		}
 
 		[$id, $secret] = $this->getIdAndSecret();
 
@@ -94,25 +100,9 @@ HTML
 		}
 
 		// Do we have an error reported by the remote endpoint?
-		if (isset($result['error']))
-		{
-			$error            = $result['error'];
-			$errorUri         = $result['error_uri'] ?? null;
-			$errorDescription = $result['error_uri'] ?? null;
+		$this->throwIfErrorResponse($result);
 
-			if ($errorUri)
-			{
-				throw new OAuth2UriException($errorUri);
-			}
-
-			throw new OAuth2Exception($error, $errorDescription);
-		}
-
-		$ret                 = new TokenResponse();
-		$ret['accessToken']  = $result['access_token'] ?? '';
-		$ret['refreshToken'] = $result['refresh_token'] ?? '';
-
-		return $ret;
+		return $this->buildTokenResponse($result);
 	}
 
 	public final function handleRefresh(Input $input): TokenResponse
@@ -183,11 +173,56 @@ HTML
 			);
 		}
 
+		return $this->buildTokenResponse($result);
+	}
+
+	/**
+	 * Builds a TokenResponse out of a decoded token endpoint response.
+	 *
+	 * Shared by handleResponse() and handleRefresh() so the access/refresh token keys can only be spelled
+	 * correctly once.
+	 *
+	 * @param   array  $result  The decoded JSON response from the token endpoint.
+	 *
+	 * @return  TokenResponse
+	 * @since   9.9.1
+	 */
+	protected function buildTokenResponse(array $result): TokenResponse
+	{
 		$ret                 = new TokenResponse();
 		$ret['accessToken']  = $result['access_token'] ?? '';
-		$ret['refreshToekn'] = $result['refresh_token'] ?? '';
+		$ret['refreshToken'] = $result['refresh_token'] ?? '';
 
 		return $ret;
+	}
+
+	/**
+	 * Throws when the decoded token endpoint response reports an OAuth2 error.
+	 *
+	 * @param   array  $result  The decoded JSON response from the token endpoint.
+	 *
+	 * @return  void
+	 * @throws  OAuth2UriException  When the remote endpoint reported an `error_uri`.
+	 * @throws  OAuth2Exception     When the remote endpoint reported an `error` without an `error_uri`.
+	 * @since   9.9.1
+	 */
+	protected function throwIfErrorResponse(array $result): void
+	{
+		if (!isset($result['error']))
+		{
+			return;
+		}
+
+		$error            = $result['error'];
+		$errorUri         = $result['error_uri'] ?? null;
+		$errorDescription = $result['error_description'] ?? null;
+
+		if ($errorUri)
+		{
+			throw new OAuth2UriException($errorUri);
+		}
+
+		throw new OAuth2Exception($error, $errorDescription);
 	}
 
 	protected function getResponseCustomFields(Input $input): array
@@ -259,6 +294,23 @@ HTML
 		$secret  = $cParams->get($engine . '_client_secret', null);
 
 		return [$id, $secret];
+	}
+
+	/**
+	 * Generates and stashes a fresh anti-CSRF `state` value for this engine, to be appended to the
+	 * authentication URL by each engine's getAuthenticationUrl().
+	 *
+	 * @return  string
+	 * @since   9.9.1
+	 */
+	protected final function generateState(): string
+	{
+		return $this->getStateManager()->generate($this->getEngineName());
+	}
+
+	protected function getStateManager(): StateManager
+	{
+		return new StateManager(Factory::getApplication()->getSession());
 	}
 
 	protected final function getUri(string $task = 'step1')

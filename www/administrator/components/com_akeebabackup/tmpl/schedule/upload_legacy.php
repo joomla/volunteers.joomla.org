@@ -43,6 +43,7 @@ use Joomla\CMS\Language\Text;
 				</p>
 			</div>
 		<?php else: ?>
+			<?= $this->loadAnyTemplate('schedule/weak_secret') ?>
 			<p>
 				<?= Text::_('COM_AKEEBABACKUP_SCHEDULE_LBL_FRONTENDBACKUP_MANYMETHODS') ?>
 			</p>
@@ -82,8 +83,8 @@ use Joomla\CMS\Language\Text;
 					<td>
 						<?= Text::_('COM_AKEEBABACKUP_SCHEDULE_LBL_FRONTEND_WEBCRON_URL') ?>
 					</td>
-					<td>
-						<?= $this->escape($this->uploadcheck->frontend->path) ?>
+					<td class="text-break">
+						<span<?= $this->weakSecretAttribs() ?>><?= $this->escape($this->uploadcheck->frontend->path) ?></span>
 					</td>
 				</tr>
 				<tr>
@@ -133,7 +134,7 @@ use Joomla\CMS\Language\Text;
 			<p>
 				<?= Text::_('COM_AKEEBABACKUP_SCHEDULE_LBL_FRONTEND_WGET') ?>
 				<code>
-					wget --max-redirect=10000 "<?= $this->escape($this->uploadcheck->frontend->path) ?>" -O - 1>/dev/null 2>/dev/null
+					wget --max-redirect=10000 "<span<?= $this->weakSecretAttribs() ?>><?= $this->escape($this->uploadcheck->frontend->path) ?></span>" -O - 1>/dev/null 2>/dev/null
 				</code>
 			</p>
 
@@ -144,7 +145,7 @@ use Joomla\CMS\Language\Text;
 			<p>
 				<?= Text::_('COM_AKEEBABACKUP_SCHEDULE_LBL_FRONTEND_CURL') ?>
 				<code>
-					curl -L --max-redirs 1000 -v "<?= $this->escape($this->uploadcheck->frontend->path) ?>" 1>/dev/null 2>/dev/null
+					curl -L --max-redirs 1000 -v "<span<?= $this->weakSecretAttribs() ?>><?= $this->escape($this->uploadcheck->frontend->path) ?></span>" 1>/dev/null 2>/dev/null
 				</code>
 			</p>
 
@@ -159,7 +160,7 @@ use Joomla\CMS\Language\Text;
 &lt;?php
 $curl_handle=curl_init();
 curl_setopt($curl_handle, CURLOPT_URL,
-  '<?= $this->escape($this->uploadcheck->frontend->path) ?>');
+  '<span<?= $this->weakSecretAttribs() ?>><?= $this->escape($this->uploadcheck->frontend->path) ?></span>');
 curl_setopt($curl_handle,CURLOPT_FOLLOWLOCATION, TRUE);
 curl_setopt($curl_handle,CURLOPT_MAXREDIRS, 10000);
 curl_setopt($curl_handle,CURLOPT_RETURNTRANSFER, 1);
@@ -179,7 +180,7 @@ else
 			<p>
 				<?= Text::_('COM_AKEEBABACKUP_SCHEDULE_LBL_FRONTEND_RAWURL') ?>
 				<code>
-					<?= $this->escape($this->uploadcheck->frontend->path) ?>
+					<span<?= $this->weakSecretAttribs() ?>><?= $this->escape($this->uploadcheck->frontend->path) ?></span>
 				</code>
 			</p>
 		<?php endif ?>

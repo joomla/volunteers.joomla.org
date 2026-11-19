@@ -20,6 +20,7 @@ namespace Akeeba\Engine\Core\Domain\Finalizer;
 
 defined('AKEEBAENGINE') || die();
 
+use Akeeba\Engine\Driver\DbQuery;
 use Akeeba\Engine\Factory;
 use Akeeba\Engine\Platform;
 use DateTime;
@@ -113,7 +114,7 @@ final class LogFileQuotas extends AbstractFinalizer
 		$statsTable = $platform->tableNameStats;
 		$profileId  = $platform->get_active_profile();
 
-		$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+		$query = DbQuery::create($db)
 			->select([
 				$db->qn('id'),
 				$db->qn('tag'),

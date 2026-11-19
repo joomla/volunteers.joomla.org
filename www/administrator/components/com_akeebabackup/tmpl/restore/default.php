@@ -65,7 +65,7 @@ $cParams = ComponentHelper::getParams('com_akeebabackup');
 				<?= Text::_('COM_AKEEBABACKUP_BUADMIN_LABEL_START') ?>
 			</div>
 			<div class="col-sm-9">
-				<?= $startTime ?> <?= $timeZoneText ?>
+				<?= $this->escape($startTime) ?> <?= $this->escape($timeZoneText) ?>
 			</div>
 		</div>
 	</div>

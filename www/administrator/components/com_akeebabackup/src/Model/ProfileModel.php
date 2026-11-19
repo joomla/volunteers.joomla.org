@@ -9,7 +9,9 @@ namespace Akeeba\Component\AkeebaBackup\Administrator\Model;
 
 defined('_JEXEC') || die();
 
+use Akeeba\Engine\Platform;
 use Joomla\CMS\Factory;
+use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\Model\AdminModel;
 
 #[\AllowDynamicProperties]
@@ -121,7 +123,52 @@ class ProfileModel extends AdminModel
 			}
 		}
 
+		// Save as Copy (the controller strips its prefix from the task): the form carries only the description, quick icon and access level. Bring the original
+		// profile's engine configuration and filters along, like the list's Copy does.
+		$input = $app->getInput();
+
+		if (empty($data['id']) && in_array($input->getCmd('task'), ['save2copy', 'profile.save2copy'], true))
+		{
+			// The ID the controller has authorised editing for (the form's URL), not one from the posted data
+			$originalId = $input->getInt('id', 0);
+
+			if ($originalId > 0)
+			{
+				$original = $this->getTable();
+
+				if ($original->load($originalId))
+				{
+					$data['configuration'] = $original->configuration;
+					$data['filters']       = $original->filters;
+				}
+			}
+		}
+
 		return parent::save($data);
+	}
+
+	/**
+	 * Deletes profiles, refusing (with a message, not an exception) to delete the currently active one.
+	 *
+	 * @param   array  $pks  The IDs of the profiles to delete
+	 *
+	 * @return  bool
+	 */
+	public function delete(&$pks)
+	{
+		$activeProfile = (int) Platform::getInstance()->get_active_profile();
+
+		foreach ((array) $pks as $pk)
+		{
+			if ((int) $pk > 1 && (int) $pk === $activeProfile)
+			{
+				$this->setError(Text::sprintf('COM_AKEEBABACKUP_PROFILE_ERR_CANNOTDELETEACTIVE', (int) $pk));
+
+				return false;
+			}
+		}
+
+		return parent::delete($pks);
 	}
 
 	/**

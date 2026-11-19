@@ -9,6 +9,7 @@ namespace Akeeba\Component\AkeebaBackup\Administrator\Model;
 
 defined('_JEXEC') or die;
 
+use Akeeba\Component\AkeebaBackup\Administrator\Helper\PathContainment;
 use Akeeba\Engine\Factory;
 use Akeeba\Engine\Platform;
 use Joomla\CMS\MVC\Model\BaseModel;
@@ -54,7 +55,7 @@ class BrowserModel extends BaseModel
 		$isFolderThere = @is_dir($folder);
 
 		// Check if it's a subdirectory of the site's root
-		$isInRoot = (strpos($folder, JPATH_SITE) === 0);
+		$isInRoot = PathContainment::isUnderRoot($folder, JPATH_SITE);
 
 		// Check open_basedir restrictions
 		$isOpenbasedirRestricted = Factory::getConfigurationChecks()->checkOpenBasedirs($folder);
@@ -62,9 +63,20 @@ class BrowserModel extends BaseModel
 		// -- Get the meta form of the directory name, if applicable
 		$folder_raw = $folder;
 
-		foreach ($stock_dirs as $replace => $find)
+		// The platform's site root ends in a slash, so the exact site root folder would otherwise be reported as
+		// [ROOTPARENT]/something instead of [SITEROOT].
+		$siteRoot = rtrim((string) ($stock_dirs['[SITEROOT]'] ?? ''), '/\\');
+
+		if ($siteRoot !== '' && rtrim($folder, '/\\') === $siteRoot)
 		{
-			$folder_raw = str_replace($find, $replace, $folder_raw);
+			$folder_raw = '[SITEROOT]';
+		}
+		else
+		{
+			foreach ($stock_dirs as $replace => $find)
+			{
+				$folder_raw = str_replace($find, $replace, $folder_raw);
+			}
 		}
 
 		$isWritable = false;

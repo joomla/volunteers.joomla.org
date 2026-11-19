@@ -7,6 +7,7 @@
 
 defined('_JEXEC') || die;
 
+use Akeeba\Component\AkeebaBackup\Administrator\Helper\VersionLimits;
 use Akeeba\Plugin\WebServices\AkeebaBackup\Extension\AkeebaBackup;
 use Joomla\CMS\Extension\PluginInterface;
 use Joomla\CMS\Factory;
@@ -26,6 +27,12 @@ return new class implements ServiceProviderInterface {
 	 */
 	public function register(Container $container)
 	{
+		// Only register the plugin in compatible environments
+		if (!class_exists(VersionLimits::class) || !VersionLimits::isCompatible())
+		{
+			return;
+		}
+
 		$container->set(
 			PluginInterface::class,
 			function (Container $container) {

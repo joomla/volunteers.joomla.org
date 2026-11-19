@@ -9,6 +9,7 @@ namespace Akeeba\Component\AkeebaBackup\Administrator\Helper;
 
 defined('_JEXEC') || die;
 
+use Akeeba\Component\AkeebaBackup\Administrator\Helper\DbQuery;
 use Akeeba\Engine\Factory;
 use Akeeba\Engine\Platform;
 use Joomla\CMS\Factory as JoomlaFactory;
@@ -135,7 +136,7 @@ class Status
 	{
 		/** @var DatabaseDriver $db */
 		$db    = JoomlaFactory::getContainer()->get(DatabaseInterface::class);
-		$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+		$query = DbQuery::create($db)
 			->select('MAX(' . $db->qn('id') . ')')
 			->from($db->qn('#__akeebabackup_backups'));
 		$db->setQuery($query);
@@ -186,6 +187,18 @@ class Status
 				$origin = Text::_('COM_AKEEBABACKUP_BUADMIN_LABEL_ORIGIN_CLI');
 				break;
 
+			case 'json':
+				$origin = Text::_('COM_AKEEBABACKUP_BUADMIN_LABEL_ORIGIN_JSON');
+				break;
+
+			case 'joomla':
+				$origin = Text::_('COM_AKEEBABACKUP_BUADMIN_LABEL_ORIGIN_JOOMLA');
+				break;
+
+			case 'joomlacli':
+				$origin = Text::_('COM_AKEEBABACKUP_BUADMIN_LABEL_ORIGIN_JOOMLACLI');
+				break;
+
 			default:
 				$origin = '&ndash;';
 				break;
@@ -206,7 +219,7 @@ class Status
 
 		$html = '<table class="table table-striped">';
 		$html .= '<tr><td>' . Text::_('COM_AKEEBABACKUP_BUADMIN_LABEL_START') . '</td><td>' . $startTime->format(Text::_('DATE_FORMAT_LC2'), true) . '</td></tr>';
-		$html .= '<tr><td>' . Text::_('COM_AKEEBABACKUP_BUADMIN_LABEL_DESCRIPTION') . '</td><td>' . $record['description'] . '</td></tr>';
+		$html .= '<tr><td>' . Text::_('COM_AKEEBABACKUP_BUADMIN_LABEL_DESCRIPTION') . '</td><td>' . htmlspecialchars((string) $record['description'], ENT_QUOTES, 'UTF-8') . '</td></tr>';
 		$html .= '<tr><td>' . Text::_('COM_AKEEBABACKUP_BUADMIN_LABEL_STATUS') . '</td><td><span class="label ' . $statusClass . '">' . $status . '</span></td></tr>';
 		$html .= '<tr><td>' . Text::_('COM_AKEEBABACKUP_BUADMIN_LABEL_ORIGIN') . '</td><td>' . $origin . '</td></tr>';
 		$html .= '<tr><td>' . Text::_('COM_AKEEBABACKUP_BUADMIN_LABEL_TYPE') . '</td><td>' . $type . '</td></tr>';

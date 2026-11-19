@@ -33,7 +33,7 @@ class Ftp extends Base
 	public function __construct()
 	{
 		$this->supportsDelete            = true;
-		$this->supportsDownloadToBrowser = true;
+		$this->supportsDownloadToBrowser = false;
 		$this->supportsDownloadToFile    = true;
 	}
 
@@ -130,39 +130,6 @@ class Ftp extends Base
 		$connector = $this->getConnector();
 
 		$connector->download($remotePath, $localFile);
-	}
-
-	public function downloadToBrowser($remotePath)
-	{
-		$config = $this->getConfig();
-
-		$host = $config['host'];
-		$port = $config['port'];
-		$user = $config['username'];
-		$pass = $config['password'];
-		$ssl  = $config['ssl'];
-		$uri  = $ssl ? 'ftps://' : 'ftp://';
-
-		if ($user && $pass)
-		{
-			$uri .= urlencode($user) . ':' . urlencode($pass) . '@';
-		}
-
-		$uri .= $host;
-
-		if ($port && ($port != 21))
-		{
-			$uri .= ':' . $port;
-		}
-
-		if (substr($remotePath, 0, 1) != '/')
-		{
-			$uri .= '/';
-		}
-
-		$uri .= $remotePath;
-
-		return $uri;
 	}
 
 	/**

@@ -190,7 +190,7 @@ class BackupList extends AbstractCommand
 	private function getOrdering(): array
 	{
 		$order = strtolower($this->cliInput->getOption('sort-order') ?? 'desc');
-		$order = in_array($order, ['asc', 'desc']) ?: 'desc';
+		$order = $this->normalizeSortOrder($order);
 
 		return [
 			'by'    => $this->cliInput->getOption('sort-by') ?? 'id',

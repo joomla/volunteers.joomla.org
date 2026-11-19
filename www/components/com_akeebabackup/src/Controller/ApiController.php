@@ -12,6 +12,7 @@ defined('_JEXEC') || die;
 use Akeeba\Component\AkeebaBackup\Administrator\Mixin\ControllerEventsTrait;
 use Akeeba\Component\AkeebaBackup\Administrator\Mixin\ControllerRegisterTasksTrait;
 use Akeeba\Component\AkeebaBackup\Administrator\Mixin\ControllerReusableModelsTrait;
+use Akeeba\Component\AkeebaBackup\Site\Helper\ExceptionChain;
 use Akeeba\Component\AkeebaBackup\Site\Model\Json\Task;
 use Akeeba\Engine\Platform;
 use Akeeba\Engine\Util\Complexify;
@@ -140,21 +141,16 @@ class ApiController extends BaseController
 
 			if ($siteDebug && $maxErrorReporting)
 			{
-				$result['debug'] = [];
-				$thisException   = $e;
-
-				while (!empty($thisException))
-				{
-					$result['debug'][] = [
+				$result['debug'] = array_map(
+					fn (\Throwable $thisException) => [
 						'message'   => $thisException->getMessage(),
 						'code'      => $thisException->getCode(),
 						'file'      => $thisException->getFile(),
 						'line'      => $thisException->getLine(),
 						'backtrace' => $thisException->getTrace(),
-					];
-
-					$thisException = $e->getPrevious();
-				}
+					],
+					ExceptionChain::walk($e)
+				);
 			}
 		}
 

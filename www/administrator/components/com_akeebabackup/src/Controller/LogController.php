@@ -11,6 +11,8 @@ defined('_JEXEC') or die;
 
 use Akeeba\Component\AkeebaBackup\Administrator\Mixin\ControllerCustomACLTrait;
 use Akeeba\Component\AkeebaBackup\Administrator\Mixin\ControllerEventsTrait;
+use Akeeba\Component\AkeebaBackup\Administrator\Mixin\ControllerProfileAccessTrait;
+use Akeeba\Component\AkeebaBackup\Administrator\Mixin\ControllerProfileRestrictionTrait;
 use Akeeba\Component\AkeebaBackup\Administrator\Mixin\ControllerRegisterTasksTrait;
 use Akeeba\Component\AkeebaBackup\Administrator\Mixin\ControllerReusableModelsTrait;
 use Akeeba\Component\AkeebaBackup\Administrator\Model\LogModel;
@@ -26,10 +28,15 @@ class LogController extends BaseController
 	use ControllerEventsTrait;
 	use ControllerCustomACLTrait
 	{
-		onBeforeExecute as onCustomACLBeforeExecute;
+		ControllerCustomACLTrait::onBeforeExecute as onCustomACLBeforeExecute;
 	}
 	use ControllerRegisterTasksTrait;
 	use ControllerReusableModelsTrait;
+	use ControllerProfileAccessTrait;
+	use ControllerProfileRestrictionTrait
+	{
+		ControllerProfileRestrictionTrait::onBeforeExecute as onBeforeExecuteRestrictedProfile;
+	}
 
 	private bool $noFlush = false;
 
@@ -162,14 +169,14 @@ class LogController extends BaseController
 	/**
 	 * Runs before any task of this controller.
 	 *
-	 * Applies the component's ACL privilege map and, optionally, switches the active backup profile.
+	 * Applies the component's ACL privilege map and, optionally, switches the active backup profile. (M5)
 	 *
-	 * The profile switch is deliberately NOT protected by an anti-CSRF token, for the same reason the Backup page's
-	 * profile switch is not: the “View Log” links in the Manage Backups page (and administrator menu items pointing at
-	 * the Log page) carry a profile ID as a plain URL parameter, and a menu item cannot carry a dynamic token. We
-	 * accept the risk because the worst a forged request can achieve is changing which backup profile the victim's own
-	 * session has selected — the tasks of this controller only ever read log files, they never write anything, and the
-	 * ACL check above still gates access to the page.
+	 * Switching the profile requires an anti-CSRF token, like every other profile switch in this component
+	 * (see `ControlpanelController::SwitchProfile()`), and the target profile ID is validated with
+	 * `checkProfileAccess()` before it is written into the session -- an unauthorised or invalid ID is silently
+	 * ignored, leaving the previously active profile in place, rather than granting the switch. The resulting
+	 * active profile is then re-validated by `ControllerProfileRestrictionTrait::onBeforeExecute()`, the same
+	 * check every other profile-scoped controller runs.
 	 *
 	 * @param   string  $task  The task about to be executed, by reference.
 	 *
@@ -177,13 +184,22 @@ class LogController extends BaseController
 	 */
 	protected function onBeforeExecute(&$task)
 	{
-		$this->akeebaBackupACLCheck($this->getName(), $task);
+		$this->onCustomACLBeforeExecute($task);
 
 		$profileId = $this->input->getInt('profileid', null);
 
 		if (!empty($profileId) && is_numeric($profileId) && ($profileId > 0))
 		{
-			$this->app->getSession()->set('akeebabackup.profile', $profileId);
+			// Anti-CSRF protection for the profile switch (M5)
+			$this->checkToken('get');
+
+			// Only switch to a profile the current user is actually allowed to access (M5)
+			if ($this->checkProfileAccess($profileId))
+			{
+				$this->app->getSession()->set('akeebabackup.profile', $profileId);
+			}
 		}
+
+		$this->onBeforeExecuteRestrictedProfile($task);
 	}
 }

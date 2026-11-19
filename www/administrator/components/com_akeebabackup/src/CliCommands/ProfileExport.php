@@ -83,7 +83,7 @@ class ProfileExport extends AbstractCommand
 		/** @var ProfileTable $table */
 		$table = $model->getTable();
 
-		if (!$table->load($id))
+		if ($id <= 0 || !$table->load($id))
 		{
 			$this->ioStyle->error(Text::sprintf('COM_AKEEBABACKUP_CLI_PROFILE_EXPORT_ERR_NOT_FOUND', $id));
 

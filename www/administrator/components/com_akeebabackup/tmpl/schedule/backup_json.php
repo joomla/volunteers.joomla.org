@@ -49,6 +49,7 @@ use Joomla\CMS\Language\Text;
 				</p>
 			</div>
 		<?php else: ?>
+			<?= $this->loadAnyTemplate('schedule/weak_secret') ?>
 			<h4><?= Text::_('COM_AKEEBABACKUP_SCHEDULE_LBL_JSONAPI_ARCCLI') ?></h4>
 			<p>
 				<?= Text::_('COM_AKEEBABACKUP_SCHEDULE_LBL_JSONAPI_ARCCLI_INTRO') ?>
@@ -57,7 +58,7 @@ use Joomla\CMS\Language\Text;
 				<?= Text::_('COM_AKEEBABACKUP_SCHEDULE_LBL_JSONAPI_ARCCLI_DOCKER') ?>
 			</p>
 			<p>
-				<code><?= sprintf(
+				<code<?= $this->weakSecretAttribs() ?>><?= sprintf(
 						'docker run --rm ghcr.io/akeeba/remotecli backup --profile=%d --host="%s" --secret="%s"',
 						Platform::getInstance()->get_active_profile(),
 						$this->escape($this->croninfo->json->path ),
@@ -68,7 +69,7 @@ use Joomla\CMS\Language\Text;
 				<?= Text::_('COM_AKEEBABACKUP_SCHEDULE_LBL_JSONAPI_ARCCLI_PHAR') ?>
 			</p>
 			<p>
-				<code><?= sprintf(
+				<code<?= $this->weakSecretAttribs() ?>><?= sprintf(
 						'php remote.phar backup --profile=%d --host="%s" --secret="%s"',
 						Platform::getInstance()->get_active_profile(),
 						$this->escape($this->croninfo->json->path ),

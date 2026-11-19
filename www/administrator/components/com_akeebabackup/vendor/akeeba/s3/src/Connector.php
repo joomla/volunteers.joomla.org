@@ -147,7 +147,7 @@ class Connector
 		if ($response->error->isError())
 		{
 			throw new CannotPutFile(
-				sprintf(__METHOD__ . "(): [%s] %s\n\nDebug info:\n%s", $response->error->getCode(), $response->error->getMessage(), print_r($response->body, true))
+				sprintf(__METHOD__ . "(): [%s] %s%s", $response->error->getCode(), $response->error->getMessage(), $this->debugInfo($response->body))
 			);
 		}
 	}
@@ -210,12 +210,12 @@ class Connector
 		{
 			throw new CannotGetFile(
 				sprintf(
-					__METHOD__ . "({%s}, {%s}): [%s] %s\n\nDebug info:\n%s",
+					__METHOD__ . "({%s}, {%s}): [%s] %s%s",
 					$bucket,
 					$uri,
 					$response->error->getCode(),
 					$response->error->getMessage(),
-					print_r($response->body, true)
+					$this->debugInfo($response->body)
 				)
 			);
 		}
@@ -257,12 +257,12 @@ class Connector
 		{
 			throw new CannotGetFile(
 				sprintf(
-					__METHOD__ . "({%s}, {%s}): [%s] %s\n\nDebug info:\n%s",
+					__METHOD__ . "({%s}, {%s}): [%s] %s%s",
 					$bucket,
 					$uri,
 					$response->error->getCode(),
 					$response->error->getMessage(),
-					print_r($response->body, true)
+					$this->debugInfo($response->body)
 				)
 			);
 		}
@@ -366,6 +366,18 @@ class Connector
 		 */
 		$newConfig = clone $this->configuration;
 		$newConfig->setUseLegacyPathStyle(true);
+
+		/**
+		 * The clone above hides whether the caller chose path-style access, and the v4 signer decides where the
+		 * bucket goes from getPreSignedBucketInURL() alone. Honour the caller's choice: with path-style access the
+		 * bucket stays in the path of the pre-signed URL, as the signer already supports. Without this, a v4
+		 * pre-signed URL for a path-style connection named a host such as bucket.endpoint, which S3-compatible
+		 * servers without per-bucket DNS never answer.
+		 */
+		if ($this->configuration->getUseLegacyPathStyle())
+		{
+			$newConfig->setPreSignedBucketInURL(true);
+		}
 
 		// Create the request object.
 		$request = new Request('GET', $bucket, $uri, $newConfig);
@@ -623,10 +635,10 @@ class Connector
 		{
 			throw new CannotPutFile(
 				sprintf(
-					__METHOD__ . "(): [%s] %s\n\nDebug info:\n%s",
+					__METHOD__ . "(): [%s] %s%s",
 					$response->error->getCode(),
 					$response->error->getMessage(),
-					print_r($response->body, true)
+					$this->debugInfo($response->body)
 				)
 			);
 		}
@@ -804,7 +816,7 @@ class Connector
 			}
 
 			throw new CannotPutFile(
-				sprintf(__METHOD__ . "(): [%s] %s\n\nDebug info:\n%s", $response->error->getCode(), $response->error->getMessage(), print_r($response->body, true))
+				sprintf(__METHOD__ . "(): [%s] %s%s", $response->error->getCode(), $response->error->getMessage(), $this->debugInfo($response->body))
 			);
 		}
 
@@ -880,9 +892,52 @@ class Connector
 			}
 
 			throw new CannotPutFile(
-				sprintf(__METHOD__ . "(): [%s] %s\n\nDebug info:\n%s", $response->error->getCode(), $response->error->getMessage(), print_r($response->body, true))
+				sprintf(__METHOD__ . "(): [%s] %s%s", $response->error->getCode(), $response->error->getMessage(), $this->debugInfo($response->body))
 			);
 		}
+	}
+
+	/**
+	 * The "Debug info" dump of an S3 response body for an exception message, if the configuration asks for it.
+	 *
+	 * The signed request S3 echoes back on a signature error (StringToSign, CanonicalRequest, SignatureProvided and
+	 * their hex forms) is always left out: it can carry the session token of temporary credentials, and exception
+	 * messages are often shown to people.
+	 *
+	 * @param   mixed  $body  The response body
+	 *
+	 * @return  string  Empty, or the dump preceded by a blank line
+	 */
+	private function debugInfo($body): string
+	{
+		if (!$this->configuration->getDebug())
+		{
+			return '';
+		}
+
+		if ($body instanceof \SimpleXMLElement)
+		{
+			$body = simplexml_load_string($body->asXML());
+
+			foreach (
+				[
+					'StringToSign', 'StringToSignBytes', 'CanonicalRequest', 'CanonicalRequestBytes',
+					'SignatureProvided',
+				] as $element
+			)
+			{
+				unset($body->{$element});
+			}
+		}
+		elseif (is_string($body))
+		{
+			$body = preg_replace(
+				'#<(StringToSign|StringToSignBytes|CanonicalRequest|CanonicalRequestBytes|SignatureProvided)>.*?</\1>#s',
+				'', $body
+			);
+		}
+
+		return "\n\nDebug info:\n" . print_r($body, true);
 	}
 
 	/**

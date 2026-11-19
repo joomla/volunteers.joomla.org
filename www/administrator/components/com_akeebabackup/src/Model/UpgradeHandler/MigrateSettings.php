@@ -9,6 +9,7 @@ namespace Akeeba\Component\AkeebaBackup\Administrator\Model\UpgradeHandler;
 
 defined('_JEXEC') || die;
 
+use Akeeba\Component\AkeebaBackup\Administrator\Helper\DbQuery;
 use Akeeba\Component\AkeebaBackup\Administrator\Helper\JoomlaPublicFolder;
 use Akeeba\Component\AkeebaBackup\Administrator\Model\UpgradeModel;
 use Akeeba\Engine\Factory;
@@ -16,7 +17,6 @@ use Akeeba\Engine\Platform;
 use Exception;
 use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Factory as JoomlaFactory;
-use Joomla\CMS\Utility\BufferStreamHandler;
 use Joomla\Component\Installer\Administrator\Helper\InstallerHelper;
 use Joomla\Database\DatabaseDriver;
 use Joomla\Database\DatabaseInterface;
@@ -100,7 +100,7 @@ class MigrateSettings
 
 		// Get the cached manifest of the old component (com_akeeba)
 		$db    = $this->dbo;
-		$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+		$query = DbQuery::create($db)
 			->select([
 				$db->quoteName('manifest_cache'),
 			])
@@ -214,7 +214,7 @@ class MigrateSettings
 	private function migrateEngineKey(): void
 	{
 		$oldKey = JPATH_ADMINISTRATOR . '/components/com_akeeba/BackupEngine/serverkey.php';
-		$newKey = JPATH_ADMINISTRATOR . '/components/com_akeebabackup/engine/serverkey.php';
+		$newKey = JPATH_ADMINISTRATOR . '/components/com_akeebabackup/serverkey.php';
 
 		if (!@file_exists($oldKey) || !@is_file($oldKey) || !@is_readable($oldKey))
 		{
@@ -241,24 +241,48 @@ class MigrateSettings
 
 		$this->dbo->transactionStart();
 
-		foreach ($tableMap as $oldTable => $newTable)
+		try
 		{
-			// Remove all data from the existing table
-			$this->dbo->truncateTable($newTable);
-
-			// Create and run an INSERT INTO ... SELECT query to make the migrate run as fast as possible.
-			$outerQuery = (method_exists($this->dbo, 'createQuery') ? $this->dbo->createQuery() : $this->dbo->getQuery(true))
-				->select('*')
-				->from($this->dbo->quoteName($oldTable));
-
-			if ($oldTable === '#__ak_profiles')
+			foreach ($tableMap as $oldTable => $newTable)
 			{
-				$outerQuery->select('1 AS ' . $this->dbo->quoteName('access'));
+				/**
+				 * Remove all data from the existing table.
+				 *
+				 * Do NOT use TRUNCATE here. It is DDL and commits implicitly, so a later failure could not roll the
+				 * deletion back and the site would be left with no profiles.
+				 */
+				$deleteQuery = DbQuery::create($this->dbo)
+					->delete($this->dbo->quoteName($newTable));
+
+				$this->dbo->setQuery($deleteQuery)->execute();
+
+				// Create and run an INSERT INTO ... SELECT query to make the migrate run as fast as possible.
+				$outerQuery = DbQuery::create($this->dbo)
+					->select('*')
+					->from($this->dbo->quoteName($oldTable));
+
+				if ($oldTable === '#__ak_profiles')
+				{
+					$outerQuery->select('1 AS ' . $this->dbo->quoteName('access'));
+				}
+
+				$innerQuery = 'INSERT INTO ' . $this->dbo->quoteName($newTable) . ' ' . ((string) $outerQuery);
+
+				$this->dbo->setQuery($innerQuery)->execute();
+			}
+		}
+		catch (Throwable $e)
+		{
+			try
+			{
+				$this->dbo->transactionRollback();
+			}
+			catch (Throwable $rollbackException)
+			{
+				// Nothing more we can do.
 			}
 
-			$innerQuery = 'INSERT INTO ' . $this->dbo->quoteName($newTable) . ' ' . ((string) $outerQuery);
-
-			$this->dbo->setQuery($innerQuery)->execute();
+			throw $e;
 		}
 
 		try
@@ -302,6 +326,8 @@ class MigrateSettings
 
 			$outputDirectory = str_replace($oldFolder, $newFolder, $outputDirectory);
 
+			$config->set('akeeba.basic.output_directory', $outputDirectory);
+
 			try
 			{
 				Platform::getInstance()->save_configuration($profile);
@@ -315,7 +341,7 @@ class MigrateSettings
 
 		// STEP 2 — Replace com_akeeba to com_akeebabackup in the absolute file path of every backup record.
 		$db    = $this->dbo;
-		$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+		$query = DbQuery::create($db)
 			->update($db->quoteName('#__akeebabackup_backups'))
 			->set(
 				$db->quoteName('absolute_path') . ' = REPLACE(' .
@@ -361,7 +387,7 @@ class MigrateSettings
 	{
 		$db = $this->dbo;
 
-		$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+		$query = DbQuery::create($db)
 			->select($db->quoteName('id'))
 			->from($db->quoteName('#__akeebabackup_profiles'));
 
@@ -372,7 +398,7 @@ class MigrateSettings
 
 	private function reloadEncryptionKey()
 	{
-		$newKey   = JPATH_ADMINISTRATOR . '/components/com_akeebabackup/engine/serverkey.php';
+		$newKey   = JPATH_ADMINISTRATOR . '/components/com_akeebabackup/serverkey.php';
 		$contents = @file_get_contents($newKey);
 
 		if ($contents === false)
@@ -380,21 +406,13 @@ class MigrateSettings
 			return;
 		}
 
-		$contents = str_replace('AKEEBA_SERVERKEY', 'AKEEBA_MIGRATED_SERVERKEY', $contents);
-
-		BufferStreamHandler::stream_register();
-		file_put_contents('buffer://serverkey.php', $contents);
-		require_once 'buffer://serverkey.php';
-
-		if (!defined('AKEEBA_MIGRATED_SERVERKEY'))
+		// Read the key without executing the file: a buffer:// stream cannot be include()'d on every PHP version.
+		if (!preg_match('/define\s*\(\s*[\'"]AKEEBA_SERVERKEY[\'"]\s*,\s*[\'"]([^\'"]*)[\'"]\s*\)/', $contents, $matches))
 		{
-			[$junk, $toProcess] = explode("'AKEEBA_MIGRATED_SERVERKEY',", $contents);
-			$toProcess = trim($toProcess, " \t\n;php?>)");
-			$toProcess = trim($toProcess, '\'');
-			define('AKEEBA_MIGRATED_SERVERKEY', $toProcess);
+			return;
 		}
 
-		$key = @base64_decode(AKEEBA_MIGRATED_SERVERKEY);
+		$key = @base64_decode($matches[1]);
 
 		if (empty($key))
 		{
@@ -480,7 +498,7 @@ class MigrateSettings
 	private function getExtraQuery(int $extension_id): ?string
 	{
 		$db    = $this->dbo;
-		$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+		$query = DbQuery::create($db)
 			->select($db->quoteName('update_site_id'))
 			->from($db->quoteName('#__update_sites_extensions'))
 			->where($db->quoteName('extension_id') . ' = :eid')
@@ -492,7 +510,7 @@ class MigrateSettings
 			return null;
 		}
 
-		$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+		$query = DbQuery::create($db)
 			->select($db->quoteName('extra_query'))
 			->from($db->quoteName('#__update_sites'))
 			->where($db->quoteName('update_site_id') . ' = :usid')
@@ -504,7 +522,7 @@ class MigrateSettings
 	private function setExtraQuery(int $extension_id, ?string $extraQuery): void
 	{
 		$db    = $this->dbo;
-		$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+		$query = DbQuery::create($db)
 			->select($db->quoteName('update_site_id'))
 			->from($db->quoteName('#__update_sites_extensions'))
 			->where($db->quoteName('extension_id') . ' = :eid')
@@ -516,7 +534,7 @@ class MigrateSettings
 			throw new RuntimeException('Cannot find the update site for the extension');
 		}
 
-		$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+		$query = DbQuery::create($db)
 			->update($db->quoteName('#__update_sites'))
 			->set($db->quoteName('extra_query') . ' = ' . $db->quote($extraQuery))
 			->where($db->quoteName('update_site_id') . ' = :usid')
@@ -528,7 +546,7 @@ class MigrateSettings
 	private function getExtensionId($element, $type, $clientId): ?int
 	{
 		$db    = $this->dbo;
-		$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+		$query = DbQuery::create($db)
 			->select($db->quoteName('extension_id'))
 			->from($db->quoteName('#__extensions'))
 			->where($db->quoteName('type') . ' = :type')

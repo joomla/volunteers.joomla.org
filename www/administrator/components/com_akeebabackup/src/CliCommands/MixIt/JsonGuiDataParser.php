@@ -151,7 +151,7 @@ trait JsonGuiDataParser
 				break;
 
 			case 'bool':
-				$ret['type']    = 'integer';
+				$ret['type']    = 'bool';
 				$ret['options'] = [0, 1];
 				$ret['limits']  = [
 					'min' => 0,
@@ -161,7 +161,6 @@ trait JsonGuiDataParser
 
 			case 'engine':
 				$ret['type']         = 'enum';
-				$ret['type']         = 'string';
 				$ret['options']      = array_keys($info['engines'][$keyInfo['subtype']]);
 				$ret['optionTitles'] = [];
 
@@ -174,14 +173,13 @@ trait JsonGuiDataParser
 
 			case 'installer':
 				$ret['type']         = 'enum';
-				$ret['type']         = 'string';
 				$ret['options']      = array_keys($info['installers']);
 				$ret['optionTitles'] = $info['installers'];
 
 				break;
 
 			case 'enum':
-				$ret['type']         = 'string';
+				$ret['type']         = 'enum';
 				$ret['options']      = explode('|', $keyInfo['enumvalues']);
 				$ret['optionTitles'] = explode('|', $keyInfo['enumkeys']);
 

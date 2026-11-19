@@ -19,6 +19,7 @@ use Joomla\CMS\Form\FormFactoryInterface;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\Controller\FormController;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
+use Joomla\CMS\Router\Route;
 use Joomla\Input\Input;
 use RuntimeException;
 
@@ -34,6 +35,31 @@ class ProfileController extends FormController
 		parent::__construct($config, $factory, $app, $input, $formFactory);
 
 		$this->registerTask('export', 'export');
+	}
+
+	/**
+	 * Display the view. The edit layout is only shown for a profile whose ID the edit task has put in the session, as
+	 * Joomla's own components do; opening it by URL redirects to the list.
+	 *
+	 * @param   bool   $cachable   If true, the view output will be cached
+	 * @param   array  $urlparams  An array of safe URL parameters and their variable types
+	 *
+	 * @return  static|false
+	 */
+	public function display($cachable = false, $urlparams = [])
+	{
+		$layout = $this->input->get('layout', 'default', 'cmd');
+		$id     = $this->input->getInt('id', 0);
+
+		if ($layout === 'edit' && !$this->checkEditId('com_akeebabackup.edit.profile', $id))
+		{
+			$this->setMessage(Text::sprintf('JLIB_APPLICATION_ERROR_UNHELD_ID', $id), 'error');
+			$this->setRedirect(Route::_('index.php?option=com_akeebabackup&view=Profiles', false));
+
+			return false;
+		}
+
+		return parent::display($cachable, $urlparams);
 	}
 
 	public function export($cachable = false, $urlparams = [])
@@ -85,14 +111,14 @@ class ProfileController extends FormController
 			'quickicon'     => $item->quickicon,
 		];
 
-		$defaultName = $this->input->get('view', 'joomla', 'cmd');
-		$filename    = $this->input->get('basename', $defaultName, 'cmd');
+		// Joomla 4/5's JsonDocument sends its own Content-Disposition from the document name; Joomla 6.2's sends none
+		$filename = $this->input->get('basename', 'profile', 'cmd');
 
 		/** @var JsonDocument $document */
 		$document = $this->app->getDocument();
 		$document->setName($filename);
 		$document->setMimeEncoding('application/json');
-		$this->app->setHeader('Content-Disposition', 'attachment; filename="profile.json"');
+		$this->app->setHeader('Content-Disposition', 'attachment; filename="' . $filename . '.json"', true);
 
 		echo json_encode($data, JSON_PRETTY_PRINT);
 	}

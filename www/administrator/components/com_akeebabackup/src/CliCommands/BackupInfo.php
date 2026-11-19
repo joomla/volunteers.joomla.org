@@ -83,6 +83,13 @@ class BackupInfo extends AbstractCommand
 
 		$record = Platform::getInstance()->get_statistics($id);
 
+		if (!is_array($record))
+		{
+			$this->ioStyle->error(Text::_('COM_AKEEBABACKUP_BUADMIN_ERROR_INVALIDID'));
+
+			return 1;
+		}
+
 		return $this->printFormattedAndReturn($record, $format);
 	}
 

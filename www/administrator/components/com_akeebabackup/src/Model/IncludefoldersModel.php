@@ -78,7 +78,51 @@ class IncludefoldersModel extends BaseModel
 			}
 
 			$def[0] = $convertedDir;
-			$this->setFilter($uuid, $def);
+
+			if ($this->setFilter($uuid, $def)['success'] ?? false)
+			{
+				$this->moveExclusionFilters($originalDir, $convertedDir);
+			}
+		}
+	}
+
+	/**
+	 * Moves all exclusion filters from one filter root to another, merging with any already set on the new root.
+	 *
+	 * The root of an off-site directory's exclusion filters is the directory's stored path, so they must follow it
+	 * when the path is rebased.
+	 *
+	 * @param   string  $oldRoot  The root the filters are currently stored under
+	 * @param   string  $newRoot  The root to move them to
+	 *
+	 * @return  void
+	 * @since   10.5.0
+	 */
+	private function moveExclusionFilters(string $oldRoot, string $newRoot): void
+	{
+		$filters = Factory::getFilters();
+		$changed = false;
+
+		foreach (['directories', 'skipdirs', 'skipfiles', 'files', 'regexdirectories', 'regexskipdirs', 'regexskipfiles', 'regexfiles'] as $type)
+		{
+			$data = $filters->getFilterData($type);
+
+			if (!is_array($data) || empty($data[$oldRoot]))
+			{
+				continue;
+			}
+
+			$data[$newRoot] = array_values(array_unique(array_merge($data[$newRoot] ?? [], $data[$oldRoot])));
+
+			unset($data[$oldRoot]);
+
+			$filters->setFilterData($type, $data);
+			$changed = true;
+		}
+
+		if ($changed)
+		{
+			$filters->save();
 		}
 	}
 

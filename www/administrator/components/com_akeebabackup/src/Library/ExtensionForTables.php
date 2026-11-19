@@ -105,8 +105,10 @@ final class ExtensionForTables
 	{
 		try
 		{
+			// $db may be an Akeeba Engine EngineDBDriver, which does not implement DatabaseInterface, so
+			// this call site cannot use Helper\DbQuery::create() and stays inline, tracking that helper.
 			/** @var QueryInterface|AbstractEngineQuery $query */
-			$query = method_exists($db, 'createQuery') ? $db->createQuery(true) : $db->getQuery(true);
+			$query = method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true);
 			$query->select([
 				$db->quoteName('type'),
 				$db->quoteName('element'),

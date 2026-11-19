@@ -33,6 +33,8 @@ class Oauth2urlField extends NoteField
 			$uri = substr($uri, 0, -14);
 		}
 
+		$uri = htmlspecialchars($uri, ENT_QUOTES, 'UTF-8');
+
 		$text1 = Text::_('COM_AKEEBABACKUP_CONFIG_OAUTH2URLFIELD_YOU_WILL_NEED');
 		$text2 = Text::_('COM_AKEEBABACKUP_CONFIG_OAUTH2URLFIELD_CALLBACK_URL');
 		$text3 = Text::_('COM_AKEEBABACKUP_CONFIG_OAUTH2URLFIELD_HELPER_URL');

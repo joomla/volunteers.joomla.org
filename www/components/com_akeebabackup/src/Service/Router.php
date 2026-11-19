@@ -23,7 +23,7 @@ class Router extends RouterView
 {
 	use MVCFactoryAwareTrait;
 
-	public function __construct(SiteApplication $app, AbstractMenu $menu, MVCFactory $factory,)
+	public function __construct(SiteApplication $app, AbstractMenu $menu, MVCFactory $factory)
 	{
 		$this->setMVCFactory($factory);
 

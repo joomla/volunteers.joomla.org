@@ -9,6 +9,7 @@ namespace Akeeba\Component\AkeebaBackup\Administrator\Model;
 
 defined('_JEXEC') or die;
 
+use Akeeba\Component\AkeebaBackup\Administrator\Helper\Utils;
 use Akeeba\Component\AkeebaBackup\Administrator\Mixin\TriggerEventTrait;
 use Akeeba\Engine\Base\Part;
 use Akeeba\Engine\Core\Timer;
@@ -387,6 +388,24 @@ class BackupModel extends BaseDatabaseModel
 
 			foreach ($overrides as $k => $v)
 			{
+				/**
+				 * Security gate: Only allow known registry keys in the `akeeba.*` and `engine.*` namespaces.
+				 *
+				 * Why: Unknown keys should be ignored, but it's best to deny them early in the backup initialisation
+				 * process than risk an unexpected side effect from code written later down the line. Moreover, there
+				 * are namespaces which should never be written to by the user, e.g. the `volatile.*` namespace.
+				 */
+				$k = (string) $k;
+
+				if (!Utils::isAllowedOverrideKey($config, $k))
+				{
+					Factory::getLog()->warning(
+						sprintf('Ignoring disallowed configuration override key "%s".', $k)
+					);
+
+					continue;
+				}
+
 				$config->set($k, $v);
 			}
 
@@ -748,6 +767,12 @@ class BackupModel extends BaseDatabaseModel
 
 		foreach ($stateVariables as $k => $v)
 		{
+			// Do not overwrite a value which the caller has already set (e.g. the CLI and front-end descriptions)
+			if ($this->state !== null && $this->state->get($k) !== null)
+			{
+				continue;
+			}
+
 			$this->setState($k, $v);
 		}
 	}

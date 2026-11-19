@@ -121,7 +121,8 @@ class WebPush
 			}
 		}
 
-		if (ini_get('mbstring.func_overload') >= 2)
+		// The mbstring.func_overload ini setting was removed in PHP 8.0, so this guard can never trigger there.
+		if (PHP_MAJOR_VERSION < 8 && ini_get('mbstring.func_overload') >= 2)
 		{
 			trigger_error(
 				"[WebPush] mbstring.func_overload is enabled for str* functions. You must disable it if you want to send push notifications with payload or use VAPID. You can fix this in your php.ini.",
@@ -141,6 +142,12 @@ class WebPush
 		if (!array_key_exists('timeout', $clientOptions) && isset($timeout))
 		{
 			$clientOptions['timeout'] = $timeout;
+		}
+
+		// A redirect would take the request to a URL nobody validated.
+		if (!array_key_exists('follow_location', $clientOptions))
+		{
+			$clientOptions['follow_location'] = false;
 		}
 
 		$this->client = (new HttpFactory())->getHttp($clientOptions);
@@ -186,6 +193,14 @@ class WebPush
 
 			foreach ($requests as $request)
 			{
+				// Last line of defence for callers which queue notifications directly.
+				if (!EndpointValidator::isAllowed((string) $request->getUri()))
+				{
+					yield null;
+
+					continue;
+				}
+
 				try
 				{
 					// So, this SHOULD work, but it doesn't because of a Joomla Framework bug. HARD MODE ENGAGED.

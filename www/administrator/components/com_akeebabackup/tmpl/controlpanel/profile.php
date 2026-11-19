@@ -52,8 +52,8 @@ $this->getDocument()->getWebAssetManager()
 		</div>
 
 		<div class="m-2">
-			<button type="button"
-					class="btn btn-primary btn-sm d-xs-none d-sm-none" type="submit">
+			<button type="submit"
+					class="btn btn-primary btn-sm d-xs-none d-sm-none">
 				<span class="akion-forward"></span>
 				<?= Text::_('COM_AKEEBABACKUP_CPANEL_PROFILE_BUTTON') ?>
 			</button>

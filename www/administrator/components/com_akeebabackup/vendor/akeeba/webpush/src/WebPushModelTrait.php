@@ -23,6 +23,8 @@
 
 namespace Akeeba\WebPush;
 
+use Akeeba\WebPush\Helper\DbQuery;
+use Akeeba\WebPush\WebPush\EndpointValidator;
 use Akeeba\WebPush\WebPush\Subscription;
 use Akeeba\WebPush\WebPush\VAPID;
 use Exception;
@@ -53,6 +55,25 @@ trait WebPushModelTrait
 	private static $vapidKeys = [];
 
 	/**
+	 * Timeout, in seconds, of each request to a push service.
+	 *
+	 * @var   int
+	 * @since __DEPLOY_VERSION__
+	 */
+	private static $webPushTimeout = 5;
+
+	/**
+	 * The most push subscriptions kept per user. The oldest are dropped first.
+	 *
+	 * Every subscription costs a request whenever the user is notified, so an unbounded list lets one user make each
+	 * notification arbitrarily slow.
+	 *
+	 * @var   int
+	 * @since __DEPLOY_VERSION__
+	 */
+	private static $maxWebPushSubscriptions = 10;
+
+	/**
 	 * The component parameters key holding the VAPID keys configuration
 	 *
 	 * @var   string
@@ -69,12 +90,38 @@ trait WebPushModelTrait
 	private $webPushOption;
 
 	/**
-	 * Return the VAPID keys for this component
+	 * Return the public VAPID key for this component, for use in the browser.
 	 *
-	 * @return  array{publicKey: string, privateKey: string}
+	 * This is what the UI JavaScript needs to subscribe to push notifications, and it is safe to pass to the page
+	 * through the document's script options. It deliberately omits the private key: that key signs every push
+	 * message the site sends, so anyone who reads it can send push messages impersonating the site. Previously
+	 * this method returned the full key pair, and consumers following the documentation shipped the private key to
+	 * every browser that rendered the subscription button.
+	 *
+	 * @return  array{publicKey: string}|null  NULL when the keys cannot be loaded or created.
 	 * @since   1.0.0
 	 */
 	public function getVapidKeys(): ?array
+	{
+		$keyPair = $this->getVapidKeyPair();
+
+		if ($keyPair === null)
+		{
+			return null;
+		}
+
+		return ['publicKey' => $keyPair['publicKey']];
+	}
+
+	/**
+	 * Return the full VAPID key pair for this component, creating it if necessary.
+	 *
+	 * The private key MUST NEVER leave the server. Use getVapidKeys() for anything sent to the browser.
+	 *
+	 * @return  array{publicKey: string, privateKey: string}|null  NULL when the keys cannot be loaded or created.
+	 * @since   __DEPLOY_VERSION__
+	 */
+	private function getVapidKeyPair(): ?array
 	{
 		if (is_array(self::$vapidKeys[$this->webPushOption] ?? null))
 		{
@@ -136,7 +183,7 @@ trait WebPushModelTrait
 
 		/** @var DatabaseInterface $db */
 		$db    = method_exists($this, 'getDatabase') ? $this->getDatabase() : $this->getDbo();
-		$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+		$query = DbQuery::create($db)
 			->select($db->quoteName('profile_value'))
 			->from($db->quoteName('#__user_profiles'))
 			->where(
@@ -199,6 +246,12 @@ trait WebPushModelTrait
 		// Convert the raw subscription data to Subscription objects
 		$subscriptions = array_map(
 			function ($subData) {
+				// Never send to an endpoint the server must not reach, including ones saved before validation existed.
+				if (!is_string($subData->endpoint ?? null) || !EndpointValidator::isAllowed($subData->endpoint))
+				{
+					return null;
+				}
+
 				try
 				{
 					return new Subscription(
@@ -222,7 +275,7 @@ trait WebPushModelTrait
 		);
 
 		// Get the WebPush object
-		$vapidKeys = $this->getVapidKeys();
+		$vapidKeys = $this->getVapidKeyPair();
 		$auth      = ($vapidKeys === null)
 			? []
 			: [
@@ -232,7 +285,8 @@ trait WebPushModelTrait
 					'privateKey' => $vapidKeys['privateKey'],
 				],
 			];
-		$webPush   = new WebPush\WebPush($auth);
+		// Push services answer quickly; a short timeout stops a slow or hostile endpoint stalling the request.
+		$webPush   = new WebPush\WebPush($auth, [], self::$webPushTimeout);
 
 		// Get the payload as JSON
 		$payload = json_encode(
@@ -291,9 +345,15 @@ trait WebPushModelTrait
 			|| !isset($subscriptionData->keys->auth)
 			|| !is_string($subscriptionData->keys->auth)
 			|| empty($subscriptionData->keys->auth)
+			|| !is_string($subscriptionData->endpoint)
 		)
 		{
 			throw new RuntimeException('Invalid Web Push user subscription record');
+		}
+
+		if (!EndpointValidator::isAllowed($subscriptionData->endpoint))
+		{
+			throw new RuntimeException('Invalid Web Push endpoint');
 		}
 
 		// Get the user options key and the user ID
@@ -301,14 +361,22 @@ trait WebPushModelTrait
 		$user_id = $user->id;
 		$key     = $this->webPushOption . '.webPushSubscription';
 
-		// Get any existing subscriptions, append the new one
-		$subscriptions   = $this->getWebPushSubscriptions() ?: [];
-		$subscriptions[] = $subscriptionData ?: [];
+		// Get any existing subscriptions, replacing any for the same endpoint, and append the new one
+		$subscriptions   = array_values(
+			array_filter(
+				$this->getWebPushSubscriptions() ?: [],
+				function ($existing) use ($subscriptionData) {
+					return ($existing->endpoint ?? null) !== $subscriptionData->endpoint;
+				}
+			)
+		);
+		$subscriptions[] = $subscriptionData;
+		$subscriptions   = array_slice($subscriptions, -self::$maxWebPushSubscriptions);
 
 		// Remove any existing options
 		/** @var DatabaseInterface $db */
 		$db    = method_exists($this, 'getDatabase') ? $this->getDatabase() : $this->getDbo();
-		$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+		$query = DbQuery::create($db)
 			->delete($db->quoteName('#__user_profiles'))
 			->where(
 				[
@@ -409,7 +477,7 @@ trait WebPushModelTrait
 		// Remove any existing options
 		/** @var DatabaseInterface $db */
 		$db    = method_exists($this, 'getDatabase') ? $this->getDatabase() : $this->getDbo();
-		$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+		$query = DbQuery::create($db)
 			->delete($db->quoteName('#__user_profiles'))
 			->where(
 				[
@@ -462,20 +530,12 @@ trait WebPushModelTrait
 	 */
 	private function clearCacheGroup(string $group, int $client_id, ApplicationInterface $app): array
 	{
-		// Get the default cache folder. Start by using the JPATH_CACHE constant.
+		/**
+		 * The cache base is the same whichever client is asked for. Since Joomla 4.0 every application — site,
+		 * administrator, API and CLI — defines JPATH_CACHE as administrator/cache, and the cache_path in
+		 * configuration.php, when set, is shared by all of them. Only Joomla 3's site used its own cache/ folder.
+		 */
 		$cacheBaseDefault = JPATH_CACHE;
-		$appClientId      = 0;
-
-		if (method_exists($app, 'getClientId'))
-		{
-			$appClientId = $app->getClientId();
-		}
-
-		// -- If we are asked to clean cache on the other side of the application we need to find a new cache base
-		if ($client_id != $appClientId)
-		{
-			$cacheBaseDefault = (($client_id) ? JPATH_SITE : JPATH_ADMINISTRATOR) . '/cache';
-		}
 
 		// Get the cache controller's options
 		$options = [
@@ -538,7 +598,7 @@ trait WebPushModelTrait
 		/** @var DatabaseInterface $db */
 		$db   = method_exists($this, 'getDatabase') ? $this->getDatabase() : $this->getDbo();
 		$data = $params->toString('JSON');
-		$sql  = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+		$sql  = DbQuery::create($db)
 			->update($db->qn('#__extensions'))
 			->set($db->qn('params') . ' = ' . $db->q($data))
 			->where($db->qn('element') . ' = :option')

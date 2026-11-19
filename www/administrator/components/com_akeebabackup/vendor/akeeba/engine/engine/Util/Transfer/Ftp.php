@@ -209,6 +209,14 @@ class Ftp implements TransferInterface, RemoteResourceInterface
 	 */
 	public function connect()
 	{
+		// The FTP extension may be missing; calling its functions would be a fatal Error, not a RuntimeException
+		if (!function_exists('ftp_connect'))
+		{
+			$this->connection = false;
+
+			throw new RuntimeException('The PHP FTP extension is not installed or enabled on this server', 500);
+		}
+
 		// Try to connect to the server
 		if ($this->ssl)
 		{

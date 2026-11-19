@@ -28,10 +28,18 @@
 			"src/aliasing.php"
 		]
 	},
+	"scripts": {
+		"test": "phpunit"
+	},
 	"archive": {
 		"exclude": [
 			"minitest",
-			"TODO.md"
+			"/UnitTest",
+			"/phpunit.xml",
+			"/rector.php",
+			"TODO.md",
+			"/AGENTS.md",
+			"/.claude"
 		]
 	}
 }

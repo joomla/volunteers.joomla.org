@@ -86,7 +86,7 @@ class OptionsGet extends AbstractCommand
 		/** @var ProfileModel $model */
 		$model = $this->getMVCFactory()->createModel('Profile', 'Administrator');
 		$table = $model->getTable();
-		$didLoad = $table->load($profileId);
+		$didLoad = $profileId > 0 && $table->load($profileId);
 
 		if (!$didLoad)
 		{

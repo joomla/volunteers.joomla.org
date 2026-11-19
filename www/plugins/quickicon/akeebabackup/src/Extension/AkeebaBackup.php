@@ -105,7 +105,7 @@ class AkeebaBackup extends CMSPlugin implements SubscriberInterface, DatabaseAwa
 			define('AKEEBAROOT', JPATH_ADMINISTRATOR . '/components/com_akeebabackup/vendor/akeeba/engine/engine');
 
 			// Make sure we have a profile set throughout the component's lifetime
-			$profile_id = $this->getApplication()->getSession()->get('akeebebackup.profile');
+			$profile_id = $this->getApplication()->getSession()->get('akeebabackup.profile');
 
 			if (is_null($profile_id))
 			{
@@ -145,7 +145,6 @@ class AkeebaBackup extends CMSPlugin implements SubscriberInterface, DatabaseAwa
 		$url = rtrim($url, '/');
 
 		$profileId = (int) $this->params->get('profileid', 1);
-		$token     = $this->getApplication()->getSession()->getToken();
 
 		if ($profileId <= 0)
 		{
@@ -153,7 +152,7 @@ class AkeebaBackup extends CMSPlugin implements SubscriberInterface, DatabaseAwa
 		}
 
 		$ret = [
-			'link'  => Route::_('index.php?option=com_akeebabackup&view=Backup&autostart=1&returnurl=' . base64_encode($url) . '&profileid=' . $profileId . "&$token=1"),
+			'link'  => Route::_('index.php?option=com_akeebabackup&view=Backup&returnurl=' . base64_encode($url) . '&profileid=' . $profileId),
 			'image' => 'icon-akeebabackup',
 			'icon'  => '',
 			'text'  => Text::_('PLG_QUICKICON_AKEEBABACKUP_OK'),
@@ -177,6 +176,17 @@ class AkeebaBackup extends CMSPlugin implements SubscriberInterface, DatabaseAwa
 					'value'   => 'restorepoint',
 				],
 			];
+
+			// Without "Warn on failed backups", only a successful backup counts: staleness is measured from the last one
+			if ($this->params->get('warnfailed', 0) != 1)
+			{
+				$filters[] = [
+					'field'   => 'status',
+					'operand' => '=',
+					'value'   => 'complete',
+				];
+			}
+
 			$ordering = [
 				'by'    => 'backupstart',
 				'order' => 'DESC',
@@ -204,7 +214,7 @@ class AkeebaBackup extends CMSPlugin implements SubscriberInterface, DatabaseAwa
 			// Process "stale backup" warnings, if necessary
 			if (!$warning && !is_null($record))
 			{
-				$maxperiod        = $this->params->get('maxbackupperiod', 24);
+				$maxperiod        = max(1, (int) $this->params->get('maxbackupperiod', 24));
 				$lastBackupRaw    = $record->backupstart;
 				$lastBackupObject = clone JoomlaFactory::getDate($lastBackupRaw);
 				$lastBackup       = $lastBackupObject->toUnix();

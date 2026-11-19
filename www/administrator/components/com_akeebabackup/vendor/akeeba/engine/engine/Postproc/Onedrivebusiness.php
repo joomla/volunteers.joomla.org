@@ -24,12 +24,48 @@ use Akeeba\Engine\Factory;
 use Akeeba\Engine\Platform;
 use Akeeba\Engine\Postproc\Connector\OneDriveBusiness as ConnectorOneDrive;
 use Akeeba\Engine\Postproc\Exception\BadConfiguration;
+use Akeeba\Engine\Postproc\Exception\RangeDownloadNotSupported;
 use Awf\Text\Text;
 use Exception;
 use Joomla\CMS\Language\Text as JText;
+use RuntimeException;
 
-class Onedrivebusiness extends Onedrive
+/**
+ * Upload to Microsoft OneDrive or OneDrive for Business post-processing engine.
+ *
+ * Uses the Microsoft Graph API through the Connector\OneDriveBusiness connector, covering OneDrive Personal, OneDrive
+ * for Business and SharePoint document libraries.
+ */
+class Onedrivebusiness extends Base
 {
+	/**
+	 * The retry count of this file (allow up to 2 retries after the first upload failure)
+	 *
+	 * @var int
+	 */
+	protected $tryCount = 0;
+
+	/**
+	 * The currently configured directory
+	 *
+	 * @var string
+	 */
+	protected $directory;
+
+	/**
+	 * Are we using chunk uploads?
+	 *
+	 * @var bool
+	 */
+	protected $isChunked = false;
+
+	/**
+	 * Chunk size (bytes)
+	 *
+	 * @var int
+	 */
+	protected $chunkSize = 10485760;
+
 	/**
 	 * The name of the OAuth2 callback method in the parent window (the configuration page)
 	 *
@@ -46,9 +82,120 @@ class Onedrivebusiness extends Onedrive
 
 	public function __construct()
 	{
-		parent::__construct();
+		$this->supportsDownloadToBrowser = true;
+		$this->supportsDelete            = true;
+		$this->supportsDownloadToFile    = true;
 
 		$this->allowedCustomAPICallMethods[] = 'getDrives';
+	}
+
+	public function oauthCallback(array $params)
+	{
+		$input = $params['input'];
+
+		$data = (object) [
+			'access_token'  => $input['access_token'],
+			'refresh_token' => $input['refresh_token'],
+		];
+
+		$serialisedData = json_encode($data);
+
+		return sprintf(
+			'<script type="application/javascript">window.opener.%s(%s);</script>',
+			$this->callbackMethod, $serialisedData
+		);
+	}
+
+	public function processPart($localFilepath, $remoteBaseName = null)
+	{
+		// Do not remove, required to set up $this->directory used below.
+		/** @var ConnectorOneDrive $connector */
+		$connector = $this->getConnector();
+
+		// Store the absolute remote path in the class property
+		$directory        = $this->directory;
+		$basename         = empty($remoteBaseName) ? basename($localFilepath) : $remoteBaseName;
+		$this->remotePath = $directory . '/' . $basename;
+
+		// Get a reference to the engine configuration
+		$config = Factory::getConfiguration();
+
+		// Have I already made sure the remote directory exists?
+		$haveCheckedRemoteDirectory = $config->get('volatile.engine.postproc.' . $this->settingsKey . '.check_directory', 0);
+
+		if (!$haveCheckedRemoteDirectory)
+		{
+			Factory::getLog()->debug(
+				sprintf(
+					"%s -- Checking if OneDrive directory %s already exists or needs to be created.",
+					__METHOD__, $directory
+				)
+			);
+
+			try
+			{
+				$connector->ping();
+				$connector->makeDirectory($directory);
+			}
+			catch (Exception $e)
+			{
+				throw new RuntimeException("Could not create directory $directory.", 500, $e);
+			}
+
+			$config->set('volatile.engine.postproc.' . $this->settingsKey . '.check_directory', 1);
+		}
+
+		// Get the remote file's pathname. This MUST use the same basename as $this->remotePath (which getRemotePath()
+		// reports and downloadToFile()/delete() are later called with), otherwise the file would be stored under the
+		// local temp file's name instead of the requested remote name and every later lookup would 404.
+		$remotePath = trim($directory, '/') . '/' . $basename;
+
+		// Check if the size of the file is compatible with chunked uploading
+		clearstatcache();
+		$totalSize = filesize($localFilepath) ?: 0;
+
+		// Chunked uploads if the feature is enabled and the file is at least as big as the chunk size.
+		if ($this->mustChunk($totalSize) || ($this->isChunked && !$this->mustSingeUpload($totalSize)))
+		{
+			return $this->multipartUpload($localFilepath, $remotePath, $totalSize);
+		}
+
+		// Single part upload
+		return $this->simpleUpload($localFilepath, $remotePath);
+	}
+
+	public function downloadToFile($remotePath, $localFile, $fromOffset = null, $length = null)
+	{
+		if (!is_null($fromOffset))
+		{
+			// Ranges are not supported
+			throw new RangeDownloadNotSupported();
+		}
+
+		/** @var ConnectorOneDrive $connector */
+		$connector = $this->getConnector();
+		$connector->ping();
+
+		// Download the file
+		$connector->download($remotePath, $localFile);
+	}
+
+	public function downloadToBrowser($remotePath)
+	{
+		/** @var ConnectorOneDrive $connector */
+		$connector = $this->getConnector();
+		$connector->ping();
+
+		return $connector->getSignedUrl($remotePath);
+	}
+
+	public function delete($path)
+	{
+		/** @var ConnectorOneDrive $connector */
+		$connector = $this->getConnector();
+		$connector->ping();
+
+		$connector->delete($path);
 	}
 
 	protected function makeConnector()
@@ -149,11 +296,11 @@ class Onedrivebusiness extends Onedrive
 
 		if (class_exists('\Awf\Text\Text'))
 		{
-			$baseItem = \Awf\Text\Text::_('COM_AKEEBA_CONFIG_ONEDRIVE_DRIVE_OPT_PERSONAL');
+			$baseItem = Text::_('COM_AKEEBA_CONFIG_ONEDRIVE_DRIVE_OPT_PERSONAL');
 
 			if ($baseItem === 'COM_AKEEBA_CONFIG_ONEDRIVE_DRIVE_OPT_PERSONAL')
 			{
-				$baseItem = \Awf\Text\Text::_('COM_AKEEBABACKUP_CONFIG_ONEDRIVE_DRIVE_OPT_PERSONAL');
+				$baseItem = Text::_('COM_AKEEBABACKUP_CONFIG_ONEDRIVE_DRIVE_OPT_PERSONAL');
 			}
 		}
 
@@ -173,7 +320,7 @@ class Onedrivebusiness extends Onedrive
 		}
 		catch (Exception $e)
 		{
-			// No worries, the user hasn't configured Google Drive correctly just yet.
+			// No worries, the user hasn't configured OneDrive correctly just yet.
 		}
 
 		$ret = [];
@@ -184,6 +331,30 @@ class Onedrivebusiness extends Onedrive
 		}
 
 		return $ret;
+	}
+
+	/**
+	 * Forcibly refresh the OneDrive tokens
+	 *
+	 * @return  void
+	 *
+	 * @throws  Exception
+	 */
+	protected function forceRefreshTokens()
+	{
+		// Retrieve engine configuration data
+		$config = Factory::getConfiguration();
+
+		/** @var ConnectorOneDrive $connector */
+		$connector  = $this->getConnector();
+		$pingResult = $connector->ping(true);
+
+		Factory::getLog()->debug(__METHOD__ . " - OneDrive tokens were forcibly refreshed");
+		$config->set('engine.postproc.' . $this->settingsKey . '.access_token', $pingResult['access_token'], false);
+		$config->set('engine.postproc.' . $this->settingsKey . '.refresh_token', $pingResult['refresh_token'], false);
+		$config->set('engine.postproc.' . $this->settingsKey . '.token_expiration', $pingResult['token_expiration'] ?? 0, false);
+
+		Platform::getInstance()->save_configuration($config->activeProfile);
 	}
 
 	protected function getOAuth2HelperUrl()
@@ -211,5 +382,245 @@ class Onedrivebusiness extends Onedrive
 	protected function mustSingeUpload(int $fileSize): bool
 	{
 		return ($fileSize <= $this->chunkSize) || ($fileSize <= 4194304);
+	}
+
+	/**
+	 * Performs a multipart (chunked) upload.
+	 *
+	 * @param   string  $localFilepath  The path to the local file we'll be uploading.
+	 * @param   string  $remotePath     The path to the file in remote storage
+	 * @param   int     $totalSize      The total size of the file, in bytes.
+	 *
+	 * @return  bool  True if the upload is complete, false if more work is necessary
+	 * @throws  Exception  If an upload error occurs
+	 */
+	private function multipartUpload($localFilepath, $remotePath, $totalSize)
+	{
+		/** @var ConnectorOneDrive $connector */
+		$connector = $this->getConnector();
+
+		// Get a reference to the engine configuration
+		$config = Factory::getConfiguration();
+
+		// Are we already processing a multipart upload?
+		Factory::getLog()->debug(
+			sprintf(
+				"%s - Using chunked upload, part size %d",
+				__METHOD__, $this->chunkSize
+			)
+		);
+
+		$offset    = $config->get('volatile.engine.postproc.' . $this->settingsKey . '.offset', 0);
+		$upload_id = $config->get('volatile.engine.postproc.' . $this->settingsKey . '.upload_id', null);
+
+		if (empty($upload_id))
+		{
+			Factory::getLog()->debug(
+				sprintf(
+					"%s - Trying to remove existing file by the same name (%s)",
+					__METHOD__, $remotePath
+				)
+			);
+
+			// Try deleting the file first because OneDrive doesn't allow replacing files when using multipart uploads
+			$connector->delete($remotePath, false);
+
+			Factory::getLog()->debug(
+				sprintf(
+					"%s - Creating new upload session",
+					__METHOD__
+				)
+			);
+
+			try
+			{
+				$upload_id = $connector->createUploadSession($remotePath);
+			}
+			catch (Exception $e)
+			{
+				Factory::getLog()->debug(
+					sprintf(
+						"%s - Failed to create a new upload session; will try to refresh the tokens first",
+						__METHOD__
+					)
+				);
+
+				$upload_id = null;
+			}
+
+			if (is_null($upload_id))
+			{
+				try
+				{
+					$this->forceRefreshTokens();
+
+					$upload_id = $connector->createUploadSession($remotePath);
+				}
+				catch (Exception $e)
+				{
+					throw new RuntimeException(
+						sprintf(
+							"The upload session for remote file %s cannot be created",
+							$remotePath
+						), 500, $e
+					);
+				}
+			}
+
+			Factory::getLog()->debug(
+				sprintf(
+					"%s - New upload session %s",
+					__METHOD__, $upload_id
+				)
+			);
+
+			$config->set('volatile.engine.postproc.' . $this->settingsKey . '.upload_id', $upload_id);
+		}
+
+		try
+		{
+			if (empty($offset))
+			{
+				$offset = 0;
+			}
+
+			Factory::getLog()->debug(
+				sprintf(
+					"%s - Uploading chunked part",
+					__METHOD__
+				)
+			);
+
+			$result = $connector->uploadPart($upload_id, $localFilepath, $offset, $this->chunkSize);
+
+			Factory::getLog()->debug(
+				sprintf(
+					"%s - Got uploadPart result %s",
+					__METHOD__, print_r($result, true)
+				)
+			);
+		}
+		catch (Exception $e)
+		{
+			Factory::getLog()->debug(
+				sprintf(
+					"%s - Got uploadPart Exception %s: %s",
+					__METHOD__, $e->getCode(), $e->getMessage()
+				)
+			);
+
+			// Let's retry
+			$this->tryCount++;
+
+			// However, if we've already retried twice, we stop retrying and call it a failure
+			if ($this->tryCount > 2)
+			{
+				throw new RuntimeException(
+					sprintf(
+						"%s - Maximum number of retries exceeded. The upload has failed.",
+						__METHOD__
+					), 500, $e
+				);
+			}
+
+			Factory::getLog()->debug(
+				sprintf(
+					"%s - Error detected, trying to force-refresh the tokens",
+					__METHOD__
+				)
+			);
+
+			$this->forceRefreshTokens();
+
+			Factory::getLog()->debug(
+				sprintf(
+					"%s - Retrying chunk upload",
+					__METHOD__
+				)
+			);
+
+			return false;
+		}
+
+		// Are we done uploading?
+		$nextOffset = $offset + $this->chunkSize - 1;
+
+		if (isset($result['name']) || ($nextOffset > $totalSize))
+		{
+			Factory::getLog()->debug(
+				sprintf(
+					"%s - Chunked upload is now complete",
+					__METHOD__
+				)
+			);
+
+			$config->set('volatile.engine.postproc.' . $this->settingsKey . '.offset', null);
+			$config->set('volatile.engine.postproc.' . $this->settingsKey . '.upload_id', null);
+
+			$this->tryCount = 0;
+
+			return true;
+		}
+
+		// Otherwise, continue uploading
+		$config->set('volatile.engine.postproc.' . $this->settingsKey . '.offset', $offset + $this->chunkSize);
+
+		return false;
+	}
+
+	/**
+	 * Performs a single part upload
+	 *
+	 * @param   string  $localFilepath
+	 * @param   string  $remotePath
+	 *
+	 * @return  bool  True if the upload is complete, false if more work is necessary
+	 * @throws  Exception  If an upload error occurs
+	 */
+	private function simpleUpload($localFilepath, $remotePath)
+	{
+		/** @var ConnectorOneDrive $connector */
+		$connector = $this->getConnector();
+
+		// Get a reference to the engine configuration
+		$config = Factory::getConfiguration();
+
+		try
+		{
+			Factory::getLog()->debug(__METHOD__ . " - Simple upload. Proactively deleting files with remote path " . $remotePath);
+
+			// Try deleting the file first because OneDrive doesn't allow replacing files when using multipart uploads
+			$connector->delete($remotePath, false);
+
+			Factory::getLog()->debug(__METHOD__ . " - Performing simple upload");
+
+			$connector->simpleUpload($remotePath, $localFilepath);
+		}
+		catch (Exception $e)
+		{
+			Factory::getLog()->debug(__METHOD__ . " - Simple upload failed, " . $e->getCode() . ": " . $e->getMessage());
+
+			// Let's retry
+			$this->tryCount++;
+
+			// However, if we've already retried twice, we stop retrying and call it a failure
+			if ($this->tryCount > 2)
+			{
+				throw new RuntimeException(__METHOD__ . " - Maximum number of retries exceeded. The upload has failed.", 500, $e);
+			}
+
+			Factory::getLog()->debug(__METHOD__ . " - Error detected, trying to force-refresh the tokens");
+
+			$this->forceRefreshTokens();
+
+			Factory::getLog()->debug(__METHOD__ . " - Retrying upload");
+
+			return false;
+		}
+
+		// Upload complete. Reset the retry counter.
+		$this->tryCount = 0;
+
+		return true;
 	}
 }

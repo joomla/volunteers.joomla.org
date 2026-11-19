@@ -154,22 +154,34 @@ class AkeebaBackup extends ActionLogPlugin implements SubscriberInterface
 		$arguments = array_values($event->getArguments());
 		$id        = $arguments[1] ?? null;
 
+		// The controller's generic event, fired with no arguments before the task runs, has no ID: not an action
+		if ($id === null)
+		{
+			return;
+		}
+
 		$this->logUserAction([
 			'id' => $id,
 		], 'COM_AKEEBABACKUP_LOGS_PROFILE_EXPORT');
 	}
 
-	public function onComAkeebabackupProfileControllerAfterImport(Event $event)
+	public function onComAkeebabackupProfilesControllerAfterImport(Event $event)
 	{
 		$arguments = array_values($event->getArguments());
 		$id        = $arguments[1] ?? null;
+
+		// The controller's generic event, fired with no arguments after the task, has no ID: not an action
+		if ($id === null)
+		{
+			return;
+		}
 
 		$this->logUserAction([
 			'id' => $id,
 		], 'COM_AKEEBABACKUP_LOGS_PROFILE_IMPORT');
 	}
 
-	public function onComAkeebabackupModelStatisticAfterDeleteFiles(Event $event)
+	public function onComAkeebabackupStatisticModelAfterDeleteFiles(Event $event)
 	{
 		$arguments = array_values($event->getArguments());
 		$id        = $arguments[1] ?? null;
@@ -185,10 +197,16 @@ class AkeebaBackup extends ActionLogPlugin implements SubscriberInterface
 		$id        = $arguments[1] ?? null;
 		$part      = $arguments[2] ?? null;
 
+		// The controller's generic event, fired with no arguments before the task runs, has no ID: not an action
+		if ($id === null)
+		{
+			return;
+		}
+
 		$this->logUserAction([
 			'id'   => $id,
 			'part' => $part,
-		], 'COM_AKEEBABACKUP_LOGS_MANAGE_DELETEFILES');
+		], 'COM_AKEEBABACKUP_LOGS_MANAGE_DOWNLOAD');
 	}
 
 	public function onComAkeebabackupConfigurationControllerAfterApply(Event $event)
@@ -196,12 +214,18 @@ class AkeebaBackup extends ActionLogPlugin implements SubscriberInterface
 		$arguments = array_values($event->getArguments());
 		$id        = $arguments[1] ?? null;
 
+		// The controller's generic event, fired with no arguments before the task runs, has no ID: not an action
+		if ($id === null)
+		{
+			return;
+		}
+
 		$this->logUserAction([
 			'id' => $id,
 		], 'COM_AKEEBABACKUP_LOGS_CONFIGURATION_EDIT');
 	}
 
-	public function onComAkeebabackupModelBackupStart(Event $event)
+	public function onComAkeebabackupBackupModelStart(Event $event)
 	{
 		$arguments = array_values($event->getArguments());
 		$id        = $arguments[1] ?? null;
@@ -231,14 +255,14 @@ class AkeebaBackup extends ActionLogPlugin implements SubscriberInterface
 		], 'COM_AKEEBABACKUP_LOGS_LOG_DOWNLOAD');
 	}
 
-	public function onComAkeebabackupTransferControllerBeforeInitialiseUpload(Event $event)
+	public function onComAkeebabackupTransferControllerBeforeInitialiseupload(Event $event)
 	{
 		$this->logUserAction([
 			'title' => $this->getApplication()->getSession()->get('akeebabackup.transfer.url', null),
 		], 'COM_AKEEBABACKUP_LOGS_TRANSFER_RUN');
 	}
 
-	public function onComAkeebabackupRemoteFilesControllerFetch(Event $event)
+	public function onComAkeebabackupRemotefilesControllerFetch(Event $event)
 	{
 		$arguments = array_values($event->getArguments());
 		$id        = $arguments[1] ?? null;
@@ -248,7 +272,7 @@ class AkeebaBackup extends ActionLogPlugin implements SubscriberInterface
 		], 'COM_AKEEBABACKUP_LOGS_REMOTEFILE_FETCH');
 	}
 
-	public function onComAkeebabackupRemoteFilesControllerDownload(Event $event)
+	public function onComAkeebabackupRemotefilesControllerDownload(Event $event)
 	{
 		$arguments = array_values($event->getArguments());
 		$id        = $arguments[1] ?? null;
@@ -260,7 +284,7 @@ class AkeebaBackup extends ActionLogPlugin implements SubscriberInterface
 		], 'COM_AKEEBABACKUP_LOGS_REMOTEFILE_DOWNLOAD');
 	}
 
-	public function onComAkeebabackupRemoteFilesControllerDelete(Event $event)
+	public function onComAkeebabackupRemotefilesControllerDelete(Event $event)
 	{
 		$arguments = array_values($event->getArguments());
 		$id        = $arguments[1] ?? null;
@@ -280,7 +304,7 @@ class AkeebaBackup extends ActionLogPlugin implements SubscriberInterface
 		], 'COM_AKEEBABACKUP_LOGS_UPLOADS_ADD');
 	}
 
-	public function onComAkeebabackupUploadControllerSuccessfulImport(Event $event)
+	public function onComAkeebabackupDiscoverControllerSuccessfulImport(Event $event)
 	{
 		$arguments = array_values($event->getArguments());
 		$id        = $arguments[1] ?? null;
@@ -297,7 +321,8 @@ class AkeebaBackup extends ActionLogPlugin implements SubscriberInterface
 		$folder    = $arguments[2] ?? null;
 		$file      = $arguments[3] ?? null;
 
-		$path = $folder . ($folder == '' ? '' : '/') . $file;
+		// The file is already the full key of the object in the bucket, folder included
+		$path = $file;
 
 		$this->logUserAction([
 			'bucket' => $bucket,

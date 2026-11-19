@@ -46,6 +46,20 @@ trait AkeebaBackupACLTrait
 			return;
 		}
 
+		$this->akeebaBackupRequirePrivilege($privilege);
+	}
+
+	/**
+	 * Authorise the currently logged-in user against a specific Akeeba Backup ACL privilege.
+	 *
+	 * @param   string  $privilege  The privilege to check, e.g. `akeebabackup.configure`
+	 *
+	 * @return  void
+	 * @throws  RuntimeException  When the user is not authorised
+	 * @since   10.5.0
+	 */
+	protected function akeebaBackupRequirePrivilege(string $privilege): void
+	{
 		$user = Factory::getApplication()->getIdentity() ?? (new User());
 
 		if (!$user->authorise($privilege, 'com_akeebabackup'))
@@ -70,8 +84,16 @@ trait AkeebaBackupACLTrait
 	{
 		// Akeeba Backup-specific ACL checks. All views not listed here are limited by the akeeba.configure privilege.
 		$viewACLMap = [
-			'controlpanel'       => 'core.manage',
-			'backup'             => 'akeebabackup.backup',
+			'controlpanel'                  => 'core.manage',
+			// Mints and echoes the plaintext Secret Word, so it needs the same access as editing the
+			// component's Options (core.admin) — same reasoning as the Schedule view below.
+			'controlpanel.resetsecretword'  => 'core.admin',
+			// These mutate the currently active profile's stored configuration (the archive filename template,
+			// the output directory's protection files) rather than merely reading or switching to it, so they
+			// need the same access as the Configuration page itself. (M4)
+			'controlpanel.addrandomtofilename' => 'akeebabackup.configure',
+			'controlpanel.fixoutputdirectory'  => 'akeebabackup.configure',
+			'backup'                        => 'akeebabackup.backup',
 			'manage'             => 'core.manage',
 			'manage.download'    => 'akeebabackup.download',
 			'manage.remove'      => 'akeebabackup.download',
@@ -81,6 +103,16 @@ trait AkeebaBackupACLTrait
 			'manage.save'        => 'akeebabackup.download',
 			'manage.restore'     => 'akeebabackup.configure',
 			'manage.cancel'      => 'akeebabackup.backup',
+			// These freeze/unfreeze backup records (StatisticTable aliases the `published` column to `frozen`),
+			// exempting or re-exposing them to quota-based deletion. Inherited from AdminController and not
+			// covered by any of the entries above, they used to fall through to the view-level
+			// 'manage' => 'core.manage' entry even though the toolbar only ever shows their buttons to a
+			// `configure`-holding user. (H10)
+			'manage.publish'     => 'akeebabackup.configure',
+			'manage.unpublish'   => 'akeebabackup.configure',
+			'manage.archive'     => 'akeebabackup.configure',
+			'manage.trash'       => 'akeebabackup.configure',
+			'manage.report'      => 'akeebabackup.configure',
 			'statistic'          => 'akeebabackup.download',
 			'upload'             => 'akeebabackup.backup',
 			'remotefiles'        => 'akeebabackup.download',

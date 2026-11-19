@@ -75,16 +75,13 @@ class SecureSettings
 
 			if (!defined('AKEEBA_SERVERKEY'))
 			{
-				$filename = dirname(__FILE__) . '/../' . $this->keyFilename;
-				$altFilename = $this->keyFilename;
+				$filename = $this->isAbsolutePath($this->keyFilename)
+					? $this->keyFilename
+					: (dirname(__FILE__) . '/../' . $this->keyFilename);
 
 				if (file_exists($filename))
 				{
 					include_once $filename;
-				}
-				elseif (file_exists($altFilename))
-				{
-					include_once $altFilename;
 				}
 			}
 
@@ -264,5 +261,27 @@ class SecureSettings
 		}
 
 		return $decrypted;
+	}
+
+	/**
+	 * Is the given path absolute (Unix-style leading slash, or Windows drive letter / UNC)?
+	 *
+	 * @param   string  $path  The path to check.
+	 *
+	 * @return  bool
+	 */
+	private function isAbsolutePath($path)
+	{
+		if ($path === '')
+		{
+			return false;
+		}
+
+		if ($path[0] === '/' || $path[0] === '\\')
+		{
+			return true;
+		}
+
+		return (bool) preg_match('#^[A-Za-z]:[/\\\\]#', $path);
 	}
 }

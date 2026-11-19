@@ -73,13 +73,13 @@ class PushMessages implements PushMessagesInterface
 				{
 					try
 					{
-						$connector = new Connector($key);
+						$connector = $this->createConnector($key);
 						$connector->getDevices();
 						$this->connectors[] = $connector;
 					}
 					catch (Exception $e)
 					{
-						Factory::getLog()->warning("Push messages cannot be sent with API key $key. Error received when trying to establish PushBullet connection: " . $e->getMessage());
+						Factory::getLog()->warning('Push messages cannot be sent with the configured API key. Error received when trying to establish PushBullet connection: ' . $e->getMessage());
 					}
 				}
 
@@ -92,6 +92,20 @@ class PushMessages implements PushMessagesInterface
 
 				break;
 		}
+	}
+
+	/**
+	 * Creates a PushBullet connector for the given API key.
+	 *
+	 * Extracted as a seam so unit tests can substitute a connector which fails without making a network request.
+	 *
+	 * @param   string  $key  The PushBullet API key.
+	 *
+	 * @return  Connector
+	 */
+	protected function createConnector($key)
+	{
+		return new Connector($key);
 	}
 
 	/**

@@ -124,7 +124,10 @@ class Logger implements LoggerInterface, LogInterface, WarningsLoggerInterface
 		// Remove all log file flavours for this tag
 		foreach ($taggedLogNames as $taggedLogName)
 		{
-			@unlink($taggedLogName);
+			if (@file_exists($taggedLogName))
+			{
+				@unlink($taggedLogName);
+			}
 		}
 
 		$hasWritten = false;
@@ -196,7 +199,47 @@ class Logger implements LoggerInterface, LogInterface, WarningsLoggerInterface
 	 */
 	public function log($level, $message = '', array $context = [])
 	{
-		// Warnings are enqueued no matter what is the minimum log level to report in the log file
+		$translateRoot = boolval($context['root_translate'] ?? false);
+
+		// Replace the site's root with <root> in the log file
+		if ($translateRoot && !defined('AKEEBADEBUG'))
+		{
+			$message = str_replace($this->site_root_untranslated, "<root>", $message);
+			$message = str_replace($this->site_root, "<root>", $message);
+		}
+
+		// Replace new lines
+		$message = str_replace("\r\n", "\n", $message);
+		$message = str_replace("\r", "\n", $message);
+		$message = str_replace("\n", ' \n ', $message);
+
+		/**
+		 * L21: neutralise the "|" field delimiter itself. The message is always the last field parsed out of a log
+		 * line (readers split on "|" with a limit), so a stray "|" cannot fabricate an extra field on its own — but
+		 * the log file is written without locking (see open()/reset()), so two concurrent same-tag backups can
+		 * interleave their writes and split a record mid-message. An unescaped "|" surviving into that interleaved
+		 * output could then be read as a fake field boundary by a consumer. Escaping it here closes that regardless
+		 * of the race.
+		 */
+		$message = str_replace('|', '\|', $message);
+
+		/**
+		 * Defence in depth: strip C0 and C1 control characters (other than the newlines already normalised above).
+		 *
+		 * Logged messages routinely include attacker-influenced data (file names, table names, User-Agent-derived
+		 * text). Consumers of the log, such as the ALICE diagnostics feature, must escape it themselves before
+		 * rendering it as HTML — but this removes the underlying control characters at the source as well, so a
+		 * consumer that forgets to escape does not automatically become an XSS or terminal-injection vector.
+		 */
+		$message = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]/', '', $message);
+
+		/**
+		 * L23: warnings are enqueued no matter what is the minimum log level to report in the log file, and no
+		 * matter whether logging is currently paused — the warnings queue feeds the UI independently of whether
+		 * anything is being written to the log file at all. It must still carry the same sanitised message that
+		 * would have been written to the log, not the raw input, so it is enqueued after normalisation above
+		 * rather than before it.
+		 */
 		if (in_array($level, [LogLevel::WARNING, LogLevel::NOTICE]))
 		{
 			$this->enqueueWarning($message);
@@ -259,20 +302,6 @@ class Logger implements LoggerInterface, LogInterface, WarningsLoggerInterface
 		{
 			return;
 		}
-
-		$translateRoot = boolval($context['root_translate'] ?? false);
-
-		// Replace the site's root with <root> in the log file
-		if ($translateRoot && !defined('AKEEBADEBUG'))
-		{
-			$message = str_replace($this->site_root_untranslated, "<root>", $message);
-			$message = str_replace($this->site_root, "<root>", $message);
-		}
-
-		// Replace new lines
-		$message = str_replace("\r\n", "\n", $message);
-		$message = str_replace("\r", "\n", $message);
-		$message = str_replace("\n", ' \n ', $message);
 
 		switch ($level)
 		{
@@ -504,6 +533,34 @@ class Logger implements LoggerInterface, LogInterface, WarningsLoggerInterface
 
 		// Store truncate offset, we will have to rewind the internal pointer to it
 		$truncate_point = ftell($this->fp) - $written;
+
+		/**
+		 * The probe above always truncates its own test write away, which is correct when we are re-opening a log
+		 * file that already carried its own guard (truncate_point > 0, restoring the pre-probe content). But when
+		 * the file was empty to begin with (truncate_point === 0) truncating away the probe leaves a zero-byte,
+		 * guardless file that log lines then get appended to — this is the one file `reset()` never wrote a real
+		 * guard into. Keep a permanent guard instead of truncating it away in that case.
+		 */
+		if ($truncate_point === 0)
+		{
+			if (@ftruncate($this->fp, 0) === false || @fseek($this->fp, 0) !== 0)
+			{
+				$this->closeAndRemove();
+
+				return false;
+			}
+
+			$written = @fwrite($this->fp, '<' . '?' . 'php die(); ' . '?' . '>' . "\n");
+
+			if ($written === false)
+			{
+				$this->closeAndRemove();
+
+				return false;
+			}
+
+			return true;
+		}
 
 		if (ftruncate($this->fp, $truncate_point) === false)
 		{

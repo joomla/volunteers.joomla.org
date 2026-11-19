@@ -22,10 +22,10 @@ $errorParts = explode("\n", $this->errorMessage, 2);
         <?= Text::_('COM_AKEEBABACKUP_TRANSFER_MSG_FAILED') ?>
     </h3>
     <p>
-        <?= $errorParts[0] ?>
+        <?= $this->escape($errorParts[0]) ?>
     </p>
     <?php if(isset($errorParts[1])): ?>
-        <pre><?= $errorParts[1] ?></pre>
+        <pre><?= $this->escape($errorParts[1]) ?></pre>
     <?php endif ?>
 	<?php else: ?>
 		<?= Text::_('COM_AKEEBABACKUP_TRANSFER_MSG_FAILED') ?>

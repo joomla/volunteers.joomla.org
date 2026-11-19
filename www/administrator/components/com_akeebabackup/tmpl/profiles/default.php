@@ -88,7 +88,7 @@ $this->tableColumnsMultiselect('#articleList');
 						<?php foreach ($this->items as $i => $item) :?>
 							<tr class="row<?= $i % 2; ?>">
 								<td class="text-center">
-									<?= HTMLHelper::_('grid.id', $i, $item->id, false, 'cid', 'cb', $item->name); ?>
+									<?= HTMLHelper::_('grid.id', $i, $item->id, false, 'cid', 'cb', $item->description); ?>
 								</td>
 
 								<td class="d-none d-md-table-cell">

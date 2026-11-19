@@ -124,6 +124,13 @@ class ConfigurationModel extends BaseModel
 		}
 		else
 		{
+			if (!function_exists('ftp_connect'))
+			{
+				throw new RuntimeException(
+					'Your server\'s PHP does not have the FTP extension (ftp) installed or enabled, so the plain FTP connection method is not available. Please use an FTP over cURL or SFTP method instead, or ask your host to enable the PHP FTP extension.'
+				);
+			}
+
 			$test = new Ftp($config);
 		}
 

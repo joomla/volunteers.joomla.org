@@ -104,7 +104,7 @@ if (substr($relativePath, 0, 2) === './')
 						<ul>
 							<?php foreach(Factory::getStatistics()->get_all_filenames($record, false) as $file): ?>
 							<li>
-								<code><?= basename($file) ?></code>
+								<code><?= $this->escape(basename($file)) ?></code>
 							</li>
 							<?php endforeach ?>
 						</ul>
@@ -127,7 +127,7 @@ if (substr($relativePath, 0, 2) === './')
 		<div class="modal-dialog modal-lg modal-dialog-centered">
 			<div class="modal-content">
 				<div class="modal-header">
-					<h3 class="modal-title" id="akeeba-buadmin-download-<?= (int)$record['id'] ?>">
+					<h3 class="modal-title" id="akeeba-buadmin-download-<?= (int)$record['id'] ?>-title">
 						<?= Text::_('COM_AKEEBABACKUP_BUADMIN_LBL_DOWNLOAD_TITLE')?>
 					</h3>
 					<button type="button" class="btn-close novalidate" data-bs-dismiss="modal"
@@ -212,7 +212,7 @@ if (substr($relativePath, 0, 2) === './')
         <?php if ($record['log_present']): ?>
             <a class="akeebabackup-viewlog-button btn btn-outline-dark btn-small text-decoration-none me-2 mb-2 akeebaCommentPopover"
                <?= ($record['meta'] != 'obsolete') ? '' : 'disabled="disabled"' ?>
-               href="index.php?option=com_akeebabackup&view=Log&tag=<?= $this->escape($record['tag']) ?>.<?= $this->escape($record['backupid']) ?>&profileid=<?= (int)$record['profile_id'] ?>"
+               href="index.php?option=com_akeebabackup&view=Log&tag=<?= $this->escape($record['tag']) ?>.<?= $this->escape($record['backupid']) ?>&profileid=<?= (int)$record['profile_id'] ?>&<?= \Joomla\CMS\Factory::getApplication()->getFormToken() ?>=1"
                title="<?= Text::_('COM_AKEEBABACKUP_BUADMIN_LBL_LOGFILEID') ?>"
                data-bs-content="<?= $this->escape($record['backupid']) ?>">
                 <span class="fa fa-search"></span>

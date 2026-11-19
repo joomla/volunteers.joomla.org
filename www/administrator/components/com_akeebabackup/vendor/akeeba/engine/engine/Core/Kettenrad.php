@@ -841,7 +841,13 @@ function akeebaEngineErrorHandler($errno, $errstr, $errfile, $errline)
 	$type     = '';
 	$logMode  = 'debug';
 
-	switch ($errno)
+	// E_STRICT is deprecated in PHP 8.4.0, therefore we are no longer handling it starting with this version.
+	if (defined('E_STRICT') && version_compare(PHP_VERSION, '8.4.0', 'lt') && $errno === E_STRICT)
+	{
+		$loggable = defined('AKEEBADEBUG');
+		$type     = 'Strict Notice';
+	}
+	else switch ($errno)
 	{
 		case E_ERROR:
 		case E_USER_ERROR:
@@ -885,11 +891,6 @@ function akeebaEngineErrorHandler($errno, $errstr, $errfile, $errline)
 		case E_USER_DEPRECATED:
 			$loggable = defined('AKEEBADEBUG');
 			$type     = 'User Deprecated';
-			break;
-
-		case E_STRICT:
-			$loggable = defined('AKEEBADEBUG');
-			$type     = 'Strict Notice';
 			break;
 
 		default:

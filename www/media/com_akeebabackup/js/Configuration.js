@@ -559,7 +559,8 @@ if (typeof akeebabackup.Configuration === "undefined")
                     {
                         minValue = minValue.toFixed(2);
                         maxValue = maxValue.toFixed(2);
-                        stepValue = stepValue.toFixed(2);
+                        // Do not round the step: for scales over 100 toFixed(2) gives "0.00", rejecting every value
+                        stepValue = parseFloat(stepValue.toPrecision(6));
                     }
                     else
                     {
@@ -658,7 +659,14 @@ if (typeof akeebabackup.Configuration === "undefined")
 
                         if (value === '-1')
                         {
-                            elCustomValue.value         = (defdata["default"] / defdata["scale"]).toFixed(2);
+                            // An empty box shows the page-load value. Whatever the box shows is also what gets saved. A box
+                            // which already holds a value (typed earlier, or restored when the engine changed) is kept.
+                            if (elCustomValue.value === "")
+                            {
+                                elCustomValue.value = (defdata["default"] / defdata["scale"]).toFixed(2);
+                            }
+
+                            updateHiddenFromCustom();
                             elCustomValue.style.display = "block";
                             akeebabackup.System.triggerEvent(elCustomValue, "focus");
 
@@ -1341,6 +1349,8 @@ if (typeof akeebabackup.Configuration === "undefined")
             formData.set('jsonForm', json);
             formData.set(Joomla.getOptions('csrf.token'), 1);
             formData.set('task', document.forms['adminForm']['task'].value);
+            // Tell the server to reply with the redirection URL instead of redirecting us, keeping its message intact.
+            formData.set('jsonsubmit', 1);
 
             // Initialise the redirection detection code.
             let url = null;
@@ -1363,6 +1373,17 @@ if (typeof akeebabackup.Configuration === "undefined")
                 // Something went wrong. Reload the configuration page.
                 if (!response.ok) {
                     throw new Error('Error found in network response');
+                }
+
+                // The server replies with the redirection URL so that it does not consume its own message.
+                if (!url)
+                {
+                    const reply = await response.json();
+
+                    if (reply && typeof reply.redirect === 'string')
+                    {
+                        url = reply.redirect;
+                    }
                 }
             } catch (error) {
                 location.reload();
@@ -1413,6 +1434,18 @@ function postprocftpcurl_test_connection()
 
 function directsftp_test_connection()
 {
+    // The engine's DirectSFTP over cURL definition may hook its Test button to this function. If the plain DirectSFTP
+    // button is not on the page but the cURL one is, the cURL engine is the one being configured.
+    if (
+        !document.getElementById("var[engine.archiver.directsftp.sftp_test]")
+        && document.getElementById("var[engine.archiver.directsftpcurl.sftp_test]")
+    )
+    {
+        directsftpcurl_test_connection();
+
+        return;
+    }
+
     akeebabackup.Configuration.SftpTest.testConnection("engine.archiver.directsftp.sftp_test", "engine.archiver.directsftp",
         0
     );
@@ -1453,7 +1486,7 @@ function akconfig_dropbox_openoauth()
 
 function akconfig_dropbox_gettoken()
 {
-    akeebabackup.System.AjaxURL = akeebabackup.Configuration.URLs["dpecustomapi"];
+    akeebabackup.System.params.AjaxURL = akeebabackup.Configuration.URLs["dpecustomapi"];
 
     var data = {
         engine: "dropbox",
@@ -1510,33 +1543,6 @@ function akeeba_dropbox2_oauth_callback(data)
     myWindow.close();
 }
 
-function akconfig_onedrive_openoauth()
-{
-    var url = akeebabackup.Configuration.URLs.dpeauthopen;
-
-    if (url.indexOf("?") == -1)
-    {
-        url = url + "?";
-    }
-    else
-    {
-        url = url + "&";
-    }
-
-    window.open(url + "engine=onedrive", "akeeba_onedrive_window", "width=1010,height=500,opener");
-}
-
-function akeeba_onedrive_oauth_callback(data)
-{
-    // Update the tokens
-    document.getElementById("var[engine.postproc.onedrive.access_token]").value  = data.access_token;
-    document.getElementById("var[engine.postproc.onedrive.refresh_token]").value = data.refresh_token;
-
-    // Close the window
-    var myWindow = window.open("", "akeeba_onedrive_window");
-    myWindow.close();
-}
-
 function akconfig_onedrivebusiness_openoauth()
 {
     var url = akeebabackup.Configuration.URLs.dpeauthopen;
@@ -1576,20 +1582,20 @@ function akeeba_onedrivebusiness_refreshdrives(params)
     if (typeof params["engine.postproc.onedrivebusiness.drive"] === "undefined")
     {
         params["engine.postproc.onedrivebusiness.drive"] = {
-            "default": document.getElementById("var[engine.postproc.googledrive.team_drive]").value
+            "default": document.getElementById("var[engine.postproc.onedrivebusiness.drive]").value
         };
     }
 
-    akeebabackup.System.AjaxURL = akeebabackup.Configuration.URLs["dpecustomapi"];
+    akeebabackup.System.params.AjaxURL = akeebabackup.Configuration.URLs["dpecustomapi"];
 
     var data = {
         engine: "onedrivebusiness",
         method: "getDrives",
         params: {
             "engine.postproc.onedrivebusiness.access_token":  document.getElementById(
-                "var[engine.postproc.googledrive.access_token]").value,
+                "var[engine.postproc.onedrivebusiness.access_token]").value,
             "engine.postproc.onedrivebusiness.refresh_token": document.getElementById(
-                "var[engine.postproc.googledrive.refresh_token]").value
+                "var[engine.postproc.onedrivebusiness.refresh_token]").value
         }
     };
 
@@ -1605,6 +1611,13 @@ function akeeba_onedrivebusiness_refreshdrives(params)
             }
 
             var dropDown       = document.getElementById("var[engine.postproc.onedrivebusiness.drive]");
+
+            // The user may have chosen another engine while the request was in flight, removing the drop-down
+            if (!dropDown)
+            {
+                return;
+            }
+
             dropDown.innerHTML = "";
 
             res.list.forEach(item => {
@@ -1624,33 +1637,6 @@ function akeeba_onedrivebusiness_refreshdrives(params)
             alert("ERROR: Could not retrieve list of OneDrive Drives. Error: " + "\n" + errorMessage);
         }, false, 15000
     );
-}
-
-function akconfig_onedriveapp_openoauth()
-{
-    var url = akeebabackup.Configuration.URLs.dpeauthopen;
-
-    if (url.indexOf("?") == -1)
-    {
-        url = url + "?";
-    }
-    else
-    {
-        url = url + "&";
-    }
-
-    window.open(url + "engine=onedriveapp", "akeeba_onedriveapp_window", "width=1010,height=500,opener");
-}
-
-function akeeba_onedriveapp_oauth_callback(data)
-{
-    // Update the tokens
-    document.getElementById("var[engine.postproc.onedriveapp.access_token]").value  = data.access_token;
-    document.getElementById("var[engine.postproc.onedriveapp.refresh_token]").value = data.refresh_token;
-
-    // Close the window
-    var myWindow = window.open("", "akeeba_onedriveapp_window");
-    myWindow.close();
 }
 
 function akconfig_googledrive_openoauth()
@@ -1699,7 +1685,7 @@ function akeeba_googledrive_refreshdrives(params)
         };
     }
 
-    akeebabackup.System.AjaxURL = akeebabackup.Configuration.URLs["dpecustomapi"];
+    akeebabackup.System.params.AjaxURL = akeebabackup.Configuration.URLs["dpecustomapi"];
 
     var data = {
         engine: "googledrive",
@@ -1726,6 +1712,13 @@ function akeeba_googledrive_refreshdrives(params)
             }
 
             var dropDown       = document.getElementById("var[engine.postproc.googledrive.team_drive]");
+
+            // The user may have chosen another engine while the request was in flight, removing the drop-down
+            if (!dropDown)
+            {
+                return;
+            }
+
             dropDown.innerHTML = "";
 
             res.list.forEach(item => {

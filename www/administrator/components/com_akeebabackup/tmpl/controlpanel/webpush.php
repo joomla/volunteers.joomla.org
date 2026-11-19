@@ -30,6 +30,7 @@ if ($vapidKeys === null):
 	</div>
 </div>
 <?php
+	return;
 endif;
 
 $this->getDocument()->addScriptOptions('com_akeebabackup.webPush', [
@@ -49,7 +50,8 @@ $this->getDocument()->addScriptOptions('com_akeebabackup.webPush', [
 		Route::TLS_IGNORE,
 		true
 	),
-	'vapidKeys'         => $vapidKeys,
+	// Only ever expose the public key to the browser. The private key must never leave the server.
+	'vapidKeys'         => ['publicKey' => $vapidKeys['publicKey']],
 	'subscribeButton'   => '#btnWebPushSubscribe',
 	'unsubscribeButton' => '#btnWebPushUnsubscribe',
 	'unavailableInfo'   => '#webPushNotAvailable',

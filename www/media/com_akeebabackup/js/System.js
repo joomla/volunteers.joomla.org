@@ -533,9 +533,9 @@ if (typeof akeebabackup.System === "undefined")
 
                 if (dialogElement != null)
                 {
-                    var errorElement       = document.getElementById(errorMessageId);
-                    errorElement.innerHTML = error;
-                    errorContent           = dialogElement.innerHTML;
+                    var errorElement         = document.getElementById(errorMessageId);
+                    errorElement.textContent = error;
+                    errorContent             = dialogElement.innerHTML;
                 }
 
                 new window.bootstrap.Modal(dialogElement).show();

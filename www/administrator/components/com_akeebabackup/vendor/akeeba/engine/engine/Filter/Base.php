@@ -143,7 +143,7 @@ abstract class Base
 						if (substr($regex, 0, 1) == '!')
 						{
 							// Custom Akeeba Backup extension to PCRE notation. If you put a ! before the PCRE, it negates the result of the PCRE.
-							if (!preg_match(substr($regex, 1), $test))
+							if (!@preg_match(substr($regex, 1), $test))
 							{
 								return true;
 							}
@@ -151,7 +151,7 @@ abstract class Base
 						else
 						{
 							// Normal PCRE
-							if (preg_match($regex, $test))
+							if (@preg_match($regex, $test))
 							{
 								return true;
 							}

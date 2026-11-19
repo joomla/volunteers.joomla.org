@@ -89,7 +89,7 @@ class ProfileCopy extends AbstractCommand
 			return 1;
 		}
 
-		$profileData = $item->getProperties();
+		$profileData = (array) $item;
 		unset($profileData['id']);
 
 		if (!$withFilters)
@@ -97,14 +97,19 @@ class ProfileCopy extends AbstractCommand
 			$profileData['filters'] = '';
 		}
 
-		$description = (string) $this->cliInput->getOption('description') ?? 0;
+		$description = $this->cliInput->getOption('description');
 
 		if (!is_null($description))
 		{
-			$profileData['description'] = trim($description);
+			$profileData['description'] = trim((string) $description);
 		}
 
-		$profileData['quickicon'] = (bool) $this->cliInput->getOption('quickicon') ?? $profileData['quickicon'];
+		$quickicon = $this->cliInput->getOption('quickicon');
+
+		if (!is_null($quickicon))
+		{
+			$profileData['quickicon'] = ((bool) $quickicon) ? 1 : 0;
+		}
 
 		try
 		{

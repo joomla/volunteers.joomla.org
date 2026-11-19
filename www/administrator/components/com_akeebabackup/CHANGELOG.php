@@ -1,3 +1,208 @@
+Akeeba Backup 10.5.0
+================================================================================
+! Restoration: extraction accepted archive entries with dot paths in their name
+! PHP and Joomla minimum and maximum version compatibility is now enforced
+! Three exception-chain walkers looped forever instead of terminating once an exception had a previous exception
++ [HARDENING] Output directory root containment misidentified sibling folders sharing a name prefix
++ [HARDENING] Log viewer's profile switch now requires an anti-CSRF token and checks profile access
++ [HARDENING] Control Panel: profile switch now checks access
++ [HARDENING] Backup page: the profileid URL parameter now checks the user's access to that profile
++ [HARDENING] JSON API startBackup's overrides parameter has additional access checks under APIv3
++ [HARDENING] JSON API startBackup under APIv3 token auth now checks the caller's access to the target profile
++ [HARDENING] Engine finalisation queue now instantiates only classes implementing the expected interface
++ [HARDENING] Control Panel's Reset Secret Word action now requires core.admin, matching the Options page
++ [HARDENING] ALICE now renders the log content escaped
++ [HARDENING] Backup records list: freeze/unfreeze/archive/trash/report tasks now require akeebabackup.configure
++ [HARDENING] OAuth2 helper's step1/step2 flow now validates a single-use, session-bound anti-CSRF state
++ [HARDENING] Control Panel now warns when the OpenSSL extension is missing, since settings then store as plaintext
++ [HARDENING] Backup description is now escaped in the Control Panel's latest backup status cell
++ [HARDENING] Multipart archive part names are now escaped in the Manage view's archive info modal
++ [HARDENING] The backup comment reflected into the Backup view's textarea is now escaped
++ [HARDENING] Post-processing error messages are now escaped in the Upload view
++ [HARDENING] Four backend JS files now use textContent instead of innerHTML for server-supplied strings
++ [HARDENING] Manage and Restore views now escape the configurable date-format and time-zone-format output
++ [HARDENING] Uri::base() is now escaped for its HTML context and never interpolated into inline JS
++ [HARDENING] OAuth2 token display pages now mark themselves non-cacheable instead of publicly cacheable
++ [HARDENING] FTP download-to-browser no longer exposes the FTP username and password in a redirect header
++ [HARDENING] Control Panel no longer sends the Web Push VAPID private key to the browser
++ [HARDENING] Leftover files warning: Delete button now sends a POST with an anti-CSRF token, not a GET link
++ [HARDENING] Backup page: autostart=1 now requires an anti-CSRF token; without one the user starts the backup
++ [HARDENING] Quick Icon: the link no longer carries the session token or autostarts the backup
++ Added support for seven additional Amazon S3 regions
++ Import Archives from S3 now supports the custom endpoint of S3-compatible storage
++ Options: "Backend backup checks the anti-CSRF token" lets backups run on servers with broken session handling
+- Removed legacy error handler
+- Integrated restoration no longer offers the "Use the FTP layer" extraction option; Direct and Hybrid remain
+- Removed "Upload to Microsoft OneDrive (LEGACY)" and "Upload to Microsoft OneDrive (App-Specific Folder)"
+- Backup menu item no longer has a "Start immediately" option; it needs an anti-CSRF token menu items cannot carry
+~ Declare the core.options permission so it can be granted per user group
+~ Route every query through Helper\DbQuery::create(), keeping the createQuery() compatibility branch in one place
+~ htmlentities() calls now pass explicit flags, so escaping no longer depends on the PHP version
+~ Restoration: removed SFTP and "use FTP for all files" modes; Hybrid now falls back to FTP when a direct write fails
+~ Restoration: the resume allow-list now derives from the extraction engine's class hierarchy, so it stays correct
+~ PostgreSQL backup: only pass --no-policies to pg_dump 18+, older versions reject it
+~ PostgreSQL backup: Exempt CREATE UNIQUE INDEX from the IF NOT EXISTS rewrite too
+~ PostgreSQL backup: Quote jsonb values as text, not as hex-encoded BYTEA
+~ PostgreSQL backup: Rewrite CREATE VIEW to OR REPLACE, not unsupported IF NOT EXISTS
+~ Schedule Automatic Backups: warns about a weak Secret Word and strikes through the URLs and commands that need it
+~ RegEx filters (database tables): warn when the saved regular expression is not valid
+~ Backup Now: a backup step rejected for an invalid token shows its own error and records why in the backup log
+# [HIGH] FilefiltersController was checking against the wrong privilege
+# [HIGH] Front-end Akeeba Backup URLs caused a white page on PHP 7.4 sites with SEF URLs enabled
+# [HIGH] "Check for failed backups/uploads" Scheduled Tasks fatally errored instead of logging their result
+# [HIGH] Restoration: ZIP archives using a "fast" compression setting were reported corrupt after the first file
+# [HIGH] Restoration: "delete files before extracting" fatally errored before deleting anything (progress reporter bug)
+# [HIGH] Restoration: "delete files before extracting" also failed under restore.php via Kickstart-only zapper calls
+# [HIGH] Restoration: Hybrid write mode could not extract multi-step archives; its snapshot was corrupted on save
+# [HIGH] Restoration: removed the dead Mcrypt AES adapter; without OpenSSL, JPS decryption failed with a fatal error
+# [HIGH] Restoration: a DB hostname with an underscore had its port number appended twice, breaking the connection
+# [HIGH] akeeba:profile:modify/copy errored with "Incorrect integer value" unless --quickicon was explicitly truthy
+# [HIGH] akeeba:filter:include-database always failed; it read two CLI options under names it never registered
+# [HIGH] akeeba:filter:include-database stored the database username and dump file under keys nothing reads
+# [HIGH] akeeba:profile:copy failed on every run with "Call to undefined method stdClass::getProperties()"
+# [HIGH] Control Panel's first load after upgrading reset encrypted backup profiles to defaults when several existed
+# [HIGH] Import Archives from S3 fatally errored: it used a connector class which no longer exists
+# [HIGH] Backup Now failed with "The security token did not match" on servers which do not keep session data reliably
+# [HIGH] Site Transfer Wizard skipped every other part of a multi-part backup, so Kickstart could not extract it
+# [HIGH] Site Transfer Wizard: uploading a multi-part backup failed with an HTTP 500 error after the first part
+# [MEDIUM] Backup Now could use another profile than the one shown if the active profile changed in another tab
+# [MEDIUM] Schedule Automatic Backups: the front-end URL to check for failed uploads returned a 404 error
+# [MEDIUM] startBackup's overrides key silently rejected every override key
+# [MEDIUM] A failed PushBullet connection logged the configured API key
+# [MEDIUM] Downgrading from Professional to Core left the Professional API application installed and reachable
+# [MEDIUM] Downgrading from Professional to Core left Professional files behind on case-insensitive filesystems
+# [MEDIUM] Restoration: extraction state was unserialized without an allow-list, letting a request name any loaded class
+# [MEDIUM] akeeba:profile:modify/copy silently blanked the profile description when --description was not specified
+# [MEDIUM] The layout URL parameter could make a page include a PHP file from outside the templates folder
+# [MEDIUM] Restoration: "display_errors" warning appeared even when the host had display_errors turned off
+# [MEDIUM] Schedule Automatic Backups: front-end URLs cut off or corrupted a Secret Word containing & # + or %
+# [MEDIUM] Multiple Databases: editing a database definition blanked its port number
+# [MEDIUM] Profiles: searching "id:N" caused an error page, and kept doing so until the search was cleared
+# [MEDIUM] akeeba:filter:exclude/delete/list failed with "Unknown root" unless --root was given, despite its default
+# [MEDIUM] Exclusion filters of an off-site directory were lost when its path was converted to [ROOTPARENT]/[SITEROOT]
+# [MEDIUM] Exclusion filters (files, database tables): renaming one to an existing name deleted the edited filter
+# [MEDIUM] Control Panel: leftover Akeeba Backup 8 notice offered a migration button leading to an error on Joomla 5+
+# [MEDIUM] RegEx Database Tables: changing the root failed and kept showing the previous root's filters
+# [MEDIUM] RegEx Database Tables: renaming a regex onto an existing one deleted the filter being edited
+# [MEDIUM] RegEx Files and Directories: renaming an expression onto an existing one deleted the original filter
+# [MEDIUM] Control Panel: the output directory web access check never ran, so its security warnings were never shown
+# [MEDIUM] A backup that died in its first step stayed "pending" forever instead of being marked failed
+# [MEDIUM] Configuration: the Test connection button of the DirectSFTP over cURL archiver did nothing
+# [MEDIUM] FTP connection tests and site transfer failed with an HTTP 500 error when PHP's FTP extension is missing
+# [MEDIUM] Configuration: an empty profile description was saved when the One-click icon setting changed too
+# [MEDIUM] Configuration: a profile uploading to OneDrive for Business raised a JavaScript error on page load
+# [MEDIUM] FTP tests and Site Transfer ended in an HTTP 500 error when PHP lacks the FTP extension
+# [MEDIUM] Joomla 4: the restoration leftovers warning never appeared (it needs a constant only Joomla 5 has)
+# [MEDIUM] Quick Icon: with "Warn on failed backups" off, a failed latest backup made the site look backed up
+# [MEDIUM] Action Log: profile imports, backup starts, archive deletes/imports, remote file actions, transfers unlogged
+# [MEDIUM] akeeba:profile:modify/export/reset/delete and option:get/set treated profile ID 0 as an existing profile
+# [MEDIUM] akeeba:option:set stored values not among an option's choices, and read yes/true/on for on/off options as 0
+# [MEDIUM] akeeba:log:list and akeeba:log:get always read the logs of profile 1, ignoring their profile argument
+# [MEDIUM] akeeba:migrate left the site with no backup profiles if the migration failed halfway
+# [MEDIUM] Backup Now: an error starting the backup was retried, then shown as a misleading security token error
+# [MEDIUM] Site Transfer Wizard: an address whose domain does not resolve showed nothing instead of the warning
+# [MEDIUM] Site Transfer Wizard: the same-site and unreachable-address warnings, and their Ignore button, never showed
+# [MEDIUM] Site Transfer Wizard: a missing backup part file ended in an HTTP 500 error instead of a message
+# [LOW] PHP notices could appear during backups, database filtering, missing-record actions and FTP transfers
+# [LOW] Visiting Joomla's Control Panel reset the active Akeeba Backup profile to the default one
+# [LOW] Database Tables Exclusion: a rejected filter stayed listed in the tabular view as if it had been saved
+# [LOW] When cleaning one cache failed, the remaining caches were not cleaned either
+# [LOW] Schedule Automatic Backups: a long front-end URL overflowed its table cell in the Check tabs
+# [LOW] Schedule Automatic Backups: the Check tabs' PHP path note was chosen from the Run Backups tab's data
+# [LOW] The Control Panel's missing OpenSSL extension warning was shown in English in non-English languages
+# [LOW] Import Archives from S3: the credentials were never pre-filled from the profile's Amazon S3 settings
+# [LOW] Import Archives: scanning a missing directory fatally errored instead of showing an error
+# [LOW] Import Archives: a single-part archive was recorded as having one part instead of none
+# [LOW] A typo disabled Amazon S3 custom endpoint scheme sanitisation
+# [LOW] Core packages contained some Professional view templates and the Remote Files MVC files
+# [LOW] Restoration: PHP 8.1 and later deprecation notices when extracting a JPS archive containing a symbolic link
+# [LOW] Restoration: JPS decryption never trimmed padding off a block; harmless since every caller trimmed it itself
+# [LOW] Restoration: PHP 8.5 deprecation notices when opening a JPS archive whose password is shorter than 16 characters
+# [LOW] Restoration: PHP 8.1+ deprecation notice extracting into an existing folder with no extraction target configured
+# [LOW] Restoration: PHP 8.1+ deprecation notices from the file zapper and finalisation with target/archive unconfigured
+# [LOW] Restoration: PHP 8.1+ deprecation notices, and a PHP 9 fatal error, for UNIX socket or named pipe DB hostnames
+# [LOW] Deleting an obsolete backup log file variant emitted a harmless "No such file or directory" PHP warning
+# [LOW] Log viewer did not escape the timestamp field, and the engine did not neutralise the "|" field delimiter
+# [LOW] Untagged log file's write probe truncated away its own die() guard, leaving it unprotected
+# [LOW] Warnings were queued for the UI before newline/pipe/control-character sanitisation was applied
+# [LOW] OAuth2 token refresh saved the new refresh token under a misspelled key, so it was discarded
+# [LOW] OAuth2 provider errors showed the error_uri value instead of the actual error description
+# [LOW] Alternate-backup CLI commands always treated the legacy API as enabled, ignoring the actual setting
+# [LOW] Restoration ignored the passive-FTP preference and reused the FTP directory setting instead
+# [LOW] akeeba:backup:list --sort-order asc had no effect; the requested direction was never applied
+# [LOW] Site Transfer's backup-selection ordering was passed as a raw SQL string and silently ignored
+# [LOW] AKWarn never recognised multipart archive leftovers (.z01, .p01, ...) due to a broken regex
+# [LOW] BackupOnUpdate's toggle-token check used loose comparison instead of strict, unlike its AKWarn sibling
+# [LOW] The Factory memory file's die() guard had its closing tag transposed, leaving only a parse error
+# [LOW] Backup view's script options were double-escaped, corrupting descriptions/comments with backslashes
+# [LOW] SQLite driver's escape() ignored the LIKE-wildcard flag, unlike every other database driver
+# [LOW] Statistics UPDATE did not whitelist columns the way INSERT does, fatally erroring on an unknown key
+# [LOW] renameTable() and SQLite schema introspection interpolated table names unquoted (no live caller)
+# [LOW] Removed dead code that would have sent proxy credentials to the origin server instead of the proxy
+# [LOW] Settings encryption key file lookup no longer depends on the process's current working directory
+# [LOW] Pro package shipped the Page Cache plugin without actually installing it
+# [LOW] Package build shipped vendor development cruft
+# [LOW] Migration from Akeeba Backup 8 raised PHP warnings while carrying over the encryption key
+# [LOW] Core package shipped unused Pro-only files which it promptly removed upon installation
+# [LOW] Amazon S3: download to browser failed (301) outside us-east-1 with path-style or bucket-in-URL enabled
+# [LOW] Site Transfer Wizard raised a JavaScript error when there was no backup to transfer
+# [LOW] Profiles page raised PHP warnings: the selection checkbox label used a nonexistent profile name
+# [LOW] Fetching a remotely stored backup back to the server could leave a stray .tmp file in the output folder
+# [LOW] Site Transfer Wizard emitted a harmless "No such file or directory" PHP warning on every uploaded chunk
+# [LOW] Folder browser: the Go button did nothing, so a typed-in folder path could not be browsed
+# [LOW] Import Archives from S3: rejected credentials made the page fail with an error instead of a warning
+# [LOW] Files and Directories Exclusion, tabular view: a filter refused by the server stayed listed as saved
+# [LOW] RegEx Database Tables: a regex refused as a duplicate was shown as saved and a second add row appeared
+# [LOW] RegEx Database Tables: saving a row without changes showed an error dialog
+# [LOW] RegEx Database Tables: a just-saved regex containing < > or & was shown HTML-escaped until reload
+# [LOW] RegEx Files and Directories: a just-saved label containing < > or & was shown HTML-escaped until reload
+# [LOW] RegEx Files and Directories: a filter refused by the server stayed listed as saved with a second add row
+# [LOW] Control Panel: the Switch Profiles button shown on narrow screens did nothing when clicked
+# [LOW] Control Panel: the Desktop notifications option never took effect, so no permission was requested
+# [LOW] Control Panel: the latest backup's origin showed a dash for JSON API and Joomla Scheduled Tasks backups
+# [LOW] Control Panel: the CHANGELOG dialog omitted the newest version's heading and left its last list unclosed
+# [LOW] Web Push: a failed Service Worker registration raised an uncaught JavaScript TypeError on the Control Panel
+# [LOW] Configuration check warning q204 (disabled PHP functions) never appeared
+# [LOW] Configuration: saving never showed the "configuration saved" message
+# [LOW] Configuration: choosing Custom for a number option without typing saved the previous preset, not the value shown
+# [LOW] Configuration: custom number boxes with a fractional unit flagged valid values as having a step mismatch
+# [LOW] Configuration: Reload drives for Google Drive after an FTP/SFTP connection test queried the wrong URL
+# [LOW] Configuration: switching engine before the Google Drive list arrived caused a JavaScript error
+# [LOW] Folder browser: choosing the site root as the output folder showed no warning, or showed a raw language key
+# [LOW] Configuration: the Test connection button of DirectSFTP over cURL (archiver) did nothing
+# [LOW] Profiles: the Sort Table By list and the column headers did not sort the list
+# [LOW] Profile edit form: Save as Copy created a profile with empty configuration and no filters
+# [LOW] Profiles: deleting the active profile caused an error page instead of a message
+# [LOW] Profiles: importing without choosing a file showed a raw language key instead of a message
+# [LOW] Profiles: the edit form opened from a bare URL instead of returning to the list
+# [LOW] Profiles: an exported profile was downloaded as Profile.json instead of profile.json
+# [LOW] Profiles: Reset wiped the selected profiles' configuration and filters without asking for confirmation
+# [LOW] Quick Icon: the "Stale backup time" option accepted values outside its allowed range, such as 0
+# [LOW] Restoration leftovers warning ignored the parts of split JPA and JPS archives (.j01, .j02...)
+# [LOW] Quick Icon: after the backup, you were left on the Backup page instead of returning to the administrator home
+# [LOW] Akeeba Backup could not be chosen in the User Actions Log options (Events To Log) after installation
+# [LOW] User Actions Log: freezing/unfreezing backup records showed a raw {$title} placeholder
+# [LOW] User Actions Log: the Extension column and filter showed raw <small> HTML markup for Akeeba Backup
+# [LOW] akeeba:filter:exclude/delete with an unknown --filterType fatally errored instead of reporting it
+# [LOW] akeeba:filter:include-database's connection error recommended a --no-check option which does not exist
+# [LOW] akeeba:profile:create --quickicon without a value created the profile with the One-click backup icon off
+# [LOW] akeeba:option:list --sort-by with an unknown column raised PHP notices instead of leaving the list unsorted
+# [LOW] akeeba:sysconfig:list --format=count always printed 1 instead of the number of options
+# [LOW] akeeba:profile:delete 1 printed two error messages instead of one
+# [LOW] akeeba:option:list --filter help said keys must begin with the filter, but it matches anywhere in the key
+# [LOW] Backup on Update: the update could fail to resume after the backup if the site URL contained certain characters
+# [LOW] Default backup descriptions lost their "(Joomla CLI)" and "(Frontend)" origin marker
+# [LOW] akeeba:backup:info exited successfully, printing nothing, for a backup record which does not exist
+# [LOW] akeeba:backup:download raised a PHP notice for unknown records and never hinted at remote storage
+# [LOW] Deleting a backup record which does not exist reported success (CLI, JSON API) and raised PHP notices
+# [LOW] akeeba:backup:fetch of a backup with no remote file fatally errored instead of reporting the problem
+# [LOW] Uploading a backup with a profile which has no remote storage claimed success and marked it as uploaded
+# [LOW] akeeba:migrate left migrated profiles pointing at Akeeba Backup 8's backup folder, after moving the archives out
+# [LOW] akeeba:migrate copied the old encryption key to a path nothing reads; migrated settings stayed unreadable
+# [LOW] Site Transfer Wizard error messages showed raw HTML tags such as <code> and <em>
+# [LOW] Site Transfer Wizard: a thrown upload error was sent under the wrong key and displayed only by luck
+# [LOW] Restoration: tables with a backtick in their name were not dropped, so restoring over them failed
+
 Akeeba Backup 10.4.0
 ================================================================================
 + akeeba:profile:import into specific profile ID with --profile, overwriting profile with --force
@@ -5,6 +210,10 @@ Akeeba Backup 10.4.0
 ~ JSON API v2, and Secret Word authentication on the v3 API, are deprecated; removal in 11.0, October 2027
 ~ JSON API: support for non-Super-User accounts in the API
 # [MEDIUM] POST requests to the v3 JSON API endpoint always failed
+# [LOW] Action Log: Import from S3 logged an archive path with the folder name repeated
+# [LOW] Action Log: downloading a single-part backup archive was logged as part #-1
+# [LOW] Action Log: downloading a backup archive was logged as deleting its archives
+# [LOW] Action Log: exporting, saving the configuration and downloading were logged twice, once without an ID
 # [MEDIUM] akeeba:sysconfig:get and akeeba:sysconfig:set improper error when missing the argument
 # [MEDIUM] Split archives could end in an empty part, failing post-processing with "Missing input parameters"
 # [LOW] Failed JSON API authentication did not fire onUserLoginFailure

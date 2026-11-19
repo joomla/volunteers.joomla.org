@@ -8,6 +8,7 @@
 defined('_JEXEC') || die;
 
 use Joomla\CMS\Factory;
+use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Uri\Uri;
 
 /**
@@ -18,8 +19,7 @@ use Joomla\CMS\Uri\Uri;
 $l = Factory::getApplication()->getLanguage();
 $hasKickstart = array_reduce($leftoverFiles, fn(bool $carry, string $x) => $carry || str_ends_with($x, '.php'), false);
 $hasArchives = array_reduce($leftoverFiles, fn(bool $carry, string $x) => $carry || str_ends_with($x, '.jpa') || str_ends_with($x, '.jps') || str_ends_with($x, '.zip'), false);
-$actionUri = clone Uri::getInstance();
-$actionUri->setVar('_akeeba_backup_delete_leftovers', $this->getApplication()->getSession()->getToken());
+$actionUri = Uri::getInstance()->toString();
 
 ?>
 <div class="card border border-warning mb-3">
@@ -41,7 +41,7 @@ $actionUri->setVar('_akeeba_backup_delete_leftovers', $this->getApplication()->g
 			</summary>
 			<ul>
 				<?php foreach($leftoverFiles as $file): ?>
-				<li><code><?php echo htmlentities($file) ?></code></li>
+				<li><code><?php echo htmlentities($file, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401) ?></code></li>
 				<?php endforeach; ?>
 			</ul>
 		</details>
@@ -50,10 +50,14 @@ $actionUri->setVar('_akeeba_backup_delete_leftovers', $this->getApplication()->g
 
 		<div class="d-flex flex-row flex-wrap align-items-baseline gap-3 justify-content-between"
 		     id="plg_system_akwarn_delete">
-			<a href="<?= $actionUri->toString() ?>" class="btn btn-primary">
-				<span class="fa fa-fw fa-trash-can" aria-hidden="true"></span>
-				<?= $l->_('PLG_SYSTEM_AKWARN_DELETE_FILES') ?>
-			</a>
+			<form action="<?= htmlspecialchars($actionUri, ENT_QUOTES, 'UTF-8') ?>" method="post">
+				<button type="submit" class="btn btn-primary">
+					<span class="fa fa-fw fa-trash-can" aria-hidden="true"></span>
+					<?= $l->_('PLG_SYSTEM_AKWARN_DELETE_FILES') ?>
+				</button>
+				<input type="hidden" name="_akeeba_backup_delete_leftovers" value="1">
+				<?= HTMLHelper::_('form.token') ?>
+			</form>
 		</div>
 
 	</div>

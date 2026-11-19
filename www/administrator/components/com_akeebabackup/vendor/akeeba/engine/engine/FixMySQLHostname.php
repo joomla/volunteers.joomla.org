@@ -54,9 +54,9 @@ trait FixMySQLHostname
 	 * A port / socket set in the hostname overrides a port specified separately. A port specified separately overrides
 	 * a socket specified separately.
 	 *
-	 * @param   string  $host    The hostname. Can contain legacy hostname:port or hostname:sc=ocket definitions.
-	 * @param   int     $port    The port. Alternatively it can contain the path to the socket.
-	 * @param   string  $socket  The path to the socket. You could abuse it to enter the port number. DON'T!
+	 * @param   string|null  $host    The hostname. Can contain legacy hostname:port or hostname:sc=ocket definitions.
+	 * @param   int|null     $port    The port. Alternatively it can contain the path to the socket.
+	 * @param   string|null  $socket  The path to the socket. You could abuse it to enter the port number. DON'T!
 	 *
 	 * @return  void  All parameters are passed by reference.
 	 *
@@ -65,11 +65,11 @@ trait FixMySQLHostname
 	protected function fixHostnamePortSocket(&$host, &$port, &$socket)
 	{
 		// Is this a persistent connection? Persistent connections are indicated by the literal "p:" in front of the hostname
-		$isPersistent = (substr($host, 0, 2) == 'p:');
+		$isPersistent = (substr($host ?? '', 0, 2) == 'p:');
 		$host         = $isPersistent ? substr($host, 2) : $host;
 
 		// If the hostname looks like a *NIX filename we need to treat it as a socket.
-		if (preg_match('#^/([^/]*/)?[^/]#', $host))
+		if (preg_match('#^/([^/]*/)?[^/]#', $host ?? ''))
 		{
 			$socket = $host;
 			$host = null;
@@ -78,7 +78,7 @@ trait FixMySQLHostname
 		// Special case: Windows named pipe (\\.\something\or\another), with or without parentheses.
 		$isNamedPipe = false;
 
-		if (preg_match("#^\(?\\\\\\\\\.\\\\#", $host))
+		if (preg_match("#^\(?\\\\\\\\\.\\\\#", $host ?? ''))
 		{
 			$isNamedPipe = true;
 			$socket = $host;
@@ -96,14 +96,14 @@ trait FixMySQLHostname
 			$port = null;
 		}
 		// UNIX socket URI, e.g. 'unix:/path/to/unix/socket.sock'
-		elseif (preg_match('/^unix:(?P<socket>[^:]+)$/', $host, $matches))
+		elseif (preg_match('/^unix:(?P<socket>[^:]+)$/', $host ?? '', $matches))
 		{
 			$host   = null;
 			$socket = $matches['socket'];
 			$port   = null;
 		}
 		// It's an IPv4 address with or without port
-		elseif (preg_match('/^(?P<host>((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))(:(?P<port>.+))?$/', $host, $matches))
+		elseif (preg_match('/^(?P<host>((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))(:(?P<port>.+))?$/', $host ?? '', $matches))
 		{
 			$host = $matches['host'];
 
@@ -113,7 +113,7 @@ trait FixMySQLHostname
 			}
 		}
 		// Square-bracketed IPv6 address with or without port, e.g. [fe80:102::2%eth1]:3306
-		elseif (preg_match('/^(?P<host>\[.*\])(:(?P<port>.+))?$/', $host, $matches))
+		elseif (preg_match('/^(?P<host>\[.*\])(:(?P<port>.+))?$/', $host ?? '', $matches))
 		{
 			$host = $matches['host'];
 
@@ -123,7 +123,7 @@ trait FixMySQLHostname
 			}
 		}
 		// Named host (e.g example.com or localhost) with or without port
-		elseif (preg_match('/^(?P<host>(\w+:\/{2,3})?[a-z0-9\.\-]+)(:(?P<port>[^:]+))?$/i', $host, $matches))
+		elseif (preg_match('/^(?P<host>(\w+:\/{2,3})?[a-z0-9\.\-]+)(:(?P<port>[^:]+))?$/i', $host ?? '', $matches))
 		{
 			$host = $matches['host'];
 
@@ -133,7 +133,7 @@ trait FixMySQLHostname
 			}
 		}
 		// Empty host, just port, e.g. ':3306'
-		elseif (preg_match('/^:(?P<port>[^:]+)$/', $host, $matches))
+		elseif (preg_match('/^:(?P<port>[^:]+)$/', $host ?? '', $matches))
 		{
 			$host = '127.0.0.1';
 			$port = $matches['port'];

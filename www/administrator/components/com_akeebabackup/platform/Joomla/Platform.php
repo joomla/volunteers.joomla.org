@@ -430,6 +430,8 @@ class Joomla extends BasePlatform
 		$id = (int) $id;
 
 		$db  = Factory::getDatabase($this->get_platform_database_options());
+		// $db is an Akeeba Engine driver here, not a Joomla DatabaseInterface, so this call site
+		// cannot use Helper\DbQuery::create() and stays inline, tracking that helper.
 		$sql = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
 			->select($db->qn('description'))
 			->from($db->qn('#__akeebabackup_profiles'))
@@ -747,6 +749,8 @@ class Joomla extends BasePlatform
 		$db      = Factory::getDatabase($options);
 
 		// Get all usergroups with Super User access
+		// $db is an Akeeba Engine driver here, not a Joomla DatabaseInterface, so this call site
+		// cannot use Helper\DbQuery::create() and stays inline, tracking that helper.
 		$q      = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
 			->select([$db->qn('id')])
 			->from($db->qn('#__usergroups'));
@@ -947,8 +951,12 @@ class Joomla extends BasePlatform
 	public function unlink($file)
 	{
 		// return (@unlink($file) === false) ? File::delete($file) : $result;
+		if (@file_exists($file) && (@is_file($file) || @is_link($file)))
+		{
+			return @unlink($file);
+		}
 
-		return @unlink($file);
+		return false;
 	}
 
 	/**
@@ -1171,6 +1179,8 @@ class Joomla extends BasePlatform
 		$db        = Factory::getDatabase($dbOptions);
 
 		// Get the package type
+		// $db is an Akeeba Engine driver here, not a Joomla DatabaseInterface, so this call site
+		// cannot use Helper\DbQuery::create() and stays inline, tracking that helper.
 		$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
 			->select($db->qn('us.extra_query'))
 			->from($db->qn('#__update_sites') . ' ' . $db->qn('us'))

@@ -15,6 +15,7 @@ use Akeeba\Component\AkeebaBackup\Administrator\Mixin\ControllerEventsTrait;
 use Akeeba\Component\AkeebaBackup\Administrator\Mixin\ControllerProfileAccessTrait;
 use Akeeba\Component\AkeebaBackup\Administrator\Mixin\ControllerRegisterTasksTrait;
 use Akeeba\Component\AkeebaBackup\Administrator\Model\BackupModel;
+use Akeeba\Engine\Factory;
 use Akeeba\Engine\Platform;
 use Joomla\CMS\Application\CMSApplication;
 use Joomla\CMS\Component\ComponentHelper;
@@ -24,6 +25,7 @@ use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\CMS\Session\Session;
 use Joomla\Input\Input;
 use Exception;
+use Throwable;
 
 class BackupController extends BaseController
 {
@@ -34,13 +36,33 @@ class BackupController extends BaseController
 
 	private bool $noFlush = false;
 
+	/**
+	 * Should the backend backup AJAX flow check the anti-CSRF tokens?
+	 *
+	 * Controlled by the "Backend backup checks the anti-CSRF token" component option, on by default. Turning it off is
+	 * NOT a security risk we need to fix. It exists for the very rare server whose session handling is broken beyond
+	 * repair, where the token checks make every backend backup fail. On such a server the alternatives are having no
+	 * backup at all (a far worse security outcome for the site) or asking the host to change the session handling,
+	 * which is often impossible and can break the site, again leaving it without a backup. Only a user who can change
+	 * the component's Options (core.admin or core.options) can turn it off, and the backup still needs a logged-in user
+	 * with the Backup permission. See .claude/security-audit-triage.md and determination (b) of
+	 * documentation/cra/risk-assessment.md.
+	 *
+	 * @var   bool
+	 * @since 10.5.0
+	 */
+	private bool $checkCsrf = true;
+
 	public function __construct(
 		$config = [], ?MVCFactoryInterface $factory = null, ?CMSApplication $app = null, ?Input $input = null
 	)
 	{
 		parent::__construct($config, $factory, $app, $input);
 
-		$this->noFlush = ComponentHelper::getParams('com_akeebabackup')->get('no_flush', 0) == 1;
+		$cParams = ComponentHelper::getParams('com_akeebabackup');
+
+		$this->noFlush   = $cParams->get('no_flush', 0) == 1;
+		$this->checkCsrf = $cParams->get('backend_backup_csrf', 1) != 0;
 
 		$this->registerControllerTasks();
 	}
@@ -61,27 +83,54 @@ class BackupController extends BaseController
 		 *
 		 * Every other action (step, pushFail, …) operates on an already-running backup. A backup may take a very long
 		 * time, during which the global session token could rotate or expire. We therefore authenticate those requests
-		 * with a per-backup token instead: it is generated when the backup starts (further down), stored in the session
-		 * keyed by the backup ID and echoed back by the page on every subsequent request.
+		 * with a per-backup token: it is generated when the backup starts (further down), stored in the session keyed by
+		 * the backup ID and echoed back by the page on every subsequent request.
+		 *
+		 * The global token, which the page also sends, is accepted for these actions too. Some servers do not keep the
+		 * per-backup token which the 'start' request wrote to the session (e.g. a concurrent request overwriting the
+		 * session, or session storage not shared between PHP processes). The global token is still a valid anti-CSRF
+		 * token, so accepting it only costs us the immunity to token rotation on such servers.
+		 *
+		 * Neither check runs when the "Backend backup checks the anti-CSRF token" option is off; see $checkCsrf.
 		 */
-		if ($ajaxTask === 'start')
+		if ($this->checkCsrf)
 		{
-			if (!Session::checkToken('post'))
+			if ($ajaxTask === 'start')
 			{
-				$this->outputBackupError(Text::_('JINVALID_TOKEN_NOTICE'));
+				if (!Session::checkToken('post'))
+				{
+					$this->outputBackupError(Text::_('JINVALID_TOKEN_NOTICE'));
+				}
 			}
-		}
-		elseif (!$this->hasValidBackupToken())
-		{
-			$this->outputBackupError(Text::_('JINVALID_TOKEN_NOTICE'));
+			elseif (!$this->hasValidBackupToken() && !Session::checkToken('post'))
+			{
+				$this->logRejectedBackupStep();
+
+				$this->outputBackupError(Text::_('COM_AKEEBABACKUP_BACKUP_ERROR_STEP_TOKEN'));
+			}
 		}
 
 		$profile_id = $this->input->get('profileid', Platform::getInstance()->get_active_profile(), 'int');
+
+		if ($profile_id <= 0)
+		{
+			$profile_id = (int) Platform::getInstance()->get_active_profile();
+		}
 
 		// Double check that the user is actually allowed to access this profile
 		if (!$this->checkProfileAccess($profile_id))
 		{
 			$this->outputBackupError(Text::_('COM_AKEEBABACKUP_BACKUP_ERROR_PROFILE_NO_ACCESS'));
+		}
+
+		/**
+		 * Starting a backup runs with the session's active profile. Make it the profile the page asked for, which may
+		 * not be the session's if the active profile changed after the page loaded (e.g. in another browser tab).
+		 */
+		if ($ajaxTask === 'start')
+		{
+			$this->app->getSession()->set('akeebabackup.profile', $profile_id);
+			Platform::getInstance()->load_configuration($profile_id);
 		}
 
 		/** @var BackupModel $model */
@@ -173,6 +222,69 @@ class BackupController extends BaseController
 		$expected = $this->getBackupTokens()[$backupId] ?? null;
 
 		return !empty($expected) && is_string($expected) && hash_equals($expected, $token);
+	}
+
+	/**
+	 * Records a backup step rejected for want of a valid anti-CSRF token in that backup's log file.
+	 *
+	 * The rejection happens before the backup engine runs, so the log would otherwise just stop mid-backup without a
+	 * word as to why. We only ever write to the log of a backup which is still running, so a forged request cannot make
+	 * us create log files of its choosing.
+	 *
+	 * @return  void
+	 * @since   10.5.0
+	 */
+	private function logRejectedBackupStep(): void
+	{
+		$backupId = $this->input->get('backupid', null, 'cmd');
+
+		if (empty($backupId))
+		{
+			return;
+		}
+
+		try
+		{
+			$record = null;
+
+			foreach (Platform::getInstance()->get_running_backups() ?: [] as $runningBackup)
+			{
+				if (($runningBackup['backupid'] ?? null) === $backupId)
+				{
+					$record = $runningBackup;
+
+					break;
+				}
+			}
+
+			if (empty($record) || empty($record['tag']))
+			{
+				return;
+			}
+
+			// The log file lives in the output directory of the backup's own profile.
+			Platform::getInstance()->load_configuration((int) $record['profile_id']);
+
+			$submittedToken = $this->input->get('backupToken', '', 'raw');
+			$sessionTokens  = $this->getBackupTokens();
+
+			$logger = Factory::getLog();
+			$logger->open($record['tag'] . '.' . $backupId);
+			// An error, not a warning: the rejection ends the backup, and "errors only" log levels must still show it.
+			$logger->error(
+				sprintf(
+					'Backup step rejected: neither the per-backup anti-CSRF token nor the Joomla session token is valid. Per-backup token submitted: %s. The session holds a per-backup token for this backup: %s. The session holds per-backup tokens for %d backup(s). The Joomla session was most likely lost or replaced while the backup was running.',
+					empty($submittedToken) ? 'no' : 'yes',
+					isset($sessionTokens[$backupId]) ? 'yes' : 'no',
+					count($sessionTokens)
+				)
+			);
+			$logger->close();
+		}
+		catch (Throwable $e)
+		{
+			// Logging is a diagnostic courtesy. It must never stand in the way of reporting the actual error.
+		}
 	}
 
 	/**
@@ -330,6 +442,25 @@ class BackupController extends BaseController
 		$newProfile = $this->input->get('profileid', -10, 'int');
 		$autostart  = $this->input->get('autostart', 0, 'int');
 
+		/**
+		 * Starting a backup without anyone pressing the Backup Now button needs an anti-CSRF token, in the URL or in the
+		 * request body. Otherwise any page could send a logged-in Super User to a link which wastes server resources by
+		 * running a backup. Without a valid token we still show the Backup page, but the user has to start the backup.
+		 * (The One-click Backup icons and Backup on Update add the token; menu items cannot, so they degrade this way.)
+		 */
+		if ($autostart && !Session::checkToken('request'))
+		{
+			$autostart = 0;
+		}
+
+		// Only activate a profile the current user is actually allowed to access
+		if (is_numeric($newProfile) && ($newProfile > 0) && !$this->checkProfileAccess($newProfile))
+		{
+			$this->app->enqueueMessage(Text::_('COM_AKEEBABACKUP_PROFILE_ERR_NOACCESS'), 'error');
+
+			$newProfile = -10;
+		}
+
 		if (is_numeric($newProfile) && ($newProfile > 0))
 		{
 			/**
@@ -367,7 +498,7 @@ class BackupController extends BaseController
 
 		// Push data to the model
 		//var_dump($model->getState('profile'));
-		$model->setState('profile', $this->input->get('profileid', -10, 'int'));
+		$model->setState('profile', $newProfile);
 		$model->setState('description', $this->input->get('description', '', 'string'));
 		$model->setState('comment', $this->input->get('comment', '', 'html'));
 		$model->setState('ajax', $this->input->get('ajax', '', 'cmd'));

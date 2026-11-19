@@ -251,6 +251,11 @@ class AliceModel extends BaseDatabaseModel
 	 * The error definition is an array. The first item (position 0) is the language key. Any further items are
 	 * sprintf() parameters.
 	 *
+	 * The sprintf() parameters may contain attacker-controlled data lifted verbatim from the backup log (file
+	 * names, paths, error text). They are escaped before substitution so the result is safe to echo as raw HTML.
+	 * The language string itself is deliberately left unescaped: several of these strings contain intentional
+	 * markup (e.g. <br/>, <strong>) that must survive.
+	 *
 	 * @param   array  $errorDefinition
 	 *
 	 * @return  string
@@ -262,12 +267,14 @@ class AliceModel extends BaseDatabaseModel
 			return '';
 		}
 
-		if (count($errorDefinition) == 1)
+		$languageKey = array_shift($errorDefinition);
+
+		if (empty($errorDefinition))
 		{
-			return nl2br(Text::_($errorDefinition[0]));
+			return nl2br(Text::_($languageKey));
 		}
 
-		return nl2br(call_user_func_array([Text::class, 'sprintf'], $errorDefinition));
+		return nl2br(Text::sprintf($languageKey, ...Utils::escapeSprintfParams($errorDefinition)));
 	}
 
 }

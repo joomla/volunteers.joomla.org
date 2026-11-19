@@ -9,6 +9,7 @@ namespace Akeeba\Component\AkeebaBackup\Administrator\Model;
 
 defined('_JEXEC') or die;
 
+use Akeeba\Component\AkeebaBackup\Administrator\Helper\DbQuery;
 use Exception;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\CMS\MVC\Model\BaseDatabaseModel;
@@ -99,7 +100,7 @@ class UpdatesModel extends BaseDatabaseModel
 		// Loop through all update sites
 		foreach ($updateSiteIds as $id)
 		{
-			$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+			$query = DbQuery::create($db)
 				->select('*')
 				->from($db->qn('#__update_sites'))
 				->where($db->qn('update_site_id') . ' = :usid')
@@ -161,13 +162,13 @@ class UpdatesModel extends BaseDatabaseModel
 			try
 			{
 				// Delete update sites
-				$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+				$query = DbQuery::create($db)
 					->delete('#__update_sites')
 					->whereIn($db->qn('update_site_id'), $deleteOldSites, ParameterType::INTEGER);
 				$db->setQuery($query)->execute();
 
 				// Delete update sites to extension ID records
-				$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+				$query = DbQuery::create($db)
 					->delete('#__update_sites_extensions')
 					->whereIn($db->qn('update_site_id'), $deleteOldSites, ParameterType::INTEGER);
 				$db->setQuery($query)->execute();
@@ -206,7 +207,7 @@ class UpdatesModel extends BaseDatabaseModel
 	public function getUpdateSiteIds(): array
 	{
 		$db    = $this->getDatabase();
-		$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+		$query = DbQuery::create($db)
 			->select($db->qn('update_site_id'))
 			->from($db->qn('#__update_sites_extensions'))
 			->where($db->qn('extension_id') . ' = :eid')
@@ -233,7 +234,7 @@ class UpdatesModel extends BaseDatabaseModel
 	{
 		$updateSiteIDs = $this->getUpdateSiteIds();
 		$db            = $this->getDatabase();
-		$query         = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+		$query         = DbQuery::create($db)
 			->select('*')
 			->from($db->qn('#__update_sites'))
 			->whereIn($db->qn('update_site_id'), $updateSiteIDs, ParameterType::INTEGER);
@@ -318,7 +319,7 @@ class UpdatesModel extends BaseDatabaseModel
 
 		// Find the extension ID
 		$db    = $this->getDatabase();
-		$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+		$query = DbQuery::create($db)
 			->select('*')
 			->from($db->qn('#__extensions'))
 			->where($db->qn('type') . ' = :type')
@@ -484,7 +485,7 @@ class UpdatesModel extends BaseDatabaseModel
 	private function findExtensionId(string $element, string $type = 'component', ?string $folder = null): int
 	{
 		$db    = $this->getDatabase();
-		$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+		$query = DbQuery::create($db)
 			->select($db->qn('extension_id'))
 			->from($db->qn('#__extensions'))
 			->where($db->qn('element') . ' = :element')

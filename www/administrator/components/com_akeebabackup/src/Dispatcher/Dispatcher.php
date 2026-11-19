@@ -10,6 +10,7 @@ namespace Akeeba\Component\AkeebaBackup\Administrator\Dispatcher;
 defined('_JEXEC') || die;
 
 use Akeeba\Component\AkeebaBackup\Administrator\Helper\SecretWord;
+use Akeeba\Component\AkeebaBackup\Administrator\Helper\VersionLimits;
 use Akeeba\Component\AkeebaBackup\Administrator\Mixin\AkeebaEngineTrait;
 use Akeeba\Component\AkeebaBackup\Administrator\Mixin\TriggerEventTrait;
 use Akeeba\Engine\Platform;
@@ -53,47 +54,15 @@ class Dispatcher extends ComponentDispatcher
 
 	public function dispatch()
 	{
-		// Check the minimum supported PHP version
-		$minPHPVersion = '7.4.0';
+		// Check the supported PHP and Joomla version limits
+		VersionLimits::throwIfVersionsIncompatible();
 
-		if (version_compare(PHP_VERSION, $minPHPVersion, 'lt'))
-		{
-			throw new \RuntimeException(
-				sprintf(
-					'Akeeba Backup requires at least PHP version %s. Your server currently uses PHP version %s. Please upgrade your PHP version.',
-					$minPHPVersion, PHP_VERSION
-				)
-			);
-		}
+		$this->triggerEvent('onBeforeDispatch');
 
-		// HHVM made sense in 2013. PHP 7 and later versions are a way better solution than a hybrid PHP interpreter.
-		if (defined('HHVM_VERSION'))
-		{
-			(include_once __DIR__ . '/../../tmpl/commontemplates/hhvm.php')
-			|| die('We have detected that you are running HHVM instead of PHP. This software WILL NOT WORK properly on HHVM. Please use PHP 7 or later instead.');
+		parent::dispatch();
 
-			return;
-		}
-
-		try
-		{
-			$this->triggerEvent('onBeforeDispatch');
-
-			parent::dispatch();
-
-			// This will only execute if there is no redirection set by the Controller
-			$this->triggerEvent('onAfterDispatch');
-		}
-		catch (Throwable $e)
-		{
-			$title = 'Akeeba Backup';
-			$isPro = defined(AKEEBABACKUP_PRO) ? AKEEBABACKUP_PRO : @is_dir(__DIR__ . '/../../AliceChecks');
-
-			if (!(include_once __DIR__ . '/../../tmpl/commontemplates/errorhandler.php'))
-			{
-				throw $e;
-			}
-		}
+		// This will only execute if there is no redirection set by the Controller
+		$this->triggerEvent('onAfterDispatch');
 	}
 
 	protected function onBeforeDispatch()

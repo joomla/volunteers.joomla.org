@@ -20,6 +20,7 @@ namespace Akeeba\Engine\Util;
 
 defined('AKEEBAENGINE') || die();
 
+use Akeeba\Engine\Driver\DbQuery;
 use Akeeba\Engine\Factory;
 use Akeeba\Engine\Platform;
 use Exception;
@@ -55,7 +56,7 @@ abstract class ProfileMigration
 		// Load the raw data from the database
 		try
 		{
-			$sql = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+			$sql = DbQuery::create($db)
 				->select('*')
 				->from($db->qn($platform->tableNameProfiles))
 				->where($db->qn('id') . ' = ' . $db->q($profileID));
@@ -94,7 +95,7 @@ abstract class ProfileMigration
 
 		$rawData['configuration'] = self::encryptConfiguration($rawData['configuration']);
 
-		$sql = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+		$sql = DbQuery::create($db)
 			->update($db->qn($platform->tableNameProfiles))
 			->set($db->qn('configuration') . ' = ' . $db->q($rawData['configuration']))
 			->set($db->qn('filters') . ' = ' . $db->q($rawData['filters']))

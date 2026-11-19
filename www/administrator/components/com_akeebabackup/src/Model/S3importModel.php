@@ -11,8 +11,8 @@ defined('_JEXEC') || die;
 
 use Akeeba\Engine\Factory;
 use Akeeba\Engine\Platform;
-use Akeeba\Engine\Postproc\Connector\S3v4\Configuration;
-use Akeeba\Engine\Postproc\Connector\S3v4\Connector as Amazons3;
+use Akeeba\S3\Configuration;
+use Akeeba\S3\Connector as Amazons3;
 use Exception;
 use Joomla\CMS\Application\CMSApplication;
 use Joomla\CMS\Language\Text;
@@ -483,6 +483,12 @@ class S3importModel extends BaseModel
 	 */
 	public function getBucketRegion(string $bucket): ?string
 	{
+		// S3-compatible storage has no bucket location API worth asking: the profile says which region to sign for
+		if ($this->getCustomEndpoint() !== '')
+		{
+			return Factory::getConfiguration()->get('engine.postproc.amazons3.region', '') ?: 'us-east-1';
+		}
+
 		$bucketForRegion = $this->getState('bucketForRegion', null);
 		$region          = $this->getState('region', null);
 
@@ -526,10 +532,39 @@ class S3importModel extends BaseModel
 		{
 			$s3Access = $this->getState('s3access');
 			$s3Secret = $this->getState('s3secret');
-			$s3Config = new Configuration($s3Access, $s3Secret, 'v4', 'us-east-1');
+			$endpoint = $this->getCustomEndpoint();
+
+			if (empty($endpoint))
+			{
+				$s3Config = new Configuration($s3Access, $s3Secret, 'v4', 'us-east-1');
+
+				return $s3Config;
+			}
+
+			// S3-compatible storage: connect the way the Amazon S3 post-processing engine does, per the profile
+			$engineConfig = Factory::getConfiguration();
+			$signature    = $engineConfig->get('engine.postproc.amazons3.signature', 'v4');
+			$signature    = ($signature === 's3') ? 'v2' : $signature;
+			$region       = $engineConfig->get('engine.postproc.amazons3.region', '') ?: 'us-east-1';
+
+			$s3Config = new Configuration($s3Access, $s3Secret, $signature, $region);
+			$s3Config->setEndpoint($endpoint);
+			$s3Config->setSSL($engineConfig->get('engine.postproc.amazons3.usessl', 0) == 1);
+			$s3Config->setUseDualstackUrl(false);
+			$s3Config->setUseLegacyPathStyle($engineConfig->get('engine.postproc.amazons3.pathaccess', 0) == 1);
 		}
 
 		return $s3Config;
+	}
+
+	/**
+	 * The custom endpoint (S3-compatible storage) set in the Amazon S3 post-processing settings of the active profile.
+	 *
+	 * @return  string  Empty when real Amazon S3 is to be used.
+	 */
+	private function getCustomEndpoint(): string
+	{
+		return trim((string) Factory::getConfiguration()->get('engine.postproc.amazons3.customendpoint', ''));
 	}
 
 	/**

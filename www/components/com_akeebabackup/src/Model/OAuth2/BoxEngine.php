@@ -25,6 +25,7 @@ class BoxEngine extends AbstractProvider implements ProviderInterface
 			'response_type' => 'code',
 			'client_id'     => $id,
 			'redirect_uri'  => $this->getUri('step2'),
+			'state'         => $this->generateState(),
 		];
 
 		return 'https://account.box.com/api/oauth2/authorize?' . http_build_query($params);

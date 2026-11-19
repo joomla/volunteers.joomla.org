@@ -93,17 +93,21 @@ class FilterIncludeDatabase extends AbstractCommand
 		$uuid       = $uuidObject->get('-');
 		$check      = (bool) $this->cliInput->getOption('check') ?? false;
 
+		$host = trim((string) ($this->cliInput->getOption('dbhost') ?? ''));
+
+		// The keys must match what the Multiple Databases page (MultipleDatabases.js) stores, and the engine reads.
 		$data = [
-			'driver'   => (string) $this->cliInput->getOption('dbdriver') ?? 'mysqli',
-			'host'     => (string) $this->cliInput->getOption('dbhost') ?? 'localhost',
-			'port'     => (int) $this->cliInput->getOption('port') ?? 0,
-			'user'     => (string) $this->cliInput->getOption('dbusername') ?? '',
-			'password' => (string) $this->cliInput->getOption('dbpassword') ?? '',
-			'database' => (string) $this->cliInput->getOption('dbname') ?? '',
-			'prefix'   => (string) $this->cliInput->getOption('dbprefix') ?? '',
+			'driver'   => (string) ($this->cliInput->getOption('dbdriver') ?? 'mysqli'),
+			'host'     => $host === '' ? 'localhost' : $host,
+			'port'     => (int) ($this->cliInput->getOption('dbport') ?? 0),
+			'username' => (string) ($this->cliInput->getOption('dbusername') ?? ''),
+			'password' => (string) ($this->cliInput->getOption('dbpassword') ?? ''),
+			'database' => (string) ($this->cliInput->getOption('dbname') ?? ''),
+			'prefix'   => (string) ($this->cliInput->getOption('dbprefix') ?? ''),
 		];
 
-		$data['port'] = ($data['port'] === 0) ? null : $data['port'];
+		$data['port']     = ($data['port'] === 0) ? null : $data['port'];
+		$data['dumpFile'] = substr($uuid, 0, 9) . $data['database'] . '.sql';
 
 		// Does the database definition already exist?
 		/** @var MultipledatabasesModel $model */
@@ -116,8 +120,11 @@ class FilterIncludeDatabase extends AbstractCommand
 			return 2;
 		}
 
-		// Can I connect to the database?
-		$checkResults = $model->test($data);
+		// Can I connect to the database? The connection test reads the username from the `user` key.
+		if ($check)
+		{
+			$checkResults = $model->test(array_merge($data, ['user' => $data['username']]));
+		}
 
 		if ($check && !$checkResults['status'])
 		{
@@ -152,6 +159,7 @@ class FilterIncludeDatabase extends AbstractCommand
 	{
 		$this->addOption('profile', null, InputOption::VALUE_OPTIONAL, Text::_('COM_AKEEBABACKUP_CLI_FILTER_MULTIDB_OPT_PROFILE'), 1);
 		$this->addOption('dbdriver', null, InputOption::VALUE_OPTIONAL, Text::_('COM_AKEEBABACKUP_CLI_FILTER_MULTIDB_OPT_DBDRIVER'), 'mysqli');
+		$this->addOption('dbhost', null, InputOption::VALUE_OPTIONAL, Text::_('COM_AKEEBABACKUP_CLI_FILTER_MULTIDB_OPT_DBHOST'), 'localhost');
 		$this->addOption('dbport', null, InputOption::VALUE_OPTIONAL, Text::_('COM_AKEEBABACKUP_CLI_FILTER_MULTIDB_OPT_DBPORT'), null);
 		$this->addOption('dbusername', null, InputOption::VALUE_REQUIRED, Text::_('COM_AKEEBABACKUP_CLI_FILTER_MULTIDB_OPT_DBUSERNAME'));
 		$this->addOption('dbpassword', null, InputOption::VALUE_REQUIRED, Text::_('COM_AKEEBABACKUP_CLI_FILTER_MULTIDB_OPT_DBPASSWORD'));

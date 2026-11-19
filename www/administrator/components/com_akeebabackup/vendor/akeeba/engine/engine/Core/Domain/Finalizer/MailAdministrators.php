@@ -26,6 +26,7 @@
 
 namespace Akeeba\Engine\Core\Domain\Finalizer;
 
+use Akeeba\Engine\Driver\DbQuery;
 use Akeeba\Engine\Factory;
 use Akeeba\Engine\Platform;
 
@@ -77,7 +78,7 @@ final class MailAdministrators extends AbstractFinalizer
 		$profileNumber = $platform->get_active_profile();
 
 		$db    = Factory::getDatabase();
-		$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))->select('1');
+		$query = DbQuery::create($db)->select('1');
 		$dummy = $db->setQuery($query)->loadResult();
 
 		$profileName   = $platform->get_profile_name($profileNumber);

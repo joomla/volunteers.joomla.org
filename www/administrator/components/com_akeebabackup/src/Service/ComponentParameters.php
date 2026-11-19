@@ -17,6 +17,7 @@ namespace Akeeba\Component\AkeebaBackup\Administrator\Service;
 
 defined('_JEXEC') || die;
 
+use Akeeba\Component\AkeebaBackup\Administrator\Helper\DbQuery;
 use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Factory as JoomlaFactory;
 use Joomla\CMS\Plugin\PluginHelper;
@@ -63,7 +64,7 @@ class ComponentParameters
 		$db   = JoomlaFactory::getContainer()->get(DatabaseInterface::class);
 		$data = $params->toString('JSON');
 
-		$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+		$query = DbQuery::create($db)
 			->update($db->qn('#__extensions'))
 			->set($db->qn('params') . ' = ' . $db->q($data))
 			->where($db->qn('element') . ' = :element')

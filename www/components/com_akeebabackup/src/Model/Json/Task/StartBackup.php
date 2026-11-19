@@ -10,11 +10,14 @@ namespace Akeeba\Component\AkeebaBackup\Site\Model\Json\Task;
 // Protect from unauthorized access
 defined('_JEXEC') || die();
 
+use Akeeba\Component\AkeebaBackup\Administrator\Mixin\AkeebaBackupACLTrait;
 use Akeeba\Component\AkeebaBackup\Administrator\Model\BackupModel;
+use Akeeba\Component\AkeebaBackup\Administrator\Model\ProfilesModel;
 use Akeeba\Engine\Factory;
 use Akeeba\Engine\Platform;
 use Joomla\CMS\Factory as JoomlaFactory;
 use Joomla\CMS\Filter\InputFilter;
+use Joomla\CMS\Language\Text;
 use RuntimeException;
 
 /**
@@ -22,6 +25,9 @@ use RuntimeException;
  */
 class StartBackup extends AbstractTask
 {
+	use AkeebaBackupACLTrait;
+
+
 	/**
 	 * The backend view.task key this API method is equivalent to.
 	 *
@@ -59,6 +65,23 @@ class StartBackup extends AbstractTask
 		$description = $filter->clean($defConfig['description'], 'string');
 		$comment     = $filter->clean($defConfig['comment'], 'string');
 		$overrides   = $filter->clean($defConfig['overrides'], 'array');
+
+		$identity           = JoomlaFactory::getApplication()->getIdentity();
+		$isTokenAuthenticated = $identity !== null && !$identity->guest;
+
+		// APIv3 with Joomla API token authentication: Scope `overrides` to `akeebabackup.configure`.
+		if (!empty($overrides) && $isTokenAuthenticated)
+		{
+			$this->akeebaBackupRequirePrivilege('akeebabackup.configure');
+		}
+
+		// APIv3 with Joomla API token authentication: the caller may only start a backup under a profile it can
+		// access. The v2 Secret Word flow has no per-user identity to check profile access against; the Secret
+		// Word itself is both the authentication and the authorisation there, same as the check above. (M6)
+		if ($isTokenAuthenticated && !$this->checkProfileAccess($profile))
+		{
+			throw new RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'), 403);
+		}
 
 		if (empty($description))
 		{
@@ -105,6 +128,37 @@ class StartBackup extends AbstractTask
 		$array['Profile'] = Platform::getInstance()->get_active_profile();
 
 		return $array;
+	}
+
+	/**
+	 * Is the currently logged in user allowed to access the given backup profile?
+	 *
+	 * Mirrors `ControllerProfileAccessTrait::checkProfileAccess()` from the backend, which every other entry point
+	 * into `startBackup` (the backend AJAX handler, the CLI command) already goes through. That trait calls
+	 * `$this->getModel()`, only available on a Joomla controller; `Task` handlers are plain classes constructed
+	 * with an `MVCFactoryInterface`, hence this copy built on `$this->factory->createModel()` instead. (M6)
+	 *
+	 * @param   int  $profileId  The backup profile ID to check.
+	 *
+	 * @return  bool
+	 * @since   10.5.0
+	 */
+	private function checkProfileAccess(int $profileId): bool
+	{
+		/** @var ProfilesModel $profileModel */
+		$profileModel = $this->factory->createModel('Profiles', 'Administrator', ['ignore_request' => true]);
+		$accessLevels = JoomlaFactory::getApplication()->getIdentity()->getAuthorisedViewLevels();
+
+		$profileModel->setState('filter.access_level', $accessLevels);
+		$profileModel->setState('list.start', 0);
+		$profileModel->setState('list.limit', 0);
+
+		$profileIDs = array_map(
+			fn($profile) => (int) $profile->id,
+			$profileModel->getItems() ?: []
+		);
+
+		return in_array($profileId, $profileIDs, true);
 	}
 
 	/**

@@ -118,7 +118,6 @@ class HtmlView extends BaseHtmlView
 		$options   = [];
 		$options[] = HTMLHelper::_('select.option', 'hybrid', Text::_('COM_AKEEBABACKUP_RESTORE_LABEL_EXTRACTIONMETHOD_HYBRID'));
 		$options[] = HTMLHelper::_('select.option', 'direct', Text::_('COM_AKEEBABACKUP_RESTORE_LABEL_EXTRACTIONMETHOD_DIRECT'));
-		$options[] = HTMLHelper::_('select.option', 'ftp', Text::_('COM_AKEEBABACKUP_RESTORE_LABEL_EXTRACTIONMETHOD_FTP'));
 
 		return $options;
 	}

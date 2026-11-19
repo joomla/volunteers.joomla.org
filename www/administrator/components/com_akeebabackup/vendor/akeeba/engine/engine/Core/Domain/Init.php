@@ -70,7 +70,7 @@ final class Init extends Part
 			E_USER_NOTICE   => 'E_USER_NOTICE',
 		];
 
-        // E_STRICT is deprecated in PHP 8.4.0, therefore we are no longer handling starting with this version.
+		// E_STRICT is deprecated in PHP 8.4.0, therefore we are no longer handling it starting with this version.
 		if (defined('E_STRICT') && version_compare(PHP_VERSION, '8.4.0', 'lt'))
 		{
 			$level_names[E_STRICT] = 'E_STRICT';
@@ -253,7 +253,6 @@ final class Init extends Part
 				Factory::getLog()->info("User agent         :" . self::sanitiseUserAgent($_SERVER['HTTP_USER_AGENT']));
 			}
 
-			Factory::getLog()->info("Safe mode          :" . ini_get("safe_mode"));
 			Factory::getLog()->info("Display errors     :" . ini_get("display_errors"));
 			Factory::getLog()->info("Error reporting    :" . self::error2string());
 			Factory::getLog()->info("Error display      :" . self::errordisplay());

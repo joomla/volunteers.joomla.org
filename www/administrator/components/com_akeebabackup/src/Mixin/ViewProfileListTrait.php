@@ -9,6 +9,7 @@ namespace Akeeba\Component\AkeebaBackup\Administrator\Mixin;
 
 defined('_JEXEC') || die;
 
+use Akeeba\Component\AkeebaBackup\Administrator\Helper\DbQuery;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Factory as JoomlaFactory;
 use Joomla\CMS\HTML\HTMLHelper;
@@ -37,7 +38,7 @@ trait ViewProfileListTrait
 		$db = Factory::getContainer()->get(DatabaseInterface::class);
 		$access_levels = JoomlaFactory::getApplication()->getIdentity()->getAuthorisedViewLevels();
 
-		$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+		$query = DbQuery::create($db)
 			->select([
 				$db->qn('id'),
 				$db->qn('description'),

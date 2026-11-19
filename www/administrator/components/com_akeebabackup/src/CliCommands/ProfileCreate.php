@@ -94,7 +94,9 @@ class ProfileCreate extends AbstractCommand
 			$profileData['description'] = trim($description);
 		}
 
-		$profileData['quickicon'] = ((bool) $this->cliInput->getOption('quickicon') ?? true) ? 1 : 0;
+		// A VALUE_OPTIONAL option given without a value (bare --quickicon) is null; that means "on".
+		$quickIcon                = $this->cliInput->getOption('quickicon') ?? 1;
+		$profileData['quickicon'] = ((bool) $quickIcon) ? 1 : 0;
 		$table                    = $model->getTable();
 
 		try

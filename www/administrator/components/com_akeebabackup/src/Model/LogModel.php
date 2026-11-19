@@ -9,6 +9,7 @@ namespace Akeeba\Component\AkeebaBackup\Administrator\Model;
 
 defined('_JEXEC') || die;
 
+use Akeeba\Component\AkeebaBackup\Administrator\Helper\DbQuery;
 use Akeeba\Component\AkeebaBackup\Administrator\Helper\Utils;
 use Akeeba\Engine\Factory;
 use Joomla\CMS\HTML\HTMLHelper;
@@ -186,7 +187,7 @@ class LogModel extends BaseDatabaseModel
 	protected function keepOnlyFailedLogs($logs)
 	{
 		$db            = $this->getDatabase();
-		$query         = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+		$query         = DbQuery::create($db)
 		                    ->select([
 			                    $db->quoteName('tag'),
 			                    $db->quoteName('backupid'),

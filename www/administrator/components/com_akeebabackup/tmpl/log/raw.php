@@ -7,6 +7,7 @@
 
 defined('_JEXEC') || die();
 
+use Akeeba\Component\AkeebaBackup\Administrator\Helper\LogLineFormatter;
 use Akeeba\Component\AkeebaBackup\Administrator\Helper\Utils;
 use Joomla\CMS\Language\Text;
 
@@ -41,29 +42,9 @@ else
 	{
 		$line = fgets($fp);
 		if (!$line) return;
-		$exploded = explode("|", $line, 3);
+		$fmtString = LogLineFormatter::format($line);
 		unset($line);
-		if (count($exploded) < 3) continue;
-		switch (trim($exploded[0]))
-		{
-			case "ERROR":
-				$fmtString = "<span style=\"color: red; font-weight: bold;\">[";
-				break;
-			case "WARNING":
-				$fmtString = "<span style=\"color: #D8AD00; font-weight: bold;\">[";
-				break;
-			case "INFO":
-				$fmtString = "<span style=\"color: black;\">[";
-				break;
-			case "DEBUG":
-				$fmtString = "<span style=\"color: #666666; font-size: small;\">[";
-				break;
-			default:
-				$fmtString = "<span style=\"font-size: small;\">[";
-				break;
-		}
-		$fmtString .= $exploded[1] . "] " . htmlspecialchars($exploded[2]) . "</span><br/>\n";
-		unset($exploded);
+		if ($fmtString === null) continue;
 		echo $fmtString;
 		unset($fmtString);
 	}

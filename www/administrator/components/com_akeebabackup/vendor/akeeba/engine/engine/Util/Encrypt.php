@@ -21,8 +21,8 @@ namespace Akeeba\Engine\Util;
 defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Util\AesAdapter\AdapterInterface;
-use Akeeba\Engine\Util\AesAdapter\Mcrypt;
 use Akeeba\Engine\Util\AesAdapter\OpenSSL;
+use RuntimeException;
 
 /**
  * AES implementation in PHP (c) Chris Veness 2005-2016.
@@ -682,6 +682,8 @@ class Encrypt
 	 *
 	 * @return  AdapterInterface
 	 *
+	 * @throws  RuntimeException  When no supported AES adapter is available.
+	 *
 	 * @since   5.2.0
 	 * @author  Nicholas K. Dionysopoulos
 	 */
@@ -698,7 +700,7 @@ class Encrypt
 
 		if (!$adapter->isSupported())
 		{
-			$adapter = new Mcrypt();
+			throw new RuntimeException('No supported AES encryption adapter is available. The OpenSSL PHP extension is required.');
 		}
 
 		return $adapter;

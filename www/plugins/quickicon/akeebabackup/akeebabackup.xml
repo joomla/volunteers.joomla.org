@@ -7,8 +7,8 @@
 
 <extension type="plugin" group="quickicon" method="upgrade">
 	<name>PLG_QUICKICON_AKEEBABACKUP</name>
-	<version>10.4.0</version>
-	<creationDate>2026-08-26</creationDate>
+	<version>10.5.0</version>
+	<creationDate>2026-10-27</creationDate>
 	<author>Nicholas K. Dionysopoulos</author>
 	<authorEmail>nicholas@dionysopoulos.me</authorEmail>
 	<authorUrl>https://www.akeeba.com</authorUrl>
@@ -78,6 +78,7 @@
 
 				<field name="maxbackupperiod"
 					   type="number"
+					   validate="number"
 					   label="PLG_QUICKICON_AKEEBABACKUP_LBL_PERIOD"
 					   description="PLG_QUICKICON_AKEEBABACKUP_DESC_PERIOD"
 					   min="1"

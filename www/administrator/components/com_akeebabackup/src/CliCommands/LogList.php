@@ -15,6 +15,7 @@ use Akeeba\Component\AkeebaBackup\Administrator\CliCommands\MixIt\InitialiseEngi
 use Akeeba\Component\AkeebaBackup\Administrator\CliCommands\MixIt\PrintFormattedArray;
 use Akeeba\Component\AkeebaBackup\Administrator\Model\LogModel;
 use Akeeba\Engine\Factory;
+use Akeeba\Engine\Platform;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\Factory\MVCFactoryAwareTrait;
 use Joomla\Console\Command\AbstractCommand;
@@ -78,6 +79,9 @@ class LogList extends AbstractCommand
 		$format     = (string) ($this->cliInput->getOption('format') ?? 'table');
 
 		define('AKEEBA_PROFILE', $profile_id);
+
+		// The engine configuration was loaded for the session's profile; load the requested profile's instead.
+		Platform::getInstance()->load_configuration($profile_id);
 
 		$configuration   = Factory::getConfiguration();
 		$outputDirectory = $configuration->get('akeeba.basic.output_directory');

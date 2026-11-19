@@ -49,6 +49,9 @@ class OAuth2Exception extends RuntimeException
 			case 'invalid_scope':
 				return 'The authentication scope requested is not supported by the remote storage provider. Please check your API application configuration with the remote storage provider.';
 
+			case 'invalid_state':
+				return 'This authentication request could not be verified and may have expired or already been used. Please restart the authorisation process from the Akeeba Backup configuration page.';
+
 			default:
 				return 'A generic error occurred, which we do not have any further information for.';
 		}

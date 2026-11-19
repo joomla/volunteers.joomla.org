@@ -97,6 +97,9 @@ class Joomla
 	 * Our workaround for Joomla! 5.1+ is to check if the driver object has a createQuery method. Therefore,
 	 * this shim method needs to be concrete instead of falling back to the generic __call() magic method.
 	 *
+	 * This is the compatibility shim itself (the Akeeba Engine's own driver wrapper), not a call site of it,
+	 * so it stays inline and is not routed through Administrator\Helper\DbQuery::create().
+	 *
 	 * @return Query\Base
 	 */
 	public function createQuery()

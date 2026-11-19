@@ -35,7 +35,7 @@ akeebabackup.Restore.errorCallbackDefault = function (msg)
 {
     document.getElementById("restoration-progress").style.display = "none";
     document.getElementById("restoration-error").style.display    = "block";
-    document.getElementById("backup-error-message").innerHTML     = msg;
+    document.getElementById("backup-error-message").textContent   = msg;
 };
 
 /**

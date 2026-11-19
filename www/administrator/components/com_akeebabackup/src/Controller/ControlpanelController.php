@@ -12,6 +12,8 @@ defined('_JEXEC') || die;
 use Akeeba\Component\AkeebaBackup\Administrator\Helper\Utils;
 use Akeeba\Component\AkeebaBackup\Administrator\Mixin\ControllerCustomACLTrait;
 use Akeeba\Component\AkeebaBackup\Administrator\Mixin\ControllerEventsTrait;
+use Akeeba\Component\AkeebaBackup\Administrator\Mixin\ControllerProfileAccessTrait;
+use Akeeba\Component\AkeebaBackup\Administrator\Mixin\ControllerProfileRestrictionTrait;
 use Akeeba\Component\AkeebaBackup\Administrator\Mixin\ControllerRegisterTasksTrait;
 use Akeeba\Component\AkeebaBackup\Administrator\Mixin\ControllerReusableModelsTrait;
 use Akeeba\Component\AkeebaBackup\Administrator\Model\BackupModel;
@@ -37,9 +39,17 @@ use RuntimeException;
 class ControlpanelController extends BaseController
 {
 	use ControllerEventsTrait;
-	use ControllerCustomACLTrait;
 	use ControllerRegisterTasksTrait;
 	use ControllerReusableModelsTrait;
+	use ControllerProfileAccessTrait;
+	use ControllerCustomACLTrait
+	{
+		ControllerCustomACLTrait::onBeforeExecute as onBeforeExecuteACL;
+	}
+	use ControllerProfileRestrictionTrait
+	{
+		ControllerProfileRestrictionTrait::onBeforeExecute as onBeforeExecuteRestrictedProfile;
+	}
 
 	/**
 	 * The default view.
@@ -54,6 +64,12 @@ class ControlpanelController extends BaseController
 		parent::__construct($config, $factory, $app, $input);
 
 		$this->registerControllerTasks('main');
+	}
+
+	protected function onBeforeExecute(&$task)
+	{
+		$this->onBeforeExecuteACL($task);
+		$this->onBeforeExecuteRestrictedProfile($task);
 	}
 
 	public function main($cachable = false, $urlparams = [])
@@ -142,6 +158,14 @@ class ControlpanelController extends BaseController
 		if (!is_numeric($newProfile) || ($newProfile <= 0))
 		{
 			$this->setRedirect(Uri::base() . 'index.php?option=com_akeebabackup', Text::_('COM_AKEEBABACKUP_CPANEL_PROFILE_SWITCH_ERROR'), 'error');
+
+			return;
+		}
+
+		// Only switch to a profile the current user is actually allowed to access. (M4)
+		if (!$this->checkProfileAccess($newProfile))
+		{
+			$this->setRedirect(Uri::base() . 'index.php?option=com_akeebabackup', Text::_('COM_AKEEBABACKUP_PROFILE_ERR_NOACCESS'), 'error');
 
 			return;
 		}

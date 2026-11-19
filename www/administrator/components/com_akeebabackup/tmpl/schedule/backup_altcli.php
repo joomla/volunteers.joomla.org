@@ -53,6 +53,7 @@ use Joomla\CMS\Language\Text;
 				</p>
 			</div>
 		<?php else: ?>
+			<?= $this->loadAnyTemplate('schedule/weak_secret') ?>
 			<p>
 				<?= Text::_('COM_AKEEBABACKUP_SCHEDULE_LBL_GENERICUSECLI') ?><br/>
 				<code>

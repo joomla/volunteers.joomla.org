@@ -14,8 +14,10 @@ use Akeeba\Engine\Platform;
 use Exception;
 use Joomla\CMS\Application\CMSApplication;
 use Joomla\CMS\Factory as JoomlaFactory;
+use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\Model\BaseModel;
 use LogicException;
+use RuntimeException;
 
 #[\AllowDynamicProperties]
 class UploadModel extends BaseModel
@@ -39,6 +41,11 @@ class UploadModel extends BaseModel
 		$stat            = Platform::getInstance()->get_statistics($id);
 		$returnStatus    = false;
 		$remote_filename = null;
+
+		if (!is_array($stat))
+		{
+			throw new RuntimeException(Text::_('COM_AKEEBABACKUP_BUADMIN_ERROR_INVALIDID'));
+		}
 
 		// The number of parts must be AT LEAST 1. If it's 0 it mean no split archive, i.e. a single part.
 		$stat['multipart'] = max($stat['multipart'], 1);
@@ -70,6 +77,13 @@ class UploadModel extends BaseModel
 		// Load the post-processing engine
 		$config      = Factory::getConfiguration();
 		$engine_name = $config->get('akeeba.advanced.postproc_engine');
+
+		// With no post-processing there is no remote storage to upload to; do not mark the record as uploaded.
+		if (in_array($engine_name, ['', 'none'], true))
+		{
+			throw new RuntimeException(Text::_('COM_AKEEBABACKUP_REMOTEFILES_ERR_UNSUPPORTED'));
+		}
+
 		$engine      = Factory::getPostprocEngine($engine_name);
 
 		// Get the timer and reset it

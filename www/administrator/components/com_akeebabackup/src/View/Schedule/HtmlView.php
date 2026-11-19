@@ -14,6 +14,7 @@ use Akeeba\Component\AkeebaBackup\Administrator\Mixin\ViewProfileIdAndNameTrait;
 use Akeeba\Component\AkeebaBackup\Administrator\Mixin\ViewTaskBasedEventsTrait;
 use Akeeba\Component\AkeebaBackup\Administrator\Mixin\ViewToolbarTrait;
 use Akeeba\Component\AkeebaBackup\Administrator\Model\ScheduleModel;
+use Akeeba\Engine\Util\Complexify;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\View\HtmlView as BaseHtmlView;
@@ -60,6 +61,15 @@ class HtmlView extends BaseHtmlView
 	 * @since 9.0.12
 	 */
 	public $isConsolePluginEnabled = false;
+
+	/**
+	 * Is the front-end Secret Word strong enough for the front-end and JSON API to accept it? When it is not, they
+	 * refuse every request with a 403, so the commands and URLs which use it are shown struck through.
+	 *
+	 * @var    bool
+	 * @since  10.5.0
+	 */
+	public bool $secretIsStrong = true;
 
 	/**
 	 * URL to automatically enable the legacy frontend API (and set a Secret Key, if necessary)
@@ -110,6 +120,8 @@ class HtmlView extends BaseHtmlView
 		$this->checkinfo   = $model->getCheckPaths();
 		$this->uploadcheck = $model->getUploadcheckPaths();
 
+		$this->secretIsStrong = Complexify::isStrongEnough((string) $this->croninfo->info->secret, false);
+
 		$this->enableLegacyFrontendURL = Route::_(
 			sprintf(
 				'index.php?option=com_akeebabackup&task=Schedule.enableFrontend&%s=1',
@@ -131,5 +143,17 @@ class HtmlView extends BaseHtmlView
 			)
 		);
 
+	}
+
+	/**
+	 * HTML attributes which gray out and strike through a command or URL that cannot work. Empty when the Secret
+	 * Word is strong enough.
+	 *
+	 * @return  string
+	 * @since   10.5.0
+	 */
+	public function weakSecretAttribs(): string
+	{
+		return $this->secretIsStrong ? '' : ' class="text-muted" style="text-decoration: line-through"';
 	}
 }

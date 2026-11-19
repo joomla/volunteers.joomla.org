@@ -10,6 +10,7 @@ namespace Akeeba\Plugin\Task\AkeebaBackup\Extension;
 defined('_JEXEC') or die;
 
 use Akeeba\Component\AkeebaBackup\Administrator\CliCommands\MixIt\InitialiseEngine;
+use Akeeba\Component\AkeebaBackup\Administrator\Helper\DbQuery;
 use Akeeba\Component\AkeebaBackup\Administrator\Model\BackupModel;
 use Akeeba\Component\AkeebaBackup\Administrator\Model\StatisticsModel;
 use Akeeba\Engine\Factory;
@@ -210,7 +211,7 @@ class AkeebaBackup extends CMSPlugin implements SubscriberInterface, DatabaseAwa
 		try
 		{
 			$db    = $this->getDatabase();
-			$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+			$query = DbQuery::create($db)
 				->select($db->quoteName('data'))
 				->from($db->quoteName('#__akeebabackup_storage'))
 				->where($db->quoteName('tag') . ' = :key')
@@ -242,7 +243,7 @@ class AkeebaBackup extends CMSPlugin implements SubscriberInterface, DatabaseAwa
 		try
 		{
 			$db    = $this->getDatabase();
-			$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+			$query = DbQuery::create($db)
 				->delete($db->quoteName('#__akeebabackup_storage'))
 				->where($db->quoteName('tag') . ' = :key')
 				->bind(':key', $key, ParameterType::STRING);
@@ -590,9 +591,10 @@ class AkeebaBackup extends CMSPlugin implements SubscriberInterface, DatabaseAwa
 		$model = $component->getMVCFactory()->createModel('Statistics', 'Administrator');
 		$model->setStateSetFlag(true);
 
-		$result = $model->notifyFailed();
+		$result  = $model->notifyFailed();
+		$message = is_array($result['message']) ? implode(', ', $result['message']) : $result['message'];
 
-		$this->logTask($result['message'], $result['result'] ? 'info' : 'warning');
+		$this->logTask($message, $result['result'] ? 'info' : 'warning');
 
 		return Status::OK;
 	}
@@ -624,9 +626,10 @@ class AkeebaBackup extends CMSPlugin implements SubscriberInterface, DatabaseAwa
 		$model = $component->getMVCFactory()->createModel('Statistics', 'Administrator');
 		$model->setStateSetFlag(true);
 
-		$result = $model->notifyFailedUploads();
+		$result  = $model->notifyFailedUploads();
+		$message = is_array($result['message']) ? implode(', ', $result['message']) : $result['message'];
 
-		$this->logTask($result['message'], $result['result'] ? 'info' : 'warning');
+		$this->logTask($message, $result['result'] ? 'info' : 'warning');
 
 		return Status::OK;
 	}

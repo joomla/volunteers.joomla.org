@@ -14,10 +14,9 @@ defined('_JEXEC') || die;
 use Joomla\CMS\Language\Text;
 
 $doc = \Joomla\CMS\Factory::getApplication();
-$doc->setHeader('Pragma', 'public');
+$doc->setHeader('Pragma', 'no-cache');
 $doc->setHeader('Expires', '0');
-$doc->setHeader('Cache-Control', 'must-revalidate, post-check=0, pre-check=0');
-$doc->setHeader('Cache-Control', 'public');
+$doc->setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private', true);
 $this->getDocument()->setMimeEncoding('text/html');
 
 $title = Text::sprintf('COM_AKEEBABACKUP_OAUTH2_TITLE', $this->provider->getEngineNameForHumans());

@@ -9,6 +9,7 @@ namespace Akeeba\Component\AkeebaBackup\Administrator\Model;
 
 defined('_JEXEC') || die;
 
+use Akeeba\Component\AkeebaBackup\Administrator\Helper\DbQuery;
 use Akeeba\Component\AkeebaBackup\Administrator\Mixin\ModelStateFixTrait;
 use Akeeba\Component\AkeebaBackup\Administrator\Table\ProfileTable;
 use Akeeba\Engine\Platform;
@@ -44,6 +45,8 @@ class ProfilesModel extends ListModel
 			$config['filter_fields'] = [
 				'search',
 				'quickicon',
+				'id',
+				'description',
 			];
 		}
 
@@ -62,7 +65,7 @@ class ProfilesModel extends ListModel
 
 		// Get the IDs of all profiles
 		$db    = $this->getDatabase();
-		$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+		$query = DbQuery::create($db)
 			->select($db->qn('id'))
 			->from($db->qn('#__akeebabackup_profiles'));
 		$db->setQuery($query);
@@ -168,7 +171,7 @@ class ProfilesModel extends ListModel
 	protected function getListQuery()
 	{
 		$db    = $this->getDatabase();
-		$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+		$query = DbQuery::create($db)
 			->select(['p.*', $db->quoteName('ag.title', 'access_level')])
 			->from($db->qn('#__akeebabackup_profiles', 'p'))
 			->join('LEFT', $db->quoteName('#__viewlevels', 'ag'), $db->quoteName('ag.id') . ' = ' . $db->quoteName('p.access'))
@@ -182,13 +185,13 @@ class ProfilesModel extends ListModel
 			if (stripos($search, 'id:') === 0)
 			{
 				$ids = (int) substr($search, 3);
-				$query->where($db->quoteName('id') . ' = :id')
+				$query->where($db->quoteName('p.id') . ' = :id')
 					->bind(':id', $ids, ParameterType::INTEGER);
 			}
 			else
 			{
 				$search = '%' . $search . '%';
-				$query->where($db->qn('description') . ' LIKE :search')
+				$query->where($db->qn('p.description') . ' LIKE :search')
 					->bind(':search', $search);
 			}
 		}
@@ -198,7 +201,7 @@ class ProfilesModel extends ListModel
 
 		if (is_numeric($quickIcon))
 		{
-			$query->where($db->qn('quickicon') . ' = :quickicon')
+			$query->where($db->qn('p.quickicon') . ' = :quickicon')
 				->bind(':quickicon', $quickIcon, ParameterType::INTEGER);
 		}
 
@@ -208,6 +211,13 @@ class ProfilesModel extends ListModel
 		{
 			$query->whereIn($db->quoteName('p.access'), $access_levels);
 		}
+
+		// List ordering. ListModel::populateState() has already validated it against filter_fields.
+		$ordering  = $this->getState('list.ordering', 'id');
+		$ordering  = in_array($ordering, ['id', 'description'], true) ? $ordering : 'id';
+		$direction = strtoupper((string) $this->getState('list.direction', 'ASC')) === 'DESC' ? 'DESC' : 'ASC';
+
+		$query->order($db->quoteName('p.' . $ordering) . ' ' . $direction);
 
 		return $query;
 	}

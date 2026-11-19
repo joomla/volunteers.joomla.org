@@ -147,7 +147,7 @@ class ProfileTable extends Table
 
 		if ($id == $activeProfile)
 		{
-			throw new RuntimeException(Text::_('COM_AKEEBABACKUP_PROFILE_ERR_CANNOTDELETEACTIVE'));
+			throw new RuntimeException(Text::sprintf('COM_AKEEBABACKUP_PROFILE_ERR_CANNOTDELETEACTIVE', $id));
 		}
 
 		return parent::delete($pk);

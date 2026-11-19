@@ -26,6 +26,7 @@
 
 namespace Akeeba\Engine\Core\Domain\Finalizer;
 
+use Akeeba\Engine\Driver\DbQuery;
 use Akeeba\Engine\Factory;
 use Akeeba\Engine\Platform;
 
@@ -58,7 +59,7 @@ final class ObsoleteRecordsQuotas extends AbstractFinalizer
 		$statsTable = $platform->tableNameStats;
 		$db         = Factory::getDatabase($platform->get_platform_database_options());
 		$query      =
-			(method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+			DbQuery::create($db)
 			   ->select([
 				   $db->qn('id'),
 				   $db->qn('tag'),
@@ -124,7 +125,7 @@ final class ObsoleteRecordsQuotas extends AbstractFinalizer
 
 		$ids = implode(',', $ids);
 
-		$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+		$query = DbQuery::create($db)
 		            ->delete($db->qn($statsTable))
 		            ->where($db->qn('id') . " IN ($ids)");
 		$db->setQuery($query);

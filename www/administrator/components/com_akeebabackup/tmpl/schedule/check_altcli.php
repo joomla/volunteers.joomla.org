@@ -42,6 +42,7 @@ use Joomla\CMS\Language\Text;
 				</p>
 			</div>
 		<?php else: ?>
+			<?= $this->loadAnyTemplate('schedule/weak_secret') ?>
 			<p>
 				<?= Text::_('COM_AKEEBABACKUP_SCHEDULE_LBL_GENERICUSECLI') ?><br/>
 				<code>
@@ -53,7 +54,7 @@ use Joomla\CMS\Language\Text;
 				<span class="badge bg-warning">
 					<?= Text::_('COM_AKEEBABACKUP_SCHEDULE_LBL_CLIGENERICIMPROTANTINFO') ?>
 				</span>
-				<?php if (!$this->croninfo->info->php_accurate): ?>
+				<?php if (!$this->checkinfo->info->php_accurate): ?>
 					<?= Text::sprintf('COM_AKEEBABACKUP_SCHEDULE_LBL_CLIGENERICINFO', $this->checkinfo->info->php_path) ?>
 				<?php else: ?>
 					<?= Text::sprintf('COM_AKEEBABACKUP_SCHEDULE_LBL_ACCURATEINFO', $this->checkinfo->info->php_path) ?>

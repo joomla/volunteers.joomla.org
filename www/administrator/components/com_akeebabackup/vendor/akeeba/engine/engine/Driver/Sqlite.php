@@ -173,7 +173,7 @@ class Sqlite extends Base
 	 * Note: Using query objects with bound variables is preferable to the below.
 	 *
 	 * @param   string   $text   The string to be escaped.
-	 * @param   boolean  $extra  Unused optional parameter to provide extra escaping.
+	 * @param   boolean  $extra  Also escape LIKE wildcards (% and _)?
 	 *
 	 * @return  string  The escaped string.
 	 *
@@ -193,15 +193,23 @@ class Sqlite extends Base
 
 		if (is_object($this->connection))
 		{
-			return substr($this->connection->quote($text), 1, -1);
+			$result = substr($this->connection->quote($text), 1, -1);
 		}
-
-		if (class_exists('SQLite3'))
+		elseif (class_exists('SQLite3'))
 		{
-			return SQLite3::escapeString($text);
+			$result = SQLite3::escapeString($text);
+		}
+		else
+		{
+			$result = str_replace("'", "''", $text);
 		}
 
-		return str_replace("'", "''", $text);
+		if ($extra)
+		{
+			$result = addcslashes($result, '%_');
+		}
+
+		return $result;
 	}
 
 	public function fetchAssoc($cursor = null)
@@ -347,7 +355,7 @@ class Sqlite extends Base
 
 		$table = strtoupper($table);
 
-		$query->setQuery('pragma table_info(' . $table . ')');
+		$query->setQuery('pragma table_info(' . $this->quoteName($table) . ')');
 
 		$this->setQuery($query);
 		$fields = $this->loadObjectList();
@@ -423,7 +431,7 @@ class Sqlite extends Base
 		$this->setOption(PDO::ATTR_CASE, PDO::CASE_UPPER);
 
 		$table = strtoupper($table);
-		$query->setQuery('pragma table_info( ' . $table . ')');
+		$query->setQuery('pragma table_info(' . $this->quoteName($table) . ')');
 
 		// $query->bind(':tableName', $table);
 
@@ -685,7 +693,7 @@ class Sqlite extends Base
 	 */
 	public function renameTable($oldTable, $newTable, $backup = null, $prefix = null)
 	{
-		$this->setQuery('ALTER TABLE ' . $oldTable . ' RENAME TO ' . $newTable)->execute();
+		$this->setQuery('ALTER TABLE ' . $this->quoteName($oldTable) . ' RENAME TO ' . $this->quoteName($newTable))->execute();
 
 		return $this;
 	}

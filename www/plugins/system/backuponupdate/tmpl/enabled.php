@@ -37,7 +37,7 @@ $uri->setVar('_akeeba_backup_on_update_toggle', $this->getApplication()->getSess
 			<?= Text::_('PLG_SYSTEM_BACKUPONUPDATE_LBL_CONTENT_ACTIVE') ?>
 		</p>
 		<p>
-			<a href="<?= htmlentities($uri->toString()) ?>"
+			<a href="<?= htmlentities($uri->toString(), ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401) ?>"
 			   class="btn btn-outline-danger btn-sm">
 				<span class="fa fa-power-off" aria-hidden="true"></span>
 				<?= Text::_('PLG_SYSTEM_BACKUPONUPDATE_LBL_TOGGLE_DEACTIVATE') ?>

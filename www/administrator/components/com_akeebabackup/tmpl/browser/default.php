@@ -69,6 +69,10 @@ Text::script('COM_AKEEBABACKUP_CONFIG_UI_ROOTDIR', true);
 			</div>
 		</div>
 
+		<?php // A GET form discards the query string of its action URL, so the routing variables must be form fields ?>
+		<input type="hidden" name="option" value="com_akeebabackup" />
+		<input type="hidden" name="view" value="Browser" />
+		<input type="hidden" name="tmpl" value="component" />
 		<input type="hidden" name="folderraw" id="folderraw"
 		       value="<?= $this->escape($this->folder_raw) ?>" />
 		<?= HTMLHelper::_('form.token') ?>

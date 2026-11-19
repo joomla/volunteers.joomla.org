@@ -56,6 +56,10 @@ trait ViewLoadAnyTemplateTrait
 		// Make sure I have a valid view
 		$view = $view ?: $this->getName();
 
+		// A view name can only be a valid PHP/Joomla identifier: letters, digits, underscore. Anything else is
+		// stripped so it cannot inject path traversal ('../') into the template search path built below.
+		$view = preg_replace('/[^A-Z0-9_]/i', '', $view) ?: $this->getName();
+
 		// Start with no subtemplate
 		$tpl = null;
 
@@ -173,6 +177,9 @@ HTML;
 		$file = preg_replace('/[^A-Z0-9_\.-]/i', '', $file);
 		$tpl  = isset($tpl) ? preg_replace('/[^A-Z0-9_\.-]/i', '', $tpl) : $tpl;
 
+		// Clean the template name. It comes from the request (layout=template:layout) and becomes part of a path.
+		$layoutTemplate = isset($layoutTemplate) ? preg_replace('/[^A-Z0-9_-]/i', '', $layoutTemplate) : $layoutTemplate;
+
 		// Load the language file for the template
 		$lang = Factory::getApplication()->getLanguage();
 		$lang->load('tpl_' . $template->template, JPATH_BASE)
@@ -183,8 +190,8 @@ HTML;
 		if (isset($layoutTemplate) && $layoutTemplate !== '_' && $layoutTemplate != $template->template)
 		{
 			$this->_path['template'] = str_replace(
-				JPATH_THEMES . DIRECTORY_SEPARATOR . $template->template,
-				JPATH_THEMES . DIRECTORY_SEPARATOR . $layoutTemplate,
+				JPATH_THEMES . DIRECTORY_SEPARATOR . $template->template . DIRECTORY_SEPARATOR,
+				JPATH_THEMES . DIRECTORY_SEPARATOR . $layoutTemplate . DIRECTORY_SEPARATOR,
 				$this->_path['template']
 			);
 		}

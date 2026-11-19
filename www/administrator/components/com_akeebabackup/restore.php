@@ -29,6 +29,11 @@ define('AK_STATE_POSTPROC', 4); // Post-processing
 define('AK_STATE_DONE', 5); // Done with post-processing
 
 /* Windows system detection */
+if (!defined('KSWINDOWS'))
+{
+	define('KSWINDOWS', substr(PHP_OS, 0, 3) == 'WIN');
+}
+
 if (!defined('_AKEEBA_IS_WINDOWS'))
 {
 	if (function_exists('php_uname'))
@@ -172,6 +177,78 @@ function clearFileInOPCache($file)
 	}
 
 	return false;
+}
+
+/**
+ * Akeeba Restore
+ * An AJAX-powered archive extraction library for JPA, JPS and ZIP archives
+ *
+ * @package   restore
+ * @copyright Copyright (c)2008-2025 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @license   GNU General Public License version 3, or later
+ */
+
+/**
+ * Removes trailing slash or backslash from a pathname
+ *
+ * @param   string  $path  The path to treat
+ *
+ * @return  string  The path without the trailing slash/backslash
+ */
+function TrimTrailingSlash($path)
+{
+	$newpath = $path;
+
+	if (substr($path, strlen($path) - 1, 1) == '\\')
+	{
+		$newpath = substr($path, 0, strlen($path) - 1);
+	}
+
+	if (substr($path, strlen($path) - 1, 1) == '/')
+	{
+		$newpath = substr($path, 0, strlen($path) - 1);
+	}
+
+	return $newpath;
+}
+
+/**
+ * Normalises a path's directory separators, and collapses redundant slashes.
+ *
+ * Backslash translation only happens on Windows. Everywhere else a backslash is a perfectly legal
+ * character in a file name, so rewriting it would corrupt the path rather than fix it.
+ *
+ * @param   string  $p_path  The path to treat
+ *
+ * @return  string  The translated path
+ */
+function TranslateWinPath($p_path)
+{
+	$is_unc = false;
+
+	if (KSWINDOWS)
+	{
+		// Is this a UNC path?
+		$is_unc = (substr($p_path, 0, 2) == '\\\\') || (substr($p_path, 0, 2) == '//');
+
+		// Change potential windows directory separator
+		if ((strpos($p_path, '\\') > 0) || (substr($p_path, 0, 1) == '\\'))
+		{
+			$p_path = strtr($p_path, '\\', '/');
+		}
+	}
+
+	// Remove multiple slashes
+	$p_path = str_replace('///', '/', $p_path);
+	$p_path = str_replace('//', '/', $p_path);
+
+	// Fix UNC paths
+	if ($is_unc)
+	{
+		$p_path = '//' . ltrim($p_path, '/');
+	}
+
+	return $p_path;
 }
 
 /**
@@ -750,7 +827,18 @@ abstract class AKAbstractPart extends AKAbstractObject
 	 */
 	function attach(AKAbstractPartObserver $obs)
 	{
-		$this->observers["$obs"] = $obs;
+		/**
+		 * Keyed by class name, so that attaching the same kind of observer twice replaces rather than
+		 * doubles it — which is what this has always done, since every observer which implemented
+		 * __toString() returned its own class name.
+		 *
+		 * It used to interpolate the object instead, which requires __toString() and fatals without
+		 * it: "Object of class AKPartNullObserver could not be converted to string". Two of the four
+		 * observers happened to implement it and two did not, and one of the two that did not is the
+		 * one runZapper() attaches — so switching on "delete the site's files before extracting"
+		 * ended the request there and then, in both Kickstart and standalone restore.php.
+		 */
+		$this->observers[get_class($obs)] = $obs;
 	}
 
 	/**
@@ -760,7 +848,7 @@ abstract class AKAbstractPart extends AKAbstractObject
 	 */
 	function detach(AKAbstractPartObserver $obs)
 	{
-		unset($this->observers["$obs"]);
+		unset($this->observers[get_class($obs)]);
 	}
 
 	/**
@@ -1096,16 +1184,22 @@ abstract class AKAbstractUnarchiver extends AKAbstractPart
 	 */
 	private function getBaseExtension()
 	{
-		static $baseextension;
+		/**
+		 * Deliberately not memoised. It used to cache in a `static` local, which belongs to the
+		 * method rather than to the object and is therefore shared by every unarchiver of every
+		 * format in the process — so the first archive opened decided the extension every later one
+		 * was scanned for its parts with. That never mattered in production, where a request opens
+		 * one archive, and it is wrong everywhere else: the development harnesses, and any test which
+		 * opens a .jpa and then a .zip.
+		 *
+		 * There is nothing to gain by caching it. scanArchives() is the only caller, calls this once,
+		 * outside its loop, and itself runs once per extraction — so the cache saved a single
+		 * basename() and substr() per restoration.
+		 */
+		$basename = basename($this->filename);
+		$lastdot  = strrpos($basename, '.');
 
-		if (empty($baseextension))
-		{
-			$basename      = basename($this->filename);
-			$lastdot       = strrpos($basename, '.');
-			$baseextension = substr($basename, $lastdot);
-		}
-
-		return $baseextension;
+		return substr($basename, $lastdot);
 	}
 
 	/**
@@ -1775,6 +1869,23 @@ abstract class AKAbstractPostproc extends AKAbstractObject
 	abstract public function rename($from, $to);
 
 	/**
+	 * Release anything which cannot be serialised, before the engine is hibernated.
+	 *
+	 * Called on every post-processing engine just before the Factory is serialised into the AJAX
+	 * response. Most engines have nothing to release; the FTP-capable ones hold a live connection,
+	 * and since PHP 8.1 that is an FTP\Connection object which throws outright when serialize()
+	 * reaches it — where PHP 7.4 quietly stored a resource as the integer 0. Hence an explicit hook
+	 * rather than __sleep(): __sleep() has to enumerate every property to keep, and cannot see the
+	 * private ones this class inherits, so using it silently drops the error and warning queues.
+	 *
+	 * @return  void
+	 */
+	public function shutdown()
+	{
+		// Nothing to release by default.
+	}
+
+	/**
 	 * Returns the configured temporary directory
 	 *
 	 * @return string
@@ -1892,10 +2003,13 @@ class AKPostprocDirect extends AKAbstractPostproc
 			return true;
 		}
 
-		$root = AKFactory::get('kickstart.setup.destdir');
+		$root = (string) AKFactory::get('kickstart.setup.destdir', '');
 		$root = rtrim(str_replace('\\', '/', $root), '/');
 		$dir  = rtrim(str_replace('\\', '/', $dirName), '/');
-		if (strpos($dir, $root) === 0)
+
+		// Note: $root must be checked for emptiness. strpos() with an empty needle returns 0 in PHP 8
+		// and false in PHP 7, so without this check the branch taken would depend on the PHP version.
+		if ($root !== '' && strpos($dir, $root) === 0)
 		{
 			$dir = ltrim(substr($dir, strlen($root)), '/');
 			$root .= '/';
@@ -1975,1297 +2089,6 @@ class AKPostprocDirect extends AKAbstractPostproc
  */
 
 /**
- * FTP file writer
- */
-class AKPostprocFTP extends AKAbstractPostproc
-{
-	/** @var bool Should I use FTP over implicit SSL? */
-	public $useSSL = false;
-	/** @var bool use Passive mode? */
-	public $passive = true;
-	/** @var string FTP host name */
-	public $host = '';
-	/** @var int FTP port */
-	public $port = 21;
-	/** @var string FTP user name */
-	public $user = '';
-	/** @var string FTP password */
-	public $pass = '';
-	/** @var string FTP initial directory */
-	public $dir = '';
-	/** @var resource The FTP handle */
-	private $handle = null;
-
-	public function __construct()
-	{
-		$this->useSSL  = AKFactory::get('kickstart.ftp.ssl', false);
-		$this->passive = AKFactory::get('kickstart.ftp.passive', true);
-		$this->host    = AKFactory::get('kickstart.ftp.host', '');
-		$this->port    = AKFactory::get('kickstart.ftp.port', 21);
-
-		if (trim($this->port) == '')
-		{
-			$this->port = 21;
-		}
-		$this->user    = AKFactory::get('kickstart.ftp.user', '');
-		$this->pass    = AKFactory::get('kickstart.ftp.pass', '');
-		$this->dir     = AKFactory::get('kickstart.ftp.dir', '');
-		$this->tempDir = AKFactory::get('kickstart.ftp.tempdir', '');
-
-		$connected = $this->connect();
-
-		if ($connected)
-		{
-			if (!empty($this->tempDir))
-			{
-				$tempDir  = rtrim($this->tempDir, '/\\') . '/';
-				$writable = $this->isDirWritable($tempDir);
-			}
-			else
-			{
-				$tempDir  = '';
-				$writable = false;
-			}
-
-			if (!$writable)
-			{
-				// Default temporary directory is the current root
-				$tempDir = KSROOTDIR;
-				if (empty($tempDir))
-				{
-					// Oh, we have no directory reported!
-					$tempDir = '.';
-				}
-				$absoluteDirToHere = $tempDir;
-				$tempDir           = rtrim(str_replace('\\', '/', $tempDir), '/');
-
-				if (!empty($tempDir))
-				{
-					$tempDir .= '/';
-				}
-
-				$this->tempDir = $tempDir;
-				// Is this directory writable?
-				$writable = $this->isDirWritable($tempDir);
-			}
-
-			if (!$writable)
-			{
-				// Nope. Let's try creating a temporary directory in the site's root.
-				$tempDir                 = $absoluteDirToHere . '/kicktemp';
-				$trustMeIKnowWhatImDoing = 500 + 10 + 1; // working around overzealous scanners written by bozos
-				$this->createDirRecursive($tempDir, $trustMeIKnowWhatImDoing);
-				// Try making it writable...
-				$this->fixPermissions($tempDir);
-				$writable = $this->isDirWritable($tempDir);
-			}
-
-			// Was the new directory writable?
-			if (!$writable)
-			{
-				// Let's see if the user has specified one
-				$userdir = AKFactory::get('kickstart.ftp.tempdir', '');
-
-				if (!empty($userdir))
-				{
-					// Is it an absolute or a relative directory?
-					$absolute = false;
-					$absolute = $absolute || (substr($userdir, 0, 1) == '/');
-					$absolute = $absolute || (substr($userdir, 1, 1) == ':');
-					$absolute = $absolute || (substr($userdir, 2, 1) == ':');
-
-					if (!$absolute)
-					{
-						// Make absolute
-						$tempDir = $absoluteDirToHere . $userdir;
-					}
-					else
-					{
-						// it's already absolute
-						$tempDir = $userdir;
-					}
-					// Does the directory exist?
-					if (is_dir($tempDir))
-					{
-						// Yeah. Is it writable?
-						$writable = $this->isDirWritable($tempDir);
-					}
-				}
-			}
-
-			$this->tempDir = $tempDir;
-
-			if (!$writable)
-			{
-				// No writable directory found!!!
-				$this->setError(AKText::_('FTP_TEMPDIR_NOT_WRITABLE'));
-			}
-			else
-			{
-				AKFactory::set('kickstart.ftp.tempdir', $tempDir);
-				$this->tempDir = $tempDir;
-			}
-		}
-	}
-
-	public function connect()
-	{
-		// Connect to server, using SSL if so required
-		if ($this->useSSL)
-		{
-			$this->handle = @ftp_ssl_connect($this->host, $this->port);
-		}
-		else
-		{
-			$this->handle = @ftp_connect($this->host, $this->port);
-		}
-
-		if ($this->handle === false)
-		{
-			$this->setError(AKText::_('WRONG_FTP_HOST'));
-
-			return false;
-		}
-
-		// Login
-		if (!@ftp_login($this->handle, $this->user, $this->pass))
-		{
-			$this->setError(AKText::_('WRONG_FTP_USER'));
-			@ftp_close($this->handle);
-
-			return false;
-		}
-
-		// Change to initial directory
-		if (!@ftp_chdir($this->handle, $this->dir))
-		{
-			$this->setError(AKText::_('WRONG_FTP_PATH1'));
-			@ftp_close($this->handle);
-
-			return false;
-		}
-
-		// Enable passive mode if the user requested it
-		if ($this->passive)
-		{
-			@ftp_pasv($this->handle, true);
-		}
-		else
-		{
-			@ftp_pasv($this->handle, false);
-		}
-
-		// Try to download ourselves
-		$testFilename = defined('KSSELFNAME') ? KSSELFNAME : basename(__FILE__);
-		$tempHandle   = fopen('php://temp', 'r+');
-
-		if (@ftp_fget($this->handle, $tempHandle, $testFilename, FTP_ASCII, 0) === false)
-		{
-			$this->setError(AKText::_('WRONG_FTP_PATH2'));
-			@ftp_close($this->handle);
-			fclose($tempHandle);
-
-			return false;
-		}
-
-		fclose($tempHandle);
-
-		return true;
-	}
-
-	private function isDirWritable($dir)
-	{
-		$fp = @fopen($dir . '/kickstart.dat', 'w');
-
-		if ($fp === false)
-		{
-			return false;
-		}
-		else
-		{
-			@fclose($fp);
-			unlink($dir . '/kickstart.dat');
-
-			return true;
-		}
-	}
-
-	public function createDirRecursive($dirName, $perms)
-	{
-		// Strip absolute filesystem path to website's root
-		$removePath = AKFactory::get('kickstart.setup.destdir', '');
-
-		if (!empty($removePath))
-		{
-			// UNIXize the paths
-			$removePath = str_replace('\\', '/', $removePath);
-			$dirName    = str_replace('\\', '/', $dirName);
-			// Make sure they both end in a slash
-			$removePath = rtrim($removePath, '/\\') . '/';
-			$dirName    = rtrim($dirName, '/\\') . '/';
-			// Process the path removal
-			$left = substr($dirName, 0, strlen($removePath));
-
-			if ($left == $removePath)
-			{
-				$dirName = substr($dirName, strlen($removePath));
-			}
-		}
-
-		if (empty($dirName))
-		{
-			$dirName = '';
-		} // 'cause the substr() above may return FALSE.
-
-		$check = '/' . trim($this->dir, '/') . '/' . trim($dirName, '/');
-
-		if ($this->is_dir($check))
-		{
-			return true;
-		}
-
-		$alldirs     = explode('/', $dirName);
-		$previousDir = '/' . trim($this->dir);
-
-		foreach ($alldirs as $curdir)
-		{
-			$check = $previousDir . '/' . $curdir;
-
-			if (!$this->is_dir($check))
-			{
-				// Proactively try to delete a file by the same name
-				@ftp_delete($this->handle, $check);
-
-				if (@ftp_mkdir($this->handle, $check) === false)
-				{
-					// If we couldn't create the directory, attempt to fix the permissions in the PHP level and retry!
-					$this->fixPermissions($removePath . $check);
-
-					if (@ftp_mkdir($this->handle, $check) === false)
-					{
-						// Can we fall back to pure PHP mode, sire?
-						if (!@mkdir($check))
-						{
-							$this->setError(AKText::sprintf('FTP_CANT_CREATE_DIR', $check));
-
-							return false;
-						}
-						else
-						{
-							// Since the directory was built by PHP, change its permissions
-							$trustMeIKnowWhatImDoing =
-								500 + 10 + 1; // working around overzealous scanners written by bozos
-							@chmod($check, $trustMeIKnowWhatImDoing);
-
-							return true;
-						}
-					}
-				}
-
-				@ftp_chmod($this->handle, $perms, $check);
-
-			}
-
-			$previousDir = $check;
-		}
-
-		return true;
-	}
-
-	private function is_dir($dir)
-	{
-		return @ftp_chdir($this->handle, $dir);
-	}
-
-	private function fixPermissions($path)
-	{
-		// Turn off error reporting
-		if (!defined('KSDEBUG'))
-		{
-			$oldErrorReporting = @error_reporting(0);
-		}
-
-		// Get UNIX style paths
-		$relPath  = str_replace('\\', '/', $path);
-		$basePath = rtrim(str_replace('\\', '/', KSROOTDIR), '/');
-		$basePath = rtrim($basePath, '/');
-
-		if (!empty($basePath))
-		{
-			$basePath .= '/';
-		}
-
-		// Remove the leading relative root
-		if (substr($relPath, 0, strlen($basePath)) == $basePath)
-		{
-			$relPath = substr($relPath, strlen($basePath));
-		}
-
-		$dirArray  = explode('/', $relPath);
-		$pathBuilt = rtrim($basePath, '/');
-
-		foreach ($dirArray as $dir)
-		{
-			if (empty($dir))
-			{
-				continue;
-			}
-			$oldPath = $pathBuilt;
-			$pathBuilt .= '/' . $dir;
-
-			if (is_dir($oldPath . $dir))
-			{
-				$trustMeIKnowWhatImDoing = 500 + 10 + 1; // working around overzealous scanners written by bozos
-				@chmod($oldPath . $dir, $trustMeIKnowWhatImDoing);
-			}
-			else
-			{
-				$trustMeIKnowWhatImDoing = 500 + 10 + 1; // working around overzealous scanners written by bozos
-				if (@chmod($oldPath . $dir, $trustMeIKnowWhatImDoing) === false)
-				{
-					@unlink($oldPath . $dir);
-				}
-			}
-		}
-
-		// Restore error reporting
-		if (!defined('KSDEBUG'))
-		{
-			@error_reporting($oldErrorReporting);
-		}
-	}
-
-	public function __sleep()
-	{
-		if (!is_null($this->handle) && is_resource($this->handle))
-		{
-			@ftp_close($this->handle);
-		}
-
-		$this->handle = null;
-	}
-
-	public function __destruct()
-	{
-		if (!is_null($this->handle) && is_resource($this->handle))
-		{
-			@ftp_close($this->handle);
-		}
-	}
-
-
-	public function __wakeup()
-	{
-		$this->connect();
-	}
-
-	public function process()
-	{
-		if (is_null($this->tempFilename))
-		{
-			// If an empty filename is passed, it means that we shouldn't do any post processing, i.e.
-			// the entity was a directory or symlink
-			return true;
-		}
-
-		$remotePath = dirname($this->filename);
-		$removePath = AKFactory::get('kickstart.setup.destdir', '');
-
-		if (!empty($removePath))
-		{
-			$removePath = ltrim($removePath, "/");
-			$remotePath = ltrim($remotePath, "/");
-			$left       = substr($remotePath, 0, strlen($removePath));
-
-			if ($left == $removePath)
-			{
-				$remotePath = substr($remotePath, strlen($removePath));
-			}
-		}
-
-		$absoluteFSPath  = dirname($this->filename);
-		$relativeFTPPath = trim($remotePath, '/');
-		$absoluteFTPPath = '/' . trim($this->dir, '/') . '/' . trim($remotePath, '/');
-		$onlyFilename    = basename($this->filename);
-
-		$remoteName = $absoluteFTPPath . '/' . $onlyFilename;
-
-		$ret = @ftp_chdir($this->handle, $absoluteFTPPath);
-
-		if ($ret === false)
-		{
-			$ret = $this->createDirRecursive($absoluteFSPath, 0755);
-
-			if ($ret === false)
-			{
-				$this->setError(AKText::sprintf('FTP_COULDNT_UPLOAD', $this->filename));
-
-				return false;
-			}
-
-			$ret = @ftp_chdir($this->handle, $absoluteFTPPath);
-
-			if ($ret === false)
-			{
-				$this->setError(AKText::sprintf('FTP_COULDNT_UPLOAD', $this->filename));
-
-				return false;
-			}
-		}
-
-		$ret = @ftp_put($this->handle, $remoteName, $this->tempFilename, FTP_BINARY);
-
-		if ($ret === false)
-		{
-			// If we couldn't create the file, attempt to fix the permissions in the PHP level and retry!
-			$this->fixPermissions($this->filename);
-			$this->unlink($this->filename);
-
-			$fp = @fopen($this->tempFilename, 'r');
-
-			if ($fp !== false)
-			{
-				$ret = @ftp_fput($this->handle, $remoteName, $fp, FTP_BINARY);
-				@fclose($fp);
-			}
-			else
-			{
-				$ret = false;
-			}
-		}
-
-		@unlink($this->tempFilename);
-
-		if ($ret === false)
-		{
-			$this->setError(AKText::sprintf('FTP_COULDNT_UPLOAD', $this->filename));
-
-			return false;
-		}
-
-		$restorePerms = AKFactory::get('kickstart.setup.restoreperms', false);
-
-		if ($restorePerms)
-		{
-			@ftp_chmod($this->_handle, $this->perms, $remoteName);
-		}
-		else
-		{
-			@ftp_chmod($this->_handle, 0644, $remoteName);
-		}
-
-		if (@is_file($this->filename) || @is_link($this->filename))
-		{
-			clearFileInOPCache($this->filename);
-		}
-
-		return true;
-	}
-
-	/*
-	 * Tries to fix directory/file permissions in the PHP level, so that
-	 * the FTP operation doesn't fail.
-	 * @param $path string The full path to a directory or file
-	 */
-
-	public function unlink($file)
-	{
-		$removePath = AKFactory::get('kickstart.setup.destdir', '');
-
-		if (!empty($removePath))
-		{
-			$left = substr($file, 0, strlen($removePath));
-
-			if ($left == $removePath)
-			{
-				$file = substr($file, strlen($removePath));
-			}
-		}
-
-		$check = '/' . trim($this->dir, '/') . '/' . trim($file, '/');
-
-		return @ftp_delete($this->handle, $check);
-	}
-
-	public function processFilename($filename, $perms = 0755)
-	{
-		// Catch some error conditions...
-		if ($this->getError())
-		{
-			return false;
-		}
-
-		// If a null filename is passed, it means that we shouldn't do any post processing, i.e.
-		// the entity was a directory or symlink
-		if (is_null($filename))
-		{
-			$this->filename     = null;
-			$this->tempFilename = null;
-
-			return null;
-		}
-
-		// Strip absolute filesystem path to website's root
-		$removePath = AKFactory::get('kickstart.setup.destdir', '');
-
-		if (!empty($removePath))
-		{
-			$left = substr($filename, 0, strlen($removePath));
-
-			if ($left == $removePath)
-			{
-				$filename = substr($filename, strlen($removePath));
-			}
-		}
-
-		// Trim slash on the left
-		$filename = ltrim($filename, '/');
-
-		$this->filename     = $filename;
-		$this->tempFilename = tempnam($this->tempDir, 'kickstart-');
-		$this->perms        = $perms;
-
-		if (empty($this->tempFilename))
-		{
-			// Oops! Let's try something different
-			$this->tempFilename = $this->tempDir . '/kickstart-' . time() . '.dat';
-		}
-
-		return $this->tempFilename;
-	}
-
-	public function close()
-	{
-		@ftp_close($this->handle);
-	}
-
-	public function chmod($file, $perms)
-	{
-		return @ftp_chmod($this->handle, $perms, $file);
-	}
-
-	public function rmdir($directory)
-	{
-		$removePath = AKFactory::get('kickstart.setup.destdir', '');
-
-		if (!empty($removePath))
-		{
-			$left = substr($directory, 0, strlen($removePath));
-
-			if ($left == $removePath)
-			{
-				$directory = substr($directory, strlen($removePath));
-			}
-		}
-
-		$check = '/' . trim($this->dir, '/') . '/' . trim($directory, '/');
-
-		return @ftp_rmdir($this->handle, $check);
-	}
-
-	public function rename($from, $to)
-	{
-		$originalFrom = $from;
-		$originalTo   = $to;
-
-		$removePath = AKFactory::get('kickstart.setup.destdir', '');
-
-		if (!empty($removePath))
-		{
-			$left = substr($from, 0, strlen($removePath));
-
-			if ($left == $removePath)
-			{
-				$from = substr($from, strlen($removePath));
-			}
-		}
-
-		$from = '/' . trim($this->dir, '/') . '/' . trim($from, '/');
-
-		if (!empty($removePath))
-		{
-			$left = substr($to, 0, strlen($removePath));
-
-			if ($left == $removePath)
-			{
-				$to = substr($to, strlen($removePath));
-			}
-		}
-
-		$to = '/' . trim($this->dir, '/') . '/' . trim($to, '/');
-
-		$result = @ftp_rename($this->handle, $from, $to);
-
-		if ($result !== true)
-		{
-			return @rename($from, $to);
-		}
-		else
-		{
-			return true;
-		}
-	}
-
-}
-
-
-/**
- * Akeeba Restore
- * An AJAX-powered archive extraction library for JPA, JPS and ZIP archives
- *
- * @package   restore
- * @copyright Copyright (c)2008-2025 Nicholas K. Dionysopoulos / Akeeba Ltd
- * @license   GNU General Public License version 3, or later
- */
-
-/**
- * FTP file writer
- */
-class AKPostprocSFTP extends AKAbstractPostproc
-{
-	/** @var bool Should I use FTP over implicit SSL? */
-	public $useSSL = false;
-	/** @var bool use Passive mode? */
-	public $passive = true;
-	/** @var string FTP host name */
-	public $host = '';
-	/** @var int FTP port */
-	public $port = 21;
-	/** @var string FTP user name */
-	public $user = '';
-	/** @var string FTP password */
-	public $pass = '';
-	/** @var string FTP initial directory */
-	public $dir = '';
-
-	/** @var resource SFTP resource handle */
-	private $handle = null;
-
-	/** @var resource SSH2 connection resource handle */
-	private $_connection = null;
-
-	/** @var string Current remote directory, including the remote directory string */
-	private $_currentdir;
-
-	public function __construct()
-	{
-		$this->host = AKFactory::get('kickstart.ftp.host', '');
-		$this->port = AKFactory::get('kickstart.ftp.port', 22);
-
-		if (trim($this->port) == '')
-		{
-			$this->port = 22;
-		}
-
-		$this->user    = AKFactory::get('kickstart.ftp.user', '');
-		$this->pass    = AKFactory::get('kickstart.ftp.pass', '');
-		$this->dir     = AKFactory::get('kickstart.ftp.dir', '');
-		$this->tempDir = AKFactory::get('kickstart.ftp.tempdir', '');
-
-		$connected = $this->connect();
-
-		if ($connected)
-		{
-			if (!empty($this->tempDir))
-			{
-				$tempDir  = rtrim($this->tempDir, '/\\') . '/';
-				$writable = $this->isDirWritable($tempDir);
-			}
-			else
-			{
-				$tempDir  = '';
-				$writable = false;
-			}
-
-			if (!$writable)
-			{
-				// Default temporary directory is the current root
-				$tempDir = KSROOTDIR;
-				if (empty($tempDir))
-				{
-					// Oh, we have no directory reported!
-					$tempDir = '.';
-				}
-				$absoluteDirToHere = $tempDir;
-				$tempDir           = rtrim(str_replace('\\', '/', $tempDir), '/');
-				if (!empty($tempDir))
-				{
-					$tempDir .= '/';
-				}
-				$this->tempDir = $tempDir;
-				// Is this directory writable?
-				$writable = $this->isDirWritable($tempDir);
-			}
-
-			if (!$writable)
-			{
-				// Nope. Let's try creating a temporary directory in the site's root.
-				$tempDir                 = $absoluteDirToHere . '/kicktemp';
-				$trustMeIKnowWhatImDoing = 500 + 10 + 1; // working around overzealous scanners written by bozos
-				$this->createDirRecursive($tempDir, $trustMeIKnowWhatImDoing);
-				// Try making it writable...
-				$this->fixPermissions($tempDir);
-				$writable = $this->isDirWritable($tempDir);
-			}
-
-			// Was the new directory writable?
-			if (!$writable)
-			{
-				// Let's see if the user has specified one
-				$userdir = AKFactory::get('kickstart.ftp.tempdir', '');
-				if (!empty($userdir))
-				{
-					// Is it an absolute or a relative directory?
-					$absolute = false;
-					$absolute = $absolute || (substr($userdir, 0, 1) == '/');
-					$absolute = $absolute || (substr($userdir, 1, 1) == ':');
-					$absolute = $absolute || (substr($userdir, 2, 1) == ':');
-					if (!$absolute)
-					{
-						// Make absolute
-						$tempDir = $absoluteDirToHere . $userdir;
-					}
-					else
-					{
-						// it's already absolute
-						$tempDir = $userdir;
-					}
-					// Does the directory exist?
-					if (is_dir($tempDir))
-					{
-						// Yeah. Is it writable?
-						$writable = $this->isDirWritable($tempDir);
-					}
-				}
-			}
-			$this->tempDir = $tempDir;
-
-			if (!$writable)
-			{
-				// No writable directory found!!!
-				$this->setError(AKText::_('SFTP_TEMPDIR_NOT_WRITABLE'));
-			}
-			else
-			{
-				AKFactory::set('kickstart.ftp.tempdir', $tempDir);
-				$this->tempDir = $tempDir;
-			}
-		}
-	}
-
-	public function connect()
-	{
-		$this->_connection = false;
-
-		if (!function_exists('ssh2_connect'))
-		{
-			$this->setError(AKText::_('SFTP_NO_SSH2'));
-
-			return false;
-		}
-
-		$this->_connection = @ssh2_connect($this->host, $this->port);
-
-		if (!@ssh2_auth_password($this->_connection, $this->user, $this->pass))
-		{
-			$this->setError(AKText::_('SFTP_WRONG_USER'));
-
-			$this->_connection = false;
-
-			return false;
-		}
-
-		$this->handle = @ssh2_sftp($this->_connection);
-
-		// I must have an absolute directory
-		if (!$this->dir)
-		{
-			$this->setError(AKText::_('SFTP_WRONG_STARTING_DIR'));
-
-			return false;
-		}
-
-		// Change to initial directory
-		if (!$this->sftp_chdir('/'))
-		{
-			$this->setError(AKText::_('SFTP_WRONG_STARTING_DIR'));
-
-			unset($this->_connection);
-			unset($this->handle);
-
-			return false;
-		}
-
-		// Try to download ourselves
-		$testFilename = defined('KSSELFNAME') ? KSSELFNAME : basename(__FILE__);
-		$basePath     = '/' . trim($this->dir, '/');
-
-		if (@fopen("ssh2.sftp://{$this->handle}$basePath/$testFilename", 'r+') === false)
-		{
-			$this->setError(AKText::_('SFTP_WRONG_STARTING_DIR'));
-
-			unset($this->_connection);
-			unset($this->handle);
-
-			return false;
-		}
-
-		return true;
-	}
-
-	/**
-	 * Changes to the requested directory in the remote server. You give only the
-	 * path relative to the initial directory and it does all the rest by itself,
-	 * including doing nothing if the remote directory is the one we want.
-	 *
-	 * @param   string $dir The (realtive) remote directory
-	 *
-	 * @return  bool True if successful, false otherwise.
-	 */
-	private function sftp_chdir($dir)
-	{
-		// Strip absolute filesystem path to website's root
-		$removePath = AKFactory::get('kickstart.setup.destdir', '');
-		if (!empty($removePath))
-		{
-			// UNIXize the paths
-			$removePath = str_replace('\\', '/', $removePath);
-			$dir        = str_replace('\\', '/', $dir);
-
-			// Make sure they both end in a slash
-			$removePath = rtrim($removePath, '/\\') . '/';
-			$dir        = rtrim($dir, '/\\') . '/';
-
-			// Process the path removal
-			$left = substr($dir, 0, strlen($removePath));
-
-			if ($left == $removePath)
-			{
-				$dir = substr($dir, strlen($removePath));
-			}
-		}
-
-		if (empty($dir))
-		{
-			// Because the substr() above may return FALSE.
-			$dir = '';
-		}
-
-		// Calculate "real" (absolute) SFTP path
-		$realdir = substr($this->dir, -1) == '/' ? substr($this->dir, 0, strlen($this->dir) - 1) : $this->dir;
-		$realdir .= '/' . $dir;
-		$realdir = substr($realdir, 0, 1) == '/' ? $realdir : '/' . $realdir;
-
-		if ($this->_currentdir == $realdir)
-		{
-			// Already there, do nothing
-			return true;
-		}
-
-		$result = @ssh2_sftp_stat($this->handle, $realdir);
-
-		if ($result === false)
-		{
-			return false;
-		}
-		else
-		{
-			// Update the private "current remote directory" variable
-			$this->_currentdir = $realdir;
-
-			return true;
-		}
-	}
-
-	private function isDirWritable($dir)
-	{
-		if (@fopen("ssh2.sftp://{$this->handle}$dir/kickstart.dat", 'w') === false)
-		{
-			return false;
-		}
-		else
-		{
-			@ssh2_sftp_unlink($this->handle, $dir . '/kickstart.dat');
-
-			return true;
-		}
-	}
-
-	public function createDirRecursive($dirName, $perms)
-	{
-		// Strip absolute filesystem path to website's root
-		$removePath = AKFactory::get('kickstart.setup.destdir', '');
-		if (!empty($removePath))
-		{
-			// UNIXize the paths
-			$removePath = str_replace('\\', '/', $removePath);
-			$dirName    = str_replace('\\', '/', $dirName);
-			// Make sure they both end in a slash
-			$removePath = rtrim($removePath, '/\\') . '/';
-			$dirName    = rtrim($dirName, '/\\') . '/';
-			// Process the path removal
-			$left = substr($dirName, 0, strlen($removePath));
-			if ($left == $removePath)
-			{
-				$dirName = substr($dirName, strlen($removePath));
-			}
-		}
-		if (empty($dirName))
-		{
-			$dirName = '';
-		} // 'cause the substr() above may return FALSE.
-
-		$check = '/' . trim($this->dir, '/ ') . '/' . trim($dirName, '/');
-
-		if ($this->is_dir($check))
-		{
-			return true;
-		}
-
-		$alldirs     = explode('/', $dirName);
-		$previousDir = '/' . trim($this->dir, '/ ');
-
-		foreach ($alldirs as $curdir)
-		{
-			if (!$curdir)
-			{
-				continue;
-			}
-
-			$check = $previousDir . '/' . $curdir;
-
-			if (!$this->is_dir($check))
-			{
-				// Proactively try to delete a file by the same name
-				@ssh2_sftp_unlink($this->handle, $check);
-
-				if (@ssh2_sftp_mkdir($this->handle, $check) === false)
-				{
-					// If we couldn't create the directory, attempt to fix the permissions in the PHP level and retry!
-					$this->fixPermissions($check);
-
-					if (@ssh2_sftp_mkdir($this->handle, $check) === false)
-					{
-						// Can we fall back to pure PHP mode, sire?
-						if (!@mkdir($check))
-						{
-							$this->setError(AKText::sprintf('FTP_CANT_CREATE_DIR', $check));
-
-							return false;
-						}
-						else
-						{
-							// Since the directory was built by PHP, change its permissions
-							$trustMeIKnowWhatImDoing =
-								500 + 10 + 1; // working around overzealous scanners written by bozos
-							@chmod($check, $trustMeIKnowWhatImDoing);
-
-							return true;
-						}
-					}
-				}
-
-				@ssh2_sftp_chmod($this->handle, $check, $perms);
-			}
-
-			$previousDir = $check;
-		}
-
-		return true;
-	}
-
-	private function is_dir($dir)
-	{
-		return $this->sftp_chdir($dir);
-	}
-
-	private function fixPermissions($path)
-	{
-		// Turn off error reporting
-		if (!defined('KSDEBUG'))
-		{
-			$oldErrorReporting = @error_reporting(0);
-		}
-
-		// Get UNIX style paths
-		$relPath  = str_replace('\\', '/', $path);
-		$basePath = rtrim(str_replace('\\', '/', KSROOTDIR), '/');
-		$basePath = rtrim($basePath, '/');
-
-		if (!empty($basePath))
-		{
-			$basePath .= '/';
-		}
-
-		// Remove the leading relative root
-		if (substr($relPath, 0, strlen($basePath)) == $basePath)
-		{
-			$relPath = substr($relPath, strlen($basePath));
-		}
-
-		$dirArray  = explode('/', $relPath);
-		$pathBuilt = rtrim($basePath, '/');
-
-		foreach ($dirArray as $dir)
-		{
-			if (empty($dir))
-			{
-				continue;
-			}
-
-			$oldPath = $pathBuilt;
-			$pathBuilt .= '/' . $dir;
-
-			if (is_dir($oldPath . '/' . $dir))
-			{
-				$trustMeIKnowWhatImDoing = 500 + 10 + 1; // working around overzealous scanners written by bozos
-				@chmod($oldPath . '/' . $dir, $trustMeIKnowWhatImDoing);
-			}
-			else
-			{
-				$trustMeIKnowWhatImDoing = 500 + 10 + 1; // working around overzealous scanners written by bozos
-				if (@chmod($oldPath . '/' . $dir, $trustMeIKnowWhatImDoing) === false)
-				{
-					@unlink($oldPath . $dir);
-				}
-			}
-		}
-
-		// Restore error reporting
-		if (!defined('KSDEBUG'))
-		{
-			@error_reporting($oldErrorReporting);
-		}
-	}
-
-	function __wakeup()
-	{
-		$this->connect();
-	}
-
-	/*
-	 * Tries to fix directory/file permissions in the PHP level, so that
-	 * the FTP operation doesn't fail.
-	 * @param $path string The full path to a directory or file
-	 */
-
-	public function process()
-	{
-		if (is_null($this->tempFilename))
-		{
-			// If an empty filename is passed, it means that we shouldn't do any post processing, i.e.
-			// the entity was a directory or symlink
-			return true;
-		}
-
-		$remotePath      = dirname($this->filename);
-		$absoluteFSPath  = dirname($this->filename);
-		$absoluteFTPPath = '/' . trim($this->dir, '/') . '/' . trim($remotePath, '/');
-		$onlyFilename    = basename($this->filename);
-
-		$remoteName = $absoluteFTPPath . '/' . $onlyFilename;
-
-		$ret = $this->sftp_chdir($absoluteFTPPath);
-
-		if ($ret === false)
-		{
-			$ret = $this->createDirRecursive($absoluteFSPath, 0755);
-
-			if ($ret === false)
-			{
-				$this->setError(AKText::sprintf('SFTP_COULDNT_UPLOAD', $this->filename));
-
-				return false;
-			}
-
-			$ret = $this->sftp_chdir($absoluteFTPPath);
-
-			if ($ret === false)
-			{
-				$this->setError(AKText::sprintf('SFTP_COULDNT_UPLOAD', $this->filename));
-
-				return false;
-			}
-		}
-
-		// Create the file
-		$ret = $this->write($this->tempFilename, $remoteName);
-
-		// If I got a -1 it means that I wasn't able to open the file, so I have to stop here
-		if ($ret === -1)
-		{
-			$this->setError(AKText::sprintf('SFTP_COULDNT_UPLOAD', $this->filename));
-
-			return false;
-		}
-
-		if ($ret === false)
-		{
-			// If we couldn't create the file, attempt to fix the permissions in the PHP level and retry!
-			$this->fixPermissions($this->filename);
-			$this->unlink($this->filename);
-
-			$ret = $this->write($this->tempFilename, $remoteName);
-		}
-
-		@unlink($this->tempFilename);
-
-		if ($ret === false)
-		{
-			$this->setError(AKText::sprintf('SFTP_COULDNT_UPLOAD', $this->filename));
-
-			return false;
-		}
-		$restorePerms = AKFactory::get('kickstart.setup.restoreperms', false);
-
-		if ($restorePerms)
-		{
-			$this->chmod($remoteName, $this->perms);
-		}
-		else
-		{
-			$this->chmod($remoteName, 0644);
-		}
-
-		if (@is_file($this->filename) || @is_link($this->filename))
-		{
-			clearFileInOPCache($this->filename);
-		}
-
-		return true;
-	}
-
-	private function write($local, $remote)
-	{
-		$fp      = @fopen("ssh2.sftp://{$this->handle}$remote", 'w');
-		$localfp = @fopen($local, 'r');
-
-		if ($fp === false)
-		{
-			return -1;
-		}
-
-		if ($localfp === false)
-		{
-			@fclose($fp);
-
-			return -1;
-		}
-
-		$res = true;
-
-		while (!feof($localfp) && ($res !== false))
-		{
-			$buffer = @fread($localfp, 65567);
-			$res    = @fwrite($fp, $buffer);
-		}
-
-		@fclose($fp);
-		@fclose($localfp);
-
-		return $res;
-	}
-
-	public function unlink($file)
-	{
-		$check = '/' . trim($this->dir, '/') . '/' . trim($file, '/');
-
-		return @ssh2_sftp_unlink($this->handle, $check);
-	}
-
-	public function chmod($file, $perms)
-	{
-		return @ssh2_sftp_chmod($this->handle, $file, $perms);
-	}
-
-	public function processFilename($filename, $perms = 0755)
-	{
-		// Catch some error conditions...
-		if ($this->getError())
-		{
-			return false;
-		}
-
-		// If a null filename is passed, it means that we shouldn't do any post processing, i.e.
-		// the entity was a directory or symlink
-		if (is_null($filename))
-		{
-			$this->filename     = null;
-			$this->tempFilename = null;
-
-			return null;
-		}
-
-		// Strip absolute filesystem path to website's root
-		$removePath = AKFactory::get('kickstart.setup.destdir', '');
-		if (!empty($removePath))
-		{
-			$left = substr($filename, 0, strlen($removePath));
-			if ($left == $removePath)
-			{
-				$filename = substr($filename, strlen($removePath));
-			}
-		}
-
-		// Trim slash on the left
-		$filename = ltrim($filename, '/');
-
-		$this->filename     = $filename;
-		$this->tempFilename = tempnam($this->tempDir, 'kickstart-');
-		$this->perms        = $perms;
-
-		if (empty($this->tempFilename))
-		{
-			// Oops! Let's try something different
-			$this->tempFilename = $this->tempDir . '/kickstart-' . time() . '.dat';
-		}
-
-		return $this->tempFilename;
-	}
-
-	public function close()
-	{
-		unset($this->_connection);
-		unset($this->handle);
-	}
-
-	public function rmdir($directory)
-	{
-		$check = '/' . trim($this->dir, '/') . '/' . trim($directory, '/');
-
-		return @ssh2_sftp_rmdir($this->handle, $check);
-	}
-
-	public function rename($from, $to)
-	{
-		$from = '/' . trim($this->dir, '/') . '/' . trim($from, '/');
-		$to   = '/' . trim($this->dir, '/') . '/' . trim($to, '/');
-
-		$result = @ssh2_sftp_rename($this->handle, $from, $to);
-
-		if ($result !== true)
-		{
-			return @rename($from, $to);
-		}
-		else
-		{
-			return true;
-		}
-	}
-
-}
-
-
-/**
- * Akeeba Restore
- * An AJAX-powered archive extraction library for JPA, JPS and ZIP archives
- *
- * @package   restore
- * @copyright Copyright (c)2008-2025 Nicholas K. Dionysopoulos / Akeeba Ltd
- * @license   GNU General Public License version 3, or later
- */
-
-/**
  * Hybrid direct / FTP mode file writer
  */
 class AKPostprocHybrid extends AKAbstractPostproc
@@ -3298,8 +2121,6 @@ class AKPostprocHybrid extends AKAbstractPostproc
 	/** @var resource The FTP handle */
 	private $handle = null;
 
-	/** @var null The FTP connection handle */
-	private $_handle = null;
 
 	/**
 	 * Public constructor. Tries to connect to the FTP server.
@@ -3697,7 +2518,42 @@ class AKPostprocHybrid extends AKAbstractPostproc
 	}
 
 	/**
+	 * Release the FTP connection before the engine is hibernated into the AJAX response.
+	 *
+	 * @return  void
+	 */
+	public function shutdown()
+	{
+		if (!is_null($this->handle) && (is_resource($this->handle) || is_object($this->handle)))
+		{
+			@ftp_close($this->handle);
+		}
+
+		$this->handle = null;
+	}
+
+	/**
 	 * Called after unserialisation, tries to reconnect to FTP
+	 *
+	 * There is deliberately no matching __sleep(). There was one, and it broke every Hybrid
+	 * extraction which took more than a single AJAX step: it returned nothing, and PHP requires
+	 * __sleep() to return the list of properties to serialise. An object whose __sleep() returns a
+	 * non-array is serialised as N — but the back-reference to it from the unarchiver's
+	 * postProcEngine property is still emitted as r:<slot>, pointing at a slot which is no longer an
+	 * object. The whole snapshot then fails to unserialize(), the Factory silently resets to empty,
+	 * and the next step dies with "Invalid archive type or extension in file" — naming no file,
+	 * because the configuration went down with the snapshot.
+	 *
+	 * Nor can it be fixed by returning array_keys(get_object_vars($this)): called from this class
+	 * that does not see AKAbstractObject's private properties, so the error and warning queues would
+	 * be dropped from every snapshot instead.
+	 *
+	 * What replaced it is shutdown(), called on every post-processing engine by
+	 * AKFactory::serialize() just before the snapshot is taken. It closes the connection and nulls
+	 * the handle, and this method reconnects on the way back in. That ordering matters on PHP 8.1
+	 * and later, where ftp_connect() returns an FTP\Connection OBJECT rather than a resource:
+	 * serialize() throws on one outright, where PHP 7.4 quietly stored a resource as the integer 0.
+	 * A fix which looks correct on 7.4 is therefore a fatal error on everything newer.
 	 */
 	public function __wakeup()
 	{
@@ -3706,20 +2562,6 @@ class AKPostprocHybrid extends AKAbstractPostproc
 			$this->connect();
 		}
 	}
-
-	public function __sleep()
-	{
-		if ($this->useFTP)
-		{
-			if (!is_null($this->_handle) && is_resource($this->_handle))
-			{
-				@ftp_close($this->_handle);
-			}
-		}
-
-		$this->_handle = null;
-	}
-
 
 	public function __destruct()
 	{
@@ -3842,7 +2684,7 @@ class AKPostprocHybrid extends AKAbstractPostproc
 
 		if ($this->useFTP && ($ret === false))
 		{
-			@ftp_chmod($this->_handle, $perms, $remoteName);
+			@ftp_chmod($this->handle, $perms, $remoteName);
 		}
 
 		if (@is_file($this->filename) || @is_link($this->filename))
@@ -5169,8 +4011,16 @@ class AKUnarchiverZIP extends AKUnarchiverJPA
 			}
 		}
 
-		// If bit 3 of the bitflag is set, expectDataDescriptor is true
-		$this->expectDataDescriptor = ($headerData['bitflag'] & 4) == 4;
+		/**
+		 * If bit 3 of the bitflag is set, expectDataDescriptor is true.
+		 *
+		 * Bit 3 is 0x0008. This tested 0x0004, which is bit 2 — one of the two bits carrying the
+		 * DEFLATE compression option, set by every writer which compresses with its "fast" setting,
+		 * 7-Zip and WinZip among them. Such an archive was read as though a data descriptor followed
+		 * each entity, so every offset after the first was wrong and the archive was rejected as
+		 * corrupt.
+		 */
+		$this->expectDataDescriptor = ($headerData['bitflag'] & 8) == 8;
 
 		$this->fileHeader            = new stdClass();
 		$this->fileHeader->timestamp = 0;
@@ -5846,6 +4696,17 @@ class AKUnarchiverJPS extends AKUnarchiverJPA
 		if ($this->mustSkip())
 		{
 			return true;
+		}
+
+		/**
+		 * A symlink entity never has realFile set — readFileHeader() only assigns it for 'file' and
+		 * 'dir' — so without this the line below is strrpos(null, '/'), which is a deprecation as of
+		 * PHP 8.1 and yields the wrong parent directory for the link. AKUnarchiverJPA has carried
+		 * this fallback all along; the JPS copy of the method did not.
+		 */
+		if (empty($this->fileHeader->realFile))
+		{
+			$this->fileHeader->realFile = $this->fileHeader->file;
 		}
 
 		// Do we need to create a directory?
@@ -6874,7 +5735,7 @@ class AKUtilsZapper extends AKAbstractPart
 		$defaultExcluded = $this->getDefaultExclusions();
 
 		$parameters = array_merge([
-			'root'     => rtrim(AKFactory::get('kickstart.setup.destdir'), '/' . DIRECTORY_SEPARATOR),
+			'root'     => rtrim((string) AKFactory::get('kickstart.setup.destdir', ''), '/' . DIRECTORY_SEPARATOR),
 			'excluded' => $defaultExcluded,
             'dryRun'   => AKFactory::get('kickstart.setup.dryrun', false)
 		], $this->_parametersArray);
@@ -7340,7 +6201,7 @@ class AKUtilsZapper extends AKAbstractPart
 	private function getDefaultExclusions()
 	{
 		$ret     = [];
-		$destDir = AKFactory::get('kickstart.setup.destdir');
+		$destDir = (string) AKFactory::get('kickstart.setup.destdir', '');
 
 		/**
 		 * Exclude Kickstart / restore.php itself. Otherwise it'd crash!
@@ -7363,8 +6224,8 @@ class AKUtilsZapper extends AKAbstractPart
 		 * backups before you restore from a previous backup which might not be the one you actually wanted. I will call
 		 * this feature "clumsy-proofing".
 		 */
-		$backupArchive   = AKFactory::get('kickstart.setup.sourcefile');
-		$backupDirectory = AKFactory::get('kickstart.setup.sourcepath');
+		$backupArchive   = (string) AKFactory::get('kickstart.setup.sourcefile', '');
+		$backupDirectory = (string) AKFactory::get('kickstart.setup.sourcepath', '');
 		$backupDirectory = empty($backupDirectory) ? dirname($backupArchive) : $backupDirectory;
 
 		if ($backupDirectory != $destDir)
@@ -7453,7 +6314,7 @@ class AKUtilsZapper extends AKAbstractPart
 		 * Exclude it even if we have any AddHandler directive, otherwise the site will be borked if the user
 		 * chooses not to rename the .htaccess file
 		 */
-		if (AKFactory::get('kickstart.stealth.enable') || AKFactory::get('kickstart.setup.phphandlers', []))
+		if (AKFactory::get('kickstart.stealth.enable', false) || AKFactory::get('kickstart.setup.phphandlers', []))
 		{
 			$ret[] = $destDir . '/.htaccess';
 		}
@@ -7512,16 +6373,6 @@ class AKUtilsZapper extends AKAbstractPart
  */
 function runZapper(AKAbstractPartObserver $observer)
 {
-	// This method should only run in restore.php mode or when we have Kickstart Professional.
-	$isKickstart = defined('KICKSTART');
-	$isPro       = defined('KICKSTARTPRO') ? KICKSTARTPRO : false;
-	$isDebug     = defined('KSDEBUG') ? KSDEBUG : false;
-
-	if ($isKickstart && (!$isPro && !$isDebug))
-	{
-		return false;
-	}
-
 	// Is the feature enabled?
     $enabled = AKFactory::get('kickstart.setup.zapbefore', 0);
 
@@ -7616,7 +6467,6 @@ class AKText extends AKAbstractObject
   'WRONG_FTP_PATH1' => 'Wrong FTP initial directory - the directory doesn\'t exist',
   'FTP_CANT_CREATE_DIR' => 'Could not create directory %s',
   'FTP_TEMPDIR_NOT_WRITABLE' => 'Could not find or create a writable temporary directory',
-  'SFTP_TEMPDIR_NOT_WRITABLE' => 'Could not find or create a writable temporary directory',
   'FTP_COULDNT_UPLOAD' => 'Could not upload %s',
   'THINGS_HEADER' => 'Things you should know about Akeeba Kickstart',
   'THINGS_01' => 'Kickstart is not an installer. It is an archive extraction tool. The actual installer was put inside the archive file at backup time.',
@@ -7634,8 +6484,6 @@ class AKText extends AKAbstractObject
   'WRITE_TO_FILES' => 'Write to files:',
   'WRITE_HYBRID' => 'Hybrid (use FTP only if needed)',
   'WRITE_DIRECTLY' => 'Directly',
-  'WRITE_FTP' => 'Use FTP for all files',
-  'WRITE_SFTP' => 'Use SFTP for all files',
   'FTP_HOST' => '(S)FTP host name:',
   'FTP_PORT' => '(S)FTP port:',
   'FTP_FTPS' => 'Use FTP over SSL (FTPS)',
@@ -7645,9 +6493,7 @@ class AKText extends AKAbstractObject
   'FTP_DIR' => '(S)FTP directory:',
   'FTP_TEMPDIR' => 'Temporary directory:',
   'FTP_CONNECTION_OK' => 'FTP Connection Established',
-  'SFTP_CONNECTION_OK' => 'SFTP Connection Established',
   'FTP_CONNECTION_FAILURE' => 'The FTP Connection Failed',
-  'SFTP_CONNECTION_FAILURE' => 'The SFTP Connection Failed',
   'FTP_TEMPDIR_WRITABLE' => 'The temporary directory is writable.',
   'FTP_TEMPDIR_UNWRITABLE' => 'The temporary directory is not writable. Please check the permissions.',
   'FTP_BROWSE' => 'Browse',
@@ -7658,19 +6504,11 @@ class AKText extends AKAbstractObject
   'FTPBROWSER_ERROR_UNSUPPORTED' => 'Sorry, your FTP server doesn\'t support our FTP directory browser.',
   'FTPBROWSER_LBL_GOPARENT' => '&lt;up one level&gt;',
   'FTPBROWSER_LBL_ERROR' => 'An error occurred',
-  'SFTP_NO_SSH2' => 'Your web server does not have the SSH2 PHP module, therefore cannot connect to SFTP servers.',
-  'SFTP_NO_FTP_SUPPORT' => 'Your SSH server does not allow SFTP connections',
-  'SFTP_WRONG_USER' => 'Wrong SFTP username or password',
-  'SFTP_WRONG_STARTING_DIR' => 'You must supply a valid absolute path',
-  'SFTPBROWSER_ERROR_NOACCESS' => 'Directory doesn\'t exist or you don\'t have enough permissions to access it',
-  'SFTP_COULDNT_UPLOAD' => 'Could not upload %s',
-  'SFTP_CANT_CREATE_DIR' => 'Could not create directory %s',
   'UI-ROOT' => '&lt;root&gt;',
   'CONFIG_UI_FTPBROWSER_TITLE' => 'FTP Directory Browser',
   'BTN_CHECK' => 'Check',
   'BTN_RESET' => 'Reset',
   'BTN_TESTFTPCON' => 'Test FTP Connection',
-  'BTN_TESTSFTPCON' => 'Test SFTP Connection',
   'BTN_GOTOSTART' => 'Start over',
   'BTN_RETRY' => 'Retry',
   'FINE_TUNE' => 'Fine-tune',
@@ -7731,13 +6569,13 @@ class AKText extends AKAbstractObject
   'WRONG_FTP_PATH2' => 'Wrong FTP initial directory - the directory doesn\'t correspond to your site\'s web root',
   'ARCHIVE_DIRECTORY' => 'Archive directory:',
   'RELOAD_ARCHIVES' => 'Reload',
-  'CONFIG_UI_SFTPBROWSER_TITLE' => 'SFTP Directory Browser',
   'ERR_COULD_NOT_OPEN_ARCHIVE_PART' => 'Could not open archive part file %s for reading. Check that the file exists, is readable by the web server and is not in a directory made out of reach by chroot, open_basedir restrictions or any other restriction put in place by your host.',
   'RENAME_FILES' => 'Rename server configuration files before extraction',
   'BTN_SHOW_FINE_TUNE' => 'Show advanced options (for experts)',
   'RESTORE_PERMISSIONS' => 'Restore file permissions',
   'ZAPBEFORE' => 'Delete everything before extraction',
   'ZAPBEFORE_HELP' => 'Tries to delete all existing files and folders under the directory where Kickstart is stored before extracting the backup archive. It DOES NOT take into account which files and folders exist in the backup archive. Files and folders deleted by this feature CAN NOT be recovered. <strong>WARNING! THIS MAY DELETE FILES AND FOLDERS WHICH DO NOT BELONG TO YOUR SITE. USE WITH EXTREME CAUTION. BY ENABLING THIS FEATURE YOU ASSUME ALL RESPONSIBILITY AND LIABILITY.</strong>',
+  'AKS3_ERR_NOTFOUND' => 'There is no file named %s in the bucket %s. Please check the file name and try again.',
 );
 
 	/**
@@ -7749,6 +6587,7 @@ class AKText extends AKAbstractObject
   'AUTOMODEON' => 'Ο αυτόματος τρόπος λειτουργίας ενεργοποιήθηκε',
   'ERR_NOT_A_JPA_FILE' => 'Το αρχείο δεν είναι αρχείο αρχειοθέτησης JPA',
   'ERR_CORRUPT_ARCHIVE' => 'Το αρχείο αρχειοθέτησης είναι κατεστραμμένο, τετμημένο ή λείπουν τμήματα του αρχείου αρχειοθέτησης',
+  'ERR_PATH_OUTSIDE_ROOT' => 'Το αρχείο αρχειοθέτησης περιέχει μια καταχώριση, «%s», που θα γραφόταν εκτός του φακέλου εξαγωγής. Η εξαγωγή διακόπηκε. Ένα νόμιμο αρχείο αρχειοθέτησης αντιγράφου ασφαλείας δεν το κάνει ποτέ αυτό, γι\' αυτό θεωρήστε το αρχείο αναξιόπιστο: είτε είναι κατεστραμμένο είτε έχει παραποιηθεί.',
   'ERR_INVALID_ARCHIVE_LONG' => 'Το αρχείο αρχειοθέτησης φαίνεται να είναι κατεστραμμένο ή λείπουν τμήματα. Αν τα αντίγραφα ασφαλείας σας αποτελούνται από πολλαπλά αρχεία, βεβαιωθείτε ότι έχετε κατεβάσει όλα τα αρχεία τμημάτων αρχειοθέτησης (αρχεία με το ίδιο όνομα και επεκτάσεις .%s, .%s01, .%2$s02…). Βεβαιωθείτε ότι κατεβάσατε <em>και</em> ανεβάσατε τα αρχεία χρησιμοποιώντας SFTP, ή FTP σε λειτουργία μεταφοράς Binary και ελέγξατε ότι το μέγεθός τους ταιριάζει με τα μεγέθη που αναφέρονται στη σελίδα Διαχείριση Αντιγράφων Ασφαλείας του Akeeba Backup / Akeeba Solo.',
   'ERR_INVALID_LOGIN' => 'Μη έγκυρη σύνδεση',
   'COULDNT_CREATE_DIR' => 'Αδυναμία δημιουργίας του φακέλου %s',
@@ -7758,7 +6597,6 @@ class AKText extends AKAbstractObject
   'WRONG_FTP_PATH1' => 'Λάθος αρχικός φάκελος FTP - ο φάκελος δεν υπάρχει',
   'FTP_CANT_CREATE_DIR' => 'Αδυναμία δημιουργίας φακέλου %s',
   'FTP_TEMPDIR_NOT_WRITABLE' => 'Αδυναμία εύρεσης ή δημιουργίας εγγράψιμου προσωρινού φακέλου',
-  'SFTP_TEMPDIR_NOT_WRITABLE' => 'Αδυναμία εύρεσης ή δημιουργίας εγγράψιμου προσωρινού φακέλου',
   'FTP_COULDNT_UPLOAD' => 'Αδυναμία ανέβασματος του %s',
   'THINGS_HEADER' => 'Πράγματα που πρέπει να γνωρίζετε για το Akeeba Kickstart',
   'THINGS_01' => 'Το Kickstart δεν είναι πρόγραμμα εγκατάστασης. Είναι ένα εργαλείο εξαγωγής αρχείων αρχειοθέτησης. Το πραγματικό πρόγραμμα εγκατάστασης τοποθετήθηκε μέσα στο αρχείο αρχειοθέτησης κατά την ώρα δημιουργίας του αντιγράφου ασφαλείας.',
@@ -7776,8 +6614,6 @@ class AKText extends AKAbstractObject
   'WRITE_TO_FILES' => 'Εγγραφή σε αρχεία:',
   'WRITE_HYBRID' => 'Υβριδική (χρήση FTP μόνο όταν χρειάζεται)',
   'WRITE_DIRECTLY' => 'Απευθείας',
-  'WRITE_FTP' => 'Χρήση FTP για όλα τα αρχεία',
-  'WRITE_SFTP' => 'Χρήση SFTP για όλα τα αρχεία',
   'FTP_HOST' => 'Όνομα (S)FTP host:',
   'FTP_PORT' => '(S)FTP port:',
   'FTP_FTPS' => 'Χρήση FTP μέσω SSL (FTPS)',
@@ -7787,9 +6623,7 @@ class AKText extends AKAbstractObject
   'FTP_DIR' => 'Φάκελος (S)FTP:',
   'FTP_TEMPDIR' => 'Προσωρινός φάκελος:',
   'FTP_CONNECTION_OK' => 'Η σύνδεση FTP δημιουργήθηκε',
-  'SFTP_CONNECTION_OK' => 'Η σύνδεση SFTP δημιουργήθηκε',
   'FTP_CONNECTION_FAILURE' => 'Αποτυχία σύνδεσης FTP',
-  'SFTP_CONNECTION_FAILURE' => 'Αποτυχία σύνδεσης SFTP',
   'FTP_TEMPDIR_WRITABLE' => 'Ο προσωρινός φάκελος είναι εγγράψιμος.',
   'FTP_TEMPDIR_UNWRITABLE' => 'Ο προσωρινός φάκελος δεν είναι εγγράψιμος. Ελέγξτε τα δικαιώματα πρόσβασης.',
   'FTP_BROWSE' => 'Περιήγηση',
@@ -7800,19 +6634,11 @@ class AKText extends AKAbstractObject
   'FTPBROWSER_ERROR_UNSUPPORTED' => 'Λυπούμαστε, ο FTP server σας δεν υποστηρίζει τον περιηγητή φακέλων FTP.',
   'FTPBROWSER_LBL_GOPARENT' => '&lt;ένας βαθμός πάνω&gt;',
   'FTPBROWSER_LBL_ERROR' => 'Προέκυψε σφάλμα',
-  'SFTP_NO_SSH2' => 'Ο web server σας δεν διαθέτει το module PHP SSH2, επομένως δεν μπορεί να συνδεθεί με servers SFTP.',
-  'SFTP_NO_FTP_SUPPORT' => 'Ο SSH server σας δεν επιτρέπει συνδέσεις SFTP',
-  'SFTP_WRONG_USER' => 'Λάθος όνομα χρήστη ή κωδικός πρόσβασης SFTP',
-  'SFTP_WRONG_STARTING_DIR' => 'Πρέπει να παρέχετε μια έγκυρη απόλυτη διαδρομή',
-  'SFTPBROWSER_ERROR_NOACCESS' => 'Ο φάκελος δεν υπάρχει ή δεν έχετε αρκετά δικαιώματα για πρόσβαση',
-  'SFTP_COULDNT_UPLOAD' => 'Αδυναμία ανέβασματος του %s',
-  'SFTP_CANT_CREATE_DIR' => 'Αδυναμία δημιουργίας φακέλου %s',
   'UI-ROOT' => '&lt;ρίζα&gt;',
   'CONFIG_UI_FTPBROWSER_TITLE' => 'Περιηγητής φακέλων FTP',
   'BTN_CHECK' => 'Έλεγχος',
   'BTN_RESET' => 'Επαναφορά',
   'BTN_TESTFTPCON' => 'Δοκιμή σύνδεσης FTP',
-  'BTN_TESTSFTPCON' => 'Δοκιμή σύνδεσης SFTP',
   'BTN_GOTOSTART' => 'Επανεκκίνηση',
   'BTN_RETRY' => 'Επανάληψη',
   'FINE_TUNE' => 'Λεπτή ρύθμιση',
@@ -7873,13 +6699,13 @@ class AKText extends AKAbstractObject
   'WRONG_FTP_PATH2' => 'Λάθος αρχικός φάκελος FTP - ο φάκελος δεν αντιστοιχεί στη ρίζα ιστού του ιστότοπού σας',
   'ARCHIVE_DIRECTORY' => 'Φάκελος αρχείων αρχειοθέτησης:',
   'RELOAD_ARCHIVES' => 'Επαναφόρτωση',
-  'CONFIG_UI_SFTPBROWSER_TITLE' => 'Περιηγητής φακέλων SFTP',
   'ERR_COULD_NOT_OPEN_ARCHIVE_PART' => 'Αδυναμία ανοίγματος του αρχείου τμήματος αρχειοθέτησης %s για ανάγνωση. Ελέγξτε ότι το αρχείο υπάρχει, είναι αναγνώσιμο από τον web server και δεν βρίσκεται σε φάκελο που είναι μη προσβάσιμος λόγω περιορισμών chroot, open_basedir ή οποιουδήποτε άλλου περιορισμού που έχει θέσει ο host σας.',
   'RENAME_FILES' => 'Μετονομασία αρχείων διαμόρφωσης server πριν την εξαγωγή',
   'BTN_SHOW_FINE_TUNE' => 'Εμφάνιση προηγμένων επιλογών (για ειδικούς)',
   'RESTORE_PERMISSIONS' => 'Αποκατάσταση δικαιωμάτων αρχείων',
   'ZAPBEFORE' => 'Διαγραφή όλων πριν την εξαγωγή',
   'ZAPBEFORE_HELP' => 'Προσπαθεί να διαγράψει όλα τα υπάρχοντα αρχεία και φακέλους κάτω από τον φάκελο όπου βρίσκεται το Kickstart πριν την εξαγωγή του αρχείου αρχειοθέτησης αντιγράφου ασφαλείας. ΔΕΝ λαμβάνει υπόψη ποια αρχεία και φακέλοι υπάρχουν στο αρχείο αρχειοθέτησης αντιγράφου ασφαλείας. Τα αρχεία και οι φάκελοι που διαγράφονται από αυτή τη δυνατότητα ΔΕΝ ΜΠΟΡΟΥΝ να ανακτηθούν. <strong>ΠΡΟΕΙΔΟΠΟΙΗΣΗ! ΑΥΤΟ ΜΠΟΡΕΙ ΝΑ ΔΙΑΓΡΕΙ ΑΡΧΕΙΑ ΚΑΙ ΦΑΚΕΛΟΥΣ ΠΟΥ ΔΕΝ ΑΝΗΚΟΥΝ ΣΤΟΝ ΙΣΤΟΤΟΠΟ ΣΑΣ. ΧΡΗΣΙΜΟΠΟΙΗΣΤΕ ΜΕ ΕΞΤΡΕΜΗ ΠΡΟΣΟΧΗ. ΕΝΕΡΓΟΠΟΙΩΝΤΑΣ ΑΥΤΗ ΤΗ ΔΥΝΑΤΟΤΗΤΑ ΑΝΑΛΑΜΒΑΝΕΤΕ ΟΛΗ ΤΗΝ ΕΥΘΥΝΗ ΚΑΙ ΑΠΟΔΑΝΕΥΘΥΝΩΣΗ.</strong>',
+  'AKS3_ERR_NOTFOUND' => 'Δεν υπάρχει αρχείο με όνομα %s στο bucket %s. Ελέγξτε το όνομα του αρχείου και δοκιμάστε ξανά.',
 );
 
 	/**
@@ -7891,6 +6717,7 @@ class AKText extends AKAbstractObject
   'AUTOMODEON' => 'Mode automatique activé',
   'ERR_NOT_A_JPA_FILE' => 'Le fichier n\'est pas une archive JPA',
   'ERR_CORRUPT_ARCHIVE' => 'Le fichier archive est corrompu, tronqué ou des parties de l\'archive sont manquantes',
+  'ERR_PATH_OUTSIDE_ROOT' => 'Le fichier archive contient une entrée, « %s », qui serait écrite en dehors du dossier d\'extraction. L\'extraction a été arrêtée. Une archive de sauvegarde légitime ne fait jamais cela ; considérez donc cette archive comme non fiable : elle est soit endommagée, soit falsifiée.',
   'ERR_INVALID_ARCHIVE_LONG' => 'Le fichier archive semble corrompu, ou des parties de l\'archive sont manquantes. Si vos sauvegardes se composent de plusieurs fichiers, veuillez vous assurer d\'avoir téléchargé tous les fichiers parties de l\'archive (fichiers portant le même nom et les extensions .%s, .%s01, .%2$s02…). Veuillez vous assurer de télécharger <em>et</em> téléverser les fichiers en utilisant SFTP, ou FTP en mode de transfert binaire et vérifier que la taille de leurs fichiers correspond aux tailles indiquées dans la page Gérer les sauvegardes de Akeeba Backup / Akeeba Solo.',
   'ERR_INVALID_LOGIN' => 'Identifiant de connexion invalide',
   'COULDNT_CREATE_DIR' => 'Impossible de créer le dossier %s',
@@ -7900,7 +6727,6 @@ class AKText extends AKAbstractObject
   'WRONG_FTP_PATH1' => 'Répertoire initial FTP incorrect - le répertoire n\'existe pas',
   'FTP_CANT_CREATE_DIR' => 'Impossible de créer le répertoire %s',
   'FTP_TEMPDIR_NOT_WRITABLE' => 'Impossible de trouver ou de créer un répertoire temporaire accessible en écriture',
-  'SFTP_TEMPDIR_NOT_WRITABLE' => 'Impossible de trouver ou de créer un répertoire temporaire accessible en écriture',
   'FTP_COULDNT_UPLOAD' => 'Impossible de téléverser %s',
   'THINGS_HEADER' => 'Points à connaître au sujet de Akeeba Kickstart',
   'THINGS_01' => 'Kickstart n\'est pas un programme d\'installation. C\'est un outil d\'extraction d\'archives. Le programme d\'installation proprement dit a été placé dans le fichier archive lors de la sauvegarde.',
@@ -7918,8 +6744,6 @@ class AKText extends AKAbstractObject
   'WRITE_TO_FILES' => 'Écrire dans les fichiers :',
   'WRITE_HYBRID' => 'Hybride (utiliser FTP uniquement si nécessaire)',
   'WRITE_DIRECTLY' => 'Directement',
-  'WRITE_FTP' => 'Utiliser FTP pour tous les fichiers',
-  'WRITE_SFTP' => 'Utiliser SFTP pour tous les fichiers',
   'FTP_HOST' => 'Nom d\'hôte (S)FTP :',
   'FTP_PORT' => 'Port (S)FTP :',
   'FTP_FTPS' => 'Utiliser FTP sur SSL (FTPS)',
@@ -7929,9 +6753,7 @@ class AKText extends AKAbstractObject
   'FTP_DIR' => 'Répertoire (S)FTP :',
   'FTP_TEMPDIR' => 'Répertoire temporaire :',
   'FTP_CONNECTION_OK' => 'Connexion FTP établie',
-  'SFTP_CONNECTION_OK' => 'Connexion SFTP établie',
   'FTP_CONNECTION_FAILURE' => 'La connexion FTP a échoué',
-  'SFTP_CONNECTION_FAILURE' => 'La connexion SFTP a échoué',
   'FTP_TEMPDIR_WRITABLE' => 'Le répertoire temporaire est accessible en écriture.',
   'FTP_TEMPDIR_UNWRITABLE' => 'Le répertoire temporaire n\'est pas accessible en écriture. Veuillez vérifier les permissions.',
   'FTP_BROWSE' => 'Parcourir',
@@ -7942,19 +6764,11 @@ class AKText extends AKAbstractObject
   'FTPBROWSER_ERROR_UNSUPPORTED' => 'Désolé, votre serveur FTP ne prend pas en charge notre navigateur de répertoires FTP.',
   'FTPBROWSER_LBL_GOPARENT' => '&lt;monter d\'un niveau&gt;',
   'FTPBROWSER_LBL_ERROR' => 'Une erreur s\'est produite',
-  'SFTP_NO_SSH2' => 'Votre serveur web ne dispose pas du module PHP SSH2, il ne peut donc pas se connecter aux serveurs SFTP.',
-  'SFTP_NO_FTP_SUPPORT' => 'Votre serveur SSH n\'autorise pas les connexions SFTP',
-  'SFTP_WRONG_USER' => 'Nom d\'utilisateur ou mot de passe SFTP incorrect',
-  'SFTP_WRONG_STARTING_DIR' => 'Vous devez fournir un chemin absolu valide',
-  'SFTPBROWSER_ERROR_NOACCESS' => 'Le répertoire n\'existe pas ou vous n\'avez pas les permissions suffisantes pour y accéder',
-  'SFTP_COULDNT_UPLOAD' => 'Impossible de téléverser %s',
-  'SFTP_CANT_CREATE_DIR' => 'Impossible de créer le répertoire %s',
   'UI-ROOT' => '&lt;racine&gt;',
   'CONFIG_UI_FTPBROWSER_TITLE' => 'Navigateur de répertoires FTP',
   'BTN_CHECK' => 'Vérifier',
   'BTN_RESET' => 'Réinitialiser',
   'BTN_TESTFTPCON' => 'Tester la connexion FTP',
-  'BTN_TESTSFTPCON' => 'Tester la connexion SFTP',
   'BTN_GOTOSTART' => 'Recommencer',
   'BTN_RETRY' => 'Réessayer',
   'FINE_TUNE' => 'Affiner',
@@ -8015,13 +6829,13 @@ class AKText extends AKAbstractObject
   'WRONG_FTP_PATH2' => 'Répertoire initial FTP incorrect - le répertoire ne correspond pas à la racine web de votre site',
   'ARCHIVE_DIRECTORY' => 'Répertoire des archives :',
   'RELOAD_ARCHIVES' => 'Recharger',
-  'CONFIG_UI_SFTPBROWSER_TITLE' => 'Navigateur de répertoires SFTP',
   'ERR_COULD_NOT_OPEN_ARCHIVE_PART' => 'Impossible d\'ouvrir le fichier partie d\'archive %s en lecture. Vérifiez que le fichier existe, est lisible par le serveur web et ne se trouve pas dans un répertoire rendu inaccessible par chroot, les restrictions open_basedir ou toute autre restriction mise en place par votre hébergeur.',
   'RENAME_FILES' => 'Renommer les fichiers de configuration du serveur avant l\'extraction',
   'BTN_SHOW_FINE_TUNE' => 'Afficher les options avancées (pour experts)',
   'RESTORE_PERMISSIONS' => 'Restaurer les permissions de fichiers',
   'ZAPBEFORE' => 'Supprimer tout avant l\'extraction',
   'ZAPBEFORE_HELP' => 'Tente de supprimer tous les fichiers et dossiers existants dans le répertoire où Kickstart est stocké avant d\'extraire l\'archive de sauvegarde. Il NE tient PAS compte des fichiers et dossiers présents dans l\'archive de sauvegarde. Les fichiers et dossiers supprimés par cette fonctionnalité NE PEUVENT PAS être récupérés. <strong>ATTENTION ! CELA PEUT SUPPRIMER DES FICHIERS ET DES DOSSIERS QUI NE APPARTIENNENT PAS À VOTRE SITE. UTILISER AVEC LA PLUS GRANDE PRUDENCE. EN ACTIVANT CETTE FONCTIONNALITÉ, VOUS ASSUMEZ L\'ENTIÈRE RESPONSABILITÉ ET LE RISQUE QUI EN RÉSULTE.</strong>',
+  'AKS3_ERR_NOTFOUND' => 'Il n\'y a aucun fichier nommé %s dans le bucket %s. Veuillez vérifier le nom du fichier et réessayer.',
 );
 
 	/**
@@ -8033,6 +6847,7 @@ class AKText extends AKAbstractObject
   'AUTOMODEON' => 'Automodus aktiviert',
   'ERR_NOT_A_JPA_FILE' => 'Die Datei ist kein JPA-Archiv',
   'ERR_CORRUPT_ARCHIVE' => 'Die Archivdatei ist beschädigt, abgeschnitten oder Archivteile fehlen',
+  'ERR_PATH_OUTSIDE_ROOT' => 'Das Archiv enthält einen Eintrag „%s“, der außerhalb des Extraktionsordners geschrieben würde. Die Extraktion wurde angehalten. Ein legitimes Sicherungsarchiv tut das nie, bitte betrachten Sie dieses Archiv daher als nicht vertrauenswürdig: Es ist entweder beschädigt oder manipuliert worden.',
   'ERR_INVALID_ARCHIVE_LONG' => 'Die Archivdatei scheint beschädigt zu sein oder Archivteile fehlen. Wenn Ihre Sicherungen aus mehreren Dateien bestehen, stellen Sie bitte sicher, dass Sie alle Archivteil-Dateien heruntergeladen haben (Dateien mit demselben Namen und den Erweiterungen .%s, .%s01, .%2$s02…). Bitte laden Sie <em>und</em> laden Sie Dateien über SFTP oder FTP im Binärübertragungsmodus hoch und überprüfen Sie, dass ihre Dateigröße mit den auf der Seite „Sicherungen verwalten" in Akeeba Backup / Akeeba Solo angegebenen Größen übereinstimmt.',
   'ERR_INVALID_LOGIN' => 'Ungültige Anmeldung',
   'COULDNT_CREATE_DIR' => 'Verzeichnis %s konnte nicht erstellt werden',
@@ -8042,7 +6857,6 @@ class AKText extends AKAbstractObject
   'WRONG_FTP_PATH1' => 'Falsches FTP-Startverzeichnis – das Verzeichnis existiert nicht',
   'FTP_CANT_CREATE_DIR' => 'Verzeichnis %s konnte nicht erstellt werden',
   'FTP_TEMPDIR_NOT_WRITABLE' => 'Kein beschreibbares temporäres Verzeichnis gefunden oder erstellt werden',
-  'SFTP_TEMPDIR_NOT_WRITABLE' => 'Kein beschreibbares temporäres Verzeichnis gefunden oder erstellt werden',
   'FTP_COULDNT_UPLOAD' => 'Datei %s konnte nicht hochgeladen werden',
   'THINGS_HEADER' => 'Wichtige Informationen zu Akeeba Kickstart',
   'THINGS_01' => 'Kickstart ist kein Installationsprogramm. Es ist ein Tool zum Entpacken von Archiven. Das eigentliche Installationsprogramm wurde beim Erstellen der Sicherung in die Archivdatei eingebettet.',
@@ -8060,8 +6874,6 @@ class AKText extends AKAbstractObject
   'WRITE_TO_FILES' => 'In Dateien schreiben:',
   'WRITE_HYBRID' => 'Hybrid (FTP nur bei Bedarf verwenden)',
   'WRITE_DIRECTLY' => 'Direkt',
-  'WRITE_FTP' => 'FTP für alle Dateien verwenden',
-  'WRITE_SFTP' => 'SFTP für alle Dateien verwenden',
   'FTP_HOST' => '(S)FTP-Hostname:',
   'FTP_PORT' => '(S)FTP-Port:',
   'FTP_FTPS' => 'FTP über SSL verwenden (FTPS)',
@@ -8071,9 +6883,7 @@ class AKText extends AKAbstractObject
   'FTP_DIR' => '(S)FTP-Verzeichnis:',
   'FTP_TEMPDIR' => 'Temporäres Verzeichnis:',
   'FTP_CONNECTION_OK' => 'FTP-Verbindung hergestellt',
-  'SFTP_CONNECTION_OK' => 'SFTP-Verbindung hergestellt',
   'FTP_CONNECTION_FAILURE' => 'Die FTP-Verbindung ist fehlgeschlagen',
-  'SFTP_CONNECTION_FAILURE' => 'Die SFTP-Verbindung ist fehlgeschlagen',
   'FTP_TEMPDIR_WRITABLE' => 'Das temporäre Verzeichnis ist beschreibbar.',
   'FTP_TEMPDIR_UNWRITABLE' => 'Das temporäre Verzeichnis ist nicht beschreibbar. Bitte überprüfen Sie die Berechtigungen.',
   'FTP_BROWSE' => 'Durchsuchen',
@@ -8084,19 +6894,11 @@ class AKText extends AKAbstractObject
   'FTPBROWSER_ERROR_UNSUPPORTED' => 'Ihr FTP-Server unterstützt unseren FTP-Verzeichnisbrowser leider nicht.',
   'FTPBROWSER_LBL_GOPARENT' => '&lt;eine Ebene nach oben&gt;',
   'FTPBROWSER_LBL_ERROR' => 'Ein Fehler ist aufgetreten',
-  'SFTP_NO_SSH2' => 'Ihr Webserver verfügt nicht über das SSH2-PHP-Modul und kann daher keine Verbindung zu SFTP-Servern herstellen.',
-  'SFTP_NO_FTP_SUPPORT' => 'Ihr SSH-Server erlaubt keine SFTP-Verbindungen',
-  'SFTP_WRONG_USER' => 'Falscher SFTP-Benutzername oder falsches Passwort',
-  'SFTP_WRONG_STARTING_DIR' => 'Sie müssen einen gültigen absoluten Pfad angeben',
-  'SFTPBROWSER_ERROR_NOACCESS' => 'Verzeichnis existiert nicht oder Sie haben nicht genügend Berechtigungen für den Zugriff',
-  'SFTP_COULDNT_UPLOAD' => 'Datei %s konnte nicht hochgeladen werden',
-  'SFTP_CANT_CREATE_DIR' => 'Verzeichnis %s konnte nicht erstellt werden',
   'UI-ROOT' => '&lt;Wurzel&gt;',
   'CONFIG_UI_FTPBROWSER_TITLE' => 'FTP-Verzeichnisbrowser',
   'BTN_CHECK' => 'Prüfen',
   'BTN_RESET' => 'Zurücksetzen',
   'BTN_TESTFTPCON' => 'FTP-Verbindung testen',
-  'BTN_TESTSFTPCON' => 'SFTP-Verbindung testen',
   'BTN_GOTOSTART' => 'Von vorne beginnen',
   'BTN_RETRY' => 'Wiederholen',
   'FINE_TUNE' => 'Feineinstellungen',
@@ -8157,13 +6959,13 @@ class AKText extends AKAbstractObject
   'WRONG_FTP_PATH2' => 'Falsches FTP-Startverzeichnis – das Verzeichnis entspricht nicht dem Web-Stammverzeichnis Ihrer Website',
   'ARCHIVE_DIRECTORY' => 'Archivverzeichnis:',
   'RELOAD_ARCHIVES' => 'Neu laden',
-  'CONFIG_UI_SFTPBROWSER_TITLE' => 'SFTP-Verzeichnisbrowser',
   'ERR_COULD_NOT_OPEN_ARCHIVE_PART' => 'Archivteil-Datei %s konnte nicht zum Lesen geöffnet werden. Überprüfen Sie, ob die Datei existiert, vom Webserver lesbar ist und sich nicht in einem durch chroot-, open_basedir-Einschränkungen oder andere vom Host gesetzte Einschränkungen unzugänglichen Verzeichnis befindet.',
   'RENAME_FILES' => 'Server-Konfigurationsdateien vor der Extraktion umbenennen',
   'BTN_SHOW_FINE_TUNE' => 'Erweiterte Optionen anzeigen (für Experten)',
   'RESTORE_PERMISSIONS' => 'Dateiberechtigungen wiederherstellen',
   'ZAPBEFORE' => 'Vor der Extraktion alles löschen',
   'ZAPBEFORE_HELP' => 'Versucht, alle vorhandenen Dateien und Ordner unter dem Verzeichnis, in dem Kickstart gespeichert ist, vor dem Entpacken des Sicherungsarchivs zu löschen. Es wird NICHT berücksichtigt, welche Dateien und Ordner im Sicherungsarchiv vorhanden sind. Dateien und Ordner, die durch diese Funktion gelöscht werden, Können NICHT wiederhergestellt werden. <strong>WARNUNG! DIES KÖNNTE DATEIEN UND ORNER LÖSCHEN, DIE NICHT ZU IHRER WEBSITE GEHÖREN. MIT EXTREMER VORSICHT VERWENDEN. DURCH DAS AKTIVIEREN DIESER FUNKTION ÜBERNEHMEN SIE DIE VOLLE VERANTWORTUNG UND HAFTUNG.</strong>',
+  'AKS3_ERR_NOTFOUND' => 'Es gibt keine Datei namens %s im Bucket %s. Bitte überprüfen Sie den Dateinamen und versuchen Sie es erneut.',
 );
 
 	/**
@@ -8175,6 +6977,7 @@ class AKText extends AKAbstractObject
   'AUTOMODEON' => 'Modo automático activado',
   'ERR_NOT_A_JPA_FILE' => 'El archivo no es un archivo JPA',
   'ERR_CORRUPT_ARCHIVE' => 'El archivo de archivo está corrupto, truncado o faltan partes del archivo',
+  'ERR_PATH_OUTSIDE_ROOT' => 'El archivo de archivo contiene una entrada, «%s», que se escribiría fuera de la carpeta de extracción. Se ha detenido la extracción. Un archivo de copia de seguridad legítimo nunca hace esto, así que trate este archivo como no fiable: está dañado o ha sido manipulado.',
   'ERR_INVALID_ARCHIVE_LONG' => 'El archivo de archivo parece estar corrupto o faltan partes del archivo. Si sus copias de seguridad consisten en varios archivos, asegúrese de haber descargado todos los archivos de parte del archivo (archivos con el mismo nombre y extensiones .%s, .%s01, .%2$s02…). Asegúrese de descargar <em>y</em> cargar archivos usando SFTP, o FTP en modo de transferencia binaria y compruebe que su tamaño coincide con los tamaños reportados en la página Gestionar copias de seguridad de Akeeba Backup / Akeeba Solo.',
   'ERR_INVALID_LOGIN' => 'Inicio de sesión no válido',
   'COULDNT_CREATE_DIR' => 'No se pudo crear la carpeta %s',
@@ -8184,7 +6987,6 @@ class AKText extends AKAbstractObject
   'WRONG_FTP_PATH1' => 'Directorio inicial FTP incorrecto: el directorio no existe',
   'FTP_CANT_CREATE_DIR' => 'No se pudo crear el directorio %s',
   'FTP_TEMPDIR_NOT_WRITABLE' => 'No se pudo encontrar o crear un directorio temporal con permiso de escritura',
-  'SFTP_TEMPDIR_NOT_WRITABLE' => 'No se pudo encontrar o crear un directorio temporal con permiso de escritura',
   'FTP_COULDNT_UPLOAD' => 'No se pudo cargar %s',
   'THINGS_HEADER' => 'Aspectos que debe conocer sobre Akeeba Kickstart',
   'THINGS_01' => 'Kickstart no es un instalador. Es una herramienta de extracción de archivos. El instalador real se incluyó dentro del archivo en el momento de la copia de seguridad.',
@@ -8202,8 +7004,6 @@ class AKText extends AKAbstractObject
   'WRITE_TO_FILES' => 'Escribir en archivos:',
   'WRITE_HYBRID' => 'Híbrido (usar FTP solo si es necesario)',
   'WRITE_DIRECTLY' => 'Directamente',
-  'WRITE_FTP' => 'Usar FTP para todos los archivos',
-  'WRITE_SFTP' => 'Usar SFTP para todos los archivos',
   'FTP_HOST' => 'Nombre de host (S)FTP:',
   'FTP_PORT' => 'Puerto (S)FTP:',
   'FTP_FTPS' => 'Usar FTP sobre SSL (FTPS)',
@@ -8213,9 +7013,7 @@ class AKText extends AKAbstractObject
   'FTP_DIR' => 'Directorio (S)FTP:',
   'FTP_TEMPDIR' => 'Directorio temporal:',
   'FTP_CONNECTION_OK' => 'Conexión FTP establecida',
-  'SFTP_CONNECTION_OK' => 'Conexión SFTP establecida',
   'FTP_CONNECTION_FAILURE' => 'La conexión FTP falló',
-  'SFTP_CONNECTION_FAILURE' => 'La conexión SFTP falló',
   'FTP_TEMPDIR_WRITABLE' => 'El directorio temporal tiene permiso de escritura.',
   'FTP_TEMPDIR_UNWRITABLE' => 'El directorio temporal no tiene permiso de escritura. Compruebe los permisos.',
   'FTP_BROWSE' => 'Examinar',
@@ -8226,19 +7024,11 @@ class AKText extends AKAbstractObject
   'FTPBROWSER_ERROR_UNSUPPORTED' => 'Lo sentimos, su servidor FTP no admite nuestro explorador de directorios FTP.',
   'FTPBROWSER_LBL_GOPARENT' => '&lt;subir un nivel&gt;',
   'FTPBROWSER_LBL_ERROR' => 'Se produjo un error',
-  'SFTP_NO_SSH2' => 'Su servidor web no tiene el módulo PHP SSH2, por lo tanto no puede conectarse a servidores SFTP.',
-  'SFTP_NO_FTP_SUPPORT' => 'Su servidor SSH no permite conexiones SFTP',
-  'SFTP_WRONG_USER' => 'Nombre de usuario o contraseña SFTP incorrectos',
-  'SFTP_WRONG_STARTING_DIR' => 'Debe proporcionar una ruta absoluta válida',
-  'SFTPBROWSER_ERROR_NOACCESS' => 'El directorio no existe o no tiene suficientes permisos para acceder a él',
-  'SFTP_COULDNT_UPLOAD' => 'No se pudo cargar %s',
-  'SFTP_CANT_CREATE_DIR' => 'No se pudo crear el directorio %s',
   'UI-ROOT' => '&lt;raíz&gt;',
   'CONFIG_UI_FTPBROWSER_TITLE' => 'Explorador de directorios FTP',
   'BTN_CHECK' => 'Comprobar',
   'BTN_RESET' => 'Restablecer',
   'BTN_TESTFTPCON' => 'Probar conexión FTP',
-  'BTN_TESTSFTPCON' => 'Probar conexión SFTP',
   'BTN_GOTOSTART' => 'Empezar de nuevo',
   'BTN_RETRY' => 'Reintentar',
   'FINE_TUNE' => 'Ajuste fino',
@@ -8299,13 +7089,13 @@ class AKText extends AKAbstractObject
   'WRONG_FTP_PATH2' => 'Directorio inicial FTP incorrecto: el directorio no corresponde con la raíz web de su sitio',
   'ARCHIVE_DIRECTORY' => 'Directorio de archivos:',
   'RELOAD_ARCHIVES' => 'Recargar',
-  'CONFIG_UI_SFTPBROWSER_TITLE' => 'Explorador de directorios SFTP',
   'ERR_COULD_NOT_OPEN_ARCHIVE_PART' => 'No se pudo abrir el archivo de parte del archivo %s para lectura. Compruebe que el archivo existe, es legible por el servidor web y no se encuentra en un directorio inaccesible debido a chroot, restricciones open_basedir o cualquier otra restricción impuesta por su proveedor de alojamiento.',
   'RENAME_FILES' => 'Renombrar archivos de configuración del servidor antes de la extracción',
   'BTN_SHOW_FINE_TUNE' => 'Mostrar opciones avanzadas (para expertos)',
   'RESTORE_PERMISSIONS' => 'Restaurar permisos de archivo',
   'ZAPBEFORE' => 'Eliminar todo antes de la extracción',
   'ZAPBEFORE_HELP' => 'Intenta eliminar todos los archivos y carpetas existentes bajo el directorio donde se almacena Kickstart antes de extraer el archivo de copia de seguridad. NO tiene en cuenta qué archivos y carpetas existen en el archivo de copia de seguridad. Los archivos y carpetas eliminados por esta función NO SE PUEDEN recuperar. <strong>¡ADVERTENCIA! ESTO PUEDE ELIMINAR ARCHIVOS Y CARPETAS QUE NO PERTENECEN A SU SITIO. USE CON EXTREMA PRECAUCIÓN. AL ACTIVAR ESTA FUNCIÓN USTED Asume TODA LA RESPONSABILIDAD.</strong>',
+  'AKS3_ERR_NOTFOUND' => 'No hay ningún archivo llamado %s en el bucket %s. Compruebe el nombre del archivo e inténtelo de nuevo.',
 );
 
 	/**
@@ -8317,6 +7107,7 @@ class AKText extends AKAbstractObject
   'AUTOMODEON' => 'Modalità automatica attivata',
   'ERR_NOT_A_JPA_FILE' => 'Il file non è un archivio JPA',
   'ERR_CORRUPT_ARCHIVE' => 'Il file di archivio è corrotto, troncato o mancano parti dell\'archivio',
+  'ERR_PATH_OUTSIDE_ROOT' => 'Il file di archivio contiene una voce, «%s», che verrebbe scritta fuori dalla cartella di estrazione. L\'estrazione è stata interrotta. Un archivio di backup legittimo non lo fa mai, quindi considera questo archivio non attendibile: è danneggiato oppure è stato manomesso.',
   'ERR_INVALID_ARCHIVE_LONG' => 'Il file di archivio sembra essere corrotto, o mancano parti dell\'archivio. Se i tuoi backup sono composti da più file, assicurati di aver scaricato tutti i file delle parti dell\'archivio (file con lo stesso nome ed estensioni .%s, .%s01, .%2$s02…). Assicurati di scaricare <em>e</em> caricare i file usando SFTP, o FTP in modalità di trasferimento Binario e verifica che le loro dimensioni corrispondano a quelle riportate nella pagina Gestione Backup di Akeeba Backup / Akeeba Solo.',
   'ERR_INVALID_LOGIN' => 'Accesso non valido',
   'COULDNT_CREATE_DIR' => 'Impossibile creare la cartella %s',
@@ -8326,7 +7117,6 @@ class AKText extends AKAbstractObject
   'WRONG_FTP_PATH1' => 'Directory iniziale FTP errata - la directory non esiste',
   'FTP_CANT_CREATE_DIR' => 'Impossibile creare la directory %s',
   'FTP_TEMPDIR_NOT_WRITABLE' => 'Impossibile trovare o creare una directory temporanea scrivibile',
-  'SFTP_TEMPDIR_NOT_WRITABLE' => 'Impossibile trovare o creare una directory temporanea scrivibile',
   'FTP_COULDNT_UPLOAD' => 'Impossibile caricare %s',
   'THINGS_HEADER' => 'Cose che dovresti sapere su Akeeba Kickstart',
   'THINGS_01' => 'Kickstart non è un programma di installazione. È uno strumento di estrazione degli archivi. Il programma di installazione effettivo è stato inserito nel file di archivio al momento del backup.',
@@ -8344,8 +7134,6 @@ class AKText extends AKAbstractObject
   'WRITE_TO_FILES' => 'Scrittura su file:',
   'WRITE_HYBRID' => 'Ibrido (usa FTP solo se necessario)',
   'WRITE_DIRECTLY' => 'Direttamente',
-  'WRITE_FTP' => 'Usa FTP per tutti i file',
-  'WRITE_SFTP' => 'Usa SFTP per tutti i file',
   'FTP_HOST' => 'Nome host (S)FTP:',
   'FTP_PORT' => 'Porta (S)FTP:',
   'FTP_FTPS' => 'Usa FTP su SSL (FTPS)',
@@ -8355,9 +7143,7 @@ class AKText extends AKAbstractObject
   'FTP_DIR' => 'Directory (S)FTP:',
   'FTP_TEMPDIR' => 'Directory temporanea:',
   'FTP_CONNECTION_OK' => 'Connessione FTP stabilita',
-  'SFTP_CONNECTION_OK' => 'Connessione SFTP stabilita',
   'FTP_CONNECTION_FAILURE' => 'La connessione FTP è fallita',
-  'SFTP_CONNECTION_FAILURE' => 'La connessione SFTP è fallita',
   'FTP_TEMPDIR_WRITABLE' => 'La directory temporanea è scrivibile.',
   'FTP_TEMPDIR_UNWRITABLE' => 'La directory temporanea non è scrivibile. Verifica le autorizzazioni.',
   'FTP_BROWSE' => 'Sfoglia',
@@ -8368,19 +7154,11 @@ class AKText extends AKAbstractObject
   'FTPBROWSER_ERROR_UNSUPPORTED' => 'Spiacenti, il tuo server FTP non supporta il nostro browser di directory FTP.',
   'FTPBROWSER_LBL_GOPARENT' => '&lt;su di un livello&gt;',
   'FTPBROWSER_LBL_ERROR' => 'Si è verificato un errore',
-  'SFTP_NO_SSH2' => 'Il tuo server web non dispone del modulo PHP SSH2, quindi non può connettersi ai server SFTP.',
-  'SFTP_NO_FTP_SUPPORT' => 'Il tuo server SSH non consente connessioni SFTP',
-  'SFTP_WRONG_USER' => 'Nome utente o password SFTP errati',
-  'SFTP_WRONG_STARTING_DIR' => 'Devi fornire un percorso assoluto valido',
-  'SFTPBROWSER_ERROR_NOACCESS' => 'La directory non esiste o non hai autorizzazioni sufficienti per accedervi',
-  'SFTP_COULDNT_UPLOAD' => 'Impossibile caricare %s',
-  'SFTP_CANT_CREATE_DIR' => 'Impossibile creare la directory %s',
   'UI-ROOT' => '&lt;root&gt;',
   'CONFIG_UI_FTPBROWSER_TITLE' => 'Browser di directory FTP',
   'BTN_CHECK' => 'Verifica',
   'BTN_RESET' => 'Reimposta',
   'BTN_TESTFTPCON' => 'Testa la connessione FTP',
-  'BTN_TESTSFTPCON' => 'Testa la connessione SFTP',
   'BTN_GOTOSTART' => 'Ricomincia',
   'BTN_RETRY' => 'Riprova',
   'FINE_TUNE' => 'Regola in dettaglio',
@@ -8441,13 +7219,13 @@ class AKText extends AKAbstractObject
   'WRONG_FTP_PATH2' => 'Directory iniziale FTP errata - la directory non corrisponde alla radice web del tuo sito',
   'ARCHIVE_DIRECTORY' => 'Directory degli archivi:',
   'RELOAD_ARCHIVES' => 'Ricarica',
-  'CONFIG_UI_SFTPBROWSER_TITLE' => 'Browser di directory SFTP',
   'ERR_COULD_NOT_OPEN_ARCHIVE_PART' => 'Impossibile aprire il file della parte dell\'archivio %s per la lettura. Verifica che il file esista, sia leggibile dal server web e non si trovi in una directory resa irraggiungibile da chroot, restrizioni open_basedir o qualsiasi altra restrizione impostata dal tuo host.',
   'RENAME_FILES' => 'Rinomina i file di configurazione del server prima dell\'estrazione',
   'BTN_SHOW_FINE_TUNE' => 'Mostra opzioni avanzate (per esperti)',
   'RESTORE_PERMISSIONS' => 'Ripristina le autorizzazioni dei file',
   'ZAPBEFORE' => 'Cancella tutto prima dell\'estrazione',
   'ZAPBEFORE_HELP' => 'Tenta di eliminare tutti i file e le cartelle esistenti sotto la directory dove è memorizzato Kickstart prima di estrarre l\'archivio di backup. NON tiene conto di quali file e cartelle esistono nell\'archivio di backup. I file e le cartelle eliminati da questa funzionalità NON possono essere recuperati. <strong>ATTENZIONE! QUESTO POTREBBE ELIMINARE FILE E CARTELLE CHE NON APPARTENGONO AL TUO SITO. USARE CON ESTREMA CAUTELA. ATTIVANDO QUESTA FUNZIONALITÀ SI ASSUME OGNI RESPONSABILITÀ E OBBLIGAZIONE.</strong>',
+  'AKS3_ERR_NOTFOUND' => 'Non esiste alcun file chiamato %s nel bucket %s. Controlla il nome del file e riprova.',
 );
 
 	/**
@@ -8459,6 +7237,7 @@ class AKText extends AKAbstractObject
   'AUTOMODEON' => 'Modo automático ativado',
   'ERR_NOT_A_JPA_FILE' => 'O ficheiro não é um arquivo JPA',
   'ERR_CORRUPT_ARCHIVE' => 'O ficheiro de arquivo está corrompido, truncado ou estão faltando partes do arquivo',
+  'ERR_PATH_OUTSIDE_ROOT' => 'O ficheiro de arquivo contém uma entrada, «%s», que seria escrita fora da pasta de extração. A extração foi interrompida. Um arquivo de cópia de segurança legítimo nunca faz isto, por isso trate este arquivo como não fidedigno: está danificado ou foi adulterado.',
   'ERR_INVALID_ARCHIVE_LONG' => 'O ficheiro de arquivo parece estar corrompido, ou estão faltando partes do arquivo. Se as suas cópias de segurança consistem em múltiplos ficheiros, por favor certifique-se de que descarregou todos os ficheiros de partes do arquivo (ficheiros com o mesmo nome e extensões .%s, .%s01, .%2$s02…). Por favor certifique-se de descarregar <em>e</em> enviar ficheiros usando SFTP, ou FTP no modo de transferência Binária e verifique que o tamanho dos ficheiros corresponde aos tamanhos reportados na página Gerir Cópias de Segurança do Akeeba Backup / Akeeba Solo.',
   'ERR_INVALID_LOGIN' => 'Login inválido',
   'COULDNT_CREATE_DIR' => 'Não foi possível criar a pasta %s',
@@ -8468,7 +7247,6 @@ class AKText extends AKAbstractObject
   'WRONG_FTP_PATH1' => 'Diretório inicial FTP incorreto — o diretório não existe',
   'FTP_CANT_CREATE_DIR' => 'Não foi possível criar o diretório %s',
   'FTP_TEMPDIR_NOT_WRITABLE' => 'Não foi possível encontrar ou criar um diretório temporário com permissão de escrita',
-  'SFTP_TEMPDIR_NOT_WRITABLE' => 'Não foi possível encontrar ou criar um diretório temporário com permissão de escrita',
   'FTP_COULDNT_UPLOAD' => 'Não foi possível enviar %s',
   'THINGS_HEADER' => 'Coisas que deve saber sobre o Akeeba Kickstart',
   'THINGS_01' => 'O Kickstart não é um instalador. É uma ferramenta de extração de arquivos. O instalador propriamente dito foi colocado dentro do ficheiro de arquivo no momento da cópia de segurança.',
@@ -8486,8 +7264,6 @@ class AKText extends AKAbstractObject
   'WRITE_TO_FILES' => 'Escrever em ficheiros:',
   'WRITE_HYBRID' => 'Híbrido (usar FTP apenas se necessário)',
   'WRITE_DIRECTLY' => 'Diretamente',
-  'WRITE_FTP' => 'Usar FTP para todos os ficheiros',
-  'WRITE_SFTP' => 'Usar SFTP para todos os ficheiros',
   'FTP_HOST' => 'Nome do servidor (S)FTP:',
   'FTP_PORT' => 'Porta (S)FTP:',
   'FTP_FTPS' => 'Usar FTP sobre SSL (FTPS)',
@@ -8497,9 +7273,7 @@ class AKText extends AKAbstractObject
   'FTP_DIR' => 'Diretório (S)FTP:',
   'FTP_TEMPDIR' => 'Diretório temporário:',
   'FTP_CONNECTION_OK' => 'Ligação FTP estabelecida',
-  'SFTP_CONNECTION_OK' => 'Ligação SFTP estabelecida',
   'FTP_CONNECTION_FAILURE' => 'A ligação FTP falhou',
-  'SFTP_CONNECTION_FAILURE' => 'A ligação SFTP falhou',
   'FTP_TEMPDIR_WRITABLE' => 'O diretório temporário tem permissão de escrita.',
   'FTP_TEMPDIR_UNWRITABLE' => 'O diretório temporário não tem permissão de escrita. Por favor verifique as permissões.',
   'FTP_BROWSE' => 'Navegar',
@@ -8510,19 +7284,11 @@ class AKText extends AKAbstractObject
   'FTPBROWSER_ERROR_UNSUPPORTED' => 'Lamentamos, mas o seu servidor FTP não suporta o nosso navegador de diretórios FTP.',
   'FTPBROWSER_LBL_GOPARENT' => '&lt;subir um nível&gt;',
   'FTPBROWSER_LBL_ERROR' => 'Ocorreu um erro',
-  'SFTP_NO_SSH2' => 'O seu servidor web não tem o módulo PHP SSH2, por conseguinte não consegue ligar a servidores SFTP.',
-  'SFTP_NO_FTP_SUPPORT' => 'O seu servidor SSH não permite ligações SFTP',
-  'SFTP_WRONG_USER' => 'Nome de utilizador ou palavra-passe SFTP incorretos',
-  'SFTP_WRONG_STARTING_DIR' => 'Deve fornecer um caminho absoluto válido',
-  'SFTPBROWSER_ERROR_NOACCESS' => 'O diretório não existe ou não tem permissões suficientes para aceder a ele',
-  'SFTP_COULDNT_UPLOAD' => 'Não foi possível enviar %s',
-  'SFTP_CANT_CREATE_DIR' => 'Não foi possível criar o diretório %s',
   'UI-ROOT' => '&lt;raiz&gt;',
   'CONFIG_UI_FTPBROWSER_TITLE' => 'Navegador de Diretórios FTP',
   'BTN_CHECK' => 'Verificar',
   'BTN_RESET' => 'Repor',
   'BTN_TESTFTPCON' => 'Testar Ligação FTP',
-  'BTN_TESTSFTPCON' => 'Testar Ligação SFTP',
   'BTN_GOTOSTART' => 'Recomeçar',
   'BTN_RETRY' => 'Tentar novamente',
   'FINE_TUNE' => 'Ajuste fino',
@@ -8583,13 +7349,13 @@ class AKText extends AKAbstractObject
   'WRONG_FTP_PATH2' => 'Diretório inicial FTP incorreto — o diretório não corresponde à raiz web do seu site',
   'ARCHIVE_DIRECTORY' => 'Diretório de arquivos:',
   'RELOAD_ARCHIVES' => 'Recarregar',
-  'CONFIG_UI_SFTPBROWSER_TITLE' => 'Navegador de Diretórios SFTP',
   'ERR_COULD_NOT_OPEN_ARCHIVE_PART' => 'Não foi possível abrir o ficheiro de parte do arquivo %s para leitura. Verifique que o ficheiro existe, é legível pelo servidor web e não se encontra num diretório inacessível devido a restrições de chroot, open_basedir ou qualquer outra restrição implementada pelo seu alojamento.',
   'RENAME_FILES' => 'Renomear ficheiros de configuração do servidor antes da extração',
   'BTN_SHOW_FINE_TUNE' => 'Mostrar opções avançadas (para especialistas)',
   'RESTORE_PERMISSIONS' => 'Restaurar permissões dos ficheiros',
   'ZAPBEFORE' => 'Eliminar tudo antes da extração',
   'ZAPBEFORE_HELP' => 'Tenta eliminar todos os ficheiros e pastas existentes sob o diretório onde o Kickstart se encontra antes de extrair o arquivo de cópia de segurança. NÃO tem em conta quais ficheiros e pastas existem no arquivo de cópia de segurança. Ficheiros e pastas eliminados por esta funcionalidade NÃO podem ser recuperados. <strong>AVISO! ISTO PODE ELIMINAR FICHEIROS E PASTAS QUE NÃO PERTENCEM AO SEU SITE. UTILIZAR COM EXTREMA CAUTELA. AO ATIVAR ESTA FUNCIONALIDADE ASSUME TODA A RESPONSABILIDADE.</strong>',
+  'AKS3_ERR_NOTFOUND' => 'Não existe nenhum ficheiro com o nome %s no bucket %s. Verifique o nome do ficheiro e tente novamente.',
 );
 
 
@@ -9097,7 +7863,24 @@ class AKFactory
 	{
 		$engine = self::getUnarchiver();
 		$engine->shutdown();
-		$serialized = serialize(self::getInstance());
+
+		/**
+		 * Every object in the Factory gets the chance to release what cannot be serialised, not only
+		 * the unarchiver. The post-processing engine is reachable from the Factory in its own right,
+		 * so shutting down only the unarchiver's reference to it leaves a second, live one behind —
+		 * and on PHP 8.1 and later a live FTP connection makes serialize() throw rather than degrade.
+		 */
+		$self = self::getInstance();
+
+		foreach ($self->objectlist as $object)
+		{
+			if (is_object($object) && ($object !== $engine) && method_exists($object, 'shutdown'))
+			{
+				$object->shutdown();
+			}
+		}
+
+		$serialized = serialize($self);
 
 		if (function_exists('base64_encode') && function_exists('base64_decode'))
 		{
@@ -9276,12 +8059,32 @@ class AKFactory
 	 *
 	 * The list is computed rather than written out because a stale list fails in the worst possible way. A class which
 	 * belongs in the snapshot but is missing here does not raise an error: it is silently replaced with
-	 * __PHP_Incomplete_Class, and the restoration breaks midway with nothing to point at. Since every class that can
-	 * legitimately appear is declared in this very file, the file itself is the authoritative list, and it cannot go
-	 * out of date when a class is added or renamed.
+	 * __PHP_Incomplete_Class, and the restoration breaks midway with nothing to point at. A derived list cannot go out
+	 * of date when a class is added or renamed.
 	 *
-	 * stdClass is added explicitly. It is an internal class, so it has no file to match on, and it does appear in the
-	 * graph — the unarchivers hold their archive and file headers in it.
+	 * A class is allowed when EITHER of the following holds:
+	 *
+	 * - It is declared in this very file. In the deliverable — one flat restore.php or kickstart.php — that is the
+	 *   whole engine, so this is what covers the shipped code. It is also what covers AKFactory itself, which is the
+	 *   outermost object of every snapshot but descends from nothing.
+	 * - It descends from one of the engine's base classes: AKAbstractObject, which every engine object that can be
+	 *   stored in the Factory derives from (the unarchivers, the post-processors, the timer, the zapper, AKText), or
+	 *   AKAbstractPartObserver, which the observers attached to a running part derive from. The observers are the
+	 *   reason this second rule is not redundant even in the deliverable: they are declared in the application layer,
+	 *   not here, and they travel inside the snapshot along with the part they are attached to.
+	 *
+	 * The second rule is what makes the list independent of the SHAPE of the build. When the sources are loaded as
+	 * separate files — the development harnesses in source/buildscripts/, the symlinked Minibuild non-merge mode, the
+	 * unit test suite — only AKFactory itself is declared in this file, and the first rule alone would silently reduce
+	 * every other engine object in the snapshot to __PHP_Incomplete_Class.
+	 *
+	 * Deliberately NOT used as a rule: the directory the class' file sits in. In Akeeba Backup Professional restore.php
+	 * lives in a component directory next to restoration.php and whatever else has been dropped there, so a
+	 * directory-based match would hand the allow-list to anything a third party can write to that directory.
+	 * Descending from an engine base class, by contrast, is something no class in a CMS' vendor tree does by accident.
+	 *
+	 * stdClass is added explicitly. It is an internal class, so it has no file to match on and no ancestry to check,
+	 * and it does appear in the graph — the unarchivers hold their archive and file headers in it.
 	 *
 	 * @return array The class names unserialize() may instantiate
 	 */
@@ -9296,6 +8099,17 @@ class AKFactory
 
 		$allowedClasses = ['stdClass'];
 
+		// The engine base classes. They may legitimately be missing, e.g. when this file is loaded on its own.
+		$baseClasses = [];
+
+		foreach (['AKAbstractObject', 'AKAbstractPartObserver'] as $baseClass)
+		{
+			if (class_exists($baseClass, false))
+			{
+				$baseClasses[] = $baseClass;
+			}
+		}
+
 		foreach (get_declared_classes() as $className)
 		{
 			try
@@ -9307,9 +8121,31 @@ class AKFactory
 				continue;
 			}
 
+			/**
+			 * Anonymous classes can never be part of a snapshot — serialize() refuses to write one — and their
+			 * generated names are not valid class names, which makes unserialize() reject the entire allow-list they
+			 * appear in. Leave them out before anything else.
+			 */
+			if ($refClass->isAnonymous())
+			{
+				continue;
+			}
+
 			if ($refClass->getFileName() === __FILE__)
 			{
 				$allowedClasses[] = $className;
+
+				continue;
+			}
+
+			foreach ($baseClasses as $baseClass)
+			{
+				if ($refClass->isSubclassOf($baseClass))
+				{
+					$allowedClasses[] = $className;
+
+					break;
+				}
 			}
 		}
 
@@ -9541,107 +8377,6 @@ abstract class AKEncryptionAESAdapterAbstract
 		$paddingBytes = $stringSize % $blockSize;
 
 		return str_repeat("\0", $blockSize - $paddingBytes);
-	}
-}
-
-/**
- * Akeeba Restore
- * An AJAX-powered archive extraction library for JPA, JPS and ZIP archives
- *
- * @package   restore
- * @copyright Copyright (c)2008-2025 Nicholas K. Dionysopoulos / Akeeba Ltd
- * @license   GNU General Public License version 3, or later
- */
-
-class Mcrypt extends AKEncryptionAESAdapterAbstract implements AKEncryptionAESAdapterInterface
-{
-	protected $cipherType = MCRYPT_RIJNDAEL_128;
-
-	protected $cipherMode = MCRYPT_MODE_CBC;
-
-	public function decrypt($cipherText, $key)
-	{
-		$iv_size    = $this->getBlockSize();
-		$key        = $this->resizeKey($key, $iv_size);
-		$iv         = substr($cipherText, 0, $iv_size);
-		$cipherText = substr($cipherText, $iv_size);
-		$plainText  = mcrypt_decrypt($this->cipherType, $key, $cipherText, $this->cipherMode, $iv);
-
-		return $plainText;
-	}
-
-	public function isSupported()
-	{
-		if (!function_exists('mcrypt_get_key_size'))
-		{
-			return false;
-		}
-
-		if (!function_exists('mcrypt_get_iv_size'))
-		{
-			return false;
-		}
-
-		if (!function_exists('mcrypt_create_iv'))
-		{
-			return false;
-		}
-
-		if (!function_exists('mcrypt_encrypt'))
-		{
-			return false;
-		}
-
-		if (!function_exists('mcrypt_decrypt'))
-		{
-			return false;
-		}
-
-		if (!function_exists('mcrypt_list_algorithms'))
-		{
-			return false;
-		}
-
-		if (!function_exists('hash'))
-		{
-			return false;
-		}
-
-		if (!function_exists('hash_algos'))
-		{
-			return false;
-		}
-
-		$algorightms = mcrypt_list_algorithms();
-
-		if (!in_array('rijndael-128', $algorightms))
-		{
-			return false;
-		}
-
-		if (!in_array('rijndael-192', $algorightms))
-		{
-			return false;
-		}
-
-		if (!in_array('rijndael-256', $algorightms))
-		{
-			return false;
-		}
-
-		$algorightms = hash_algos();
-
-		if (!in_array('sha256', $algorightms))
-		{
-			return false;
-		}
-
-		return true;
-	}
-
-	public function getBlockSize()
-	{
-		return mcrypt_get_iv_size($this->cipherType, $this->cipherMode);
 	}
 }
 
@@ -10077,13 +8812,10 @@ class AKEncryptionAES
 	{
 		$adapter = self::getAdapter();
 
-		if (!$adapter->isSupported())
-		{
-			return false;
-		}
-
-		// Read the data size
-		$data_size = unpack('V', substr($ciphertext, -4));
+		// Read the data size (little-endian unsigned long in the last four bytes)
+		$sizeBytes = substr($ciphertext, -4);
+		$unpacked  = (strlen($sizeBytes) == 4) ? @unpack('V', $sizeBytes) : false;
+		$data_size = is_array($unpacked) ? (int) $unpacked[1] : null;
 
 		// Do I have a PBKDF2 salt?
 		$salt             = substr($ciphertext, -92, 68);
@@ -10136,10 +8868,10 @@ class AKEncryptionAES
 		// Decrypt
 		$plaintext = $adapter->decrypt($iv . substr($ciphertext, 0, $rightStringLimit), $key);
 
-		// Trim padding, if necessary
-		if (strlen($plaintext) > $data_size)
+		// Trim padding, if necessary. A negative size can only come from a corrupt block; ignore it.
+		if (!is_null($data_size) && ($data_size >= 0) && (strlen($plaintext) > $data_size))
 		{
-			$plaintext = substr($plaintext, 0, $data_size);
+			$plaintext = ($data_size === 0) ? '' : substr($plaintext, 0, $data_size);
 		}
 
 		return $plaintext;
@@ -10163,10 +8895,12 @@ class AKEncryptionAES
 		if (!isset($ivs[$key]))
 		{
 			$nBytes  = 16;  // AES uses a 128 -bit (16 byte) block size, hence the IV size is always 16 bytes
-			$pwBytes = [];
+			// Zero-pad short passwords instead of reading past their end; ord('') is 0, but deprecated in PHP 8.5.
+			$pwSource = str_pad(substr($password, 0, $nBytes), $nBytes, "\0");
+			$pwBytes  = [];
 			for ($i = 0; $i < $nBytes; $i++)
 			{
-				$pwBytes[$i] = ord(substr($password, $i, 1)) & 0xff;
+				$pwBytes[$i] = ord($pwSource[$i]) & 0xff;
 			}
 			$iv    = self::Cipher($pwBytes, self::KeyExpansion($pwBytes));
 			$newIV = '';
@@ -10206,12 +8940,14 @@ class AKEncryptionAES
 
 		// use AES itself to encrypt password to get cipher key (using plain password as source for
 		// key expansion) - gives us well encrypted key.
-		$nBytes  = $nBits / 8; // Number of bytes in key
-		$pwBytes = [];
+		$nBytes = $nBits / 8; // Number of bytes in key
+		// Zero-pad short passwords instead of reading past their end; ord('') is 0, but deprecated in PHP 8.5.
+		$pwSource = str_pad(substr($password, 0, $nBytes), $nBytes, "\0");
+		$pwBytes  = [];
 
 		for ($i = 0; $i < $nBytes; $i++)
 		{
-			$pwBytes[$i] = ord(substr($password, $i, 1)) & 0xff;
+			$pwBytes[$i] = ord($pwSource[$i]) & 0xff;
 		}
 
 		$key    = self::Cipher($pwBytes, self::KeyExpansion($pwBytes));
@@ -10247,12 +8983,16 @@ class AKEncryptionAES
 			return $adapter;
 		}
 
-		$adapter = new OpenSSL();
+		$candidate = new OpenSSL();
 
-		if (!$adapter->isSupported())
+		if (!$candidate->isSupported())
 		{
-			$adapter = new Mcrypt();
+			throw new RuntimeException(
+				'This server does not have a usable OpenSSL extension with AES-128-CBC support, so it cannot decrypt JPS archives.'
+			);
 		}
+
+		$adapter = $candidate;
 
 		return $adapter;
 	}
@@ -10782,256 +9522,12 @@ function masterSetup()
  * @license   GNU General Public License version 3, or later
  */
 
-// Mini-controller for restore.php
-if (!defined('KICKSTART'))
-{
-	// The observer class, used to report number of files and bytes processed
-	class RestorationObserver extends AKAbstractPartObserver
-	{
-		public $compressedTotal = 0;
-		public $uncompressedTotal = 0;
-		public $filesProcessed = 0;
-
-		public function update($object, $message)
-		{
-			if (!is_object($message))
-			{
-				return;
-			}
-
-			if (!array_key_exists('type', get_object_vars($message)))
-			{
-				return;
-			}
-
-			if ($message->type == 'startfile')
-			{
-				$this->filesProcessed++;
-				$this->compressedTotal += $message->content->compressed;
-				$this->uncompressedTotal += $message->content->uncompressed;
-			}
-		}
-
-		public function __toString()
-		{
-			return self::class;
-		}
-
-	}
-
-	// Import configuration
-	masterSetup();
-
-	$retArray = [
-		'status'  => true,
-		'message' => null
-	];
-
-	$enabled = AKFactory::get('kickstart.enabled', false);
-
-	if ($enabled)
-	{
-		$task = getQueryParam('task');
-
-		switch ($task)
-		{
-			case 'ping':
-				// ping task - really does nothing!
-				$timer = AKFactory::getTimer();
-				$timer->enforce_min_exec_time();
-				break;
-
-			/**
-			 * There are two separate steps here since we were using an inefficient restoration initialization method in
-			 * the past. Now both startRestore and stepRestore are identical. The difference in behavior depends
-			 * exclusively on the calling Javascript. If no serialized factory was passed in the request then we start a
-			 * new restoration. If a serialized factory was passed in the request then the restoration is resumed. For
-			 * this reason we should NEVER call AKFactory::nuke() in startRestore anymore: that would simply reset the
-			 * extraction engine configuration which was done in masterSetup() leading to an error about the file being
-			 * invalid (since no file is found).
-			 */
-			case 'startRestore':
-			case 'stepRestore':
-				if ($task == 'startRestore')
-				{
-					// Fetch path to the site root from the restoration.php file, so we can tell the engine where it should operate
-					$siteRoot = AKFactory::get('kickstart.setup.destdir', '');
-
-					// Before starting, read and save any custom AddHandler directive
-					$phpHandlers = getPhpHandlers($siteRoot);
-					AKFactory::set('kickstart.setup.phphandlers', $phpHandlers);
-
-					// If the Stealth Mode is enabled, create the .htaccess file
-					if (AKFactory::get('kickstart.stealth.enable', false))
-					{
-						createStealthURL($siteRoot);
-					}
-					// No stealth mode, but we have custom handler directives, must write our own file
-					elseif ($phpHandlers)
-					{
-						writePhpHandlers($siteRoot);
-					}
-				}
-
-				/**
-				 * First try to run the filesystem zapper (remove all existing files and folders). If the Zapper is
-				 * disabled or has already finished running we will get a FALSE result. Otherwise it's a status array
-				 * which we can pass directly back to the caller.
-				 */
-				$nullObserver = new AKPartNullObserver();
-				$ret          = runZapper($nullObserver);
-
-				// If the Zapper had a step to run we stop here and return its status array to the caller.
-				if ($ret !== false)
-				{
-					$retArray = array_merge($retArray, $ret);
-
-					break;
-				}
-
-				$engine   = AKFactory::getUnarchiver(); // Get the engine
-				$observer = new RestorationObserver(); // Create a new observer
-				$engine->attach($observer); // Attach the observer
-				$engine->tick();
-				$ret = $engine->getStatusArray();
-
-				if ($ret['Error'] != '')
-				{
-					$retArray['status']  = false;
-					$retArray['done']    = true;
-					$retArray['message'] = $ret['Error'];
-				}
-				elseif (!$ret['HasRun'])
-				{
-					$retArray['files']    = $observer->filesProcessed;
-					$retArray['bytesIn']  = $observer->compressedTotal;
-					$retArray['bytesOut'] = $observer->uncompressedTotal;
-					$retArray['status']   = true;
-					$retArray['done']     = true;
-				}
-				else
-				{
-					$retArray['files']    = $observer->filesProcessed;
-					$retArray['bytesIn']  = $observer->compressedTotal;
-					$retArray['bytesOut'] = $observer->uncompressedTotal;
-					$retArray['status']   = true;
-					$retArray['done']     = false;
-					$retArray['factory']  = AKFactory::serialize();
-				}
-
-				$timer = AKFactory::getTimer();
-				$timer->enforce_min_exec_time();
-
-				break;
-
-			case 'finalizeRestore':
-				$root = AKFactory::get('kickstart.setup.destdir');
-				// Remove the installation directory
-				recursive_remove_directory($root . '/installation');
-
-				$postproc = AKFactory::getPostProc();
-
-				/**
-				 * Should I rename the htaccess.bak and web.config.bak files back to their live filenames...?
-				 */
-				$renameFiles = AKFactory::get('kickstart.setup.postrenamefiles', true);
-
-				if ($renameFiles)
-				{
-					// Rename htaccess.bak to .htaccess
-					if (file_exists($root . '/htaccess.bak'))
-					{
-						if (file_exists($root . '/.htaccess'))
-						{
-							$postproc->unlink($root . '/.htaccess');
-						}
-
-						$postproc->rename($root . '/htaccess.bak', $root . '/.htaccess');
-					}
-
-					// Rename htaccess.bak to .htaccess
-					if (file_exists($root . '/web.config.bak'))
-					{
-						if (file_exists($root . '/web.config'))
-						{
-							$postproc->unlink($root . '/web.config');
-						}
-
-						$postproc->rename($root . '/web.config.bak', $root . '/web.config');
-					}
-				}
-
-				// Remove restoration.php
-				$basepath = KSROOTDIR;
-				$basepath = rtrim(str_replace('\\', '/', $basepath), '/');
-
-				if (!empty($basepath))
-				{
-					$basepath .= '/';
-				}
-
-				$postproc->unlink($basepath . 'restoration.php');
-				clearFileInOPCache($basepath . 'restoration.php');
-
-				// Import a custom finalisation file
-				$filename = __DIR__ . '/restore_finalisation.php';
-
-				if (file_exists($filename))
-				{
-					// opcode cache busting before including the filename
-					if (function_exists('opcache_invalidate'))
-					{
-						opcache_invalidate($filename, true);
-					}
-
-					if (function_exists('apc_compile_file'))
-					{
-						apc_compile_file($filename);
-					}
-
-					if (function_exists('wincache_refresh_if_changed'))
-					{
-						wincache_refresh_if_changed([$filename]);
-					}
-
-					if (function_exists('xcache_asm'))
-					{
-						xcache_asm($filename);
-					}
-
-					include_once $filename;
-				}
-
-				// Run a custom finalisation script
-				if (function_exists('finalizeRestore'))
-				{
-					finalizeRestore($root, $basepath);
-				}
-
-				break;
-
-			default:
-				// Invalid task!
-				$enabled = false;
-				break;
-		}
-	}
-
-	// Maybe we weren't authorized or the task was invalid?
-	if (!$enabled)
-	{
-		// Maybe the user failed to enter any information
-		$retArray['status']  = false;
-		$retArray['message'] = AKText::_('ERR_INVALID_LOGIN');
-	}
-
-	// JSON encode the message
-	$json = json_encode($retArray);
-
-	// Return the message
-	echo "###$json###";
-
-}
+/**
+ * Helper functions shared by restore.php's own mini-controller (application.controller.php) and by
+ * Kickstart's task dispatcher. They are kept in a separate file from the mini-controller so that
+ * including them does not run a restoration: application.controller.php executes on include, this
+ * file only declares.
+ */
 
 // ------------ lixlpixel recursive PHP functions -------------
 // recursive_remove_directory( directory to delete, empty )
@@ -11234,4 +9730,270 @@ function writePhpHandlers($siteRoot = '')
 	$tempfile = $postproc->processFilename($siteRoot.'.htaccess');
 	@file_put_contents($tempfile, $contents);
 	$postproc->process();
+}
+
+/**
+ * Akeeba Restore
+ * An AJAX-powered archive extraction library for JPA, JPS and ZIP archives
+ *
+ * @package   restore
+ * @copyright Copyright (c)2008-2025 Nicholas K. Dionysopoulos / Akeeba Ltd
+ * @license   GNU General Public License version 3, or later
+ */
+
+/**
+ * The mini-controller for standalone restore.php. This file EXECUTES on include, which is why it is
+ * kept apart from application.functions.php — the helper functions it calls are declared there and
+ * must already be loaded when this file runs.
+ */
+
+// Mini-controller for restore.php
+if (!defined('KICKSTART'))
+{
+	// The observer class, used to report number of files and bytes processed
+	class RestorationObserver extends AKAbstractPartObserver
+	{
+		public $compressedTotal = 0;
+		public $uncompressedTotal = 0;
+		public $filesProcessed = 0;
+
+		public function update($object, $message)
+		{
+			if (!is_object($message))
+			{
+				return;
+			}
+
+			if (!array_key_exists('type', get_object_vars($message)))
+			{
+				return;
+			}
+
+			if ($message->type == 'startfile')
+			{
+				$this->filesProcessed++;
+				$this->compressedTotal += $message->content->compressed;
+				$this->uncompressedTotal += $message->content->uncompressed;
+			}
+		}
+
+		public function __toString()
+		{
+			return self::class;
+		}
+
+	}
+
+	// Import configuration
+	masterSetup();
+
+	$retArray = [
+		'status'  => true,
+		'message' => null
+	];
+
+	$enabled = AKFactory::get('kickstart.enabled', false);
+
+	if ($enabled)
+	{
+		$task = getQueryParam('task');
+
+		switch ($task)
+		{
+			case 'ping':
+				// ping task - really does nothing!
+				$timer = AKFactory::getTimer();
+				$timer->enforce_min_exec_time();
+				break;
+
+			/**
+			 * There are two separate steps here since we were using an inefficient restoration initialization method in
+			 * the past. Now both startRestore and stepRestore are identical. The difference in behavior depends
+			 * exclusively on the calling Javascript. If no serialized factory was passed in the request then we start a
+			 * new restoration. If a serialized factory was passed in the request then the restoration is resumed. For
+			 * this reason we should NEVER call AKFactory::nuke() in startRestore anymore: that would simply reset the
+			 * extraction engine configuration which was done in masterSetup() leading to an error about the file being
+			 * invalid (since no file is found).
+			 */
+			case 'startRestore':
+			case 'stepRestore':
+				if ($task == 'startRestore')
+				{
+					// Fetch path to the site root from the restoration.php file, so we can tell the engine where it should operate
+					$siteRoot = AKFactory::get('kickstart.setup.destdir', '');
+
+					// Before starting, read and save any custom AddHandler directive
+					$phpHandlers = getPhpHandlers($siteRoot);
+					AKFactory::set('kickstart.setup.phphandlers', $phpHandlers);
+
+					// If the Stealth Mode is enabled, create the .htaccess file
+					if (AKFactory::get('kickstart.stealth.enable', false))
+					{
+						createStealthURL($siteRoot);
+					}
+					// No stealth mode, but we have custom handler directives, must write our own file
+					elseif ($phpHandlers)
+					{
+						writePhpHandlers($siteRoot);
+					}
+				}
+
+				/**
+				 * First try to run the filesystem zapper (remove all existing files and folders). If the Zapper is
+				 * disabled or has already finished running we will get a FALSE result. Otherwise it's a status array
+				 * which we can pass directly back to the caller.
+				 */
+				$nullObserver = new AKPartNullObserver();
+				$ret          = runZapper($nullObserver);
+
+				// If the Zapper had a step to run we stop here and return its status array to the caller.
+				if ($ret !== false)
+				{
+					$retArray = array_merge($retArray, $ret);
+
+					break;
+				}
+
+				$engine   = AKFactory::getUnarchiver(); // Get the engine
+				$observer = new RestorationObserver(); // Create a new observer
+				$engine->attach($observer); // Attach the observer
+				$engine->tick();
+				$ret = $engine->getStatusArray();
+
+				if ($ret['Error'] != '')
+				{
+					$retArray['status']  = false;
+					$retArray['done']    = true;
+					$retArray['message'] = $ret['Error'];
+				}
+				elseif (!$ret['HasRun'])
+				{
+					$retArray['files']    = $observer->filesProcessed;
+					$retArray['bytesIn']  = $observer->compressedTotal;
+					$retArray['bytesOut'] = $observer->uncompressedTotal;
+					$retArray['status']   = true;
+					$retArray['done']     = true;
+				}
+				else
+				{
+					$retArray['files']    = $observer->filesProcessed;
+					$retArray['bytesIn']  = $observer->compressedTotal;
+					$retArray['bytesOut'] = $observer->uncompressedTotal;
+					$retArray['status']   = true;
+					$retArray['done']     = false;
+					$retArray['factory']  = AKFactory::serialize();
+				}
+
+				$timer = AKFactory::getTimer();
+				$timer->enforce_min_exec_time();
+
+				break;
+
+			case 'finalizeRestore':
+				$root = (string) AKFactory::get('kickstart.setup.destdir', '');
+				// Remove the installation directory
+				recursive_remove_directory($root . '/installation');
+
+				$postproc = AKFactory::getPostProc();
+
+				/**
+				 * Should I rename the htaccess.bak and web.config.bak files back to their live filenames...?
+				 */
+				$renameFiles = AKFactory::get('kickstart.setup.postrenamefiles', true);
+
+				if ($renameFiles)
+				{
+					// Rename htaccess.bak to .htaccess
+					if (file_exists($root . '/htaccess.bak'))
+					{
+						if (file_exists($root . '/.htaccess'))
+						{
+							$postproc->unlink($root . '/.htaccess');
+						}
+
+						$postproc->rename($root . '/htaccess.bak', $root . '/.htaccess');
+					}
+
+					// Rename htaccess.bak to .htaccess
+					if (file_exists($root . '/web.config.bak'))
+					{
+						if (file_exists($root . '/web.config'))
+						{
+							$postproc->unlink($root . '/web.config');
+						}
+
+						$postproc->rename($root . '/web.config.bak', $root . '/web.config');
+					}
+				}
+
+				// Remove restoration.php
+				$basepath = KSROOTDIR;
+				$basepath = rtrim(str_replace('\\', '/', $basepath), '/');
+
+				if (!empty($basepath))
+				{
+					$basepath .= '/';
+				}
+
+				$postproc->unlink($basepath . 'restoration.php');
+				clearFileInOPCache($basepath . 'restoration.php');
+
+				// Import a custom finalisation file
+				$filename = __DIR__ . '/restore_finalisation.php';
+
+				if (file_exists($filename))
+				{
+					// opcode cache busting before including the filename
+					if (function_exists('opcache_invalidate'))
+					{
+						opcache_invalidate($filename, true);
+					}
+
+					if (function_exists('apc_compile_file'))
+					{
+						apc_compile_file($filename);
+					}
+
+					if (function_exists('wincache_refresh_if_changed'))
+					{
+						wincache_refresh_if_changed([$filename]);
+					}
+
+					if (function_exists('xcache_asm'))
+					{
+						xcache_asm($filename);
+					}
+
+					include_once $filename;
+				}
+
+				// Run a custom finalisation script
+				if (function_exists('finalizeRestore'))
+				{
+					finalizeRestore($root, $basepath);
+				}
+
+				break;
+
+			default:
+				// Invalid task!
+				$enabled = false;
+				break;
+		}
+	}
+
+	// Maybe we weren't authorized or the task was invalid?
+	if (!$enabled)
+	{
+		// Maybe the user failed to enter any information
+		$retArray['status']  = false;
+		$retArray['message'] = AKText::_('ERR_INVALID_LOGIN');
+	}
+
+	// JSON encode the message
+	$json = json_encode($retArray);
+
+	// Return the message
+	echo "###$json###";
+
 }

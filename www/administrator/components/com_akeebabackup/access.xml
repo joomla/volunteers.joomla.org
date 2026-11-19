@@ -7,6 +7,7 @@
 <access component="com_akeebabackup">
 	<section name="component">
 		<action name="core.admin" title="JACTION_ADMIN" />
+		<action name="core.options" title="JACTION_OPTIONS" />
 		<action name="core.manage" title="JACTION_MANAGE" />
 		<action name="akeebabackup.backup" title="COM_AKEEBABACKUP_ACCESS_BACKUP_LBL" description="COM_AKEEBABACKUP_ACCESS_BACKUP_DESC" />
 		<action name="akeebabackup.configure" title="COM_AKEEBABACKUP_ACCESS_CONFIGURE_LBL" description="COM_AKEEBABACKUP_ACCESS_CONFIGURE_DESC" />

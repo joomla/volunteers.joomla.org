@@ -96,7 +96,7 @@ class BackupAlternateCheckUpload extends AbstractCommand
 		}
 
 		// Get the front-end backup settings
-		$frontend_enabled = Platform::getInstance()->get_platform_configuration_option('akeebabackup', 'legacyapi_enabled');
+		$frontend_enabled = Platform::getInstance()->get_platform_configuration_option('legacyapi_enabled', 0) != 0;
 		$secret           = Platform::getInstance()->get_platform_configuration_option('frontend_secret_word', '');
 
 		if (!$frontend_enabled)

@@ -17,14 +17,15 @@ use Joomla\CMS\Uri\Uri;
  * @var  $this  \Akeeba\Component\AkeebaBackup\Administrator\View\Backup\HtmlView
  */
 
-$escapedBaseURL = addslashes(Uri::base());
+$escapedBaseURL = Uri::base();
 
 // Initialization
 $document = $this->getDocument();
-$document->addScriptOptions('akeebabackup.Backup.defaultDescription', addslashes($this->defaultDescription));
-$document->addScriptOptions('akeebabackup.Backup.currentDescription', addslashes(empty($this->description) ? $this->defaultDescription : $this->description));
-$document->addScriptOptions('akeebabackup.Backup.currentComment', addslashes($this->comment));
+$document->addScriptOptions('akeebabackup.Backup.defaultDescription', $this->defaultDescription);
+$document->addScriptOptions('akeebabackup.Backup.currentDescription', empty($this->description) ? $this->defaultDescription : $this->description);
+$document->addScriptOptions('akeebabackup.Backup.currentComment', $this->comment);
 $document->addScriptOptions('akeebabackup.Backup.hasAngieKey', $this->hasANGIEPassword);
+$document->addScriptOptions('akeebabackup.Backup.profileId', (int) $this->profileId);
 
 // Auto-resume setup
 $document->addScriptOptions('akeebabackup.Backup.resume.enabled', (bool) $this->autoResume);
@@ -32,7 +33,7 @@ $document->addScriptOptions('akeebabackup.Backup.resume.timeout', (int) $this->a
 $document->addScriptOptions('akeebabackup.Backup.resume.maxRetries', (int) $this->autoResumeRetries);
 
 // The return URL
-$document->addScriptOptions('akeebabackup.Backup.returnUrl', addcslashes($this->returnURL, "'\\"));
+$document->addScriptOptions('akeebabackup.Backup.returnUrl', $this->returnURL);
 
 // Used as parameters to start_timeout_bar()
 $document->addScriptOptions('akeebabackup.Backup.maxExecutionTime', (int) $this->maxExecutionTime);

@@ -85,12 +85,9 @@ class DownloadDirect extends AbstractTask
 		}
 
 		// Remove php's time limit
-		if (function_exists('ini_get') && function_exists('set_time_limit'))
+		if (function_exists('set_time_limit'))
 		{
-			if (!ini_get('safe_mode'))
-			{
-				@set_time_limit(0);
-			}
+			@set_time_limit(0);
 		}
 
 		$basename  = @basename($filename);

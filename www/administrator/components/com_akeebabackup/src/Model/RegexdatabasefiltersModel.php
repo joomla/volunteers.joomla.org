@@ -10,7 +10,9 @@ namespace Akeeba\Component\AkeebaBackup\Administrator\Model;
 defined('_JEXEC') || die;
 
 use Akeeba\Component\AkeebaBackup\Administrator\Mixin\ModelExclusionFilterTrait;
+use Akeeba\Component\AkeebaBackup\Administrator\Helper\RegexValidator;
 use Akeeba\Engine\Factory;
+use Joomla\CMS\Language\Text;
 
 #[\AllowDynamicProperties]
 class RegexdatabasefiltersModel extends \Joomla\CMS\MVC\Model\BaseModel
@@ -122,6 +124,15 @@ class RegexdatabasefiltersModel extends \Joomla\CMS\MVC\Model\BaseModel
 			// Set a filter (used by the editor)
 			case 'set':
 				$ret_array = ['success' => $this->setFilter($action['type'], $action['root'], $action['node'])];
+
+				// The filter is saved either way, but an expression which does not compile never matches anything
+				if ($ret_array['success'] && !RegexValidator::isValid((string) $action['node']))
+				{
+					$ret_array['warning'] = Text::sprintf(
+						'COM_AKEEBABACKUP_REGEXFILTERS_WARN_INVALID_REGEX',
+						htmlspecialchars((string) $action['node'], ENT_QUOTES, 'UTF-8')
+					);
+				}
 				break;
 
 			// Remove a filter (used by the editor)

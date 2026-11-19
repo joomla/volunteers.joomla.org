@@ -9,6 +9,7 @@ namespace Akeeba\Component\AkeebaBackup\Administrator\Helper;
 
 defined('_JEXEC') || die;
 
+use Akeeba\Component\AkeebaBackup\Administrator\Helper\DbQuery;
 use Akeeba\Component\AkeebaBackup\Administrator\Model\PushModel;
 use Akeeba\Engine\Platform;
 use Akeeba\Engine\Util\PushMessagesInterface;
@@ -251,7 +252,7 @@ class PushMessages implements PushMessagesInterface
 		{
 			/** @var DatabaseDriver $db */
 			$db    = Factory::getContainer()->get(DatabaseInterface::class);
-			$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+			$query = DbQuery::create($db)
 			            ->select($db->quoteName('user_id'))
 			            ->from($db->quoteName('#__user_profiles'))
 			            ->where($db->quoteName('profile_key') . ' = ' . $db->quote('com_akeebabackup.webPushSubscription'));

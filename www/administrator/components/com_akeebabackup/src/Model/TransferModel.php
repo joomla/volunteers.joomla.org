@@ -9,6 +9,7 @@ namespace Akeeba\Component\AkeebaBackup\Administrator\Model;
 
 defined('_JEXEC') || die;
 
+use Akeeba\Component\AkeebaBackup\Administrator\Helper\ArchivePartName;
 use Akeeba\Component\AkeebaBackup\Administrator\Model\Exceptions\TransferFatalError;
 use Akeeba\Component\AkeebaBackup\Administrator\Model\Exceptions\TransferIgnorableError;
 use Akeeba\Component\AkeebaBackup\Administrator\Model\StatisticsModel as Statistics;
@@ -76,9 +77,6 @@ class TransferModel extends BaseDatabaseModel
 	 */
 	public function getLatestBackupInformation(?int $profileID = null): ?array
 	{
-		// Initialise
-		$db = $this->getDatabase();
-
 		/** @var Statistics $model */
 		$model = $this->getMVCFactory()->createModel('Statistics', 'Administrator', ['ignore_request' => 1]);
 		$model->setState('list.start', 0);
@@ -97,7 +95,7 @@ class TransferModel extends BaseDatabaseModel
 			];
 		}
 
-		$backups = $model->getStatisticsListWithMeta(false, $filters, $db->qn('id') . ' DESC');
+		$backups = $model->getStatisticsListWithMeta(false, $filters, ['by' => 'id', 'order' => 'DESC']);
 
 		// No valid backups? No joy.
 		if (empty($backups))
@@ -138,9 +136,6 @@ class TransferModel extends BaseDatabaseModel
 	 */
 	public function getBackupInformationById(int $backupID): ?array
 	{
-		// Initialise
-		$db = $this->getDatabase();
-
 		/** @var Statistics $model */
 		$model = $this->getMVCFactory()->createModel('Statistics', 'Administrator', ['ignore_request' => 1]);
 		$model->setState('list.start', 0);
@@ -154,7 +149,7 @@ class TransferModel extends BaseDatabaseModel
 			],
 		];
 
-		$backups = $model->getStatisticsListWithMeta(false, $filters, $db->qn('id') . ' DESC');
+		$backups = $model->getStatisticsListWithMeta(false, $filters, ['by' => 'id', 'order' => 'DESC']);
 
 		// No such backup? No joy.
 		if (empty($backups))
@@ -319,9 +314,17 @@ class TransferModel extends BaseDatabaseModel
 		// Sometimes just the SSL certificate is wrong. Let's give it a go.
 		if (!$isValid)
 		{
-			$dummy = $this->httpGet($uri->toString(), [], 5);
+			try
+			{
+				$dummy = $this->httpGet($uri->toString(), [], 5);
 
-			$isValid = !empty($dummy);
+				$isValid = !empty($dummy);
+			}
+			catch (TransferFatalError $e)
+			{
+				// The domain name does not resolve. That's the 'notexists' status, not a fatal error of the wizard.
+				$isValid = false;
+			}
 		}
 
 		if (!$isValid)
@@ -643,45 +646,65 @@ class TransferModel extends BaseDatabaseModel
 
 		$ret['totalSize'] = $totalSize;
 
-		// First fragment of a new part
-		if ($frag == -1)
-		{
-			$frag = 0;
-			$part++;
-		}
-
 		/**
-		 * If the backup is single part then $backup['multipart'] is 0. This means that the next if-block will report
-		 * that the transfer is done. In these cases we have to convert $backup['multipart'] to 1 to let the upload
-		 * actually run at all.
+		 * If the backup is single part then $backup['multipart'] is 0. This means that the part check below would
+		 * report that the transfer is done. In these cases we have to convert $backup['multipart'] to 1 to let the
+		 * upload actually run at all.
 		 */
 		if ($backup['multipart'] == 0)
 		{
 			$backup['multipart'] = 1;
 		}
 
-		// If I'm past the last part I'm done.
-		if ($part >= $backup['multipart'])
+		/**
+		 * Find the part and fragment to upload. This is a loop, not a recursion: a part with nothing left to upload is
+		 * skipped by moving to the next part, and the new position is saved in the session as we go. A part file which
+		 * is missing or unreadable ends the upload with an error instead of looping or recursing forever.
+		 */
+		while (true)
 		{
+			// First fragment of a new part
+			if ($frag == -1)
+			{
+				$frag = 0;
+				$part++;
+			}
 
-			// We are done
-			$ret['done'] = true;
+			// If I'm past the last part I'm done.
+			if ($part >= $backup['multipart'])
+			{
+				$this->session->set('akeebabackup.transfer.part', $part);
+				$this->session->set('akeebabackup.transfer.frag', -1);
 
-			return $ret;
-		}
+				$ret['done'] = true;
 
-		// Get the information for this part
-		$fileName = $this->getPartFilename($backup['absolute_path'], $part);
-		$fileSize = filesize($fileName);
+				return $ret;
+			}
 
-		$intendedSeekPosition = $fragSize * $frag;
+			// Get the information for this part
+			$fileName = $this->getPartFilename($backup['absolute_path'], $part);
+			$fileSize = is_file($fileName) && is_readable($fileName) ? @filesize($fileName) : false;
 
-		// I am trying to seek past EOF. Oops. Upload the next part.
-		if ($intendedSeekPosition >= $fileSize)
-		{
+			if ($fileSize === false)
+			{
+				$ret['result']  = false;
+				$ret['message'] = Text::sprintf('COM_AKEEBABACKUP_TRANSFER_ERR_CANNOTREADLOCALFILE', $fileName);
+
+				return $ret;
+			}
+
+			$intendedSeekPosition = $fragSize * $frag;
+
+			if ($intendedSeekPosition < $fileSize)
+			{
+				break;
+			}
+
+			// I am trying to seek past EOF. Oops. Upload the next part; remember that we have moved on.
+			$this->session->set('akeebabackup.transfer.part', $part);
 			$this->session->set('akeebabackup.transfer.frag', -1);
 
-			return $this->uploadChunk($config);
+			$frag = -1;
 		}
 
 		// Open the part
@@ -747,15 +770,18 @@ class TransferModel extends BaseDatabaseModel
 
 		if ($intendedSeekPosition >= $fileSize)
 		{
+			/**
+			 * The next call sees frag = -1 and moves on to the next part itself. Do not increment the part here as well,
+			 * or every other part of a multi-part archive is skipped.
+			 */
 			$this->session->set('akeebabackup.transfer.frag', -1);
-			$this->session->set('akeebabackup.transfer.part', ++$part);
-		}
 
-		// Did I reach the last part? Then I'm done
-		if ($part >= $backup['multipart'])
-		{
-			// We are done
-			$ret['done'] = true;
+			// Did I just finish the last part? Then I'm done
+			if (($part + 1) >= $backup['multipart'])
+			{
+				// We are done
+				$ret['done'] = true;
+			}
 		}
 
 		return $ret;
@@ -882,6 +908,13 @@ class TransferModel extends BaseDatabaseModel
 				break;
 
 			default:
+				if (!function_exists('ftp_connect'))
+				{
+					throw new RuntimeException(
+						'Your server\'s PHP does not have the FTP extension (ftp) installed or enabled, so the plain FTP connection method is not available. Please use an FTP over cURL or SFTP method instead, or ask your host to enable the PHP FTP extension.'
+					);
+				}
+
 				$connector = new Ftp($config);
 				break;
 		}
@@ -1262,20 +1295,7 @@ class TransferModel extends BaseDatabaseModel
 	 */
 	private function getPartFilename(string $baseFile, int $part = 0): string
 	{
-		if ($part == 0)
-		{
-			return $baseFile;
-		}
-
-		$dirname  = dirname($baseFile);
-		$basename = basename($baseFile);
-
-		$pos       = strrpos($basename, '.');
-		$extension = substr($basename, $pos + 1);
-
-		$newExtension = substr($baseFile, 0, 1) . sprintf('%02u', $part);
-
-		return $dirname . '/' . basename($basename, '.' . $extension) . '.' . $newExtension;
+		return ArchivePartName::forPart($baseFile, $part);
 	}
 
 	/**
@@ -1555,7 +1575,11 @@ class TransferModel extends BaseDatabaseModel
 		$rawData = $this->httpGet($uri->toString(), [], $phpTimeout);
 
 		// ==== Delete the temporary files
-		@unlink($localTempFile);
+		if (@file_exists($localTempFile))
+		{
+			@unlink($localTempFile);
+		}
+
 		$connector->delete($remoteFile);
 
 		// ==== Parse Kickstart's response

@@ -409,11 +409,11 @@ interface PlatformInterface
 	/**
 	 * Set the proxy configuration for this platform
 	 *
-	 * @param   false   $useProxy  Should I use a proxy at all?
-	 * @param   string  $host      Proxy hostname or IP address
-	 * @param   int     $port      Proxy port
-	 * @param   string  $username  Proxy username. Optional. Leavel blank to turn off authentication.
-	 * @param   string  $password  Proxy password.
+	 * @param   false        $useProxy  Should I use a proxy at all?
+	 * @param   string|null  $host      Proxy hostname or IP address
+	 * @param   int|null     $port      Proxy port
+	 * @param   string|null  $username  Proxy username. Optional. Leavel blank to turn off authentication.
+	 * @param   string|null  $password  Proxy password.
 	 *
 	 * @return  void
 	 * @since   9.0.7

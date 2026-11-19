@@ -21,6 +21,7 @@ namespace Akeeba\Engine\Core\Domain;
 defined('AKEEBAENGINE') || die();
 
 use Akeeba\Engine\Base\Part;
+use Akeeba\Engine\Core\Domain\Finalizer\FinalizerInterface;
 use Akeeba\Engine\Core\Domain\Finalizer\LocalQuotas;
 use Akeeba\Engine\Core\Domain\Finalizer\LogFileQuotas;
 use Akeeba\Engine\Core\Domain\Finalizer\MailAdministrators;
@@ -61,6 +62,46 @@ final class Finalization extends Part
 
 	/** @var int How many finalisation substeps I have in total */
 	private $subStepsTotal = 0;
+
+	/**
+	 * Filters a list of finalizer class names down to the ones that actually implement FinalizerInterface.
+	 *
+	 * The finalization action queue (and its quota, before and after variants) is read straight out of the
+	 * configuration registry and used both to instantiate objects and to invoke them as callables. Since that
+	 * registry can be populated from sources outside the Engine's control (JSON API overrides, consumer-specific
+	 * JSON definition files, …) every entry must be proven safe to instantiate before it is queued: it must be an
+	 * autoloadable class that implements FinalizerInterface. There is deliberately no namespace or vendor-prefix
+	 * restriction here — consumer applications are expected to register their own finalizer classes.
+	 *
+	 * @param   array  $classes  The candidate class names.
+	 *
+	 * @return  array  Only the entries which are safe to instantiate as finalizers.
+	 * @since   __DEPLOY_VERSION__
+	 */
+	private static function filterFinalizerClasses(array $classes): array
+	{
+		$filtered = [];
+
+		foreach ($classes as $className)
+		{
+			if (!is_string($className) || !class_exists($className) || !is_a($className, FinalizerInterface::class, true))
+			{
+				Factory::getLog()->warning(
+					sprintf(
+						'Ignoring finalization action queue entry %s: it does not implement %s.',
+						is_string($className) ? $className : gettype($className),
+						FinalizerInterface::class
+					)
+				);
+
+				continue;
+			}
+
+			$filtered[] = $className;
+		}
+
+		return $filtered;
+	}
 
 	/**
 	 * Get the percentage of finalization steps done
@@ -141,7 +182,7 @@ final class Finalization extends Part
 		// Get the quota actions
 		$quotaActions = $configuration->get('volatile.core.finalization.quotaActions', null);
 
-		$quotaActions = is_array($quotaActions) ? $quotaActions : [
+		$quotaActions = is_array($quotaActions) ? self::filterFinalizerClasses($quotaActions) : [
 			LocalQuotas::class,
 			RemoteQuotas::class,
 			ObsoleteRecordsQuotas::class,
@@ -172,6 +213,10 @@ final class Finalization extends Part
 		$customQueue       = $configuration->get('volatile.core.finalization.action_queue', null);
 		$customQueueBefore = $configuration->get('volatile.core.finalization.action_queue_before', null);
 		$customQueueAfter  = $configuration->get('volatile.core.finalization.action_queue_after', null);
+
+		$customQueue       = is_array($customQueue) ? self::filterFinalizerClasses($customQueue) : $customQueue;
+		$customQueueBefore = is_array($customQueueBefore) ? self::filterFinalizerClasses($customQueueBefore) : $customQueueBefore;
+		$customQueueAfter  = is_array($customQueueAfter) ? self::filterFinalizerClasses($customQueueAfter) : $customQueueAfter;
 
 		if (is_array($customQueue) && !empty($customQueue))
 		{

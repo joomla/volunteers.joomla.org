@@ -76,7 +76,7 @@ class SysconfigList extends AbstractCommand
 		$format = (string) $this->cliInput->getOption('format') ?? 'table';
 		$output = $this->getComponentOptions();
 
-		if (in_array($format, ['table', 'csv']))
+		if (in_array($format, ['table', 'csv', 'count']))
 		{
 			$temp = [];
 

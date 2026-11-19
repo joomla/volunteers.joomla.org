@@ -7,6 +7,7 @@
 
 defined('_JEXEC') || die;
 
+use Akeeba\Component\AkeebaBackup\Administrator\Helper\VersionLimits;
 use Akeeba\Plugin\Console\AkeebaBackup\Command\CommandFactoryInterface;
 use Akeeba\Plugin\Console\AkeebaBackup\Command\CommandFactoryProvider;
 use Akeeba\Plugin\Console\AkeebaBackup\Extension\AkeebaBackup;
@@ -17,12 +18,6 @@ use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\DI\Container;
 use Joomla\DI\ServiceProviderInterface;
 use Joomla\Event\DispatcherInterface;
-
-// Make sure that Joomla has registered the namespace for the plugin
-if (!class_exists('\Akeeba\Plugin\Console\AkeebaBackup\Extension\AkeebaBackup'))
-{
-	JLoader::registerNamespace('\Akeeba\Plugin\Console\AkeebaBackup', realpath(__DIR__ . '/../src'));
-}
 
 return new class implements ServiceProviderInterface {
 	/**
@@ -36,6 +31,12 @@ return new class implements ServiceProviderInterface {
 	 */
 	public function register(Container $container)
 	{
+		// Only register the plugin in compatible environments
+		if (!class_exists(VersionLimits::class) || !VersionLimits::isCompatible())
+		{
+			return;
+		}
+
 		$container->registerServiceProvider(new MVCFactory('Akeeba\\Component\\AkeebaBackup'));
 		$container->registerServiceProvider(new CommandFactoryProvider());
 

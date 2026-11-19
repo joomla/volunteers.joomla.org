@@ -77,13 +77,15 @@ class ProfileDelete extends AbstractCommand
 		if ($id === 1)
 		{
 			$this->ioStyle->error(Text::_('COM_AKEEBABACKUP_CLI_PROFILE_DELETE_ERR_DEFAULT'));
+
+			return 3;
 		}
 
 		/** @var ProfileModel $model */
 		$model = $this->mvcFactory->createModel('Profile', 'Administrator');
 		$table = $model->getTable();
 
-		if (!$table->load($id))
+		if ($id <= 0 || !$table->load($id))
 		{
 			$this->ioStyle->error(Text::sprintf('COM_AKEEBABACKUP_CLI_PROFILE_DELETE_ERR_NOTFOUND', $id));
 

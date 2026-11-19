@@ -9,6 +9,7 @@ namespace Akeeba\Component\AkeebaBackup\Administrator\Mixin;
 
 defined('_JEXEC') || die;
 
+use Akeeba\Component\AkeebaBackup\Administrator\Helper\DbQuery;
 use Akeeba\Engine\Platform;
 use Joomla\CMS\Factory;
 use Joomla\Database\DatabaseDriver;
@@ -48,7 +49,7 @@ trait ViewProfileIdAndNameTrait
 		/** @var DatabaseDriver $db */
 		$db = Factory::getContainer()->get(DatabaseInterface::class);
 
-		$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+		$query = DbQuery::create($db)
 			->select([
 				$db->qn('description'),
 				$db->qn('quickicon')

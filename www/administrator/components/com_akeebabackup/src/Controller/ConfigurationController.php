@@ -136,8 +136,13 @@ class ConfigurationController extends BaseController
 		$quickIconValue = $input->getCmd('quickicon', '');
 		$quickIcon      = (int) !empty($quickIconValue);
 
-		$mustSaveProfile = !empty($profileName) && ($profileName != $oldProfileName);
-		$mustSaveProfile = $mustSaveProfile || ($quickIcon != $oldQuickIcon);
+		// An empty description is never saved; the old one is kept.
+		if ($profileName === '')
+		{
+			$profileName = $oldProfileName;
+		}
+
+		$mustSaveProfile = ($profileName != $oldProfileName) || ($quickIcon != $oldQuickIcon);
 
 		if ($mustSaveProfile)
 		{
@@ -248,6 +253,45 @@ class ConfigurationController extends BaseController
 		return parent::display($cachable, $urlparams);
 	}
 
+	/**
+	 * Performs the redirection set up by the task.
+	 *
+	 * When the Configuration page submits its form with fetch() (sending `jsonsubmit=1`) we must not issue a real HTTP
+	 * redirect. fetch() would follow it and render the target page, using up the message we flash in the session
+	 * before the user's browser navigates there. Instead we flash the message and tell the page where to go.
+	 *
+	 * @param   string|null  $url  Unused; kept for compatibility with the parent class
+	 *
+	 * @return  bool
+	 */
+	public function redirect($url = null)
+	{
+		if (!$this->redirect || !$this->input->post->getInt('jsonsubmit', 0))
+		{
+			return parent::redirect();
+		}
+
+		if ($this->message)
+		{
+			$this->app->enqueueMessage($this->message, $this->messageType ?: 'message');
+		}
+
+		// What CMSApplication::redirect() does for a real redirection: persist the queue for the next page load
+		$queue = $this->app->getMessageQueue();
+
+		if (count($queue))
+		{
+			$this->app->getSession()->set('application.queue', $queue);
+		}
+
+		header('Content-Type: application/json; charset=utf-8');
+		echo json_encode(['redirect' => $this->redirect]);
+
+		$this->app->close();
+
+		return false;
+	}
+
 	protected function onBeforeExecute(&$task)
 	{
 		$this->onBeforeExecuteACL($task);
@@ -331,8 +375,9 @@ class ConfigurationController extends BaseController
 			$model->testFTP();
 			$testResult = true;
 		}
-		catch (\RuntimeException $e)
+		catch (\Throwable $e)
 		{
+			// Not just RuntimeException: a missing PHP extension raises an Error which must not become an HTTP 500
 			$testResult = $e->getMessage();
 		}
 
@@ -375,8 +420,9 @@ class ConfigurationController extends BaseController
 			$model->testSFTP();
 			$testResult = true;
 		}
-		catch (\RuntimeException $e)
+		catch (\Throwable $e)
 		{
+			// Not just RuntimeException: a missing PHP extension raises an Error which must not become an HTTP 500
 			$testResult = $e->getMessage();
 		}
 

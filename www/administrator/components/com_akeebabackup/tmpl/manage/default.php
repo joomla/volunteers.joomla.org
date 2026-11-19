@@ -182,7 +182,7 @@ if ($this->promptForBackupRestoration)
 												<span class="fa fa-calendar akeebaTooltip"
 													  title="<?= Text::_('COM_AKEEBABACKUP_BUADMIN_LABEL_START') ?>"
 												></span>&nbsp;
-												<?= $startTime ?> <?= $timeZoneText ?>
+												<?= $this->escape($startTime) ?> <?= $this->escape($timeZoneText) ?>
 										</span>
 
 										<span class="col-lg akeeba-buadmin-duration">

@@ -9,6 +9,7 @@ namespace Akeeba\Component\AkeebaBackup\Administrator\Model\UpgradeHandler;
 
 defined('_JEXEC') || die;
 
+use Akeeba\Component\AkeebaBackup\Administrator\Helper\DbQuery;
 use Akeeba\Component\AkeebaBackup\Administrator\Mixin\AkeebaEngineTrait;
 use Akeeba\Component\AkeebaBackup\Administrator\Model\UpgradeModel;
 use Akeeba\Engine\Factory;
@@ -54,7 +55,7 @@ class AngieToBrs
 	{
 		// Get a list of all backup profiles
 		$db         = $this->dbo;
-		$query      = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+		$query      = DbQuery::create($db)
 			->select($db->quoteName('id'))
 			->from($db->quoteName('#__akeebabackup_profiles'));
 		$profileIds = $db->setQuery($query)->loadColumn();

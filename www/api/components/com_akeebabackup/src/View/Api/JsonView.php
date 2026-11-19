@@ -9,6 +9,7 @@ namespace Akeeba\Component\AkeebaBackup\Api\View\Api;
 
 \defined('_JEXEC') || die;
 
+use Akeeba\Component\AkeebaBackup\Api\Helper\ExceptionChain;
 use Joomla\CMS\Factory;
 use Joomla\CMS\MVC\View\JsonView as BaseJsonView;
 
@@ -48,21 +49,16 @@ class JsonView extends BaseJsonView
 
 			if ($siteDebug && $maxErrorReporting)
 			{
-				$result['debug'] = [];
-				$thisException   = $this->data;
-
-				while (!empty($thisException))
-				{
-					$result['debug'][] = [
+				$result['debug'] = array_map(
+					fn (\Throwable $thisException) => [
 						'message'   => $thisException->getMessage(),
 						'code'      => $thisException->getCode(),
 						'file'      => $thisException->getFile(),
 						'line'      => $thisException->getLine(),
 						'backtrace' => $thisException->getTrace(),
-					];
-
-					$thisException = $this->data->getPrevious();
-				}
+					],
+					ExceptionChain::walk($this->data)
+				);
 			}
 		}
 

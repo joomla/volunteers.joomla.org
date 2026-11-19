@@ -702,17 +702,10 @@ class Postgresql extends Base
 					}
 					else
 					{
-						// Accommodate for runtime magic quotes
-						if (function_exists('get_magic_quotes_runtime'))
-						{
-							$value = @get_magic_quotes_runtime() ? stripslashes($value) : $value;
-						}
-
 						switch ($columnTypes[$fieldName] ?? '')
 						{
 							// Hex encode spatial data and special types
 							case 'BYTEA':
-							case 'JSONB':
 							case 'GEOMETRY':
 							case 'GEOGRAPHY':
 							case 'POINT':
@@ -957,7 +950,13 @@ class Postgresql extends Base
 		$command .= ' -s'; // Schema only
 		$command .= ' -O'; // Disable owner information
 		$command .= ' --no-comments'; // Disable comments
-		$command .= ' --no-policies'; // Disable dumping security policies
+
+		if ($this->getPgDumpVersion($pgDumpPath) >= 18)
+		{
+			// --no-policies was only introduced in pg_dump 18; older versions reject it outright
+			$command .= ' --no-policies'; // Disable dumping security policies
+		}
+
 		$command .= ' --no-security-labels'; // Disable dumping security labels
 		$command .= ' --quote-all-identifiers';
 
@@ -1048,10 +1047,16 @@ class Postgresql extends Base
 		});
 		// -- Change all `CREATE ... "#__` to `CREATE ... IF NOT EXISTS "#__`
 		$lines = array_map(function ($line) {
-			// CREATE INDEX... must NOT be converted!!!
-			if (str_contains($line, 'CREATE INDEX'))
+			// CREATE INDEX / CREATE UNIQUE INDEX... must NOT be converted!!!
+			if (str_contains($line, 'CREATE INDEX') || str_contains($line, 'CREATE UNIQUE INDEX'))
 			{
 				return $line;
+			}
+
+			// CREATE VIEW has no IF NOT EXISTS clause in PostgreSQL; use CREATE OR REPLACE VIEW instead
+			if (preg_match('/^CREATE VIEW "#__/i', $line))
+			{
+				return preg_replace('/^CREATE VIEW "#__/i', 'CREATE OR REPLACE VIEW "#__', $line);
 			}
 
 			return preg_replace('/^CREATE (.*) "#__/i', 'CREATE \1 IF NOT EXISTS "#__', $line);
@@ -1060,6 +1065,47 @@ class Postgresql extends Base
 		$sql = implode("\n", $lines);
 
 		return $sql;
+	}
+
+	/**
+	 * Gets the major version number of the `pg_dump` executable at the given path.
+	 *
+	 * The result is cached (per path) in the volatile configuration since `getCreateStatement()` calls this once
+	 * per table and spawning `pg_dump --version` on every table would be wasteful.
+	 *
+	 * @param   string  $pgDumpPath  Path to the `pg_dump` executable
+	 *
+	 * @return  int  The major version number, or 0 if it could not be determined
+	 * @since   10.3
+	 */
+	protected function getPgDumpVersion(string $pgDumpPath): int
+	{
+		$configuration = Factory::getConfiguration();
+		$cacheKey      = 'volatile.database.postgres.pgdump_version.' . md5($pgDumpPath);
+		$cachedVersion = $configuration->get($cacheKey, null);
+
+		if ($cachedVersion !== null)
+		{
+			return (int) $cachedVersion;
+		}
+
+		$command  = escapeshellarg($pgDumpPath) . ' --version';
+		$output   = [];
+		$exitCode = $this->ektelese($command, $output);
+		$version  = 0;
+
+		if ($exitCode === 0 && !empty($output))
+		{
+			// Typical output: "pg_dump (PostgreSQL) 18.0"
+			if (preg_match('/(\d+)(?:\.\d+)*/', implode(' ', $output), $matches))
+			{
+				$version = (int) $matches[1];
+			}
+		}
+
+		$configuration->set($cacheKey, $version);
+
+		return $version;
 	}
 
 	/**

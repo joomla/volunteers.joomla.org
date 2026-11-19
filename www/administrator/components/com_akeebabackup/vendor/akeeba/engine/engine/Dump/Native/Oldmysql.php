@@ -20,6 +20,7 @@ namespace Akeeba\Engine\Dump\Native;
 
 defined('AKEEBAENGINE') || die();
 
+use Akeeba\Engine\Driver\DbQuery;
 use Akeeba\Engine\Driver\QueryException;
 use Akeeba\Engine\Dump\Base;
 use Akeeba\Engine\Factory;
@@ -510,7 +511,7 @@ class Oldmysql extends Base
 	{
 		$db = $this->getDB();
 
-		$sql = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+		$sql = DbQuery::create($db)
 			->select('COUNT(*)')
 			->from($db->nameQuote($tableAbstract));
 
@@ -1278,7 +1279,7 @@ class Oldmysql extends Base
 			$columns         = $this->getSelectColumns($tableAbstract);
 			$columnTypes     = $this->getColumnTypes($tableAbstract);
 			$columnsForQuery = is_array($columns) ? array_map([$db, 'qn'], $columns) : $columns;
-			$sql             = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+			$sql             = DbQuery::create($db)
 				->select($columnsForQuery)
 				->from($db->nameQuote($tableAbstract));
 
@@ -1468,12 +1469,6 @@ class Oldmysql extends Base
 						}
 						else
 						{
-							// Accommodate for runtime magic quotes
-							if (function_exists('get_magic_quotes_runtime'))
-							{
-								$value = @get_magic_quotes_runtime() ? stripslashes($value) : $value;
-							}
-
 							switch ($columnTypes[$fieldName] ?? '')
 							{
 								// Hex encode spatial data

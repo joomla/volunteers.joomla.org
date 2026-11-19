@@ -37,6 +37,7 @@ class DropboxEngine extends AbstractProvider implements ProviderInterface
 			]
 			),
 			'token_access_type' => 'offline',
+			'state'             => $this->generateState(),
 		];
 
 		return 'https://www.dropbox.com/1/oauth2/authorize?' . http_build_query($params);

@@ -63,6 +63,16 @@ class DiscoverController extends BaseController
 
 		$directory = Factory::getFilesystemTools()->translateStockDirs($directory);
 
+		if (!@is_dir($directory) || !@is_readable($directory))
+		{
+			$url = Route::_('index.php?option=com_akeebabackup&view=Discover', false);
+			$msg = Text::_('COM_AKEEBABACKUP_DISCOVER_ERROR_NOTADIRECTORY');
+
+			$this->setRedirect($url, $msg, 'error');
+
+			return;
+		}
+
 		/** @var DiscoverModel $model */
 		$model = $this->getModel('Discover', 'Administrator');
 		$model->setState('directory', $directory);

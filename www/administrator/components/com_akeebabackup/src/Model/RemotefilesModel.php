@@ -115,8 +115,21 @@ class RemotefilesModel extends BaseDatabaseModel
 	public function downloadToServer(int $id, int $part = -1, int $frag = -1): bool
 	{
 		// Gather the necessary information to perform the download
-		$backupRecord        = Platform::getInstance()->get_statistics($id);
-		$remoteFilenameParts = explode('://', $backupRecord['remote_filename']);
+		$backupRecord = Platform::getInstance()->get_statistics($id);
+
+		if (!is_array($backupRecord))
+		{
+			throw new RuntimeException(Text::_('COM_AKEEBABACKUP_BUADMIN_ERROR_INVALIDID'));
+		}
+
+		// A backup which is only stored locally has no remote file to fetch
+		$remoteFilenameParts = explode('://', (string) ($backupRecord['remote_filename'] ?? ''), 2);
+
+		if (count($remoteFilenameParts) < 2 || in_array($remoteFilenameParts[0], ['', 'none'], true))
+		{
+			throw new RuntimeException(Text::_('COM_AKEEBABACKUP_REMOTEFILES_ERR_UNSUPPORTED'));
+		}
+
 		$engine              = Factory::getPostprocEngine($remoteFilenameParts[0]);
 		$remoteFilepath      = $remoteFilenameParts[1];
 		// Note that single part archives have $backupRecord['multipart'] == 0. We need that to be 1.
@@ -205,6 +218,12 @@ class RemotefilesModel extends BaseDatabaseModel
 			}
 			catch (Exception $e)
 			{
+				// The engine may have created the temporary file before failing; do not leave it behind
+				if (is_file($tempFilepath))
+				{
+					Platform::getInstance()->unlink($tempFilepath);
+				}
+
 				// Failed download
 				if (
 					(($part < $backupRecord['multipart']) || (($backupRecord['multipart'] == 0) && ($part == 0))) &&

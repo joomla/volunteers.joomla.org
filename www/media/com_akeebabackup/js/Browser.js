@@ -16,11 +16,12 @@ if (typeof akeebabackup.Browser == "undefined")
         useThis: function () {
             var rawFolder = document.forms.adminForm.folderraw.value;
 
-            if (rawFolder === "[SITEROOT]")
+            // Ignore any trailing directory separator, e.g. "[SITEROOT]/"
+            if (rawFolder.replace(/[\/\\]+$/, "") === "[SITEROOT]")
             {
                 rawFolder = "[SITETMP]";
 
-                alert(Joomla.Text._("COM_AKEEBA_CONFIG_UI_ROOTDIR"));
+                alert(Joomla.Text._("COM_AKEEBABACKUP_CONFIG_UI_ROOTDIR"));
             }
 
             window.parent.akeebabackup.Configuration.onBrowserCallback(rawFolder);
@@ -34,7 +35,7 @@ akeebabackup.System.addEventListener('comAkeebaBrowserUseThis', 'click', functio
     return false;
 });
 akeebabackup.System.addEventListener('comAkeebaBrowserGo', 'click', function () {
-    document.form.adminForm.submit();
+    document.forms.adminForm.submit();
 
     return false;
 });

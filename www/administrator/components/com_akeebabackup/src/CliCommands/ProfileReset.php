@@ -82,7 +82,7 @@ class ProfileReset extends AbstractCommand
 		$model = $this->getMVCFactory()->createModel('Profile', 'Administrator');
 		$table = $model->getTable();
 
-		if (!$table->load($id))
+		if ($id <= 0 || !$table->load($id))
 		{
 			$this->ioStyle->error(Text::sprintf('COM_AKEEBABACKUP_CLI_PROFILE_RESET_ERR_NOTFOUND', $id));
 

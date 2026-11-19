@@ -87,7 +87,7 @@ class ProfilesController extends AdminController
 
 		if (!isset($file['name']) || empty($file['name']) || ($file['error'] ?? UPLOAD_ERR_OK) !== UPLOAD_ERR_OK)
 		{
-			$this->setRedirect(Uri::base() . 'index.php?option=com_akeebabackup&view=Profiles', Text::_('MSG_UPLOAD_INVALID_REQUEST'), 'error');
+			$this->setRedirect(Uri::base() . 'index.php?option=com_akeebabackup&view=Profiles', Text::_('COM_AKEEBABACKUP_PROFILES_ERR_IMPORT_NOFILE'), 'error');
 
 			return;
 		}

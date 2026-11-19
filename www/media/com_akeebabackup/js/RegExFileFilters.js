@@ -226,7 +226,7 @@ akeebabackup.Regexfsfilters.addRow = function (def, append_to_here)
                     .substr(5);
 
                 trow.querySelector("td.ak-type span").textContent = Joomla.Text._(type_translation_key);
-                trow.querySelector("td.ak-item code").textContent   = akeebabackup.System.escapeHTML(def.item);
+                trow.querySelector("td.ak-item code").textContent = def.item;
                 akeebabackup.System.triggerEvent(tdFirst.querySelector("span.cancel"), "click");
 
                 if (haveToDelete)
@@ -240,7 +240,16 @@ akeebabackup.Regexfsfilters.addRow = function (def, append_to_here)
                 {
                     akeebabackup.Regexfsfilters.addNewRow(append_to_here);
                 }
-            }, false);
+            }, false, true, function ()
+            {
+                // The server refused the filter: the editor stays open, so the user must be able to cancel it
+                var elCancelAgain = tdFirst.querySelector("span.cancel");
+
+                if (elCancelAgain)
+                {
+                    elCancelAgain.style.display = "";
+                }
+            });
         });
         tdFirst.appendChild(elSave);
 

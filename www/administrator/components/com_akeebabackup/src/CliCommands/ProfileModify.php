@@ -78,7 +78,7 @@ class ProfileModify extends AbstractCommand
 		/** @var ProfileModel $model */
 		$model    = $this->getMVCFactory()->createModel('Profile', 'Administrator');
 		$table    = $model->getTable();
-		$isLoaded = $table->load($id);
+		$isLoaded = $id > 0 && $table->load($id);
 
 		if (!$isLoaded)
 		{
@@ -89,14 +89,19 @@ class ProfileModify extends AbstractCommand
 
 		$changes = [];
 
-		$description = (string) $this->cliInput->getOption('description') ?? 0;
+		$description = $this->cliInput->getOption('description');
 
 		if (!is_null($description))
 		{
-			$changes['description'] = $description;
+			$changes['description'] = (string) $description;
 		}
 
-		$changes['quickicon'] = (bool) $this->cliInput->getOption('quickicon') ?? $table->quickicon;
+		$quickicon = $this->cliInput->getOption('quickicon');
+
+		if (!is_null($quickicon))
+		{
+			$changes['quickicon'] = ((bool) $quickicon) ? 1 : 0;
+		}
 
 		try
 		{

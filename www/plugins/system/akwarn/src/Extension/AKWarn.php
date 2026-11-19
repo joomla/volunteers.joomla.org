@@ -14,6 +14,7 @@ use Joomla\CMS\Document\HtmlDocument;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\CMS\Plugin\PluginHelper;
+use Joomla\CMS\Session\Session;
 use Joomla\CMS\Uri\Uri;
 use Joomla\Event\Event;
 use Joomla\Event\SubscriberInterface;
@@ -66,17 +67,14 @@ class AKWarn extends CMSPlugin implements SubscriberInterface
 			return;
 		}
 
-		$jInput      = $this->getApplication()->getInput();
-		$toggleParam = $jInput->getCmd('_akeeba_backup_delete_leftovers', null);
+		$jInput = $this->getApplication()->getInput();
 
-		if ($toggleParam && ($toggleParam === $this->getApplication()->getSession()->getToken()))
+		if ($jInput->getMethod() === 'POST' && $jInput->post->getCmd('_akeeba_backup_delete_leftovers') === '1'
+		    && Session::checkToken('post'))
 		{
 			$this->deleteFiles();
 
-			$uri = Uri::getInstance();
-			$uri->delVar('_akeeba_backup_delete_leftovers');
-
-			$this->getApplication()->redirect($uri->toString());
+			$this->getApplication()->redirect(Uri::getInstance()->toString());
 		}
 	}
 
@@ -178,7 +176,7 @@ class AKWarn extends CMSPlugin implements SubscriberInterface
 		}
 
 		// Make sure this is the Joomla control panel (com_cpanel)
-		$option = $app->input->get('option', 'com_cpanel');
+		$option = $app->getInput()->get('option', 'com_cpanel');
 
 		if ($option !== 'com_cpanel' && $option !== '')
 		{
@@ -186,6 +184,25 @@ class AKWarn extends CMSPlugin implements SubscriberInterface
 		}
 
 		return true;
+	}
+
+	/**
+	 * Returns the absolute path to the site's public folder.
+	 *
+	 * Joomla 5.0 introduced the JPATH_PUBLIC constant; Joomla 4 has no separate public folder, so its web root is
+	 * JPATH_ROOT.
+	 *
+	 * @return  string
+	 * @since   10.5.0
+	 */
+	private function getPublicFolder(): string
+	{
+		if (version_compare(JVERSION, '5.0', 'lt'))
+		{
+			return JPATH_ROOT;
+		}
+
+		return JPATH_PUBLIC;
 	}
 
 	/**
@@ -200,7 +217,7 @@ class AKWarn extends CMSPlugin implements SubscriberInterface
 
 		try
 		{
-			$di = new \DirectoryIterator(JPATH_PUBLIC);
+			$di = new \DirectoryIterator($this->getPublicFolder());
 		}
 		catch (Throwable $e)
 		{
@@ -246,8 +263,8 @@ class AKWarn extends CMSPlugin implements SubscriberInterface
 			}
 
 			$isArchive     = in_array($ext, ['zip', 'jpa', 'jps']);
-			$isArchivePart = (str_starts_with($ext, 'z') || str_starts_with($ext, 'p'))
-			                 && preg_match('/[pz][\d]]{2,}/', $ext);
+			// Split archive parts: .zNN (ZIP) and .jNN (JPA, JPS); .pNN is kept for backwards compatibility
+			$isArchivePart = (bool) preg_match('/^[pzj]\d{2,}$/', $ext);
 			$isKickstart   = $basename === 'kickstart.php'
 			                 || ($ext === 'php' && str_contains($basename, 'kickstart'));
 
@@ -279,7 +296,7 @@ class AKWarn extends CMSPlugin implements SubscriberInterface
 
 		foreach ($leftoverFiles as $file)
 		{
-			$filePath = JPATH_PUBLIC . '/' . $file;
+			$filePath = $this->getPublicFolder() . '/' . $file;
 
 			if (!file_exists($filePath))
 			{

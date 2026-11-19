@@ -109,7 +109,7 @@ echo $this->loadTemplate('script');
 					<textarea
 							name="comment" id="comment"
 							class="form-control"
-							rows="5" cols="73"><?= $this->comment ?></textarea>
+							rows="5" cols="73"><?= $this->escape($this->comment) ?></textarea>
 					<span class="text-muted"><?= Text::_('COM_AKEEBABACKUP_BACKUP_LABEL_COMMENT_HELP') ?></span>
 				</div>
 			</div>

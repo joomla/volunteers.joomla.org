@@ -28,6 +28,8 @@ defined('AKEEBAENGINE') || die();
  */
 class Buffer
 {
+	/** @var resource|null Stream context supplied by PHP */
+	public $context;
 
 	/**
 	 * Stream position
@@ -67,7 +69,7 @@ class Buffer
 	{
 		$url                         = parse_url($path);
 		$this->name                  = $url["host"];
-		$this->_buffers[$this->name] = null;
+		$this->_buffers[$this->name] = '';
 		$this->position              = 0;
 
 		return true;

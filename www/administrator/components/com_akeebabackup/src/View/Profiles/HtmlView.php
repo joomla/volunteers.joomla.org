@@ -163,7 +163,8 @@ class HtmlView extends BaseHtmlView
 				->text('COM_AKEEBABACKUP_PROFILES_BTN_UNPUBLISH')
 				->listCheck(true);
 
-			$childBar->standardButton('reset', 'COM_AKEEBABACKUP_PROFILES_BTN_RESET', 'profiles.reset')
+			$childBar->confirmButton('reset', 'COM_AKEEBABACKUP_PROFILES_BTN_RESET', 'profiles.reset')
+				->message('COM_AKEEBABACKUP_PROFILES_BTN_RESET_CONFIRM')
 				->icon('fa fa-radiation')
 				->listCheck(true);
 

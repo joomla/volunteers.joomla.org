@@ -85,11 +85,31 @@ class FilterDelete extends AbstractCommand
 		$target     = (in_array($filterType, [
 			'tables', 'tabledata', 'regextables', 'regextabledata', 'multidb',
 		])) ? 'db' : 'fs';
-		$root       = (string) ($this->cliInput->getOption('root') ?? (($target == 'fs') ? '[SITEROOT]' : '[SITEDB]'));
+		$root       = trim((string) ($this->cliInput->getOption('root') ?? ''));
+
+		// An unknown filter type has no filter object; refuse it instead of calling a method on null.
+		$filterObject = Factory::getFilterObject($filterType);
+
+		if (!is_object($filterObject))
+		{
+			$this->ioStyle->error(Text::sprintf('COM_AKEEBABACKUP_CLI_FILTER_ERR_UNKNOWN_TYPE', $filterType));
+
+			return 1;
+		}
+
+		// An empty root means the default root for the filter type, as documented in the option's help.
+		if ($root === '')
+		{
+			$root = ($target == 'fs') ? '[SITEROOT]' : '[SITEDB]';
+		}
 
 		if (!in_array($root, $this->getRoots($target)))
 		{
-			$this->ioStyle->error(Text::sprintf('COM_AKEEBABACKUP_CLI_FILTER_DELETE_ERR_UNKNOWN_ROOT', $target, $root));
+			$this->ioStyle->error(Text::sprintf(
+				'COM_AKEEBABACKUP_CLI_FILTER_DELETE_ERR_UNKNOWN_ROOT',
+				$target === 'db' ? Text::_('COM_AKEEBABACKUP_CLI_FILTER_TYPE_DATABASE') : Text::_('COM_AKEEBABACKUP_CLI_FILTER_TYPE_FILESYSTEM'),
+				$root
+			));
 
 			return 1;
 		}
@@ -103,9 +123,6 @@ class FilterDelete extends AbstractCommand
 			$filterType,
 			$profileId
 		));
-
-		// Delete the filter
-		$filterObject = Factory::getFilterObject($filterType);
 
 		if ((stripos($filterType, 'regex') !== false) && !$this->isPro())
 		{

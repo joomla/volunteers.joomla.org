@@ -48,7 +48,7 @@
     "engine.archiver.directsftpcurl.sftp_test": {
         "default": "0",
         "type": "button",
-        "hook": "directsftp_test_connection",
+        "hook": "directsftpcurl_test_connection",
         "title": "COM_AKEEBA_CONFIG_DIRECTSFTP_TEST_TITLE",
         "description": "COM_AKEEBA_CONFIG_DIRECTSFTP_TEST_DESCRIPTION"
     }

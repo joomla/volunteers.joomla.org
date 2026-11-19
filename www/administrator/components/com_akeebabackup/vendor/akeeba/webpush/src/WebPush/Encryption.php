@@ -181,7 +181,10 @@ class Encryption
 				$private_key = array_map([Base64Url::class, 'encode'], $private_key);
 				$privatePem = self::convertPrivateKeyToPEM($private_key);
 
-				$result = openssl_pkey_derive($publicPem, $privatePem, 256);
+				// PHP 8.5+ deprecates the $key_length argument; omitting it derives the full (32-byte) P-256 shared secret anyway.
+				$result = version_compare(PHP_VERSION, '8.5.0', '<')
+					? openssl_pkey_derive($publicPem, $privatePem, 256)
+					: openssl_pkey_derive($publicPem, $privatePem);
 				if ($result === false)
 				{
 					throw new \Exception('Unable to compute the agreement key');

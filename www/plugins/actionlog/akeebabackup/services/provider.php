@@ -7,6 +7,7 @@
 
 defined('_JEXEC') || die;
 
+use Akeeba\Component\AkeebaBackup\Administrator\Helper\VersionLimits;
 use Akeeba\Plugin\ActionLog\AkeebaBackup\Extension\AkeebaBackup;
 use Joomla\CMS\Extension\PluginInterface;
 use Joomla\CMS\Factory;
@@ -14,12 +15,6 @@ use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\DI\Container;
 use Joomla\DI\ServiceProviderInterface;
 use Joomla\Event\DispatcherInterface;
-
-// Make sure that Joomla has registered the namespace for the plugin
-if (!class_exists('\Akeeba\Plugin\ActionLog\AkeebaBackup\Extension\AkeebaBackup'))
-{
-	JLoader::registerNamespace('\Akeeba\Plugin\ActionLog\AkeebaBackup', realpath(__DIR__ . '/../src'));
-}
 
 return new class implements ServiceProviderInterface {
 	/**
@@ -33,6 +28,12 @@ return new class implements ServiceProviderInterface {
 	 */
 	public function register(Container $container)
 	{
+		// Only register the plugin in compatible environments
+		if (!class_exists(VersionLimits::class) || !VersionLimits::isCompatible())
+		{
+			return;
+		}
+
 		$container->set(
 			PluginInterface::class,
 			function (Container $container) {

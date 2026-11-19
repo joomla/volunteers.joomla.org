@@ -14,6 +14,7 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\Installer\Adapter\PackageAdapter;
 use Joomla\CMS\Installer\InstallerAdapter;
 use Joomla\CMS\Installer\InstallerScript;
+use Joomla\CMS\Log\Log;
 use Joomla\Database\DatabaseDriver;
 use Joomla\Database\DatabaseInterface;
 
@@ -35,6 +36,10 @@ class Pkg_AkeebabackupInstallerScript extends InstallerScript
 
 	protected $minimumJoomla = '4.4.0';
 
+	protected $maximumPhp = '8.7';
+
+	protected $maximumJoomla = '6.3';
+
 	protected $allowDowngrades = true;
 
 	public function preflight($type, $parent)
@@ -43,6 +48,33 @@ class Pkg_AkeebabackupInstallerScript extends InstallerScript
 		{
 			return false;
 		}
+
+		// Check for the maximum PHP version before continuing
+		$maxPhp = !empty($this->maximumPhp) ? trim($this->maximumPhp) : null;
+
+		if (!empty($maxPhp) && version_compare(PHP_VERSION, $maxPhp, 'ge')) {
+			Log::add(
+				sprintf('This extension supports PHP versions lower than %s. Your server has a newer PHP version (%s) which has not been tested with it. The installation cannot proceed.', $maxPhp, PHP_VERSION),
+				Log::WARNING,
+				'jerror'
+			);
+
+			return false;
+		}
+
+		// Check for the maximum Joomla version before continuing
+		$maxJoomla = !empty($this->maximumJoomla) ? trim($this->maximumJoomla) : null;
+
+		if (!empty($maxJoomla) && version_compare(JVERSION, $maxJoomla, 'ge')) {
+			Log::add(
+				sprintf('This extension supports Joomla! versions lower than %s. Your site has a newer Joomla! version (%s) which has not been tested with it. The installation cannot proceed.', $maxJoomla, JVERSION),
+				Log::WARNING,
+				'jerror'
+			);
+
+			return false;
+		}
+
 
 		$this->setDboFromAdapter($parent);
 
@@ -124,6 +156,8 @@ class Pkg_AkeebabackupInstallerScript extends InstallerScript
 
 		$this->invalidateFiles();
 
+		$this->registerActionLogExtension();
+
 		$model = $this->getUpgradeModel();
 
 		if (empty($model))
@@ -132,6 +166,81 @@ class Pkg_AkeebabackupInstallerScript extends InstallerScript
 		}
 
 		return $model->postflight($type, $parent);
+	}
+
+	/**
+	 * Called when the package is uninstalled. Removes our Action Logs extension registration.
+	 *
+	 * @param   PackageAdapter|mixed  $parent  The object responsible for running this script
+	 *
+	 * @return  void
+	 * @since   10.5.0
+	 */
+	public function uninstall($parent)
+	{
+		$this->unregisterActionLogExtension();
+	}
+
+	/**
+	 * Registers com_akeebabackup in #__action_logs_extensions so it can be selected in the Action Logs options.
+	 *
+	 * Idempotent. Failures are swallowed; this must never break installation.
+	 *
+	 * @return  void
+	 * @since   10.5.0
+	 */
+	private function registerActionLogExtension(): void
+	{
+		try
+		{
+			/** @var DatabaseDriver $db */
+			$db        = Factory::getContainer()->get(DatabaseInterface::class);
+			$extension = 'com_akeebabackup';
+			$query     = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+				->select($db->quoteName('id'))
+				->from($db->quoteName('#__action_logs_extensions'))
+				->where($db->quoteName('extension') . ' = :extension')
+				->bind(':extension', $extension);
+
+			if ($db->setQuery($query)->loadResult())
+			{
+				return;
+			}
+
+			$object = (object) ['extension' => $extension];
+
+			$db->insertObject('#__action_logs_extensions', $object);
+		}
+		catch (Throwable $e)
+		{
+			// Never fail the installation because of this
+		}
+	}
+
+	/**
+	 * Removes com_akeebabackup from #__action_logs_extensions.
+	 *
+	 * @return  void
+	 * @since   10.5.0
+	 */
+	private function unregisterActionLogExtension(): void
+	{
+		try
+		{
+			/** @var DatabaseDriver $db */
+			$db        = Factory::getContainer()->get(DatabaseInterface::class);
+			$extension = 'com_akeebabackup';
+			$query     = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+				->delete($db->quoteName('#__action_logs_extensions'))
+				->where($db->quoteName('extension') . ' = :extension')
+				->bind(':extension', $extension);
+
+			$db->setQuery($query)->execute();
+		}
+		catch (Throwable $e)
+		{
+			// Never fail the uninstallation because of this
+		}
 	}
 
 	/**

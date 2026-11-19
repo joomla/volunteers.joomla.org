@@ -464,8 +464,14 @@
 
 
 			// Register the service worker, then check the user's subscription
-			this.registerServiceWorker()
+			Promise.resolve(this.registerServiceWorker())
 				.then((serviceWorkerRegistration) => {
+					// Registration failed (or there is no worker URI): there is nothing to check
+					if (!serviceWorkerRegistration)
+					{
+						return;
+					}
+
 					this.isUserSubscribed(serviceWorkerRegistration);
 				});
 

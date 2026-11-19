@@ -9,6 +9,7 @@ namespace Akeeba\Component\AkeebaBackup\Administrator\Model;
 
 defined('_JEXEC') || die;
 
+use Akeeba\Component\AkeebaBackup\Administrator\Helper\DbQuery;
 use Akeeba\Component\AkeebaBackup\Administrator\Mixin\ModelStateFixTrait;
 use Akeeba\Component\AkeebaBackup\Administrator\Service\ComponentParameters;
 use Akeeba\Engine\Factory;
@@ -632,7 +633,7 @@ ENDBODY;
 		try
 		{
 			$db         = $this->getDatabase();
-			$query      = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+			$query      = DbQuery::create($db)
 				->select($db->quoteName('id'))
 				->from($db->quoteName('#__akeebabackup_profiles'));
 			$profileIDs = $db->setQuery($query)->loadColumn() ?: [];
@@ -724,7 +725,7 @@ ENDBODY;
 	{
 		/** @var DatabaseDriver $db */
 		$db    = $this->getDatabase();
-		$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+		$query = DbQuery::create($db)
 		            ->select('*')
 		            ->from($db->qn('#__akeebabackup_backups'));
 
@@ -836,7 +837,7 @@ ENDBODY;
 
 		// Get all usergroups with Super User access
 		$db     = $this->getDatabase();
-		$q      = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+		$q      = DbQuery::create($db)
 		             ->select([$db->qn('id')])
 		             ->from($db->qn('#__usergroups'));
 		$groups = $db->setQuery($q)->loadColumn();
@@ -885,7 +886,7 @@ ENDBODY;
 		$now      = clone JoomlaFactory::getDate();
 		$nowToSql = $now->toSql();
 
-		$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+		$query = DbQuery::create($db)
 		            ->insert($db->qn('#__akeebabackup_storage'))
 		            ->columns([$db->qn('tag'), $db->qn('lastupdate')])
 		            ->values(':tag, :lastupdate')
@@ -894,7 +895,7 @@ ENDBODY;
 
 		if ($exists)
 		{
-			$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+			$query = DbQuery::create($db)
 			            ->update($db->qn('#__akeebabackup_storage'))
 			            ->set($db->qn('lastupdate') . ' = :lastupdate')
 			            ->where($db->qn('tag') . ' = :tag')
@@ -922,7 +923,7 @@ ENDBODY;
 	{
 		$db = $this->getDatabase();
 
-		$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+		$query = DbQuery::create($db)
 		            ->select($db->qn('lastupdate'))
 		            ->from($db->qn('#__akeebabackup_storage'))
 		            ->where($db->qn('tag') . ' = :tag')

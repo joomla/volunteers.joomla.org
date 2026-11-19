@@ -20,6 +20,7 @@ namespace Akeeba\Engine\Dump\Native;
 
 defined('AKEEBAENGINE') || die();
 
+use Akeeba\Engine\Driver\DbQuery;
 use Akeeba\Engine\Driver\QueryException;
 use Akeeba\Engine\Dump\Base;
 use Akeeba\Engine\Dump\Dependencies\Entity;
@@ -685,12 +686,6 @@ class Mysql extends Base
 					}
 					else
 					{
-						// Accommodate for runtime magic quotes
-						if (function_exists('get_magic_quotes_runtime'))
-						{
-							$value = @get_magic_quotes_runtime() ? stripslashes($value) : $value;
-						}
-
 						switch ($columnTypes[$fieldName] ?? '')
 						{
 							// Hex encode spatial data
@@ -1024,7 +1019,7 @@ class Mysql extends Base
 	{
 		$db = $this->getDB();
 
-		$sql = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
+		$sql = DbQuery::create($db)
 			->select('COUNT(*)')
 			->from($db->nameQuote($tableAbstract));
 

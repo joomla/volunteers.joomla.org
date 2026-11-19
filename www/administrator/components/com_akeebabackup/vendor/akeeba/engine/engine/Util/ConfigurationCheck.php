@@ -80,10 +80,6 @@ class ConfigurationCheck
 		['code'        => '107', 'severity' => 'high', 'callback' => [null, 'q107'],
 		 'description' => 'COM_AKEEBA_CPANEL_WARNING_Q107',
 		],
-
-		['code'        => '201', 'severity' => 'medium', 'callback' => [null, 'q201'],
-		 'description' => 'COM_AKEEBA_CPANEL_WARNING_Q201',
-		],
 		['code'        => '202', 'severity' => 'medium', 'callback' => [null, 'q202'],
 		 'description' => 'COM_AKEEBA_CPANEL_WARNING_Q202',
 		],
@@ -477,25 +473,8 @@ class ConfigurationCheck
 	 */
 	private function q103()
 	{
-		$exectime = ini_get('max_execution_time');
-		$safemode = ini_get('safe_mode');
-
-		if (!$safemode)
-		{
-			return false;
-		}
-
-		if (!is_numeric($exectime))
-		{
-			return false;
-		}
-
-		if ($exectime <= 0)
-		{
-			return false;
-		}
-
-		return $exectime < 10;
+		// PHP Safe Mode was removed in PHP 5.4; this check can never trigger on any supported PHP version.
+		return false;
 	}
 
 	/**
@@ -580,18 +559,6 @@ class ConfigurationCheck
 	}
 
 	/**
-	 * Q201 - MEDIUM - Outdated PHP version.
-	 *
-	 * We currently check for PHP lower than 8.0.
-	 *
-	 * @return  bool
-	 */
-	private function q201()
-	{
-		return version_compare(PHP_VERSION, '8.0.0', 'lt');
-	}
-
-	/**
 	 * Q202 - MED  - CRC problems with hash extension not present
 	 *
 	 * @return  bool
@@ -634,7 +601,7 @@ class ConfigurationCheck
 	 */
 	private function q204()
 	{
-		$disabled = ini_get('disabled_functions');
+		$disabled = ini_get('disable_functions');
 
 		return (!empty($disabled));
 	}

@@ -49,7 +49,22 @@ class S3importController extends BaseController
 			$model->setState('s3bucket', $s3bucket);
 		}
 
-		$this->getS3Credentials();
+		/**
+		 * Merely loading the page must not die on credentials S3 rejects, e.g. wrong ones pre-filled from the profile.
+		 * The bucket region lookup is the only network call here; on failure forget the bucket, so the view does not
+		 * try to list its contents with the same credentials, and show the error on the (still pre-filled) form.
+		 */
+		try
+		{
+			$this->getS3Credentials();
+		}
+		catch (\Exception $e)
+		{
+			$model->setState('s3bucket', '');
+
+			$this->app->enqueueMessage(htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8'), 'warning');
+		}
+
 		$model->setS3Credentials($model->getState('s3access'), $model->getState('s3secret'));
 
 		$this->display(false);
@@ -154,8 +169,8 @@ class S3importController extends BaseController
 	protected function getS3Credentials()
 	{
 		$config         = Factory::getConfiguration();
-		$defS3AccessKey = $config->get('engine.postproc.s3.accesskey', '');
-		$defS3SecretKey = $config->get('engine.postproc.s3.privatekey', '');
+		$defS3AccessKey = $config->get('engine.postproc.amazons3.accesskey', '');
+		$defS3SecretKey = $config->get('engine.postproc.amazons3.secretkey', '');
 
 		$accessKey = $this->app->getUserStateFromRequest('com_akeebabackup.s3access', 's3access', $defS3AccessKey, 'raw');
 		$secretKey = $this->app->getUserStateFromRequest('com_akeebabackup.s3secret', 's3secret', $defS3SecretKey, 'raw');

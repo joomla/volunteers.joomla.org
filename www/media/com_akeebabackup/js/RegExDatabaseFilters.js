@@ -23,7 +23,7 @@ if (typeof akeebabackup.Regexdbfilters == "undefined")
  */
 akeebabackup.Regexdbfilters.activeRootChanged = function ()
 {
-    var activeRootEl = document.getElementById("active-root");
+    var activeRootEl = document.getElementById("active_root");
     akeebabackup.Regexdbfilters.load(
         activeRootEl.options[activeRootEl.selectedIndex].value
     );
@@ -175,6 +175,14 @@ akeebabackup.Regexdbfilters.addRow = function (def, append_to_here)
                 }
             }
 
+            if (def.item != "" && def.item === new_item && def.type === new_type)
+            {
+                // Nothing changed. The engine refuses to set an existing filter, so don't ask it to; just close.
+                akeebabackup.System.triggerEvent(firstTD.querySelector("span.cancel"), "click");
+
+                return;
+            }
+
             var elActiveRoot = document.getElementById("active_root");
             var new_data     = {
                 verb: "set",
@@ -187,6 +195,11 @@ akeebabackup.Regexdbfilters.addRow = function (def, append_to_here)
 
             akeebabackup.Fsfilters.toggle(new_data, this, function (response, caller)
             {
+                if (response.warning)
+                {
+                    Joomla.renderMessages({warning: [response.warning]});
+                }
+
                 // Now that we saved the new filter, delete the old one
                 var haveToDelete = (def.item != "") && (def.type != "") &&
                     ((def.item != new_item) || (def.type != new_type));
@@ -209,7 +222,7 @@ akeebabackup.Regexdbfilters.addRow = function (def, append_to_here)
                     String(def.type).toUpperCase();
 
                 trow.querySelector("td.ak-type span").textContent = Joomla.Text._(type_translation_key);
-                trow.querySelector("td.ak-item code").textContent = akeebabackup.System.escapeHTML(def.item);
+                trow.querySelector("td.ak-item code").textContent = def.item;
 
                 akeebabackup.System.triggerEvent(firstTD.querySelector("span.cancel"), "click");
 
@@ -225,7 +238,16 @@ akeebabackup.Regexdbfilters.addRow = function (def, append_to_here)
                 {
                     akeebabackup.Regexdbfilters.addNewRow(append_to_here);
                 }
-            }, false);
+            }, false, true, function ()
+            {
+                // The server refused the filter: the editor stays open, so the user must be able to cancel it
+                var elCancelAgain = firstTD.querySelector("span.cancel");
+
+                if (elCancelAgain)
+                {
+                    elCancelAgain.style.display = "";
+                }
+            });
         });
 
         var elCancel = document.createElement("span");

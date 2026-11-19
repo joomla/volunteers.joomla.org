@@ -54,4 +54,19 @@ trait ArgumentUtilities
 
 		return $ret;
 	}
+
+	/**
+	 * Normalises a requested sort direction to 'asc' or 'desc'.
+	 *
+	 * @param   string  $requestedOrder  The requested sort direction, already lower-cased.
+	 * @param   string  $default         The direction to fall back to when the requested one is not recognised.
+	 *
+	 * @return  string  Either 'asc' or 'desc'.
+	 *
+	 * @since   9.9.1
+	 */
+	private function normalizeSortOrder(string $requestedOrder, string $default = 'desc'): string
+	{
+		return in_array($requestedOrder, ['asc', 'desc']) ? $requestedOrder : $default;
+	}
 }

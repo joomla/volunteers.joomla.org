@@ -122,6 +122,14 @@ class HtmlView extends BaseHtmlView
 	public $checkMbstring = true;
 
 	/**
+	 * Is the OpenSSL extension installed and enabled? Without it, encrypted settings (cloud keys, FTP and SFTP
+	 * passwords, OAuth refresh tokens, the JPS password and the Secret Word) are stored as plaintext.
+	 *
+	 * @var  bool
+	 */
+	public $checkOpenSsl = true;
+
+	/**
 	 * The fancy formatted changelog of the component
 	 *
 	 * @var  string
@@ -225,11 +233,10 @@ class HtmlView extends BaseHtmlView
 		$this->latestBackupCell                = $statusHelper->getLatestBackupDetails();
 		$this->areMediaPermissionsFixed        = $model->fixMediaPermissions();
 		$this->checkMbstring                   = $model->checkMbstring();
+		$this->checkOpenSsl                    = $model->checkOpenSsl();
 		$this->needsDownloadID                 = $model->needsDownloadID() ? 1 : 0;
 		$this->coreWarningForDownloadID        = $model->mustWarnAboutDownloadIDInCore();
 		$this->extension_id                    = (int) $model->getState('extension_id', 0);
-		$this->frontEndSecretWordIssue         = $model->getFrontendSecretWordError();
-		$this->newSecretWord                   = $session->get('akeebabackup.cpanel.newSecretWord', null);
 		$this->desktopNotifications            = $params->get('desktop_notifications', '0') ? 1 : 0;
 		$this->formattedChangelog              = $this->formatChangelog();
 		$this->promptForConfigurationwizard    = Factory::getConfiguration()->get('akeeba.flag.confwiz', 0) == 0;
@@ -239,9 +246,17 @@ class HtmlView extends BaseHtmlView
 			'configure'   => $user->authorise('akeebabackup.configure', 'com_akeebabackup'),
 			'backup'      => $user->authorise('akeebabackup.backup', 'com_akeebabackup'),
 			'download'    => $user->authorise('akeebabackup.download', 'com_akeebabackup'),
-			// Matches the privilege required to edit the component's Options page; gates the Schedule view.
+			// Matches the privilege required to edit the component's Options page; gates the Schedule view
+			// and the Secret Word suggestion/reveal below.
 			'editoptions' => $user->authorise('core.admin', 'com_akeebabackup'),
 		];
+
+		// The Secret Word suggestion (and, after a reset, its plaintext value) is only for whoever can also
+		// change it from the Options page — same privilege as resetSecretWord() itself requires.
+		$this->frontEndSecretWordIssue = $this->permissions['editoptions'] ? $model->getFrontendSecretWordError() : '';
+		$this->newSecretWord           = $this->permissions['editoptions']
+			? $session->get('akeebabackup.cpanel.newSecretWord', null)
+			: null;
 		$this->isOutputDirectoryUnderSiteRoot  = $model->isOutputDirectoryUnderSiteRoot();
 		$this->hasOutputDirectorySecurityFiles = $model->hasOutputDirectorySecurityFiles();
 
@@ -286,14 +301,14 @@ class HtmlView extends BaseHtmlView
 	protected function addJSScriptOptions()
 	{
 		$this->getDocument()->addScriptOptions(
-			'akeeba.System.notification.hasDesktopNotification', (bool) $this->desktopNotifications
+			'akeebabackup.System.notification.hasDesktopNotification', (bool) $this->desktopNotifications
 		);
-		$this->getDocument()->addScriptOptions('akeeba.ControlPanel.needsDownloadID', (bool) $this->needsDownloadID);
+		$this->getDocument()->addScriptOptions('akeebabackup.ControlPanel.needsDownloadID', (bool) $this->needsDownloadID);
 		$this->getDocument()->addScriptOptions(
-			'akeeba.ControlPanel.outputDirUnderSiteRoot', (bool) $this->isOutputDirectoryUnderSiteRoot
+			'akeebabackup.ControlPanel.outputDirUnderSiteRoot', (bool) $this->isOutputDirectoryUnderSiteRoot
 		);
 		$this->getDocument()->addScriptOptions(
-			'akeeba.ControlPanel.hasSecurityFiles', (bool) $this->hasOutputDirectorySecurityFiles
+			'akeebabackup.ControlPanel.hasSecurityFiles', (bool) $this->hasOutputDirectorySecurityFiles
 		);
 	}
 
@@ -307,8 +322,6 @@ class HtmlView extends BaseHtmlView
 		{
 			return $ret;
 		}
-
-		array_shift($lines);
 
 		foreach ($lines as $line)
 		{
@@ -328,40 +341,28 @@ class HtmlView extends BaseHtmlView
 					break;
 
 				case '+':
-					$ret .= "\t" . '<li><span class="badge bg-success">Added</span> ' . htmlentities(
-							trim(substr($line, 2))
-						) . "</li>\n";
+					$ret .= "\t" . '<li><span class="badge bg-success">Added</span> ' . htmlentities(trim(substr($line, 2)), ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401) . "</li>\n";
 					break;
 
 				case '-':
-					$ret .= "\t" . '<li><span class="badge bg-dark">Removed</span> ' . htmlentities(
-							trim(substr($line, 2))
-						) . "</li>\n";
+					$ret .= "\t" . '<li><span class="badge bg-dark">Removed</span> ' . htmlentities(trim(substr($line, 2)), ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401) . "</li>\n";
 					break;
 
 				case '~':
 				case '^':
-					$ret .= "\t" . '<li><span class="badge bg-info">Changed</span> ' . htmlentities(
-							trim(substr($line, 2))
-						) . "</li>\n";
+					$ret .= "\t" . '<li><span class="badge bg-info">Changed</span> ' . htmlentities(trim(substr($line, 2)), ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401) . "</li>\n";
 					break;
 
 				case '*':
-					$ret .= "\t" . '<li><span class="badge bg-danger">Security</span> ' . htmlentities(
-							trim(substr($line, 2))
-						) . "</li>\n";
+					$ret .= "\t" . '<li><span class="badge bg-danger">Security</span> ' . htmlentities(trim(substr($line, 2)), ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401) . "</li>\n";
 					break;
 
 				case '!':
-					$ret .= "\t" . '<li><span class="badge bg-warning">Important</span> ' . htmlentities(
-							trim(substr($line, 2))
-						) . "</li>\n";
+					$ret .= "\t" . '<li><span class="badge bg-warning">Important</span> ' . htmlentities(trim(substr($line, 2)), ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401) . "</li>\n";
 					break;
 
 				case '#':
-					$ret .= "\t" . '<li><span class="badge bg-primary">Fixed</span> ' . htmlentities(
-							trim(substr($line, 2))
-						) . "</li>\n";
+					$ret .= "\t" . '<li><span class="badge bg-primary">Fixed</span> ' . htmlentities(trim(substr($line, 2)), ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401) . "</li>\n";
 					break;
 
 				default:
@@ -382,6 +383,12 @@ class HtmlView extends BaseHtmlView
 
 					break;
 			}
+		}
+
+		// Close the last list, which no following version heading closed
+		if (!empty($ret))
+		{
+			$ret .= "</ul>";
 		}
 
 		return $ret;

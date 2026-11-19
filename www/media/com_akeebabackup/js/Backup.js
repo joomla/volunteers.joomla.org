@@ -254,6 +254,8 @@ akeebabackup.Backup.start = function ()
     var ajax_request = {
         // Data to send to AJAX
         "ajax":      "start",
+        // Explicit profile ID: the session's active profile may have changed since this page was loaded (other tab)
+        profileid:   Joomla.getOptions("akeebabackup.Backup.profileId", 0),
         description: document.getElementById("backup-description").value,
         comment:     document.getElementById("comment").value
     };
@@ -454,6 +456,17 @@ akeebabackup.Backup.onError = function (message)
 {
     // If resume is not enabled, die.
     if (!Joomla.getOptions("akeebabackup.Backup.resume.enabled", true))
+    {
+        akeebabackup.Backup.endWithError(message);
+
+        return;
+    }
+
+    /**
+     * If the backup never started, die. Without the backup ID the start request should have given us there is no
+     * backup to resume: retrying would only replace the real error with one about the missing backup.
+     */
+    if (!akeebabackup.Backup.backupid)
     {
         akeebabackup.Backup.endWithError(message);
 

@@ -70,7 +70,8 @@ class HtmlView extends BaseHtmlView
         $userId      = (int) $user->id;
         $volunteerId = (int) $model->getVolunteerId($userId);
 
-        if ($volunteerId) {
+        // A user without a Joomler profile gets -1 and stays on the consent page
+        if ($volunteerId > 0) {
             $this->app->redirect(Route::_('index.php?option=com_volunteers&view=volunteer&id=' . $volunteerId, false));
         }
         parent::display($tpl);

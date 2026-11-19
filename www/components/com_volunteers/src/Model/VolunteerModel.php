@@ -20,7 +20,6 @@ use Joomla\CMS\MVC\Model\ItemModel;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\Table\Table;
 use Joomla\Database\ParameterType;
-use Joomla\Utilities\ArrayHelper;
 use stdClass;
 
 /**
@@ -82,58 +81,56 @@ class VolunteerModel extends ItemModel
      */
     public function getItem($pk = null)
     {
-
         $pk = (!empty($pk)) ? $pk : (int) $this->getState($this->getName() . '.id');
 
-        if ($pk > 0) {
-            try {
-                $db    = $this->getDatabase();
-                $query = $db->getQuery(true)
-                    ->select($this->getState('item.select', 'a.*, user.name AS name'))
-                    ->from('#__volunteers_volunteers AS a')
-                    ->where('a.id = ' . (int) $pk);
-
-                // Join on user table.
-                $query->select('user.email AS email')
-                    ->join('LEFT', '#__users AS ' . $db->quoteName('user') . ' on user.id = a.user_id');
-
-                // Filter by published state.
-                $published = $this->getState('filter.published');
-                $archived  = $this->getState('filter.archived');
-
-                if (is_numeric($published)) {
-                    $query->where('(a.published = ' . (int) $published . ' OR a.published =' . (int) $archived . ')')
-                        ->where('(c.published = ' . (int) $published . ' OR c.published =' . (int) $archived . ')');
-                }
-
-                $db->setQuery($query);
-
-                $data = $db->loadObject();
-
-                if (empty($data)) {
-                    throw new Exception(Text::_('COM_VOLUNTEERS_ERROR_VOLUNTEER_NOT_FOUND'), 404);
-                }
-
-                // Check for published state if filter set.
-                if (((is_numeric($published)) || (is_numeric($archived))) && (($data->published != $published) && ($data->published != $archived))) {
-                    throw new Exception(Text::_('COM_VOLUNTEERS_ERROR_VOLUNTEER_NOT_FOUND'), 404);
-                }
-
-                // Make sure we have http:// or https://
-                if ($data->website) {
-                    $data->website = parse_url((string) $data->website, PHP_URL_SCHEME) == '' ? 'http://' . $data->website : $data->website;
-                }
-
-                return $data;
-            } catch (Exception $e) {
-                // Keep the 404 of a missing Joomler, anything else is a server error
-                throw new Exception($e->getMessage(), $e->getCode() === 404 ? 404 : 500, $e);
-            }
+        // A Joomler profile needs a valid id
+        if ($pk <= 0) {
+            throw new Exception(Text::_('COM_VOLUNTEERS_ERROR_VOLUNTEER_NOT_FOUND'), 404);
         }
 
-        $properties = $this->getTable()->getTableProperties(1);
+        try {
+            $db    = $this->getDatabase();
+            $query = $db->getQuery(true)
+                ->select($this->getState('item.select', 'a.*, user.name AS name'))
+                ->from('#__volunteers_volunteers AS a')
+                ->where('a.id = ' . (int) $pk);
 
-        return ArrayHelper::toObject($properties);
+            // Join on user table.
+            $query->select('user.email AS email')
+                ->join('LEFT', '#__users AS ' . $db->quoteName('user') . ' on user.id = a.user_id');
+
+            // Filter by published state.
+            $published = $this->getState('filter.published');
+            $archived  = $this->getState('filter.archived');
+
+            if (is_numeric($published)) {
+                $query->where('(a.published = ' . (int) $published . ' OR a.published =' . (int) $archived . ')')
+                    ->where('(c.published = ' . (int) $published . ' OR c.published =' . (int) $archived . ')');
+            }
+
+            $db->setQuery($query);
+
+            $data = $db->loadObject();
+
+            if (empty($data)) {
+                throw new Exception(Text::_('COM_VOLUNTEERS_ERROR_VOLUNTEER_NOT_FOUND'), 404);
+            }
+
+            // Check for published state if filter set.
+            if (((is_numeric($published)) || (is_numeric($archived))) && (($data->published != $published) && ($data->published != $archived))) {
+                throw new Exception(Text::_('COM_VOLUNTEERS_ERROR_VOLUNTEER_NOT_FOUND'), 404);
+            }
+
+            // Make sure we have http:// or https://
+            if ($data->website) {
+                $data->website = parse_url((string) $data->website, PHP_URL_SCHEME) == '' ? 'http://' . $data->website : $data->website;
+            }
+
+            return $data;
+        } catch (Exception $e) {
+            // Keep the 404 of a missing Joomler, anything else is a server error
+            throw new Exception($e->getMessage(), $e->getCode() === 404 ? 404 : 500, $e);
+        }
     }
 
     /**
